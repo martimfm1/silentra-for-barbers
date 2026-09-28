@@ -496,21 +496,6 @@ export class BarbershopStripeService {
       );
 
     const cancellationRequestedAt = new Date().toISOString();
-    const database = createAdminClient();
-    const { error: cancellationError } = await database
-      .from('subscriptions')
-      .update({
-        canceled_by_user_id: userId,
-        cancellation_requested_at: cancellationRequestedAt,
-        canceled_at: null,
-      })
-      .eq('id', subscription.id);
-    if (cancellationError)
-      throw new BillingError(
-        'Could not persist the cancellation request.',
-        'DB_WRITE_FAILED',
-      );
-
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       { cancel_at_period_end: true },
