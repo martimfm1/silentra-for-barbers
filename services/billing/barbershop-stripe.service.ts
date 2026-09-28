@@ -275,7 +275,8 @@ export class BarbershopStripeService {
           : null,
         canceled_by_user_id:
           isCanceled || cancellationIsScheduled
-            ? subscription.canceled_by_user_id
+            ? subscription.canceled_by_user_id ??
+              (isCanceled ? remote.metadata?.user_id ?? null : null)
             : null,
         cancellation_requested_at:
           isCanceled || cancellationIsScheduled
@@ -680,7 +681,7 @@ export class BarbershopStripeService {
       : isCanceled || cancellationIsScheduled
         ? options?.cancellationActorUserId ??
           existing?.canceled_by_user_id ??
-          null
+          (isCanceled ? subscription.metadata?.user_id ?? null : null)
         : null;
     const cancellationRequestedAt = options?.clearCancellationMetadata
       ? null
