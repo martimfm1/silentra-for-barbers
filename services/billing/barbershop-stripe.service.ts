@@ -265,6 +265,15 @@ export class BarbershopStripeService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: remote.cancel_at_period_end,
+        canceled_at: remote.canceled_at
+          ? new Date(remote.canceled_at * 1000).toISOString()
+          : remote.status === 'canceled'
+            ? subscription.canceled_at
+            : null,
+        canceled_by_user_id:
+          remote.status === 'canceled'
+            ? subscription.canceled_by_user_id
+            : null,
       };
 
       const changed =
@@ -274,7 +283,9 @@ export class BarbershopStripeService {
         subscription.stripe_customer_id !== updates.stripe_customer_id ||
         subscription.trial_end !== updates.trial_end ||
         subscription.current_period_end !== updates.current_period_end ||
-        subscription.cancel_at_period_end !== updates.cancel_at_period_end;
+        subscription.cancel_at_period_end !== updates.cancel_at_period_end ||
+        subscription.canceled_at !== updates.canceled_at ||
+        subscription.canceled_by_user_id !== updates.canceled_by_user_id;
       if (changed) {
         const { error } = await createAdminClient()
           .from('subscriptions')
@@ -295,6 +306,8 @@ export class BarbershopStripeService {
           plan: PLANS.FREE,
           status: 'canceled',
           cancel_at_period_end: false,
+          canceled_at: subscription.canceled_at ?? new Date().toISOString(),
+          canceled_by_user_id: subscription.canceled_by_user_id,
         })
         .eq('id', subscription.id);
       if (updateError)
@@ -307,6 +320,7 @@ export class BarbershopStripeService {
         plan: PLANS.FREE,
         status: 'canceled',
         cancel_at_period_end: false,
+        canceled_at: subscription.canceled_at ?? new Date().toISOString(),
       } as SubscriptionRecord;
     }
   }
@@ -611,6 +625,10 @@ export class BarbershopStripeService {
     )
       ? (planForPrice(priceId) ?? PLANS.FREE)
       : PLANS.FREE;
+    const isCanceled = subscription.status === 'canceled';
+    const cancellationActor = isCanceled
+      ? subscription.metadata?.user_id || ownerUserId
+      : null;
     const payload = {
       user_id: ownerUserId,
       barbershop_id: barbershopId,
@@ -624,6 +642,10 @@ export class BarbershopStripeService {
         : null,
       current_period_end: new Date(periodEnd * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
+      canceled_at: isCanceled && subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000).toISOString()
+        : null,
+      canceled_by_user_id: cancellationActor,
       updated_at: new Date().toISOString(),
     };
 
@@ -698,7 +720,7 @@ export class BarbershopStripeService {
       .maybeSingle();
     if (userError)
       throw new BillingError(
-        'Could not resolve customer owner.',
+        'Could not resolve legacy billing user.',
         'DB_READ_FAILED',
       );
     if (
@@ -706,62 +728,18 @@ export class BarbershopStripeService {
       String(user.role ?? '').toLowerCase() !== 'owner'
     )
       return null;
-
-    const mappingWrite = await database
-      .from('barbershop_billing_accounts')
-      .upsert(
-        {
-          barbershop_id: user.barbershop_id,
-          billing_owner_user_id: user.id,
-          stripe_customer_id: customer,
-        },
-        { onConflict: 'barbershop_id' },
-      );
-    if (mappingWrite.error)
-      throw new BillingError(
-        'Could not persist Stripe customer mapping.',
-        'DB_WRITE_FAILED',
-      );
-
     return { barbershopId: user.barbershop_id, ownerUserId: user.id };
   }
 
   static async processWebhookEvent(event: Stripe.Event): Promise<void> {
-    if (
-      ![
-        'customer.subscription.created',
-        'customer.subscription.updated',
-        'customer.subscription.deleted',
-      ].includes(event.type)
-    )
-      return;
     const subscription = event.data.object as Stripe.Subscription;
-    const mapping = await this.findBarbershopByCustomerId(
-      stripeCustomerId(subscription.customer),
-    );
+    const customer = stripeCustomerId(subscription.customer);
+    const mapping = await this.findBarbershopByCustomerId(customer);
     if (!mapping)
       throw new BillingError(
-        'Webhook customer mapping was not found.',
+        'Could not resolve the barbershop for the Stripe subscription.',
         'WEBHOOK_PROCESSING_FAILED',
       );
-
-    if (event.type === 'customer.subscription.deleted') {
-      const { error } = await createAdminClient()
-        .from('subscriptions')
-        .update({
-          plan: PLANS.FREE,
-          status: 'canceled',
-          cancel_at_period_end: false,
-        })
-        .eq('barbershop_id', mapping.barbershopId);
-      if (error)
-        throw new BillingError(
-          'Could not persist canceled subscription.',
-          'DB_WRITE_FAILED',
-        );
-      return;
-    }
-
     await this.syncFromStripe(
       mapping.barbershopId,
       mapping.ownerUserId,
