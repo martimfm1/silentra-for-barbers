@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { PLANS } from '@/lib/stripe/constants';
+import { getStripeClient } from '@/lib/stripe/server';
+import { PLANS, planForPrice } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 
@@ -45,6 +46,7 @@ export async function GET() {
           subscription: null,
           plan: PLANS.FREE,
           planSource: 'free',
+          cancellation: null,
           isAuthenticated: true,
           isBillingOwner: false,
           barbershopId: null,
@@ -62,7 +64,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -118,6 +120,53 @@ export async function GET() {
       (!assignment.expires_at ||
         new Date(assignment.expires_at).getTime() > Date.now()),
     );
+
+    let cancellation: {
+      canceledAt: string | null;
+      canceledByEmail: string | null;
+      previousPlan: BillingPlan | null;
+    } | null = null;
+
+    if (subscription?.status === 'canceled') {
+      let canceledAt = subscription.updated_at ?? null;
+      let canceledByEmail = userRow?.email ?? null;
+      let previousPlan = planForPrice(subscription.stripe_price_id ?? '');
+
+      if (subscription.stripe_subscription_id) {
+        try {
+          const remote = await getStripeClient().subscriptions.retrieve(
+            subscription.stripe_subscription_id,
+          );
+          canceledAt = remote.canceled_at
+            ? new Date(remote.canceled_at * 1000).toISOString()
+            : canceledAt;
+          previousPlan =
+            planForPrice(remote.items.data[0]?.price.id ?? '') ?? previousPlan;
+
+          const canceledByUserId = remote.metadata?.user_id?.trim();
+          if (canceledByUserId) {
+            const { data: canceledByUser } = await database
+              .from('users')
+              .select('email')
+              .eq('id', canceledByUserId)
+              .maybeSingle();
+            canceledByEmail = canceledByUser?.email ?? canceledByEmail;
+          }
+        } catch (error) {
+          console.error(
+            '[BILLING_SUMMARY_CANCELLATION_SYNC_ERROR]',
+            error instanceof Error ? error.name : 'UNKNOWN',
+          );
+        }
+      }
+
+      cancellation = {
+        canceledAt,
+        canceledByEmail,
+        previousPlan: previousPlan ?? null,
+      };
+    }
+
     const plan: BillingPlan =
       hasActiveAssignment && assignment
         ? (assignment.plan as BillingPlan)
@@ -140,6 +189,7 @@ export async function GET() {
         subscription,
         plan,
         planSource,
+        cancellation,
         isAuthenticated: true,
         isBillingOwner: String(userRow?.role ?? '').toLowerCase() === 'owner',
         barbershopId,
