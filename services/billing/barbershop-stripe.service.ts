@@ -689,7 +689,10 @@ export class BarbershopStripeService {
       if (
         currentRemote &&
         (currentRemote.created >= subscription.created ||
-          (['active', 'trialing'] as string[]).includes(currentRemote.status))
+          (subscription.status === 'canceled' &&
+            (['active', 'trialing'] as string[]).includes(
+              currentRemote.status,
+            )))
       ) {
         return;
       }
