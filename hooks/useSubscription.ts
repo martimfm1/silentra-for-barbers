@@ -21,10 +21,17 @@ export interface SubscriptionData {
   plan: 'free' | 'pro' | 'enterprise';
 }
 
+export interface SubscriptionCancellation {
+  canceledAt: string | null;
+  canceledByEmail: string | null;
+  previousPlan: 'free' | 'pro' | 'enterprise' | null;
+}
+
 interface SubscriptionQueryResult {
   subscription: SubscriptionData | null;
   plan: 'free' | 'pro' | 'enterprise';
   planSource: 'free' | 'admin' | 'subscription_override' | 'stripe';
+  cancellation: SubscriptionCancellation | null;
   isAuthenticated: boolean;
   isBillingOwner: boolean;
   barbershopId: string | null;
@@ -49,6 +56,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
         subscription: null,
         plan: 'free',
         planSource: 'free',
+        cancellation: null,
         isAuthenticated: false,
         isBillingOwner: false,
         barbershopId: null,
@@ -63,6 +71,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
     subscription: json.subscription ?? null,
     plan: json.plan ?? 'free',
     planSource: json.planSource ?? 'free',
+    cancellation: json.cancellation ?? null,
     isAuthenticated: true,
     isBillingOwner: Boolean(json.isBillingOwner),
     barbershopId: json.barbershopId ?? null,
@@ -89,6 +98,7 @@ export function useSubscription() {
   const subscription = data?.subscription
     ? { ...data.subscription, plan }
     : null;
+  const cancellation = data?.cancellation ?? null;
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
@@ -131,6 +141,7 @@ export function useSubscription() {
 
   return {
     subscription,
+    cancellation,
     isAuthenticated,
     isBillingOwner,
     plan,
