@@ -144,11 +144,14 @@ export async function GET() {
       let canceledByName: string | null = null;
       let canceledByEmail: string | null = null;
 
-      if (subscription.canceled_by_user_id) {
+      const canceledByUserId =
+        subscription.canceled_by_user_id ?? subscription.user_id;
+
+      if (canceledByUserId) {
         const { data: canceledByUser } = await database
           .from('users')
           .select('name_complete, name, email')
-          .eq('id', subscription.canceled_by_user_id)
+          .eq('id', canceledByUserId)
           .maybeSingle();
         if (canceledByUser) {
           canceledByName =
