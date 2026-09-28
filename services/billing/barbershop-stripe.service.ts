@@ -673,6 +673,28 @@ export class BarbershopStripeService {
       : PLANS.FREE;
 
     const existing = await this.getSubscriptionForBarbershop(barbershopId);
+
+    // A plan change can briefly have two Stripe subscriptions for the same
+    // customer. Ignore an older subscription's webhook if the database already
+    // points at a newer/current subscription so a delayed delete/update event
+    // cannot overwrite the new plan.
+    if (
+      existing?.stripe_subscription_id &&
+      existing.stripe_subscription_id !== subscription.id
+    ) {
+      const currentRemote = await getStripeClient()
+        .subscriptions.retrieve(existing.stripe_subscription_id)
+        .catch(() => null);
+
+      if (
+        currentRemote &&
+        (currentRemote.created >= subscription.created ||
+          (['active', 'trialing'] as string[]).includes(currentRemote.status))
+      ) {
+        return;
+      }
+    }
+
     const isCanceled = subscription.status === 'canceled';
     const cancellationIsScheduled =
       subscription.cancel_at_period_end && !isCanceled;
