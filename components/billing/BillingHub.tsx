@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
+  ArrowUpRight,
   CalendarDays,
   Check,
   Download,
@@ -36,6 +37,7 @@ function formatAmount(amount: number, currency: string) {
 export function BillingHub() {
   const {
     subscription,
+    cancellation,
     plan,
     planSource,
     isAdministrativePlan,
@@ -49,10 +51,20 @@ export function BillingHub() {
   const [openingPortal, setOpeningPortal] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [renewalPriceId, setRenewalPriceId] = useState<string | null>(null);
+  const [loadingRenewalPrice, setLoadingRenewalPrice] = useState(false);
 
   const hasSubscription = Boolean(subscription?.stripe_subscription_id);
+  const isCanceled = subscription?.status === 'canceled';
   const active =
     subscription?.status === 'active' || subscription?.status === 'trialing';
+  const canceledPlan = cancellation?.previousPlan ?? 'free';
+  const renewalPlan =
+    canceledPlan === 'pro'
+      ? 'enterprise'
+      : canceledPlan === 'enterprise'
+        ? 'enterprise'
+        : 'pro';
   const currentPeriodEnd = subscription?.current_period_end ?? null;
   const nextRenewal = currentPeriodEnd
     ? new Date(currentPeriodEnd).toLocaleDateString('pt-PT', {
@@ -61,6 +73,86 @@ export function BillingHub() {
         year: 'numeric',
       })
     : '—';
+  const cancellationDate = cancellation?.canceledAt
+    ? new Date(cancellation.canceledAt).toLocaleDateString('pt-PT', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '—';
+
+  useEffect(() => {
+    if (!isCanceled || isAdministrativePlan || canceledPlan === 'free') {
+      setRenewalPriceId(null);
+      setLoadingRenewalPrice(false);
+      return;
+    }
+
+    if (canceledPlan === 'enterprise' && subscription?.stripe_price_id) {
+      setRenewalPriceId(subscription.stripe_price_id);
+      setLoadingRenewalPrice(false);
+      return;
+    }
+
+    if (canceledPlan !== 'pro') return;
+
+    let cancelled = false;
+    setLoadingRenewalPrice(true);
+
+    fetch('/api/stripe/prices', {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(body.data))
+          throw new Error('PRICES_UNAVAILABLE');
+        return body.data as Array<{
+          id: string;
+          plan: 'pro' | 'enterprise' | null;
+          interval: 'month' | 'year' | null;
+        }>;
+      })
+      .then((prices) => {
+        if (cancelled) return;
+        const previousInterval =
+          prices.find((price) => price.id === subscription?.stripe_price_id)
+            ?.interval ?? 'month';
+        const enterprisePrice =
+          prices.find(
+            (price) =>
+              price.plan === 'enterprise' &&
+              price.interval === previousInterval,
+          ) ??
+          prices.find(
+            (price) =>
+              price.plan === 'enterprise' && price.interval === 'month',
+          ) ??
+          null;
+        setRenewalPriceId(enterprisePrice?.id ?? null);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setRenewalPriceId(null);
+          console.error(
+            '[BILLING_HUB_RENEWAL_PRICE_ERROR]',
+            error instanceof Error ? error.name : 'UNKNOWN',
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRenewalPrice(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    canceledPlan,
+    isAdministrativePlan,
+    isCanceled,
+    subscription?.stripe_price_id,
+  ]);
 
   useEffect(() => {
     if (!hasSubscription || isAdministrativePlan) return;
@@ -133,6 +225,17 @@ export function BillingHub() {
     }
   };
 
+  const handleResubscribe = () => {
+    if (loadingRenewalPrice) return;
+    if (renewalPriceId) {
+      window.location.assign(
+        `/checkout?priceId=${encodeURIComponent(renewalPriceId)}&plan=${renewalPlan}`,
+      );
+      return;
+    }
+    window.location.assign('/plans');
+  };
+
   const handleOpenCustomerPortal = async () => {
     try {
       setOpeningPortal(true);
@@ -166,50 +269,83 @@ export function BillingHub() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
                 <ShieldCheck className="size-3.5" /> Subscrição
               </span>
-              {isTrial && (
+              {isCanceled && (
+                <span className="rounded-full border border-red-400/20 bg-red-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-200">
+                  Cancelada
+                </span>
+              )}
+              {isTrial && !isCanceled && (
                 <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-200">
                   Trial ativo
                 </span>
               )}
             </div>
+
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white">
-              {PLAN_NAMES[plan]}
+              {isCanceled
+                ? PLAN_NAMES[canceledPlan]
+                : PLAN_NAMES[plan]}
             </h2>
+
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              {isAdministrativePlan
-                ? 'Plano atribuído pela administração da Silentra e aplicado à barbearia.'
-                : hasSubscription
-                  ? 'A subscrição é sincronizada com a Stripe e pertence à barbearia.'
-                  : 'Plano gratuito, sem subscrição paga ativa.'}
+              {isCanceled
+                ? `Esta subscrição foi cancelada em ${cancellationDate}${cancellation?.canceledByName ? ` por ${cancellation.canceledByName}` : cancellation?.canceledByEmail ? ` por ${cancellation.canceledByEmail}` : ''}.`
+                : isAdministrativePlan
+                  ? 'Plano atribuído pela administração da Silentra e aplicado à barbearia.'
+                  : hasSubscription
+                    ? 'A subscrição é sincronizada com a Stripe e pertence à barbearia.'
+                    : 'Plano gratuito, sem subscrição paga ativa.'}
             </p>
           </div>
+
           <div className="grid min-w-[220px] grid-cols-2 gap-2 text-sm">
             <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
                 Estado
               </p>
               <p className="mt-2 font-medium text-zinc-100">
-                {isAdministrativePlan
+                {isAdministrativePlan && !isCanceled
                   ? 'Atribuído'
-                  : subscription?.cancel_at_period_end
-                    ? 'Cancelamento agendado'
-                    : active
-                      ? isTrial
-                        ? 'Em trial'
-                        : 'Ativo'
-                      : 'Gratuito'}
+                  : isCanceled
+                    ? 'Cancelada'
+                    : subscription?.cancel_at_period_end
+                      ? 'Cancelamento agendado'
+                      : active
+                        ? isTrial
+                          ? 'Em trial'
+                          : 'Ativo'
+                        : 'Gratuito'}
               </p>
             </div>
+
             <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                Renovação
+                {isCanceled ? 'Cancelada em' : 'Renovação'}
               </p>
               <p className="mt-2 font-medium text-zinc-100">
-                {isAdministrativePlan ? '—' : nextRenewal}
+                {isCanceled
+                  ? cancellationDate
+                  : isAdministrativePlan
+                    ? '—'
+                    : nextRenewal}
               </p>
             </div>
           </div>
         </div>
+
+        {isCanceled && cancellation?.canceledByName ? (
+          <div className="mt-3 rounded-2xl border border-white/8 bg-black/20 p-4">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+              Cancelada por
+            </p>
+            <p className="mt-1 text-sm font-medium text-zinc-100">
+              {cancellation.canceledByName}
+              {cancellation.canceledByEmail
+                ? ` · ${cancellation.canceledByEmail}`
+                : ''}
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-6 flex flex-col gap-3 border-t border-white/8 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-zinc-500">
@@ -220,14 +356,36 @@ export function BillingHub() {
                 ? 'Stripe'
                 : 'Plano gratuito'}
           </p>
+
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              href="/plans"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.07]"
-            >
-              Comparar planos <ArrowRight className="size-4" />
-            </Link>
-            {hasSubscription && !isAdministrativePlan && (
+            {!isCanceled && (
+              <Link
+                href="/plans"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.07]"
+              >
+                Comparar planos <ArrowRight className="size-4" />
+              </Link>
+            )}
+
+            {isCanceled ? (
+              <button
+                type="button"
+                onClick={handleResubscribe}
+                disabled={loadingRenewalPrice}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-60"
+              >
+                {loadingRenewalPrice ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ArrowUpRight className="size-4" />
+                )}
+                {canceledPlan === 'pro'
+                  ? 'Melhorar para Enterprise'
+                  : `Voltar a subscrever ${PLAN_NAMES[canceledPlan]}`}
+              </button>
+            ) : null}
+
+            {hasSubscription && !isAdministrativePlan && !isCanceled && (
               <button
                 type="button"
                 onClick={() => void handleOpenCustomerPortal()}
@@ -240,9 +398,11 @@ export function BillingHub() {
                 Gerir faturação na Stripe
               </button>
             )}
+
             {active &&
               !isAdministrativePlan &&
-              !subscription?.cancel_at_period_end && (
+              !subscription?.cancel_at_period_end &&
+              !isCanceled && (
                 <button
                   type="button"
                   onClick={() => void handleCancel()}
@@ -257,7 +417,8 @@ export function BillingHub() {
                   Cancelar subscrição
                 </button>
               )}
-            {subscription?.cancel_at_period_end && (
+
+            {subscription?.cancel_at_period_end && !isCanceled ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 text-sm font-medium text-amber-200">
                   <CalendarDays className="size-4" /> Cancelamento agendado (
@@ -275,7 +436,7 @@ export function BillingHub() {
                   Retomar subscrição
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </section>
