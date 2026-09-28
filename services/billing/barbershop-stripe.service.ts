@@ -252,6 +252,9 @@ export class BarbershopStripeService {
         stripePlan !== PLANS.FREE;
       const nextPlan = hasAccess ? stripePlan : PLANS.FREE;
       const periodEnd = subscriptionPeriodEnd(remote);
+      const isCanceled = remote.status === 'canceled';
+      const cancellationIsScheduled =
+        remote.cancel_at_period_end && !isCanceled;
       const updates = {
         barbershop_id: barbershopId,
         stripe_customer_id: stripeCustomerId(remote.customer),
@@ -265,14 +268,18 @@ export class BarbershopStripeService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: remote.cancel_at_period_end,
-        canceled_at: remote.canceled_at
-          ? new Date(remote.canceled_at * 1000).toISOString()
-          : remote.status === 'canceled'
-            ? subscription.canceled_at
-            : null,
+        canceled_at: isCanceled
+          ? remote.canceled_at
+            ? new Date(remote.canceled_at * 1000).toISOString()
+            : subscription.canceled_at
+          : null,
         canceled_by_user_id:
-          remote.status === 'canceled'
+          isCanceled || cancellationIsScheduled
             ? subscription.canceled_by_user_id
+            : null,
+        cancellation_requested_at:
+          isCanceled || cancellationIsScheduled
+            ? subscription.cancellation_requested_at
             : null,
       };
 
@@ -285,7 +292,9 @@ export class BarbershopStripeService {
         subscription.current_period_end !== updates.current_period_end ||
         subscription.cancel_at_period_end !== updates.cancel_at_period_end ||
         subscription.canceled_at !== updates.canceled_at ||
-        subscription.canceled_by_user_id !== updates.canceled_by_user_id;
+        subscription.canceled_by_user_id !== updates.canceled_by_user_id ||
+        subscription.cancellation_requested_at !==
+          updates.cancellation_requested_at;
       if (changed) {
         const { error } = await createAdminClient()
           .from('subscriptions')
@@ -306,8 +315,10 @@ export class BarbershopStripeService {
           plan: PLANS.FREE,
           status: 'canceled',
           cancel_at_period_end: false,
-          canceled_at: subscription.canceled_at ?? new Date().toISOString(),
+          canceled_at:
+            subscription.canceled_at ?? new Date().toISOString(),
           canceled_by_user_id: subscription.canceled_by_user_id,
+          cancellation_requested_at: subscription.cancellation_requested_at,
         })
         .eq('id', subscription.id);
       if (updateError)
@@ -483,11 +494,55 @@ export class BarbershopStripeService {
         'No active paid subscription was found.',
         'SUBSCRIPTION_NOT_FOUND',
       );
+
+    const cancellationRequestedAt = new Date().toISOString();
+    const database = createAdminClient();
+    const { error: cancellationError } = await database
+      .from('subscriptions')
+      .update({
+        canceled_by_user_id: userId,
+        cancellation_requested_at: cancellationRequestedAt,
+        canceled_at: null,
+      })
+      .eq('id', subscription.id);
+    if (cancellationError)
+      throw new BillingError(
+        'Could not persist the cancellation request.',
+        'DB_WRITE_FAILED',
+      );
+
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       { cancel_at_period_end: true },
     );
-    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated);
+    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated, {
+      cancellationActorUserId: userId,
+      cancellationRequestedAt,
+    });
+  }
+
+  static async resume(userId: string): Promise<void> {
+    const tenant = await this.getTenantContext(userId);
+    const subscription = await this.reconcileSubscription(
+      tenant.barbershopId,
+      await this.getSubscriptionForBarbershop(tenant.barbershopId),
+    );
+    if (!subscription?.stripe_subscription_id)
+      throw new BillingError(
+        'No active paid subscription was found.',
+        'SUBSCRIPTION_NOT_FOUND',
+      );
+    if (!subscription.cancel_at_period_end)
+      return;
+
+    const updated = await getStripeClient().subscriptions.update(
+      subscription.stripe_subscription_id,
+      { cancel_at_period_end: false },
+    );
+
+    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated, {
+      clearCancellationMetadata: true,
+    });
   }
 
   static async getInvoices(userId: string) {
@@ -526,6 +581,11 @@ export class BarbershopStripeService {
     barbershopId: string,
     ownerUserId: string,
     subscription: Stripe.Subscription,
+    options?: {
+      cancellationActorUserId?: string | null;
+      cancellationRequestedAt?: string | null;
+      clearCancellationMetadata?: boolean;
+    },
   ): Promise<void> {
     const customer = stripeCustomerId(subscription.customer);
     const priceId = subscription.items.data[0]?.price.id;
@@ -625,10 +685,26 @@ export class BarbershopStripeService {
     )
       ? (planForPrice(priceId) ?? PLANS.FREE)
       : PLANS.FREE;
+
+    const existing = await this.getSubscriptionForBarbershop(barbershopId);
     const isCanceled = subscription.status === 'canceled';
-    const cancellationActor = isCanceled
-      ? subscription.metadata?.user_id || ownerUserId
-      : null;
+    const cancellationIsScheduled =
+      subscription.cancel_at_period_end && !isCanceled;
+    const cancellationActor = options?.clearCancellationMetadata
+      ? null
+      : isCanceled || cancellationIsScheduled
+        ? options?.cancellationActorUserId ??
+          existing?.canceled_by_user_id ??
+          null
+        : null;
+    const cancellationRequestedAt = options?.clearCancellationMetadata
+      ? null
+      : isCanceled || cancellationIsScheduled
+        ? options?.cancellationRequestedAt ??
+          existing?.cancellation_requested_at ??
+          null
+        : null;
+
     const payload = {
       user_id: ownerUserId,
       barbershop_id: barbershopId,
@@ -642,14 +718,15 @@ export class BarbershopStripeService {
         : null,
       current_period_end: new Date(periodEnd * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
-      canceled_at: isCanceled && subscription.canceled_at
-        ? new Date(subscription.canceled_at * 1000).toISOString()
-        : null,
+      canceled_at:
+        isCanceled && subscription.canceled_at
+          ? new Date(subscription.canceled_at * 1000).toISOString()
+          : null,
       canceled_by_user_id: cancellationActor,
+      cancellation_requested_at: cancellationRequestedAt,
       updated_at: new Date().toISOString(),
     };
 
-    const existing = await this.getSubscriptionForBarbershop(barbershopId);
     const write = existing
       ? await database
           .from('subscriptions')
