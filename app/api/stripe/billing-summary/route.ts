@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getStripeClient } from '@/lib/stripe/server';
 import { PLANS, planForPrice } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
