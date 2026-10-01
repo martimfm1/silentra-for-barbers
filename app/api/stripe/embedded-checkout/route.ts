@@ -59,6 +59,87 @@ async function recoverBillingCustomer(
   return customer.id;
 }
 
+async function hasStripeBillingHistory(customerId: string): Promise<boolean> {
+  const stripe = getStripeClient();
+
+  const [subscriptions, invoices] = await Promise.all([
+    stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 1,
+    }),
+    stripe.invoices.list({
+      customer: customerId,
+      limit: 1,
+    }),
+  ]);
+
+  return subscriptions.data.length > 0 || invoices.data.length > 0;
+}
+
+function stripeErrorCode(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return null;
+  }
+
+  const code = (error as { code?: unknown }).code;
+  return typeof code === 'string' ? code : null;
+}
+
+function checkoutErrorResponse(error: unknown) {
+  if (error instanceof BillingError) {
+    const status =
+      error.code === 'INVALID_PRICE'
+        ? 400
+        : error.code === 'SUBSCRIPTION_NOT_ACTIVE'
+          ? 409
+          : error.code === 'PROMOTION_NOT_ELIGIBLE'
+            ? 409
+            : 500;
+
+    return {
+      status,
+      code: error.code,
+      message: error.message,
+    };
+  }
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : 'Não foi possível iniciar o checkout.';
+
+  if (
+    /prior transactions|first[_ -]?time transaction|cannot be redeemed/i.test(
+      message,
+    )
+  ) {
+    return {
+      status: 409,
+      code: 'PROMOTION_NOT_ELIGIBLE' as const,
+      message:
+        'Esta oferta é exclusiva para novos clientes. A tua subscrição anterior não impede uma nova subscrição, mas esta oferta já não está disponível para esta conta.',
+    };
+  }
+
+  const code = stripeErrorCode(error);
+  if (code === 'resource_missing') {
+    return {
+      status: 409,
+      code: 'CHECKOUT_RESOURCE_MISSING' as const,
+      message:
+        'A configuração de pagamento deixou de estar disponível. Atualiza a página e tenta novamente.',
+    };
+  }
+
+  return {
+    status: 502,
+    code: 'CHECKOUT_FAILED' as const,
+    message:
+      'Não foi possível iniciar o checkout neste momento. Os teus dados de faturação não foram alterados. Tenta novamente.',
+  };
+}
+
 async function resolveNewMemberPromotionCodeId(): Promise<string> {
   const promotions = await getStripeClient().promotionCodes.list({
     code: NEW_MEMBER_PRO_PROMOTION_CODE,
@@ -138,8 +219,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const hasBillingHistory =
+      Boolean(existing?.stripe_subscription_id) ||
+      (await hasStripeBillingHistory(customer));
+
     const isNewMemberProOffer =
-      requestedPlan === PLANS.PRO && !previousSubscriptionId;
+      requestedPlan === PLANS.PRO && !hasBillingHistory;
     const promotionCodeId = isNewMemberProOffer
       ? await resolveNewMemberPromotionCodeId()
       : null;
@@ -225,28 +310,23 @@ export async function POST(request: Request) {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
+    const mapped = checkoutErrorResponse(error);
+
     console.error('[STRIPE_CUSTOM_CHECKOUT_ERROR]', {
       name: error instanceof Error ? error.name : 'UnknownError',
       message: error instanceof Error ? error.message : String(error),
-      code: error instanceof BillingError ? error.code : undefined,
+      code: error instanceof BillingError ? error.code : stripeErrorCode(error),
+      publicCode: mapped.code,
     });
-
-    const status =
-      error instanceof BillingError && error.code === 'INVALID_PRICE'
-        ? 400
-        : error instanceof BillingError &&
-            error.code === 'SUBSCRIPTION_NOT_ACTIVE'
-          ? 409
-          : 500;
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível iniciar o checkout.',
+        error: mapped,
       },
-      { status },
+      {
+        status: mapped.status,
+        headers: { 'Cache-Control': 'no-store' },
+      },
     );
   }
 }
