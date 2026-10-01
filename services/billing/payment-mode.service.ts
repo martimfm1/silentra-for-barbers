@@ -70,3 +70,30 @@ export async function assertManualPaymentsEnabled(): Promise<void> {
     );
   }
 }
+
+export async function assertStripeBillingAvailableForUser(
+  userId: string,
+): Promise<void> {
+  const mode = await PaymentModeService.getPaymentMode();
+  if (mode === 'STRIPE') return;
+
+  const { data, error } = await createAdminClient()
+    .from('subscriptions')
+    .select('payment_method, stripe_subscription_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new BillingError(
+      'Não foi possível verificar o método de faturação.',
+      'DB_READ_FAILED',
+    );
+  }
+
+  if (data?.payment_method === 'STRIPE' && data.stripe_subscription_id) return;
+
+  throw new BillingError(
+    'Os pagamentos Stripe estão atualmente desativados.',
+    'PAYMENT_MODE_STRIPE_DISABLED',
+  );
+}
