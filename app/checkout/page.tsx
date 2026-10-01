@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { CustomCheckout } from '@/components/billing/custom-checkout';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
+import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,25 @@ export default async function CheckoutPage({
   }
 
   const params = await searchParams;
+  const paymentMode = await PaymentModeService.getPaymentMode();
+  const tenant = await BarbershopStripeService.getTenantContext(user.id);
+  const existingSubscription =
+    await BarbershopStripeService.getSubscriptionForBarbershop(
+      tenant.barbershopId,
+    );
+  const existingStripeSubscription = Boolean(
+    existingSubscription?.payment_method === 'STRIPE' &&
+      existingSubscription.stripe_subscription_id &&
+      existingSubscription.plan !== 'free' &&
+      ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
+        existingSubscription.status,
+      ),
+  );
+
+  if (paymentMode === 'MANUAL' && !existingStripeSubscription) {
+    redirect('/plans?payment=manual');
+  }
+
   const priceId = params.priceId?.trim() ?? '';
   const plan = params.plan === 'enterprise' ? 'enterprise' : 'pro';
 
