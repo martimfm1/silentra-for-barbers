@@ -127,7 +127,7 @@ export async function GET() {
     if (subscription?.stripe_subscription_id && !subscription.plan_override) {
       subscription = await BarbershopStripeService.reconcileSubscription(
         barbershopId,
-        subscription: publicSubscription,
+        subscription,
       );
     }
 
