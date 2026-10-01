@@ -23,6 +23,50 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '',
 );
 
+function readBackendError(
+  body: unknown,
+  fallback: string,
+): { code: string | null; message: string } {
+  if (typeof body !== 'object' || body === null || !('error' in body)) {
+    return { code: null, message: fallback };
+  }
+
+  const error = (body as { error?: unknown }).error;
+
+  if (typeof error === 'string') {
+    return { code: null, message: error };
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const code =
+      'code' in error && typeof (error as { code?: unknown }).code === 'string'
+        ? (error as { code: string }).code
+        : null;
+    const message =
+      'message' in error &&
+      typeof (error as { message?: unknown }).message === 'string'
+        ? (error as { message: string }).message
+        : fallback;
+
+    return { code, message };
+  }
+
+  return { code: null, message: fallback };
+}
+
+function checkoutErrorTitle(code: string | null): string {
+  switch (code) {
+    case 'PROMOTION_NOT_ELIGIBLE':
+      return 'Oferta indisponível para esta conta';
+    case 'CHECKOUT_RESOURCE_MISSING':
+      return 'Configuração de pagamento indisponível';
+    case 'INVALID_PRICE':
+      return 'Plano indisponível';
+    default:
+      return 'Não foi possível iniciar o checkout';
+  }
+}
+
 const PLAN_COPY = {
   pro: {
     name: 'Barbers Pro',
@@ -357,8 +401,17 @@ export function CustomCheckout({
           cache: 'no-store',
         });
         const body = await response.json().catch(() => ({}));
-        if (!response.ok)
-          throw new Error(body.error || 'Não foi possível iniciar o checkout.');
+        if (!response.ok) {
+          const backendError = readBackendError(
+            body,
+            'Não foi possível iniciar o checkout.',
+          );
+          const error = new Error(backendError.message) as Error & {
+            code?: string | null;
+          };
+          error.code = backendError.code;
+          throw error;
+        }
         if (!body.clientSecret)
           throw new Error(
             'O Stripe não devolveu uma sessão de checkout válida.',
