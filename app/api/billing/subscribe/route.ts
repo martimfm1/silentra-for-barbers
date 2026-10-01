@@ -58,43 +58,59 @@ export async function POST(request: Request) {
 
     const mode = await PaymentModeService.getPaymentMode();
 
-    if (mode === 'MANUAL') {
-      const admin = (await import('@/lib/supabase/admin')).createAdminClient();
-      const { data: profile } = await admin
-        .from('users')
-        .select('id, name_complete, email, barbershop_id')
-        .eq('id', user.id)
-        .maybeSingle();
+    const admin = (await import('@/lib/supabase/admin')).createAdminClient();
+    const { data: profile } = await admin
+      .from('users')
+      .select('id, name_complete, email, barbershop_id')
+      .eq('id', user.id)
+      .maybeSingle();
 
-      if (!profile?.barbershop_id) {
-        throw new BillingError(
-          'A tua conta ainda não está associada a uma barbearia.',
-          'SUBSCRIPTION_NOT_FOUND',
-        );
-      }
+    if (!profile?.barbershop_id) {
+      throw new BillingError(
+        'A tua conta ainda não está associada a uma barbearia.',
+        'SUBSCRIPTION_NOT_FOUND',
+      );
+    }
 
-      const existing = await admin
-        .from('subscriptions')
-        .select('id, plan, status, payment_method')
-        .eq('barbershop_id', profile.barbershop_id)
-        .maybeSingle();
+    const existing = await admin
+      .from('subscriptions')
+      .select(
+        'id, plan, status, payment_method, stripe_subscription_id, current_period_end',
+      )
+      .eq('barbershop_id', profile.barbershop_id)
+      .maybeSingle();
 
-      if (existing.error)
-        throw new BillingError(
-          'Não foi possível verificar a subscrição atual.',
-          'DB_READ_FAILED',
-        );
-
-      const hasActivePaid = Boolean(
-        existing.data &&
-          existing.data.plan !== PLANS.FREE &&
-          (PLAN_ACCESS_STATUSES as readonly string[]).includes(
-            existing.data.status,
-          ),
+    if (existing.error)
+      throw new BillingError(
+        'Não foi possível verificar a subscrição atual.',
+        'DB_READ_FAILED',
       );
 
+    const hasActivePaid = Boolean(
+      existing.data &&
+        existing.data.plan !== PLANS.FREE &&
+        (PLAN_ACCESS_STATUSES as readonly string[]).includes(
+          existing.data.status,
+        ),
+    );
+    const existingPaymentMethod =
+      existing.data?.payment_method === 'STRIPE' ? 'STRIPE' : 'MANUAL';
+
+    // Existing subscriptions never migrate when the global mode changes.
+    // A Stripe subscription therefore continues using the Stripe flow.
+    const useExistingStripeFlow =
+      hasActivePaid && existingPaymentMethod === 'STRIPE';
+
+    if (mode === 'MANUAL' && !useExistingStripeFlow) {
       let requestType: 'NEW' | 'CHANGE' = 'NEW';
+
       if (hasActivePaid) {
+        if (existing.data?.payment_method !== 'MANUAL') {
+          throw new BillingError(
+            'A subscrição existente pertence a outro método de pagamento e não pode ser migrada automaticamente.',
+            'SUBSCRIPTION_NOT_ACTIVE',
+          );
+        }
         if (existing.data?.plan === plan) {
           throw new BillingError(
             'Este plano já está ativo na tua barbearia.',
@@ -139,6 +155,7 @@ export async function POST(request: Request) {
             requestType === 'CHANGE'
               ? 'Pedido de alteração recebido. A equipa irá enviar-te as instruções de pagamento.'
               : 'Pedido de subscrição recebido. A equipa irá enviar-te as instruções de pagamento.',
+          redirectUrl: `/dashboard/billing?manual=pending&request_id=${encodeURIComponent(row.id)}`,
           request: {
             id: row.id,
             status: row.status,
