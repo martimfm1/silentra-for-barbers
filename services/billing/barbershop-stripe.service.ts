@@ -524,12 +524,15 @@ export class BarbershopStripeService {
       );
 
     const cancellationRequestedAt = new Date().toISOString();
+    const stripeSubscription = await getStripeClient().subscriptions.retrieve(
+      subscription.stripe_subscription_id,
+    );
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       {
         cancel_at_period_end: true,
         metadata: {
-          ...subscriptionMetadata(subscription),
+          ...subscriptionMetadata(stripeSubscription),
           cancellation_requested_by_user_id: userId,
           cancellation_requested_at: cancellationRequestedAt,
         },
