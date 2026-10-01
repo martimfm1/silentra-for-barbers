@@ -295,7 +295,9 @@ export class ManualPaymentService {
       barbershopName: string;
     },
   ) {
-    const adminEmail = process.env.SILENTRA_PLATFORM_ADMIN_EMAIL?.trim();
+    const adminEmail =
+      process.env.SILENTRA_PLATFORM_ADMIN_EMAIL?.trim() ||
+      process.env.ADMIN_EMAIL?.trim();
     if (!adminEmail) {
       console.error('[MANUAL_PAYMENT_ADMIN_EMAIL_MISSING]', {
         requestId: requestRow.id,
