@@ -3,13 +3,16 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { getStripeClient } from '@/lib/stripe/server';
-import {
-  planForPrice,
-  PLANS,
-  NEW_MEMBER_PRO_PROMOTION_CODE,
-} from '@/lib/stripe/constants';
+import { PLANS, NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingError } from '@/types/stripe';
+import {
+  assertSameOrigin,
+  billingErrorResponse,
+  readJsonObject,
+} from '@/services/billing/http';
+import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
+import { StripePriceService } from '@/services/billing/stripe-price.service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -59,6 +62,113 @@ async function recoverBillingCustomer(
   return customer.id;
 }
 
+async function hasStripeBillingHistory(customerId: string): Promise<boolean> {
+  const stripe = getStripeClient();
+
+  const [subscriptions, invoices] = await Promise.all([
+    stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 1,
+    }),
+    stripe.invoices.list({
+      customer: customerId,
+      limit: 1,
+    }),
+  ]);
+
+  return subscriptions.data.length > 0 || invoices.data.length > 0;
+}
+
+function stripeErrorCode(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return null;
+  }
+
+  const code = (error as { code?: unknown }).code;
+  return typeof code === 'string' ? code : null;
+}
+
+function checkoutErrorResponse(error: unknown) {
+  if (error instanceof BillingError) {
+    const messages: Record<string, string> = {
+      INVALID_PRICE: 'O plano selecionado não está disponível neste momento.',
+      CUSTOMER_NOT_FOUND:
+        'A conta de pagamento não está disponível. Atualiza a página e tenta novamente.',
+      SUBSCRIPTION_NOT_FOUND:
+        'Não foi encontrada uma subscrição válida para esta operação.',
+      SUBSCRIPTION_NOT_ACTIVE:
+        'Já existe uma subscrição ativa para esta barbearia.',
+      PROMOTION_NOT_ELIGIBLE:
+        'Esta oferta é exclusiva para novos clientes e não está disponível para esta conta.',
+      CHECKOUT_RESOURCE_MISSING:
+        'A configuração de pagamento deixou de estar disponível. Atualiza a página e tenta novamente.',
+      CHECKOUT_FAILED:
+        'Não foi possível iniciar o checkout neste momento. Tenta novamente.',
+      DB_READ_FAILED:
+        'Não foi possível carregar os dados de faturação. Tenta novamente.',
+      DB_WRITE_FAILED:
+        'Não foi possível guardar o estado de faturação. Tenta novamente.',
+      WEBHOOK_VERIFICATION_FAILED:
+        'Não foi possível validar a operação de pagamento.',
+      WEBHOOK_PROCESSING_FAILED:
+        'Não foi possível concluir a preparação do checkout. Tenta novamente.',
+      BILLING_NOT_CONFIGURED:
+        'A faturação ainda não está configurada para esta conta.',
+    };
+
+    const status =
+      error.code === 'INVALID_PRICE'
+        ? 400
+        : error.code === 'SUBSCRIPTION_NOT_ACTIVE' ||
+            error.code === 'PROMOTION_NOT_ELIGIBLE' ||
+            error.code === 'CHECKOUT_RESOURCE_MISSING'
+          ? 409
+          : 500;
+
+    return {
+      status,
+      code: error.code,
+      message: messages[error.code] ?? 'Não foi possível iniciar o checkout.',
+    };
+  }
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : 'Não foi possível iniciar o checkout.';
+
+  if (
+    /prior transactions|first[_ -]?time transaction|cannot be redeemed/i.test(
+      message,
+    )
+  ) {
+    return {
+      status: 409,
+      code: 'PROMOTION_NOT_ELIGIBLE' as const,
+      message:
+        'Esta oferta é exclusiva para novos clientes. A tua subscrição anterior não impede uma nova subscrição, mas esta oferta já não está disponível para esta conta.',
+    };
+  }
+
+  const code = stripeErrorCode(error);
+  if (code === 'resource_missing') {
+    return {
+      status: 409,
+      code: 'CHECKOUT_RESOURCE_MISSING' as const,
+      message:
+        'A configuração de pagamento deixou de estar disponível. Atualiza a página e tenta novamente.',
+    };
+  }
+
+  return {
+    status: 502,
+    code: 'CHECKOUT_FAILED' as const,
+    message:
+      'Não foi possível iniciar o checkout neste momento. Os teus dados de faturação não foram alterados. Tenta novamente.',
+  };
+}
+
 async function resolveNewMemberPromotionCodeId(): Promise<string> {
   const promotions = await getStripeClient().promotionCodes.list({
     code: NEW_MEMBER_PRO_PROMOTION_CODE,
@@ -79,6 +189,8 @@ async function resolveNewMemberPromotionCodeId(): Promise<string> {
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -88,24 +200,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json().catch(() => ({}));
-    const priceId =
-      typeof body?.priceId === 'string' ? body.priceId.trim() : '';
-    if (!priceId)
+    const body = await readJsonObject(request);
+    const checkoutToken =
+      typeof body.checkoutToken === 'string' ? body.checkoutToken.trim() : '';
+    if (!checkoutToken) {
       throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
+        'O checkout não foi autorizado. Inicia novamente a partir dos planos.',
+        'CHECKOUT_INTENT_INVALID',
       );
+    }
 
-    const requestedPlan = planForPrice(priceId);
-    if (!requestedPlan || requestedPlan === PLANS.FREE) {
+    const intent = verifyCheckoutIntent(checkoutToken);
+    if (!intent || intent.sub !== user.id) {
       throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
+        'O checkout expirou ou não pertence a esta conta. Inicia novamente a partir dos planos.',
+        'CHECKOUT_INTENT_INVALID',
       );
     }
 
     const tenant = await BarbershopStripeService.getTenantContext(user.id);
+    if (intent.barbershopId !== tenant.barbershopId) {
+      throw new BillingError(
+        'O checkout não pertence a esta barbearia.',
+        'CHECKOUT_INTENT_INVALID',
+      );
+    }
+
+    // Verification 2: resolve and validate the actual Stripe Price again on
+    // the server. A modified or stale signed intent can never select another
+    // arbitrary Stripe price.
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      intent.plan,
+      intent.interval,
+    );
+    const priceId = verifiedPrice.id;
+    const requestedPlan = intent.plan;
     const existing = await BarbershopStripeService.reconcileSubscription(
       tenant.barbershopId,
       await BarbershopStripeService.getSubscriptionForBarbershop(
@@ -138,8 +267,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const hasBillingHistory =
+      Boolean(existing?.stripe_subscription_id) ||
+      (await hasStripeBillingHistory(customer));
+
     const isNewMemberProOffer =
-      requestedPlan === PLANS.PRO && !previousSubscriptionId;
+      requestedPlan === PLANS.PRO && !hasBillingHistory;
     const promotionCodeId = isNewMemberProOffer
       ? await resolveNewMemberPromotionCodeId()
       : null;
@@ -200,7 +333,7 @@ export async function POST(request: Request) {
         locale: 'pt',
       },
       {
-        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${priceId}:${previousSubscriptionId ?? 'new'}:${bucket}`,
+        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${intent.jti}:${bucket}`,
       },
     );
 
@@ -225,28 +358,28 @@ export async function POST(request: Request) {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
+    const mapped = checkoutErrorResponse(error);
+    const billingResponse = billingErrorResponse(error);
+
     console.error('[STRIPE_CUSTOM_CHECKOUT_ERROR]', {
       name: error instanceof Error ? error.name : 'UnknownError',
       message: error instanceof Error ? error.message : String(error),
-      code: error instanceof BillingError ? error.code : undefined,
+      code: error instanceof BillingError ? error.code : stripeErrorCode(error),
+      publicCode: mapped.code,
     });
-
-    const status =
-      error instanceof BillingError && error.code === 'INVALID_PRICE'
-        ? 400
-        : error instanceof BillingError &&
-            error.code === 'SUBSCRIPTION_NOT_ACTIVE'
-          ? 409
-          : 500;
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível iniciar o checkout.',
+        error: mapped.message,
+        code: mapped.code,
       },
-      { status },
+      {
+        status:
+          error instanceof BillingError
+            ? billingResponse.status
+            : mapped.status,
+        headers: { 'Cache-Control': 'no-store' },
+      },
     );
   }
 }
