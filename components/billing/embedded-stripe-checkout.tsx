@@ -19,13 +19,9 @@ export function EmbeddedStripeCheckout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkoutToken = new URLSearchParams(window.location.search).get(
-      'intent',
-    );
-    if (!checkoutToken) {
-      setError(
-        'O checkout não foi autorizado. Volta aos planos e inicia novamente.',
-      );
+    const priceId = new URLSearchParams(window.location.search).get('priceId');
+    if (!priceId) {
+      setError('Não foi selecionado nenhum plano para o checkout.');
       setLoading(false);
       return;
     }
@@ -35,7 +31,7 @@ export function EmbeddedStripeCheckout() {
     void fetch('/api/stripe/embedded-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checkoutToken }),
+      body: JSON.stringify({ priceId }),
     })
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));

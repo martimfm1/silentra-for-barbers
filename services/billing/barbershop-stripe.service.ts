@@ -1,20 +1,13 @@
 import type Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
-import {
-  planForPrice,
-  PLANS,
-  TRIAL_PERIOD_DAYS,
-  type CheckoutInterval,
-  type CheckoutPlan,
-} from '@/lib/stripe/constants';
+import { planForPrice, PLANS, TRIAL_PERIOD_DAYS } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES, resolvePlan } from '@/lib/billing/plan-access';
 import {
   BillingError,
   type BillingPlan,
   type SubscriptionRecord,
 } from '@/types/stripe';
-import { StripePriceService } from './stripe-price.service';
 
 const PENDING_INVOICE_TTL_MS = 10 * 60 * 1000;
 const CHECKOUT_IDEMPOTENCY_BUCKET_MS = 10 * 60 * 1000;
@@ -45,7 +38,9 @@ function subscriptionMetadata(
 ): Record<string, string> {
   const metadata = subscription.metadata ?? {};
   return Object.fromEntries(
-    Object.entries(metadata).filter(([, value]) => typeof value === 'string'),
+    Object.entries(metadata).filter(
+      ([, value]) => typeof value === 'string',
+    ),
   );
 }
 
@@ -284,6 +279,7 @@ export class BarbershopStripeService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: remote.cancel_at_period_end,
+
       };
 
       const changed =
@@ -331,24 +327,6 @@ export class BarbershopStripeService {
     }
   }
 
-  private static async hasRecordedStripeBillingHistory(
-    customerId: string,
-  ): Promise<boolean> {
-    const stripe = getStripeClient();
-    const [subscriptions, invoices] = await Promise.all([
-      stripe.subscriptions.list({
-        customer: customerId,
-        status: 'all',
-        limit: 1,
-      }),
-      stripe.invoices.list({
-        customer: customerId,
-        limit: 1,
-      }),
-    ]);
-    return subscriptions.data.length > 0 || invoices.data.length > 0;
-  }
-
   static async getEffectivePlan(userId: string): Promise<BillingPlan> {
     const database = createAdminClient();
     const tenant = await database
@@ -390,14 +368,15 @@ export class BarbershopStripeService {
 
   static async createElementsCheckout(
     userId: string,
-    plan: CheckoutPlan,
-    interval: CheckoutInterval = 'month',
+    priceId: string,
   ): Promise<{ clientSecret: string; sessionId: string }> {
     const tenant = await this.getTenantContext(userId);
-    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
-      plan,
-      interval,
-    );
+    const requestedPlan = planForPrice(priceId);
+    if (!requestedPlan || requestedPlan === PLANS.FREE)
+      throw new BillingError(
+        'The requested price is not available.',
+        'INVALID_PRICE',
+      );
 
     const existing = await this.reconcileSubscription(
       tenant.barbershopId,
@@ -409,21 +388,17 @@ export class BarbershopStripeService {
       (PLAN_ACCESS_STATUSES as readonly string[]).includes(existing.status)
     )
       throw new BillingError(
-        'An active subscription already exists.',
+        'An active subscription already exists for this barbershop.',
         'SUBSCRIPTION_NOT_ACTIVE',
       );
 
     const customer = await this.getOrCreateCustomer(userId);
-    const canTrial =
-      plan === PLANS.PRO &&
-      !existing?.stripe_subscription_id &&
-      !(await this.hasRecordedStripeBillingHistory(customer));
+    const canTrial = requestedPlan === PLANS.PRO && !existing;
     let appOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
     if (!appOrigin) appOrigin = 'https://barbers.silentra.me';
     if (!appOrigin.startsWith('http://') && !appOrigin.startsWith('https://'))
-      appOrigin = 'https://' + appOrigin;
-    const returnUrl =
-      appOrigin + '/checkout/success?session_id={CHECKOUT_SESSION_ID}';
+      appOrigin = `https://${appOrigin}`;
+    const returnUrl = `${appOrigin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
     const bucket = Math.floor(Date.now() / CHECKOUT_IDEMPOTENCY_BUCKET_MS);
 
     const session = await getStripeClient().checkout.sessions.create(
@@ -431,7 +406,7 @@ export class BarbershopStripeService {
         customer,
         mode: 'subscription',
         ui_mode: 'elements',
-        line_items: [{ price: verifiedPrice.id, quantity: 1 }],
+        line_items: [{ price: priceId, quantity: 1 }],
         return_url: returnUrl,
         client_reference_id: tenant.barbershopId,
         allow_promotion_codes: true,
@@ -440,8 +415,7 @@ export class BarbershopStripeService {
           user_id: tenant.userId,
           barbershop_id: tenant.barbershopId,
           stripe_customer_id: customer,
-          plan,
-          billing_interval: interval,
+          plan: requestedPlan,
           trial_eligible: canTrial ? 'true' : 'false',
         },
         subscription_data: {
@@ -449,8 +423,6 @@ export class BarbershopStripeService {
             app: 'silentra-for-barbers',
             user_id: tenant.userId,
             barbershop_id: tenant.barbershopId,
-            plan,
-            billing_interval: interval,
             trial_eligible: canTrial ? 'true' : 'false',
           },
           ...(canTrial ? { trial_period_days: TRIAL_PERIOD_DAYS } : {}),
@@ -462,15 +434,7 @@ export class BarbershopStripeService {
         locale: 'pt',
       },
       {
-        idempotencyKey:
-          'checkout-elements:' +
-          tenant.barbershopId +
-          ':' +
-          plan +
-          ':' +
-          interval +
-          ':' +
-          bucket,
+        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${priceId}:${bucket}`,
       },
     );
 
@@ -481,6 +445,7 @@ export class BarbershopStripeService {
       );
     return { clientSecret: session.client_secret, sessionId: session.id };
   }
+
   static async createCustomerPortal(
     userId: string,
     requestUrl?: string,
@@ -522,21 +487,22 @@ export class BarbershopStripeService {
       );
 
     const cancellationRequestedAt = new Date().toISOString();
-    const stripeSubscription = await getStripeClient().subscriptions.retrieve(
-      subscription.stripe_subscription_id,
-    );
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       {
         cancel_at_period_end: true,
         metadata: {
-          ...subscriptionMetadata(stripeSubscription),
+          ...subscriptionMetadata(subscription),
           cancellation_requested_by_user_id: userId,
           cancellation_requested_at: cancellationRequestedAt,
         },
       },
     );
-    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated);
+    await this.syncFromStripe(
+      tenant.barbershopId,
+      tenant.userId,
+      updated,
+    );
   }
 
   static async resume(userId: string): Promise<void> {
@@ -550,14 +516,19 @@ export class BarbershopStripeService {
         'No active paid subscription was found.',
         'SUBSCRIPTION_NOT_FOUND',
       );
-    if (!subscription.cancel_at_period_end) return;
+    if (!subscription.cancel_at_period_end)
+      return;
 
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       { cancel_at_period_end: false },
     );
 
-    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated);
+    await this.syncFromStripe(
+      tenant.barbershopId,
+      tenant.userId,
+      updated,
+    );
   }
 
   static async getInvoices(userId: string) {
@@ -596,6 +567,7 @@ export class BarbershopStripeService {
     barbershopId: string,
     ownerUserId: string,
     subscription: Stripe.Subscription,
+
   ): Promise<void> {
     const customer = stripeCustomerId(subscription.customer);
     const priceId = subscription.items.data[0]?.price.id;
