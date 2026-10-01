@@ -239,10 +239,17 @@ export class ManualPaymentService {
       );
     }
 
-    if (requestType === 'CHANGE' && !hasActivePaid) {
+    if (
+      requestType === 'CHANGE' &&
+      (!hasActivePaid || active?.payment_method !== 'MANUAL')
+    ) {
       throw new BillingError(
-        'Não foi encontrada uma subscrição ativa para alterar.',
-        'SUBSCRIPTION_NOT_FOUND',
+        active?.payment_method === 'STRIPE'
+          ? 'A subscrição atual é gerida pela Stripe e não pode ser alterada através do pagamento manual.'
+          : 'Não foi encontrada uma subscrição manual ativa para alterar.',
+        active?.payment_method === 'STRIPE'
+          ? 'SUBSCRIPTION_NOT_ACTIVE'
+          : 'SUBSCRIPTION_NOT_FOUND',
       );
     }
 
