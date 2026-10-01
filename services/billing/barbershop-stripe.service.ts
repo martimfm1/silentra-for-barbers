@@ -1,13 +1,20 @@
 import type Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
-import { planForPrice, PLANS, TRIAL_PERIOD_DAYS } from '@/lib/stripe/constants';
+import {
+  planForPrice,
+  PLANS,
+  TRIAL_PERIOD_DAYS,
+  type CheckoutInterval,
+  type CheckoutPlan,
+} from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES, resolvePlan } from '@/lib/billing/plan-access';
 import {
   BillingError,
   type BillingPlan,
   type SubscriptionRecord,
 } from '@/types/stripe';
+import { StripePriceService } from './stripe-price.service';
 
 const PENDING_INVOICE_TTL_MS = 10 * 60 * 1000;
 const CHECKOUT_IDEMPOTENCY_BUCKET_MS = 10 * 60 * 1000;
@@ -327,6 +334,23 @@ export class BarbershopStripeService {
     }
   }
 
+  private static async hasRecordedStripeBillingHistory(
+    customerId: string,
+  ): Promise<boolean> {
+    const stripe = getStripeClient();
+    const [subscriptions, invoices] = await Promise.all([
+      stripe.subscriptions.list({
+        customer: customerId,
+        status: 'all',
+        limit: 1,
+      }),
+      stripe.invoices.list({
+        customer: customerId,
+        limit: 1,
+      }),
+    ]);
+    return subscriptions.data.length > 0 || invoices.data.length > 0;
+  }
   static async getEffectivePlan(userId: string): Promise<BillingPlan> {
     const database = createAdminClient();
     const tenant = await database
@@ -348,35 +372,16 @@ export class BarbershopStripeService {
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
     if (assignmentError)
-      throw new BillingError(
-        'Could not load barbershop plan assignment.',
-        'DB_READ_FAILED',
-      );
-    if (
-      assignment &&
-      (!assignment.expires_at ||
-        new Date(assignment.expires_at).getTime() > Date.now())
-    )
-      return assignment.plan as BillingPlan;
-
-    const subscription = await this.reconcileSubscription(
-      barbershopId,
-      await this.getSubscriptionForBarbershop(barbershopId),
-    );
-    return resolvePlan(subscription);
-  }
-
-  static async createElementsCheckout(
+     static async createElementsCheckout(
     userId: string,
-    priceId: string,
+    plan: CheckoutPlan,
+    interval: CheckoutInterval = 'month',
   ): Promise<{ clientSecret: string; sessionId: string }> {
     const tenant = await this.getTenantContext(userId);
-    const requestedPlan = planForPrice(priceId);
-    if (!requestedPlan || requestedPlan === PLANS.FREE)
-      throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
-      );
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      plan,
+      interval,
+    );
 
     const existing = await this.reconcileSubscription(
       tenant.barbershopId,
@@ -388,17 +393,20 @@ export class BarbershopStripeService {
       (PLAN_ACCESS_STATUSES as readonly string[]).includes(existing.status)
     )
       throw new BillingError(
-        'An active subscription already exists for this barbershop.',
+        'An active subscription already exists.',
         'SUBSCRIPTION_NOT_ACTIVE',
       );
 
     const customer = await this.getOrCreateCustomer(userId);
-    const canTrial = requestedPlan === PLANS.PRO && !existing;
+    const canTrial =
+      plan === PLANS.PRO &&
+      !existing?.stripe_subscription_id &&
+      !(await this.hasRecordedStripeBillingHistory(customer));
     let appOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
     if (!appOrigin) appOrigin = 'https://barbers.silentra.me';
     if (!appOrigin.startsWith('http://') && !appOrigin.startsWith('https://'))
-      appOrigin = `https://${appOrigin}`;
-    const returnUrl = `${appOrigin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+      appOrigin = 'https://' + appOrigin;
+    const returnUrl = appOrigin + '/checkout/success?session_id={CHECKOUT_SESSION_ID}';
     const bucket = Math.floor(Date.now() / CHECKOUT_IDEMPOTENCY_BUCKET_MS);
 
     const session = await getStripeClient().checkout.sessions.create(
@@ -406,7 +414,7 @@ export class BarbershopStripeService {
         customer,
         mode: 'subscription',
         ui_mode: 'elements',
-        line_items: [{ price: priceId, quantity: 1 }],
+        line_items: [{ price: verifiedPrice.id, quantity: 1 }],
         return_url: returnUrl,
         client_reference_id: tenant.barbershopId,
         allow_promotion_codes: true,
@@ -415,7 +423,8 @@ export class BarbershopStripeService {
           user_id: tenant.userId,
           barbershop_id: tenant.barbershopId,
           stripe_customer_id: customer,
-          plan: requestedPlan,
+          plan,
+          billing_interval: interval,
           trial_eligible: canTrial ? 'true' : 'false',
         },
         subscription_data: {
@@ -423,6 +432,8 @@ export class BarbershopStripeService {
             app: 'silentra-for-barbers',
             user_id: tenant.userId,
             barbershop_id: tenant.barbershopId,
+            plan,
+            billing_interval: interval,
             trial_eligible: canTrial ? 'true' : 'false',
           },
           ...(canTrial ? { trial_period_days: TRIAL_PERIOD_DAYS } : {}),
@@ -430,6 +441,30 @@ export class BarbershopStripeService {
         billing_address_collection: 'required',
         customer_update: { name: 'auto', address: 'auto' },
         phone_number_collection: { enabled: true },
+        tax_id_collection: { enabled: true },
+        locale: 'pt',
+      },
+      {
+        idempotencyKey:
+          'checkout-elements:' +
+          tenant.barbershopId +
+          ':' +
+          plan +
+          ':' +
+          interval +
+          ':' +
+          bucket,
+      },
+    );
+
+    if (!session.client_secret)
+      throw new BillingError(
+        'Stripe did not return a Checkout Elements client secret.',
+        'WEBHOOK_PROCESSING_FAILED',
+      );
+    return { clientSecret: session.client_secret, sessionId: session.id };
+  }
+umber_collection: { enabled: true },
         tax_id_collection: { enabled: true },
         locale: 'pt',
       },
