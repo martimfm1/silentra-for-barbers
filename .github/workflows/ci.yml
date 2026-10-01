@@ -75,9 +75,6 @@ jobs:
       - name: Security audit
         run: pnpm qa:security
 
-      - name: Dependency audit
-        run: pnpm qa:deps
-
       - name: UI copy audit
         run: pnpm qa:copy
 
@@ -86,6 +83,9 @@ jobs:
 
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
+
+      - name: Dependency audit
+        run: pnpm qa:deps
 
       - name: Format check
         run: pnpm format:check
