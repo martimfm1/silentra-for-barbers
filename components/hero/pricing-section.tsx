@@ -51,7 +51,6 @@ export function PricingSection({
   destination?: PricingDestination;
   showDecisionHeader?: boolean;
 }) {
-  const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricesError, setPricesError] = useState(false);
@@ -76,7 +75,6 @@ export function PricingSection({
           throw new Error('PRICES_UNAVAILABLE');
         }
         if (!cancelled) {
-          setPrices(body.data);
           setPaymentMode(body.mode === 'STRIPE' ? 'STRIPE' : 'MANUAL');
         }
       } catch (error) {
