@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
-import { billingErrorResponse } from '@/services/billing/http';
+import { billingErrorResponse, assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
+    assertSameOrigin(request);
+
     const {
       data: { user },
       error,
