@@ -3,7 +3,7 @@ import { hasActivePaidSubscription } from '@/lib/billing/plan-access';
 
 export interface SubscriptionData {
   id: string;
-  stripe_customer_id: string;
+  stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   stripe_price_id: string | null;
   status:
@@ -16,9 +16,30 @@ export interface SubscriptionData {
     | 'incomplete_expired'
     | 'paused';
   cancel_at_period_end: boolean;
+  payment_method: 'MANUAL' | 'STRIPE';
   current_period_start?: string | null;
   current_period_end: string | null;
   plan: 'free' | 'pro' | 'enterprise';
+}
+
+export interface ManualSubscriptionRequest {
+  id: string;
+  plan: 'pro' | 'enterprise';
+  billingInterval: 'month' | 'year';
+  status:
+    | 'PENDING'
+    | 'PAYMENT_SENT'
+    | 'PAID'
+    | 'REJECTED'
+    | 'EXPIRED'
+    | 'CANCELLED';
+  price: number;
+  currency: string;
+  paymentLink: string | null;
+  paymentSentAt: string | null;
+  createdAt: string;
+  startedAt: string | null;
+  expiresAt: string | null;
 }
 
 export interface SubscriptionCancellation {
@@ -38,6 +59,8 @@ interface SubscriptionQueryResult {
   isBillingOwner: boolean;
   barbershopId: string | null;
   barbershopName: string | null;
+  paymentMode: 'MANUAL' | 'STRIPE';
+  manualRequest: ManualSubscriptionRequest | null;
 }
 
 async function fetchSubscription(): Promise<SubscriptionQueryResult> {
@@ -63,6 +86,8 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
         isBillingOwner: false,
         barbershopId: null,
         barbershopName: null,
+        paymentMode: 'MANUAL',
+        manualRequest: null,
       };
     }
     throw new Error('Failed to fetch subscription data.');
@@ -78,6 +103,22 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
     isBillingOwner: Boolean(json.isBillingOwner),
     barbershopId: json.barbershopId ?? null,
     barbershopName: json.barbershopName ?? null,
+    paymentMode: json.paymentMode === 'STRIPE' ? 'STRIPE' : 'MANUAL',
+    manualRequest: json.manualRequest
+      ? {
+          id: json.manualRequest.id,
+          plan: json.manualRequest.plan,
+          billingInterval: json.manualRequest.billing_interval,
+          status: json.manualRequest.status,
+          price: Number(json.manualRequest.price),
+          currency: json.manualRequest.currency ?? 'EUR',
+          paymentLink: json.manualRequest.payment_link ?? null,
+          paymentSentAt: json.manualRequest.payment_sent_at ?? null,
+          createdAt: json.manualRequest.created_at,
+          startedAt: json.manualRequest.started_at ?? null,
+          expiresAt: json.manualRequest.expires_at ?? null,
+        }
+      : null,
   };
 }
 
@@ -155,6 +196,8 @@ export function useSubscription() {
     loading,
     barbershopId: data?.barbershopId ?? null,
     barbershopName: data?.barbershopName ?? null,
+    paymentMode: data?.paymentMode ?? 'MANUAL',
+    manualRequest: data?.manualRequest ?? null,
     cancel: cancelMutation.mutateAsync,
     resume: resumeMutation.mutateAsync,
     upgrade: async () => {
