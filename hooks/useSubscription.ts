@@ -5,7 +5,6 @@ export interface SubscriptionData {
   id: string;
   stripe_customer_id: string;
   stripe_subscription_id: string | null;
-  stripe_price_id: string | null;
   status:
     | 'active'
     | 'trialing'
@@ -38,6 +37,7 @@ interface SubscriptionQueryResult {
   isBillingOwner: boolean;
   barbershopId: string | null;
   barbershopName: string | null;
+  billingInterval: 'month' | 'year' | null;
 }
 
 async function fetchSubscription(): Promise<SubscriptionQueryResult> {
@@ -63,6 +63,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
         isBillingOwner: false,
         barbershopId: null,
         barbershopName: null,
+        billingInterval: null,
       };
     }
     throw new Error('Failed to fetch subscription data.');
@@ -78,6 +79,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
     isBillingOwner: Boolean(json.isBillingOwner),
     barbershopId: json.barbershopId ?? null,
     barbershopName: json.barbershopName ?? null,
+    billingInterval: json.billingInterval ?? null,
   };
 }
 
@@ -155,6 +157,7 @@ export function useSubscription() {
     loading,
     barbershopId: data?.barbershopId ?? null,
     barbershopName: data?.barbershopName ?? null,
+    billingInterval: data?.billingInterval ?? null,
     cancel: cancelMutation.mutateAsync,
     resume: resumeMutation.mutateAsync,
     upgrade: async () => {

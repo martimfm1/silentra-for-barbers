@@ -1,21 +1,37 @@
 import { useMutation } from '@tanstack/react-query';
 
 export interface UseCheckoutParams {
-  priceId: string;
-  plan?: 'pro' | 'enterprise';
-  successUrl?: string;
-  cancelUrl?: string;
+  plan: 'pro' | 'enterprise';
+  interval?: 'month' | 'year';
 }
 
 export function useCheckout() {
   const checkoutMutation = useMutation({
-    mutationFn: async ({ priceId, plan = 'pro' }: UseCheckoutParams) => {
-      window.location.assign(
-        `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${plan}`,
-      );
-      return {
-        url: `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${plan}`,
+    mutationFn: async ({ plan, interval = 'month' }: UseCheckoutParams) => {
+      const response = await fetch('/api/stripe/checkout-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ plan, interval }),
+        cache: 'no-store',
+      });
+
+      const body = (await response.json().catch(() => ({}))) as {
+        checkoutToken?: string;
+        error?: string;
       };
+
+      if (!response.ok || typeof body.checkoutToken !== 'string') {
+        throw new Error(body.error ?? 'Não foi possível iniciar o checkout.');
+      }
+
+      window.location.assign(
+        '/checkout?intent=' + encodeURIComponent(body.checkoutToken),
+      );
+
+      return { token: body.checkoutToken };
     },
   });
 

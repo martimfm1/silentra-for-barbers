@@ -21,6 +21,11 @@ export function billingErrorResponse(error: unknown): NextResponse {
       DB_WRITE_FAILED: 503,
       WEBHOOK_VERIFICATION_FAILED: 400,
       WEBHOOK_PROCESSING_FAILED: 500,
+      CSRF_VALIDATION_FAILED: 403,
+      CHECKOUT_INTENT_INVALID: 400,
+      PROMOTION_NOT_ELIGIBLE: 409,
+      CHECKOUT_RESOURCE_MISSING: 409,
+      CHECKOUT_FAILED: 502,
     }[error.code];
     return NextResponse.json(
       { error: error.message, code: error.code },
@@ -59,6 +64,46 @@ export function safeReturnUrl(value: unknown, fallbackPath: string): string {
     // Use the safe fallback for malformed URLs.
   }
   return fallback;
+}
+
+export function assertSameOrigin(request: Request): void {
+  const origin = request.headers.get('origin')?.trim();
+  if (!origin) {
+    throw new BillingError(
+      'A origem do pedido não pôde ser validada.',
+      'CSRF_VALIDATION_FAILED',
+    );
+  }
+
+  const configuredOrigin =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.APP_URL?.trim() ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
+
+  const expectedOrigin = configuredOrigin
+    ? new URL(
+        configuredOrigin.startsWith('http')
+          ? configuredOrigin
+          : `https://${configuredOrigin}`,
+      ).origin
+    : new URL(request.url).origin;
+
+  let receivedOrigin: string;
+  try {
+    receivedOrigin = new URL(origin).origin;
+  } catch {
+    throw new BillingError(
+      'A origem do pedido não pôde ser validada.',
+      'CSRF_VALIDATION_FAILED',
+    );
+  }
+
+  if (receivedOrigin !== expectedOrigin) {
+    throw new BillingError(
+      'O pedido não foi iniciado a partir da aplicação autorizada.',
+      'CSRF_VALIDATION_FAILED',
+    );
+  }
 }
 
 export async function readJsonObject(
