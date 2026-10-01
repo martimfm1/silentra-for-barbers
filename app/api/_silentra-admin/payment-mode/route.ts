@@ -6,7 +6,6 @@ import {
   type PaymentMode,
 } from '@/services/billing/payment-mode.service';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,7 +28,6 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    assertSameOrigin(request);
     const { admin, user } = await requirePlatformAdmin();
     const body = (await request.json().catch(() => null)) as {
       paymentMode?: unknown;
