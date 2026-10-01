@@ -219,7 +219,8 @@ export function PricingCard({
   const confirmationTitle = isDowngrade
     ? 'Confirmar mudança para um plano inferior'
     : 'Confirmar upgrade';
-  const confirmationDescription = `Depois da confirmação vais para o checkout Stripe para concluir a nova subscrição. A subscrição atual só será cancelada depois de o novo checkout ficar concluído.`;
+  const confirmationDescription =
+    'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
 
   return (
     <>
