@@ -112,18 +112,55 @@ export class BillingService {
   }
 
   static async isEligibleForProTrial(userId: string): Promise<boolean> {
-    const { data, error } = await createAdminClient()
+    const database = createAdminClient();
+    const { data, error } = await database
       .from('subscriptions')
       .select('id')
       .eq('user_id', userId)
       .limit(1);
+
     if (error)
       throw new BillingError(
         'Could not verify trial eligibility.',
         'DB_READ_FAILED',
         { userId },
       );
-    return data.length === 0;
+
+    // First check: local billing history. Second check: Stripe history.
+    // Clearing or desynchronizing local rows can never restore the new-member offer.
+    const { data: account, error: accountError } = await database
+      .from('barbershop_billing_accounts')
+      .select('stripe_customer_id')
+      .eq('billing_owner_user_id', userId)
+      .maybeSingle();
+
+    if (accountError)
+      throw new BillingError(
+        'Could not verify Stripe billing history.',
+        'DB_READ_FAILED',
+        { userId },
+      );
+
+    if (!account?.stripe_customer_id) return data.length === 0;
+
+    const stripe = getStripeClient();
+    const [subscriptions, invoices] = await Promise.all([
+      stripe.subscriptions.list({
+        customer: account.stripe_customer_id,
+        status: 'all',
+        limit: 1,
+      }),
+      stripe.invoices.list({
+        customer: account.stripe_customer_id,
+        limit: 1,
+      }),
+    ]);
+
+    return (
+      data.length === 0 &&
+      subscriptions.data.length === 0 &&
+      invoices.data.length === 0
+    );
   }
 
   private static async resolvePromotionCodeId(
