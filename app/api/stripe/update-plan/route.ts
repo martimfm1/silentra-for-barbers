@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import { billingErrorResponse, readJsonObject } from '@/services/billing/http';
+import { assertUserHasStripeSubscription } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -14,6 +15,8 @@ export async function POST(request: Request) {
     if (error || !user)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     await BillingService.assertBillingOwner(user.id);
+    await assertUserHasStripeSubscription(user.id);
+
     const { newPriceId } = await readJsonObject(request);
     if (typeof newPriceId !== 'string')
       return NextResponse.json(
