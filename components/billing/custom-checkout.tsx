@@ -359,10 +359,10 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
 }
 
 export function CustomCheckout({
-  priceId,
+  checkoutToken,
   plan,
 }: {
-  priceId: string;
+  checkoutToken: string;
   plan: keyof typeof PLAN_COPY;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -373,8 +373,8 @@ export function CustomCheckout({
   const checkoutAttemptIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!priceId || initializedKey.current === priceId) return;
-    initializedKey.current = priceId;
+    if (!checkoutToken || initializedKey.current === checkoutToken) return;
+    initializedKey.current = checkoutToken;
     checkoutAttemptIdRef.current = crypto.randomUUID();
     const checkoutAttemptId = checkoutAttemptIdRef.current;
     let cancelled = false;
@@ -384,7 +384,7 @@ export function CustomCheckout({
         const response = await fetch('/api/stripe/embedded-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId, checkoutAttemptId }),
+          body: JSON.stringify({ checkoutToken, checkoutAttemptId }),
           cache: 'no-store',
         });
         const body = await response.json().catch(() => ({}));
@@ -420,7 +420,7 @@ export function CustomCheckout({
     return () => {
       cancelled = true;
     };
-  }, [priceId]);
+  }, [checkoutToken]);
 
   const copy = PLAN_COPY[plan];
   if (initializationError)
