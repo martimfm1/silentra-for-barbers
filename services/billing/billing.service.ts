@@ -17,6 +17,7 @@ import {
   type SubscriptionRecord,
 } from '@/types/stripe';
 import { SubscriptionService } from './subscription.service';
+import { safeReturnUrl } from './http';
 
 const PENDING_INVOICE_TTL_MS = 10 * 60 * 1000;
 
@@ -217,8 +218,8 @@ export class BillingService {
       customer,
       mode: 'subscription',
       line_items: [{ price: verifiedPrice.id, quantity: 1 }],
-      success_url: input.successUrl,
-      cancel_url: input.cancelUrl,
+      success_url: safeReturnUrl(input.successUrl, '/dashboard/billing'),
+      cancel_url: safeReturnUrl(input.cancelUrl, '/dashboard/billing'),
       client_reference_id: input.userId,
       metadata: {
         user_id: input.userId,
