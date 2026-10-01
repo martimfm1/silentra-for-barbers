@@ -53,6 +53,9 @@ export function PricingSection({
 }) {
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
+  const [billingInterval, setBillingInterval] = useState<'month' | 'year'>(
+    'month',
+  );
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricesError, setPricesError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -99,7 +102,7 @@ export function PricingSection({
 
   const formatPrice = (plan: 'pro' | 'enterprise') => {
     const amount = prices.find(
-      (price) => price.plan === plan && price.interval === 'month',
+      (price) => price.plan === plan && price.interval === billingInterval,
     )?.unitAmount;
 
     if (typeof amount !== 'number') {
@@ -114,8 +117,48 @@ export function PricingSection({
     }).format(amount / 100);
   };
 
+  const annualAvailable = prices.some(
+    (price) => price.interval === 'year',
+  );
+
   return (
     <section id="precos" className="space-y-8">
+      {!loadingPrices && !pricesError && (
+        <div className="flex justify-start sm:justify-end">
+          <div
+            className="inline-flex rounded-xl border border-white/10 bg-white/[0.025] p-1"
+            role="group"
+            aria-label="Período de faturação"
+          >
+            <button
+              type="button"
+              onClick={() => setBillingInterval('month')}
+              aria-pressed={billingInterval === 'month'}
+              className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition ${
+                billingInterval === 'month'
+                  ? 'bg-white text-zinc-950'
+                  : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              disabled={!annualAvailable}
+              onClick={() => setBillingInterval('year')}
+              aria-pressed={billingInterval === 'year'}
+              className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition ${
+                billingInterval === 'year'
+                  ? 'bg-white text-zinc-950'
+                  : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
+              } disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              Anual
+            </button>
+          </div>
+        </div>
+      )}
+
       {showDecisionHeader ? (
         <>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -224,16 +267,22 @@ export function PricingSection({
           />
           <PricingCard
             destination={destination}
+            billingInterval={billingInterval}
             tier="pro"
             title="Barbers Pro"
             price={formatPrice('pro')}
             description={PLAN_DESCRIPTIONS.pro}
             features={HERO_FEATURES.pro}
             popular
-            trialDays={paymentMode === 'STRIPE' ? 30 : undefined}
+            trialDays={
+              paymentMode === 'STRIPE' && billingInterval === 'month'
+                ? 30
+                : undefined
+            }
           />
           <PricingCard
             destination={destination}
+            billingInterval={billingInterval}
             tier="enterprise"
             title="Barbers Enterprise"
             price={formatPrice('enterprise')}
