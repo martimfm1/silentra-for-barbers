@@ -54,6 +54,49 @@ export async function PATCH(request: Request, { params }: Params) {
       return json({ ok: true, status: 'PAYMENT_SENT' });
     }
 
+    if (action === 'create_renewal') {
+      const existing = await ManualPaymentService.getRequest(requestId);
+      if (!existing)
+        return json(
+          { ok: false, error: 'Pedido de subscrição não encontrado.' },
+          404,
+        );
+
+      const renewal = await ManualPaymentService.createRequest({
+        userId: existing.user_id,
+        barbershopId: existing.barbershop_id,
+        plan: existing.plan,
+        billingInterval: existing.billing_interval,
+        requestType: 'RENEWAL',
+      });
+
+      const admin = (await import('@/lib/supabase/admin')).createAdminClient();
+      const [{ data: customer }, { data: shop }] = await Promise.all([
+        admin
+          .from('users')
+          .select('name_complete,email')
+          .eq('id', existing.user_id)
+          .maybeSingle(),
+        admin
+          .from('barbershops')
+          .select('name')
+          .eq('id', existing.barbershop_id)
+          .maybeSingle(),
+      ]);
+
+      await ManualPaymentService.notifyAdmin(renewal, {
+        customerName: customer?.name_complete ?? customer?.email ?? 'Cliente',
+        customerEmail: customer?.email ?? '',
+        barbershopName: shop?.name ?? 'Barbearia',
+      });
+
+      return json({
+        ok: true,
+        status: 'PENDING',
+        request: renewal,
+      }, 201);
+    }
+
     if (action === 'confirm_payment') {
       const result = await ManualPaymentService.confirmPayment(
         requestId,
