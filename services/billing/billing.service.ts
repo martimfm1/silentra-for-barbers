@@ -420,9 +420,7 @@ export class BillingService {
     }
 
     const eligibleForProTrial =
-      plan === PLANS.PRO
-        ? await this.isEligibleForProTrial(userId)
-        : false;
+      plan === PLANS.PRO ? await this.isEligibleForProTrial(userId) : false;
     const promotionCodeId = await this.resolvePromotionCodeId(promotionCode);
     const customer = await this.getOrCreateCustomer(userId, email);
     const subscription = await getStripeClient().subscriptions.create({

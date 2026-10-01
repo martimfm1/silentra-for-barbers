@@ -18,7 +18,10 @@ export async function POST(request: Request) {
       error,
     } = await (await createClient()).auth.getUser();
     if (error || !user)
-      return NextResponse.json({ error: 'Não tens sessão iniciada.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não tens sessão iniciada.' },
+        { status: 401 },
+      );
     await BillingService.assertBillingOwner(user.id);
     const body = await readJsonObject(request);
     if (!body.action)

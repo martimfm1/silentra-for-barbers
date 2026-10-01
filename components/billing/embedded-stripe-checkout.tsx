@@ -19,9 +19,13 @@ export function EmbeddedStripeCheckout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkoutToken = new URLSearchParams(window.location.search).get('intent');
+    const checkoutToken = new URLSearchParams(window.location.search).get(
+      'intent',
+    );
     if (!checkoutToken) {
-      setError('O checkout não foi autorizado. Volta aos planos e inicia novamente.');
+      setError(
+        'O checkout não foi autorizado. Volta aos planos e inicia novamente.',
+      );
       setLoading(false);
       return;
     }

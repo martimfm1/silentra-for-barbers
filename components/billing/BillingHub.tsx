@@ -214,9 +214,7 @@ export function BillingHub() {
             </div>
 
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white">
-              {isCanceled
-                ? PLAN_NAMES[canceledPlan]
-                : PLAN_NAMES[plan]}
+              {isCanceled ? PLAN_NAMES[canceledPlan] : PLAN_NAMES[plan]}
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">

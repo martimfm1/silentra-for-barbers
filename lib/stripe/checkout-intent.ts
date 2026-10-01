@@ -1,8 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import type {
-  CheckoutInterval,
-  CheckoutPlan,
-} from '@/lib/stripe/constants';
+import type { CheckoutInterval, CheckoutPlan } from '@/lib/stripe/constants';
 
 const CHECKOUT_INTENT_TTL_SECONDS = 10 * 60;
 
@@ -75,7 +72,9 @@ export function verifyCheckoutIntent(
   if (!isValidSignature(payloadPart, signature)) return null;
 
   try {
-    const payload = JSON.parse(decode(payloadPart)) as Partial<CheckoutIntentPayload>;
+    const payload = JSON.parse(
+      decode(payloadPart),
+    ) as Partial<CheckoutIntentPayload>;
     if (
       payload.v !== 1 ||
       typeof payload.sub !== 'string' ||

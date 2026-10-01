@@ -10,7 +10,9 @@ export type BillingPlan = (typeof PLANS)[keyof typeof PLANS];
 export type CheckoutPlan = Exclude<BillingPlan, typeof PLANS.FREE>;
 export type CheckoutInterval = 'month' | 'year';
 
-const configuredPrices: Array<[BillingPlan, CheckoutInterval, string | undefined]> = [
+const configuredPrices: Array<
+  [BillingPlan, CheckoutInterval, string | undefined]
+> = [
   [PLANS.PRO, 'month', process.env.STRIPE_PRICE_PRO_MONTHLY],
   [PLANS.PRO, 'year', process.env.STRIPE_PRICE_PRO_YEARLY],
   [PLANS.ENTERPRISE, 'month', process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY],
@@ -37,11 +39,11 @@ export function intervalForPriceId(
 ): CheckoutInterval | null {
   if (!priceId) return null;
   return (
-    configuredPrices.find(([, , configuredPriceId]) => configuredPriceId === priceId)?.[1] ??
-    null
+    configuredPrices.find(
+      ([, , configuredPriceId]) => configuredPriceId === priceId,
+    )?.[1] ?? null
   );
 }
-
 
 // Kept for legacy billing flows that still reference the old trial setting.
 // New Embedded Checkout uses the Stripe promotion code below instead.

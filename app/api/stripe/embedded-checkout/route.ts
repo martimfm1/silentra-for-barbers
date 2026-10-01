@@ -3,10 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { getStripeClient } from '@/lib/stripe/server';
-import {
-  PLANS,
-  NEW_MEMBER_PRO_PROMOTION_CODE,
-} from '@/lib/stripe/constants';
+import { PLANS, NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingError } from '@/types/stripe';
 import {
@@ -377,7 +374,10 @@ export async function POST(request: Request) {
         code: mapped.code,
       },
       {
-        status: error instanceof BillingError ? billingResponse.status : mapped.status,
+        status:
+          error instanceof BillingError
+            ? billingResponse.status
+            : mapped.status,
         headers: { 'Cache-Control': 'no-store' },
       },
     );

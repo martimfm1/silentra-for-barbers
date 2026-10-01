@@ -24,9 +24,7 @@ export function useCheckout() {
       };
 
       if (!response.ok || typeof body.checkoutToken !== 'string') {
-        throw new Error(
-          body.error ?? 'Não foi possível iniciar o checkout.',
-        );
+        throw new Error(body.error ?? 'Não foi possível iniciar o checkout.');
       }
 
       window.location.assign(

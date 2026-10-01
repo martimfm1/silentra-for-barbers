@@ -189,8 +189,7 @@ export async function GET() {
           canceledByName,
           canceledByEmail,
           previousPlan,
-          requestedAt:
-            remote?.metadata?.cancellation_requested_at ?? null,
+          requestedAt: remote?.metadata?.cancellation_requested_at ?? null,
         };
       } catch (error) {
         console.error(
@@ -201,9 +200,7 @@ export async function GET() {
       }
     }
 
-    const billingInterval = intervalForPriceId(
-      subscription?.stripe_price_id,
-    );
+    const billingInterval = intervalForPriceId(subscription?.stripe_price_id);
 
     const plan: BillingPlan =
       hasActiveAssignment && assignment

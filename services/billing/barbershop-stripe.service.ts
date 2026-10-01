@@ -45,9 +45,7 @@ function subscriptionMetadata(
 ): Record<string, string> {
   const metadata = subscription.metadata ?? {};
   return Object.fromEntries(
-    Object.entries(metadata).filter(
-      ([, value]) => typeof value === 'string',
-    ),
+    Object.entries(metadata).filter(([, value]) => typeof value === 'string'),
   );
 }
 
@@ -286,7 +284,6 @@ export class BarbershopStripeService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: remote.cancel_at_period_end,
-
       };
 
       const changed =
@@ -425,7 +422,8 @@ export class BarbershopStripeService {
     if (!appOrigin) appOrigin = 'https://barbers.silentra.me';
     if (!appOrigin.startsWith('http://') && !appOrigin.startsWith('https://'))
       appOrigin = 'https://' + appOrigin;
-    const returnUrl = appOrigin + '/checkout/success?session_id={CHECKOUT_SESSION_ID}';
+    const returnUrl =
+      appOrigin + '/checkout/success?session_id={CHECKOUT_SESSION_ID}';
     const bucket = Math.floor(Date.now() / CHECKOUT_IDEMPOTENCY_BUCKET_MS);
 
     const session = await getStripeClient().checkout.sessions.create(
@@ -538,11 +536,7 @@ export class BarbershopStripeService {
         },
       },
     );
-    await this.syncFromStripe(
-      tenant.barbershopId,
-      tenant.userId,
-      updated,
-    );
+    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated);
   }
 
   static async resume(userId: string): Promise<void> {
@@ -556,19 +550,14 @@ export class BarbershopStripeService {
         'No active paid subscription was found.',
         'SUBSCRIPTION_NOT_FOUND',
       );
-    if (!subscription.cancel_at_period_end)
-      return;
+    if (!subscription.cancel_at_period_end) return;
 
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       { cancel_at_period_end: false },
     );
 
-    await this.syncFromStripe(
-      tenant.barbershopId,
-      tenant.userId,
-      updated,
-    );
+    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated);
   }
 
   static async getInvoices(userId: string) {
@@ -607,7 +596,6 @@ export class BarbershopStripeService {
     barbershopId: string,
     ownerUserId: string,
     subscription: Stripe.Subscription,
-
   ): Promise<void> {
     const customer = stripeCustomerId(subscription.customer);
     const priceId = subscription.items.data[0]?.price.id;

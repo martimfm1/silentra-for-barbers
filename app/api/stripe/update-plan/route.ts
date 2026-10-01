@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
-import { billingErrorResponse, readJsonObject, assertSameOrigin } from '@/services/billing/http';
+import {
+  billingErrorResponse,
+  readJsonObject,
+  assertSameOrigin,
+} from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,7 +19,10 @@ export async function POST(request: Request) {
       error,
     } = await (await createClient()).auth.getUser();
     if (error || !user)
-      return NextResponse.json({ error: 'Não tens sessão iniciada.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não tens sessão iniciada.' },
+        { status: 401 },
+      );
 
     await BillingService.assertBillingOwner(user.id);
 
@@ -31,7 +38,10 @@ export async function POST(request: Request) {
 
     if (interval !== undefined && interval !== 'month' && interval !== 'year')
       return NextResponse.json(
-        { error: 'O período de faturação selecionado não é válido.', code: 'INVALID_PRICE' },
+        {
+          error: 'O período de faturação selecionado não é válido.',
+          code: 'INVALID_PRICE',
+        },
         { status: 400 },
       );
 

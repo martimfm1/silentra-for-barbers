@@ -8,7 +8,11 @@ import {
 } from '@/lib/stripe/constants';
 import { createCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { StripePriceService } from '@/services/billing/stripe-price.service';
-import { billingErrorResponse, assertSameOrigin, readJsonObject } from '@/services/billing/http';
+import {
+  billingErrorResponse,
+  assertSameOrigin,
+  readJsonObject,
+} from '@/services/billing/http';
 import { BillingError } from '@/types/stripe';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 
@@ -17,15 +21,13 @@ export const dynamic = 'force-dynamic';
 
 function parsePlan(value: unknown): CheckoutPlan {
   if (value === PLANS.PRO || value === PLANS.ENTERPRISE) return value;
-  throw new BillingError(
-    'O plano selecionado não é válido.',
-    'INVALID_PRICE',
-  );
+  throw new BillingError('O plano selecionado não é válido.', 'INVALID_PRICE');
 }
 
 function parseInterval(value: unknown): CheckoutInterval {
   if (value === 'year') return 'year';
-  if (value === undefined || value === null || value === 'month') return 'month';
+  if (value === undefined || value === null || value === 'month')
+    return 'month';
   throw new BillingError(
     'O período de faturação selecionado não é válido.',
     'INVALID_PRICE',
