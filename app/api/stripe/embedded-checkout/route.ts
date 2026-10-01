@@ -88,19 +88,45 @@ function stripeErrorCode(error: unknown): string | null {
 
 function checkoutErrorResponse(error: unknown) {
   if (error instanceof BillingError) {
+    const messages: Record<string, string> = {
+      INVALID_PRICE: 'O plano selecionado não está disponível neste momento.',
+      CUSTOMER_NOT_FOUND:
+        'A conta de pagamento não está disponível. Atualiza a página e tenta novamente.',
+      SUBSCRIPTION_NOT_FOUND:
+        'Não foi encontrada uma subscrição válida para esta operação.',
+      SUBSCRIPTION_NOT_ACTIVE:
+        'Já existe uma subscrição ativa para esta barbearia.',
+      PROMOTION_NOT_ELIGIBLE:
+        'Esta oferta é exclusiva para novos clientes e não está disponível para esta conta.',
+      CHECKOUT_RESOURCE_MISSING:
+        'A configuração de pagamento deixou de estar disponível. Atualiza a página e tenta novamente.',
+      CHECKOUT_FAILED:
+        'Não foi possível iniciar o checkout neste momento. Tenta novamente.',
+      DB_READ_FAILED:
+        'Não foi possível carregar os dados de faturação. Tenta novamente.',
+      DB_WRITE_FAILED:
+        'Não foi possível guardar o estado de faturação. Tenta novamente.',
+      WEBHOOK_VERIFICATION_FAILED:
+        'Não foi possível validar a operação de pagamento.',
+      WEBHOOK_PROCESSING_FAILED:
+        'Não foi possível concluir a preparação do checkout. Tenta novamente.',
+      BILLING_NOT_CONFIGURED:
+        'A faturação ainda não está configurada para esta conta.',
+    };
+
     const status =
       error.code === 'INVALID_PRICE'
         ? 400
-        : error.code === 'SUBSCRIPTION_NOT_ACTIVE'
+        : error.code === 'SUBSCRIPTION_NOT_ACTIVE' ||
+            error.code === 'PROMOTION_NOT_ELIGIBLE' ||
+            error.code === 'CHECKOUT_RESOURCE_MISSING'
           ? 409
-          : error.code === 'PROMOTION_NOT_ELIGIBLE'
-            ? 409
-            : 500;
+          : 500;
 
     return {
       status,
       code: error.code,
-      message: error.message,
+      message: messages[error.code] ?? 'Não foi possível iniciar o checkout.',
     };
   }
 
