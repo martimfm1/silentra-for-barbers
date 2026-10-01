@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { CustomCheckout } from '@/components/billing/custom-checkout';
+import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
+import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,8 +10,7 @@ export default async function CheckoutPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    priceId?: string;
-    plan?: string;
+    intent?: string;
     checkout?: string;
     session_id?: string;
   }>;
@@ -23,8 +24,6 @@ export default async function CheckoutPage({
   }
 
   const params = await searchParams;
-  const priceId = params.priceId?.trim() ?? '';
-  const plan = params.plan === 'enterprise' ? 'enterprise' : 'pro';
 
   if (params.checkout === 'return') {
     return (
@@ -51,19 +50,48 @@ export default async function CheckoutPage({
     );
   }
 
-  if (!priceId) {
+  const token = params.intent?.trim() ?? '';
+  const intent = token ? verifyCheckoutIntent(token) : null;
+
+  if (!intent || intent.sub !== user.id) {
     return (
-      <main className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-50 sm:px-6 lg:px-8">
-        <div className="glassmorphism mx-auto max-w-xl rounded-2xl border border-white/10 bg-zinc-900/70 p-7 text-center shadow-[0_24px_90px_rgba(0,0,0,0.28)]">
-          <h1 className="text-2xl font-semibold text-white">Checkout</h1>
-          <p className="mt-2 text-sm leading-6 text-zinc-500">
-            Seleciona um plano para continuares para o checkout.
+      <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 py-10 text-zinc-50">
+        <div className="glassmorphism w-full max-w-xl rounded-2xl border border-red-400/20 bg-zinc-900/70 p-7 text-center shadow-[0_24px_90px_rgba(0,0,0,0.28)] sm:p-9">
+          <h1 className="text-2xl font-semibold text-white">
+            Checkout indisponível
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
+            Este checkout expirou ou não pertence à tua conta. Inicia um novo
+            checkout a partir dos planos.
           </p>
           <a
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
-            Ver planos
+            Voltar aos planos
+          </a>
+        </div>
+      </main>
+    );
+  }
+
+  const tenant = await BarbershopStripeService.getTenantContext(user.id);
+  if (intent.barbershopId !== tenant.barbershopId) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 py-10 text-zinc-50">
+        <div className="glassmorphism w-full max-w-xl rounded-2xl border border-red-400/20 bg-zinc-900/70 p-7 text-center shadow-[0_24px_90px_rgba(0,0,0,0.28)] sm:p-9">
+          <h1 className="text-2xl font-semibold text-white">
+            Checkout indisponível
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
+            O checkout não corresponde à barbearia atualmente associada à tua
+            conta.
+          </p>
+          <a
+            href="/dashboard/billing"
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
+          >
+            Ir para faturação
           </a>
         </div>
       </main>
@@ -72,7 +100,7 @@ export default async function CheckoutPage({
 
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6 text-zinc-50 sm:px-6 sm:py-10 lg:px-8">
-      <CustomCheckout priceId={priceId} plan={plan} />
+      <CustomCheckout checkoutToken={token} plan={intent.plan} />
     </main>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCheckout } from '@/hooks/useCheckout';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
 interface Invoice {
@@ -45,14 +46,14 @@ export function BillingHub() {
     loading,
     cancel,
     resume,
+    billingInterval,
   } = useSubscription();
+  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const [cancelling, setCancelling] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
-  const [renewalPriceId, setRenewalPriceId] = useState<string | null>(null);
-  const [loadingRenewalPrice, setLoadingRenewalPrice] = useState(false);
 
   const hasSubscription = Boolean(subscription?.stripe_subscription_id);
   const isCanceled = subscription?.status === 'canceled';
@@ -80,79 +81,6 @@ export function BillingHub() {
         year: 'numeric',
       })
     : '—';
-
-  useEffect(() => {
-    if (!isCanceled || isAdministrativePlan || canceledPlan === 'free') {
-      setRenewalPriceId(null);
-      setLoadingRenewalPrice(false);
-      return;
-    }
-
-    if (canceledPlan === 'enterprise' && subscription?.stripe_price_id) {
-      setRenewalPriceId(subscription.stripe_price_id);
-      setLoadingRenewalPrice(false);
-      return;
-    }
-
-    if (canceledPlan !== 'pro') return;
-
-    let cancelled = false;
-    setLoadingRenewalPrice(true);
-
-    fetch('/api/stripe/prices', {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    })
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok || !Array.isArray(body.data))
-          throw new Error('PRICES_UNAVAILABLE');
-        return body.data as Array<{
-          id: string;
-          plan: 'pro' | 'enterprise' | null;
-          interval: 'month' | 'year' | null;
-        }>;
-      })
-      .then((prices) => {
-        if (cancelled) return;
-        const previousInterval =
-          prices.find((price) => price.id === subscription?.stripe_price_id)
-            ?.interval ?? 'month';
-        const enterprisePrice =
-          prices.find(
-            (price) =>
-              price.plan === 'enterprise' &&
-              price.interval === previousInterval,
-          ) ??
-          prices.find(
-            (price) =>
-              price.plan === 'enterprise' && price.interval === 'month',
-          ) ??
-          null;
-        setRenewalPriceId(enterprisePrice?.id ?? null);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          setRenewalPriceId(null);
-          console.error(
-            '[BILLING_HUB_RENEWAL_PRICE_ERROR]',
-            error instanceof Error ? error.name : 'UNKNOWN',
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingRenewalPrice(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    canceledPlan,
-    isAdministrativePlan,
-    isCanceled,
-    subscription?.stripe_price_id,
-  ]);
 
   useEffect(() => {
     if (!hasSubscription || isAdministrativePlan) return;
@@ -225,15 +153,19 @@ export function BillingHub() {
     }
   };
 
-  const handleResubscribe = () => {
-    if (loadingRenewalPrice) return;
-    if (renewalPriceId) {
-      window.location.assign(
-        `/checkout?priceId=${encodeURIComponent(renewalPriceId)}&plan=${renewalPlan}`,
+  const handleResubscribe = async () => {
+    try {
+      await beginCheckout({
+        plan: renewalPlan === 'enterprise' ? 'enterprise' : 'pro',
+        interval: billingInterval ?? 'month',
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar a nova subscrição.',
       );
-      return;
     }
-    window.location.assign('/plans');
   };
 
   const handleOpenCustomerPortal = async () => {
@@ -282,9 +214,7 @@ export function BillingHub() {
             </div>
 
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white">
-              {isCanceled
-                ? PLAN_NAMES[canceledPlan]
-                : PLAN_NAMES[plan]}
+              {isCanceled ? PLAN_NAMES[canceledPlan] : PLAN_NAMES[plan]}
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
@@ -371,10 +301,10 @@ export function BillingHub() {
               <button
                 type="button"
                 onClick={handleResubscribe}
-                disabled={loadingRenewalPrice}
+                disabled={checkoutLoading}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-60"
               >
-                {loadingRenewalPrice ? (
+                {checkoutLoading ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
                   <ArrowUpRight className="size-4" />
