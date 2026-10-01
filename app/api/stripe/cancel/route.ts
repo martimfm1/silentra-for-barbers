@@ -6,7 +6,7 @@ import { billingErrorResponse, assertSameOrigin } from '@/services/billing/http'
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
 
