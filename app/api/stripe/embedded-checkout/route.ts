@@ -167,10 +167,9 @@ export async function POST(request: Request) {
         line_items: [{ price: priceId, quantity: 1 }],
         return_url: returnUrl,
         client_reference_id: tenant.barbershopId,
-        allow_promotion_codes: !isNewMemberProOffer,
         ...(promotionCodeId
           ? { discounts: [{ promotion_code: promotionCodeId }] }
-          : {}),
+          : { allow_promotion_codes: true }),
         metadata: {
           app: 'silentra-for-barbers',
           user_id: tenant.userId,
