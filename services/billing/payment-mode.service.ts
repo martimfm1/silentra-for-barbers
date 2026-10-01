@@ -97,3 +97,27 @@ export async function assertStripeBillingAvailableForUser(
     'PAYMENT_MODE_STRIPE_DISABLED',
   );
 }
+
+export async function assertUserHasStripeSubscription(
+  userId: string,
+): Promise<void> {
+  const { data, error } = await createAdminClient()
+    .from('subscriptions')
+    .select('payment_method, stripe_subscription_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new BillingError(
+      'Não foi possível verificar a subscrição Stripe.',
+      'DB_READ_FAILED',
+    );
+  }
+
+  if (data?.payment_method !== 'STRIPE' || !data.stripe_subscription_id) {
+    throw new BillingError(
+      'Esta subscrição não é gerida pela Stripe.',
+      'PAYMENT_MODE_STRIPE_DISABLED',
+    );
+  }
+}
