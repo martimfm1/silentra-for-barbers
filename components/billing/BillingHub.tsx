@@ -68,6 +68,10 @@ export function BillingHub() {
   const active =
     subscription?.status === 'active' || subscription?.status === 'trialing';
   const canceledPlan = cancellation?.previousPlan ?? 'free';
+  const displayPlan =
+    manualRequest && !subscription?.stripe_subscription_id && plan === 'free'
+      ? manualRequest.plan
+      : plan;
   const renewalPlan =
     canceledPlan === 'pro'
       ? 'enterprise'
@@ -293,7 +297,7 @@ export function BillingHub() {
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white">
               {isCanceled
                 ? PLAN_NAMES[canceledPlan]
-                : PLAN_NAMES[plan]}
+                : PLAN_NAMES[displayPlan]}
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
@@ -551,9 +555,11 @@ export function BillingHub() {
             <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 py-10 text-zinc-500">
               <Loader2 className="size-5 animate-spin" />
             </div>
-          ) : !hasSubscription || isAdministrativePlan ? (
+          ) : !isStripeSubscription || isAdministrativePlan ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem recibos de uma subscrição Stripe nesta conta.
+              {isManualSubscription || manualRequest
+                ? 'Os recibos deste pedido são tratados fora da Stripe.'
+                : 'Ainda não existem recibos de uma subscrição Stripe nesta conta.'}
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
