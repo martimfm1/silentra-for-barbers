@@ -11,7 +11,6 @@ import {
 import { SubscriptionService } from '@/services/billing/subscription.service';
 import { getManualPrice } from '@/lib/billing/manual-pricing';
 import { BillingError } from '@/types/stripe';
-import { assertSameOrigin } from '@/services/billing/http';
 
 type Plan = 'pro' | 'enterprise';
 type Interval = 'month' | 'year';
@@ -30,8 +29,6 @@ function modeLabel(mode: PaymentMode) {
 
 export async function POST(request: Request) {
   try {
-    assertSameOrigin(request);
-
     const supabase = await createClient();
     const {
       data: { user },
