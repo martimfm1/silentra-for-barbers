@@ -47,7 +47,6 @@ export function PricingCard({
   tier,
   title,
   price,
-  priceId,
   description,
   features,
   popular = false,
@@ -124,7 +123,7 @@ export function PricingCard({
     }
   };
 
-  const confirmPlanChange = () => {
+  const confirmPlanChange = async () => {
     if (isDowngradeToFree) {
       toast.error(
         'A mudança para o plano Free não utiliza o checkout Stripe porque não existe uma subscrição paga para iniciar.',
