@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { BillingError } from '@/types/stripe';
+import { assertSameOrigin } from '@/services/billing/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -22,8 +23,10 @@ function fail(message: string, status: number) {
   );
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -128,7 +131,7 @@ export async function POST() {
     const { data: persisted, error: persistedError } = await database
       .from('subscriptions')
       .select(
-        'id, user_id, barbershop_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, plan, status, trial_end, current_period_end, cancel_at_period_end',
+        'id, user_id, barbershop_id, stripe_subscription_id, stripe_customer_id, plan, status, trial_end, current_period_end, cancel_at_period_end',
       )
       .eq('user_id', user.id)
       .eq('barbershop_id', barbershopId)
