@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
-import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,7 +16,6 @@ function json(body: unknown, status = 200) {
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    assertSameOrigin(request);
     const { user } = await requirePlatformAdmin();
     const { requestId } = await params;
     const body = (await request.json().catch(() => null)) as {
