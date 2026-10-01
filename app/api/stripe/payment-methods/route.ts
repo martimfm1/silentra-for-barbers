@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import { billingErrorResponse, readJsonObject } from '@/services/billing/http';
+import {
+  assertStripeBillingAvailableForUser,
+} from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -11,16 +14,24 @@ export async function POST(request: Request) {
       data: { user },
       error,
     } = await (await createClient()).auth.getUser();
-    if (error || !user)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (error || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+
     await assertStripeBillingAvailableForUser(user.id);
-    const body =
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const body = await readJsonObject(request);
-    if (!body.action)
+
+    if (!body.action) {
       return NextResponse.json({
         paymentMethods: await BillingService.getPaymentMethods(user.id),
       });
+    }
+
     if (
       (body.action !== 'set_default' && body.action !== 'remove') ||
       typeof body.paymentMethodId !== 'string'
@@ -30,11 +41,13 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
     await BillingService.updatePaymentMethod(
       user.id,
       body.action,
       body.paymentMethodId,
     );
+
     return NextResponse.json({
       paymentMethods: await BillingService.getPaymentMethods(user.id),
     });
