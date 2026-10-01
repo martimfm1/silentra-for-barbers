@@ -23,7 +23,7 @@ function fail(message: string, status: number) {
   );
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
 
