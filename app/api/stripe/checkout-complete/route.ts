@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { BillingError } from '@/types/stripe';
+import { assertSameOrigin } from '@/services/billing/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -24,6 +25,8 @@ function fail(message: string, status: number) {
 
 export async function POST() {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
