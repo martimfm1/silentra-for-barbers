@@ -351,6 +351,7 @@ export class BarbershopStripeService {
     ]);
     return subscriptions.data.length > 0 || invoices.data.length > 0;
   }
+
   static async getEffectivePlan(userId: string): Promise<BillingPlan> {
     const database = createAdminClient();
     const tenant = await database
@@ -372,7 +373,25 @@ export class BarbershopStripeService {
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
     if (assignmentError)
-     static async createElementsCheckout(
+      throw new BillingError(
+        'Could not load barbershop plan assignment.',
+        'DB_READ_FAILED',
+      );
+    if (
+      assignment &&
+      (!assignment.expires_at ||
+        new Date(assignment.expires_at).getTime() > Date.now())
+    )
+      return assignment.plan as BillingPlan;
+
+    const subscription = await this.reconcileSubscription(
+      barbershopId,
+      await this.getSubscriptionForBarbershop(barbershopId),
+    );
+    return resolvePlan(subscription);
+  }
+
+  static async createElementsCheckout(
     userId: string,
     plan: CheckoutPlan,
     interval: CheckoutInterval = 'month',
@@ -464,23 +483,6 @@ export class BarbershopStripeService {
       );
     return { clientSecret: session.client_secret, sessionId: session.id };
   }
-umber_collection: { enabled: true },
-        tax_id_collection: { enabled: true },
-        locale: 'pt',
-      },
-      {
-        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${priceId}:${bucket}`,
-      },
-    );
-
-    if (!session.client_secret)
-      throw new BillingError(
-        'Stripe did not return a Checkout Elements client secret.',
-        'WEBHOOK_PROCESSING_FAILED',
-      );
-    return { clientSecret: session.client_secret, sessionId: session.id };
-  }
-
   static async createCustomerPortal(
     userId: string,
     requestUrl?: string,
