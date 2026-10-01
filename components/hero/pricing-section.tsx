@@ -51,6 +51,7 @@ export function PricingSection({
   destination?: PricingDestination;
   showDecisionHeader?: boolean;
 }) {
+  const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricesError, setPricesError] = useState(false);
@@ -75,6 +76,7 @@ export function PricingSection({
           throw new Error('PRICES_UNAVAILABLE');
         }
         if (!cancelled) {
+          setPrices(body.data);
           setPaymentMode(body.mode === 'STRIPE' ? 'STRIPE' : 'MANUAL');
         }
       } catch (error) {
@@ -94,6 +96,23 @@ export function PricingSection({
       cancelled = true;
     };
   }, [retryKey]);
+
+  const formatPrice = (plan: 'pro' | 'enterprise') => {
+    const amount = prices.find(
+      (price) => price.plan === plan && price.interval === 'month',
+    )?.unitAmount;
+
+    if (typeof amount !== 'number') {
+      return plan === 'pro' ? '9,90 €' : '29,90 €';
+    }
+
+    return new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount / 100);
+  };
 
   return (
     <section id="precos" className="space-y-8">
@@ -207,7 +226,7 @@ export function PricingSection({
             destination={destination}
             tier="pro"
             title="Barbers Pro"
-            price="9,90 €"
+            price={formatPrice('pro')}
             description={PLAN_DESCRIPTIONS.pro}
             features={HERO_FEATURES.pro}
             popular
@@ -217,7 +236,7 @@ export function PricingSection({
             destination={destination}
             tier="enterprise"
             title="Barbers Enterprise"
-            price="29,90 €"
+            price={formatPrice('enterprise')}
             description={PLAN_DESCRIPTIONS.enterprise}
             features={HERO_FEATURES.enterprise}
           />
