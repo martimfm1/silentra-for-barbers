@@ -23,6 +23,9 @@ export function billingErrorResponse(error: unknown): NextResponse {
       WEBHOOK_PROCESSING_FAILED: 500,
       CSRF_VALIDATION_FAILED: 403,
       CHECKOUT_INTENT_INVALID: 400,
+      PROMOTION_NOT_ELIGIBLE: 409,
+      CHECKOUT_RESOURCE_MISSING: 409,
+      CHECKOUT_FAILED: 502,
     }[error.code];
     return NextResponse.json(
       { error: error.message, code: error.code },
