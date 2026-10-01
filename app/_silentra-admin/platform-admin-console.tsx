@@ -360,7 +360,12 @@ export default function PlatformAdminConsole() {
 
   const runManualRequestAction = async (
     request: ManualRequest,
-    action: 'send_payment' | 'resend_payment' | 'confirm_payment' | 'reject',
+    action:
+      | 'send_payment'
+      | 'resend_payment'
+      | 'confirm_payment'
+      | 'create_renewal'
+      | 'reject',
   ) => {
     try {
       setPaymentAction(true);
@@ -388,11 +393,13 @@ export default function PlatformAdminConsole() {
       setMessage(
         action === 'confirm_payment'
           ? 'Pagamento confirmado e subscrição ativada.'
-          : action === 'reject'
-            ? 'Pedido rejeitado.'
-            : action === 'resend_payment'
-              ? 'Pagamento reenviado.'
-              : 'Instruções de pagamento enviadas.',
+          : action === 'create_renewal'
+            ? 'Pedido de renovação criado.'
+            : action === 'reject'
+              ? 'Pedido rejeitado.'
+              : action === 'resend_payment'
+                ? 'Pagamento reenviado.'
+                : 'Instruções de pagamento enviadas.',
       );
 
       const refresh = await fetch(
@@ -1104,21 +1111,44 @@ export default function PlatformAdminConsole() {
                       Confirmar pagamento
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    disabled={
-                      paymentAction ||
-                      !['PENDING', 'PAYMENT_SENT'].includes(
-                        selectedRequest.status,
-                      )
-                    }
-                    onClick={() =>
-                      void runManualRequestAction(selectedRequest, 'reject')
-                    }
-                    className="min-h-11 w-full rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Rejeitar pedido
-                  </button>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !['PAID', 'EXPIRED'].includes(selectedRequest.status)
+                      }
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            'Criar um novo pedido de renovação para este plano?',
+                          )
+                        )
+                          void runManualRequestAction(
+                            selectedRequest,
+                            'create_renewal',
+                          );
+                      }}
+                      className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Criar renovação
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !['PENDING', 'PAYMENT_SENT'].includes(
+                          selectedRequest.status,
+                        )
+                      }
+                      onClick={() =>
+                        void runManualRequestAction(selectedRequest, 'reject')
+                      }
+                      className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Rejeitar pedido
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-4 rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
