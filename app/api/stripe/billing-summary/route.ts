@@ -70,7 +70,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, payment_method, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -149,7 +149,10 @@ export async function GET() {
       requestedAt: string | null;
     } | null = null;
 
-    if (subscription?.status === 'canceled') {
+    if (
+      subscription?.status === 'canceled' &&
+      subscription.payment_method !== 'MANUAL'
+    ) {
       try {
         const stripe = getStripeClient();
         const remote = subscription.stripe_subscription_id
@@ -222,9 +225,11 @@ export async function GET() {
       ? 'admin'
       : subscription?.plan_override && subscription.plan_override !== PLANS.FREE
         ? 'subscription_override'
-        : subscription?.stripe_subscription_id && plan !== PLANS.FREE
-          ? 'stripe'
-          : 'free';
+        : subscription?.payment_method === 'MANUAL'
+          ? 'manual'
+          : subscription?.stripe_subscription_id && plan !== PLANS.FREE
+            ? 'stripe'
+            : 'free';
 
     return NextResponse.json(
       {
