@@ -6,6 +6,9 @@ import {
   billingErrorResponse,
   readJsonObject,
 } from '@/services/billing/http';
+import {
+  assertStripeBillingAvailableForUser,
+} from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -17,17 +20,24 @@ export async function POST(request: Request) {
       data: { user },
       error,
     } = await (await createClient()).auth.getUser();
-    if (error || !user)
+
+    if (error || !user) {
       return NextResponse.json(
-        { error: 'Não tens sessão iniciada.' },
+        { error: 'Unauthorized' },
         { status: 401 },
       );
-    await BillingService.assertBillingOwner(user.id);
+    }
+
+    await assertStripeBillingAvailableForUser(user.id);
+
     const body = await readJsonObject(request);
-    if (!body.action)
+
+    if (!body.action) {
       return NextResponse.json({
         paymentMethods: await BillingService.getPaymentMethods(user.id),
       });
+    }
+
     if (
       (body.action !== 'set_default' && body.action !== 'remove') ||
       typeof body.paymentMethodId !== 'string'
@@ -37,11 +47,13 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
     await BillingService.updatePaymentMethod(
       user.id,
       body.action,
       body.paymentMethodId,
     );
+
     return NextResponse.json({
       paymentMethods: await BillingService.getPaymentMethods(user.id),
     });

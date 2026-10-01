@@ -6,6 +6,7 @@ import {
   readJsonObject,
   assertSameOrigin,
 } from '@/services/billing/http';
+import { assertUserHasStripeSubscription } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
       );
 
     await BillingService.assertBillingOwner(user.id);
+    await assertUserHasStripeSubscription(user.id);
 
     const body = await readJsonObject(request);
     const plan = body.plan;

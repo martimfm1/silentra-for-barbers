@@ -5,6 +5,8 @@ import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { BillingError } from '@/types/stripe';
 import { billingErrorResponse } from '@/services/billing/http';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -53,6 +55,8 @@ export async function GET(request: Request) {
         { headers: { 'Cache-Control': 'no-store' } },
       );
     }
+
+    await assertStripeBillingAvailableForUser(user.id);
 
     const checkoutSessionId =
       new URL(request.url).searchParams.get('session_id')?.trim() || null;
@@ -212,6 +216,7 @@ export async function GET(request: Request) {
       }
     }
 
+    const paymentMode = await PaymentModeService.getPaymentMode();
     const plan = await BarbershopStripeService.getEffectivePlan(user.id);
     const { data: assignment, error: assignmentError } = await database
       .from('barbershop_plan_assignments')
@@ -249,6 +254,7 @@ export async function GET(request: Request) {
         barbershopId,
         isBillingOwner,
         stripeSubscriptionId: subscription?.stripe_subscription_id ?? null,
+        paymentMode,
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );

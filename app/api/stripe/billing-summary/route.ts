@@ -9,6 +9,8 @@ import {
 } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
+import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +29,7 @@ export async function GET() {
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
 
+    const paymentMode = await PaymentModeService.getPaymentMode();
     const database = createAdminClient();
     const { data: userRow, error: userError } = await database
       .from('users')
@@ -57,6 +60,8 @@ export async function GET() {
           barbershopId: null,
           barbershopName: null,
           billingInterval: null,
+          paymentMode,
+          manualRequest: null,
         },
         {
           headers: {
@@ -201,6 +206,10 @@ export async function GET() {
     }
 
     const billingInterval = intervalForPriceId(subscription?.stripe_price_id);
+    const manualRequest =
+      subscription?.payment_method === 'MANUAL' || paymentMode === 'MANUAL'
+        ? await ManualPaymentService.getRequestForUser(user.id)
+        : null;
 
     const plan: BillingPlan =
       hasActiveAssignment && assignment
@@ -234,6 +243,8 @@ export async function GET() {
         barbershopId,
         barbershopName: barbershopResult.data?.name ?? null,
         billingInterval,
+        paymentMode,
+        manualRequest,
       },
       {
         headers: {

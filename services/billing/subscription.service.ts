@@ -20,6 +20,7 @@ type SubscriptionRow = Pick<
   | 'trial_end'
   | 'current_period_end'
   | 'cancel_at_period_end'
+  | 'payment_method'
 > & {
   barbershop_id?: string | null;
 };
@@ -126,6 +127,7 @@ export class SubscriptionService {
     subscription: SubscriptionRecord | null,
   ): Promise<SubscriptionRecord | null> {
     if (
+      subscription?.payment_method === 'MANUAL' ||
       !subscription?.stripe_subscription_id ||
       (subscription.plan_override && subscription.plan_override !== PLANS.FREE)
     )
@@ -159,6 +161,7 @@ export class SubscriptionService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: stripeSubscription.cancel_at_period_end,
+        payment_method: 'STRIPE' as const,
       };
       const changed =
         subscription.plan !== updates.plan ||
@@ -285,6 +288,18 @@ export class SubscriptionService {
 
   static async getAccessPlan(userId: string): Promise<BillingPlan> {
     const barbershopId = await this.getBarbershopIdForUser(userId);
+
+    const current = await this.getForUser(userId);
+    if (
+      current?.payment_method === 'MANUAL' &&
+      current.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(current.status)
+    ) {
+      throw new BillingError(
+        'A subscrição manual ativa não pode ser migrada automaticamente para Stripe.',
+        'SUBSCRIPTION_NOT_ACTIVE',
+      );
+    }
     if (!barbershopId) return PLANS.FREE;
     return this.getAccessPlanForBarbershop(barbershopId);
   }
@@ -340,6 +355,7 @@ export class SubscriptionService {
       stripe_price_id: priceId,
       plan,
       status: subscription.status,
+      payment_method: 'STRIPE',
       trial_end: subscription.trial_end
         ? new Date(subscription.trial_end * 1000).toISOString()
         : null,

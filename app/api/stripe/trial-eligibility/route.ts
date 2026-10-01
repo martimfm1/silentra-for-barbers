@@ -5,6 +5,7 @@ import {
   NEW_MEMBER_PRO_OFFER_MONTHS,
   NEW_MEMBER_PRO_PROMOTION_CODE,
 } from '@/lib/stripe/constants';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +18,21 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (error || !user)
       return NextResponse.json({ eligible: false }, { status: 401 });
+
+    if ((await PaymentModeService.getPaymentMode()) === 'MANUAL') {
+      return NextResponse.json(
+        {
+          eligible: false,
+          offerMonths: NEW_MEMBER_PRO_OFFER_MONTHS,
+          promotionCode: null,
+          plan: 'pro',
+          paymentMode: 'MANUAL',
+        },
+        {
+          headers: { 'Cache-Control': 'private, no-store, max-age=0' },
+        },
+      );
+    }
 
     const eligible = await BillingService.isEligibleForProTrial(user.id);
     return NextResponse.json(

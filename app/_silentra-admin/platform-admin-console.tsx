@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle2,
+  CreditCard,
   ChevronRight,
   Clock3,
   Copy,
@@ -52,10 +53,53 @@ const tabs = [
   { id: 'overview', label: 'Overview', icon: Gauge },
   { id: 'shops', label: 'Barbearias', icon: Building2 },
   { id: 'plans', label: 'Planos', icon: KeyRound },
+  { id: 'payments', label: 'Pagamentos', icon: CreditCard },
+  { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
 ] as const;
 
 type Tab = (typeof tabs)[number]['id'];
+
+type PaymentMode = 'MANUAL' | 'STRIPE';
+
+type ManualRequest = {
+  id: string;
+  user_id: string;
+  barbershop_id: string;
+  subscription_id: string | null;
+  request_type: 'NEW' | 'RENEWAL' | 'CHANGE';
+  plan: 'pro' | 'enterprise';
+  billing_interval: 'month' | 'year';
+  status:
+    | 'PENDING'
+    | 'PAYMENT_SENT'
+    | 'PAID'
+    | 'REJECTED'
+    | 'EXPIRED'
+    | 'CANCELLED';
+  payment_method: 'MANUAL';
+  price: number;
+  currency: string;
+  payment_link: string | null;
+  payment_sent_at: string | null;
+  paid_at: string | null;
+  processed_at: string | null;
+  started_at: string | null;
+  expires_at: string | null;
+  last_email_error: string | null;
+  created_at: string;
+  updated_at: string;
+  customer: { id: string; name_complete: string | null; email: string | null } | null;
+  barbershop: { id: string; name: string } | null;
+};
+
+function formatMoney(value: number, currency = 'EUR') {
+  return new Intl.NumberFormat('pt-PT', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  }).format(value);
+}
 
 function formatDate(value: string | null) {
   if (!value) return '—';
@@ -123,6 +167,14 @@ export default function PlatformAdminConsole() {
     latencyMs: number;
     ok: boolean;
   } | null>(null);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('MANUAL');
+  const [paymentModeLoading, setPaymentModeLoading] = useState(true);
+  const [changingPaymentMode, setChangingPaymentMode] = useState(false);
+  const [manualRequests, setManualRequests] = useState<ManualRequest[]>([]);
+  const [manualRequestFilter, setManualRequestFilter] = useState<'ALL' | ManualRequest['status']>('ALL');
+  const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(null);
+  const [paymentLink, setPaymentLink] = useState('');
+  const [paymentAction, setPaymentAction] = useState(false);
 
   const load = useCallback(
     async (search = query) => {
@@ -150,7 +202,68 @@ export default function PlatformAdminConsole() {
 
   useEffect(() => {
     void load('');
+
+    const queryTab = new URLSearchParams(window.location.search).get('tab');
+    if (queryTab && tabs.some((item) => item.id === queryTab)) {
+      setTab(queryTab as Tab);
+    }
   }, [load]);
+
+  useEffect(() => {
+    const loadPaymentMode = async () => {
+      try {
+        setPaymentModeLoading(true);
+        const response = await fetch('/api/_silentra-admin/payment-mode', {
+          cache: 'no-store',
+        });
+        const payload = (await response.json()) as {
+          paymentMode?: PaymentMode;
+          error?: string;
+        };
+        if (!response.ok || (payload.paymentMode !== 'MANUAL' && payload.paymentMode !== 'STRIPE')) {
+          throw new Error(payload.error || 'Não foi possível carregar o método de pagamento.');
+        }
+        setPaymentMode(payload.paymentMode);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado.');
+      } finally {
+        setPaymentModeLoading(false);
+      }
+    };
+
+    const loadRequests = async () => {
+      try {
+        const query = manualRequestFilter === 'ALL'
+          ? ''
+          : `?status=${encodeURIComponent(manualRequestFilter)}`;
+        const response = await fetch(
+          `/api/_silentra-admin/subscription-requests${query}`,
+          { cache: 'no-store' },
+        );
+        const payload = (await response.json()) as {
+          requests?: ManualRequest[];
+          error?: string;
+        };
+        if (!response.ok || !Array.isArray(payload.requests)) {
+          throw new Error(
+            payload.error || 'Não foi possível carregar os pedidos de subscrição.',
+          );
+        }
+        setManualRequests(payload.requests);
+        setSelectedRequest((current) => {
+          if (!current) return null;
+          return (
+            payload.requests?.find((item) => item.id === current.id) ?? null
+          );
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado.');
+      }
+    };
+
+    void loadPaymentMode();
+    void loadRequests();
+  }, [manualRequestFilter]);
 
   const searchResults = useMemo(() => data?.recentShops ?? [], [data]);
 
@@ -205,6 +318,108 @@ export default function PlatformAdminConsole() {
       setError(err instanceof Error ? err.message : 'Erro inesperado.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const changePaymentMode = async (nextMode: PaymentMode) => {
+    if (nextMode === paymentMode || changingPaymentMode) return;
+
+    const confirmed = window.confirm(
+      nextMode === 'STRIPE'
+        ? 'Tens a certeza que queres ativar os pagamentos Stripe? As novas subscrições utilizarão o Stripe. Subscrições existentes não serão migradas.'
+        : 'Tens a certeza que queres ativar os pagamentos manuais? As novas subscrições utilizarão o fluxo manual. Subscrições Stripe existentes não serão migradas.',
+    );
+    if (!confirmed) return;
+
+    try {
+      setChangingPaymentMode(true);
+      const response = await fetch('/api/_silentra-admin/payment-mode', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentMode: nextMode }),
+      });
+      const payload = (await response.json()) as {
+        paymentMode?: PaymentMode;
+        error?: string;
+      };
+      if (!response.ok || !payload.paymentMode)
+        throw new Error(payload.error || 'Não foi possível alterar o método de pagamento.');
+
+      setPaymentMode(payload.paymentMode);
+      setMessage(
+        payload.paymentMode === 'STRIPE'
+          ? 'Pagamentos Stripe ativados para novas subscrições.'
+          : 'Pagamentos manuais ativados para novas subscrições.',
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado.');
+    } finally {
+      setChangingPaymentMode(false);
+    }
+  };
+
+  const runManualRequestAction = async (
+    request: ManualRequest,
+    action:
+      | 'send_payment'
+      | 'resend_payment'
+      | 'confirm_payment'
+      | 'create_renewal'
+      | 'reject',
+  ) => {
+    try {
+      setPaymentAction(true);
+      setError(null);
+      const response = await fetch(
+        `/api/_silentra-admin/subscription-requests/${encodeURIComponent(request.id)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action,
+            ...(action === 'send_payment' || action === 'resend_payment'
+              ? { paymentLink }
+              : {}),
+          }),
+        },
+      );
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!response.ok || !payload.ok)
+        throw new Error(payload.error || 'Não foi possível atualizar o pedido.');
+
+      setMessage(
+        action === 'confirm_payment'
+          ? 'Pagamento confirmado e subscrição ativada.'
+          : action === 'create_renewal'
+            ? 'Pedido de renovação criado.'
+            : action === 'reject'
+              ? 'Pedido rejeitado.'
+              : action === 'resend_payment'
+                ? 'Pagamento reenviado.'
+                : 'Instruções de pagamento enviadas.',
+      );
+
+      const refresh = await fetch(
+        `/api/_silentra-admin/subscription-requests${manualRequestFilter === 'ALL' ? '' : `?status=${encodeURIComponent(manualRequestFilter)}`}`,
+        { cache: 'no-store' },
+      );
+      const refreshed = (await refresh.json()) as {
+        requests?: ManualRequest[];
+      };
+      const nextRequests = Array.isArray(refreshed.requests)
+        ? refreshed.requests
+        : [];
+      setManualRequests(nextRequests);
+      const nextSelected = nextRequests.find((item) => item.id === request.id) ?? null;
+      setSelectedRequest(nextSelected);
+      setPaymentLink(nextSelected?.payment_link ?? '');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado.');
+    } finally {
+      setPaymentAction(false);
     }
   };
 
@@ -612,6 +827,332 @@ export default function PlatformAdminConsole() {
               ) : (
                 <div className="mt-4 rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-600">
                   Seleciona uma barbearia em Overview ou Barbearias.
+                </div>
+              )}
+            </div>
+          </section>
+        ) : null}
+
+        {tab === 'payments' ? (
+          <section className="space-y-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="size-4 text-emerald-300" />
+                    <h2 className="text-lg font-semibold">Método de pagamento</h2>
+                  </div>
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                    Controla qual método é usado por novas subscrições. Mudar esta opção não migra nem cancela subscrições existentes.
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                  Atual: {paymentMode === 'MANUAL' ? 'Manual' : 'Stripe'}
+                </span>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                {([
+                  {
+                    mode: 'MANUAL' as const,
+                    title: 'Pagamento Manual',
+                    description:
+                      'Novos clientes criam um pedido. A equipa envia o link e confirma o pagamento manualmente.',
+                  },
+                  {
+                    mode: 'STRIPE' as const,
+                    title: 'Stripe',
+                    description:
+                      'Novas subscrições utilizam o checkout Stripe que já existe no projeto.',
+                  },
+                ]).map((item) => (
+                  <button
+                    key={item.mode}
+                    type="button"
+                    disabled={paymentModeLoading || changingPaymentMode}
+                    onClick={() => void changePaymentMode(item.mode)}
+                    className={`rounded-2xl border p-5 text-left transition ${
+                      paymentMode === item.mode
+                        ? 'border-emerald-400/30 bg-emerald-400/[0.07]'
+                        : 'border-white/10 bg-black/15 hover:border-white/20'
+                    } disabled:cursor-wait disabled:opacity-60`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className={`flex size-9 items-center justify-center rounded-xl border ${
+                          paymentMode === item.mode
+                            ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
+                            : 'border-white/10 bg-white/[0.03] text-zinc-500'
+                        }`}>
+                          <CreditCard className="size-4" />
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold text-zinc-100">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {paymentMode === item.mode ? 'Método atual' : 'Selecionar método'}
+                          </p>
+                        </div>
+                      </div>
+                      {paymentMode === item.mode ? (
+                        <CheckCircle2 className="size-4 text-emerald-300" />
+                      ) : null}
+                    </div>
+                    <p className="mt-4 text-xs leading-5 text-zinc-500">
+                      {item.description}
+                    </p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.025] p-4 text-xs leading-5 text-amber-100/70">
+                O método é aplicado apenas a novas subscrições. Uma subscrição
+                manual continua manual e uma subscrição Stripe continua Stripe,
+                mesmo depois de esta opção mudar.
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {tab === 'subscriptions' ? (
+          <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_390px]">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">Pedidos de subscrição</h2>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Pedidos do fluxo de pagamento manual e respetivo histórico.
+                  </p>
+                </div>
+                <select
+                  value={manualRequestFilter}
+                  onChange={(event) =>
+                    setManualRequestFilter(
+                      event.target.value as 'ALL' | ManualRequest['status'],
+                    )
+                  }
+                  className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-200 outline-none"
+                >
+                  <option value="ALL">Todos</option>
+                  <option value="PENDING">Pendentes</option>
+                  <option value="PAYMENT_SENT">Pagamento enviado</option>
+                  <option value="PAID">Pagos</option>
+                  <option value="REJECTED">Rejeitados</option>
+                  <option value="EXPIRED">Expirados</option>
+                  <option value="CANCELLED">Cancelados</option>
+                </select>
+              </div>
+
+              <div className="mt-5 space-y-2">
+                {manualRequests.map((request) => (
+                  <button
+                    key={request.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setPaymentLink(request.payment_link ?? '');
+                    }}
+                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                      selectedRequest?.id === request.id
+                        ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
+                        : 'border-white/8 bg-black/15 hover:border-white/15'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-zinc-100">
+                          {request.customer?.name_complete || request.customer?.email || 'Cliente'}
+                        </p>
+                        <p className="mt-1 truncate text-xs text-zinc-500">
+                          {request.barbershop?.name || request.barbershop_id} ·{' '}
+                          {request.plan === 'enterprise' ? 'Enterprise' : 'Pro'}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="text-sm font-semibold text-zinc-200">
+                          {formatMoney(request.price, request.currency)}
+                        </span>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                          request.status === 'PAID'
+                            ? 'bg-emerald-400/10 text-emerald-200'
+                            : request.status === 'REJECTED' || request.status === 'EXPIRED'
+                              ? 'bg-red-400/10 text-red-200'
+                              : 'bg-amber-400/10 text-amber-200'
+                        }`}>
+                          {request.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-[11px] text-zinc-600">
+                      {request.request_type} · {formatDate(request.created_at)}
+                    </p>
+                  </button>
+                ))}
+                {manualRequests.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
+                    Não existem pedidos neste filtro.
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <h2 className="font-semibold">Detalhes</h2>
+              {selectedRequest ? (
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-xl border border-white/8 bg-black/15 p-4">
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {selectedRequest.customer?.name_complete || 'Cliente'}
+                    </p>
+                    <p className="mt-1 break-all text-xs text-zinc-500">
+                      {selectedRequest.customer?.email || 'Sem email'}
+                    </p>
+                    <p className="mt-3 text-xs text-zinc-500">
+                      {selectedRequest.barbershop?.name || selectedRequest.barbershop_id}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                      <p className="text-[10px] uppercase text-zinc-600">Plano</p>
+                      <p className="mt-1 text-sm font-semibold uppercase">
+                        {selectedRequest.plan}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                      <p className="text-[10px] uppercase text-zinc-600">Estado</p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {selectedRequest.status}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                      <p className="text-[10px] uppercase text-zinc-600">Preço</p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {formatMoney(selectedRequest.price, selectedRequest.currency)}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                      <p className="text-[10px] uppercase text-zinc-600">Período</p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {selectedRequest.billing_interval === 'year' ? 'Anual' : 'Mensal'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="block space-y-2">
+                    <span className="text-xs font-medium text-zinc-400">
+                      Link de pagamento
+                    </span>
+                    <input
+                      value={paymentLink}
+                      onChange={(event) => setPaymentLink(event.target.value)}
+                      placeholder="https://..."
+                      maxLength={2048}
+                      disabled={paymentAction || !['PENDING', 'PAYMENT_SENT'].includes(selectedRequest.status)}
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30 disabled:opacity-50"
+                    />
+                  </label>
+
+                  {selectedRequest.last_email_error ? (
+                    <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
+                      Último erro de email: {selectedRequest.last_email_error}
+                    </div>
+                  ) : null}
+
+                  {selectedRequest.payment_link ? (
+                    <a
+                      href={selectedRequest.payment_link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block truncate text-xs text-zinc-500 hover:text-zinc-200"
+                    >
+                      {selectedRequest.payment_link}
+                    </a>
+                  ) : null}
+
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !['PENDING', 'PAYMENT_SENT'].includes(
+                          selectedRequest.status,
+                        ) ||
+                        !paymentLink.trim()
+                      }
+                      onClick={() =>
+                        void runManualRequestAction(
+                          selectedRequest,
+                          selectedRequest.status === 'PAYMENT_SENT'
+                            ? 'resend_payment'
+                            : 'send_payment',
+                        )
+                      }
+                      className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {selectedRequest.status === 'PAYMENT_SENT'
+                        ? 'Reenviar pagamento'
+                        : 'Enviar pagamento'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction || selectedRequest.status !== 'PAYMENT_SENT'
+                      }
+                      onClick={() =>
+                        void runManualRequestAction(
+                          selectedRequest,
+                          'confirm_payment',
+                        )
+                      }
+                      className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Confirmar pagamento
+                    </button>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !['PAID', 'EXPIRED'].includes(selectedRequest.status)
+                      }
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            'Criar um novo pedido de renovação para este plano?',
+                          )
+                        )
+                          void runManualRequestAction(
+                            selectedRequest,
+                            'create_renewal',
+                          );
+                      }}
+                      className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Criar renovação
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !['PENDING', 'PAYMENT_SENT'].includes(
+                          selectedRequest.status,
+                        )
+                      }
+                      onClick={() =>
+                        void runManualRequestAction(selectedRequest, 'reject')
+                      }
+                      className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Rejeitar pedido
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
+                  Seleciona um pedido para gerir o pagamento.
                 </div>
               )}
             </div>

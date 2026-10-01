@@ -103,14 +103,17 @@ As quotas e os entitlements efetivos são definidos no código e validados pelas
 
 ## Billing
 
-A faturação utiliza Stripe Billing.
+A faturação suporta dois métodos globais: **Pagamento Manual** e **Stripe**.
 
-- O utilizador começa num plano Free.
-- Upgrades e alterações de plano reutilizam a subscrição paga quando possível para evitar duplicações.
-- Pro e Enterprise são resolvidos através dos Price IDs configurados no ambiente.
-- Eventos Stripe sincronizam o estado da subscrição.
-- O backend reconcilia o plano guardado com o preço atual da subscrição.
-- O Customer Portal do Stripe pode ser configurado através de `STRIPE_BILLING_PORTAL_CONFIGURATION_ID`.
+- O modo inicial é **MANUAL** e pode ser alterado pelo painel administrativo sem deploy.
+- No modo Manual, uma nova subscrição cria um pedido com preço e período guardados no momento da criação.
+- O administrador pode enviar/reenviar um link de pagamento, confirmar o pagamento e ativar a subscrição.
+- Renovações manuais reutilizam a mesma conta e mantêm o histórico dos pedidos.
+- Um pedido manual não cria Customers, Checkout Sessions ou Subscriptions na Stripe.
+- No modo Stripe, o fluxo Stripe existente continua a tratar novas subscrições.
+- Uma subscrição Stripe existente continua Stripe mesmo que o modo global passe para Manual.
+- Uma subscrição Manual existente continua Manual mesmo que o modo global passe para Stripe.
+- Eventos Stripe continuam a sincronizar apenas subscrições associadas ao provider Stripe.
 
 ## Segurança e arquitetura
 

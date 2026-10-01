@@ -44,6 +44,8 @@ export function BillingHub() {
     isAdministrativePlan,
     isTrial,
     loading,
+    paymentMode,
+    manualRequest,
     cancel,
     resume,
     billingInterval,
@@ -55,11 +57,22 @@ export function BillingHub() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
 
-  const hasSubscription = Boolean(subscription?.stripe_subscription_id);
-  const isCanceled = subscription?.status === 'canceled';
+  const isStripeSubscription =
+    subscription?.payment_method === 'STRIPE' &&
+    Boolean(subscription?.stripe_subscription_id);
+  const isManualSubscription = subscription?.payment_method === 'MANUAL';
+  const hasSubscription = Boolean(
+    subscription?.stripe_subscription_id || isManualSubscription,
+  );
+  const isCanceled =
+    subscription?.status === 'canceled' && !isManualSubscription;
   const active =
     subscription?.status === 'active' || subscription?.status === 'trialing';
   const canceledPlan = cancellation?.previousPlan ?? 'free';
+  const displayPlan =
+    manualRequest && !subscription?.stripe_subscription_id && plan === 'free'
+      ? manualRequest.plan
+      : plan;
   const renewalPlan =
     canceledPlan === 'pro'
       ? 'enterprise'
@@ -83,7 +96,7 @@ export function BillingHub() {
     : '—';
 
   useEffect(() => {
-    if (!hasSubscription || isAdministrativePlan) return;
+    if (!isStripeSubscription || isAdministrativePlan) return;
     let cancelled = false;
     setLoadingInvoices(true);
     fetch('/api/stripe/invoices', { cache: 'no-store' })
@@ -112,7 +125,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [hasSubscription, isAdministrativePlan]);
+  }, [isStripeSubscription, isAdministrativePlan]);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;

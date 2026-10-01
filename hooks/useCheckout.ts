@@ -7,8 +7,11 @@ export interface UseCheckoutParams {
 
 export function useCheckout() {
   const checkoutMutation = useMutation({
-    mutationFn: async ({ plan, interval = 'month' }: UseCheckoutParams) => {
-      const response = await fetch('/api/stripe/checkout-intent', {
+    mutationFn: async ({
+      plan,
+      interval = 'month',
+    }: UseCheckoutParams) => {
+      const response = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -17,21 +20,30 @@ export function useCheckout() {
         body: JSON.stringify({ plan, interval }),
         cache: 'no-store',
       });
-
       const body = (await response.json().catch(() => ({}))) as {
-        checkoutToken?: string;
+        redirectUrl?: string;
+        message?: string;
         error?: string;
+        mode?: 'MANUAL' | 'STRIPE';
       };
 
-      if (!response.ok || typeof body.checkoutToken !== 'string') {
-        throw new Error(body.error ?? 'Não foi possível iniciar o checkout.');
+      if (!response.ok) {
+        throw new Error(
+          body.error ?? 'Não foi possível iniciar a subscrição.',
+        );
       }
 
-      window.location.assign(
-        '/checkout?intent=' + encodeURIComponent(body.checkoutToken),
-      );
+      if (typeof body.redirectUrl !== 'string') {
+        if (body.mode === 'MANUAL') {
+          window.location.assign('/dashboard/billing?manual=pending');
+        }
+        throw new Error(
+          body.message ?? 'Não foi possível iniciar a subscrição.',
+        );
+      }
 
-      return { token: body.checkoutToken };
+      window.location.assign(body.redirectUrl);
+      return { url: body.redirectUrl, mode: body.mode };
     },
   });
 

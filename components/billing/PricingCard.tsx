@@ -34,6 +34,7 @@ export interface PricingCardProps {
   popular?: boolean;
   trialDays?: number;
   destination?: PricingDestination;
+  billingInterval?: 'month' | 'year';
 }
 
 const PLAN_RANK: Record<PlanTier, number> = { free: 0, pro: 1, enterprise: 2 };
@@ -52,6 +53,7 @@ export function PricingCard({
   popular = false,
   trialDays,
   destination = 'checkout',
+  billingInterval = 'month',
 }: PricingCardProps) {
   const isMounted = useSyncExternalStore(
     () => () => undefined,
@@ -64,9 +66,9 @@ export function PricingCard({
     plan: currentPlan,
     loading,
   } = useSubscription();
-  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const isCurrentPlan = useMemo(
     () => isAuthenticated && currentPlan === tier,
     [currentPlan, isAuthenticated, tier],
@@ -111,8 +113,11 @@ export function PricingCard({
         setConfirmationOpen(true);
         return;
       }
+      if (tier === 'free') return;
+
       await beginCheckout({
-        plan: tier === 'enterprise' ? 'enterprise' : 'pro',
+        plan: tier,
+        interval: billingInterval,
       });
     } catch (error) {
       toast.error(
@@ -126,7 +131,7 @@ export function PricingCard({
   const confirmPlanChange = async () => {
     if (isDowngradeToFree) {
       toast.error(
-        'A mudança para o plano Free não utiliza o checkout Stripe porque não existe uma subscrição paga para iniciar.',
+        'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
       );
       return;
     }
@@ -134,15 +139,16 @@ export function PricingCard({
     setConfirmationOpen(false);
     try {
       await beginCheckout({
-        plan: tier === 'enterprise' ? 'enterprise' : 'pro',
+        plan: tier as 'pro' | 'enterprise',
+        interval: billingInterval,
       });
     } catch (error) {
+      setIsChangingPlan(false);
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível iniciar o checkout.',
+          : 'Não foi possível iniciar a alteração da subscrição.',
       );
-      setIsChangingPlan(false);
     }
   };
 
@@ -207,6 +213,8 @@ export function PricingCard({
     isUpgrade,
     popular,
     tier,
+    checkoutLoading,
+    billingInterval,
   ]);
 
   const isActivePaidPlan =
@@ -217,7 +225,8 @@ export function PricingCard({
   const confirmationTitle = isDowngrade
     ? 'Confirmar mudança para um plano inferior'
     : 'Confirmar upgrade';
-  const confirmationDescription = `Depois da confirmação vais para o checkout Stripe para concluir a nova subscrição. A subscrição atual só será cancelada depois de o novo checkout ficar concluído.`;
+  const confirmationDescription =
+    'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
 
   return (
     <>
@@ -264,7 +273,9 @@ export function PricingCard({
               {price}
             </span>
             {tier !== 'free' && (
-              <span className="text-xs text-zinc-500">/mês</span>
+              <span className="text-xs text-zinc-500">
+                {billingInterval === 'year' ? '/ano' : '/mês'}
+              </span>
             )}
           </div>
           {tier === 'pro' && trialDays ? (
@@ -311,7 +322,7 @@ export function PricingCard({
           <button
             type="button"
             onClick={handleAction}
-            disabled={buttonConfig.disabled || loading || isChangingPlan}
+            disabled={buttonConfig.disabled || loading || isChangingPlan || checkoutLoading}
             className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${buttonConfig.variant === 'primary' ? 'bg-emerald-400 text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.18)] hover:bg-emerald-300 hover:shadow-[0_10px_30px_rgba(52,211,153,0.24)]' : buttonConfig.variant === 'secondary' ? 'border border-white/10 bg-white/5 text-zinc-400' : 'border border-white/15 bg-white/[0.04] text-zinc-100 hover:border-white/25 hover:bg-white/[0.08]'}`}
           >
             {loading || isChangingPlan || checkoutLoading ? (
@@ -325,8 +336,9 @@ export function PricingCard({
           </button>
           {tier === 'pro' && !isCurrentPlan ? (
             <p className="mt-2 text-center text-[11px] text-zinc-600">
-              1 mês grátis para novos utilizadores elegíveis com TRIALPRO.
-              Depois aplica-se o preço normal.
+              {trialDays
+                ? '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.'
+                : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.'}
             </p>
           ) : null}
         </div>

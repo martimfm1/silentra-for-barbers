@@ -5,6 +5,7 @@ import {
   assertSameOrigin,
   billingErrorResponse,
 } from '@/services/billing/http';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     }
 
     await BillingService.assertBillingOwner(user.id);
+    await assertStripeBillingAvailableForUser(user.id);
 
     const clientSecret = await BillingService.createSetupIntent(
       user.id,
