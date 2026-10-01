@@ -5,6 +5,7 @@ import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { BillingError } from '@/types/stripe';
 import { billingErrorResponse } from '@/services/billing/http';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -53,6 +54,8 @@ export async function GET(request: Request) {
         { headers: { 'Cache-Control': 'no-store' } },
       );
     }
+
+    await assertStripeBillingAvailableForUser(user.id);
 
     const checkoutSessionId =
       new URL(request.url).searchParams.get('session_id')?.trim() || null;
