@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getStripeClient } from '@/lib/stripe/server';
 import { PLANS, planForPrice } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
@@ -64,7 +65,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, canceled_at, canceled_by_user_id, cancellation_requested_at, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -141,37 +142,58 @@ export async function GET() {
     } | null = null;
 
     if (subscription?.status === 'canceled') {
-      let canceledByName: string | null = null;
-      let canceledByEmail: string | null = null;
+      try {
+        const stripe = getStripeClient();
+        const remote = subscription.stripe_subscription_id
+          ? await stripe.subscriptions.retrieve(
+              subscription.stripe_subscription_id,
+            )
+          : null;
 
-      const canceledByUserId =
-        subscription.canceled_by_user_id ?? subscription.user_id;
-
-      if (canceledByUserId) {
-        const { data: canceledByUser } = await database
-          .from('users')
-          .select('name_complete, name, email')
-          .eq('id', canceledByUserId)
-          .maybeSingle();
-        if (canceledByUser) {
-          canceledByName =
-            canceledByUser.name_complete?.trim() ||
-            canceledByUser.name?.trim() ||
-            null;
-          canceledByEmail = canceledByUser.email ?? null;
-        }
-      }
-
-      cancellation = {
-        canceledAt:
-          subscription.canceled_at ?? subscription.cancellation_requested_at,
-        canceledByName,
-        canceledByEmail,
-        previousPlan:
+        const canceledAt = remote?.canceled_at
+          ? new Date(remote.canceled_at * 1000).toISOString()
+          : null;
+        const previousPlan =
+          planForPrice(remote?.items.data[0]?.price.id ?? '') ??
           planForPrice(subscription.stripe_price_id ?? '') ??
-          (subscription.plan === PLANS.FREE ? null : subscription.plan),
-        requestedAt: subscription.cancellation_requested_at,
-      };
+          (subscription.plan === PLANS.FREE ? null : subscription.plan);
+        const canceledByUserId =
+          remote?.metadata?.cancellation_requested_by_user_id?.trim() ||
+          remote?.metadata?.user_id?.trim() ||
+          subscription.user_id;
+
+        let canceledByName: string | null = null;
+        let canceledByEmail: string | null = null;
+        if (canceledByUserId) {
+          const { data: canceledByUser } = await database
+            .from('users')
+            .select('name_complete, name, email')
+            .eq('id', canceledByUserId)
+            .maybeSingle();
+          if (canceledByUser) {
+            canceledByName =
+              canceledByUser.name_complete?.trim() ||
+              canceledByUser.name?.trim() ||
+              null;
+            canceledByEmail = canceledByUser.email ?? null;
+          }
+        }
+
+        cancellation = {
+          canceledAt,
+          canceledByName,
+          canceledByEmail,
+          previousPlan,
+          requestedAt:
+            remote?.metadata?.cancellation_requested_at ?? null,
+        };
+      } catch (error) {
+        console.error(
+          '[BILLING_SUMMARY_CANCELLATION_SYNC_ERROR]',
+          error instanceof Error ? error.name : 'UNKNOWN',
+        );
+        cancellation = null;
+      }
     }
 
     const plan: BillingPlan =
