@@ -53,7 +53,7 @@ export interface SubscriptionCancellation {
 interface SubscriptionQueryResult {
   subscription: SubscriptionData | null;
   plan: 'free' | 'pro' | 'enterprise';
-  planSource: 'free' | 'admin' | 'subscription_override' | 'stripe';
+  planSource: 'free' | 'admin' | 'subscription_override' | 'stripe' | 'manual';
   cancellation: SubscriptionCancellation | null;
   isAuthenticated: boolean;
   isBillingOwner: boolean;
