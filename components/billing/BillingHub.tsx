@@ -43,6 +43,8 @@ export function BillingHub() {
     isAdministrativePlan,
     isTrial,
     loading,
+    paymentMode,
+    manualRequest,
     cancel,
     resume,
   } = useSubscription();
@@ -54,8 +56,15 @@ export function BillingHub() {
   const [renewalPriceId, setRenewalPriceId] = useState<string | null>(null);
   const [loadingRenewalPrice, setLoadingRenewalPrice] = useState(false);
 
-  const hasSubscription = Boolean(subscription?.stripe_subscription_id);
-  const isCanceled = subscription?.status === 'canceled';
+  const isStripeSubscription =
+    subscription?.payment_method === 'STRIPE' &&
+    Boolean(subscription?.stripe_subscription_id);
+  const isManualSubscription = subscription?.payment_method === 'MANUAL';
+  const hasSubscription = Boolean(
+    subscription?.stripe_subscription_id || isManualSubscription,
+  );
+  const isCanceled =
+    subscription?.status === 'canceled' && !isManualSubscription;
   const active =
     subscription?.status === 'active' || subscription?.status === 'trialing';
   const canceledPlan = cancellation?.previousPlan ?? 'free';
@@ -155,7 +164,7 @@ export function BillingHub() {
   ]);
 
   useEffect(() => {
-    if (!hasSubscription || isAdministrativePlan) return;
+    if (!isStripeSubscription || isAdministrativePlan) return;
     let cancelled = false;
     setLoadingInvoices(true);
     fetch('/api/stripe/invoices', { cache: 'no-store' })
@@ -184,7 +193,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [hasSubscription, isAdministrativePlan]);
+  }, [isStripeSubscription, isAdministrativePlan]);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
@@ -314,7 +323,11 @@ export function BillingHub() {
                         ? isTrial
                           ? 'Em trial'
                           : 'Ativo'
-                        : 'Gratuito'}
+                        : manualRequest?.status === 'PAYMENT_SENT'
+                          ? 'Pagamento enviado'
+                          : manualRequest?.status === 'PENDING'
+                            ? 'Pedido pendente'
+                            : 'Gratuito'}
               </p>
             </div>
 
@@ -327,7 +340,9 @@ export function BillingHub() {
                   ? cancellationDate
                   : isAdministrativePlan
                     ? '—'
-                    : nextRenewal}
+                    : isManualSubscription
+                      ? nextRenewal
+                      : nextRenewal}
               </p>
             </div>
           </div>
@@ -354,7 +369,9 @@ export function BillingHub() {
               ? 'Administração Silentra'
               : planSource === 'stripe'
                 ? 'Stripe'
-                : 'Plano gratuito'}
+                : planSource === 'manual'
+                  ? 'Pagamento manual'
+                  : 'Plano gratuito'}
           </p>
 
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -385,7 +402,7 @@ export function BillingHub() {
               </button>
             ) : null}
 
-            {hasSubscription && !isAdministrativePlan && !isCanceled && (
+            {isStripeSubscription && !isAdministrativePlan && !isCanceled && (
               <button
                 type="button"
                 onClick={() => void handleOpenCustomerPortal()}
@@ -400,6 +417,7 @@ export function BillingHub() {
             )}
 
             {active &&
+              isStripeSubscription &&
               !isAdministrativePlan &&
               !subscription?.cancel_at_period_end &&
               !isCanceled && (
@@ -418,7 +436,9 @@ export function BillingHub() {
                 </button>
               )}
 
-            {subscription?.cancel_at_period_end && !isCanceled ? (
+            {isStripeSubscription &&
+              subscription?.cancel_at_period_end &&
+              !isCanceled ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 text-sm font-medium text-amber-200">
                   <CalendarDays className="size-4" /> Cancelamento agendado (
@@ -438,6 +458,74 @@ export function BillingHub() {
               </div>
             ) : null}
           </div>
+        {manualRequest &&
+        ['PENDING', 'PAYMENT_SENT'].includes(manualRequest.status) ? (
+          <section className="rounded-3xl border border-amber-400/15 bg-amber-400/[0.04] p-5 sm:p-7">
+            <div className="flex items-start gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-200">
+                <CalendarDays className="size-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+                  Pagamento manual
+                </p>
+                <h3 className="mt-1 text-xl font-semibold text-white">
+                  Pedido de subscrição recebido
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  A tua subscrição foi registada e está agora a aguardar
+                  ativação. A equipa da Silentra irá enviar-te as instruções
+                  de pagamento assim que o pedido for processado.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                  Plano
+                </p>
+                <p className="mt-2 font-medium text-zinc-100">
+                  {PLAN_NAMES[manualRequest.plan]}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                  Valor
+                </p>
+                <p className="mt-2 font-medium text-zinc-100">
+                  {formatAmount(
+                    manualRequest.price * 100,
+                    manualRequest.currency,
+                  )}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+                  Estado
+                </p>
+                <p className="mt-2 font-medium text-zinc-100">
+                  {manualRequest.status === 'PAYMENT_SENT'
+                    ? 'Pagamento enviado'
+                    : 'A aguardar processamento'}
+                </p>
+              </div>
+            </div>
+
+            {manualRequest.paymentLink ? (
+              <a
+                href={manualRequest.paymentLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 hover:bg-zinc-200"
+              >
+                <ArrowUpRight className="size-4" />
+                Efetuar pagamento
+              </a>
+            ) : null}
+          </section>
+        ) : null}
+
         </div>
       </section>
 
@@ -512,8 +600,10 @@ export function BillingHub() {
       </section>
 
       <div className="flex items-center gap-2 text-xs text-zinc-600">
-        <Check className="size-3.5 text-emerald-400" /> Pagamentos e recibos
-        processados pela Stripe. A Silentra não guarda dados do cartão.
+        <Check className="size-3.5 text-emerald-400" />
+        {paymentMode === 'MANUAL'
+          ? 'Os pedidos e pagamentos desta conta estão a ser processados manualmente pela Silentra.'
+          : 'Pagamentos e recibos processados pela Stripe. A Silentra não guarda dados do cartão.'}
       </div>
     </div>
   );
