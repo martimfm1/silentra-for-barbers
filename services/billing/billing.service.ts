@@ -6,7 +6,10 @@ import {
   PLANS,
   PRICE_ID_TO_PLAN,
   TRIAL_PERIOD_DAYS,
+  type CheckoutInterval,
+  type CheckoutPlan,
 } from '@/lib/stripe/constants';
+import { StripePriceService } from './stripe-price.service';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import {
   BillingError,
@@ -20,7 +23,8 @@ const PENDING_INVOICE_TTL_MS = 10 * 60 * 1000;
 export interface CreateCheckoutInput {
   userId: string;
   email: string;
-  priceId: string;
+  plan: CheckoutPlan;
+  interval?: CheckoutInterval;
   successUrl: string;
   cancelUrl: string;
   promotionCode?: string | null;
@@ -149,13 +153,12 @@ export class BillingService {
   static async createCheckoutSession(
     input: CreateCheckoutInput,
   ): Promise<string> {
-    const requestedPlan = planForPrice(input.priceId);
-    if (!requestedPlan)
-      throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
-        { priceId: input.priceId },
-      );
+    await this.assertBillingOwner(input.userId);
+    const interval = input.interval ?? 'month';
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      input.plan,
+      interval,
+    );
     const existing = await SubscriptionService.getActiveForUser(input.userId);
     if (existing)
       throw new BillingError(
@@ -163,8 +166,9 @@ export class BillingService {
         'SUBSCRIPTION_NOT_ACTIVE',
         { userId: input.userId },
       );
+
     const isEligibleForProTrial =
-      requestedPlan === PLANS.PRO
+      input.plan === PLANS.PRO
         ? await this.isEligibleForProTrial(input.userId)
         : false;
     const promotionCodeId = await this.resolvePromotionCodeId(
@@ -175,17 +179,13 @@ export class BillingService {
     const session = await stripe.checkout.sessions.create({
       customer,
       mode: 'subscription',
-      line_items: [{ price: input.priceId, quantity: 1 }],
+      line_items: [{ price: verifiedPrice.id, quantity: 1 }],
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,
       client_reference_id: input.userId,
       metadata: {
         user_id: input.userId,
-        offer: isEligibleForProTrial
-          ? 'pro_trial'
-          : requestedPlan === PLANS.PRO
-            ? 'pro_standard'
-            : 'standard',
+        offer: isEligibleForProTrial ? 'pro_trial' : 'standard',
         trial_eligible: isEligibleForProTrial ? 'true' : 'false',
         ...(promotionCodeId ? { promotion_code_id: promotionCodeId } : {}),
       },
@@ -222,25 +222,7 @@ export class BillingService {
   }
 
   static async getAvailablePrices() {
-    const prices = await Promise.all(
-      [...PRICE_ID_TO_PLAN.keys()].map(async (priceId) => {
-        const price = await getStripeClient().prices.retrieve(priceId, {
-          expand: ['product'],
-        });
-        return {
-          id: price.id,
-          plan: planForPrice(price.id),
-          name:
-            planForPrice(price.id) === PLANS.ENTERPRISE
-              ? 'Barbers Enterprise'
-              : 'Barbers Pro',
-          unitAmount: price.unit_amount,
-          currency: price.currency,
-          interval: price.recurring?.interval ?? null,
-        };
-      }),
-    );
-    return prices.filter((price) => price.unitAmount !== null);
+    return StripePriceService.getAvailablePrices();
   }
 
   static async cancelAtPeriodEnd(userId: string): Promise<void> {
