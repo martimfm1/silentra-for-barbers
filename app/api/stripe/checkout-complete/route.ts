@@ -32,6 +32,8 @@ export async function POST() {
 
     if (authError || !user) return fail('Unauthorized', 401);
 
+    await assertStripeBillingAvailableForUser(user.id);
+
     const database = createAdminClient();
     const { data: userRow, error: userError } = await database
       .from('users')
