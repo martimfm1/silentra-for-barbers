@@ -21,6 +21,8 @@ export async function POST(request: Request) {
       );
     }
 
+    await assertStripeBillingAvailableForUser(user.id);
+
     const url = await BarbershopStripeService.createCustomerPortal(
       user.id,
       request.url,
