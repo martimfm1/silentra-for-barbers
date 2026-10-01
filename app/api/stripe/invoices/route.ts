@@ -14,6 +14,9 @@ export async function GET() {
     } = await (await createClient()).auth.getUser();
     if (error || !user)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    await assertStripeBillingAvailableForUser(user.id);
+    return NextResponse.json(
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     return NextResponse.json(
       { invoices: await BarbershopStripeService.getInvoices(user.id) },
       { headers: { 'Cache-Control': 'no-store' } },
