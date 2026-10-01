@@ -17,6 +17,7 @@ import {
 import { PLAN_DESCRIPTIONS } from '@/lib/billing/plan-features';
 
 type BillingPrice = {
+  id: string;
   plan: 'pro' | 'enterprise' | null;
   interval: 'month' | 'year' | null;
 };
@@ -90,6 +91,13 @@ export function PricingSection({
       cancelled = true;
     };
   }, [retryKey]);
+
+  const proPriceId = prices.find(
+    (price) => price.plan === 'pro' && price.interval === 'month',
+  )?.id;
+  const enterprisePriceId = prices.find(
+    (price) => price.plan === 'enterprise' && price.interval === 'month',
+  )?.id;
 
   return (
     <section id="precos" className="space-y-8">
@@ -200,6 +208,7 @@ export function PricingSection({
             tier="pro"
             title="Barbers Pro"
             price="9,90 €"
+            priceId={proPriceId}
             description={PLAN_DESCRIPTIONS.pro}
             features={HERO_FEATURES.pro}
             popular
@@ -210,6 +219,7 @@ export function PricingSection({
             tier="enterprise"
             title="Barbers Enterprise"
             price="29,99 €"
+            priceId={enterprisePriceId}
             description={PLAN_DESCRIPTIONS.enterprise}
             features={HERO_FEATURES.enterprise}
           />

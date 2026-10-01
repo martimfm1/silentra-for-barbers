@@ -11,7 +11,6 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,6 +28,7 @@ export interface PricingCardProps {
   tier: PlanTier;
   title: string;
   price: string;
+  priceId?: string;
   description: string;
   features: readonly string[];
   popular?: boolean;
@@ -47,6 +47,7 @@ export function PricingCard({
   tier,
   title,
   price,
+  priceId,
   description,
   features,
   popular = false,
@@ -64,7 +65,6 @@ export function PricingCard({
     plan: currentPlan,
     loading,
   } = useSubscription();
-  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const isCurrentPlan = useMemo(
@@ -111,9 +111,14 @@ export function PricingCard({
         setConfirmationOpen(true);
         return;
       }
-      await beginCheckout({
-        plan: tier === 'enterprise' ? 'enterprise' : 'pro',
-      });
+      if (!priceId) {
+        toast.error('Este plano ainda não está disponível para checkout.');
+        return;
+      }
+
+      window.location.assign(
+        `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${tier}`,
+      );
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -123,27 +128,22 @@ export function PricingCard({
     }
   };
 
-  const confirmPlanChange = async () => {
+  const confirmPlanChange = () => {
     if (isDowngradeToFree) {
       toast.error(
         'A mudança para o plano Free não utiliza o checkout Stripe porque não existe uma subscrição paga para iniciar.',
       );
       return;
     }
+    if (!priceId) {
+      toast.error('Este plano ainda não está disponível para checkout.');
+      return;
+    }
     setIsChangingPlan(true);
     setConfirmationOpen(false);
-    try {
-      await beginCheckout({
-        plan: tier === 'enterprise' ? 'enterprise' : 'pro',
-      });
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível iniciar o checkout.',
-      );
-      setIsChangingPlan(false);
-    }
+    window.location.assign(
+      `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${tier}&change=1`,
+    );
   };
 
   const buttonConfig = useMemo(() => {
@@ -192,6 +192,12 @@ export function PricingCard({
         disabled: false,
         variant: 'outline' as const,
       };
+    if (!priceId)
+      return {
+        label: 'Indisponível',
+        disabled: true,
+        variant: 'outline' as const,
+      };
     return {
       label: isUpgrade ? 'Fazer upgrade' : 'Mudar para este plano',
       disabled: false,
@@ -206,6 +212,7 @@ export function PricingCard({
     isMounted,
     isUpgrade,
     popular,
+    priceId,
     tier,
   ]);
 
@@ -314,7 +321,7 @@ export function PricingCard({
             disabled={buttonConfig.disabled || loading || isChangingPlan}
             className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${buttonConfig.variant === 'primary' ? 'bg-emerald-400 text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.18)] hover:bg-emerald-300 hover:shadow-[0_10px_30px_rgba(52,211,153,0.24)]' : buttonConfig.variant === 'secondary' ? 'border border-white/10 bg-white/5 text-zinc-400' : 'border border-white/15 bg-white/[0.04] text-zinc-100 hover:border-white/25 hover:bg-white/[0.08]'}`}
           >
-            {loading || isChangingPlan || checkoutLoading ? (
+            {loading || isChangingPlan ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
