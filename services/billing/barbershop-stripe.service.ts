@@ -671,6 +671,17 @@ export class BarbershopStripeService {
 
     const existing = await this.getSubscriptionForBarbershop(barbershopId);
 
+    if (
+      existing?.payment_method === 'MANUAL' &&
+      existing.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(existing.status)
+    ) {
+      throw new BillingError(
+        'A subscrição manual ativa não pode ser migrada automaticamente para Stripe.',
+        'SUBSCRIPTION_NOT_ACTIVE',
+      );
+    }
+
     // A plan change can briefly have two Stripe subscriptions for the same
     // customer. Ignore an older subscription's webhook if the database already
     // points at a newer/current subscription so a delayed delete/update event
