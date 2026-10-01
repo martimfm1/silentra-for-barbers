@@ -34,6 +34,7 @@ export interface PricingCardProps {
   popular?: boolean;
   trialDays?: number;
   destination?: PricingDestination;
+  billingInterval?: 'month' | 'year';
 }
 
 const PLAN_RANK: Record<PlanTier, number> = { free: 0, pro: 1, enterprise: 2 };
@@ -52,6 +53,7 @@ export function PricingCard({
   popular = false,
   trialDays,
   destination = 'checkout',
+  billingInterval = 'month',
 }: PricingCardProps) {
   const isMounted = useSyncExternalStore(
     () => () => undefined,
@@ -115,6 +117,7 @@ export function PricingCard({
 
       await beginCheckout({
         plan: tier,
+        interval: billingInterval,
       });
     } catch (error) {
       toast.error(
@@ -137,6 +140,7 @@ export function PricingCard({
     try {
       await beginCheckout({
         plan: tier as 'pro' | 'enterprise',
+        interval: billingInterval,
       });
     } catch (error) {
       setIsChangingPlan(false);
@@ -209,6 +213,8 @@ export function PricingCard({
     isUpgrade,
     popular,
     tier,
+    checkoutLoading,
+    billingInterval,
   ]);
 
   const isActivePaidPlan =
@@ -267,7 +273,9 @@ export function PricingCard({
               {price}
             </span>
             {tier !== 'free' && (
-              <span className="text-xs text-zinc-500">/mês</span>
+              <span className="text-xs text-zinc-500">
+                {billingInterval === 'year' ? '/ano' : '/mês'}
+              </span>
             )}
           </div>
           {tier === 'pro' && trialDays ? (
