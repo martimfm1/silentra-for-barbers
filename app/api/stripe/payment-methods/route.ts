@@ -13,6 +13,9 @@ export async function POST(request: Request) {
     } = await (await createClient()).auth.getUser();
     if (error || !user)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    await assertStripeBillingAvailableForUser(user.id);
+    const body =
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await readJsonObject(request);
     if (!body.action)
       return NextResponse.json({
