@@ -95,7 +95,6 @@ export default async function CheckoutPage({
     );
   }
 
-  const tenant = await BarbershopStripeService.getTenantContext(user.id);
   if (intent.barbershopId !== tenant.barbershopId) {
     return (
       <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 py-10 text-zinc-50">

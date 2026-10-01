@@ -59,6 +59,7 @@ interface SubscriptionQueryResult {
   isBillingOwner: boolean;
   barbershopId: string | null;
   barbershopName: string | null;
+  billingInterval: 'month' | 'year' | null;
   paymentMode: 'MANUAL' | 'STRIPE';
   manualRequest: ManualSubscriptionRequest | null;
 }
@@ -86,6 +87,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
         isBillingOwner: false,
         barbershopId: null,
         barbershopName: null,
+        billingInterval: null,
         paymentMode: 'MANUAL',
         manualRequest: null,
       };
@@ -103,6 +105,10 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
     isBillingOwner: Boolean(json.isBillingOwner),
     barbershopId: json.barbershopId ?? null,
     barbershopName: json.barbershopName ?? null,
+    billingInterval:
+      json.billingInterval === 'year' || json.billingInterval === 'month'
+        ? json.billingInterval
+        : null,
     paymentMode: json.paymentMode === 'STRIPE' ? 'STRIPE' : 'MANUAL',
     manualRequest: json.manualRequest
       ? {
@@ -196,6 +202,7 @@ export function useSubscription() {
     loading,
     barbershopId: data?.barbershopId ?? null,
     barbershopName: data?.barbershopName ?? null,
+    billingInterval: data?.billingInterval ?? null,
     paymentMode: data?.paymentMode ?? 'MANUAL',
     manualRequest: data?.manualRequest ?? null,
     cancel: cancelMutation.mutateAsync,
