@@ -19,7 +19,8 @@
     "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:product",
     "translate": "tsx scripts/translate.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "qa:manual-payments": "node scripts/qa/manual-payments.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",
