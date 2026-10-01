@@ -25,6 +25,7 @@ export async function GET() {
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
 
+    const paymentMode = await PaymentModeService.getPaymentMode();
     const database = createAdminClient();
     const { data: userRow, error: userError } = await database
       .from('users')
@@ -203,7 +204,6 @@ export async function GET() {
       }
     }
 
-    const paymentMode = await PaymentModeService.getPaymentMode();
     const manualRequest =
       subscription?.payment_method === 'MANUAL' || paymentMode === 'MANUAL'
         ? await ManualPaymentService.getRequestForUser(user.id)
