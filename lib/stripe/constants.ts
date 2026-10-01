@@ -32,6 +32,16 @@ export function configuredPriceIdFor(
   )?.[2];
 }
 
+export function intervalForPriceId(
+  priceId: string | null | undefined,
+): CheckoutInterval | null {
+  if (!priceId) return null;
+  return (
+    configuredPrices.find(([, , configuredPriceId]) => configuredPriceId === priceId)?.[1] ??
+    null
+  );
+}
+
 
 // Kept for legacy billing flows that still reference the old trial setting.
 // New Embedded Checkout uses the Stripe promotion code below instead.
