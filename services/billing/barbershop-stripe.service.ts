@@ -246,6 +246,7 @@ export class BarbershopStripeService {
     subscription: SubscriptionRecord | null,
   ): Promise<SubscriptionRecord | null> {
     if (
+      subscription?.payment_method === 'MANUAL' ||
       !subscription?.stripe_subscription_id ||
       (subscription.plan_override && subscription.plan_override !== PLANS.FREE)
     )
