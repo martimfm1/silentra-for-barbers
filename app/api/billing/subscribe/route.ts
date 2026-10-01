@@ -10,6 +10,8 @@ import {
 } from '@/services/billing/payment-mode.service';
 import { SubscriptionService } from '@/services/billing/subscription.service';
 import { getManualPrice } from '@/lib/billing/manual-pricing';
+import { createCheckoutIntent } from '@/lib/stripe/checkout-intent';
+import { StripePriceService } from '@/services/billing/stripe-price.service';
 import { BillingError } from '@/types/stripe';
 
 type Plan = 'pro' | 'enterprise';
@@ -177,17 +179,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const prices = await BillingService.getAvailablePrices();
-    const selected = prices.find(
-      (price) => price.plan === plan && price.interval === interval,
-    );
-
-    if (!selected?.id) {
-      throw new BillingError(
-        'Este plano não está disponível para checkout.',
-        'INVALID_PRICE',
-      );
-    }
+    // The Stripe price is resolved and validated exclusively on the server.
+    // Its ID is intentionally never exposed in the checkout URL.
+    await StripePriceService.resolveVerifiedPrice(plan, interval);
 
     const current = await SubscriptionService.getActiveForUser(user.id);
     const changingPlan = Boolean(
@@ -197,9 +191,15 @@ export async function POST(request: Request) {
         (PLAN_ACCESS_STATUSES as readonly string[]).includes(current.status),
     );
 
-    const query = new URLSearchParams({
-      priceId: selected.id,
+    const checkoutIntent = createCheckoutIntent(
+      user.id,
+      profile.barbershop_id,
       plan,
+      interval,
+    );
+
+    const query = new URLSearchParams({
+      intent: checkoutIntent,
     });
     if (changingPlan) query.set('change', '1');
 
