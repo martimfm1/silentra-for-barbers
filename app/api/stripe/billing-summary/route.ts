@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
-import { PLANS, planForPrice } from '@/lib/stripe/constants';
+import {
+  PLANS,
+  intervalForPriceId,
+  planForPrice,
+} from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
@@ -52,6 +56,7 @@ export async function GET() {
           isBillingOwner: false,
           barbershopId: null,
           barbershopName: null,
+          billingInterval: null,
         },
         {
           headers: {
@@ -196,6 +201,10 @@ export async function GET() {
       }
     }
 
+    const billingInterval = intervalForPriceId(
+      subscription?.stripe_price_id,
+    );
+
     const plan: BillingPlan =
       hasActiveAssignment && assignment
         ? (assignment.plan as BillingPlan)
@@ -223,6 +232,7 @@ export async function GET() {
         isBillingOwner: String(userRow?.role ?? '').toLowerCase() === 'owner',
         barbershopId,
         barbershopName: barbershopResult.data?.name ?? null,
+        billingInterval,
       },
       {
         headers: {
