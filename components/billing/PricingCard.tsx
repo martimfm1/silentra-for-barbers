@@ -208,7 +208,6 @@ export function PricingCard({
     isMounted,
     isUpgrade,
     popular,
-    `checkoutLoading`,
     tier,
   ]);
 
