@@ -83,7 +83,6 @@ export function PricingSection({
           '[PRICING_SECTION_LOAD_ERROR]',
           error instanceof Error ? error.name : 'UNKNOWN',
         );
-        setPrices([]);
         setPricesError(true);
       } finally {
         if (!cancelled) setLoadingPrices(false);
@@ -133,8 +132,10 @@ export function PricingSection({
               ['01', 'Escolhe', 'Compara os planos e encontra o nível certo.'],
               [
                 '02',
-                'Checkout',
-                'Revê os dados e conclui o pagamento dentro da Silentra.',
+                paymentMode === 'MANUAL' ? 'Pedido' : 'Checkout',
+                paymentMode === 'MANUAL'
+                  ? 'Regista o pedido e aguarda as instruções de pagamento.'
+                  : 'Revê os dados e conclui o pagamento dentro da Silentra.',
               ],
               [
                 '03',
