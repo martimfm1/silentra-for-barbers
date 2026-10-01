@@ -276,6 +276,29 @@ begin
     created_at
   )
   values (
+    'SUBSCRIPTION_ACTIVATED',
+    'subscription',
+    v_subscription_id::text,
+    jsonb_build_object(
+      'actor_user_id', p_actor_user_id,
+      'user_id', v_request.user_id,
+      'barbershop_id', v_request.barbershop_id,
+      'request_id', v_request.id,
+      'plan', v_request.plan,
+      'billing_interval', v_request.billing_interval,
+      'expires_at', v_expires
+    ),
+    now()
+  );
+
+  insert into public.audit_logs (
+    action,
+    entity_type,
+    entity_id,
+    metadata,
+    created_at
+  )
+  values (
     'PAYMENT_CONFIRMED',
     'subscription_request',
     v_request.id::text,
