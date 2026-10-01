@@ -5,7 +5,6 @@ export interface SubscriptionData {
   id: string;
   stripe_customer_id: string;
   stripe_subscription_id: string | null;
-  stripe_price_id: string | null;
   status:
     | 'active'
     | 'trialing'
