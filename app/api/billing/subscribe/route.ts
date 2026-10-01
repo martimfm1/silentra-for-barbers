@@ -105,8 +105,8 @@ export async function POST(request: Request) {
       hasActivePaid && existingPaymentMethod === 'STRIPE';
 
     const useManualFlow =
-      existingPaymentMethod === 'MANUAL' &&
-      (hasActivePaid || mode === 'MANUAL');
+      !useExistingStripeFlow &&
+      (mode === 'MANUAL' || existingPaymentMethod === 'MANUAL');
 
     if (useManualFlow) {
       let requestType: 'NEW' | 'CHANGE' = 'NEW';
