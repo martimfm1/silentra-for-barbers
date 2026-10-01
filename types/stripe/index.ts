@@ -7,7 +7,7 @@ export interface SubscriptionRecord {
   id: string;
   user_id: string;
   barbershop_id: string | null;
-  stripe_customer_id: string;
+  stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   stripe_price_id: string | null;
   plan: BillingPlan;
@@ -17,6 +17,7 @@ export interface SubscriptionRecord {
   trial_end: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
+  payment_method: 'MANUAL' | 'STRIPE';
   canceled_at: string | null;
   canceled_by_user_id: string | null;
   cancellation_requested_at: string | null;
@@ -47,6 +48,9 @@ export type BillingErrorCode =
   | 'CUSTOMER_NOT_FOUND'
   | 'SUBSCRIPTION_NOT_FOUND'
   | 'SUBSCRIPTION_NOT_ACTIVE'
+  | 'PAYMENT_MODE_STRIPE_DISABLED'
+  | 'MANUAL_REQUEST_NOT_FOUND'
+  | 'MANUAL_REQUEST_INVALID'
   | 'DB_READ_FAILED'
   | 'DB_WRITE_FAILED'
   | 'WEBHOOK_VERIFICATION_FAILED'
