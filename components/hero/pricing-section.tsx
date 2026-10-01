@@ -117,9 +117,13 @@ export function PricingSection({
     }).format(amount / 100);
   };
 
-  const annualAvailable = prices.some(
-    (price) => price.interval === 'year',
-  );
+  const annualAvailable =
+    prices.some(
+      (price) => price.plan === 'pro' && price.interval === 'year',
+    ) &&
+    prices.some(
+      (price) => price.plan === 'enterprise' && price.interval === 'year',
+    );
 
   return (
     <section id="precos" className="space-y-8">
