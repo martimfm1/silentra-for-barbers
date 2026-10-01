@@ -131,7 +131,7 @@ export async function POST(request: Request) {
     const { data: persisted, error: persistedError } = await database
       .from('subscriptions')
       .select(
-        'id, user_id, barbershop_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, plan, status, trial_end, current_period_end, cancel_at_period_end',
+        'id, user_id, barbershop_id, stripe_subscription_id, stripe_customer_id, plan, status, trial_end, current_period_end, cancel_at_period_end',
       )
       .eq('user_id', user.id)
       .eq('barbershop_id', barbershopId)
