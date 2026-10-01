@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCheckout } from '@/hooks/useCheckout';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
 interface Invoice {
@@ -47,14 +48,14 @@ export function BillingHub() {
     manualRequest,
     cancel,
     resume,
+    billingInterval,
   } = useSubscription();
+  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const [cancelling, setCancelling] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
-  const [renewalPriceId, setRenewalPriceId] = useState<string | null>(null);
-  const [loadingRenewalPrice, setLoadingRenewalPrice] = useState(false);
 
   const isStripeSubscription =
     subscription?.payment_method === 'STRIPE' &&
@@ -93,79 +94,6 @@ export function BillingHub() {
         year: 'numeric',
       })
     : '—';
-
-  useEffect(() => {
-    if (!isCanceled || isAdministrativePlan || canceledPlan === 'free') {
-      setRenewalPriceId(null);
-      setLoadingRenewalPrice(false);
-      return;
-    }
-
-    if (canceledPlan === 'enterprise' && subscription?.stripe_price_id) {
-      setRenewalPriceId(subscription.stripe_price_id);
-      setLoadingRenewalPrice(false);
-      return;
-    }
-
-    if (canceledPlan !== 'pro') return;
-
-    let cancelled = false;
-    setLoadingRenewalPrice(true);
-
-    fetch('/api/stripe/prices', {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    })
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok || !Array.isArray(body.data))
-          throw new Error('PRICES_UNAVAILABLE');
-        return body.data as Array<{
-          id: string;
-          plan: 'pro' | 'enterprise' | null;
-          interval: 'month' | 'year' | null;
-        }>;
-      })
-      .then((prices) => {
-        if (cancelled) return;
-        const previousInterval =
-          prices.find((price) => price.id === subscription?.stripe_price_id)
-            ?.interval ?? 'month';
-        const enterprisePrice =
-          prices.find(
-            (price) =>
-              price.plan === 'enterprise' &&
-              price.interval === previousInterval,
-          ) ??
-          prices.find(
-            (price) =>
-              price.plan === 'enterprise' && price.interval === 'month',
-          ) ??
-          null;
-        setRenewalPriceId(enterprisePrice?.id ?? null);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          setRenewalPriceId(null);
-          console.error(
-            '[BILLING_HUB_RENEWAL_PRICE_ERROR]',
-            error instanceof Error ? error.name : 'UNKNOWN',
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingRenewalPrice(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    canceledPlan,
-    isAdministrativePlan,
-    isCanceled,
-    subscription?.stripe_price_id,
-  ]);
 
   useEffect(() => {
     if (!isStripeSubscription || isAdministrativePlan) return;
@@ -238,15 +166,19 @@ export function BillingHub() {
     }
   };
 
-  const handleResubscribe = () => {
-    if (loadingRenewalPrice) return;
-    if (renewalPriceId) {
-      window.location.assign(
-        `/checkout?priceId=${encodeURIComponent(renewalPriceId)}&plan=${renewalPlan}`,
+  const handleResubscribe = async () => {
+    try {
+      await beginCheckout({
+        plan: renewalPlan === 'enterprise' ? 'enterprise' : 'pro',
+        interval: billingInterval ?? 'month',
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar a nova subscrição.',
       );
-      return;
     }
-    window.location.assign('/plans');
   };
 
   const handleOpenCustomerPortal = async () => {
@@ -295,9 +227,7 @@ export function BillingHub() {
             </div>
 
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white">
-              {isCanceled
-                ? PLAN_NAMES[canceledPlan]
-                : PLAN_NAMES[displayPlan]}
+              {isCanceled ? PLAN_NAMES[canceledPlan] : PLAN_NAMES[plan]}
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
@@ -327,11 +257,7 @@ export function BillingHub() {
                         ? isTrial
                           ? 'Em trial'
                           : 'Ativo'
-                        : manualRequest?.status === 'PAYMENT_SENT'
-                          ? 'Pagamento enviado'
-                          : manualRequest?.status === 'PENDING'
-                            ? 'Pedido pendente'
-                            : 'Gratuito'}
+                        : 'Gratuito'}
               </p>
             </div>
 
@@ -344,9 +270,7 @@ export function BillingHub() {
                   ? cancellationDate
                   : isAdministrativePlan
                     ? '—'
-                    : isManualSubscription
-                      ? nextRenewal
-                      : nextRenewal}
+                    : nextRenewal}
               </p>
             </div>
           </div>
@@ -373,9 +297,7 @@ export function BillingHub() {
               ? 'Administração Silentra'
               : planSource === 'stripe'
                 ? 'Stripe'
-                : planSource === 'manual'
-                  ? 'Pagamento manual'
-                  : 'Plano gratuito'}
+                : 'Plano gratuito'}
           </p>
 
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -392,10 +314,10 @@ export function BillingHub() {
               <button
                 type="button"
                 onClick={handleResubscribe}
-                disabled={loadingRenewalPrice}
+                disabled={checkoutLoading}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-60"
               >
-                {loadingRenewalPrice ? (
+                {checkoutLoading ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
                   <ArrowUpRight className="size-4" />
@@ -406,7 +328,7 @@ export function BillingHub() {
               </button>
             ) : null}
 
-            {isStripeSubscription && !isAdministrativePlan && !isCanceled && (
+            {hasSubscription && !isAdministrativePlan && !isCanceled && (
               <button
                 type="button"
                 onClick={() => void handleOpenCustomerPortal()}
@@ -421,7 +343,6 @@ export function BillingHub() {
             )}
 
             {active &&
-              isStripeSubscription &&
               !isAdministrativePlan &&
               !subscription?.cancel_at_period_end &&
               !isCanceled && (
@@ -440,9 +361,7 @@ export function BillingHub() {
                 </button>
               )}
 
-            {isStripeSubscription &&
-              subscription?.cancel_at_period_end &&
-              !isCanceled ? (
+            {subscription?.cancel_at_period_end && !isCanceled ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 text-sm font-medium text-amber-200">
                   <CalendarDays className="size-4" /> Cancelamento agendado (
@@ -462,74 +381,6 @@ export function BillingHub() {
               </div>
             ) : null}
           </div>
-        {manualRequest &&
-        ['PENDING', 'PAYMENT_SENT'].includes(manualRequest.status) ? (
-          <section className="rounded-3xl border border-amber-400/15 bg-amber-400/[0.04] p-5 sm:p-7">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-200">
-                <CalendarDays className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300/80">
-                  Pagamento manual
-                </p>
-                <h3 className="mt-1 text-xl font-semibold text-white">
-                  Pedido de subscrição recebido
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  A tua subscrição foi registada e está agora a aguardar
-                  ativação. A equipa da Silentra irá enviar-te as instruções
-                  de pagamento assim que o pedido for processado.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                  Plano
-                </p>
-                <p className="mt-2 font-medium text-zinc-100">
-                  {PLAN_NAMES[manualRequest.plan]}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                  Valor
-                </p>
-                <p className="mt-2 font-medium text-zinc-100">
-                  {formatAmount(
-                    manualRequest.price * 100,
-                    manualRequest.currency,
-                  )}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                  Estado
-                </p>
-                <p className="mt-2 font-medium text-zinc-100">
-                  {manualRequest.status === 'PAYMENT_SENT'
-                    ? 'Pagamento enviado'
-                    : 'A aguardar processamento'}
-                </p>
-              </div>
-            </div>
-
-            {manualRequest.paymentLink ? (
-              <a
-                href={manualRequest.paymentLink}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 hover:bg-zinc-200"
-              >
-                <ArrowUpRight className="size-4" />
-                Efetuar pagamento
-              </a>
-            ) : null}
-          </section>
-        ) : null}
-
         </div>
       </section>
 
@@ -555,11 +406,9 @@ export function BillingHub() {
             <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 py-10 text-zinc-500">
               <Loader2 className="size-5 animate-spin" />
             </div>
-          ) : !isStripeSubscription || isAdministrativePlan ? (
+          ) : !hasSubscription || isAdministrativePlan ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              {isManualSubscription || manualRequest
-                ? 'Os recibos deste pedido são tratados fora da Stripe.'
-                : 'Ainda não existem recibos de uma subscrição Stripe nesta conta.'}
+              Ainda não existem recibos de uma subscrição Stripe nesta conta.
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
@@ -606,10 +455,8 @@ export function BillingHub() {
       </section>
 
       <div className="flex items-center gap-2 text-xs text-zinc-600">
-        <Check className="size-3.5 text-emerald-400" />
-        {paymentMode === 'MANUAL'
-          ? 'Os pedidos e pagamentos desta conta estão a ser processados manualmente pela Silentra.'
-          : 'Pagamentos e recibos processados pela Stripe. A Silentra não guarda dados do cartão.'}
+        <Check className="size-3.5 text-emerald-400" /> Pagamentos e recibos
+        processados pela Stripe. A Silentra não guarda dados do cartão.
       </div>
     </div>
   );

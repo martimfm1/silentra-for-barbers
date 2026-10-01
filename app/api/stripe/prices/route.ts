@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
-import { BillingService } from '@/services/billing/billing.service';
+import { StripePriceService } from '@/services/billing/stripe-price.service';
 import { getManualPrices } from '@/lib/billing/manual-pricing';
 import { PaymentModeService } from '@/services/billing/payment-mode.service';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const paymentMode = await PaymentModeService.getPaymentMode();
-
     if (paymentMode === 'MANUAL') {
       return NextResponse.json(
         {
@@ -25,19 +27,15 @@ export async function GET() {
       );
     }
 
-    const prices = await BillingService.getAvailablePrices();
+    const prices = await StripePriceService.getAvailablePrices();
     return NextResponse.json(
-      { mode: paymentMode, data: prices },
-      {
-        status: 200,
-        headers: { 'Cache-Control': 'public, max-age=60' },
-      },
+      { data: prices },
+      { status: 200, headers: { 'Cache-Control': 'public, max-age=60' } },
     );
   } catch (error) {
-    console.error(
-      '[PRICES_API_ERROR]',
-      error instanceof Error ? error.name : 'UNKNOWN',
-    );
+    console.error('[STRIPE_PRICES_ERROR]', {
+      error: error instanceof Error ? error.name : 'unknown',
+    });
     return NextResponse.json(
       { error: 'Não foi possível carregar os preços.' },
       { status: 503, headers: { 'Cache-Control': 'no-store' } },

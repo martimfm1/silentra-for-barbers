@@ -2,14 +2,17 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import {
-  assertStripeBillingAvailableForUser,
-} from '@/services/billing/payment-mode.service';
-import { billingErrorResponse } from '@/services/billing/http';
+  assertSameOrigin,
+  billingErrorResponse,
+} from '@/services/billing/http';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const {
       data: { user },
       error,
@@ -17,11 +20,12 @@ export async function POST() {
 
     if (error || !user?.email) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Não tens sessão iniciada.' },
         { status: 401 },
       );
     }
 
+    await BillingService.assertBillingOwner(user.id);
     await assertStripeBillingAvailableForUser(user.id);
 
     const clientSecret = await BillingService.createSetupIntent(

@@ -242,9 +242,13 @@ export async function GET(request: Request) {
           ? 'stripe'
           : 'free';
 
+    const publicSubscription = subscription
+      ? { ...subscription, stripe_price_id: null }
+      : null;
+
     return NextResponse.json(
       {
-        subscription,
+        subscription: publicSubscription,
         plan,
         planSource,
         barbershopId,
