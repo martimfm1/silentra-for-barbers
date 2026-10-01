@@ -17,9 +17,10 @@ import {
 import { PLAN_DESCRIPTIONS } from '@/lib/billing/plan-features';
 
 type BillingPrice = {
-  id: string;
   plan: 'pro' | 'enterprise' | null;
   interval: 'month' | 'year' | null;
+  unitAmount?: number;
+  currency?: string;
 };
 
 const HERO_FEATURES = {
@@ -51,6 +52,7 @@ export function PricingSection({
   showDecisionHeader?: boolean;
 }) {
   const [prices, setPrices] = useState<BillingPrice[]>([]);
+  const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricesError, setPricesError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -68,11 +70,15 @@ export function PricingSection({
         });
         const body = (await response.json().catch(() => ({}))) as {
           data?: BillingPrice[];
+          mode?: 'MANUAL' | 'STRIPE';
         };
         if (!response.ok || !Array.isArray(body.data)) {
           throw new Error('PRICES_UNAVAILABLE');
         }
-        if (!cancelled) setPrices(body.data);
+        if (!cancelled) {
+          setPrices(body.data);
+          setPaymentMode(body.mode === 'STRIPE' ? 'STRIPE' : 'MANUAL');
+        }
       } catch (error) {
         if (cancelled) return;
         console.error(
@@ -92,13 +98,6 @@ export function PricingSection({
     };
   }, [retryKey]);
 
-  const proPriceId = prices.find(
-    (price) => price.plan === 'pro' && price.interval === 'month',
-  )?.id;
-  const enterprisePriceId = prices.find(
-    (price) => price.plan === 'enterprise' && price.interval === 'month',
-  )?.id;
-
   return (
     <section id="precos" className="space-y-8">
       {showDecisionHeader ? (
@@ -110,12 +109,14 @@ export function PricingSection({
                 e checkout
               </div>
               <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-zinc-50 sm:text-4xl lg:text-5xl">
-                Escolhe o plano. O próximo passo é sempre o checkout.
+                Escolhe o plano. O próximo passo é{' '}
+                {paymentMode === 'MANUAL' ? 'o pedido de subscrição.' : 'o checkout.'}
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-                Compara o essencial, escolhe a fase certa da tua barbearia e
-                continua sem saltos de página desnecessários. O pagamento
-                acontece na experiência de checkout da Silentra.
+                Compara o essencial e escolhe a fase certa da tua barbearia.{' '}
+                {paymentMode === 'MANUAL'
+                  ? 'O pedido é registado e a equipa envia-te as instruções de pagamento.'
+                  : 'O pagamento acontece na experiência de checkout da Silentra.'}
               </p>
             </div>
             <Link
@@ -208,18 +209,16 @@ export function PricingSection({
             tier="pro"
             title="Barbers Pro"
             price="9,90 €"
-            priceId={proPriceId}
             description={PLAN_DESCRIPTIONS.pro}
             features={HERO_FEATURES.pro}
             popular
-            trialDays={30}
+            trialDays={paymentMode === 'STRIPE' ? 30 : undefined}
           />
           <PricingCard
             destination={destination}
             tier="enterprise"
             title="Barbers Enterprise"
-            price="29,99 €"
-            priceId={enterprisePriceId}
+            price="29,90 €"
             description={PLAN_DESCRIPTIONS.enterprise}
             features={HERO_FEATURES.enterprise}
           />
@@ -237,11 +236,15 @@ export function PricingSection({
         </div>
         <div className="glassmorphism rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.045] p-5">
           <p className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
-            <Check className="size-4 text-emerald-300" /> Oferta Pro para
-            elegíveis
+            <Check className="size-4 text-emerald-300" />{' '}
+            {paymentMode === 'MANUAL'
+              ? 'Pagamento manual'
+              : 'Oferta Pro para elegíveis'}
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            A oferta aplicável é validada no fluxo de checkout.
+            {paymentMode === 'MANUAL'
+              ? 'Recebe as instruções de pagamento depois de o pedido ser processado.'
+              : 'A oferta aplicável é validada no fluxo de checkout.'}
           </p>
         </div>
         <div className="glassmorphism rounded-2xl border border-white/10 bg-white/[0.025] p-5">
@@ -250,7 +253,9 @@ export function PricingSection({
             transparente
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            A subscrição pertence à barbearia e é processada pela Stripe.
+            {paymentMode === 'MANUAL'
+              ? 'O pedido fica associado à tua barbearia e o método é registado como manual.'
+              : 'A subscrição pertence à barbearia e é processada pela Stripe.'}
           </p>
         </div>
       </div>
