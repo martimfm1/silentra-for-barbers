@@ -350,30 +350,29 @@ export class BillingService {
   static async createSubscription(
     userId: string,
     email: string,
-    priceId: string,
+    plan: CheckoutPlan,
+    interval: CheckoutInterval = 'month',
     promotionCode?: string | null,
   ): Promise<{
     subscriptionId: string;
     clientSecret: string | null;
     action: 'created' | 'changed';
   }> {
-    const requestedPlan = planForPrice(priceId);
-    if (!requestedPlan || requestedPlan === PLANS.FREE)
-      throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
-        { priceId },
-      );
+    await this.assertBillingOwner(userId);
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      plan,
+      interval,
+    );
     const activeSubscription =
       await SubscriptionService.getActiveForUser(userId);
     if (activeSubscription?.stripe_subscription_id) {
-      await this.updatePlan(userId, priceId);
-      return {
-        subscriptionId: activeSubscription.stripe_subscription_id,
-        clientSecret: null,
-        action: 'changed',
-      };
+      throw new BillingError(
+        'Já existe uma subscrição ativa. Faz a alteração através do fluxo de mudança de plano.',
+        'SUBSCRIPTION_NOT_ACTIVE',
+        { userId },
+      );
     }
+
     const existing = await SubscriptionService.getForUser(userId);
     if (existing?.stripe_subscription_id && existing.status === 'incomplete') {
       await getStripeClient().subscriptions.cancel(
@@ -381,15 +380,16 @@ export class BillingService {
       );
       await SubscriptionService.markCanceled(userId);
     }
+
     const eligibleForProTrial =
-      requestedPlan === PLANS.PRO
+      plan === PLANS.PRO
         ? await this.isEligibleForProTrial(userId)
         : false;
     const promotionCodeId = await this.resolvePromotionCodeId(promotionCode);
     const customer = await this.getOrCreateCustomer(userId, email);
     const subscription = await getStripeClient().subscriptions.create({
       customer,
-      items: [{ price: priceId }],
+      items: [{ price: verifiedPrice.id }],
       ...(eligibleForProTrial ? { trial_period_days: TRIAL_PERIOD_DAYS } : {}),
       payment_behavior: eligibleForProTrial
         ? 'allow_incomplete'
@@ -408,6 +408,7 @@ export class BillingService {
         ...(promotionCodeId ? { promotion_code_id: promotionCodeId } : {}),
       },
     });
+
     const stripe = getStripeClient();
     const invoice =
       typeof subscription.latest_invoice === 'string'
@@ -428,11 +429,13 @@ export class BillingService {
       invoice?.confirmation_secret?.client_secret ??
       paymentIntentSecret ??
       null;
+
     if (!eligibleForProTrial && !clientSecret)
       throw new BillingError(
         'Stripe did not return a payment confirmation secret.',
         'WEBHOOK_PROCESSING_FAILED',
       );
+
     await SubscriptionService.syncFromStripe(userId, subscription);
     return { subscriptionId: subscription.id, clientSecret, action: 'created' };
   }
@@ -498,14 +501,16 @@ export class BillingService {
       });
     await stripe.paymentMethods.detach(paymentMethodId);
   }
-  static async updatePlan(userId: string, newPriceId: string): Promise<void> {
-    const newPlan = planForPrice(newPriceId);
-    if (!newPlan || newPlan === PLANS.FREE)
-      throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
-        { newPriceId },
-      );
+  static async updatePlan(
+    userId: string,
+    newPlan: CheckoutPlan,
+    interval: CheckoutInterval = 'month',
+  ): Promise<void> {
+    await this.assertBillingOwner(userId);
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      newPlan,
+      interval,
+    );
     const subscription = await SubscriptionService.getActiveForUser(userId);
     if (!subscription?.stripe_subscription_id)
       throw new BillingError(
@@ -513,6 +518,7 @@ export class BillingService {
         'SUBSCRIPTION_NOT_FOUND',
         { userId },
       );
+
     const current = await getStripeClient().subscriptions.retrieve(
       subscription.stripe_subscription_id,
     );
@@ -522,18 +528,21 @@ export class BillingService {
         'SUBSCRIPTION_NOT_FOUND',
         { userId, status: current.status },
       );
+
     const item = current.items.data[0];
     if (!item)
       throw new BillingError(
         'Subscription has no billable item.',
         'SUBSCRIPTION_NOT_FOUND',
       );
+
     const updated = await getStripeClient().subscriptions.update(current.id, {
-      items: [{ id: item.id, price: newPriceId }],
+      items: [{ id: item.id, price: verifiedPrice.id }],
       proration_behavior: 'always_invoice',
     });
     await SubscriptionService.syncFromStripe(userId, updated);
   }
+
   static async processWebhookEvent(event: Stripe.Event): Promise<void> {
     const stripe = getStripeClient();
     if (
