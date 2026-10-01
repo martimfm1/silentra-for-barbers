@@ -18,6 +18,8 @@ export async function POST() {
     if (authError || !user)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    await assertStripeBillingAvailableForUser(user.id);
+
     const database = createAdminClient();
     const { data: owner, error: ownerError } = await database
       .from('users')
