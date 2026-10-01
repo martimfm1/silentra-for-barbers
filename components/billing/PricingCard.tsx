@@ -336,8 +336,9 @@ export function PricingCard({
           </button>
           {tier === 'pro' && !isCurrentPlan ? (
             <p className="mt-2 text-center text-[11px] text-zinc-600">
-              1 mês grátis para novos utilizadores elegíveis com TRIALPRO.
-              Depois aplica-se o preço normal.
+              {trialDays
+                ? '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.'
+                : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.'}
             </p>
           ) : null}
         </div>
