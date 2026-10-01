@@ -124,8 +124,8 @@ export async function POST(request: Request) {
     const existingIsManual = existing?.payment_method === 'MANUAL';
 
     if (
-      paymentMode === 'MANUAL' &&
-      (!hasActivePaidSubscription || existingIsManual)
+      (hasActivePaidSubscription && existingIsManual) ||
+      (!hasActivePaidSubscription && paymentMode === 'MANUAL')
     ) {
       throw new BillingError(
         'Os pagamentos Stripe estão atualmente desativados.',
