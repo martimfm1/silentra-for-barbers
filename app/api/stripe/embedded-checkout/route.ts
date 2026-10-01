@@ -10,6 +10,7 @@ import {
 } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingError } from '@/types/stripe';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -118,6 +119,19 @@ export async function POST(request: Request) {
       existing.plan !== PLANS.FREE &&
       (PLAN_ACCESS_STATUSES as readonly string[]).includes(existing.status),
     );
+
+    const paymentMode = await PaymentModeService.getPaymentMode();
+    const existingIsManual = existing?.payment_method === 'MANUAL';
+
+    if (
+      paymentMode === 'MANUAL' &&
+      (!hasActivePaidSubscription || existingIsManual)
+    ) {
+      throw new BillingError(
+        'Os pagamentos Stripe estão atualmente desativados.',
+        'PAYMENT_MODE_STRIPE_DISABLED',
+      );
+    }
     const previousSubscriptionId = hasActivePaidSubscription
       ? (existing?.stripe_subscription_id ?? null)
       : null;
