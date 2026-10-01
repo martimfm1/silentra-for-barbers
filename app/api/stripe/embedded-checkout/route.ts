@@ -4,12 +4,18 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { getStripeClient } from '@/lib/stripe/server';
 import {
-  planForPrice,
   PLANS,
   NEW_MEMBER_PRO_PROMOTION_CODE,
 } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingError } from '@/types/stripe';
+import {
+  assertSameOrigin,
+  billingErrorResponse,
+  readJsonObject,
+} from '@/services/billing/http';
+import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
+import { StripePriceService } from '@/services/billing/stripe-price.service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -186,6 +192,8 @@ async function resolveNewMemberPromotionCodeId(): Promise<string> {
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -195,24 +203,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json().catch(() => ({}));
-    const priceId =
-      typeof body?.priceId === 'string' ? body.priceId.trim() : '';
-    if (!priceId)
+    const body = await readJsonObject(request);
+    const checkoutToken =
+      typeof body.checkoutToken === 'string' ? body.checkoutToken.trim() : '';
+    if (!checkoutToken) {
       throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
+        'O checkout não foi autorizado. Inicia novamente a partir dos planos.',
+        'CHECKOUT_INTENT_INVALID',
       );
+    }
 
-    const requestedPlan = planForPrice(priceId);
-    if (!requestedPlan || requestedPlan === PLANS.FREE) {
+    const intent = verifyCheckoutIntent(checkoutToken);
+    if (!intent || intent.sub !== user.id) {
       throw new BillingError(
-        'The requested price is not available.',
-        'INVALID_PRICE',
+        'O checkout expirou ou não pertence a esta conta. Inicia novamente a partir dos planos.',
+        'CHECKOUT_INTENT_INVALID',
       );
     }
 
     const tenant = await BarbershopStripeService.getTenantContext(user.id);
+    if (intent.barbershopId !== tenant.barbershopId) {
+      throw new BillingError(
+        'O checkout não pertence a esta barbearia.',
+        'CHECKOUT_INTENT_INVALID',
+      );
+    }
+
+    // Verification 2: resolve and validate the actual Stripe Price again on
+    // the server. A modified or stale signed intent can never select another
+    // arbitrary Stripe price.
+    const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
+      intent.plan,
+      intent.interval,
+    );
+    const priceId = verifiedPrice.id;
+    const requestedPlan = intent.plan;
     const existing = await BarbershopStripeService.reconcileSubscription(
       tenant.barbershopId,
       await BarbershopStripeService.getSubscriptionForBarbershop(
@@ -311,7 +336,7 @@ export async function POST(request: Request) {
         locale: 'pt',
       },
       {
-        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${priceId}:${previousSubscriptionId ?? 'new'}:${bucket}`,
+        idempotencyKey: `checkout-elements:${tenant.barbershopId}:${intent.jti}:${bucket}`,
       },
     );
 
@@ -337,6 +362,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const mapped = checkoutErrorResponse(error);
+    const billingResponse = billingErrorResponse(error);
 
     console.error('[STRIPE_CUSTOM_CHECKOUT_ERROR]', {
       name: error instanceof Error ? error.name : 'UnknownError',
@@ -347,10 +373,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: mapped,
+        error: mapped.message,
+        code: mapped.code,
       },
       {
-        status: mapped.status,
+        status: error instanceof BillingError ? billingResponse.status : mapped.status,
         headers: { 'Cache-Control': 'no-store' },
       },
     );
