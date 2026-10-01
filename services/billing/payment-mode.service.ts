@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { BillingError } from '@/types/stripe';
 
 export const PAYMENT_MODES = ['MANUAL', 'STRIPE'] as const;
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
@@ -47,5 +48,25 @@ export class PaymentModeService {
     if (error) throw error;
 
     return mode;
+  }
+}
+
+export async function assertStripeNewSubscriptionsEnabled(): Promise<void> {
+  const mode = await PaymentModeService.getPaymentMode();
+  if (mode !== 'STRIPE') {
+    throw new BillingError(
+      'Os pagamentos Stripe estão atualmente desativados.',
+      'PAYMENT_MODE_STRIPE_DISABLED',
+    );
+  }
+}
+
+export async function assertManualPaymentsEnabled(): Promise<void> {
+  const mode = await PaymentModeService.getPaymentMode();
+  if (mode !== 'MANUAL') {
+    throw new BillingError(
+      'Os pagamentos manuais estão atualmente desativados.',
+      'PAYMENT_MODE_MANUAL_DISABLED',
+    );
   }
 }
