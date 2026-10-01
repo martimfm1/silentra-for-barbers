@@ -127,7 +127,7 @@ export async function GET() {
     if (subscription?.stripe_subscription_id && !subscription.plan_override) {
       subscription = await BarbershopStripeService.reconcileSubscription(
         barbershopId,
-        subscription,
+        subscription: publicSubscription,
       );
     }
 
@@ -214,6 +214,10 @@ export async function GET() {
           : subscription
             ? resolvePlan(subscription)
             : PLANS.FREE;
+    const publicSubscription = subscription
+      ? { ...subscription, stripe_price_id: null }
+      : null;
+
     const planSource = hasActiveAssignment
       ? 'admin'
       : subscription?.plan_override && subscription.plan_override !== PLANS.FREE
