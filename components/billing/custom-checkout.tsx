@@ -54,19 +54,6 @@ function readBackendError(
   return { code: null, message: fallback };
 }
 
-function checkoutErrorTitle(code: string | null): string {
-  switch (code) {
-    case 'PROMOTION_NOT_ELIGIBLE':
-      return 'Oferta indisponível para esta conta';
-    case 'CHECKOUT_RESOURCE_MISSING':
-      return 'Configuração de pagamento indisponível';
-    case 'INVALID_PRICE':
-      return 'Plano indisponível';
-    default:
-      return 'Não foi possível iniciar o checkout';
-  }
-}
-
 const PLAN_COPY = {
   pro: {
     name: 'Barbers Pro',
