@@ -75,11 +75,9 @@ export async function assertStripeBillingAvailableForUser(
   userId: string,
 ): Promise<void> {
   const mode = await PaymentModeService.getPaymentMode();
-  if (mode === 'STRIPE') return;
-
   const { data, error } = await createAdminClient()
     .from('subscriptions')
-    .select('payment_method, stripe_subscription_id')
+    .select('payment_method, stripe_subscription_id, plan, status')
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -90,7 +88,21 @@ export async function assertStripeBillingAvailableForUser(
     );
   }
 
-  if (data?.payment_method === 'STRIPE' && data.stripe_subscription_id) return;
+  if (
+    data?.payment_method === 'MANUAL' &&
+    data.plan !== 'free' &&
+    ['active', 'trialing'].includes(data.status)
+  ) {
+    throw new BillingError(
+      'Esta subscrição é gerida manualmente e não pode ser migrada para a Stripe.',
+      'PAYMENT_MODE_STRIPE_DISABLED',
+    );
+  }
+
+  if (data?.payment_method === 'STRIPE' && data.stripe_subscription_id)
+    return;
+
+  if (mode === 'STRIPE') return;
 
   throw new BillingError(
     'Os pagamentos Stripe estão atualmente desativados.',
