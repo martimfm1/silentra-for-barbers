@@ -19,6 +19,7 @@ export interface SubscriptionRecord {
   cancel_at_period_end: boolean;
   canceled_at: string | null;
   canceled_by_user_id: string | null;
+  cancellation_requested_at: string | null;
   created_at: string;
   updated_at: string;
 }

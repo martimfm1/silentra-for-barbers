@@ -23,8 +23,10 @@ export interface SubscriptionData {
 
 export interface SubscriptionCancellation {
   canceledAt: string | null;
+  canceledByName: string | null;
   canceledByEmail: string | null;
   previousPlan: 'free' | 'pro' | 'enterprise' | null;
+  requestedAt: string | null;
 }
 
 interface SubscriptionQueryResult {

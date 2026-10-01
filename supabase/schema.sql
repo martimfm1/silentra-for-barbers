@@ -1658,6 +1658,9 @@ CREATE TABLE IF NOT EXISTS "public"."subscriptions" (
     "trial_end" timestamp with time zone,
     "current_period_end" timestamp with time zone,
     "cancel_at_period_end" boolean DEFAULT false NOT NULL,
+    "canceled_at" timestamp with time zone,
+    "canceled_by_user_id" "uuid",
+    "cancellation_requested_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "plan_override" "text",
@@ -1709,6 +1712,18 @@ COMMENT ON COLUMN "public"."subscriptions"."current_period_end" IS 'UTC timestam
 
 
 COMMENT ON COLUMN "public"."subscriptions"."cancel_at_period_end" IS 'True if the subscription will cancel at current_period_end.';
+
+
+
+COMMENT ON COLUMN "public"."subscriptions"."canceled_at" IS 'UTC timestamp when Stripe marked the subscription as canceled.';
+
+
+
+COMMENT ON COLUMN "public"."subscriptions"."canceled_by_user_id" IS 'User who requested the cancellation when it was initiated from the application.';
+
+
+
+COMMENT ON COLUMN "public"."subscriptions"."cancellation_requested_at" IS 'UTC timestamp when cancellation was requested by a user.';
 
 
 

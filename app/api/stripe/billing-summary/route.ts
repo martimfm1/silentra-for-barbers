@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getStripeClient } from '@/lib/stripe/server';
 import { PLANS, planForPrice } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
+import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +64,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, canceled_at, canceled_by_user_id, cancellation_requested_at, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -113,7 +113,18 @@ export async function GET() {
       );
     }
 
-    const subscription = subscriptionResult.data as SubscriptionRecord | null;
+    let subscription = subscriptionResult.data as SubscriptionRecord | null;
+
+    // Stripe is the billing source of truth. Reconcile on every billing-page
+    // read so a missed/delayed webhook cannot leave the dashboard showing
+    // "cancelamento agendado" after Stripe has already canceled the subscription.
+    if (subscription?.stripe_subscription_id && !subscription.plan_override) {
+      subscription = await BarbershopStripeService.reconcileSubscription(
+        barbershopId,
+        subscription,
+      );
+    }
+
     const assignment = assignmentResult.data;
     const hasActiveAssignment = Boolean(
       assignment &&
@@ -123,47 +134,43 @@ export async function GET() {
 
     let cancellation: {
       canceledAt: string | null;
+      canceledByName: string | null;
       canceledByEmail: string | null;
       previousPlan: BillingPlan | null;
+      requestedAt: string | null;
     } | null = null;
 
     if (subscription?.status === 'canceled') {
-      let canceledAt = subscription.updated_at ?? null;
-      let canceledByEmail = userRow?.email ?? null;
-      let previousPlan = planForPrice(subscription.stripe_price_id ?? '');
+      let canceledByName: string | null = null;
+      let canceledByEmail: string | null = null;
 
-      if (subscription.stripe_subscription_id) {
-        try {
-          const remote = await getStripeClient().subscriptions.retrieve(
-            subscription.stripe_subscription_id,
-          );
-          canceledAt = remote.canceled_at
-            ? new Date(remote.canceled_at * 1000).toISOString()
-            : canceledAt;
-          previousPlan =
-            planForPrice(remote.items.data[0]?.price.id ?? '') ?? previousPlan;
+      const canceledByUserId =
+        subscription.canceled_by_user_id ?? subscription.user_id;
 
-          const canceledByUserId = remote.metadata?.user_id?.trim();
-          if (canceledByUserId) {
-            const { data: canceledByUser } = await database
-              .from('users')
-              .select('email')
-              .eq('id', canceledByUserId)
-              .maybeSingle();
-            canceledByEmail = canceledByUser?.email ?? canceledByEmail;
-          }
-        } catch (error) {
-          console.error(
-            '[BILLING_SUMMARY_CANCELLATION_SYNC_ERROR]',
-            error instanceof Error ? error.name : 'UNKNOWN',
-          );
+      if (canceledByUserId) {
+        const { data: canceledByUser } = await database
+          .from('users')
+          .select('name_complete, name, email')
+          .eq('id', canceledByUserId)
+          .maybeSingle();
+        if (canceledByUser) {
+          canceledByName =
+            canceledByUser.name_complete?.trim() ||
+            canceledByUser.name?.trim() ||
+            null;
+          canceledByEmail = canceledByUser.email ?? null;
         }
       }
 
       cancellation = {
-        canceledAt,
+        canceledAt:
+          subscription.canceled_at ?? subscription.cancellation_requested_at,
+        canceledByName,
         canceledByEmail,
-        previousPlan: previousPlan ?? null,
+        previousPlan:
+          planForPrice(subscription.stripe_price_id ?? '') ??
+          (subscription.plan === PLANS.FREE ? null : subscription.plan),
+        requestedAt: subscription.cancellation_requested_at,
       };
     }
 
