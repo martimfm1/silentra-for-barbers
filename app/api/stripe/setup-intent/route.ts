@@ -13,6 +13,9 @@ export async function POST() {
     } = await (await createClient()).auth.getUser();
     if (error || !user?.email)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    await assertStripeBillingAvailableForUser(user.id);
+    return NextResponse.json(
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     return NextResponse.json({
       clientSecret: await BillingService.createSetupIntent(user.id, user.email),
     });
