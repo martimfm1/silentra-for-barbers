@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle2,
+  CreditCard,
   ChevronRight,
   Clock3,
   Copy,
@@ -52,10 +53,53 @@ const tabs = [
   { id: 'overview', label: 'Overview', icon: Gauge },
   { id: 'shops', label: 'Barbearias', icon: Building2 },
   { id: 'plans', label: 'Planos', icon: KeyRound },
+  { id: 'payments', label: 'Pagamentos', icon: CreditCard },
+  { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
 ] as const;
 
 type Tab = (typeof tabs)[number]['id'];
+
+type PaymentMode = 'MANUAL' | 'STRIPE';
+
+type ManualRequest = {
+  id: string;
+  user_id: string;
+  barbershop_id: string;
+  subscription_id: string | null;
+  request_type: 'NEW' | 'RENEWAL' | 'CHANGE';
+  plan: 'pro' | 'enterprise';
+  billing_interval: 'month' | 'year';
+  status:
+    | 'PENDING'
+    | 'PAYMENT_SENT'
+    | 'PAID'
+    | 'REJECTED'
+    | 'EXPIRED'
+    | 'CANCELLED';
+  payment_method: 'MANUAL';
+  price: number;
+  currency: string;
+  payment_link: string | null;
+  payment_sent_at: string | null;
+  paid_at: string | null;
+  processed_at: string | null;
+  started_at: string | null;
+  expires_at: string | null;
+  last_email_error: string | null;
+  created_at: string;
+  updated_at: string;
+  customer: { id: string; name_complete: string | null; email: string | null } | null;
+  barbershop: { id: string; name: string } | null;
+};
+
+function formatMoney(value: number, currency = 'EUR') {
+  return new Intl.NumberFormat('pt-PT', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  }).format(value);
+}
 
 function formatDate(value: string | null) {
   if (!value) return '—';
@@ -123,6 +167,14 @@ export default function PlatformAdminConsole() {
     latencyMs: number;
     ok: boolean;
   } | null>(null);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('MANUAL');
+  const [paymentModeLoading, setPaymentModeLoading] = useState(true);
+  const [changingPaymentMode, setChangingPaymentMode] = useState(false);
+  const [manualRequests, setManualRequests] = useState<ManualRequest[]>([]);
+  const [manualRequestFilter, setManualRequestFilter] = useState<'ALL' | ManualRequest['status']>('ALL');
+  const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(null);
+  const [paymentLink, setPaymentLink] = useState('');
+  const [paymentAction, setPaymentAction] = useState(false);
 
   const load = useCallback(
     async (search = query) => {
@@ -150,7 +202,68 @@ export default function PlatformAdminConsole() {
 
   useEffect(() => {
     void load('');
+
+    const queryTab = new URLSearchParams(window.location.search).get('tab');
+    if (queryTab && tabs.some((item) => item.id === queryTab)) {
+      setTab(queryTab as Tab);
+    }
   }, [load]);
+
+  useEffect(() => {
+    const loadPaymentMode = async () => {
+      try {
+        setPaymentModeLoading(true);
+        const response = await fetch('/api/_silentra-admin/payment-mode', {
+          cache: 'no-store',
+        });
+        const payload = (await response.json()) as {
+          paymentMode?: PaymentMode;
+          error?: string;
+        };
+        if (!response.ok || (payload.paymentMode !== 'MANUAL' && payload.paymentMode !== 'STRIPE')) {
+          throw new Error(payload.error || 'Não foi possível carregar o método de pagamento.');
+        }
+        setPaymentMode(payload.paymentMode);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado.');
+      } finally {
+        setPaymentModeLoading(false);
+      }
+    };
+
+    const loadRequests = async () => {
+      try {
+        const query = manualRequestFilter === 'ALL'
+          ? ''
+          : `?status=${encodeURIComponent(manualRequestFilter)}`;
+        const response = await fetch(
+          `/api/_silentra-admin/subscription-requests${query}`,
+          { cache: 'no-store' },
+        );
+        const payload = (await response.json()) as {
+          requests?: ManualRequest[];
+          error?: string;
+        };
+        if (!response.ok || !Array.isArray(payload.requests)) {
+          throw new Error(
+            payload.error || 'Não foi possível carregar os pedidos de subscrição.',
+          );
+        }
+        setManualRequests(payload.requests);
+        setSelectedRequest((current) => {
+          if (!current) return null;
+          return (
+            payload.requests?.find((item) => item.id === current.id) ?? null
+          );
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado.');
+      }
+    };
+
+    void loadPaymentMode();
+    void loadRequests();
+  }, [manualRequestFilter]);
 
   const searchResults = useMemo(() => data?.recentShops ?? [], [data]);
 
@@ -205,6 +318,101 @@ export default function PlatformAdminConsole() {
       setError(err instanceof Error ? err.message : 'Erro inesperado.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const changePaymentMode = async (nextMode: PaymentMode) => {
+    if (nextMode === paymentMode || changingPaymentMode) return;
+
+    const confirmed = window.confirm(
+      nextMode === 'STRIPE'
+        ? 'Tens a certeza que queres ativar os pagamentos Stripe? As novas subscrições utilizarão o Stripe. Subscrições existentes não serão migradas.'
+        : 'Tens a certeza que queres ativar os pagamentos manuais? As novas subscrições utilizarão o fluxo manual. Subscrições Stripe existentes não serão migradas.',
+    );
+    if (!confirmed) return;
+
+    try {
+      setChangingPaymentMode(true);
+      const response = await fetch('/api/_silentra-admin/payment-mode', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentMode: nextMode }),
+      });
+      const payload = (await response.json()) as {
+        paymentMode?: PaymentMode;
+        error?: string;
+      };
+      if (!response.ok || !payload.paymentMode)
+        throw new Error(payload.error || 'Não foi possível alterar o método de pagamento.');
+
+      setPaymentMode(payload.paymentMode);
+      setMessage(
+        payload.paymentMode === 'STRIPE'
+          ? 'Pagamentos Stripe ativados para novas subscrições.'
+          : 'Pagamentos manuais ativados para novas subscrições.',
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado.');
+    } finally {
+      setChangingPaymentMode(false);
+    }
+  };
+
+  const runManualRequestAction = async (
+    request: ManualRequest,
+    action: 'send_payment' | 'resend_payment' | 'confirm_payment' | 'reject',
+  ) => {
+    try {
+      setPaymentAction(true);
+      setError(null);
+      const response = await fetch(
+        `/api/_silentra-admin/subscription-requests/${encodeURIComponent(request.id)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action,
+            ...(action === 'send_payment' || action === 'resend_payment'
+              ? { paymentLink }
+              : {}),
+          }),
+        },
+      );
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!response.ok || !payload.ok)
+        throw new Error(payload.error || 'Não foi possível atualizar o pedido.');
+
+      setMessage(
+        action === 'confirm_payment'
+          ? 'Pagamento confirmado e subscrição ativada.'
+          : action === 'reject'
+            ? 'Pedido rejeitado.'
+            : action === 'resend_payment'
+              ? 'Pagamento reenviado.'
+              : 'Instruções de pagamento enviadas.',
+      );
+
+      const refresh = await fetch(
+        `/api/_silentra-admin/subscription-requests${manualRequestFilter === 'ALL' ? '' : `?status=${encodeURIComponent(manualRequestFilter)}`}`,
+        { cache: 'no-store' },
+      );
+      const refreshed = (await refresh.json()) as {
+        requests?: ManualRequest[];
+      };
+      const nextRequests = Array.isArray(refreshed.requests)
+        ? refreshed.requests
+        : [];
+      setManualRequests(nextRequests);
+      const nextSelected = nextRequests.find((item) => item.id === request.id) ?? null;
+      setSelectedRequest(nextSelected);
+      setPaymentLink(nextSelected?.payment_link ?? '');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado.');
+    } finally {
+      setPaymentAction(false);
     }
   };
 
