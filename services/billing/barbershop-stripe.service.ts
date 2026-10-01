@@ -33,6 +33,17 @@ function stripeCustomerId(
   return typeof customer === 'string' ? customer : customer.id;
 }
 
+function subscriptionMetadata(
+  subscription: Stripe.Subscription,
+): Record<string, string> {
+  const metadata = subscription.metadata ?? {};
+  return Object.fromEntries(
+    Object.entries(metadata).filter(
+      ([, value]) => typeof value === 'string',
+    ),
+  );
+}
+
 function subscriptionPeriodEnd(
   subscription: Stripe.Subscription,
 ): number | null {
@@ -268,20 +279,7 @@ export class BarbershopStripeService {
           ? new Date(periodEnd * 1000).toISOString()
           : subscription.current_period_end,
         cancel_at_period_end: remote.cancel_at_period_end,
-        canceled_at: isCanceled
-          ? remote.canceled_at
-            ? new Date(remote.canceled_at * 1000).toISOString()
-            : subscription.canceled_at
-          : null,
-        canceled_by_user_id:
-          isCanceled || cancellationIsScheduled
-            ? subscription.canceled_by_user_id ??
-              (isCanceled ? remote.metadata?.user_id ?? null : null)
-            : null,
-        cancellation_requested_at:
-          isCanceled || cancellationIsScheduled
-            ? subscription.cancellation_requested_at
-            : null,
+
       };
 
       const changed =
@@ -291,11 +289,7 @@ export class BarbershopStripeService {
         subscription.stripe_customer_id !== updates.stripe_customer_id ||
         subscription.trial_end !== updates.trial_end ||
         subscription.current_period_end !== updates.current_period_end ||
-        subscription.cancel_at_period_end !== updates.cancel_at_period_end ||
-        subscription.canceled_at !== updates.canceled_at ||
-        subscription.canceled_by_user_id !== updates.canceled_by_user_id ||
-        subscription.cancellation_requested_at !==
-          updates.cancellation_requested_at;
+        subscription.cancel_at_period_end !== updates.cancel_at_period_end;
       if (changed) {
         const { error } = await createAdminClient()
           .from('subscriptions')
@@ -316,10 +310,6 @@ export class BarbershopStripeService {
           plan: PLANS.FREE,
           status: 'canceled',
           cancel_at_period_end: false,
-          canceled_at:
-            subscription.canceled_at ?? new Date().toISOString(),
-          canceled_by_user_id: subscription.canceled_by_user_id,
-          cancellation_requested_at: subscription.cancellation_requested_at,
         })
         .eq('id', subscription.id);
       if (updateError)
@@ -499,12 +489,20 @@ export class BarbershopStripeService {
     const cancellationRequestedAt = new Date().toISOString();
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
-      { cancel_at_period_end: true },
+      {
+        cancel_at_period_end: true,
+        metadata: {
+          ...subscriptionMetadata(subscription),
+          cancellation_requested_by_user_id: userId,
+          cancellation_requested_at: cancellationRequestedAt,
+        },
+      },
     );
-    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated, {
-      cancellationActorUserId: userId,
-      cancellationRequestedAt,
-    });
+    await this.syncFromStripe(
+      tenant.barbershopId,
+      tenant.userId,
+      updated,
+    );
   }
 
   static async resume(userId: string): Promise<void> {
@@ -526,9 +524,11 @@ export class BarbershopStripeService {
       { cancel_at_period_end: false },
     );
 
-    await this.syncFromStripe(tenant.barbershopId, tenant.userId, updated, {
-      clearCancellationMetadata: true,
-    });
+    await this.syncFromStripe(
+      tenant.barbershopId,
+      tenant.userId,
+      updated,
+    );
   }
 
   static async getInvoices(userId: string) {
@@ -567,11 +567,7 @@ export class BarbershopStripeService {
     barbershopId: string,
     ownerUserId: string,
     subscription: Stripe.Subscription,
-    options?: {
-      cancellationActorUserId?: string | null;
-      cancellationRequestedAt?: string | null;
-      clearCancellationMetadata?: boolean;
-    },
+
   ): Promise<void> {
     const customer = stripeCustomerId(subscription.customer);
     const priceId = subscription.items.data[0]?.price.id;
@@ -698,24 +694,6 @@ export class BarbershopStripeService {
       }
     }
 
-    const isCanceled = subscription.status === 'canceled';
-    const cancellationIsScheduled =
-      subscription.cancel_at_period_end && !isCanceled;
-    const cancellationActor = options?.clearCancellationMetadata
-      ? null
-      : isCanceled || cancellationIsScheduled
-        ? options?.cancellationActorUserId ??
-          existing?.canceled_by_user_id ??
-          (isCanceled ? subscription.metadata?.user_id ?? null : null)
-        : null;
-    const cancellationRequestedAt = options?.clearCancellationMetadata
-      ? null
-      : isCanceled || cancellationIsScheduled
-        ? options?.cancellationRequestedAt ??
-          existing?.cancellation_requested_at ??
-          null
-        : null;
-
     const payload = {
       user_id: ownerUserId,
       barbershop_id: barbershopId,
@@ -729,12 +707,6 @@ export class BarbershopStripeService {
         : null,
       current_period_end: new Date(periodEnd * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
-      canceled_at:
-        isCanceled && subscription.canceled_at
-          ? new Date(subscription.canceled_at * 1000).toISOString()
-          : null,
-      canceled_by_user_id: cancellationActor,
-      cancellation_requested_at: cancellationRequestedAt,
       updated_at: new Date().toISOString(),
     };
 
