@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
-import { billingErrorResponse } from '@/services/billing/http';
+import { billingErrorResponse, assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 
 export async function POST() {
   try {
+    assertSameOrigin(request);
+
     const {
       data: { user },
       error,
