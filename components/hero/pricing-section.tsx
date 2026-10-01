@@ -17,9 +17,10 @@ import {
 import { PLAN_DESCRIPTIONS } from '@/lib/billing/plan-features';
 
 type BillingPrice = {
-  id: string;
   plan: 'pro' | 'enterprise' | null;
   interval: 'month' | 'year' | null;
+  unitAmount?: number;
+  currency?: string;
 };
 
 const HERO_FEATURES = {
@@ -51,6 +52,10 @@ export function PricingSection({
   showDecisionHeader?: boolean;
 }) {
   const [prices, setPrices] = useState<BillingPrice[]>([]);
+  const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
+  const [billingInterval, setBillingInterval] = useState<'month' | 'year'>(
+    'month',
+  );
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricesError, setPricesError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -68,18 +73,21 @@ export function PricingSection({
         });
         const body = (await response.json().catch(() => ({}))) as {
           data?: BillingPrice[];
+          mode?: 'MANUAL' | 'STRIPE';
         };
         if (!response.ok || !Array.isArray(body.data)) {
           throw new Error('PRICES_UNAVAILABLE');
         }
-        if (!cancelled) setPrices(body.data);
+        if (!cancelled) {
+          setPrices(body.data);
+          setPaymentMode(body.mode === 'STRIPE' ? 'STRIPE' : 'MANUAL');
+        }
       } catch (error) {
         if (cancelled) return;
         console.error(
           '[PRICING_SECTION_LOAD_ERROR]',
           error instanceof Error ? error.name : 'UNKNOWN',
         );
-        setPrices([]);
         setPricesError(true);
       } finally {
         if (!cancelled) setLoadingPrices(false);
@@ -92,15 +100,69 @@ export function PricingSection({
     };
   }, [retryKey]);
 
-  const proPriceId = prices.find(
-    (price) => price.plan === 'pro' && price.interval === 'month',
-  )?.id;
-  const enterprisePriceId = prices.find(
-    (price) => price.plan === 'enterprise' && price.interval === 'month',
-  )?.id;
+  const formatPrice = (plan: 'pro' | 'enterprise') => {
+    const amount = prices.find(
+      (price) => price.plan === plan && price.interval === billingInterval,
+    )?.unitAmount;
+
+    if (typeof amount !== 'number') {
+      return plan === 'pro' ? '9,90 €' : '29,90 €';
+    }
+
+    return new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount / 100);
+  };
+
+  const annualAvailable =
+    prices.some(
+      (price) => price.plan === 'pro' && price.interval === 'year',
+    ) &&
+    prices.some(
+      (price) => price.plan === 'enterprise' && price.interval === 'year',
+    );
 
   return (
     <section id="precos" className="space-y-8">
+      {!loadingPrices && !pricesError && (
+        <div className="flex justify-start sm:justify-end">
+          <div
+            className="inline-flex rounded-xl border border-white/10 bg-white/[0.025] p-1"
+            role="group"
+            aria-label="Período de faturação"
+          >
+            <button
+              type="button"
+              onClick={() => setBillingInterval('month')}
+              aria-pressed={billingInterval === 'month'}
+              className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition ${
+                billingInterval === 'month'
+                  ? 'bg-white text-zinc-950'
+                  : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              disabled={!annualAvailable}
+              onClick={() => setBillingInterval('year')}
+              aria-pressed={billingInterval === 'year'}
+              className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition ${
+                billingInterval === 'year'
+                  ? 'bg-white text-zinc-950'
+                  : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
+              } disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              Anual
+            </button>
+          </div>
+        </div>
+      )}
+
       {showDecisionHeader ? (
         <>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -110,12 +172,14 @@ export function PricingSection({
                 e checkout
               </div>
               <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-zinc-50 sm:text-4xl lg:text-5xl">
-                Escolhe o plano. O próximo passo é sempre o checkout.
+                Escolhe o plano. O próximo passo é{' '}
+                {paymentMode === 'MANUAL' ? 'o pedido de subscrição.' : 'o checkout.'}
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-                Compara o essencial, escolhe a fase certa da tua barbearia e
-                continua sem saltos de página desnecessários. O pagamento
-                acontece na experiência de checkout da Silentra.
+                Compara o essencial e escolhe a fase certa da tua barbearia.{' '}
+                {paymentMode === 'MANUAL'
+                  ? 'O pedido é registado e a equipa envia-te as instruções de pagamento.'
+                  : 'O pagamento acontece na experiência de checkout da Silentra.'}
               </p>
             </div>
             <Link
@@ -134,8 +198,10 @@ export function PricingSection({
               ['01', 'Escolhe', 'Compara os planos e encontra o nível certo.'],
               [
                 '02',
-                'Checkout',
-                'Revê os dados e conclui o pagamento dentro da Silentra.',
+                paymentMode === 'MANUAL' ? 'Pedido' : 'Checkout',
+                paymentMode === 'MANUAL'
+                  ? 'Regista o pedido e aguarda as instruções de pagamento.'
+                  : 'Revê os dados e conclui o pagamento dentro da Silentra.',
               ],
               [
                 '03',
@@ -205,21 +271,25 @@ export function PricingSection({
           />
           <PricingCard
             destination={destination}
+            billingInterval={billingInterval}
             tier="pro"
             title="Barbers Pro"
-            price="9,90 €"
-            priceId={proPriceId}
+            price={formatPrice('pro')}
             description={PLAN_DESCRIPTIONS.pro}
             features={HERO_FEATURES.pro}
             popular
-            trialDays={30}
+            trialDays={
+              paymentMode === 'STRIPE' && billingInterval === 'month'
+                ? 30
+                : undefined
+            }
           />
           <PricingCard
             destination={destination}
+            billingInterval={billingInterval}
             tier="enterprise"
             title="Barbers Enterprise"
-            price="29,99 €"
-            priceId={enterprisePriceId}
+            price={formatPrice('enterprise')}
             description={PLAN_DESCRIPTIONS.enterprise}
             features={HERO_FEATURES.enterprise}
           />
@@ -237,11 +307,15 @@ export function PricingSection({
         </div>
         <div className="glassmorphism rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.045] p-5">
           <p className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
-            <Check className="size-4 text-emerald-300" /> Oferta Pro para
-            elegíveis
+            <Check className="size-4 text-emerald-300" />{' '}
+            {paymentMode === 'MANUAL'
+              ? 'Pagamento manual'
+              : 'Oferta Pro para elegíveis'}
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            A oferta aplicável é validada no fluxo de checkout.
+            {paymentMode === 'MANUAL'
+              ? 'Recebe as instruções de pagamento depois de o pedido ser processado.'
+              : 'A oferta aplicável é validada no fluxo de checkout.'}
           </p>
         </div>
         <div className="glassmorphism rounded-2xl border border-white/10 bg-white/[0.025] p-5">
@@ -250,7 +324,9 @@ export function PricingSection({
             transparente
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            A subscrição pertence à barbearia e é processada pela Stripe.
+            {paymentMode === 'MANUAL'
+              ? 'O pedido fica associado à tua barbearia e o método é registado como manual.'
+              : 'A subscrição pertence à barbearia e é processada pela Stripe.'}
           </p>
         </div>
       </div>

@@ -5,6 +5,8 @@ import { getStripeClient } from '@/lib/stripe/server';
 import { PLANS, planForPrice } from '@/lib/stripe/constants';
 import { resolvePlan } from '@/lib/billing/plan-access';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
+import { PaymentModeService } from '@/services/billing/payment-mode.service';
+import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +25,7 @@ export async function GET() {
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
 
+    const paymentMode = await PaymentModeService.getPaymentMode();
     const database = createAdminClient();
     const { data: userRow, error: userError } = await database
       .from('users')
@@ -52,6 +55,8 @@ export async function GET() {
           isBillingOwner: false,
           barbershopId: null,
           barbershopName: null,
+          paymentMode,
+          manualRequest: null,
         },
         {
           headers: {
@@ -65,7 +70,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, payment_method, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -116,10 +121,13 @@ export async function GET() {
 
     let subscription = subscriptionResult.data as SubscriptionRecord | null;
 
-    // Stripe is the billing source of truth. Reconcile on every billing-page
-    // read so a missed/delayed webhook cannot leave the dashboard showing
-    // "cancelamento agendado" after Stripe has already canceled the subscription.
-    if (subscription?.stripe_subscription_id && !subscription.plan_override) {
+    // Only Stripe-owned subscriptions are reconciled against Stripe.
+    // Manual subscriptions remain completely independent of the Stripe API.
+    if (
+      subscription?.payment_method !== 'MANUAL' &&
+      subscription?.stripe_subscription_id &&
+      !subscription.plan_override
+    ) {
       subscription = await BarbershopStripeService.reconcileSubscription(
         barbershopId,
         subscription,
@@ -141,7 +149,10 @@ export async function GET() {
       requestedAt: string | null;
     } | null = null;
 
-    if (subscription?.status === 'canceled') {
+    if (
+      subscription?.status === 'canceled' &&
+      subscription.payment_method !== 'MANUAL'
+    ) {
       try {
         const stripe = getStripeClient();
         const remote = subscription.stripe_subscription_id
@@ -196,6 +207,11 @@ export async function GET() {
       }
     }
 
+    const manualRequest =
+      subscription?.payment_method === 'MANUAL' || paymentMode === 'MANUAL'
+        ? await ManualPaymentService.getRequestForUser(user.id)
+        : null;
+
     const plan: BillingPlan =
       hasActiveAssignment && assignment
         ? (assignment.plan as BillingPlan)
@@ -209,9 +225,11 @@ export async function GET() {
       ? 'admin'
       : subscription?.plan_override && subscription.plan_override !== PLANS.FREE
         ? 'subscription_override'
-        : subscription?.stripe_subscription_id && plan !== PLANS.FREE
-          ? 'stripe'
-          : 'free';
+        : subscription?.payment_method === 'MANUAL'
+          ? 'manual'
+          : subscription?.stripe_subscription_id && plan !== PLANS.FREE
+            ? 'stripe'
+            : 'free';
 
     return NextResponse.json(
       {
@@ -223,6 +241,8 @@ export async function GET() {
         isBillingOwner: String(userRow?.role ?? '').toLowerCase() === 'owner',
         barbershopId,
         barbershopName: barbershopResult.data?.name ?? null,
+        paymentMode,
+        manualRequest,
       },
       {
         headers: {

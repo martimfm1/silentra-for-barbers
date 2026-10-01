@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/automations",
       "schedule": "20 0 * * *"
+    },
+    {
+      "path": "/api/cron/manual-subscriptions",
+      "schedule": "30 0 * * *"
     }
   ],
   "git": {

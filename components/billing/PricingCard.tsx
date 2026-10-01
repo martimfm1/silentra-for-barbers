@@ -11,6 +11,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -28,12 +29,12 @@ export interface PricingCardProps {
   tier: PlanTier;
   title: string;
   price: string;
-  priceId?: string;
   description: string;
   features: readonly string[];
   popular?: boolean;
   trialDays?: number;
   destination?: PricingDestination;
+  billingInterval?: 'month' | 'year';
 }
 
 const PLAN_RANK: Record<PlanTier, number> = { free: 0, pro: 1, enterprise: 2 };
@@ -47,12 +48,12 @@ export function PricingCard({
   tier,
   title,
   price,
-  priceId,
   description,
   features,
   popular = false,
   trialDays,
   destination = 'checkout',
+  billingInterval = 'month',
 }: PricingCardProps) {
   const isMounted = useSyncExternalStore(
     () => () => undefined,
@@ -67,6 +68,7 @@ export function PricingCard({
   } = useSubscription();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const { checkout: beginCheckout, loading: checkoutLoading } = useCheckout();
   const isCurrentPlan = useMemo(
     () => isAuthenticated && currentPlan === tier,
     [currentPlan, isAuthenticated, tier],
@@ -111,14 +113,12 @@ export function PricingCard({
         setConfirmationOpen(true);
         return;
       }
-      if (!priceId) {
-        toast.error('Este plano ainda não está disponível para checkout.');
-        return;
-      }
+      if (tier === 'free') return;
 
-      window.location.assign(
-        `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${tier}`,
-      );
+      await beginCheckout({
+        plan: tier,
+        interval: billingInterval,
+      });
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -128,22 +128,28 @@ export function PricingCard({
     }
   };
 
-  const confirmPlanChange = () => {
+  const confirmPlanChange = async () => {
     if (isDowngradeToFree) {
       toast.error(
-        'A mudança para o plano Free não utiliza o checkout Stripe porque não existe uma subscrição paga para iniciar.',
+        'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
       );
-      return;
-    }
-    if (!priceId) {
-      toast.error('Este plano ainda não está disponível para checkout.');
       return;
     }
     setIsChangingPlan(true);
     setConfirmationOpen(false);
-    window.location.assign(
-      `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${tier}&change=1`,
-    );
+    try {
+      await beginCheckout({
+        plan: tier as 'pro' | 'enterprise',
+        interval: billingInterval,
+      });
+    } catch (error) {
+      setIsChangingPlan(false);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar a alteração da subscrição.',
+      );
+    }
   };
 
   const buttonConfig = useMemo(() => {
@@ -192,12 +198,6 @@ export function PricingCard({
         disabled: false,
         variant: 'outline' as const,
       };
-    if (!priceId)
-      return {
-        label: 'Indisponível',
-        disabled: true,
-        variant: 'outline' as const,
-      };
     return {
       label: isUpgrade ? 'Fazer upgrade' : 'Mudar para este plano',
       disabled: false,
@@ -212,8 +212,9 @@ export function PricingCard({
     isMounted,
     isUpgrade,
     popular,
-    priceId,
     tier,
+    checkoutLoading,
+    billingInterval,
   ]);
 
   const isActivePaidPlan =
@@ -224,7 +225,8 @@ export function PricingCard({
   const confirmationTitle = isDowngrade
     ? 'Confirmar mudança para um plano inferior'
     : 'Confirmar upgrade';
-  const confirmationDescription = `Depois da confirmação vais para o checkout Stripe para concluir a nova subscrição. A subscrição atual só será cancelada depois de o novo checkout ficar concluído.`;
+  const confirmationDescription =
+    'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
 
   return (
     <>
@@ -271,7 +273,9 @@ export function PricingCard({
               {price}
             </span>
             {tier !== 'free' && (
-              <span className="text-xs text-zinc-500">/mês</span>
+              <span className="text-xs text-zinc-500">
+                {billingInterval === 'year' ? '/ano' : '/mês'}
+              </span>
             )}
           </div>
           {tier === 'pro' && trialDays ? (
@@ -318,10 +322,10 @@ export function PricingCard({
           <button
             type="button"
             onClick={handleAction}
-            disabled={buttonConfig.disabled || loading || isChangingPlan}
+            disabled={buttonConfig.disabled || loading || isChangingPlan || checkoutLoading}
             className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${buttonConfig.variant === 'primary' ? 'bg-emerald-400 text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.18)] hover:bg-emerald-300 hover:shadow-[0_10px_30px_rgba(52,211,153,0.24)]' : buttonConfig.variant === 'secondary' ? 'border border-white/10 bg-white/5 text-zinc-400' : 'border border-white/15 bg-white/[0.04] text-zinc-100 hover:border-white/25 hover:bg-white/[0.08]'}`}
           >
-            {loading || isChangingPlan ? (
+            {loading || isChangingPlan || checkoutLoading ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
@@ -332,8 +336,9 @@ export function PricingCard({
           </button>
           {tier === 'pro' && !isCurrentPlan ? (
             <p className="mt-2 text-center text-[11px] text-zinc-600">
-              1 mês grátis para novos utilizadores elegíveis com TRIALPRO.
-              Depois aplica-se o preço normal.
+              {trialDays
+                ? '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.'
+                : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.'}
             </p>
           ) : null}
         </div>

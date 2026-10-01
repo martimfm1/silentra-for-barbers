@@ -246,6 +246,7 @@ export class BarbershopStripeService {
     subscription: SubscriptionRecord | null,
   ): Promise<SubscriptionRecord | null> {
     if (
+      subscription?.payment_method === 'MANUAL' ||
       !subscription?.stripe_subscription_id ||
       (subscription.plan_override && subscription.plan_override !== PLANS.FREE)
     )
@@ -487,12 +488,15 @@ export class BarbershopStripeService {
       );
 
     const cancellationRequestedAt = new Date().toISOString();
+    const stripeSubscription = await getStripeClient().subscriptions.retrieve(
+      subscription.stripe_subscription_id,
+    );
     const updated = await getStripeClient().subscriptions.update(
       subscription.stripe_subscription_id,
       {
         cancel_at_period_end: true,
         metadata: {
-          ...subscriptionMetadata(subscription),
+          ...subscriptionMetadata(stripeSubscription),
           cancellation_requested_by_user_id: userId,
           cancellation_requested_at: cancellationRequestedAt,
         },
@@ -670,6 +674,17 @@ export class BarbershopStripeService {
 
     const existing = await this.getSubscriptionForBarbershop(barbershopId);
 
+    if (
+      existing?.payment_method === 'MANUAL' &&
+      existing.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(existing.status)
+    ) {
+      throw new BillingError(
+        'A subscrição manual ativa não pode ser migrada automaticamente para Stripe.',
+        'SUBSCRIPTION_NOT_ACTIVE',
+      );
+    }
+
     // A plan change can briefly have two Stripe subscriptions for the same
     // customer. Ignore an older subscription's webhook if the database already
     // points at a newer/current subscription so a delayed delete/update event
@@ -707,6 +722,7 @@ export class BarbershopStripeService {
         : null,
       current_period_end: new Date(periodEnd * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
+      payment_method: 'STRIPE',
       updated_at: new Date().toISOString(),
     };
 
