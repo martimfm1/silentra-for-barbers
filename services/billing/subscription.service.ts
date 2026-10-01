@@ -288,6 +288,18 @@ export class SubscriptionService {
 
   static async getAccessPlan(userId: string): Promise<BillingPlan> {
     const barbershopId = await this.getBarbershopIdForUser(userId);
+
+    const current = await this.getForUser(userId);
+    if (
+      current?.payment_method === 'MANUAL' &&
+      current.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(current.status)
+    ) {
+      throw new BillingError(
+        'A subscrição manual ativa não pode ser migrada automaticamente para Stripe.',
+        'SUBSCRIPTION_NOT_ACTIVE',
+      );
+    }
     if (!barbershopId) return PLANS.FREE;
     return this.getAccessPlanForBarbershop(barbershopId);
   }
