@@ -176,7 +176,7 @@ types/                       # tipos partilhados
 ### Requisitos
 
 - Node.js 22.
-- pnpm 10.
+- pnpm 11.28.2.
 - Conta Supabase para database e autenticação.
 - Stripe para testar billing.
 - Brevo para testar email.
