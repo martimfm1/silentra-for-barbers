@@ -10,3 +10,5 @@ allowBuilds:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+overrides:
+  browserslist: '>=4.28.7'
