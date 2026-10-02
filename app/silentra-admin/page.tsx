@@ -11,9 +11,38 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function SilentraAdminPage() {
+export default async function SilentraAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const context = await getPlatformAdminContext();
-  if (!context) notFound();
+  if (!context) {
+    const params = await searchParams;
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (typeof value === 'string') query.set(key, value);
+    }
+    const nextPath = query.toString()
+      ? `/_silentra-admin?${query.toString()}`
+      : '/_silentra-admin';
+
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      const loginQuery = new URLSearchParams({
+        redirect: nextPath,
+      });
+      const { redirect } = await import('next/navigation');
+      redirect(`/login?${loginQuery.toString()}`);
+    }
+
+    notFound();
+  }
 
   return (
     <div className="relative">
