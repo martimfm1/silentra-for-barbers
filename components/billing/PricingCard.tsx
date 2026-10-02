@@ -45,7 +45,6 @@ const PLAN_NAMES: Record<PlanTier, string> = {
 };
 
 export function PricingCard({
-  const router = useRouter();
   tier,
   title,
   price,
@@ -56,6 +55,7 @@ export function PricingCard({
   destination = 'checkout',
   billingInterval = 'month',
 }: PricingCardProps) {
+  const router = useRouter();
   const isMounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
