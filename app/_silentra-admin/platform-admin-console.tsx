@@ -182,7 +182,7 @@ export default function PlatformAdminConsole() {
       setError(null);
       try {
         const response = await fetch(
-          `/api/_silentra-admin/overview?q=${encodeURIComponent(search)}`,
+          `/api/silentra-admin/overview?q=${encodeURIComponent(search)}`,
           { cache: 'no-store' },
         );
         const payload = (await response.json()) as Overview & ApiResponse;
@@ -213,7 +213,7 @@ export default function PlatformAdminConsole() {
     const loadPaymentMode = async () => {
       try {
         setPaymentModeLoading(true);
-        const response = await fetch('/api/_silentra-admin/payment-mode', {
+        const response = await fetch('/api/silentra-admin/payment-mode', {
           cache: 'no-store',
         });
         const payload = (await response.json()) as {
@@ -237,7 +237,7 @@ export default function PlatformAdminConsole() {
           ? ''
           : `?status=${encodeURIComponent(manualRequestFilter)}`;
         const response = await fetch(
-          `/api/_silentra-admin/subscription-requests${query}`,
+          `/api/silentra-admin/subscription-requests${query}`,
           { cache: 'no-store' },
         );
         const payload = (await response.json()) as {
@@ -280,7 +280,7 @@ export default function PlatformAdminConsole() {
     setMessage(null);
     setError(null);
     try {
-      const response = await fetch('/api/_silentra-admin/plan', {
+      const response = await fetch('/api/silentra-admin/plan', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -311,7 +311,7 @@ export default function PlatformAdminConsole() {
     setError(null);
     try {
       const response = await fetch(
-        `/api/_silentra-admin/plan?barbershopId=${encodeURIComponent(selectedShop.id)}`,
+        `/api/silentra-admin/plan?barbershopId=${encodeURIComponent(selectedShop.id)}`,
         { method: 'DELETE' },
       );
       const payload = (await response.json()) as ApiResponse;
@@ -333,14 +333,14 @@ export default function PlatformAdminConsole() {
 
     const confirmed = window.confirm(
       nextMode === 'STRIPE'
-        ? 'Tens a certeza que queres ativar os pagamentos Stripe? As novas subscrições utilizarão o Stripe. Subscrições existentes não serão migradas.'
+        ? 'Tens a certeza que queres ativar os pagamentos Stripe? As novas subscrições utilizarão o checkout automático via Stripe. Subscrições existentes não serão migradas.'
         : 'Tens a certeza que queres ativar os pagamentos manuais? As novas subscrições utilizarão o fluxo manual. Subscrições Stripe existentes não serão migradas.',
     );
     if (!confirmed) return;
 
     try {
       setChangingPaymentMode(true);
-      const response = await fetch('/api/_silentra-admin/payment-mode', {
+      const response = await fetch('/api/silentra-admin/payment-mode', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paymentMode: nextMode }),
@@ -355,8 +355,8 @@ export default function PlatformAdminConsole() {
       setPaymentMode(payload.paymentMode);
       setMessage(
         payload.paymentMode === 'STRIPE'
-          ? 'Pagamentos Stripe ativados para novas subscrições.'
-          : 'Pagamentos manuais ativados para novas subscrições.',
+          ? 'Checkout automático via Stripe ativado para novas subscrições.'
+          : 'Checkout manual ativado para novas subscrições.',
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado.');
@@ -378,7 +378,7 @@ export default function PlatformAdminConsole() {
       setPaymentAction(true);
       setError(null);
       const response = await fetch(
-        `/api/_silentra-admin/subscription-requests/${encodeURIComponent(request.id)}`,
+        `/api/silentra-admin/subscription-requests/${encodeURIComponent(request.id)}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -410,7 +410,7 @@ export default function PlatformAdminConsole() {
       );
 
       const refresh = await fetch(
-        `/api/_silentra-admin/subscription-requests${manualRequestFilter === 'ALL' ? '' : `?status=${encodeURIComponent(manualRequestFilter)}`}`,
+        `/api/silentra-admin/subscription-requests${manualRequestFilter === 'ALL' ? '' : `?status=${encodeURIComponent(manualRequestFilter)}`}`,
         { cache: 'no-store' },
       );
       const refreshed = (await refresh.json()) as {
@@ -862,13 +862,13 @@ export default function PlatformAdminConsole() {
                 {([
                   {
                     mode: 'MANUAL' as const,
-                    title: 'Pagamento Manual',
+                    title: 'Manual',
                     description:
                       'Novos clientes criam um pedido. A equipa envia o link e confirma o pagamento manualmente.',
                   },
                   {
                     mode: 'STRIPE' as const,
-                    title: 'Stripe',
+                    title: 'Automático (Stripe)',
                     description:
                       'Novas subscrições utilizam o checkout Stripe que já existe no projeto.',
                   },
