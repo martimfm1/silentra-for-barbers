@@ -249,13 +249,20 @@ export default function PlatformAdminConsole() {
             payload.error || 'Não foi possível carregar os pedidos de subscrição.',
           );
         }
+        const requestId = new URLSearchParams(window.location.search)
+          .get('request_id')
+          ?.trim();
+        const requested = requestId
+          ? payload.requests.find((item) => item.id === requestId) ?? null
+          : null;
+
         setManualRequests(payload.requests);
-        setSelectedRequest((current) => {
-          if (!current) return null;
-          return (
-            payload.requests?.find((item) => item.id === current.id) ?? null
-          );
-        });
+        setSelectedRequest((current) => requested ?? (
+          current
+            ? payload.requests.find((item) => item.id === current.id) ?? null
+            : null
+        ));
+        if (requested) setPaymentLink(requested.payment_link ?? '');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro inesperado.');
       }
