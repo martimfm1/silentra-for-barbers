@@ -79,19 +79,6 @@ export function assertSameOrigin(request: Request): void {
     );
   }
 
-  const configuredOrigin =
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    process.env.APP_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
-
-  const expectedOrigin = configuredOrigin
-    ? new URL(
-        configuredOrigin.startsWith('http')
-          ? configuredOrigin
-          : `https://${configuredOrigin}`,
-      ).origin
-    : new URL(request.url).origin;
-
   let receivedOrigin: string;
   try {
     receivedOrigin = new URL(origin).origin;
@@ -102,7 +89,60 @@ export function assertSameOrigin(request: Request): void {
     );
   }
 
-  if (receivedOrigin !== expectedOrigin) {
+  const allowedOrigins = new Set<string>();
+
+  // The request target is authoritative for same-origin browser requests.
+  // This keeps custom domains and local development working even when the
+  // deployment's VERCEL_URL points at an internal/preview hostname.
+  try {
+    allowedOrigins.add(new URL(request.url).origin);
+  } catch {
+    // Invalid request URLs are rejected below if no trusted origin can be built.
+  }
+
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
+  const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const host = forwardedHost || request.headers.get('host')?.trim();
+
+  if (host) {
+    const protocol =
+      forwardedProto === 'http' || forwardedProto === 'https'
+        ? forwardedProto
+        : new URL(request.url).protocol.replace(':', '');
+
+    try {
+      allowedOrigins.add(new URL(`${protocol}://${host}`).origin);
+    } catch {
+      // Ignore malformed proxy headers; explicit configured origins may still validate.
+    }
+  }
+
+  const configuredOrigins = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  ];
+
+  for (const configuredOrigin of configuredOrigins) {
+    const value = configuredOrigin?.trim();
+    if (!value) continue;
+
+    try {
+      allowedOrigins.add(
+        new URL(
+          value.startsWith('http://') || value.startsWith('https://')
+            ? value
+            : `https://${value}`,
+        ).origin,
+      );
+    } catch {
+      console.warn('[CSRF_CONFIGURED_ORIGIN_INVALID]');
+    }
+  }
+
+  if (!allowedOrigins.has(receivedOrigin)) {
     throw new BillingError(
       'O pedido não foi iniciado a partir da aplicação autorizada.',
       'CSRF_VALIDATION_FAILED',
