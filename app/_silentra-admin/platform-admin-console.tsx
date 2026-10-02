@@ -259,10 +259,11 @@ export default function PlatformAdminConsole() {
           ? payload.requests.find((item) => item.id === requestId) ?? null
           : null;
 
-        setManualRequests(payload.requests);
+        const requests = payload.requests;
+        setManualRequests(requests);
         setSelectedRequest((current) => requested ?? (
           current
-            ? payload.requests.find((item) => item.id === current.id) ?? null
+            ? requests.find((item) => item.id === current.id) ?? null
             : null
         ));
         if (requested) setPaymentLink(requested.payment_link ?? '');
