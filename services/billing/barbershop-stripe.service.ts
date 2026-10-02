@@ -516,7 +516,50 @@ export class BarbershopStripeService {
       tenant.barbershopId,
       await this.getSubscriptionForBarbershop(tenant.barbershopId),
     );
-    if (!subscription?.stripe_subscription_id)
+    if (!subscription)
+      throw new BillingError(
+        'No active paid subscription was found.',
+        'SUBSCRIPTION_NOT_FOUND',
+      );
+
+    if (subscription.payment_method === 'MANUAL') {
+      if (
+        subscription.plan === PLANS.FREE ||
+        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(subscription.status)
+      )
+        throw new BillingError(
+          'No active paid subscription was found.',
+          'SUBSCRIPTION_NOT_FOUND',
+        );
+
+      if (subscription.cancel_at_period_end) return;
+
+      const now = new Date().toISOString();
+      const { error } = await createAdminClient()
+        .from('subscriptions')
+        .update({ cancel_at_period_end: true, updated_at: now })
+        .eq('id', subscription.id);
+
+      if (error)
+        throw new BillingError(
+          'Não foi possível agendar o cancelamento da subscrição.',
+          'DB_WRITE_FAILED',
+        );
+
+      await createAdminClient().from('audit_logs').insert({
+        action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED',
+        entity_type: 'subscription',
+        entity_id: subscription.id,
+        metadata: {
+          actor_user_id: userId,
+          barbershop_id: tenant.barbershopId,
+        },
+        created_at: now,
+      });
+      return;
+    }
+
+    if (!subscription.stripe_subscription_id)
       throw new BillingError(
         'No active paid subscription was found.',
         'SUBSCRIPTION_NOT_FOUND',
@@ -546,7 +589,50 @@ export class BarbershopStripeService {
       tenant.barbershopId,
       await this.getSubscriptionForBarbershop(tenant.barbershopId),
     );
-    if (!subscription?.stripe_subscription_id)
+    if (!subscription)
+      throw new BillingError(
+        'No active paid subscription was found.',
+        'SUBSCRIPTION_NOT_FOUND',
+      );
+
+    if (subscription.payment_method === 'MANUAL') {
+      if (
+        subscription.plan === PLANS.FREE ||
+        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(subscription.status)
+      )
+        throw new BillingError(
+          'No active paid subscription was found.',
+          'SUBSCRIPTION_NOT_FOUND',
+        );
+
+      if (!subscription.cancel_at_period_end) return;
+
+      const now = new Date().toISOString();
+      const { error } = await createAdminClient()
+        .from('subscriptions')
+        .update({ cancel_at_period_end: false, updated_at: now })
+        .eq('id', subscription.id);
+
+      if (error)
+        throw new BillingError(
+          'Não foi possível retomar a subscrição.',
+          'DB_WRITE_FAILED',
+        );
+
+      await createAdminClient().from('audit_logs').insert({
+        action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REVOKED',
+        entity_type: 'subscription',
+        entity_id: subscription.id,
+        metadata: {
+          actor_user_id: userId,
+          barbershop_id: tenant.barbershopId,
+        },
+        created_at: now,
+      });
+      return;
+    }
+
+    if (!subscription.stripe_subscription_id)
       throw new BillingError(
         'No active paid subscription was found.',
         'SUBSCRIPTION_NOT_FOUND',
