@@ -24,8 +24,8 @@ export default async function SilentraAdminPage({
       if (typeof value === 'string') query.set(key, value);
     }
     const nextPath = query.toString()
-      ? `/_silentra-admin?${query.toString()}`
-      : '/_silentra-admin';
+      ? `/silentra-admin?${query.toString()}`
+      : '/silentra-admin';
 
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
