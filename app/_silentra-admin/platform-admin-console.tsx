@@ -961,7 +961,7 @@ export default function PlatformAdminConsole() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setManualRequestFilter('ALL')}
+                    onClick={() => setRequestsRefreshKey((value) => value + 1)}
                     className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs text-zinc-300 hover:bg-white/[0.06]"
                   >
                     <RefreshCw className="size-3.5" />
