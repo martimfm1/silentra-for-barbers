@@ -359,13 +359,13 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
 }
 
 export function CustomCheckout({
-  const router = useRouter();
   checkoutToken,
   plan,
 }: {
   checkoutToken: string;
   plan: keyof typeof PLAN_COPY;
 }) {
+  const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [initializationError, setInitializationError] = useState<string | null>(
     null,
