@@ -47,6 +47,11 @@ const checks = [
   ['PricingCard does not accept Stripe priceId', !pricingCard.includes('priceId')],
   ['Manual expiry cron exists', cron.includes("expire_manual_subscriptions")],
   ['Manual expiry cron is configured', vercel.includes('/api/cron/manual-subscriptions')],
+  ['Admin page renders manual-payment console', read('app/silentra-admin/page.tsx').includes('PlatformAdminConsole')],
+  ['Admin email carries request deep link', manualService.includes("request_id") && manualService.includes('adminUrl'),
+  ['Billing summary reads payment_method', read('app/api/stripe/billing-summary/route.ts').includes('payment_method, updated_at')],
+  ['Manual cancellation is server-side', read('services/billing/barbershop-stripe.service.ts').includes('MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED')],
+  ['Manual cancellation API keeps CSRF protection', read('app/api/_silentra-admin/subscription-requests/[requestId]/route.ts').includes('assertSameOrigin')],
 ];
 
 for (const [name, passed] of checks) {
