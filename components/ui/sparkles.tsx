@@ -26,6 +26,7 @@ export const SparklesCore = (props: ParticlesProps) => {
     background,
     minSize,
     maxSize,
+    particleSize,
     speed,
     particleColor,
     particleDensity,
