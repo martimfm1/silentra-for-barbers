@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Gift } from 'lucide-react';
 import { getPlatformAdminContext } from '@/lib/internal/platform-admin';
-import ProductionConsole from './production-console';
+import PlatformAdminConsole from '@/app/_silentra-admin/platform-admin-console';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default async function SilentraAdminPage() {
 
   return (
     <div className="relative">
-      <ProductionConsole />
+      <PlatformAdminConsole />
       <Link
         href="/silentra-admin/loyalty"
         className="fixed bottom-5 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-400/20 bg-zinc-950/95 px-4 text-xs font-semibold text-emerald-200 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"
