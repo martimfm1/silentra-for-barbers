@@ -72,6 +72,15 @@ export async function handleLogin({
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
+  const requestedNext =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('redirect')
+      : null;
+  const safeNext =
+    requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//')
+      ? requestedNext
+      : null;
+
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -112,7 +121,9 @@ export async function handleLogin({
       }
     }
 
-    if (!result.user?.barbershopId) {
+    if (safeNext) {
+      router.push(safeNext);
+    } else if (!result.user?.barbershopId) {
       router.push('/onboarding');
     } else {
       router.push('/dashboard');
