@@ -239,9 +239,11 @@ export function BillingHub() {
                 ? `Esta subscrição foi cancelada em ${cancellationDate}${cancellation?.canceledByName ? ` por ${cancellation.canceledByName}` : cancellation?.canceledByEmail ? ` por ${cancellation.canceledByEmail}` : ''}.`
                 : isAdministrativePlan
                   ? 'Plano atribuído pela administração da Silentra e aplicado à barbearia.'
-                  : hasSubscription
-                    ? 'A subscrição é sincronizada com a Stripe e pertence à barbearia.'
-                    : 'Plano gratuito, sem subscrição paga ativa.'}
+                  : isManualSubscription
+                    ? 'A subscrição é gerida manualmente pela Silentra e pertence à barbearia.'
+                    : hasSubscription
+                      ? 'A subscrição é sincronizada com a Stripe e pertence à barbearia.'
+                      : 'Plano gratuito, sem subscrição paga ativa.'}
             </p>
           </div>
 
