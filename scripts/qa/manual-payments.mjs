@@ -13,9 +13,9 @@ const requiredFiles = [
   'services/billing/manual-payment.service.ts',
   'lib/billing/manual-pricing.ts',
   'app/api/billing/subscribe/route.ts',
-  'app/api/_silentra-admin/payment-mode/route.ts',
-  'app/api/_silentra-admin/subscription-requests/route.ts',
-  'app/api/_silentra-admin/subscription-requests/[requestId]/route.ts',
+  'app/api/silentra-admin/payment-mode/route.ts',
+  'app/api/silentra-admin/subscription-requests/route.ts',
+  'app/api/silentra-admin/subscription-requests/[requestId]/route.ts',
   'app/api/cron/manual-subscriptions/route.ts',
 ];
 
@@ -51,7 +51,7 @@ const checks = [
   ['Admin email carries request deep link', manualService.includes("request_id") && manualService.includes('adminUrl')],
   ['Billing summary reads payment_method', read('app/api/stripe/billing-summary/route.ts').includes('payment_method, updated_at')],
   ['Manual cancellation is server-side', read('services/billing/barbershop-stripe.service.ts').includes('MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED')],
-  ['Manual cancellation API keeps CSRF protection', read('app/api/_silentra-admin/subscription-requests/[requestId]/route.ts').includes('assertSameOrigin')],
+  ['Manual cancellation API keeps CSRF protection', read('app/api/silentra-admin/subscription-requests/[requestId]/route.ts').includes('assertSameOrigin')],
 ];
 
 for (const [name, passed] of checks) {
