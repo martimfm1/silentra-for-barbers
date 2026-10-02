@@ -526,5 +526,3 @@ export function BillingHub() {
     </div>
   );
 }
-      ) : null}
-
