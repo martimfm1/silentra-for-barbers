@@ -392,6 +392,7 @@ export function BillingHub() {
         </div>
       </section>
 
+      {(paymentMode === 'MANUAL' && !isStripeSubscription) ? (
       <section className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 sm:p-7">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -444,6 +445,7 @@ export function BillingHub() {
           )}
         </div>
       </section>
+      ) : null}
 
       <section className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 sm:p-7">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -522,3 +524,5 @@ export function BillingHub() {
     </div>
   );
 }
+      ) : null}
+
