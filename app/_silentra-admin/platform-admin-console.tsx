@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   CreditCard,
   ChevronRight,
+  MailCheck,
   Clock3,
   Copy,
   Database,
@@ -54,6 +55,7 @@ const tabs = [
   { id: 'shops', label: 'Barbearias', icon: Building2 },
   { id: 'plans', label: 'Planos', icon: KeyRound },
   { id: 'payments', label: 'Pagamentos', icon: CreditCard },
+  { id: 'payment_requests', label: 'Pedidos de pagamento', icon: MailCheck },
   { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
 ] as const;
@@ -917,6 +919,293 @@ export default function PlatformAdminConsole() {
                 O método é aplicado apenas a novas subscrições. Uma subscrição
                 manual continua manual e uma subscrição Stripe continua Stripe,
                 mesmo depois de esta opção mudar.
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {tab === 'payment_requests' ? (
+          <section className="space-y-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <MailCheck className="size-4 text-emerald-300" />
+                    <h2 className="text-lg font-semibold">Pedidos de pagamento abertos</h2>
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Define o link de pagamento e envia-o diretamente para o email do responsável pela barbearia.
+                  </p>
+                </div>
+                <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">
+                  {manualRequests.filter((item) =>
+                    item.status === 'PENDING' || item.status === 'PAYMENT_SENT',
+                  ).length}{' '}
+                  abertos
+                </span>
+              </div>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">Fila de pedidos</h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Apenas pedidos que ainda precisam de tratamento.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setManualRequestFilter('ALL')}
+                    className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs text-zinc-300 hover:bg-white/[0.06]"
+                  >
+                    <RefreshCw className="size-3.5" />
+                    Atualizar
+                  </button>
+                </div>
+
+                <div className="mt-5 space-y-2">
+                  {manualRequests
+                    .filter(
+                      (request) =>
+                        request.status === 'PENDING' ||
+                        request.status === 'PAYMENT_SENT',
+                    )
+                    .map((request) => (
+                      <button
+                        key={request.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setPaymentLink(request.payment_link ?? '');
+                        }}
+                        className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
+                          selectedRequest?.id === request.id
+                            ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
+                            : 'border-white/8 bg-black/15 hover:border-white/15'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-zinc-100">
+                              {request.customer?.name_complete ||
+                                request.customer?.email ||
+                                'Cliente'}
+                            </p>
+                            <p className="mt-1 truncate text-xs text-zinc-500">
+                              {request.barbershop?.name || request.barbershop_id}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span className="text-sm font-semibold text-zinc-200">
+                              {formatMoney(request.price, request.currency)}
+                            </span>
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                                request.status === 'PAYMENT_SENT'
+                                  ? 'bg-blue-400/10 text-blue-200'
+                                  : 'bg-amber-400/10 text-amber-200'
+                              }`}
+                            >
+                              {request.status === 'PAYMENT_SENT'
+                                ? 'LINK ENVIADO'
+                                : 'AGUARDA LINK'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-600">
+                          <span>
+                            {request.plan === 'enterprise' ? 'Enterprise' : 'Pro'}
+                          </span>
+                          <span>·</span>
+                          <span>
+                            {request.billing_interval === 'year'
+                              ? 'Anual'
+                              : 'Mensal'}
+                          </span>
+                          <span>·</span>
+                          <span>{formatDate(request.created_at)}</span>
+                        </div>
+                      </button>
+                    ))}
+
+                  {manualRequests.filter(
+                    (request) =>
+                      request.status === 'PENDING' ||
+                      request.status === 'PAYMENT_SENT',
+                  ).length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
+                      <CheckCircle2 className="mx-auto size-8 text-emerald-300/60" />
+                      <p className="mt-3 text-sm font-medium text-zinc-300">
+                        Não existem pedidos de pagamento abertos.
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-600">
+                        Quando um cliente pedir uma subscrição manual, o pedido aparece aqui.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">Enviar pagamento</h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      O email é enviado para o responsável associado ao pedido.
+                    </p>
+                  </div>
+                  {selectedRequest ? (
+                    <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] font-medium text-zinc-500">
+                      {selectedRequest.status}
+                    </span>
+                  ) : null}
+                </div>
+
+                {selectedRequest ? (
+                  <div className="mt-5 space-y-4">
+                    <div className="rounded-2xl border border-white/8 bg-black/15 p-4">
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {selectedRequest.barbershop?.name ||
+                          'Barbearia sem nome'}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {selectedRequest.customer?.name_complete || 'Responsável'}
+                      </p>
+                      <p className="mt-1 break-all text-xs text-zinc-600">
+                        {selectedRequest.customer?.email || 'Sem email'}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                          Plano
+                        </p>
+                        <p className="mt-1 text-sm font-semibold uppercase text-zinc-200">
+                          {selectedRequest.plan}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                          Valor
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-zinc-200">
+                          {formatMoney(
+                            selectedRequest.price,
+                            selectedRequest.currency,
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="block space-y-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        Link de pagamento
+                      </span>
+                      <input
+                        value={paymentLink}
+                        onChange={(event) => setPaymentLink(event.target.value)}
+                        placeholder="https://..."
+                        inputMode="url"
+                        autoComplete="off"
+                        maxLength={2048}
+                        disabled={paymentAction}
+                        className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
+                      />
+                      <p className="text-[11px] leading-5 text-zinc-600">
+                        O servidor valida o URL antes de o guardar e enviar. O cliente nunca pode escolher o preço deste pedido.
+                      </p>
+                    </label>
+
+                    {selectedRequest.last_email_error ? (
+                      <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
+                        Último erro de email: {selectedRequest.last_email_error}
+                      </div>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      disabled={
+                        paymentAction ||
+                        !paymentLink.trim() ||
+                        !['PENDING', 'PAYMENT_SENT'].includes(
+                          selectedRequest.status,
+                        )
+                      }
+                      onClick={() =>
+                        void runManualRequestAction(
+                          selectedRequest,
+                          selectedRequest.status === 'PAYMENT_SENT'
+                            ? 'resend_payment'
+                            : 'send_payment',
+                        )
+                      }
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <MailCheck className="size-4" />
+                      {selectedRequest.status === 'PAYMENT_SENT'
+                        ? 'Reenviar email com o link'
+                        : 'Enviar email com o link'}
+                    </button>
+
+                    {selectedRequest.payment_link ? (
+                      <a
+                        href={selectedRequest.payment_link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block truncate text-xs text-zinc-600 hover:text-zinc-300"
+                      >
+                        Abrir link atual
+                      </a>
+                    ) : null}
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        disabled={
+                          paymentAction ||
+                          selectedRequest.status !== 'PAYMENT_SENT'
+                        }
+                        onClick={() =>
+                          void runManualRequestAction(
+                            selectedRequest,
+                            'confirm_payment',
+                          )
+                        }
+                        className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Confirmar pagamento
+                      </button>
+                      <button
+                        type="button"
+                        disabled={
+                          paymentAction ||
+                          !['PENDING', 'PAYMENT_SENT'].includes(
+                            selectedRequest.status,
+                          )
+                        }
+                        onClick={() =>
+                          void runManualRequestAction(selectedRequest, 'reject')
+                        }
+                        className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 transition hover:bg-red-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Rejeitar pedido
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-12 text-center">
+                    <MailCheck className="mx-auto size-8 text-zinc-700" />
+                    <p className="mt-3 text-sm font-medium text-zinc-400">
+                      Seleciona um pedido na fila.
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      Depois cola o link de pagamento e envia o email.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </section>
