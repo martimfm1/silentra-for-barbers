@@ -121,6 +121,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
               fill
               sizes="(max-width: 767px) 100vw, 50vw"
               quality={60}
+              unoptimized
               loading="lazy"
               onError={() => setBannerError(true)}
               className="object-cover opacity-50 transition-transform duration-500 sm:group-hover:scale-105"

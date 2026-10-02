@@ -14,6 +14,7 @@ const stripePromise = loadStripe(
 );
 
 export function EmbeddedStripeCheckout() {
+  const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +99,7 @@ export function EmbeddedStripeCheckout() {
                 } catch {
                   console.error('[STRIPE_CHECKOUT_COMPLETE_CLIENT_CRITICAL]');
                 } finally {
-                  window.location.assign('/checkout/success');
+                  router.push('/checkout/success');
                 }
               })();
             },

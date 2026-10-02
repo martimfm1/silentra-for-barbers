@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { hasActivePaidSubscription } from '@/lib/billing/plan-access';
 
 export interface SubscriptionData {
@@ -129,6 +130,7 @@ async function fetchSubscription(): Promise<SubscriptionQueryResult> {
 }
 
 export function useSubscription() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery<SubscriptionQueryResult>({
     queryKey: ['user-subscription'],
@@ -208,7 +210,7 @@ export function useSubscription() {
     cancel: cancelMutation.mutateAsync,
     resume: resumeMutation.mutateAsync,
     upgrade: async () => {
-      window.location.assign('/plans');
+      router.push('/plans');
     },
     checkout: async ({
       priceId,
@@ -217,7 +219,7 @@ export function useSubscription() {
       priceId: string;
       plan?: 'pro' | 'enterprise';
     }) => {
-      window.location.assign(
+      router.push(
         `/checkout?priceId=${encodeURIComponent(priceId)}&plan=${requestedPlan}`,
       );
     },

@@ -45,6 +45,7 @@ const PLAN_NAMES: Record<PlanTier, string> = {
 };
 
 export function PricingCard({
+  const router = useRouter();
   tier,
   title,
   price,
@@ -91,7 +92,7 @@ export function PricingCard({
     try {
       if (!isMounted || loading || isChangingPlan) return;
       if (!isAuthenticated) {
-        window.location.assign('/registo');
+        router.push('/registo');
         return;
       }
       if (isCurrentPlan) return;
@@ -102,11 +103,11 @@ export function PricingCard({
         return;
       }
       if (destination === 'plans') {
-        window.location.assign('/plans');
+        router.push('/plans');
         return;
       }
       if (tier === 'free' && !hasCurrentPaidPlan) {
-        window.location.assign('/dashboard/billing');
+        router.push('/dashboard/billing');
         return;
       }
       if (requiresPlanChangeConfirmation) {

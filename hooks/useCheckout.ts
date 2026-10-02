@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 export interface UseCheckoutParams {
   plan: 'pro' | 'enterprise';
@@ -6,6 +7,7 @@ export interface UseCheckoutParams {
 }
 
 export function useCheckout() {
+  const router = useRouter();
   const checkoutMutation = useMutation({
     mutationFn: async ({
       plan,
@@ -35,14 +37,14 @@ export function useCheckout() {
 
       if (typeof body.redirectUrl !== 'string') {
         if (body.mode === 'MANUAL') {
-          window.location.assign('/dashboard/billing?manual=pending');
+          router.push('/dashboard/billing?manual=pending');
         }
         throw new Error(
           body.message ?? 'Não foi possível iniciar a subscrição.',
         );
       }
 
-      window.location.assign(body.redirectUrl);
+      router.push(body.redirectUrl);
       return { url: body.redirectUrl, mode: body.mode };
     },
   });

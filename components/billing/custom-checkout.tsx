@@ -132,7 +132,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         setSubmitting(false);
         return;
       }
-      window.location.assign('/dashboard/billing?checkout=success');
+      router.push('/dashboard/billing?checkout=success');
     } catch (error) {
       setPromotionError(
         error instanceof Error
@@ -359,6 +359,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
 }
 
 export function CustomCheckout({
+  const router = useRouter();
   checkoutToken,
   plan,
 }: {

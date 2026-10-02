@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -63,6 +64,7 @@ const inputClass =
   'min-h-11 rounded-xl border-white/10 bg-white/[0.04] text-sm text-zinc-50 placeholder:text-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50';
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>('selection');
   const [loading, setLoading] = useState(false);
   const [shopName, setShopName] = useState('');
@@ -238,7 +240,7 @@ export default function OnboardingPage() {
         throw new Error(data.error || 'Não foi possível criar a barbearia.');
 
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
     } catch (error) {
       console.error(error);
       toast.error(getErrorMessage(error));
@@ -266,7 +268,7 @@ export default function OnboardingPage() {
         throw new Error(data.error || 'Não foi possível validar o convite.');
 
       toast.success('Convite aceite. Bem-vindo à equipa.');
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
     } catch (error) {
       console.error(error);
       toast.error(getErrorMessage(error));
