@@ -75,7 +75,7 @@ export async function GET() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, payment_method, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -205,11 +205,14 @@ export async function GET() {
       }
     }
 
-    const billingInterval = intervalForPriceId(subscription?.stripe_price_id);
     const manualRequest =
       subscription?.payment_method === 'MANUAL' || paymentMode === 'MANUAL'
         ? await ManualPaymentService.getRequestForUser(user.id)
         : null;
+    const billingInterval =
+      subscription?.payment_method === 'MANUAL'
+        ? (manualRequest?.billing_interval ?? null)
+        : intervalForPriceId(subscription?.stripe_price_id);
 
     const plan: BillingPlan =
       hasActiveAssignment && assignment
@@ -220,17 +223,15 @@ export async function GET() {
           : subscription
             ? resolvePlan(subscription)
             : PLANS.FREE;
-    const publicSubscription = subscription
-      ? { ...subscription, stripe_price_id: null }
-      : null;
-
     const planSource = hasActiveAssignment
       ? 'admin'
       : subscription?.plan_override && subscription.plan_override !== PLANS.FREE
         ? 'subscription_override'
-        : subscription?.stripe_subscription_id && plan !== PLANS.FREE
-          ? 'stripe'
-          : 'free';
+        : subscription?.payment_method === 'MANUAL' && plan !== PLANS.FREE
+          ? 'manual'
+          : subscription?.stripe_subscription_id && plan !== PLANS.FREE
+            ? 'stripe'
+            : 'free';
 
     return NextResponse.json(
       {
