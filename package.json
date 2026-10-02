@@ -35,9 +35,9 @@
     "@tabler/icons-react": "^3.44.0",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-table": "^8.21.3",
-    "@tsparticles/engine": "^3.0.0",
-    "@tsparticles/react": "^3.0.0",
-    "@tsparticles/slim": "^3.0.0",
+    "@tsparticles/engine": "^4.4.0",
+    "@tsparticles/react": "^4.4.0",
+    "@tsparticles/slim": "^4.4.0",
     "@types/leaflet": "^1.9.21",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -73,7 +73,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.3.8",
     "prettier": "^3.9.6",
     "shadcn": "^4.9.0",
@@ -82,9 +82,5 @@
     "tsx": "^4.19.2",
     "typescript": "^5"
   },
-  "pnpm": {
-    "overrides": {
-      "browserslist": ">=4.28.7"
-    }
-  }
+  "packageManager": "pnpm@11.28.2"
 }
