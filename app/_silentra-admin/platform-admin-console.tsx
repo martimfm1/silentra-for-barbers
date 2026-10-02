@@ -177,6 +177,7 @@ export default function PlatformAdminConsole() {
   const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(null);
   const [paymentLink, setPaymentLink] = useState('');
   const [paymentAction, setPaymentAction] = useState(false);
+  const [requestsRefreshKey, setRequestsRefreshKey] = useState(0);
 
   const load = useCallback(
     async (search = query) => {
@@ -272,7 +273,7 @@ export default function PlatformAdminConsole() {
 
     void loadPaymentMode();
     void loadRequests();
-  }, [manualRequestFilter]);
+  }, [manualRequestFilter, requestsRefreshKey]);
 
   const searchResults = useMemo(() => data?.recentShops ?? [], [data]);
 
@@ -493,7 +494,10 @@ export default function PlatformAdminConsole() {
               <button
                 key={id}
                 type="button"
-                onClick={() => setTab(id)}
+                onClick={() => {
+                  if (id === 'payment_requests') setManualRequestFilter('ALL');
+                  setTab(id);
+                }}
                 className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-sm font-medium ${tab === id ? 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200' : 'border-white/10 bg-white/[0.025] text-zinc-500 hover:text-zinc-200'}`}
               >
                 <Icon className="size-4" />
