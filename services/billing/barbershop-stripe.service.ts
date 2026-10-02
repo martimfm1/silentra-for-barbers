@@ -250,8 +250,69 @@ export class BarbershopStripeService {
     barbershopId: string,
     subscription: SubscriptionRecord | null,
   ): Promise<SubscriptionRecord | null> {
+    if (subscription?.payment_method === 'MANUAL') {
+      const expired =
+        subscription.plan !== PLANS.FREE &&
+        ['active', 'trialing'].includes(subscription.status) &&
+        subscription.current_period_end !== null &&
+        new Date(subscription.current_period_end).getTime() <= Date.now();
+
+      if (!expired) return subscription;
+
+      const now = new Date().toISOString();
+      const database = createAdminClient();
+      const { data: updated, error } = await database
+        .from('subscriptions')
+        .update({
+          plan: PLANS.FREE,
+          status: 'canceled',
+          cancel_at_period_end: false,
+          updated_at: now,
+        })
+        .eq('id', subscription.id)
+        .eq('payment_method', 'MANUAL')
+        .select('*')
+        .maybeSingle();
+
+      if (error)
+        throw new BillingError(
+          'Could not expire manual subscription.',
+          'DB_WRITE_FAILED',
+          { barbershopId },
+        );
+
+      await database
+        .from('subscription_requests')
+        .update({
+          status: 'EXPIRED',
+          processed_at: now,
+          updated_at: now,
+        })
+        .eq('subscription_id', subscription.id)
+        .eq('status', 'PAID')
+        .lte('expires_at', now);
+
+      await database.from('audit_logs').insert({
+        action: 'SUBSCRIPTION_EXPIRED',
+        entity_type: 'subscription',
+        entity_id: subscription.id,
+        metadata: {
+          barbershop_id: barbershopId,
+          expires_at: subscription.current_period_end,
+          reconciled_at: now,
+        },
+        created_at: now,
+      });
+
+      return (updated ?? {
+        ...subscription,
+        plan: PLANS.FREE,
+        status: 'canceled',
+        cancel_at_period_end: false,
+      }) as SubscriptionRecord;
+    }
+
     if (
-      subscription?.payment_method === 'MANUAL' ||
       !subscription?.stripe_subscription_id ||
       (subscription.plan_override && subscription.plan_override !== PLANS.FREE)
     )
