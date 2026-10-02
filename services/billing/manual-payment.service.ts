@@ -125,7 +125,6 @@ export class ManualPaymentService {
       .from('subscription_requests')
       .select('*')
       .eq('user_id', userId)
-      .in('status', ['PENDING', 'PAYMENT_SENT'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -300,6 +299,7 @@ export class ManualPaymentService {
       customerName: string;
       customerEmail: string;
       barbershopName: string;
+      appOrigin?: string;
     },
   ) {
     const adminEmail =
@@ -312,11 +312,37 @@ export class ManualPaymentService {
       return { sent: false, error: 'Admin email is not configured.' };
     }
 
-    const baseUrl =
+    const configuredBaseUrl =
+      context.appOrigin?.trim() ||
       process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+      process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+      process.env.VERCEL_URL?.trim() ||
       'https://barbers.silentra.me';
-    const adminPath = '/_silentra-admin?tab=subscriptions';
+
+    let baseUrl = 'https://barbers.silentra.me';
+    try {
+      const parsed = new URL(
+        configuredBaseUrl.startsWith('http://') ||
+          configuredBaseUrl.startsWith('https://')
+          ? configuredBaseUrl
+          : `https://${configuredBaseUrl}`,
+      );
+      parsed.pathname = '';
+      parsed.search = '';
+      parsed.hash = '';
+      baseUrl = parsed.toString().replace(/\/$/, '');
+    } catch {
+      console.warn('[MANUAL_PAYMENT_ADMIN_URL_INVALID]', {
+        configuredBaseUrl,
+        requestId: requestRow.id,
+      });
+    }
+
+    const adminUrl = new URL('/_silentra-admin', baseUrl);
+    adminUrl.searchParams.set('tab', 'subscriptions');
+    adminUrl.searchParams.set('request_id', requestRow.id);
+    const adminPath = adminUrl.toString();
     const html = `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b">
         <h2>Nova solicitação de subscrição — Silentra</h2>
@@ -326,7 +352,7 @@ export class ManualPaymentService {
         <p><strong>Plano:</strong> ${escapeHtml(planLabel(requestRow.plan))}</p>
         <p><strong>Preço:</strong> ${escapeHtml(formatManualPrice(requestRow.plan, requestRow.billing_interval))}</p>
         <p><strong>Data:</strong> ${escapeHtml(new Date(requestRow.created_at).toLocaleString('pt-PT'))}</p>
-        <p><a href="${escapeHtml(baseUrl + adminPath)}" style="display:inline-block;padding:12px 18px;background:#18181b;color:#fff;text-decoration:none;border-radius:8px">VER SOLICITAÇÃO</a></p>
+        <p><a href="${escapeHtml(adminPath)}" style="display:inline-block;padding:12px 18px;background:#18181b;color:#fff;text-decoration:none;border-radius:8px">VER SOLICITAÇÃO</a></p>
       </div>
     `;
 
