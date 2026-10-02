@@ -205,10 +205,12 @@ export async function GET() {
       }
     }
 
-    const manualRequest =
-      subscription?.payment_method === 'MANUAL' || paymentMode === 'MANUAL'
-        ? await ManualPaymentService.getRequestForUser(user.id)
-        : null;
+    const manualFlow =
+      subscription?.payment_method === 'MANUAL' ||
+      (!subscription?.stripe_subscription_id && paymentMode === 'MANUAL');
+    const manualRequest = manualFlow
+      ? await ManualPaymentService.getRequestForUser(user.id)
+      : null;
     const billingInterval =
       subscription?.payment_method === 'MANUAL'
         ? (manualRequest?.billing_interval ?? null)
