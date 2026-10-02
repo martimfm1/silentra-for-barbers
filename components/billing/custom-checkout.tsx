@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   CheckoutElementsProvider,
   BillingAddressElement,
@@ -86,6 +87,7 @@ const PLAN_COPY = {
 type CheckoutFormProps = { plan: keyof typeof PLAN_COPY };
 
 function CheckoutForm({ plan }: CheckoutFormProps) {
+  const router = useRouter();
   const checkoutState = useCheckout();
   const [promotionCode, setPromotionCode] = useState('');
   const [promotionError, setPromotionError] = useState<string | null>(null);
@@ -365,7 +367,6 @@ export function CustomCheckout({
   checkoutToken: string;
   plan: keyof typeof PLAN_COPY;
 }) {
-  const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [initializationError, setInitializationError] = useState<string | null>(
     null,
