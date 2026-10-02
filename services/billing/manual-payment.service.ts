@@ -340,7 +340,7 @@ export class ManualPaymentService {
     }
 
     const adminUrl = new URL('/silentra-admin', baseUrl);
-    adminUrl.searchParams.set('tab', 'subscriptions');
+    adminUrl.searchParams.set('tab', 'payment_requests');
     adminUrl.searchParams.set('request_id', requestRow.id);
     const adminPath = adminUrl.toString();
     const html = `
