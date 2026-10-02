@@ -70,51 +70,47 @@ export function safeReturnUrl(value: unknown, fallbackPath: string): string {
   return fallback;
 }
 
-export function assertSameOrigin(request: Request): void {
-  const origin = request.headers.get('origin')?.trim();
-  if (!origin) {
-    throw new BillingError(
-      'A origem do pedido não pôde ser validada.',
-      'CSRF_VALIDATION_FAILED',
-    );
-  }
+function normalizeOrigin(value: string | null | undefined): string | null {
+  const candidate = value?.trim();
+  if (!candidate) return null;
 
-  let receivedOrigin: string;
   try {
-    receivedOrigin = new URL(origin).origin;
+    return new URL(candidate).origin;
   } catch {
-    throw new BillingError(
-      'A origem do pedido não pôde ser validada.',
-      'CSRF_VALIDATION_FAILED',
-    );
+    return null;
   }
+}
 
+function getAllowedOrigins(request: Request): Set<string> {
   const allowedOrigins = new Set<string>();
 
-  // The request target is authoritative for same-origin browser requests.
-  // This keeps custom domains and local development working even when the
-  // deployment's VERCEL_URL points at an internal/preview hostname.
+  let requestUrl: URL;
   try {
-    allowedOrigins.add(new URL(request.url).origin);
+    requestUrl = new URL(request.url);
+    allowedOrigins.add(requestUrl.origin);
   } catch {
-    // Invalid request URLs are rejected below if no trusted origin can be built.
+    return allowedOrigins;
   }
 
-  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
-  const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const forwardedHost = request.headers
+    .get('x-forwarded-host')
+    ?.split(',')[0]
+    ?.trim();
+  const forwardedProto = request.headers
+    .get('x-forwarded-proto')
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase();
   const host = forwardedHost || request.headers.get('host')?.trim();
 
   if (host) {
     const protocol =
       forwardedProto === 'http' || forwardedProto === 'https'
         ? forwardedProto
-        : new URL(request.url).protocol.replace(':', '');
+        : requestUrl.protocol.replace(':', '');
 
-    try {
-      allowedOrigins.add(new URL(`${protocol}://${host}`).origin);
-    } catch {
-      // Ignore malformed proxy headers; explicit configured origins may still validate.
-    }
+    const proxyOrigin = normalizeOrigin(\`\${protocol}://\${host}\`);
+    if (proxyOrigin) allowedOrigins.add(proxyOrigin);
   }
 
   const configuredOrigins = [
@@ -122,32 +118,79 @@ export function assertSameOrigin(request: Request): void {
     process.env.NEXT_PUBLIC_SITE_URL,
     process.env.APP_URL,
     process.env.VERCEL_PROJECT_PRODUCTION_URL,
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : undefined,
   ];
 
   for (const configuredOrigin of configuredOrigins) {
     const value = configuredOrigin?.trim();
     if (!value) continue;
 
-    try {
-      allowedOrigins.add(
-        new URL(
-          value.startsWith('http://') || value.startsWith('https://')
-            ? value
-            : `https://${value}`,
-        ).origin,
-      );
-    } catch {
+    const normalized = normalizeOrigin(
+      value.startsWith('http://') || value.startsWith('https://')
+        ? value
+        : \`https://\${value}\`,
+    );
+
+    if (normalized) {
+      allowedOrigins.add(normalized);
+    } else {
       console.warn('[CSRF_CONFIGURED_ORIGIN_INVALID]');
     }
   }
 
-  if (!allowedOrigins.has(receivedOrigin)) {
+  // Local development often alternates between localhost, 127.0.0.1 and [::1].
+  // Keep these aliases development-only and preserve the same port.
+  if (
+    process.env.NODE_ENV === 'development' &&
+    requestUrl.protocol === 'http:'
+  ) {
+    const loopbackPort = requestUrl.port ? \`:\${requestUrl.port}\` : '';
+    for (const hostname of ['localhost', '127.0.0.1', '[::1]']) {
+      const loopbackOrigin = normalizeOrigin(
+        \`http://\${hostname}\${loopbackPort}\`,
+      );
+      if (loopbackOrigin) allowedOrigins.add(loopbackOrigin);
+    }
+  }
+
+  return allowedOrigins;
+}
+
+export function assertSameOrigin(request: Request): void {
+  const allowedOrigins = getAllowedOrigins(request);
+  const originHeader = request.headers.get('origin');
+  const receivedOrigin = normalizeOrigin(originHeader);
+
+  // Prefer the browser Origin header. If it is present but unexpected, never
+  // fall back to Referer or Fetch Metadata because that would weaken CSRF.
+  if (originHeader?.trim()) {
+    if (receivedOrigin && allowedOrigins.has(receivedOrigin)) return;
+
+    console.warn('[CSRF_ORIGIN_REJECTED]', {
+      receivedOrigin: receivedOrigin ?? 'invalid',
+      requestOrigin: normalizeOrigin(request.url) ?? 'invalid',
+    });
+
     throw new BillingError(
       'O pedido não foi iniciado a partir da aplicação autorizada.',
       'CSRF_VALIDATION_FAILED',
     );
   }
+
+  // Some same-origin clients legitimately omit Origin. Referer is accepted
+  // only when its origin matches one of the trusted application origins.
+  const refererOrigin = normalizeOrigin(request.headers.get('referer'));
+  if (refererOrigin && allowedOrigins.has(refererOrigin)) return;
+
+  // Fetch Metadata is browser-controlled and cannot be set by page JavaScript.
+  // Accepting only "same-origin" preserves a strict boundary when Origin is absent.
+  if (request.headers.get('sec-fetch-site')?.trim().toLowerCase() === 'same-origin')
+    return;
+
+  throw new BillingError(
+    'A origem do pedido não pôde ser validada.',
+    'CSRF_VALIDATION_FAILED',
+  );
 }
 
 export async function readJsonObject(
