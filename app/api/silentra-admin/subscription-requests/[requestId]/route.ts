@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
-import { assertSameOrigin } from '@/services/billing/http';
+import { assertSameOrigin, billingErrorResponse } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -125,6 +126,21 @@ export async function PATCH(request: Request, { params }: Params) {
     return json({ ok: false, error: 'Ação administrativa inválida.' }, 400);
   } catch (error) {
     console.error('[MANUAL_REQUEST_PATCH]', error);
+    if (error instanceof BillingError) {
+      const response = billingErrorResponse(error);
+      return NextResponse.json(
+        {
+          ok: false,
+          error: error.message,
+          code: error.code,
+        },
+        {
+          status: response.status,
+          headers: { 'Cache-Control': 'no-store' },
+        },
+      );
+    }
+
     return json(
       {
         ok: false,
