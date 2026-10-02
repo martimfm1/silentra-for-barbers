@@ -152,6 +152,7 @@ export async function POST(request: Request) {
         customerName: profile.name_complete || user.email,
         customerEmail: user.email,
         barbershopName: shop?.name || 'Barbearia',
+        appOrigin: new URL(request.url).origin,
       });
 
       return NextResponse.json(
