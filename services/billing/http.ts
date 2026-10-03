@@ -109,7 +109,7 @@ function getAllowedOrigins(request: Request): Set<string> {
         ? forwardedProto
         : requestUrl.protocol.replace(':', '');
 
-    const proxyOrigin = normalizeOrigin(\`\${protocol}://\${host}\`);
+    const proxyOrigin = normalizeOrigin(`${protocol}://${host}`);
     if (proxyOrigin) allowedOrigins.add(proxyOrigin);
   }
 
@@ -118,7 +118,7 @@ function getAllowedOrigins(request: Request): Set<string> {
     process.env.NEXT_PUBLIC_SITE_URL,
     process.env.APP_URL,
     process.env.VERCEL_PROJECT_PRODUCTION_URL,
-    process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : undefined,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
   ];
 
   for (const configuredOrigin of configuredOrigins) {
@@ -128,7 +128,7 @@ function getAllowedOrigins(request: Request): Set<string> {
     const normalized = normalizeOrigin(
       value.startsWith('http://') || value.startsWith('https://')
         ? value
-        : \`https://\${value}\`,
+        : `https://${value}`,
     );
 
     if (normalized) {
@@ -144,10 +144,10 @@ function getAllowedOrigins(request: Request): Set<string> {
     process.env.NODE_ENV === 'development' &&
     requestUrl.protocol === 'http:'
   ) {
-    const loopbackPort = requestUrl.port ? \`:\${requestUrl.port}\` : '';
+    const loopbackPort = requestUrl.port ? `:${requestUrl.port}` : '';
     for (const hostname of ['localhost', '127.0.0.1', '[::1]']) {
       const loopbackOrigin = normalizeOrigin(
-        \`http://\${hostname}\${loopbackPort}\`,
+        `http://${hostname}${loopbackPort}`,
       );
       if (loopbackOrigin) allowedOrigins.add(loopbackOrigin);
     }
