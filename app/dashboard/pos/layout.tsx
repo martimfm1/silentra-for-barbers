@@ -23,9 +23,9 @@ export default function SalesLayout({
     <div className="min-w-0 mt-12">
       <nav
         aria-label="Área de vendas"
-        className="sticky top-2 z-30 mb-5 overflow-x-auto rounded-2xl bg-zinc-950/10 p-1.5 shadow-[0_14px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+        className="sticky top-2 z-30 mb-5 rounded-2xl bg-zinc-950/10 p-1.5 shadow-[0_14px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl"
       >
-        <div className="flex min-w-max gap-1">
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active =
@@ -38,7 +38,7 @@ export default function SalesLayout({
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/80',
+                  'inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-2.5 text-center text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/80',
                   active
                     ? 'bg-white/[0.09] text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200',
