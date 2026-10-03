@@ -528,12 +528,44 @@ export class ManualPaymentService {
           'É necessário enviar primeiro o link de pagamento.',
         ACTIVE_MANUAL_SUBSCRIPTION_EXISTS:
           'Esta barbearia já tem uma subscrição manual ativa.',
+        ACTIVE_STRIPE_SUBSCRIPTION_EXISTS:
+          'Esta barbearia já tem uma subscrição Stripe ativa. Não é seguro convertê-la através deste pedido manual.',
         SUBSCRIPTION_REQUEST_NOT_FOUND:
           'Pedido de subscrição não encontrado.',
+        MANUAL_SUBSCRIPTION_NOT_FOUND:
+          'Não foi encontrada uma subscrição manual válida para esta operação.',
+        PLAN_ALREADY_ACTIVE:
+          'O plano selecionado já está ativo nesta barbearia.',
+        USER_SUBSCRIPTION_TENANT_CONFLICT:
+          'A conta já está associada a uma subscrição de outra barbearia. Corrige a associação antes de confirmar este pagamento.',
+        INVALID_CONFIRMATION_REQUEST:
+          'Os dados de confirmação do pagamento são inválidos.',
       };
+
+      // PGRST202 means the database function is missing from PostgREST's
+      // schema cache. Keep this actionable instead of reporting a generic
+      // "subscription not active" error.
+      const isRpcUnavailable =
+        error.code === 'PGRST202' ||
+        /could not find the function|function .*activate_manual_subscription_payment.*does not exist/i.test(
+          error.message ?? '',
+        );
+
+      console.error('[MANUAL_PAYMENT_CONFIRMATION_RPC_ERROR]', {
+        requestId,
+        actorUserId,
+        code: error.code ?? null,
+        message: error.message ?? null,
+        details: error.details ?? null,
+        hint: error.hint ?? null,
+      });
+
       throw new BillingError(
-        known[error.message] ?? 'Não foi possível confirmar o pagamento.',
-        'SUBSCRIPTION_NOT_ACTIVE',
+        isRpcUnavailable
+          ? 'O serviço de confirmação de pagamentos ainda não está sincronizado com a base de dados. Aplica as migrações pendentes e atualiza o schema do Supabase.'
+          : (known[error.message] ??
+              'Não foi possível confirmar o pagamento. Verifica os registos de faturação e tenta novamente.'),
+        isRpcUnavailable ? 'DB_WRITE_FAILED' : 'SUBSCRIPTION_NOT_ACTIVE',
       );
     }
 
