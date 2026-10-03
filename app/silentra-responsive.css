@@ -3,7 +3,8 @@
 html,
 body {
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 img,
@@ -57,6 +58,21 @@ canvas {
   [role='main'] {
     scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
+}
+
+/* Dashboard mobile is a vertical-only surface: prevent viewport-level horizontal panning. */
+body:has(.silentra-dashboard-shell),
+.silentra-dashboard-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+}
+
+.silentra-dashboard-shell * {
+  min-width: 0;
 }
 
 /* The public booking drawer should be a focused sheet, not a full-screen takeover. */
