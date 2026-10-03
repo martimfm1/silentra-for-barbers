@@ -71,20 +71,20 @@ export function FeatureGate({
   if (fallback) return <>{fallback}</>;
   if (mode === 'disable')
     return (
-      <div
-        role="button"
-        tabIndex={0}
-        aria-disabled="true"
-        onClick={() => requestUpgrade(feature)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') requestUpgrade(feature);
-        }}
-        className="relative cursor-pointer opacity-55 grayscale transition-opacity hover:opacity-75"
-      >
+      <div className="relative opacity-55 grayscale transition-opacity hover:opacity-75">
         <div className="pointer-events-none">{children}</div>
-        <div className="absolute right-3 top-3 rounded-full border bg-background/95 p-1.5 shadow-sm">
+        <button
+          type="button"
+          className="absolute inset-0 z-10 cursor-pointer rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          onClick={() => requestUpgrade(feature)}
+          aria-label="Desbloquear esta funcionalidade através de um upgrade"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute right-3 top-3 z-20 rounded-full border bg-background/95 p-1.5 shadow-sm"
+        >
           <Lock className="size-3.5" />
-        </div>
+        </span>
       </div>
     );
   return null;
