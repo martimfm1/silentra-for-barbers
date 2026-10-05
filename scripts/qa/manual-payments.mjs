@@ -9,6 +9,7 @@ function read(relative) {
 
 const requiredFiles = [
   'supabase/migrations/20261001190000_manual_payment_mode.sql',
+  'supabase/migrations/20261003120000_harden_manual_payment_confirmation.sql',
   'services/billing/payment-mode.service.ts',
   'services/billing/manual-payment.service.ts',
   'lib/billing/manual-pricing.ts',
@@ -26,6 +27,7 @@ for (const file of requiredFiles) {
 }
 
 const migration = read('supabase/migrations/20261001190000_manual_payment_mode.sql');
+const confirmationMigration = read('supabase/migrations/20261003120000_harden_manual_payment_confirmation.sql');
 const subscribe = read('app/api/billing/subscribe/route.ts');
 const embedded = read('app/api/stripe/embedded-checkout/route.ts');
 const modeService = read('services/billing/payment-mode.service.ts');
@@ -52,6 +54,7 @@ const checks = [
   ['Billing summary reads payment_method', read('app/api/stripe/billing-summary/route.ts').includes('payment_method, updated_at')],
   ['Manual cancellation is server-side', read('services/billing/barbershop-stripe.service.ts').includes('MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED')],
   ['Manual cancellation API keeps CSRF protection', read('app/api/silentra-admin/subscription-requests/[requestId]/route.ts').includes('assertSameOrigin')],
+  ['Manual confirmation RPC hardening is tracked', confirmationMigration.includes('USER_SUBSCRIPTION_TENANT_CONFLICT') && confirmationMigration.includes("notify pgrst, 'reload schema'")],
 ];
 
 for (const [name, passed] of checks) {
