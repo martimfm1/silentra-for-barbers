@@ -560,12 +560,44 @@ export class ManualPaymentService {
         hint: error.hint ?? null,
       });
 
+      const rpcMessage = error.message ?? '';
+      const knownCode =
+        isRpcUnavailable
+          ? 'DB_WRITE_FAILED'
+          : rpcMessage === 'SUBSCRIPTION_REQUEST_NOT_FOUND'
+            ? 'SUBSCRIPTION_NOT_FOUND'
+            : rpcMessage === 'MANUAL_SUBSCRIPTION_NOT_FOUND'
+              ? 'SUBSCRIPTION_NOT_FOUND'
+              : rpcMessage === 'PAYMENT_NOT_READY_FOR_CONFIRMATION'
+                ? 'MANUAL_REQUEST_INVALID'
+                : rpcMessage === 'PAYMENT_LINK_NOT_SENT'
+                  ? 'MANUAL_REQUEST_INVALID'
+                  : rpcMessage === 'INVALID_CONFIRMATION_REQUEST'
+                    ? 'MANUAL_REQUEST_INVALID'
+                    : rpcMessage === 'ACTIVE_MANUAL_SUBSCRIPTION_EXISTS'
+                      ? 'SUBSCRIPTION_NOT_ACTIVE'
+                      : rpcMessage === 'ACTIVE_STRIPE_SUBSCRIPTION_EXISTS'
+                        ? 'SUBSCRIPTION_NOT_ACTIVE'
+                        : rpcMessage === 'PLAN_ALREADY_ACTIVE'
+                          ? 'SUBSCRIPTION_NOT_ACTIVE'
+                          : rpcMessage === 'USER_SUBSCRIPTION_TENANT_CONFLICT'
+                            ? 'SUBSCRIPTION_NOT_ACTIVE'
+                            : 'DB_WRITE_FAILED';
+
+      console.error('[MANUAL_PAYMENT_CONFIRMATION_FAILED]', {
+        requestId,
+        actorUserId,
+        rpcCode: error.code ?? null,
+        rpcMessage: rpcMessage || null,
+        billingCode: knownCode,
+      });
+
       throw new BillingError(
         isRpcUnavailable
           ? 'O serviço de confirmação de pagamentos ainda não está sincronizado com a base de dados. Aplica as migrações pendentes e atualiza o schema do Supabase.'
-          : (known[error.message] ??
+          : (known[rpcMessage] ??
               'Não foi possível confirmar o pagamento. Verifica os registos de faturação e tenta novamente.'),
-        isRpcUnavailable ? 'DB_WRITE_FAILED' : 'SUBSCRIPTION_NOT_ACTIVE',
+        knownCode,
       );
     }
 
