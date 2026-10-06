@@ -18,7 +18,7 @@ const requiredFiles = [
   'app/api/silentra-admin/subscription-requests/route.ts',
   'app/api/silentra-admin/subscription-requests/[requestId]/route.ts',
   'app/api/cron/manual-subscriptions/route.ts',
-  'supabase/migrations/20261006110000_manual_payment_documents.sql',
+  'supabase/migrations/20261006132715_manual_payment_documents.sql',
   'services/billing/manual-payment-document.ts',
   'services/billing/manual-payment-document.service.ts',
   'app/api/billing/documents/[documentId]/route.ts',
@@ -39,7 +39,7 @@ const manualService = read('services/billing/manual-payment.service.ts');
 const pricingCard = read('components/billing/PricingCard.tsx');
 const cron = read('app/api/cron/manual-subscriptions/route.ts');
 const vercel = read('vercel.json');
-const documentsMigration = read('supabase/migrations/20261006110000_manual_payment_documents.sql');
+const documentsMigration = read('supabase/migrations/20261006132715_manual_payment_documents.sql');
 const documentService = read('services/billing/manual-payment-document.service.ts');
 const brevo = read('lib/email/brevo.ts');
 
