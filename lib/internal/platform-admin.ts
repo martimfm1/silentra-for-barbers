@@ -25,7 +25,13 @@ export async function getPlatformAdminContext() {
     ? normalized(user.email) === allowedEmail
     : false;
 
-  if (!userMatches && !emailMatches) return null;
+  // When both allowlist values are configured, require both to match. This
+  // gives production a stable identity check plus an independent email check.
+  if (allowedUserId && allowedEmail) {
+    if (!userMatches || !emailMatches) return null;
+  } else if (!userMatches && !emailMatches) {
+    return null;
+  }
 
   return {
     user,
