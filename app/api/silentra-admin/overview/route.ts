@@ -331,6 +331,9 @@ export async function GET(request: Request) {
           process.env.MANUAL_PRICE_ENTERPRISE_MONTHLY_EUR?.trim() &&
           process.env.MANUAL_PRICE_ENTERPRISE_YEARLY_EUR?.trim(),
         ),
+        manualPaymentHostAllowlistConfigured: Boolean(
+          process.env.MANUAL_PAYMENT_ALLOWED_HOSTS?.trim(),
+        ),
       },
       activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map(
         (event) => ({
