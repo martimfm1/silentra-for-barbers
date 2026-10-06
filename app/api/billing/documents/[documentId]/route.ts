@@ -18,7 +18,7 @@ export async function GET(request: Request, { params }: Params) {
       const document = await ManualPaymentDocumentService.getForUser(documentId, user.id);
       if (document) {
         const pdf = ManualPaymentDocumentService.generatePdf(document);
-        return new NextResponse(pdf as unknown as BodyInit, {
+        return new NextResponse(new Uint8Array(pdf), {
           headers: {
             'Content-Type': 'application/pdf',
             'Content-Disposition': `attachment; filename="Silentra-${document.document_number}.pdf"`,
@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: Params) {
     const document = await ManualPaymentDocumentService.getById(documentId);
     if (!document) return NextResponse.json({ error: 'Comprovativo não encontrado.' }, { status: 404 });
     const pdf = ManualPaymentDocumentService.generatePdf(document);
-    return new NextResponse(pdf as unknown as BodyInit, {
+    return new NextResponse(new Uint8Array(pdf), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Silentra-${document.document_number}.pdf"`,
