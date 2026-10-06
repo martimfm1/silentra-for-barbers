@@ -57,7 +57,7 @@ export default async function RootLayout({
       )}
     >
       <head>
-        <!-- Google Tag Manager -->
+        {/* Google Tag Manager */}
         <script
           id="google-tag-manager"
           dangerouslySetInnerHTML={{
@@ -68,7 +68,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PBCWTRT5');`,
           }}
         />
-        <!-- End Google Tag Manager -->
+        {/* End Google Tag Manager */}
         <script
           id="whop-pixel"
           dangerouslySetInnerHTML={{ __html: WHOP_PIXEL_SCRIPT }}
