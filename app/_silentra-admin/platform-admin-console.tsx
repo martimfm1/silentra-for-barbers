@@ -14,9 +14,15 @@ import {
   Database,
   Gauge,
   KeyRound,
+  MailWarning,
   RefreshCw,
   Search,
+  ServerCog,
+  ShieldAlert,
   ShieldCheck,
+  TimerReset,
+  TrendingUp,
+  WalletCards,
   UserRoundCog,
   Wrench,
   XCircle,
@@ -35,7 +41,33 @@ type Overview = {
     upcomingAppointments: number;
     activeSubscriptions: number;
     planAssignments: number;
+    activePaidSubscriptions: number;
   };
+  operations: {
+    openPaymentRequests: number;
+    paymentSentRequests: number;
+    paidManualRequests30d: number;
+    manualRevenue30d: number;
+    manualConversion30d: number;
+    emailFailures: number;
+    manualExpiring7d: number;
+    newShops7d: number;
+    newUsers7d: number;
+    appointmentsNext7d: number;
+    canceledSubscriptions30d: number;
+  };
+  system: {
+    adminIdentityConfigured: boolean;
+    emailConfigured: boolean;
+    stripeConfigured: boolean;
+    manualPricingConfigured: boolean;
+  };
+  activity: Array<{
+    action: string;
+    entityType: string;
+    entityId: string | null;
+    createdAt: string;
+  }>;
   plans: { free: number; pro: number; enterprise: number };
   recentShops: Array<{
     id: string;
@@ -568,6 +600,158 @@ export default function PlatformAdminConsole() {
                 meta={`${data.stats.planAssignments} overrides`}
               />
             </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                label="Receita manual · 30d"
+                value={formatMoney(data.operations.manualRevenue30d)}
+                meta={`${data.operations.paidManualRequests30d} pagamentos confirmados`}
+                tone="good"
+              />
+              <StatCard
+                label="Conversão manual · 30d"
+                value={`${data.operations.manualConversion30d}%`}
+                meta="pedidos → pagos"
+                tone={data.operations.manualConversion30d >= 50 ? 'good' : 'warn'}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setManualRequestFilter('ALL');
+                  setTab('payment_requests');
+                }}
+                className="text-left"
+              >
+                <StatCard
+                  label="Pedidos por tratar"
+                  value={data.operations.openPaymentRequests}
+                  meta={`${data.operations.paymentSentRequests} com pagamento enviado`}
+                  tone={data.operations.openPaymentRequests > 0 ? 'warn' : 'good'}
+                />
+              </button>
+              <StatCard
+                label="Subscrições pagas"
+                value={data.stats.activePaidSubscriptions}
+                meta={`${data.operations.manualExpiring7d} manuais a expirar em 7d`}
+                tone={data.operations.manualExpiring7d > 0 ? 'warn' : 'good'}
+              />
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="size-4 text-emerald-300" />
+                  <h2 className="font-semibold">Operação e crescimento</h2>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                    <p className="text-[10px] uppercase text-zinc-600">Novos tenants</p>
+                    <p className="mt-1 text-lg font-semibold">{data.operations.newShops7d}</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                    <p className="text-[10px] uppercase text-zinc-600">Novos utilizadores</p>
+                    <p className="mt-1 text-lg font-semibold">{data.operations.newUsers7d}</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                    <p className="text-[10px] uppercase text-zinc-600">Bookings próximos</p>
+                    <p className="mt-1 text-lg font-semibold">{data.operations.appointmentsNext7d}</p>
+                    <p className="text-[11px] text-zinc-600">próximos 7d</p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                    <p className="text-[10px] uppercase text-zinc-600">Cancelamentos</p>
+                    <p className="mt-1 text-lg font-semibold">{data.operations.canceledSubscriptions30d}</p>
+                    <p className="text-[11px] text-zinc-600">últimos 30d</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="size-4 text-amber-300" />
+                  <h2 className="font-semibold">Atenção</h2>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setManualRequestFilter('PAYMENT_SENT');
+                      setTab('payment_requests');
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3 text-left hover:border-white/15"
+                  >
+                    <span className="flex items-center gap-2 text-xs text-zinc-300">
+                      <WalletCards className="size-4 text-amber-300" />
+                      Pagamentos aguardam confirmação
+                    </span>
+                    <span className="font-semibold text-amber-200">{data.operations.paymentSentRequests}</span>
+                  </button>
+                  <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                    <span className="flex items-center gap-2 text-xs text-zinc-300">
+                      <TimerReset className="size-4 text-amber-300" />
+                      Manuais a expirar em 7d
+                    </span>
+                    <span className="font-semibold">{data.operations.manualExpiring7d}</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                    <span className="flex items-center gap-2 text-xs text-zinc-300">
+                      <MailWarning className="size-4 text-red-300" />
+                      Pedidos com erro de email
+                    </span>
+                    <span className="font-semibold text-red-200">{data.operations.emailFailures}</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="font-semibold">Atividade recente</h2>
+                    <p className="mt-1 text-xs text-zinc-600">Últimas ações registadas na plataforma.</p>
+                  </div>
+                  <ServerCog className="size-4 text-zinc-600" />
+                </div>
+                <div className="mt-4 space-y-1">
+                  {data.activity.map((event) => (
+                    <div key={`${event.createdAt}-${event.action}-${event.entityId ?? 'none'}`} className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-medium text-zinc-300">{event.action}</p>
+                        <p className="truncate text-[10px] text-zinc-700">{event.entityType}{event.entityId ? ` · ${event.entityId.slice(0, 8)}` : ''}</p>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-zinc-700">{formatDate(event.createdAt)}</span>
+                    </div>
+                  ))}
+                  {data.activity.length === 0 ? (
+                    <p className="py-6 text-center text-xs text-zinc-700">Ainda não existem eventos.</p>
+                  ) : null}
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-emerald-300" />
+                  <h2 className="font-semibold">Estado da plataforma</h2>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {[
+                    ['Admin identity', data.system.adminIdentityConfigured],
+                    ['Email / Brevo', data.system.emailConfigured],
+                    ['Stripe', data.system.stripeConfigured],
+                    ['Preços manuais', data.system.manualPricingConfigured],
+                  ].map(([label, ok]) => (
+                    <div key={String(label)} className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                      <span className="text-xs text-zinc-400">{label}</span>
+                      <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${ok ? 'bg-emerald-400/10 text-emerald-200' : 'bg-red-400/10 text-red-200'}`}>
+                        {ok ? 'OK' : 'Atenção'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
