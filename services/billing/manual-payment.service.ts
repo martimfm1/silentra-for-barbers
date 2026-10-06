@@ -6,6 +6,13 @@ import {
 } from '@/lib/billing/manual-pricing';
 import { PLANS, type BillingPlan } from '@/lib/stripe/constants';
 import { sendEmail } from '@/lib/notifications';
+import {
+  adminPaymentRequestEmail,
+  customerPaymentLinkEmail,
+  customerSubscriptionActivatedEmail,
+  customerPaymentRejectedEmail,
+  getBillingEmailBaseUrl,
+} from '@/services/billing/email-templates';
 import { BillingError } from '@/types/stripe';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
@@ -89,32 +96,6 @@ export function validatePaymentLink(value: string): string {
   }
 
   return trimmed;
-}
-
-function planLabel(plan: Exclude<BillingPlan, 'free'>) {
-  return plan === PLANS.ENTERPRISE ? 'Barbers Enterprise' : 'Barbers Pro';
-}
-
-function requestTypeLabel(type: ManualRequestType) {
-  return type === 'RENEWAL'
-    ? 'renovação'
-    : type === 'CHANGE'
-      ? 'alteração de plano'
-      : 'subscrição';
-}
-
-function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    (character) =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      })[character] ?? character,
-  );
 }
 
 export class ManualPaymentService {
@@ -343,25 +324,25 @@ export class ManualPaymentService {
     adminUrl.searchParams.set('tab', 'payment_requests');
     adminUrl.searchParams.set('request_id', requestRow.id);
     const adminPath = adminUrl.toString();
-    const html = `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b">
-        <h2>Nova solicitação de subscrição — Silentra</h2>
-        <p><strong>Cliente:</strong> ${escapeHtml(context.customerName)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(context.customerEmail)}</p>
-        <p><strong>Barbearia:</strong> ${escapeHtml(context.barbershopName)}</p>
-        <p><strong>Plano:</strong> ${escapeHtml(planLabel(requestRow.plan))}</p>
-        <p><strong>Preço:</strong> ${escapeHtml(formatManualPrice(requestRow.plan, requestRow.billing_interval))}</p>
-        <p><strong>Data:</strong> ${escapeHtml(new Date(requestRow.created_at).toLocaleString('pt-PT'))}</p>
-        <p><a href="${escapeHtml(adminPath)}" style="display:inline-block;padding:12px 18px;background:#18181b;color:#fff;text-decoration:none;border-radius:8px">VER SOLICITAÇÃO</a></p>
-      </div>
-    `;
+    const template = adminPaymentRequestEmail({
+      customerName: context.customerName,
+      customerEmail: context.customerEmail,
+      barbershopName: context.barbershopName,
+      plan: requestRow.plan,
+      billingInterval: requestRow.billing_interval,
+      price: requestRow.price,
+      currency: requestRow.currency,
+      requestId: requestRow.id,
+      createdAt: requestRow.created_at,
+      adminUrl: adminPath,
+    });
 
     const result = await sendEmail(
       { email: adminEmail },
       {
-        subject: 'Nova solicitação de subscrição — Silentra',
-        body: `Nova solicitação de subscrição — ${planLabel(requestRow.plan)}.`,
-        html,
+        subject: 'Novo pedido de subscrição — Silentra',
+        body: template.text,
+        html: template.html,
         senderName: 'Silentra',
       },
     );
@@ -423,18 +404,17 @@ export class ManualPaymentService {
       })
       .eq('id', row.id);
 
-    const html = `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b">
-        <h2>Pagamento da tua subscrição Silentra</h2>
-        <p>Olá, ${escapeHtml(customer.name_complete ?? 'Cliente')}.</p>
-        <p>A tua solicitação de ${escapeHtml(requestTypeLabel(row.request_type))} do plano <strong>${escapeHtml(planLabel(row.plan))}</strong> foi processada.</p>
-        <p><strong>Valor:</strong> ${escapeHtml(formatManualPrice(row.plan, row.billing_interval))}</p>
-        <p>Para concluir a ativação da tua subscrição, utiliza o botão abaixo.</p>
-        <p><a href="${escapeHtml(link)}" style="display:inline-block;padding:12px 18px;background:#18181b;color:#fff;text-decoration:none;border-radius:8px">EFETUAR PAGAMENTO</a></p>
-        <p>Depois de o pagamento ser confirmado, a tua subscrição será ativada.</p>
-        <p>Obrigado,<br>Equipa Silentra</p>
-      </div>
-    `;
+    const template = customerPaymentLinkEmail({
+      customerName: customer.name_complete,
+      customerEmail: customer.email,
+      barbershopName: shop.name,
+      plan: row.plan,
+      billingInterval: row.billing_interval,
+      price: row.price,
+      currency: row.currency,
+      requestId: row.id,
+      paymentLink: link,
+    });
 
     const emailResult = await sendEmail(
       {
@@ -443,8 +423,8 @@ export class ManualPaymentService {
       },
       {
         subject: 'Pagamento da tua subscrição Silentra',
-        body: 'Foi disponibilizado um link para concluir o pagamento da tua subscrição.',
-        html,
+        body: template.text,
+        html: template.html,
         senderName: 'Silentra',
       },
     );
@@ -622,18 +602,18 @@ export class ManualPaymentService {
         {
           subject: 'A tua subscrição Silentra está ativa',
           body: 'O teu pagamento foi confirmado e a subscrição está ativa.',
-          html: `
-            <div style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b">
-              <h2>A tua subscrição Silentra está ativa</h2>
-              <p>Olá, ${escapeHtml(user.data.name_complete ?? 'Cliente')}.</p>
-              <p>O pagamento foi confirmado.</p>
-              <p><strong>Plano:</strong> ${escapeHtml(planLabel(confirmation.plan as 'pro' | 'enterprise'))}</p>
-              <p><strong>Início:</strong> ${escapeHtml(new Date(confirmation.started_at).toLocaleString('pt-PT'))}</p>
-              <p><strong>Próxima renovação:</strong> ${escapeHtml(new Date(confirmation.expires_at).toLocaleString('pt-PT'))}</p>
-              <p><strong>Estado:</strong> Ativo</p>
-              <p>Obrigado,<br>Equipa Silentra</p>
-            </div>
-          `,
+          html: customerSubscriptionActivatedEmail({
+            customerName: user.data.name_complete,
+            customerEmail: user.data.email,
+            plan: confirmation.plan as 'pro' | 'enterprise',
+            billingInterval: confirmation.billing_interval as 'month' | 'year',
+            price: Number(confirmation.price),
+            currency: confirmation.currency,
+            requestId: confirmation.request_id,
+            startedAt: confirmation.started_at,
+            expiresAt: confirmation.expires_at,
+            dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
+          }).html,
           senderName: 'Silentra',
         },
       );
@@ -695,6 +675,44 @@ export class ManualPaymentService {
       },
       created_at: now,
     });
+
+    const admin = createAdminClient();
+    const { data: customer } = await admin
+      .from('users')
+      .select('id,name_complete,email')
+      .eq('id', row.user_id)
+      .maybeSingle();
+
+    if (customer?.email) {
+      const template = customerPaymentRejectedEmail({
+        customerName: customer.name_complete,
+        customerEmail: customer.email,
+        plan: row.plan,
+        billingInterval: row.billing_interval,
+        price: row.price,
+        currency: row.currency,
+        requestId: row.id,
+        reason: reason?.trim() || null,
+        dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
+      });
+
+      const emailResult = await sendEmail(
+        { email: customer.email, userId: customer.id },
+        {
+          subject: 'Atualização sobre o teu pedido Silentra',
+          body: template.text,
+          html: template.html,
+          senderName: 'Silentra',
+        },
+      );
+
+      if (!emailResult.success) {
+        console.error('[MANUAL_PAYMENT_REJECTION_EMAIL_ERROR]', {
+          requestId: row.id,
+          error: emailResult.error,
+        });
+      }
+    }
 
     return { success: true };
   }
