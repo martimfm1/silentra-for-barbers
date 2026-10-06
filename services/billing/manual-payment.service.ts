@@ -427,7 +427,7 @@ export class ManualPaymentService {
         'DB_READ_FAILED',
       );
 
-    await admin
+    const { error: paymentLinkUpdateError } = await admin
       .from('subscription_requests')
       .update({
         payment_link: link,
@@ -435,6 +435,19 @@ export class ManualPaymentService {
         updated_at: new Date().toISOString(),
       })
       .eq('id', row.id);
+
+    if (paymentLinkUpdateError) {
+      console.error('[MANUAL_PAYMENT_LINK_SAVE_ERROR]', {
+        requestId: row.id,
+        actorUserId,
+        code: paymentLinkUpdateError.code,
+      });
+      return {
+        sent: false as const,
+        error:
+          'Não foi possível guardar o link de pagamento. O email não foi enviado.',
+      };
+    }
 
     const template = customerPaymentLinkEmail({
       customerName: customer.name_complete,
@@ -486,7 +499,9 @@ export class ManualPaymentService {
         updated_at: sentAt,
       })
       .eq('id', row.id)
-      .in('status', ['PENDING', 'PAYMENT_SENT']);
+      .in('status', ['PENDING', 'PAYMENT_SENT'])
+      .select('id')
+      .maybeSingle();
 
     if (markSentError) {
       console.error('[MANUAL_PAYMENT_MARK_SENT_ERROR]', {
@@ -679,7 +694,7 @@ export class ManualPaymentService {
     }
 
     const now = new Date().toISOString();
-    const { error } = await createAdminClient()
+    const { data: rejectedRow, error } = await createAdminClient()
       .from('subscription_requests')
       .update({
         status: 'REJECTED',
@@ -688,12 +703,14 @@ export class ManualPaymentService {
         updated_at: now,
       })
       .eq('id', row.id)
-      .in('status', ['PENDING', 'PAYMENT_SENT']);
+      .in('status', ['PENDING', 'PAYMENT_SENT'])
+      .select('id')
+      .maybeSingle();
 
-    if (error)
+    if (error || !rejectedRow)
       throw new BillingError(
-        'Não foi possível rejeitar o pedido.',
-        'DB_WRITE_FAILED',
+        'O pedido já foi alterado ou não foi possível rejeitá-lo.',
+        error ? 'DB_WRITE_FAILED' : 'SUBSCRIPTION_NOT_ACTIVE',
       );
 
     await createAdminClient().from('audit_logs').insert({
