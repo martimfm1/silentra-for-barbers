@@ -14,6 +14,7 @@ import {
   getBillingEmailBaseUrl,
 } from '@/services/billing/email-templates';
 import { BillingError } from '@/types/stripe';
+import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
@@ -637,44 +638,65 @@ export class ManualPaymentService {
     }
 
     let emailSent = true;
-    const user = await admin
-      .from('users')
-      .select('name_complete,email')
-      .eq('id', confirmation.user_id)
-      .maybeSingle();
+    let receiptEmailSent = false;
+    let receiptDocumentId: string | null = null;
 
-    if (user.data?.email) {
-      const result = await sendEmail(
-        { email: user.data.email, userId: confirmation.user_id },
-        {
-          subject: 'A tua subscrição Silentra está ativa',
-          body: 'O teu pagamento foi confirmado e a subscrição está ativa.',
-          html: customerSubscriptionActivatedEmail({
-            customerName: user.data.name_complete,
-            customerEmail: user.data.email,
-            plan: confirmation.plan as 'pro' | 'enterprise',
-            billingInterval: confirmation.billing_interval as 'month' | 'year',
-            price: Number(confirmation.price),
-            currency: confirmation.currency,
-            requestId: confirmation.request_id,
-            startedAt: confirmation.started_at,
-            expiresAt: confirmation.expires_at,
-            dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
-          }).html,
-          senderName: 'Silentra',
-        },
-      );
-      emailSent = result.success;
-      if (!result.success)
-        console.error('[MANUAL_PAYMENT_ACTIVATION_EMAIL_ERROR]', {
+    try {
+      const receipt = await ManualPaymentDocumentService.sendReceipt(requestId);
+      receiptEmailSent = receipt.sent;
+      receiptDocumentId = receipt.document.id;
+      if (!receipt.sent) {
+        console.error('[MANUAL_PAYMENT_RECEIPT_EMAIL_ERROR]', {
           requestId,
-          error: result.error,
+          error: receipt.error ?? null,
         });
+      }
+    } catch (error) {
+      emailSent = false;
+      console.error('[MANUAL_PAYMENT_RECEIPT_ERROR]', {
+        requestId,
+        error: error instanceof Error ? error.message : error,
+      });
     }
+
+    if (!receiptEmailSent) {
+      const user = await admin
+        .from('users')
+        .select('name_complete,email')
+        .eq('id', confirmation.user_id)
+        .maybeSingle();
+
+      if (user.data?.email) {
+        const result = await sendEmail(
+          { email: user.data.email, userId: confirmation.user_id },
+          {
+            subject: 'A tua subscrição Silentra está ativa',
+            body: 'O teu pagamento foi confirmado e a subscrição está ativa.',
+            html: customerSubscriptionActivatedEmail({
+              customerName: user.data.name_complete,
+              customerEmail: user.data.email,
+              plan: confirmation.plan as 'pro' | 'enterprise',
+              billingInterval: confirmation.billing_interval as 'month' | 'year',
+              price: Number(confirmation.price),
+              currency: confirmation.currency,
+              requestId: confirmation.request_id,
+              startedAt: confirmation.started_at,
+              expiresAt: confirmation.expires_at,
+              dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
+            }).html,
+            senderName: 'Silentra',
+          },
+        );
+        emailSent = result.success;
+      }
+    }
+
 
     return {
       ...confirmation,
       emailSent,
+      receiptEmailSent,
+      receiptDocumentId,
     };
   }
 
