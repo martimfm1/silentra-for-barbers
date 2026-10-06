@@ -15,6 +15,21 @@ type Subscription = {
   plan_override: string | null;
   status: string;
   updated_at: string | null;
+  payment_method?: string | null;
+  current_period_end?: string | null;
+};
+
+type RecentPayment = {
+  price: number | string;
+  billing_interval: string;
+  paid_at: string | null;
+};
+
+type AuditEvent = {
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  created_at: string;
 };
 
 export async function GET(request: Request) {
@@ -39,6 +54,18 @@ export async function GET(request: Request) {
       users,
       assignments,
       subscriptions,
+      openPaymentRequestsCount,
+      paymentSentRequestsCount,
+      allManualRequests30d,
+      paidManualRequests30d,
+      paidManualRevenue30d,
+      emailFailureRequestsCount,
+      manualExpiring7d,
+      newShops7d,
+      newUsers7d,
+      appointmentsNext7d,
+      canceledSubscriptions30d,
+      recentAuditEvents,
     ] = await Promise.all([
       admin.from('barbershops').select('id', { count: 'exact', head: true }),
       admin.from('users').select('id', { count: 'exact', head: true }),
@@ -95,8 +122,67 @@ export async function GET(request: Request) {
         .or(`expires_at.is.null,expires_at.gt.${now}`),
       admin
         .from('subscriptions')
-        .select('user_id,plan,plan_override,status,updated_at')
+        .select('user_id,plan,plan_override,status,updated_at,payment_method,current_period_end')
         .order('updated_at', { ascending: false }),
+      admin
+        .from('subscription_requests')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['PENDING', 'PAYMENT_SENT']),
+      admin
+        .from('subscription_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'PAYMENT_SENT'),
+      admin
+        .from('subscription_requests')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+      admin
+        .from('subscription_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'PAID')
+        .gte('paid_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+      admin
+        .from('subscription_requests')
+        .select('price,billing_interval,paid_at')
+        .eq('status', 'PAID')
+        .gte('paid_at', new Date(Date.now() - 30 * 86400000).toISOString())
+        .order('paid_at', { ascending: false })
+        .limit(500),
+      admin
+        .from('subscription_requests')
+        .select('id', { count: 'exact', head: true })
+        .not('last_email_error', 'is', null),
+      admin
+        .from('subscriptions')
+        .select('id', { count: 'exact', head: true })
+        .eq('payment_method', 'MANUAL')
+        .in('status', ['active', 'trialing'])
+        .gte('current_period_end', now)
+        .lt('current_period_end', new Date(Date.now() + 7 * 86400000).toISOString()),
+      admin
+        .from('barbershops')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
+      admin
+        .from('appointments')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'scheduled'])
+        .gte('date_hour', now)
+        .lt('date_hour', new Date(Date.now() + 7 * 86400000).toISOString()),
+      admin
+        .from('subscriptions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'canceled')
+        .gte('updated_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+      admin
+        .from('audit_logs')
+        .select('action,entity_type,entity_id,created_at')
+        .order('created_at', { ascending: false })
+        .limit(12),
     ]);
 
     for (const result of [
@@ -114,9 +200,38 @@ export async function GET(request: Request) {
       users,
       assignments,
       subscriptions,
+      openPaymentRequestsCount,
+      paymentSentRequestsCount,
+      allManualRequests30d,
+      paidManualRequests30d,
+      paidManualRevenue30d,
+      emailFailureRequestsCount,
+      manualExpiring7d,
+      newShops7d,
+      newUsers7d,
+      appointmentsNext7d,
+      canceledSubscriptions30d,
+      recentAuditEvents,
     ]) {
       if (result.error) throw result.error;
     }
+
+    const paidActiveSubscriptions = (subscriptions.data ?? []).filter(
+      (subscription) =>
+        ['pro', 'enterprise'].includes(subscription.plan ?? '') &&
+        ['active', 'trialing'].includes(subscription.status),
+    ).length;
+
+    const manualRevenue30d = (
+      (paidManualRevenue30d.data ?? []) as RecentPayment[]
+    ).reduce((sum, payment) => sum + Number(payment.price || 0), 0);
+
+    const manualRequestTotal30d = allManualRequests30d.count ?? 0;
+    const manualPaid30d = paidManualRequests30d.count ?? 0;
+    const manualConversion30d =
+      manualRequestTotal30d > 0
+        ? Math.round((manualPaid30d / manualRequestTotal30d) * 100)
+        : 0;
 
     const userShopById = new Map<string, string>(
       ((users.data ?? []) as UserShop[])
@@ -183,8 +298,48 @@ export async function GET(request: Request) {
         appointments: appointmentsCount.count ?? 0,
         upcomingAppointments: upcomingCount.count ?? 0,
         activeSubscriptions: activeSubscriptionsCount.count ?? 0,
+        activePaidSubscriptions: paidActiveSubscriptions,
         planAssignments: assignmentsCount.count ?? 0,
       },
+      operations: {
+        openPaymentRequests: openPaymentRequestsCount.count ?? 0,
+        paymentSentRequests: paymentSentRequestsCount.count ?? 0,
+        paidManualRequests30d: manualPaid30d,
+        manualRevenue30d: Number(manualRevenue30d.toFixed(2)),
+        manualConversion30d,
+        emailFailures: emailFailureRequestsCount.count ?? 0,
+        manualExpiring7d: manualExpiring7d.count ?? 0,
+        newShops7d: newShops7d.count ?? 0,
+        newUsers7d: newUsers7d.count ?? 0,
+        appointmentsNext7d: appointmentsNext7d.count ?? 0,
+        canceledSubscriptions30d: canceledSubscriptions30d.count ?? 0,
+      },
+      system: {
+        adminIdentityConfigured: Boolean(
+          process.env.SILENTRA_PLATFORM_ADMIN_USER_ID?.trim() ||
+          process.env.SILENTRA_PLATFORM_ADMIN_EMAIL?.trim(),
+        ),
+        emailConfigured: Boolean(
+          process.env.BREVO_API_KEY?.trim() &&
+          (process.env.BREVO_FROM_EMAIL?.trim() ||
+            process.env.SENDER_EMAIL?.trim()),
+        ),
+        stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
+        manualPricingConfigured: Boolean(
+          process.env.MANUAL_PRICE_PRO_MONTHLY_EUR?.trim() &&
+          process.env.MANUAL_PRICE_PRO_YEARLY_EUR?.trim() &&
+          process.env.MANUAL_PRICE_ENTERPRISE_MONTHLY_EUR?.trim() &&
+          process.env.MANUAL_PRICE_ENTERPRISE_YEARLY_EUR?.trim(),
+        ),
+      },
+      activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map(
+        (event) => ({
+          action: event.action,
+          entityType: event.entity_type,
+          entityId: event.entity_id,
+          createdAt: event.created_at,
+        }),
+      ),
       plans,
       recentShops: rows,
     });
