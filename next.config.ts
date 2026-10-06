@@ -41,6 +41,16 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source:
+          '/(login|forgot-password|reset-password|registo|confirm-email|email-confirmed|email-confirmation-error|my-bookings|onboarding|checkout|dashboard|silentra-admin)(/:path*)?',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
         source: '/silentra-admin/:path*',
         headers: [
           {
