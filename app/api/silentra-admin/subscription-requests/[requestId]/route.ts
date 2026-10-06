@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
+import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 import { assertSameOrigin, billingErrorResponse } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
@@ -99,6 +100,16 @@ export async function PATCH(request: Request, { params }: Params) {
         status: 'PENDING',
         request: renewal,
       }, 201);
+    }
+
+    if (action === 'resend_receipt') {
+      const result = await ManualPaymentDocumentService.sendReceipt(requestId, true);
+      return json({
+        ok: result.sent,
+        status: result.sent ? 'SENT' : 'FAILED',
+        document: result.document,
+        error: result.error ?? null,
+      }, result.sent ? 200 : 502);
     }
 
     if (action === 'confirm_payment') {
