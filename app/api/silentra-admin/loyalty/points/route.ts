@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
-import { assertSameOrigin } from '@/services/billing/http';
+import { assertSameOrigin, billingErrorResponse } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -69,6 +70,13 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error && error.name === 'PlatformAdminError')
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (error instanceof BillingError) {
+      const response = billingErrorResponse(error);
+      return NextResponse.json(
+        { ok: false, error: error.message, code: error.code },
+        { status: response.status, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     console.error('[SILENTRA_ADMIN_LOYALTY_GRANT]', error);
     return NextResponse.json(
       { error: 'Não foi possível atribuir os pontos.' },
