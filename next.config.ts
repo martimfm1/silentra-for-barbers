@@ -41,8 +41,106 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source:
-          '/(login|forgot-password|reset-password|registo|confirm-email|email-confirmed|email-confirmation-error|my-bookings|onboarding|checkout|dashboard|silentra-admin)(/:path*)?',
+        source: '/login/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/forgot-password/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/reset-password/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/registo/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/confirm-email/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/email-confirmed/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/email-confirmation-error/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/my-bookings/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/onboarding/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/checkout/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/dashboard/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
+      {
+        source: '/silentra-admin/:path*',
         headers: [
           {
             key: 'X-Robots-Tag',
