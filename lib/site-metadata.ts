@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 const SITE_URL = 'https://barbers.silentra.me';
-const SITE_NAME = 'Silentra';
+const SITE_NAME = 'Silentra for Barbers';
 const OG_IMAGE = `/og-image.png`;
 
 // ── Shared base ──────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ export const guestMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
 
   title: {
-    default: 'Silentra — Gestão e Agendamento Online para Barbearias',
+    default: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
     template: '%s | Silentra',
   },
 
@@ -70,6 +70,7 @@ export const guestMetadata: Metadata = {
       'Gestão completa, faturação e agendamentos sem fricção. O cliente agenda pelo browser em segundos, sem registo nem app.',
     url: base.url,
     siteName: base.siteName,
+    alternateName: 'Silentra',
     locale: base.locale,
     type: 'website',
     images: [base.ogImage],
@@ -79,7 +80,7 @@ export const guestMetadata: Metadata = {
     card: 'summary_large_image',
     site: '@silentra',
     creator: '@silentra',
-    title: 'Silentra — Agendamento Online para Barbearias',
+    title: 'Silentra for Barbers — Agendamento Online para Barbearias',
     description:
       'O teu cliente agenda sem criar conta. Gestão completa da barbearia num único painel.',
     images: [OG_IMAGE],
