@@ -61,6 +61,7 @@ type Overview = {
     emailConfigured: boolean;
     stripeConfigured: boolean;
     manualPricingConfigured: boolean;
+    manualPaymentHostAllowlistConfigured: boolean;
   };
   activity: Array<{
     action: string;
@@ -743,6 +744,7 @@ export default function PlatformAdminConsole() {
                     ['Email / Brevo', data.system.emailConfigured],
                     ['Stripe', data.system.stripeConfigured],
                     ['Preços manuais', data.system.manualPricingConfigured],
+                    ['Allowlist de pagamentos', data.system.manualPaymentHostAllowlistConfigured],
                   ].map(([label, ok]) => (
                     <div key={String(label)} className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
                       <span className="text-xs text-zinc-400">{label}</span>
