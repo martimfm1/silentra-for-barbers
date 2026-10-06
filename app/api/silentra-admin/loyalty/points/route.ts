@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
+import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -8,6 +9,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
     const body = (await request.json().catch(() => null)) as Record<
       string,
