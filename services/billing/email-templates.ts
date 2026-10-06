@@ -9,6 +9,7 @@ export type BillingEmailContext = {
   price: number;
   currency?: string;
   requestId?: string | null;
+  createdAt?: string | null;
   paymentLink?: string | null;
   startedAt?: string | null;
   expiresAt?: string | null;
@@ -180,7 +181,7 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
     ['Período', intervalLabel(context.billingInterval)],
     ['Valor', money(context.price, context.currency)],
     ['Referência', reference(context.requestId)],
-    ['Criado em', dateTime(new Date().toISOString())],
+    ['Criado em', dateTime(context.createdAt)],
   ]);
 
   return shell({
