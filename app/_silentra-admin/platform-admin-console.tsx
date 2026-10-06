@@ -208,6 +208,7 @@ export default function PlatformAdminConsole() {
   const [manualRequestFilter, setManualRequestFilter] = useState<'ALL' | ManualRequest['status']>('ALL');
   const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(null);
   const [paymentLink, setPaymentLink] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
   const [paymentAction, setPaymentAction] = useState(false);
   const [requestsRefreshKey, setRequestsRefreshKey] = useState(0);
 
@@ -422,7 +423,9 @@ export default function PlatformAdminConsole() {
             action,
             ...(action === 'send_payment' || action === 'resend_payment'
               ? { paymentLink }
-              : {}),
+              : action === 'reject'
+                ? { reason: rejectReason }
+                : {}),
           }),
         },
       );
@@ -1168,6 +1171,7 @@ export default function PlatformAdminConsole() {
                         onClick={() => {
                           setSelectedRequest(request);
                           setPaymentLink(request.payment_link ?? '');
+                          setRejectReason('');
                         }}
                         className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
                           selectedRequest?.id === request.id
@@ -1306,6 +1310,21 @@ export default function PlatformAdminConsole() {
                       <p className="text-[11px] leading-5 text-zinc-600">
                         O servidor valida o URL antes de o guardar e enviar. O cliente nunca pode escolher o preço deste pedido.
                       </p>
+                    </label>
+
+                    <label className="block space-y-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        Nota interna para rejeição (opcional)
+                      </span>
+                      <textarea
+                        value={rejectReason}
+                        onChange={(event) => setRejectReason(event.target.value)}
+                        maxLength={500}
+                        rows={3}
+                        placeholder="Ex.: pagamento não identificado, dados incorretos…"
+                        disabled={paymentAction}
+                        className="w-full resize-none rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-red-400/30 disabled:opacity-50"
+                      />
                     </label>
 
                     {selectedRequest.last_email_error ? (
