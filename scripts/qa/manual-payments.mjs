@@ -18,6 +18,10 @@ const requiredFiles = [
   'app/api/silentra-admin/subscription-requests/route.ts',
   'app/api/silentra-admin/subscription-requests/[requestId]/route.ts',
   'app/api/cron/manual-subscriptions/route.ts',
+  'supabase/migrations/20261006110000_manual_payment_documents.sql',
+  'services/billing/manual-payment-document.ts',
+  'services/billing/manual-payment-document.service.ts',
+  'app/api/billing/documents/[documentId]/route.ts',
 ];
 
 for (const file of requiredFiles) {
@@ -35,6 +39,9 @@ const manualService = read('services/billing/manual-payment.service.ts');
 const pricingCard = read('components/billing/PricingCard.tsx');
 const cron = read('app/api/cron/manual-subscriptions/route.ts');
 const vercel = read('vercel.json');
+const documentsMigration = read('supabase/migrations/20261006110000_manual_payment_documents.sql');
+const documentService = read('services/billing/manual-payment-document.service.ts');
+const brevo = read('lib/email/brevo.ts');
 
 const checks = [
   ['Default payment mode is MANUAL', modeService.includes("DEFAULT_PAYMENT_MODE: PaymentMode = 'MANUAL'")],
@@ -55,6 +62,10 @@ const checks = [
   ['Manual cancellation is server-side', read('services/billing/barbershop-stripe.service.ts').includes('MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED')],
   ['Manual cancellation API keeps CSRF protection', read('app/api/silentra-admin/subscription-requests/[requestId]/route.ts').includes('assertSameOrigin')],
   ['Manual confirmation RPC hardening is tracked', confirmationMigration.includes('USER_SUBSCRIPTION_TENANT_CONFLICT') && confirmationMigration.includes("notify pgrst, 'reload schema'")],
+  ['Manual payment documents are idempotent', documentsMigration.includes('manual_request_id uuid not null unique') && documentsMigration.includes('create_manual_payment_document')],
+  ['Manual receipt PDF generation exists', documentService.includes('generateManualPaymentReceiptPdf')],
+  ['Manual receipt email has PDF attachment', documentService.includes('attachments:') && brevo.includes('attachment: input.attachments.map')],
+  ['Manual receipt resend endpoint exists', read('app/api/billing/documents/[documentId]/route.ts').includes('ManualPaymentDocumentService.sendReceipt')],
 ];
 
 for (const [name, passed] of checks) {
