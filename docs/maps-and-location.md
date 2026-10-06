@@ -13,10 +13,10 @@ Não uses esta variável com o prefixo `NEXT_PUBLIC_`: o token não deve ser env
 O mapa público de `/barbershops` usa os basemaps da CARTO através do Leaflet. A chave de basemap deve ser definida no ambiente da aplicação:
 
 ```env
-CARTO_API_KEY=
+NEXT_PUBLIC_CARTO_API_KEY=
 ```
 
-A chave é usada pelo browser apenas para autenticar pedidos aos tiles do basemap. Não a hardcodes no repositório.
+A chave de basemap é destinada ao browser e deve ser configurada como `NEXT_PUBLIC_CARTO_API_KEY`. No dashboard da CARTO, restringe a chave ao domínio da aplicação sempre que possível. Não a hardcodes no repositório.
 
 ## Experiência de localização
 
@@ -39,5 +39,5 @@ Em `/dashboard/settings` existe um editor dedicado de morada e localização. O 
 - Coordenadas e moradas são validadas server-side.
 - A API de edição verifica que o utilizador pertence à barbearia e é `owner` ou `admin`.
 - O token Mapbox é mantido exclusivamente no servidor.
-- A chave CARTO não é hardcoded no código; é lida de `CARTO_API_KEY`.
+- A chave CARTO não é hardcoded no código; é lida de `NEXT_PUBLIC_CARTO_API_KEY`.
 - A localização do utilizador não é gravada na base de dados.
