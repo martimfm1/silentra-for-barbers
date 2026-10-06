@@ -275,8 +275,8 @@ export function SiteNavbar() {
         href: '/barbershops',
       },
       {
-        label: t('nav.manageBookings', { defaultValue: 'As minhas marcações' }),
-        href: '/my-bookings',
+        label: t('nav.plans', { defaultValue: 'Planos' }),
+        href: '/plans',
       },
       {
         label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
