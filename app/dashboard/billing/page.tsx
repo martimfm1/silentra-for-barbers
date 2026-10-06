@@ -48,7 +48,7 @@ export default function BillingPage() {
               Plano e faturação
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              Resumo do teu plano, estado da subscrição e recibos. As decisões
+              Resumo do teu plano, estado da subscrição e comprovativos de pagamento. As decisões
               de compra e mudança de plano acontecem em /plans.
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function BillingPage() {
               Recibos
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Consulta e descarrega os recibos emitidos pela Stripe.
+              Os pagamentos manuais geram automaticamente um comprovativo em PDF enviado por email.
             </p>
           </div>
           <div className="border border-white/10 bg-white/[0.025] px-4 py-4">
