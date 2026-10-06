@@ -1,6 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
-  formatManualPrice,
   getManualPrice,
   type ManualBillingInterval,
 } from '@/lib/billing/manual-pricing';
