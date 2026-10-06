@@ -13,6 +13,8 @@ export type BillingEmailContext = {
   paymentLink?: string | null;
   startedAt?: string | null;
   expiresAt?: string | null;
+  issuedAt?: string | null;
+  documentNumber?: string | null;
   reason?: string | null;
   adminUrl?: string | null;
   dashboardUrl?: string | null;
@@ -268,6 +270,31 @@ export function customerPaymentRejectedEmail(context: BillingEmailContext) {
     content,
     cta: { label: 'Ver faturação', href: dashboardUrl },
     footer: 'Se acreditas que isto aconteceu por engano, responde ao suporte da Silentra com a referência do pedido.',
+  });
+}
+
+export function customerPaymentReceiptEmail(context: BillingEmailContext) {
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
+  const content =
+    details([
+      ['Comprovativo', context.documentNumber || '—'],
+      ['Plano', planLabel(context.plan)],
+      ['Período', intervalLabel(context.billingInterval)],
+      ['Total pago', money(context.price, context.currency)],
+      ['Data', dateTime(context.issuedAt)],
+      ['Referência', reference(context.requestId)],
+    ]) +
+    '<p style="margin:18px 0 0;color:#71717a;font-size:12px;line-height:1.7">O PDF em anexo é um comprovativo interno de pagamento. Não substitui uma fatura ou recibo fiscal certificado.</p>';
+  return shell({
+    preheader: `Comprovativo ${context.documentNumber || reference(context.requestId)} do teu pagamento Silentra.`,
+    eyebrow: 'Billing · Comprovativo',
+    title: 'Pagamento confirmado',
+    intro: 'O pagamento da tua subscrição foi confirmado. Enviamos em anexo o teu comprovativo de pagamento em PDF.',
+    content,
+    cta: { label: 'Abrir faturação', href: dashboardUrl },
+    footer: 'Silentra · Gestão e agendamento para barbearias',
   });
 }
 
