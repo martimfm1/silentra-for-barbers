@@ -78,16 +78,16 @@ begin
   -- historical unique(user_id) constraint.
   select *
     into v_subscription
-  from public.subscriptions
-  where barbershop_id = v_request.barbershop_id
+  from public.subscriptions as s
+  where s.barbershop_id = v_request.barbershop_id
   for update;
 
   if not found then
     select *
       into v_subscription
-    from public.subscriptions
-    where user_id = v_request.user_id
-      and barbershop_id is null
+    from public.subscriptions as s
+    where s.user_id = v_request.user_id
+      and s.barbershop_id is null
     for update;
   end if;
 
@@ -96,10 +96,10 @@ begin
   if v_subscription.id is null then
     select *
       into v_other_user_subscription
-    from public.subscriptions
-    where user_id = v_request.user_id
-      and barbershop_id is not null
-      and barbershop_id <> v_request.barbershop_id
+    from public.subscriptions as s
+    where s.user_id = v_request.user_id
+      and s.barbershop_id is not null
+      and s.barbershop_id <> v_request.barbershop_id
     limit 1
     for update;
 
