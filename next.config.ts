@@ -41,6 +41,26 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/silentra-admin/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+        ],
+      },
+      {
+        source: '/api/silentra-admin/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+        ],
+      },
+      {
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
