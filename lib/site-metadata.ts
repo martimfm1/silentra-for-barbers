@@ -15,7 +15,7 @@ const base = {
     url: OG_IMAGE,
     width: 1200,
     height: 630,
-    alt: 'Silentra — Gestão e agendamento online para barbearias',
+    alt: 'Silentra for Barbers — Gestão e agendamento online para barbearias',
   },
 } as const;
 
@@ -65,12 +65,11 @@ export const guestMetadata: Metadata = {
   },
 
   openGraph: {
-    title: 'Silentra — Gestão e Agendamento Online para Barbearias',
+    title: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
     description:
       'Gestão completa, faturação e agendamentos sem fricção. O cliente agenda pelo browser em segundos, sem registo nem app.',
     url: base.url,
     siteName: base.siteName,
-    alternateName: 'Silentra',
     locale: base.locale,
     type: 'website',
     images: [base.ogImage],
