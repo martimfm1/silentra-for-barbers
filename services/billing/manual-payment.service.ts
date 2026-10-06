@@ -111,7 +111,7 @@ export function validatePaymentLink(value: string): string {
     configuredHosts.length > 0 &&
     !configuredHosts.some(
       (allowedHost) =>
-        hostname === allowedHost || hostname.endsWith(\`.${allowedHost}\`),
+        hostname === allowedHost || hostname.endsWith(`.${allowedHost}`),
     )
   ) {
     throw new BillingError(
