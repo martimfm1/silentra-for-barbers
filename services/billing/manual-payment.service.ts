@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isIP } from 'node:net';
 import {
   getManualPrice,
   type ManualBillingInterval,
@@ -80,9 +81,41 @@ export function validatePaymentLink(value: string): string {
     );
   }
 
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
+  if (parsed.protocol !== 'https:') {
     throw new BillingError(
-      'O link de pagamento só pode utilizar http:// ou https://.',
+      'O link de pagamento tem de utilizar HTTPS.',
+      'INVALID_PRICE',
+    );
+  }
+
+  const hostname = parsed.hostname.toLowerCase().replace(/\.$/, '');
+  if (
+    !hostname ||
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    isIP(hostname) !== 0
+  ) {
+    throw new BillingError(
+      'O link de pagamento não pode apontar para um host local ou endereço IP.',
+      'INVALID_PRICE',
+    );
+  }
+
+  const configuredHosts = (process.env.MANUAL_PAYMENT_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map((host) => host.trim().toLowerCase().replace(/^\*\./, '').replace(/\.$/, ''))
+    .filter(Boolean);
+
+  if (
+    configuredHosts.length > 0 &&
+    !configuredHosts.some(
+      (allowedHost) =>
+        hostname === allowedHost || hostname.endsWith(\`.${allowedHost}\`),
+    )
+  ) {
+    throw new BillingError(
+      'O domínio deste link de pagamento não está autorizado.',
       'INVALID_PRICE',
     );
   }
