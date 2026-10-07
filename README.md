@@ -161,7 +161,7 @@ app/
 ├── marketplace/             # marketplace
 ├── checkout/                # checkout/billing
 ├── plans/                   # planos
-├── silentrа-admin/          # administração da plataforma
+├── silentra-admin/          # administração da plataforma
 └── ...
 
 components/                  # componentes React
