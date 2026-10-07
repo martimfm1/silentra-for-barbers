@@ -4,6 +4,23 @@ type WebpackConfig = {
   };
 };
 
+/**
+ * Public pages are intentionally embeddable by default.
+ *
+ * Sensitive/authenticated areas explicitly opt out of framing below with
+ * both CSP frame-ancestors and X-Frame-Options for legacy browser coverage.
+ */
+const noFrameHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: "frame-ancestors 'none';",
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY',
+  },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ['192.168.56.1', 'localhost:3000', '192.168.1.6'],
@@ -21,7 +38,7 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Next.js treats app folders starting with `_` as private folders and
+      // Next.js treats app folders starting with '_' as private folders and
       // excludes them from the route tree. Keep the intentionally obscure
       // public URL while routing internally to normal route segments.
       {
@@ -47,6 +64,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -56,6 +74,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -65,6 +84,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -74,6 +94,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -83,6 +104,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -92,6 +114,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -101,6 +124,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -110,6 +134,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -119,6 +144,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -128,6 +154,7 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -137,16 +164,12 @@ const nextConfig = {
             key: 'X-Robots-Tag',
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
+          ...noFrameHeaders,
         ],
       },
       {
-        source: '/silentra-admin/:path*',
-        headers: [
-          {
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow, noarchive, nosnippet',
-          },
-        ],
+        source: '/mensagens/:path*',
+        headers: [...noFrameHeaders],
       },
       {
         source: '/silentra-admin/:path*',
@@ -156,6 +179,18 @@ const nextConfig = {
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          ...noFrameHeaders,
+        ],
+      },
+      {
+        source: '/_silentra-admin/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          ...noFrameHeaders,
         ],
       },
       {
@@ -166,13 +201,21 @@ const nextConfig = {
             value: 'noindex, nofollow, noarchive, nosnippet',
           },
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          ...noFrameHeaders,
         ],
+      },
+      {
+        source: '/api/_silentra-admin/:path*',
+        headers: [...noFrameHeaders],
+      },
+      {
+        source: '/api/:path*',
+        headers: [...noFrameHeaders],
       },
       {
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
             key: 'Permissions-Policy',
