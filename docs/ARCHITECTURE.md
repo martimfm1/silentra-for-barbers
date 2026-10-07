@@ -1,50 +1,63 @@
-# Silentra for Barbers — Architecture
+# Arquitetura
 
-## Canonical rules
+## Objetivo
 
-The project should have one canonical implementation per product surface. Do not create files named `final`, `optimized`, `stable`, `v2`, `new` or `legacy` for a temporary UI variant. Refactor the canonical implementation instead.
+O Silentra for Barbers é uma aplicação Next.js multi-tenant. Cada operação deve respeitar o contexto da barbearia, o utilizador autenticado e os entitlements do plano.
 
-### Booking
+## Camadas
 
-- `app/barbershops/components/booking-drawer.tsx` is the public entry point.
-- `app/barbershops/components/booking-drawer-public.tsx` is the canonical public drawer implementation.
-- Availability is read from `/api/shops/[id]/booking-data`.
-- Booking creation is handled by `/api/bookings` and finalized by the atomic `create_booking_atomic` database function.
-- The browser is never the source of truth for conflicts, tenant ownership, plan access or booking state.
+```text
+UI / Client Components
+        │
+        ▼
+Next.js Route Handlers / Server Actions
+        │
+        ▼
+Services / domain logic
+        │
+        ├── Supabase
+        ├── Stripe
+        ├── Brevo
+        └── Web Push
+```
 
-### Public barbershop page
+A UI apresenta estado e recolhe input, mas não é responsável por decidir se uma operação é autorizada.
 
-- `app/barbershops/[slug]/page.tsx` owns server-side profile resolution.
-- `public-barbershop-page.tsx` is the canonical client presentation.
-- Public amenities come from the normalized `shops.amenities` model.
+## Multi-tenancy
 
-### Settings
+O contexto de tenant deve ser obtido e validado server-side.
 
-`/dashboard/settings` is the single configuration workspace.
+Um endpoint que recebe um `barbershopId`, `tenantId`, recurso ou identificador semelhante do cliente não deve assumir que esse valor é autorizado.
 
-- Business: identity and public business data.
-- Location: address, map and establishment amenities.
-- Hours: opening hours, breaks, days off and booking rules.
-- Appearance: logo and cover.
-- Billing: subscription and invoices.
-- Account: authentication and security.
+Fluxo esperado:
 
-There is intentionally no separate sidebar section for booking rules. Booking rules belong with operating hours because they directly affect availability and reservations.
+1. Identificar o utilizador/sessão.
+2. Resolver o tenant autorizado.
+3. Verificar role/permissões.
+4. Verificar entitlement quando necessário.
+5. Validar o input.
+6. Executar através do service/database layer.
+7. Devolver apenas dados autorizados.
 
-## Data boundaries
+## Supabase
 
-Use the browser Supabase client only for authenticated user operations that are safe under RLS. Server-only operations that require service-role access belong in API routes or server services. Tenant identity must always come from authenticated context and be checked against the requested barbershop.
+O PostgreSQL é a fonte de verdade para os dados persistentes. RLS é uma camada essencial de isolamento. Operações privilegiadas através de service role ficam server-side e devem ter verificações próprias.
 
-Never trust IDs, roles, plan names or visibility flags sent by the browser.
+## API
 
-## Plans
+Route Handlers devem validar autenticação, tenant, permissões e input; aplicar rate limiting em endpoints públicos sensíveis; nunca confiar em IDs, preços, roles ou entitlements enviados pelo browser; e devolver erros controlados sem expor secrets.
 
-Feature access is resolved by `hooks/useFeatureAccess.ts` and `lib/billing/plan-features.ts` for UI state. Backend authorization remains authoritative. Pro-only settings must be enforced again by the server/database function.
+## Billing
 
-## Observability
+Billing tem duas superfícies independentes: provider manual e Stripe. Uma subscrição existente mantém o provider que lhe foi atribuído. Alterar o modo global não deve migrar silenciosamente subscrições existentes.
 
-Production errors use `lib/observability/logger.ts`. Logs must be structured, short and free of credentials or customer PII. See `docs/OBSERVABILITY.md`.
+## Background jobs
 
-## UI principles
+Workers e cron endpoints são protegidos por `CRON_SECRET`. Operações idempotentes são preferíveis porque schedulers e retries podem repetir execuções.
 
-Prefer progressive disclosure, one primary action per section, 44px+ touch targets, visible keyboard focus, reduced-motion friendly transitions and inline validation. See `docs/UI-UX.md`.
+## Princípio
+
+```text
+Never trust the client.
+Resolve → authorize → validate → execute → audit
+```
