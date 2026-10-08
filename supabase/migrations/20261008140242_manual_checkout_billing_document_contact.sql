@@ -77,7 +77,10 @@ begin
     manual_request_id, subscription_id, user_id, barbershop_id,
     document_type, document_number, issued_at, customer_name, customer_email,
     barbershop_name, plan, billing_interval, payment_method, description,
-    currency, subtotal, tax_amount, total
+    currency, subtotal, tax_amount, total,
+    customer_tax_id, customer_phone, customer_address_line1, customer_address_line2,
+    customer_postal_code, customer_city, customer_country, customer_website,
+    seller_name, seller_website
   )
   values (
     v_request.id, v_subscription_id, v_request.user_id, v_request.barbershop_id,
@@ -86,7 +89,10 @@ begin
     v_request.billing_interval, 'MANUAL',
     'Subscrição Silentra for Barbers — ' || initcap(v_request.plan::text) ||
       ' (' || v_request.billing_interval || ')',
-    v_request.currency, v_request.price, 0, v_request.price
+    v_request.currency, v_request.price, 0, v_request.price,
+    v_request.tax_id, v_request.phone, v_request.address_line1, v_request.address_line2,
+    v_request.postal_code, v_request.city, v_request.country, v_request.website,
+    'Silentra', 'https://silentra.me'
   )
   returning * into v_document;
 
