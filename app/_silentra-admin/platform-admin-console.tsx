@@ -1273,7 +1273,60 @@ export default function PlatformAdminConsole() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl border border-emerald-400/10 bg-emerald-400/[0.025] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-200">Dados enviados no checkout</p>
+                        <p className="mt-1 text-[11px] text-zinc-600">
+                          Snapshot preenchido pelo cliente no momento do pedido.
+                        </p>
+                      </div>
+                      {selectedRequest.submitted_at ? (
+                        <span className="text-[10px] text-zinc-600">
+                          {formatDate(selectedRequest.submitted_at)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Faturação</p>
+                        <p className="mt-1 text-xs text-zinc-300">{selectedRequest.billing_name || '—'}</p>
+                        <p className="mt-0.5 break-all text-xs text-zinc-500">{selectedRequest.billing_email || '—'}</p>
+                        <p className="mt-0.5 text-xs text-zinc-500">{selectedRequest.tax_id || 'Sem NIF/VAT'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Contacto</p>
+                        <p className="mt-1 text-xs text-zinc-300">{selectedRequest.phone || '—'}</p>
+                        <p className="mt-0.5 break-all text-xs text-zinc-500">{selectedRequest.website || 'Sem website'}</p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Morada</p>
+                        <p className="mt-1 text-xs text-zinc-300">
+                          {[selectedRequest.address_line1, selectedRequest.address_line2].filter(Boolean).join(', ') || '—'}
+                        </p>
+                        <p className="mt-0.5 text-xs text-zinc-500">
+                          {[selectedRequest.postal_code, selectedRequest.city, selectedRequest.country].filter(Boolean).join(' · ') || '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Operação</p>
+                        <p className="mt-1 text-xs text-zinc-300">
+                          {selectedRequest.business_type || '—'} · {selectedRequest.location_count ?? '—'} localizações
+                        </p>
+                        <p className="mt-0.5 text-xs text-zinc-500">
+                          {selectedRequest.team_size ?? '—'} elementos na equipa
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Mensagem</p>
+                        <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                          {selectedRequest.customer_message || 'Sem mensagem adicional.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
                       <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                         <p className="text-[10px] uppercase tracking-wide text-zinc-600">
                           Plano
