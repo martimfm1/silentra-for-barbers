@@ -3,13 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingService } from '@/services/billing/billing.service';
-import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import {
   PaymentModeService,
   type PaymentMode,
 } from '@/services/billing/payment-mode.service';
 import { SubscriptionService } from '@/services/billing/subscription.service';
-import { getManualPrice } from '@/lib/billing/manual-pricing';
 import { createCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { StripePriceService } from '@/services/billing/stripe-price.service';
 import { BillingError } from '@/types/stripe';
