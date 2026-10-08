@@ -1,186 +1,189 @@
 # Silentra for Barbers
 
-> SaaS multi-tenant de gestão, agendamento e operações para barbearias, com experiência pública para clientes e ferramentas de gestão para equipas.
+> SaaS multi-tenant da Silentra para gestão, agendamento e operações de barbearias, com experiência pública de booking e backoffice completo para equipas.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase)](https://supabase.com/)
-[![Stripe](https://img.shields.io/badge/Stripe-Billing-635bff?logo=stripe)](https://stripe.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06b6d4?logo=tailwindcss)](https://tailwindcss.com/)
+**Produção:** https://barbers.silentra.me
 
-## Sobre o projeto
+[![Next.js](https://img.shields.io/badge/Next.js-16.3.8-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)](https://supabase.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-Billing-635BFF?logo=stripe)](https://stripe.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployment-black?logo=vercel)](https://vercel.com/)
+[![pnpm](https://img.shields.io/badge/pnpm-11.28.2-F69220?logo=pnpm)](https://pnpm.io/)
 
-O Silentra for Barbers é uma plataforma web multi-tenant para barbearias. O produto liga a experiência pública de descoberta e marcação à operação diária da barbearia num único sistema.
+## O que é
 
-A plataforma foi desenhada para manter uma separação clara entre:
+O **Silentra for Barbers** é uma plataforma SaaS multi-tenant para digitalizar a operação de uma barbearia.
 
-```text
-Cliente → páginas públicas / booking / customer portal
-Barbearia → dashboard / agenda / clientes / equipa / POS / marketing
-Backend → APIs / regras de negócio / Supabase / Stripe / Brevo
-```
+A experiência está dividida em duas superfícies:
 
-A autorização, o isolamento de tenants e os entitlements dos planos são tratados no servidor. A UI nunca é considerada a camada de segurança.
+- **Pública:** marketplace, páginas de barbearias, serviços, disponibilidade e booking.
+- **Privada:** dashboard, agenda, clientes, equipa, marketing, mensagens, configurações e billing.
+
+Regras de negócio, autorização, isolamento de tenants e entitlements são decididos no servidor. A UI não é uma fronteira de segurança.
 
 ## Funcionalidades
 
-### Experiência pública e cliente
+### Booking e experiência pública
 
 - Marketplace público de barbearias.
 - Pesquisa, filtros e localização.
-- Perfil público da barbearia e página pública de vendas.
-- Marcação sem obrigar o cliente a criar uma conta.
-- Seleção de serviço, profissional, data e horário.
-- Disponibilidade calculada a partir da agenda e dos bloqueios.
-- Dias fechados protegidos no frontend e no backend.
-- Proteção contra marcações duplicadas/concorrentes no fluxo de reserva.
-- Customer portal com próxima marcação e acesso a detalhes.
-- Gestão segura de marcações através de tokens.
+- Perfil público da barbearia.
+- Serviços, profissionais, horários e disponibilidade.
+- Booking sem obrigar o cliente a criar uma conta.
+- Bloqueios de agenda e dias fechados.
+- Proteção contra reservas concorrentes/duplicadas.
+- Customer portal e gestão de marcações através de tokens.
 - Sistema de fidelização e validação de códigos.
 
-### Dashboard da barbearia
+### Gestão da barbearia
 
-- Início com visão operacional.
-- Agenda e gestão de marcações.
+- Dashboard operacional.
+- Agenda e marcações.
 - Clientes.
 - Serviços, preços e duração.
 - Profissionais e permissões.
 - Bloqueios de agenda.
-- Analytics e estatísticas.
+- Analytics.
 - Marketing e automações.
-- Comunicação manual por email.
-- Notificações push para a equipa.
+- Mensagens e comunicação por email.
+- Push notifications.
 - Configurações da barbearia.
-- Billing e gestão da subscrição.
 
-### POS e vendas
+### POS e marketplace
 
 - Registo de vendas.
-- Catálogo de produtos e serviços.
-- Controlo de quantidade e stock.
-- Pesquisa/seleção de cliente quando aplicável.
-- Histórico de vendas.
-- Reembolso e anulação.
-- Repetição rápida de uma venda concluída usando os dados atuais do catálogo.
-- Validação server-side de preços e stock antes de concluir a operação.
+- Produtos e serviços.
+- Stock e quantidades.
+- Histórico, reembolsos e anulações.
+- Catálogo público.
+- Checkout de produtos.
+- Validação server-side de preços, stock, produtos e entrega.
+- Encomendas e estados de lifecycle.
 
-### Marketplace e encomendas
+### Comunicação
 
-- Catálogo público de produtos.
-- Checkout para produtos.
-- Validação server-side de loja, produtos, quantidades e entrega.
-- Criação atómica de encomendas.
-- Estados de encomenda rastreáveis.
-- Histórico de transições através de eventos de lifecycle.
-- Notificações/transporte preparados para os diferentes estados operacionais.
+- Email transacional via Brevo.
+- Templates com variáveis.
+- Sender por barbearia.
+- Marketing e automações.
+- Workers/filas assíncronas.
+- Push notifications.
+- Suporte preparado para SMS.
 
-### Comunicação e automações
+## Planos
 
-- Email transacional através da Brevo.
-- Templates com variáveis do cliente e da barbearia.
-- Sender baseado na configuração da barbearia.
-- Campanhas e automações de marketing.
-- Filas para processamento assíncrono.
-- Push notifications para eventos operacionais.
-- SMS preparado para futura ativação quando o fornecedor estiver configurado.
+O acesso às funcionalidades é baseado em entitlements verificados no backend.
 
-## Planos SaaS
+| Área | Free | Pro | Enterprise |
+| --- | :---: | :---: | :---: |
+| Marcações | ✓ | ✓ | ✓ |
+| Clientes e serviços | ✓ | ✓ | ✓ |
+| Profissionais | ✓ | ✓ | ✓ |
+| Dashboard | ✓ | ✓ | ✓ |
+| Funcionalidades avançadas | — | ✓ | ✓ |
+| Marketing e automações | — | ✓ | ✓ |
+| Analytics avançado | — | ✓ | ✓ |
+| Funcionalidades Enterprise | — | — | ✓ |
 
-O acesso às funcionalidades e quotas é definido pelos entitlements no backend.
-
-| Área                       | Free | Pro | Enterprise |
-| -------------------------- | :--: | :-: | :--------: |
-| Gestão de marcações        |  ✓   |  ✓  |     ✓      |
-| Clientes e serviços        |  ✓   |  ✓  |     ✓      |
-| Gestão de profissionais    |  ✓   |  ✓  |     ✓      |
-| Dashboard operacional      |  ✓   |  ✓  |     ✓      |
-| Funcionalidades avançadas  |  —   |  ✓  |     ✓      |
-| Marketing e automações     |  —   |  ✓  |     ✓      |
-| Analytics avançado         |  —   |  ✓  |     ✓      |
-| Funcionalidades Enterprise |  —   |  —  |     ✓      |
-
-As quotas e os entitlements efetivos são definidos no código e validados pelas APIs. A interface adapta-se ao plano atual, mas não é utilizada como mecanismo de segurança.
+Os contratos de planos são validados por QA e as APIs não devem confiar no estado enviado pelo cliente.
 
 ## Billing
 
-A faturação suporta dois métodos globais: **Pagamento Manual** e **Stripe**.
+O sistema suporta **Pagamento Manual** e **Stripe**.
 
-- O modo inicial é **MANUAL** e pode ser alterado pelo painel administrativo sem deploy.
-- No modo Manual, uma nova subscrição cria um pedido com preço e período guardados no momento da criação.
-- O administrador pode enviar/reenviar um link de pagamento, confirmar o pagamento e ativar a subscrição.
-- Renovações manuais reutilizam a mesma conta e mantêm o histórico dos pedidos.
-- Um pedido manual não cria Customers, Checkout Sessions ou Subscriptions na Stripe.
-- No modo Stripe, o fluxo Stripe existente continua a tratar novas subscrições.
-- Uma subscrição Stripe existente continua Stripe mesmo que o modo global passe para Manual.
-- Uma subscrição Manual existente continua Manual mesmo que o modo global passe para Stripe.
-- Eventos Stripe continuam a sincronizar apenas subscrições associadas ao provider Stripe.
+- No modo Manual, pedidos guardam o preço/período no momento da criação.
+- O administrador pode enviar/reenviar links de pagamento e ativar subscrições.
+- Uma subscrição Manual continua Manual mesmo que o modo global mude.
+- Uma subscrição Stripe continua Stripe mesmo que o modo global mude.
+- Webhooks Stripe sincronizam apenas subscrições do provider Stripe.
+- Preços e operações sensíveis são validados server-side.
 
-## Segurança e arquitetura
+Ver [docs/BILLING.md](docs/BILLING.md).
 
-A aplicação utiliza uma arquitetura multi-tenant com autorização server-side.
+## Arquitetura
 
-- **Supabase Auth** para autenticação.
-- **PostgreSQL + Row Level Security (RLS)** para isolamento dos dados.
-- Cliente administrativo do Supabase apenas em código server-side.
-- APIs com verificação de identidade e tenant.
-- Entitlements de planos verificados no backend.
-- Permissões de staff separadas das permissões de plano.
-- Rate limiting para fluxos públicos sensíveis.
-- Webhooks Stripe validados server-side.
-- Workers/cron protegidos por `CRON_SECRET`.
-- Segredos nunca devem ser expostos através de variáveis `NEXT_PUBLIC_*`.
-- Headers de segurança configurados no Next.js.
-- Auditoria estática de APIs e segurança integrada na CI.
+```text
+Browser
+  │
+  ├── Public pages
+  │     ├── Marketplace
+  │     ├── Barbershop pages
+  │     └── Booking
+  │
+  └── Authenticated dashboard
+        │
+        ▼
+Next.js App Router
+  │
+  ├── Route Handlers / API
+  ├── Server-side services
+  ├── Authentication / authorization
+  ├── Plan entitlements
+  └── Integrations
+        ├── Supabase Auth
+        ├── PostgreSQL + RLS
+        ├── Stripe
+        ├── Brevo
+        └── Web Push
+```
+
+**Regra de arquitetura:**
+
+```
+UI → API → service layer → database/provider
+```
+
+Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Stack
 
-- **Framework:** Next.js 16.3, App Router
-- **Linguagem:** TypeScript
-- **UI:** React, Tailwind CSS, shadcn/ui, Radix UI, Lucide
-- **Data fetching/state:** TanStack Query
-- **Backend:** Next.js Route Handlers + serviços server-side
-- **Database:** Supabase PostgreSQL
-- **Authentication:** Supabase Auth
-- **Billing:** Stripe
-- **Email:** Brevo
-- **Push:** Web Push
-- **Maps:** Leaflet / React Leaflet
-- **Analytics:** Vercel Analytics + Speed Insights
+- Next.js 16.3.8 + App Router
+- React 19 + TypeScript
+- Tailwind CSS 4 + shadcn/ui + Radix UI
+- TanStack Query
+- Supabase PostgreSQL + Auth
+- Stripe + billing manual
+- Brevo
+- Leaflet / React Leaflet
+- Vercel Analytics + Speed Insights
+- Vercel
+- pnpm 11.28.2
 
-## Estrutura do projeto
+## Estrutura
 
 ```text
 app/
-├── api/                     # APIs, webhooks e workers HTTP
-├── barbershops/             # marketplace e experiência pública
-├── dashboard/               # área autenticada da barbearia
-├── marketplace/             # fluxos públicos de marketplace/checkout
-├── checkout/                # estados de checkout/billing
-├── plans/                   # apresentação pública dos planos
+├── api/                     # APIs, webhooks e workers
+├── barbershops/             # experiência pública
+├── dashboard/               # área autenticada
+├── marketplace/             # marketplace
+├── checkout/                # checkout/billing
+├── plans/                   # planos
+├── silentra-admin/          # administração da plataforma
 └── ...
 
-components/                 # componentes React reutilizáveis
-context/                     # providers de contexto
-lib/                         # auth, Supabase, Stripe, email, segurança e utilitários
-services/                    # regras de negócio e serviços server-side
-supabase/
-├── migrations/              # migrações PostgreSQL versionadas
-└── ...
-scripts/                    # QA, manutenção e automações
+components/                  # componentes React
+context/                     # providers/contextos
+lib/                         # clientes e utilitários
+services/                    # regras de negócio server-side
+supabase/migrations/         # migrations PostgreSQL
+scripts/                     # QA e manutenção
 types/                       # tipos partilhados
-.github/workflows/            # CI e jobs operacionais
+.github/workflows/            # CI
 ```
 
 ## Desenvolvimento local
 
 ### Requisitos
 
-- Node.js 22.
-- pnpm 11.28.2.
-- Conta Supabase para database e autenticação.
-- Stripe para testar billing.
-- Brevo para testar email.
-- Docker Desktop apenas quando forem necessárias operações locais do Supabase CLI que utilizem shadow database.
+- Node.js 22
+- pnpm 11.28.2
+- Projeto Supabase
+- Stripe para billing
+- Brevo para email
+- Docker Desktop quando necessário para operações locais do Supabase CLI
 
 ### Instalação
 
@@ -188,7 +191,9 @@ types/                       # tipos partilhados
 pnpm install
 ```
 
-Cria `.env.local` com os valores do teu ambiente. Usa `.env.example` como referência e nunca comitas secrets reais.
+Cria `.env.local` usando [.env.example](.env.example) como referência.
+
+**Nunca commits secrets reais.**
 
 ### Desenvolvimento
 
@@ -196,148 +201,150 @@ Cria `.env.local` com os valores do teu ambiente. Usa `.env.example` como refer�
 pnpm dev
 ```
 
-### Build de produção local
+O projeto usa Webpack no script de desenvolvimento e build:
+
+```text
+next dev --webpack
+next build --webpack
+```
+
+### Build
 
 ```bash
 pnpm build
 pnpm start
 ```
 
-## Quality assurance
+Ver [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-A repository inclui verificações automáticas para reduzir regressões antes de um release.
+## Variáveis de ambiente
+
+A referência canónica é [.env.example](.env.example).
+
+Principais grupos:
+
+| Grupo | Variáveis |
+| --- | --- |
+| Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
+| Stripe | `STRIPE_SECRET_KEY`, webhook secret e price IDs |
+| Manual billing | `MANUAL_PRICE_*`, `MANUAL_PAYMENT_ALLOWED_HOSTS` |
+| Brevo | `BREVO_API_KEY`, sender e webhook secret |
+| Workers | `CRON_SECRET` |
+| Abuse protection | `RATE_LIMIT_SECRET` |
+| App | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL` |
+| Storage opcional | `AWS_*` |
+
+Secrets server-side nunca devem usar `NEXT_PUBLIC_`.
+
+## Supabase
+
+As alterações de schema vivem em `supabase/migrations`.
+
+Regras:
+
+1. Não editar migrations já aplicadas em produção.
+2. Resolver divergências de migration history antes de operações destrutivas.
+3. Rever RLS e policies em cada alteração de dados.
+4. RPCs privilegiadas devem validar o contexto autorizado.
+5. Service-role credentials ficam exclusivamente server-side.
+
+## Segurança
+
+O projeto utiliza:
+
+- Supabase Auth.
+- PostgreSQL Row Level Security.
+- Isolamento multi-tenant.
+- Autorização server-side.
+- Entitlements server-side.
+- Rate limiting em fluxos públicos sensíveis.
+- Validação de Stripe webhooks.
+- `CRON_SECRET` para workers.
+- Headers de segurança.
+- Auditorias automáticas de API, dependências e segurança.
+
+### Política de embeds
+
+A intenção é permitir que **páginas públicas** sejam integradas em sites como Silentra e Whop, sem transformar áreas privadas em superfícies iframe.
+
+```text
+Páginas públicas
+  → embed permitido
+
+Login / recuperação / onboarding
+  → embed bloqueado
+
+Dashboard / billing / checkout / admin
+  → embed bloqueado
+
+API
+  → não é superfície de iframe
+```
+
+Ver [docs/SECURITY.md](docs/SECURITY.md).
+
+## Quality Assurance
+
+Comandos principais:
 
 ```bash
 pnpm typecheck
 pnpm lint
+pnpm build
 pnpm qa:api
 pnpm qa:plans
 pnpm qa:security
 pnpm qa:deps
 pnpm qa:copy
 pnpm qa:product
+pnpm qa:manual-payments
 pnpm format:check
-pnpm build
-```
-
-Ou executar a sequência principal:
-
-```bash
 pnpm qa
 ```
 
-Também existe smoke QA contra um servidor de produção local:
+Smoke QA:
 
 ```bash
 pnpm start
 pnpm qa:smoke
 ```
 
-A CI executa typecheck, lint, auditorias de API/segurança/dependências, contratos de planos/produto, formatting, build e smoke QA. A validação de secrets de produção (`pnpm qa:env`) é executada separadamente porque requer valores reais do ambiente de produção.
+O `pnpm qa` executa typecheck, lint, build e os contratos/auditorias principais.
 
-## Supabase
+## Deploy
 
-As alterações de schema são versionadas em `supabase/migrations`.
+O projeto está preparado para Vercel.
 
-Antes de aplicar migrations num ambiente remoto:
+Antes de produção:
 
-1. Confirma o estado da migration history local e remota.
-2. Não edites retroativamente migrations que já tenham sido aplicadas em produção.
-3. Resolve discrepâncias de migrations antes de executar comandos destrutivos.
-4. Confirma RLS, policies e funções RPC associadas a cada alteração de dados.
+- CI sem falhas.
+- Env vars configuradas.
+- Migrations aplicadas e verificadas.
+- Stripe webhooks ativos.
+- Brevo configurado.
+- Secrets de workers configurados.
+- Cron/workers operacionais.
+- Domínio e URLs corretos.
+- Smoke tests dos fluxos críticos.
 
-A lógica crítica de reservas, stock, encomendas, billing e outros fluxos sensíveis deve permanecer protegida no servidor/database e não apenas na UI.
+Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-## Variáveis de ambiente
+## Documentação
 
-Consulta `.env.example` para a lista atualizada. As principais variáveis são:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-STRIPE_PRO_MONTHLY_PRICE_ID=
-STRIPE_PRO_YEARLY_PRICE_ID=
-STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=
-STRIPE_ENTERPRISE_YEARLY_PRICE_ID=
-STRIPE_BILLING_PORTAL_CONFIGURATION_ID=
-
-BREVO_API_KEY=
-BREVO_FROM_EMAIL=
-BREVO_FROM_NAME=Silentra
-BREVO_WEBHOOK_SECRET=
-BREVO_SMS_SENDER=
-
-CRON_SECRET=
-RATE_LIMIT_SECRET=
-
-NEXT_PUBLIC_APP_URL=https://barbers.silentra.me
-NEXT_PUBLIC_SITE_URL=https://barbers.silentra.me
-QA_BASE_URL=http://127.0.0.1:3000
-```
-
-As integrações opcionais de storage podem utilizar:
-
-```env
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=
-AWS_S3_BUCKET=
-```
-
-Nunca coloques chaves privadas, tokens, passwords ou secrets no repositório.
-
-## Cron e workers
-
-Existem workers protegidos para tarefas como:
-
-- processamento de marketing;
-- automações;
-- conclusão automática de marcações;
-- filas de emails/notificações.
-
-O endpoint de cada worker valida `CRON_SECRET`. A execução agendada deve ser configurada no ambiente escolhido e monitorizada; uma chamada manual/autenticada não substitui o scheduler de produção.
-
-## Deploy e release
-
-O projeto está preparado para deploy em Vercel.
-
-Antes de promover uma versão para produção, confirma pelo menos:
-
-```text
-1. CI sem falhas.
-2. Dependências sem vulnerabilidades High/Critical bloqueadoras.
-3. Variáveis de ambiente de produção configuradas.
-4. Migrations Supabase aplicadas e validadas.
-5. Stripe webhooks ativos e verificados.
-6. Brevo configurado e sender validado.
-7. CRON_SECRET e RATE_LIMIT_SECRET configurados.
-8. Cron/workers com scheduler operacional.
-9. Domínio e URLs públicas corretos.
-10. Smoke test de booking, login, dashboard, billing e checkout.
-```
-
-Não considerar um release pronto apenas porque o build terminou. Os fluxos críticos devem ser validados ponta a ponta.
+| Documento | Conteúdo |
+| --- | --- |
+| [Architecture](docs/ARCHITECTURE.md) | Arquitetura, camadas e isolamento multi-tenant |
+| [Development](docs/DEVELOPMENT.md) | Setup local, env e workflow |
+| [Billing](docs/BILLING.md) | Stripe e pagamentos manuais |
+| [Security](docs/SECURITY.md) | Segurança, auth, RLS, APIs e embeds |
+| [Deployment](docs/DEPLOYMENT.md) | Release, Vercel, Supabase e produção |
 
 ## Estado do projeto
 
-O Silentra for Barbers encontra-se em desenvolvimento ativo e em fase de hardening para produção. A base funcional, segurança server-side, contratos de produto e infraestrutura de QA estão implementados, mas uma release de produção só deve ser promovida depois de a CI final passar e das integrações externas terem sido verificadas no ambiente real.
+O Silentra for Barbers está em desenvolvimento ativo e em fase de hardening para produção.
 
-A regra de ouro para alterações sensíveis é:
-
-```text
-UI → API → service layer → Supabase / Stripe / Brevo
-```
-
-Uma funcionalidade só está concluída quando o fluxo completo, a autorização, os dados e os estados de erro estão corretos.
-
-## Documentação legal
-
-A aplicação disponibiliza Termos de Serviço e Política de Privacidade para o modelo SaaS. A documentação legal deve ser revista juridicamente antes de uma utilização comercial definitiva.
+Uma funcionalidade só deve ser considerada concluída quando UI, backend, autorização, isolamento de tenant, estados de erro e QA estiverem corretos.
 
 ## Licença
 
-O código deste repositório é disponibilizado de acordo com os termos definidos pelo proprietário do projeto. Na ausência de um ficheiro `LICENSE`, não é concedida qualquer licença open-source por defeito.
+O repositório é privado e propriedade da Silentra. Na ausência de um ficheiro `LICENSE`, não é concedida uma licença open-source por defeito.
