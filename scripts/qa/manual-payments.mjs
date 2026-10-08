@@ -74,7 +74,7 @@ for (const [name, passed] of checks) {
 }
 
 if (process.exitCode) {
-  throw new Error('Manual payment contract checks failed.');
+  throw new Error(`Manual payment contract checks failed: ${checks.filter(([, passed]) => !passed).map(([name]) => name).join(', ')}`);
 }
 
 console.log(`Manual payment contract checks passed: ${checks.length} checks.`);
