@@ -48,7 +48,7 @@ const checks = [
   ['Persistent payment_mode row exists', migration.includes("values ('payment_mode', 'MANUAL')")],
   ['Manual request history exists', migration.includes('create table if not exists public.subscription_requests')],
   ['Manual request is service-role controlled', migration.includes('alter table public.subscription_requests enable row level security')],
-  ['Manual payment link is URL validated', manualService.includes("['http:', 'https:'].includes(parsed.protocol)")],
+  ['Manual payment link is URL validated', manualService.includes("parsed.protocol !== 'https:'")],
   ['Manual price is server resolved', manualService.includes('getManualPrice(input.plan, interval)')],
   ['Manual mode never enters Stripe creation branch', (() => { const start = subscribe.indexOf('if (useManualFlow)'); const end = subscribe.indexOf('// The Stripe price is resolved and validated exclusively on the server.'); return start >= 0 && end > start && !subscribe.slice(start, end).includes('getStripeClient'); })()],
   ['Stripe checkout is server blocked in manual mode', embedded.includes('PAYMENT_MODE_STRIPE_DISABLED')],
@@ -64,7 +64,7 @@ const checks = [
   ['Manual confirmation RPC hardening is tracked', confirmationMigration.includes('USER_SUBSCRIPTION_TENANT_CONFLICT') && confirmationMigration.includes("notify pgrst, 'reload schema'")],
   ['Manual payment documents are idempotent', documentsMigration.includes('manual_request_id uuid not null unique') && documentsMigration.includes('create_manual_payment_document')],
   ['Manual receipt PDF generation exists', documentService.includes('generateManualPaymentReceiptPdf')],
-  ['Manual receipt email has PDF attachment', documentService.includes('attachments:') && brevo.includes('attachment: input.attachments.map')],
+  ['Manual receipt email has PDF attachment', documentService.includes('attachments:') && brevo.includes('attachment:input.attachments.map')],
   ['Manual receipt resend endpoint exists', read('app/api/billing/documents/[documentId]/route.ts').includes('ManualPaymentDocumentService.sendReceipt')],
 ];
 
