@@ -50,7 +50,7 @@ const checks = [
   ['Manual request is service-role controlled', migration.includes('alter table public.subscription_requests enable row level security')],
   ['Manual payment link is URL validated', manualService.includes("['http:', 'https:'].includes(parsed.protocol)")],
   ['Manual price is server resolved', manualService.includes('getManualPrice(input.plan, interval)')],
-  ['Manual mode never enters Stripe creation branch', subscribe.includes("if (useManualFlow)") && !subscribe.slice(subscribe.indexOf('if (useManualFlow)'), subscribe.indexOf('const prices = await BillingService.getAvailablePrices()')).includes('getStripeClient')],
+  ['Manual mode never enters Stripe creation branch', (() => { const start = subscribe.indexOf('if (useManualFlow)'); const end = subscribe.indexOf('// The Stripe price is resolved and validated exclusively on the server.'); return start >= 0 && end > start && !subscribe.slice(start, end).includes('getStripeClient'); })()],
   ['Stripe checkout is server blocked in manual mode', embedded.includes('PAYMENT_MODE_STRIPE_DISABLED')],
   ['Manual active subscriptions are isolated from Stripe', embedded.includes('existingIsManual')],
   ['PricingCard does not accept Stripe priceId', !pricingCard.includes('priceId')],
@@ -74,7 +74,7 @@ for (const [name, passed] of checks) {
 }
 
 if (process.exitCode) {
-  throw new Error('Manual payment contract checks failed.');
+  throw new Error(`Manual payment contract checks failed: ${checks.filter(([, passed]) => !passed).map(([name]) => name).join(', ')}`);
 }
 
 console.log(`Manual payment contract checks passed: ${checks.length} checks.`);

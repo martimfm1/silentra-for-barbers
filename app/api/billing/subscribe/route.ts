@@ -3,13 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import { BillingService } from '@/services/billing/billing.service';
-import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import {
   PaymentModeService,
   type PaymentMode,
 } from '@/services/billing/payment-mode.service';
 import { SubscriptionService } from '@/services/billing/subscription.service';
-import { getManualPrice } from '@/lib/billing/manual-pricing';
 import { createCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { StripePriceService } from '@/services/billing/stripe-price.service';
 import { BillingError } from '@/types/stripe';
@@ -108,73 +106,26 @@ export async function POST(request: Request) {
       : mode === 'MANUAL';
 
     if (useManualFlow) {
-      let requestType: 'NEW' | 'CHANGE' = 'NEW';
-
-      if (hasActivePaid) {
-        if (existing.data?.payment_method !== 'MANUAL') {
-          throw new BillingError(
-            'A subscrição existente pertence a outro método de pagamento e não pode ser migrada automaticamente.',
-            'SUBSCRIPTION_NOT_ACTIVE',
-          );
-        }
-        if (existing.data?.plan === plan) {
-          throw new BillingError(
-            'Este plano já está ativo na tua barbearia.',
-            'SUBSCRIPTION_NOT_ACTIVE',
-          );
-        }
-        requestType = 'CHANGE';
-      }
-
-      const price = getManualPrice(plan, interval);
-      if (!price) {
-        throw new BillingError(
-          'Este plano não está configurado para o período de faturação selecionado.',
-          'INVALID_PRICE',
-        );
-      }
-
-      const row = await ManualPaymentService.createRequest({
-        userId: user.id,
-        barbershopId: profile.barbershop_id,
+      // Manual billing always goes through the dedicated customer-information
+      // checkout. No subscription request is created until the form is submitted.
+      const checkoutIntent = createCheckoutIntent(
+        user.id,
+        profile.barbershop_id,
         plan,
-        billingInterval: interval,
-        requestType,
-      });
+        interval,
+      );
 
-      const { data: shop } = await admin
-        .from('barbershops')
-        .select('name')
-        .eq('id', profile.barbershop_id)
-        .maybeSingle();
-
-      const notification = await ManualPaymentService.notifyAdmin(row, {
-        customerName: profile.name_complete || user.email,
-        customerEmail: user.email,
-        barbershopName: shop?.name || 'Barbearia',
-        appOrigin: new URL(request.url).origin,
+      const query = new URLSearchParams({
+        intent: checkoutIntent,
       });
 
       return NextResponse.json(
         {
           mode,
-          message:
-            requestType === 'CHANGE'
-              ? 'Pedido de alteração recebido. A equipa irá enviar-te as instruções de pagamento.'
-              : 'Pedido de subscrição recebido. A equipa irá enviar-te as instruções de pagamento.',
-          redirectUrl: `/dashboard/billing?manual=pending&request_id=${encodeURIComponent(row.id)}`,
-          request: {
-            id: row.id,
-            status: row.status,
-            plan: row.plan,
-            billingInterval: row.billing_interval,
-            price: row.price,
-            currency: row.currency,
-          },
-          adminNotificationSent: notification.sent,
+          message: 'A abrir o checkout de pagamento manual.',
+          redirectUrl: `/checkout/manual?${query.toString()}`,
         },
         {
-          status: 201,
           headers: { 'Cache-Control': 'no-store' },
         },
       );

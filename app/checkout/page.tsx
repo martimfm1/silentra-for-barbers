@@ -41,10 +41,6 @@ export default async function CheckoutPage({
       ),
   );
 
-  if (paymentMode === 'MANUAL' && !existingStripeSubscription) {
-    redirect('/plans?payment=manual');
-  }
-
   if (params.checkout === 'return') {
     return (
       <main className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-50 sm:px-6 lg:px-8">
@@ -93,6 +89,10 @@ export default async function CheckoutPage({
         </div>
       </main>
     );
+  }
+
+  if (paymentMode === 'MANUAL' && !existingStripeSubscription) {
+    redirect(`/checkout/manual?intent=${encodeURIComponent(token)}`);
   }
 
   if (intent.barbershopId !== tenant.barbershopId) {

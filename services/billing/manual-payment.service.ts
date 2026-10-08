@@ -46,6 +46,21 @@ export interface ManualSubscriptionRequest {
   last_email_error: string | null;
   payment_email_message_id: string | null;
   notes: string | null;
+  billing_name: string | null;
+  tax_id: string | null;
+  billing_email: string | null;
+  phone: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  postal_code: string | null;
+  city: string | null;
+  country: string;
+  website: string | null;
+  business_type: string | null;
+  location_count: number | null;
+  team_size: number | null;
+  customer_message: string | null;
+  submitted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -201,6 +216,22 @@ export class ManualPaymentService {
     plan: Exclude<BillingPlan, 'free'>;
     billingInterval?: ManualBillingInterval;
     requestType?: ManualRequestType;
+    details?: {
+      billingName: string;
+      taxId?: string | null;
+      billingEmail: string;
+      phone: string;
+      addressLine1: string;
+      addressLine2?: string | null;
+      postalCode: string;
+      city: string;
+      country: string;
+      website?: string | null;
+      businessType?: string | null;
+      locationCount?: number | null;
+      teamSize?: number | null;
+      customerMessage?: string | null;
+    };
   }): Promise<ManualSubscriptionRequest> {
     const interval = input.billingInterval ?? 'month';
     const requestType = input.requestType ?? 'NEW';
@@ -287,6 +318,21 @@ export class ManualPaymentService {
         payment_method: 'MANUAL',
         price: Number(price.unitAmount.toFixed(2)),
         currency: price.currency,
+        billing_name: input.details?.billingName ?? null,
+        tax_id: input.details?.taxId ?? null,
+        billing_email: input.details?.billingEmail ?? null,
+        phone: input.details?.phone ?? null,
+        address_line1: input.details?.addressLine1 ?? null,
+        address_line2: input.details?.addressLine2 ?? null,
+        postal_code: input.details?.postalCode ?? null,
+        city: input.details?.city ?? null,
+        country: input.details?.country ?? 'PT',
+        website: input.details?.website ?? null,
+        business_type: input.details?.businessType ?? null,
+        location_count: input.details?.locationCount ?? null,
+        team_size: input.details?.teamSize ?? null,
+        customer_message: input.details?.customerMessage ?? null,
+        submitted_at: new Date().toISOString(),
       })
       .select('*')
       .single();
@@ -450,9 +496,12 @@ export class ManualPaymentService {
       };
     }
 
+    const recipientEmail = row.billing_email || customer.email;
+    const recipientName = row.billing_name || customer.name_complete || customer.email;
+
     const template = customerPaymentLinkEmail({
-      customerName: customer.name_complete,
-      customerEmail: customer.email,
+      customerName: recipientName,
+      customerEmail: recipientEmail,
       barbershopName: shop.name,
       plan: row.plan,
       billingInterval: row.billing_interval,
@@ -464,7 +513,7 @@ export class ManualPaymentService {
 
     const emailResult = await sendEmail(
       {
-        email: customer.email,
+        email: recipientEmail,
         userId: customer.id,
       },
       {
