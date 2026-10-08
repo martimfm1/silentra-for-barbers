@@ -496,9 +496,12 @@ export class ManualPaymentService {
       };
     }
 
+    const recipientEmail = row.billing_email || customer.email;
+    const recipientName = row.billing_name || customer.name_complete || customer.email;
+
     const template = customerPaymentLinkEmail({
-      customerName: customer.name_complete,
-      customerEmail: customer.email,
+      customerName: recipientName,
+      customerEmail: recipientEmail,
       barbershopName: shop.name,
       plan: row.plan,
       billingInterval: row.billing_interval,
@@ -510,7 +513,7 @@ export class ManualPaymentService {
 
     const emailResult = await sendEmail(
       {
-        email: customer.email,
+        email: recipientEmail,
         userId: customer.id,
       },
       {
