@@ -131,11 +131,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'O website introduzido não é válido.' }, { status: 400 });
     }
 
-    if (details.locationCount !== '' && details.locationCount !== undefined && locationCount === null) {
+    if (details.locationCount !== '' && details.locationCount !== undefined && details.locationCount !== null && locationCount === null) {
       return NextResponse.json({ error: 'O número de localizações não é válido.' }, { status: 400 });
     }
 
-    if (details.teamSize !== '' && details.teamSize !== undefined && teamSize === null) {
+    if (details.teamSize !== '' && details.teamSize !== undefined && details.teamSize !== null && teamSize === null) {
       return NextResponse.json({ error: 'O número de elementos da equipa não é válido.' }, { status: 400 });
     }
 
