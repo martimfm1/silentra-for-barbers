@@ -154,7 +154,7 @@ const checks = [
   [
     'Manual receipt email has PDF attachment',
     documentService.includes('attachments:') &&
-      brevo.includes('attachment:input.attachments.map'),
+      /attachment:\s*input\.attachments\.map/.test(brevo),
   ],
   [
     'Manual receipt resend endpoint exists',
