@@ -18,12 +18,7 @@ import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
-  | 'PENDING'
-  | 'PAYMENT_SENT'
-  | 'PAID'
-  | 'REJECTED'
-  | 'EXPIRED'
-  | 'CANCELLED';
+  'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
 
 export interface ManualSubscriptionRequest {
   id: string;
@@ -120,7 +115,9 @@ export function validatePaymentLink(value: string): string {
 
   const configuredHosts = (process.env.MANUAL_PAYMENT_ALLOWED_HOSTS ?? '')
     .split(',')
-    .map((host) => host.trim().toLowerCase().replace(/^\*\./, '').replace(/\.$/, ''))
+    .map((host) =>
+      host.trim().toLowerCase().replace(/^\*\./, '').replace(/\.$/, ''),
+    )
     .filter(Boolean);
 
   if (
@@ -262,8 +259,8 @@ export class ManualPaymentService {
 
     const hasActivePaid = Boolean(
       active &&
-        active.plan !== PLANS.FREE &&
-        ['active', 'trialing'].includes(active.status),
+      active.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(active.status),
     );
 
     if (requestType === 'NEW' && hasActivePaid) {
@@ -309,8 +306,7 @@ export class ManualPaymentService {
       .insert({
         user_id: input.userId,
         barbershop_id: input.barbershopId,
-        subscription_id:
-          requestType === 'NEW' ? null : (active?.id ?? null),
+        subscription_id: requestType === 'NEW' ? null : (active?.id ?? null),
         request_type: requestType,
         plan: input.plan,
         billing_interval: interval,
@@ -497,7 +493,8 @@ export class ManualPaymentService {
     }
 
     const recipientEmail = row.billing_email || customer.email;
-    const recipientName = row.billing_name || customer.name_complete || customer.email;
+    const recipientName =
+      row.billing_name || customer.name_complete || customer.email;
 
     const template = customerPaymentLinkEmail({
       customerName: recipientName,
@@ -607,8 +604,7 @@ export class ManualPaymentService {
           'Esta barbearia já tem uma subscrição manual ativa.',
         ACTIVE_STRIPE_SUBSCRIPTION_EXISTS:
           'Esta barbearia já tem uma subscrição Stripe ativa. Não é seguro convertê-la através deste pedido manual.',
-        SUBSCRIPTION_REQUEST_NOT_FOUND:
-          'Pedido de subscrição não encontrado.',
+        SUBSCRIPTION_REQUEST_NOT_FOUND: 'Pedido de subscrição não encontrado.',
         MANUAL_SUBSCRIPTION_NOT_FOUND:
           'Não foi encontrada uma subscrição manual válida para esta operação.',
         PLAN_ALREADY_ACTIVE:
@@ -638,28 +634,27 @@ export class ManualPaymentService {
       });
 
       const rpcMessage = error.message ?? '';
-      const knownCode =
-        isRpcUnavailable
-          ? 'DB_WRITE_FAILED'
-          : rpcMessage === 'SUBSCRIPTION_REQUEST_NOT_FOUND'
+      const knownCode = isRpcUnavailable
+        ? 'DB_WRITE_FAILED'
+        : rpcMessage === 'SUBSCRIPTION_REQUEST_NOT_FOUND'
+          ? 'SUBSCRIPTION_NOT_FOUND'
+          : rpcMessage === 'MANUAL_SUBSCRIPTION_NOT_FOUND'
             ? 'SUBSCRIPTION_NOT_FOUND'
-            : rpcMessage === 'MANUAL_SUBSCRIPTION_NOT_FOUND'
-              ? 'SUBSCRIPTION_NOT_FOUND'
-              : rpcMessage === 'PAYMENT_NOT_READY_FOR_CONFIRMATION'
+            : rpcMessage === 'PAYMENT_NOT_READY_FOR_CONFIRMATION'
+              ? 'MANUAL_REQUEST_INVALID'
+              : rpcMessage === 'PAYMENT_LINK_NOT_SENT'
                 ? 'MANUAL_REQUEST_INVALID'
-                : rpcMessage === 'PAYMENT_LINK_NOT_SENT'
+                : rpcMessage === 'INVALID_CONFIRMATION_REQUEST'
                   ? 'MANUAL_REQUEST_INVALID'
-                  : rpcMessage === 'INVALID_CONFIRMATION_REQUEST'
-                    ? 'MANUAL_REQUEST_INVALID'
-                    : rpcMessage === 'ACTIVE_MANUAL_SUBSCRIPTION_EXISTS'
+                  : rpcMessage === 'ACTIVE_MANUAL_SUBSCRIPTION_EXISTS'
+                    ? 'SUBSCRIPTION_NOT_ACTIVE'
+                    : rpcMessage === 'ACTIVE_STRIPE_SUBSCRIPTION_EXISTS'
                       ? 'SUBSCRIPTION_NOT_ACTIVE'
-                      : rpcMessage === 'ACTIVE_STRIPE_SUBSCRIPTION_EXISTS'
+                      : rpcMessage === 'PLAN_ALREADY_ACTIVE'
                         ? 'SUBSCRIPTION_NOT_ACTIVE'
-                        : rpcMessage === 'PLAN_ALREADY_ACTIVE'
+                        : rpcMessage === 'USER_SUBSCRIPTION_TENANT_CONFLICT'
                           ? 'SUBSCRIPTION_NOT_ACTIVE'
-                          : rpcMessage === 'USER_SUBSCRIPTION_TENANT_CONFLICT'
-                            ? 'SUBSCRIPTION_NOT_ACTIVE'
-                            : 'DB_WRITE_FAILED';
+                          : 'DB_WRITE_FAILED';
 
       console.error('[MANUAL_PAYMENT_CONFIRMATION_FAILED]', {
         requestId,
@@ -725,13 +720,17 @@ export class ManualPaymentService {
               customerName: user.data.name_complete,
               customerEmail: user.data.email,
               plan: confirmation.plan as 'pro' | 'enterprise',
-              billingInterval: confirmation.billing_interval as 'month' | 'year',
+              billingInterval: confirmation.billing_interval as
+                'month' | 'year',
               price: Number(confirmation.price),
               currency: confirmation.currency,
               requestId: confirmation.request_id,
               startedAt: confirmation.started_at,
               expiresAt: confirmation.expires_at,
-              dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
+              dashboardUrl: new URL(
+                '/dashboard/billing',
+                getBillingEmailBaseUrl(),
+              ).toString(),
             }).html,
             senderName: 'Silentra',
           },
@@ -739,7 +738,6 @@ export class ManualPaymentService {
         emailSent = result.success;
       }
     }
-
 
     return {
       ...confirmation,
@@ -784,17 +782,19 @@ export class ManualPaymentService {
         error ? 'DB_WRITE_FAILED' : 'SUBSCRIPTION_NOT_ACTIVE',
       );
 
-    await createAdminClient().from('audit_logs').insert({
-      action: 'PAYMENT_REJECTED',
-      entity_type: 'subscription_request',
-      entity_id: row.id,
-      metadata: {
-        actor_user_id: actorUserId,
-        barbershop_id: row.barbershop_id,
-        reason: reason?.trim().slice(0, 500) || null,
-      },
-      created_at: now,
-    });
+    await createAdminClient()
+      .from('audit_logs')
+      .insert({
+        action: 'PAYMENT_REJECTED',
+        entity_type: 'subscription_request',
+        entity_id: row.id,
+        metadata: {
+          actor_user_id: actorUserId,
+          barbershop_id: row.barbershop_id,
+          reason: reason?.trim().slice(0, 500) || null,
+        },
+        created_at: now,
+      });
 
     const admin = createAdminClient();
     const { data: customer } = await admin
@@ -813,7 +813,10 @@ export class ManualPaymentService {
         currency: row.currency,
         requestId: row.id,
         reason: reason?.trim() || null,
-        dashboardUrl: new URL('/dashboard/billing', getBillingEmailBaseUrl()).toString(),
+        dashboardUrl: new URL(
+          '/dashboard/billing',
+          getBillingEmailBaseUrl(),
+        ).toString(),
       });
 
       const emailResult = await sendEmail(

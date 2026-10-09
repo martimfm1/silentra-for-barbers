@@ -3,7 +3,10 @@ import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
-import { assertSameOrigin, billingErrorResponse } from '@/services/billing/http';
+import {
+  assertSameOrigin,
+  billingErrorResponse,
+} from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -33,7 +36,10 @@ export async function PATCH(request: Request, { params }: Params) {
     if (action === 'send_payment' || action === 'resend_payment') {
       const existing = await ManualPaymentService.getRequest(requestId);
       if (!existing)
-        return json({ ok: false, error: 'Pedido de subscrição não encontrado.' }, 404);
+        return json(
+          { ok: false, error: 'Pedido de subscrição não encontrado.' },
+          404,
+        );
 
       const paymentLink =
         typeof body?.paymentLink === 'string' && body.paymentLink.trim()
@@ -52,8 +58,7 @@ export async function PATCH(request: Request, { params }: Params) {
         user.id,
       );
 
-      if (!result.sent)
-        return json({ ok: false, error: result.error }, 502);
+      if (!result.sent) return json({ ok: false, error: result.error }, 502);
 
       return json({ ok: true, status: 'PAYMENT_SENT' });
     }
@@ -95,21 +100,30 @@ export async function PATCH(request: Request, { params }: Params) {
         appOrigin: new URL(request.url).origin,
       });
 
-      return json({
-        ok: true,
-        status: 'PENDING',
-        request: renewal,
-      }, 201);
+      return json(
+        {
+          ok: true,
+          status: 'PENDING',
+          request: renewal,
+        },
+        201,
+      );
     }
 
     if (action === 'resend_receipt') {
-      const result = await ManualPaymentDocumentService.sendReceipt(requestId, true);
-      return json({
-        ok: result.sent,
-        status: result.sent ? 'SENT' : 'FAILED',
-        document: result.document,
-        error: result.error ?? null,
-      }, result.sent ? 200 : 502);
+      const result = await ManualPaymentDocumentService.sendReceipt(
+        requestId,
+        true,
+      );
+      return json(
+        {
+          ok: result.sent,
+          status: result.sent ? 'SENT' : 'FAILED',
+          document: result.document,
+          error: result.error ?? null,
+        },
+        result.sent ? 200 : 502,
+      );
     }
 
     if (action === 'confirm_payment') {

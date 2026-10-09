@@ -394,59 +394,84 @@ export function BillingHub() {
         </div>
       </section>
 
-      {(paymentMode === 'MANUAL' && !isStripeSubscription) ? (
-      <section className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 sm:p-7">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
-              Pagamento manual
-            </p>
-            <h3 className="mt-1 text-xl font-semibold text-white">Estado do pedido</h3>
-          </div>
-          {manualRequest ? (
-            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
-              {manualRequest.status.replace('_', ' ')}
-            </span>
-          ) : null}
-        </div>
-        <div className="mt-5">
-          {manualRequest?.status === 'PENDING' ? (
-            <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
-              O pedido foi recebido. A equipa irá preparar o pagamento e enviar-te as instruções para o email associado à tua conta.
-            </div>
-          ) : manualRequest?.status === 'PAYMENT_SENT' && manualRequest.paymentLink ? (
-            <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
-              <p className="text-sm leading-6 text-zinc-300">
-                O link de pagamento já foi enviado. Podes abrir o pagamento diretamente aqui.
+      {paymentMode === 'MANUAL' && !isStripeSubscription ? (
+        <section className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 sm:p-7">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+                Pagamento manual
               </p>
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <a href={manualRequest.paymentLink} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950">
-                  Pagar agora
-                </a>
-                <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 text-xs text-zinc-500">
-                  {manualRequest.plan === 'enterprise' ? 'Enterprise' : 'Pro'} · {manualRequest.billingInterval === 'year' ? 'Anual' : 'Mensal'} · {formatAmount(manualRequest.price, manualRequest.currency)}
-                </span>
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                Estado do pedido
+              </h3>
+            </div>
+            {manualRequest ? (
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                {manualRequest.status.replace('_', ' ')}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-5">
+            {manualRequest?.status === 'PENDING' ? (
+              <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
+                O pedido foi recebido. A equipa irá preparar o pagamento e
+                enviar-te as instruções para o email associado à tua conta.
               </div>
-            </div>
-          ) : manualRequest?.status === 'PAID' ? (
-            <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4 text-sm leading-6 text-emerald-100/80">
-              O pagamento foi confirmado e a tua subscrição manual está ativa.
-            </div>
-          ) : manualRequest?.status === 'EXPIRED' ? (
-            <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
-              O período da subscrição terminou. Para continuar, escolhe novamente um plano em <Link href="/plans" className="font-semibold text-emerald-300 hover:text-emerald-200">/plans</Link>.
-            </div>
-          ) : manualRequest?.status === 'REJECTED' ? (
-            <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.04] p-4 text-sm leading-6 text-red-200">
-              O último pedido de pagamento foi rejeitado. Podes criar um novo pedido através da página de planos.
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-white/8 bg-black/20 p-4 text-sm text-zinc-500">
-              Não existe nenhum pedido de pagamento manual em curso.
-            </div>
-          )}
-        </div>
-      </section>
+            ) : manualRequest?.status === 'PAYMENT_SENT' &&
+              manualRequest.paymentLink ? (
+              <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
+                <p className="text-sm leading-6 text-zinc-300">
+                  O link de pagamento já foi enviado. Podes abrir o pagamento
+                  diretamente aqui.
+                </p>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <a
+                    href={manualRequest.paymentLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950"
+                  >
+                    Pagar agora
+                  </a>
+                  <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 text-xs text-zinc-500">
+                    {manualRequest.plan === 'enterprise' ? 'Enterprise' : 'Pro'}{' '}
+                    ·{' '}
+                    {manualRequest.billingInterval === 'year'
+                      ? 'Anual'
+                      : 'Mensal'}{' '}
+                    ·{' '}
+                    {formatAmount(manualRequest.price, manualRequest.currency)}
+                  </span>
+                </div>
+              </div>
+            ) : manualRequest?.status === 'PAID' ? (
+              <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4 text-sm leading-6 text-emerald-100/80">
+                O pagamento foi confirmado e a tua subscrição manual está ativa.
+              </div>
+            ) : manualRequest?.status === 'EXPIRED' ? (
+              <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
+                O período da subscrição terminou. Para continuar, escolhe
+                novamente um plano em{' '}
+                <Link
+                  href="/plans"
+                  className="font-semibold text-emerald-300 hover:text-emerald-200"
+                >
+                  /plans
+                </Link>
+                .
+              </div>
+            ) : manualRequest?.status === 'REJECTED' ? (
+              <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.04] p-4 text-sm leading-6 text-red-200">
+                O último pedido de pagamento foi rejeitado. Podes criar um novo
+                pedido através da página de planos.
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4 text-sm text-zinc-500">
+                Não existe nenhum pedido de pagamento manual em curso.
+              </div>
+            )}
+          </div>
+        </section>
       ) : null}
 
       <section className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 sm:p-7">

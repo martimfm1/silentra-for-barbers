@@ -32,7 +32,9 @@ function resolveEnvironmentPrice(
   interval: ManualBillingInterval,
 ): number | null {
   const key =
-    ENV_PRICE_KEYS[plan][interval as keyof typeof ENV_PRICE_KEYS[typeof plan]];
+    ENV_PRICE_KEYS[plan][
+      interval as keyof (typeof ENV_PRICE_KEYS)[typeof plan]
+    ];
   const raw = process.env[key];
   if (!raw?.trim()) return null;
   const parsed = Number(raw);

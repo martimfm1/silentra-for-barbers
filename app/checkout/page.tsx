@@ -34,11 +34,11 @@ export default async function CheckoutPage({
     );
   const existingStripeSubscription = Boolean(
     existingSubscription?.payment_method === 'STRIPE' &&
-      existingSubscription.stripe_subscription_id &&
-      existingSubscription.plan !== 'free' &&
-      ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
-        existingSubscription.status,
-      ),
+    existingSubscription.stripe_subscription_id &&
+    existingSubscription.plan !== 'free' &&
+    ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
+      existingSubscription.status,
+    ),
   );
 
   if (params.checkout === 'return') {

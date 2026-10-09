@@ -41,12 +41,8 @@ export async function GET(request: Request) {
         : Promise.resolve({ data: [] }),
     ]);
 
-    const usersById = new Map(
-      (users ?? []).map((user) => [user.id, user]),
-    );
-    const shopsById = new Map(
-      (shops ?? []).map((shop) => [shop.id, shop]),
-    );
+    const usersById = new Map((users ?? []).map((user) => [user.id, user]));
+    const shopsById = new Map((shops ?? []).map((shop) => [shop.id, shop]));
 
     return NextResponse.json(
       {
@@ -61,10 +57,16 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     if (error instanceof Error && error.name === 'PlatformAdminError')
-      return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: 'Not found' },
+        { status: 404 },
+      );
     console.error('[MANUAL_REQUESTS_GET]', error);
     return NextResponse.json(
-      { ok: false, error: 'Não foi possível carregar os pedidos de subscrição.' },
+      {
+        ok: false,
+        error: 'Não foi possível carregar os pedidos de subscrição.',
+      },
       { status: 500 },
     );
   }

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
-import {
-  assertStripeBillingAvailableForUser,
-} from '@/services/billing/payment-mode.service';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 import { billingErrorResponse } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
@@ -17,10 +15,7 @@ export async function GET() {
     } = await (await createClient()).auth.getUser();
 
     if (error || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await assertStripeBillingAvailableForUser(user.id);

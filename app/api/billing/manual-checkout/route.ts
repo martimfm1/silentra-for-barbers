@@ -55,13 +55,19 @@ function website(value: string | null) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user?.email) {
-      return NextResponse.json({ error: 'Não tens sessão iniciada.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não tens sessão iniciada.' },
+        { status: 401 },
+      );
     }
 
-    const body = await request.json().catch(() => null) as {
+    const body = (await request.json().catch(() => null)) as {
       checkoutToken?: unknown;
       details?: Details;
     } | null;
@@ -77,18 +83,27 @@ export async function POST(request: Request) {
     }
 
     if (intent.barbershopId === '') {
-      return NextResponse.json({ error: 'A barbearia associada ao checkout é inválida.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'A barbearia associada ao checkout é inválida.' },
+        { status: 400 },
+      );
     }
 
     const plan = intent.plan;
     if (plan !== PLANS.PRO && plan !== PLANS.ENTERPRISE) {
-      return NextResponse.json({ error: 'O plano selecionado não é válido.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'O plano selecionado não é válido.' },
+        { status: 400 },
+      );
     }
 
     const mode = await PaymentModeService.getPaymentMode();
     if (mode !== 'MANUAL') {
       return NextResponse.json(
-        { error: 'O pagamento manual já não está disponível. Volta aos planos para continuar.' },
+        {
+          error:
+            'O pagamento manual já não está disponível. Volta aos planos para continuar.',
+        },
         { status: 409 },
       );
     }
@@ -97,7 +112,8 @@ export async function POST(request: Request) {
 
     const details = body?.details ?? {};
     const billingName = clean(details.billingName, 160);
-    const billingEmail = clean(details.billingEmail, 254)?.toLowerCase() ?? null;
+    const billingEmail =
+      clean(details.billingEmail, 254)?.toLowerCase() ?? null;
     const phone = clean(details.phone, 40);
     const addressLine1 = clean(details.addressLine1, 200);
     const addressLine2 = clean(details.addressLine2, 200);
@@ -112,31 +128,66 @@ export async function POST(request: Request) {
     const locationCount = positiveInt(details.locationCount, 10000);
     const teamSize = positiveInt(details.teamSize, 100000);
 
-    if (!billingName || !billingEmail || !phone || !addressLine1 || !postalCode || !city) {
+    if (
+      !billingName ||
+      !billingEmail ||
+      !phone ||
+      !addressLine1 ||
+      !postalCode ||
+      !city
+    ) {
       return NextResponse.json(
-        { error: 'Preenche todos os campos obrigatórios de faturação antes de continuar.' },
+        {
+          error:
+            'Preenche todos os campos obrigatórios de faturação antes de continuar.',
+        },
         { status: 400 },
       );
     }
 
     if (!email(billingEmail)) {
-      return NextResponse.json({ error: 'Introduz um email de faturação válido.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Introduz um email de faturação válido.' },
+        { status: 400 },
+      );
     }
 
     if (!/^[A-Z]{2}$/.test(country)) {
-      return NextResponse.json({ error: 'Seleciona um país válido.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Seleciona um país válido.' },
+        { status: 400 },
+      );
     }
 
     if (websiteValue && !websiteUrl) {
-      return NextResponse.json({ error: 'O website introduzido não é válido.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'O website introduzido não é válido.' },
+        { status: 400 },
+      );
     }
 
-    if (details.locationCount !== '' && details.locationCount !== undefined && details.locationCount !== null && locationCount === null) {
-      return NextResponse.json({ error: 'O número de localizações não é válido.' }, { status: 400 });
+    if (
+      details.locationCount !== '' &&
+      details.locationCount !== undefined &&
+      details.locationCount !== null &&
+      locationCount === null
+    ) {
+      return NextResponse.json(
+        { error: 'O número de localizações não é válido.' },
+        { status: 400 },
+      );
     }
 
-    if (details.teamSize !== '' && details.teamSize !== undefined && details.teamSize !== null && teamSize === null) {
-      return NextResponse.json({ error: 'O número de elementos da equipa não é válido.' }, { status: 400 });
+    if (
+      details.teamSize !== '' &&
+      details.teamSize !== undefined &&
+      details.teamSize !== null &&
+      teamSize === null
+    ) {
+      return NextResponse.json(
+        { error: 'O número de elementos da equipa não é válido.' },
+        { status: 400 },
+      );
     }
 
     const admin = (await import('@/lib/supabase/admin')).createAdminClient();
@@ -146,9 +197,15 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (!profile?.barbershop_id || profile.barbershop_id !== intent.barbershopId) {
+    if (
+      !profile?.barbershop_id ||
+      profile.barbershop_id !== intent.barbershopId
+    ) {
       return NextResponse.json(
-        { error: 'A barbearia associada à tua conta mudou. Inicia novamente o checkout.' },
+        {
+          error:
+            'A barbearia associada à tua conta mudou. Inicia novamente o checkout.',
+        },
         { status: 409 },
       );
     }
@@ -160,13 +217,16 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existing.error) {
-      throw new BillingError('Não foi possível verificar a subscrição atual.', 'DB_READ_FAILED');
+      throw new BillingError(
+        'Não foi possível verificar a subscrição atual.',
+        'DB_READ_FAILED',
+      );
     }
 
     const hasActivePaid = Boolean(
       existing.data &&
-        existing.data.plan !== PLANS.FREE &&
-        ['active', 'trialing'].includes(existing.data.status),
+      existing.data.plan !== PLANS.FREE &&
+      ['active', 'trialing'].includes(existing.data.status),
     );
 
     const requestType = hasActivePaid ? 'CHANGE' : 'NEW';
@@ -229,7 +289,9 @@ export async function POST(request: Request) {
       error instanceof BillingError && ['INVALID_PRICE'].includes(error.code)
         ? 400
         : error instanceof BillingError &&
-            ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(error.code)
+            ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
+              error.code,
+            )
           ? 409
           : 500;
 

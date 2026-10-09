@@ -118,9 +118,7 @@ export function PricingSection({
   };
 
   const annualAvailable =
-    prices.some(
-      (price) => price.plan === 'pro' && price.interval === 'year',
-    ) &&
+    prices.some((price) => price.plan === 'pro' && price.interval === 'year') &&
     prices.some(
       (price) => price.plan === 'enterprise' && price.interval === 'year',
     );
@@ -173,7 +171,9 @@ export function PricingSection({
               </div>
               <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-zinc-50 sm:text-4xl lg:text-5xl">
                 Escolhe o plano. O próximo passo é{' '}
-                {paymentMode === 'MANUAL' ? 'o pedido de subscrição.' : 'o checkout.'}
+                {paymentMode === 'MANUAL'
+                  ? 'o pedido de subscrição.'
+                  : 'o checkout.'}
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
                 Compara o essencial e escolhe a fase certa da tua barbearia.{' '}

@@ -88,10 +88,10 @@ export async function POST(request: Request) {
 
     const hasActivePaid = Boolean(
       existing.data &&
-        existing.data.plan !== PLANS.FREE &&
-        (PLAN_ACCESS_STATUSES as readonly string[]).includes(
-          existing.data.status,
-        ),
+      existing.data.plan !== PLANS.FREE &&
+      (PLAN_ACCESS_STATUSES as readonly string[]).includes(
+        existing.data.status,
+      ),
     );
     const existingPaymentMethod =
       existing.data?.payment_method === 'STRIPE' ? 'STRIPE' : 'MANUAL';
@@ -138,9 +138,9 @@ export async function POST(request: Request) {
     const current = await SubscriptionService.getActiveForUser(user.id);
     const changingPlan = Boolean(
       current &&
-        current.plan !== PLANS.FREE &&
-        current.plan !== plan &&
-        (PLAN_ACCESS_STATUSES as readonly string[]).includes(current.status),
+      current.plan !== PLANS.FREE &&
+      current.plan !== plan &&
+      (PLAN_ACCESS_STATUSES as readonly string[]).includes(current.status),
     );
 
     const checkoutIntent = createCheckoutIntent(

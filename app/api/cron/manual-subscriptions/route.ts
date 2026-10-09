@@ -15,7 +15,10 @@ function authorized(request: Request): boolean {
 
 export async function GET(request: Request) {
   if (!authorized(request))
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: 'Unauthorized' },
+      { status: 401 },
+    );
 
   const requestId = crypto.randomUUID();
 

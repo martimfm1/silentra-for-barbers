@@ -77,7 +77,9 @@ export async function handleLogin({
       ? new URLSearchParams(window.location.search).get('redirect')
       : null;
   const safeNext =
-    requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//')
+    requestedNext &&
+    requestedNext.startsWith('/') &&
+    !requestedNext.startsWith('//')
       ? requestedNext
       : null;
 

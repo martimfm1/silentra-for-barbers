@@ -122,7 +122,9 @@ export async function GET(request: Request) {
         .or(`expires_at.is.null,expires_at.gt.${now}`),
       admin
         .from('subscriptions')
-        .select('user_id,plan,plan_override,status,updated_at,payment_method,current_period_end')
+        .select(
+          'user_id,plan,plan_override,status,updated_at,payment_method,current_period_end',
+        )
         .order('updated_at', { ascending: false }),
       admin
         .from('subscription_requests')
@@ -158,7 +160,10 @@ export async function GET(request: Request) {
         .eq('payment_method', 'MANUAL')
         .in('status', ['active', 'trialing'])
         .gte('current_period_end', now)
-        .lt('current_period_end', new Date(Date.now() + 7 * 86400000).toISOString()),
+        .lt(
+          'current_period_end',
+          new Date(Date.now() + 7 * 86400000).toISOString(),
+        ),
       admin
         .from('barbershops')
         .select('id', { count: 'exact', head: true })

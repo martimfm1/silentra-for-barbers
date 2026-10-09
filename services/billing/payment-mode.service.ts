@@ -99,8 +99,7 @@ export async function assertStripeBillingAvailableForUser(
     );
   }
 
-  if (data?.payment_method === 'STRIPE' && data.stripe_subscription_id)
-    return;
+  if (data?.payment_method === 'STRIPE' && data.stripe_subscription_id) return;
 
   if (mode === 'STRIPE') return;
 
