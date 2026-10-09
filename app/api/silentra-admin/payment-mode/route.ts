@@ -7,7 +7,10 @@ import {
   type PaymentMode,
 } from '@/services/billing/payment-mode.service';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { assertSameOrigin, billingErrorResponse } from '@/services/billing/http';
+import {
+  assertSameOrigin,
+  billingErrorResponse,
+} from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -76,7 +79,10 @@ export async function PATCH(request: Request) {
     );
   } catch (error) {
     if (error instanceof Error && error.name === 'PlatformAdminError')
-      return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: 'Not found' },
+        { status: 404 },
+      );
     if (error instanceof BillingError) {
       const response = billingErrorResponse(error);
       return NextResponse.json(

@@ -25,7 +25,8 @@ export const guestMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
 
   title: {
-    default: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
+    default:
+      'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
     template: '%s | Silentra for Barbers',
   },
 

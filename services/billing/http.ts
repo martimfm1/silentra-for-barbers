@@ -184,7 +184,10 @@ export function assertSameOrigin(request: Request): void {
 
   // Fetch Metadata is browser-controlled and cannot be set by page JavaScript.
   // Accepting only "same-origin" preserves a strict boundary when Origin is absent.
-  if (request.headers.get('sec-fetch-site')?.trim().toLowerCase() === 'same-origin')
+  if (
+    request.headers.get('sec-fetch-site')?.trim().toLowerCase() ===
+    'same-origin'
+  )
     return;
 
   throw new BillingError(

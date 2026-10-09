@@ -74,7 +74,9 @@ function dateTime(value: string | null | undefined) {
 }
 
 function reference(requestId: string | null | undefined) {
-  return requestId ? requestId.replace(/-/g, '').slice(0, 8).toUpperCase() : '—';
+  return requestId
+    ? requestId.replace(/-/g, '').slice(0, 8).toUpperCase()
+    : '—';
 }
 
 function getBaseUrl() {
@@ -131,9 +133,13 @@ function shell(input: {
                   <h1 style="margin:9px 0 12px;font-size:27px;line-height:1.18;letter-spacing:-.03em;color:#09090b">${escapeHtml(input.title)}</h1>
                   <p style="margin:0;color:#52525b;font-size:15px;line-height:1.7">${input.intro}</p>
                   <div style="margin-top:24px">${input.content}</div>
-                  ${ctaHref ? `<div style="margin-top:28px">
+                  ${
+                    ctaHref
+                      ? `<div style="margin-top:28px">
                     <a href="${escapeHtml(ctaHref)}" style="display:inline-block;padding:13px 19px;background:#18181b;color:#ffffff;text-decoration:none;border-radius:11px;font-size:14px;font-weight:700">${escapeHtml(input.cta!.label)}</a>
-                  </div>` : ''}
+                  </div>`
+                      : ''
+                  }
                   <div style="margin-top:30px;padding-top:18px;border-top:1px solid #f4f4f5;color:#71717a;font-size:12px;line-height:1.7">
                     ${input.footer ?? 'Este email foi enviado pela Silentra. Se não reconheces esta ação, contacta o suporte.'}
                   </div>
@@ -173,7 +179,9 @@ function details(rows: Array<[string, string]>) {
 }
 
 export function adminPaymentRequestEmail(context: BillingEmailContext) {
-  const adminUrl = safeUrl(context.adminUrl) ?? new URL('/silentra-admin', getBaseUrl()).toString();
+  const adminUrl =
+    safeUrl(context.adminUrl) ??
+    new URL('/silentra-admin', getBaseUrl()).toString();
   const name = context.customerName || context.customerEmail || 'Cliente';
   const content = details([
     ['Cliente', name],
@@ -193,7 +201,8 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
     intro: `Existe um pedido de ${escapeHtml(planLabel(context.plan))} que precisa da tua atenção.`,
     content,
     cta: { label: 'Abrir no Control Center', href: adminUrl },
-    footer: 'Este aviso é interno e foi enviado para o administrador da plataforma.',
+    footer:
+      'Este aviso é interno e foi enviado para o administrador da plataforma.',
   });
 }
 
@@ -218,12 +227,17 @@ export function customerPaymentLinkEmail(context: BillingEmailContext) {
     intro: `Olá, ${escapeHtml(name)}. O link de pagamento da tua ${escapeHtml(planLabel(context.plan))} já está disponível.`,
     content,
     cta: link ? { label: 'Efetuar pagamento', href: link } : undefined,
-    footer: 'Depois da confirmação do pagamento, a tua subscrição será ativada pela equipa Silentra.',
+    footer:
+      'Depois da confirmação do pagamento, a tua subscrição será ativada pela equipa Silentra.',
   });
 }
 
-export function customerSubscriptionActivatedEmail(context: BillingEmailContext) {
-  const dashboardUrl = safeUrl(context.dashboardUrl) ?? new URL('/dashboard/billing', getBaseUrl()).toString();
+export function customerSubscriptionActivatedEmail(
+  context: BillingEmailContext,
+) {
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
   const content = details([
     ['Plano', planLabel(context.plan)],
     ['Período', intervalLabel(context.billingInterval)],
@@ -240,12 +254,15 @@ export function customerSubscriptionActivatedEmail(context: BillingEmailContext)
     intro: `O pagamento foi confirmado e a tua subscrição está agora ativa.`,
     content,
     cta: { label: 'Abrir faturação', href: dashboardUrl },
-    footer: 'Podes consultar o estado da tua subscrição e a próxima renovação na área de faturação.',
+    footer:
+      'Podes consultar o estado da tua subscrição e a próxima renovação na área de faturação.',
   });
 }
 
 export function customerPaymentRejectedEmail(context: BillingEmailContext) {
-  const dashboardUrl = safeUrl(context.dashboardUrl) ?? new URL('/dashboard/billing', getBaseUrl()).toString();
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
   const reason = context.reason?.trim();
 
   const reasonBlock = reason
@@ -269,7 +286,8 @@ export function customerPaymentRejectedEmail(context: BillingEmailContext) {
     intro: `Olá, ${escapeHtml(context.customerName || 'Cliente')}. O teu pedido de subscrição não foi aprovado.`,
     content,
     cta: { label: 'Ver faturação', href: dashboardUrl },
-    footer: 'Se acreditas que isto aconteceu por engano, responde ao suporte da Silentra com a referência do pedido.',
+    footer:
+      'Se acreditas que isto aconteceu por engano, responde ao suporte da Silentra com a referência do pedido.',
   });
 }
 
@@ -291,7 +309,8 @@ export function customerPaymentReceiptEmail(context: BillingEmailContext) {
     preheader: `Comprovativo ${context.documentNumber || reference(context.requestId)} do teu pagamento Silentra.`,
     eyebrow: 'Billing · Comprovativo',
     title: 'Pagamento confirmado',
-    intro: 'O pagamento da tua subscrição foi confirmado. Enviamos em anexo o teu comprovativo de pagamento em PDF.',
+    intro:
+      'O pagamento da tua subscrição foi confirmado. Enviamos em anexo o teu comprovativo de pagamento em PDF.',
     content,
     cta: { label: 'Abrir faturação', href: dashboardUrl },
     footer: 'Silentra · Gestão e agendamento para barbearias',

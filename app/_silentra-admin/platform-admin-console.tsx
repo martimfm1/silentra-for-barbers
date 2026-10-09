@@ -106,12 +106,7 @@ type ManualRequest = {
   plan: 'pro' | 'enterprise';
   billing_interval: 'month' | 'year';
   status:
-    | 'PENDING'
-    | 'PAYMENT_SENT'
-    | 'PAID'
-    | 'REJECTED'
-    | 'EXPIRED'
-    | 'CANCELLED';
+    'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
   payment_method: 'MANUAL';
   price: number;
   currency: string;
@@ -140,7 +135,11 @@ type ManualRequest = {
   submitted_at: string | null;
   created_at: string;
   updated_at: string;
-  customer: { id: string; name_complete: string | null; email: string | null } | null;
+  customer: {
+    id: string;
+    name_complete: string | null;
+    email: string | null;
+  } | null;
   barbershop: { id: string; name: string } | null;
 };
 
@@ -222,8 +221,12 @@ export default function PlatformAdminConsole() {
   const [paymentModeLoading, setPaymentModeLoading] = useState(true);
   const [changingPaymentMode, setChangingPaymentMode] = useState(false);
   const [manualRequests, setManualRequests] = useState<ManualRequest[]>([]);
-  const [manualRequestFilter, setManualRequestFilter] = useState<'ALL' | ManualRequest['status']>('ALL');
-  const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(null);
+  const [manualRequestFilter, setManualRequestFilter] = useState<
+    'ALL' | ManualRequest['status']
+  >('ALL');
+  const [selectedRequest, setSelectedRequest] = useState<ManualRequest | null>(
+    null,
+  );
   const [paymentLink, setPaymentLink] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [paymentAction, setPaymentAction] = useState(false);
@@ -273,8 +276,13 @@ export default function PlatformAdminConsole() {
           paymentMode?: PaymentMode;
           error?: string;
         };
-        if (!response.ok || (payload.paymentMode !== 'MANUAL' && payload.paymentMode !== 'STRIPE')) {
-          throw new Error(payload.error || 'Não foi possível carregar o método de pagamento.');
+        if (
+          !response.ok ||
+          (payload.paymentMode !== 'MANUAL' && payload.paymentMode !== 'STRIPE')
+        ) {
+          throw new Error(
+            payload.error || 'Não foi possível carregar o método de pagamento.',
+          );
         }
         setPaymentMode(payload.paymentMode);
       } catch (err) {
@@ -286,9 +294,10 @@ export default function PlatformAdminConsole() {
 
     const loadRequests = async () => {
       try {
-        const query = manualRequestFilter === 'ALL'
-          ? ''
-          : `?status=${encodeURIComponent(manualRequestFilter)}`;
+        const query =
+          manualRequestFilter === 'ALL'
+            ? ''
+            : `?status=${encodeURIComponent(manualRequestFilter)}`;
         const response = await fetch(
           `/api/silentra-admin/subscription-requests${query}`,
           { cache: 'no-store' },
@@ -299,23 +308,26 @@ export default function PlatformAdminConsole() {
         };
         if (!response.ok || !Array.isArray(payload.requests)) {
           throw new Error(
-            payload.error || 'Não foi possível carregar os pedidos de subscrição.',
+            payload.error ||
+              'Não foi possível carregar os pedidos de subscrição.',
           );
         }
         const requestId = new URLSearchParams(window.location.search)
           .get('request_id')
           ?.trim();
         const requested = requestId
-          ? payload.requests.find((item) => item.id === requestId) ?? null
+          ? (payload.requests.find((item) => item.id === requestId) ?? null)
           : null;
 
         const requests = payload.requests;
         setManualRequests(requests);
-        setSelectedRequest((current) => requested ?? (
-          current
-            ? requests.find((item) => item.id === current.id) ?? null
-            : null
-        ));
+        setSelectedRequest(
+          (current) =>
+            requested ??
+            (current
+              ? (requests.find((item) => item.id === current.id) ?? null)
+              : null),
+        );
         if (requested) setPaymentLink(requested.payment_link ?? '');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro inesperado.');
@@ -404,7 +416,9 @@ export default function PlatformAdminConsole() {
         error?: string;
       };
       if (!response.ok || !payload.paymentMode)
-        throw new Error(payload.error || 'Não foi possível alterar o método de pagamento.');
+        throw new Error(
+          payload.error || 'Não foi possível alterar o método de pagamento.',
+        );
 
       setPaymentMode(payload.paymentMode);
       setMessage(
@@ -451,7 +465,9 @@ export default function PlatformAdminConsole() {
         error?: string;
       };
       if (!response.ok || !payload.ok)
-        throw new Error(payload.error || 'Não foi possível atualizar o pedido.');
+        throw new Error(
+          payload.error || 'Não foi possível atualizar o pedido.',
+        );
 
       setMessage(
         action === 'confirm_payment'
@@ -476,7 +492,8 @@ export default function PlatformAdminConsole() {
         ? refreshed.requests
         : [];
       setManualRequests(nextRequests);
-      const nextSelected = nextRequests.find((item) => item.id === request.id) ?? null;
+      const nextSelected =
+        nextRequests.find((item) => item.id === request.id) ?? null;
       setSelectedRequest(nextSelected);
       setPaymentLink(nextSelected?.payment_link ?? '');
     } catch (err) {
@@ -631,7 +648,9 @@ export default function PlatformAdminConsole() {
                 label="Conversão manual · 30d"
                 value={`${data.operations.manualConversion30d}%`}
                 meta="pedidos → pagos"
-                tone={data.operations.manualConversion30d >= 50 ? 'good' : 'warn'}
+                tone={
+                  data.operations.manualConversion30d >= 50 ? 'good' : 'warn'
+                }
               />
               <button
                 type="button"
@@ -645,7 +664,9 @@ export default function PlatformAdminConsole() {
                   label="Pedidos por tratar"
                   value={data.operations.openPaymentRequests}
                   meta={`${data.operations.paymentSentRequests} com pagamento enviado`}
-                  tone={data.operations.openPaymentRequests > 0 ? 'warn' : 'good'}
+                  tone={
+                    data.operations.openPaymentRequests > 0 ? 'warn' : 'good'
+                  }
                 />
               </button>
               <StatCard
@@ -664,23 +685,39 @@ export default function PlatformAdminConsole() {
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">Novos tenants</p>
-                    <p className="mt-1 text-lg font-semibold">{data.operations.newShops7d}</p>
+                    <p className="text-[10px] uppercase text-zinc-600">
+                      Novos tenants
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {data.operations.newShops7d}
+                    </p>
                     <p className="text-[11px] text-zinc-600">últimos 7d</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">Novos utilizadores</p>
-                    <p className="mt-1 text-lg font-semibold">{data.operations.newUsers7d}</p>
+                    <p className="text-[10px] uppercase text-zinc-600">
+                      Novos utilizadores
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {data.operations.newUsers7d}
+                    </p>
                     <p className="text-[11px] text-zinc-600">últimos 7d</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">Bookings próximos</p>
-                    <p className="mt-1 text-lg font-semibold">{data.operations.appointmentsNext7d}</p>
+                    <p className="text-[10px] uppercase text-zinc-600">
+                      Bookings próximos
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {data.operations.appointmentsNext7d}
+                    </p>
                     <p className="text-[11px] text-zinc-600">próximos 7d</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">Cancelamentos</p>
-                    <p className="mt-1 text-lg font-semibold">{data.operations.canceledSubscriptions30d}</p>
+                    <p className="text-[10px] uppercase text-zinc-600">
+                      Cancelamentos
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {data.operations.canceledSubscriptions30d}
+                    </p>
                     <p className="text-[11px] text-zinc-600">últimos 30d</p>
                   </div>
                 </div>
@@ -704,21 +741,27 @@ export default function PlatformAdminConsole() {
                       <WalletCards className="size-4 text-amber-300" />
                       Pagamentos aguardam confirmação
                     </span>
-                    <span className="font-semibold text-amber-200">{data.operations.paymentSentRequests}</span>
+                    <span className="font-semibold text-amber-200">
+                      {data.operations.paymentSentRequests}
+                    </span>
                   </button>
                   <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
                     <span className="flex items-center gap-2 text-xs text-zinc-300">
                       <TimerReset className="size-4 text-amber-300" />
                       Manuais a expirar em 7d
                     </span>
-                    <span className="font-semibold">{data.operations.manualExpiring7d}</span>
+                    <span className="font-semibold">
+                      {data.operations.manualExpiring7d}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
                     <span className="flex items-center gap-2 text-xs text-zinc-300">
                       <MailWarning className="size-4 text-red-300" />
                       Pedidos com erro de email
                     </span>
-                    <span className="font-semibold text-red-200">{data.operations.emailFailures}</span>
+                    <span className="font-semibold text-red-200">
+                      {data.operations.emailFailures}
+                    </span>
                   </div>
                 </div>
               </section>
@@ -729,22 +772,38 @@ export default function PlatformAdminConsole() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h2 className="font-semibold">Atividade recente</h2>
-                    <p className="mt-1 text-xs text-zinc-600">Últimas ações registadas na plataforma.</p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      Últimas ações registadas na plataforma.
+                    </p>
                   </div>
                   <ServerCog className="size-4 text-zinc-600" />
                 </div>
                 <div className="mt-4 space-y-1">
                   {data.activity.map((event) => (
-                    <div key={`${event.createdAt}-${event.action}-${event.entityId ?? 'none'}`} className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]">
+                    <div
+                      key={`${event.createdAt}-${event.action}-${event.entityId ?? 'none'}`}
+                      className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]"
+                    >
                       <div className="min-w-0">
-                        <p className="truncate text-xs font-medium text-zinc-300">{event.action}</p>
-                        <p className="truncate text-[10px] text-zinc-700">{event.entityType}{event.entityId ? ` · ${event.entityId.slice(0, 8)}` : ''}</p>
+                        <p className="truncate text-xs font-medium text-zinc-300">
+                          {event.action}
+                        </p>
+                        <p className="truncate text-[10px] text-zinc-700">
+                          {event.entityType}
+                          {event.entityId
+                            ? ` · ${event.entityId.slice(0, 8)}`
+                            : ''}
+                        </p>
                       </div>
-                      <span className="shrink-0 text-[10px] text-zinc-700">{formatDate(event.createdAt)}</span>
+                      <span className="shrink-0 text-[10px] text-zinc-700">
+                        {formatDate(event.createdAt)}
+                      </span>
                     </div>
                   ))}
                   {data.activity.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-zinc-700">Ainda não existem eventos.</p>
+                    <p className="py-6 text-center text-xs text-zinc-700">
+                      Ainda não existem eventos.
+                    </p>
                   ) : null}
                 </div>
               </section>
@@ -760,11 +819,19 @@ export default function PlatformAdminConsole() {
                     ['Email / Brevo', data.system.emailConfigured],
                     ['Stripe', data.system.stripeConfigured],
                     ['Preços manuais', data.system.manualPricingConfigured],
-                    ['Allowlist de pagamentos', data.system.manualPaymentHostAllowlistConfigured],
+                    [
+                      'Allowlist de pagamentos',
+                      data.system.manualPaymentHostAllowlistConfigured,
+                    ],
                   ].map(([label, ok]) => (
-                    <div key={String(label)} className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                    <div
+                      key={String(label)}
+                      className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3"
+                    >
                       <span className="text-xs text-zinc-400">{label}</span>
-                      <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${ok ? 'bg-emerald-400/10 text-emerald-200' : 'bg-red-400/10 text-red-200'}`}>
+                      <span
+                        className={`rounded-full px-2 py-1 text-[10px] font-semibold ${ok ? 'bg-emerald-400/10 text-emerald-200' : 'bg-red-400/10 text-red-200'}`}
+                      >
                         {ok ? 'OK' : 'Atenção'}
                       </span>
                     </div>
@@ -1059,10 +1126,13 @@ export default function PlatformAdminConsole() {
                 <div>
                   <div className="flex items-center gap-2">
                     <CreditCard className="size-4 text-emerald-300" />
-                    <h2 className="text-lg font-semibold">Método de pagamento</h2>
+                    <h2 className="text-lg font-semibold">
+                      Método de pagamento
+                    </h2>
                   </div>
                   <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-                    Controla qual método é usado por novas subscrições. Mudar esta opção não migra nem cancela subscrições existentes.
+                    Controla qual método é usado por novas subscrições. Mudar
+                    esta opção não migra nem cancela subscrições existentes.
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
@@ -1071,7 +1141,7 @@ export default function PlatformAdminConsole() {
               </div>
 
               <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {([
+                {[
                   {
                     mode: 'MANUAL' as const,
                     title: 'Manual',
@@ -1084,7 +1154,7 @@ export default function PlatformAdminConsole() {
                     description:
                       'Novas subscrições utilizam o checkout Stripe que já existe no projeto.',
                   },
-                ]).map((item) => (
+                ].map((item) => (
                   <button
                     key={item.mode}
                     type="button"
@@ -1098,11 +1168,13 @@ export default function PlatformAdminConsole() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className={`flex size-9 items-center justify-center rounded-xl border ${
-                          paymentMode === item.mode
-                            ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-                            : 'border-white/10 bg-white/[0.03] text-zinc-500'
-                        }`}>
+                        <span
+                          className={`flex size-9 items-center justify-center rounded-xl border ${
+                            paymentMode === item.mode
+                              ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
+                              : 'border-white/10 bg-white/[0.03] text-zinc-500'
+                          }`}
+                        >
                           <CreditCard className="size-4" />
                         </span>
                         <div>
@@ -1110,7 +1182,9 @@ export default function PlatformAdminConsole() {
                             {item.title}
                           </p>
                           <p className="mt-1 text-xs text-zinc-500">
-                            {paymentMode === item.mode ? 'Método atual' : 'Selecionar método'}
+                            {paymentMode === item.mode
+                              ? 'Método atual'
+                              : 'Selecionar método'}
                           </p>
                         </div>
                       </div>
@@ -1141,16 +1215,23 @@ export default function PlatformAdminConsole() {
                 <div>
                   <div className="flex items-center gap-2">
                     <MailCheck className="size-4 text-emerald-300" />
-                    <h2 className="text-lg font-semibold">Pedidos de pagamento abertos</h2>
+                    <h2 className="text-lg font-semibold">
+                      Pedidos de pagamento abertos
+                    </h2>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Define o link de pagamento e envia-o diretamente para o email do responsável pela barbearia.
+                    Define o link de pagamento e envia-o diretamente para o
+                    email do responsável pela barbearia.
                   </p>
                 </div>
                 <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">
-                  {manualRequests.filter((item) =>
-                    item.status === 'PENDING' || item.status === 'PAYMENT_SENT',
-                  ).length}{' '}
+                  {
+                    manualRequests.filter(
+                      (item) =>
+                        item.status === 'PENDING' ||
+                        item.status === 'PAYMENT_SENT',
+                    ).length
+                  }{' '}
                   abertos
                 </span>
               </div>
@@ -1205,7 +1286,8 @@ export default function PlatformAdminConsole() {
                                 'Cliente'}
                             </p>
                             <p className="mt-1 truncate text-xs text-zinc-500">
-                              {request.barbershop?.name || request.barbershop_id}
+                              {request.barbershop?.name ||
+                                request.barbershop_id}
                             </p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
@@ -1227,7 +1309,9 @@ export default function PlatformAdminConsole() {
                         </div>
                         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-600">
                           <span>
-                            {request.plan === 'enterprise' ? 'Enterprise' : 'Pro'}
+                            {request.plan === 'enterprise'
+                              ? 'Enterprise'
+                              : 'Pro'}
                           </span>
                           <span>·</span>
                           <span>
@@ -1252,7 +1336,8 @@ export default function PlatformAdminConsole() {
                         Não existem pedidos de pagamento abertos.
                       </p>
                       <p className="mt-1 text-xs text-zinc-600">
-                        Quando um cliente pedir uma subscrição manual, o pedido aparece aqui.
+                        Quando um cliente pedir uma subscrição manual, o pedido
+                        aparece aqui.
                       </p>
                     </div>
                   ) : null}
@@ -1282,7 +1367,8 @@ export default function PlatformAdminConsole() {
                           'Barbearia sem nome'}
                       </p>
                       <p className="mt-1 text-xs text-zinc-500">
-                        {selectedRequest.customer?.name_complete || 'Responsável'}
+                        {selectedRequest.customer?.name_complete ||
+                          'Responsável'}
                       </p>
                       <p className="mt-1 break-all text-xs text-zinc-600">
                         {selectedRequest.customer?.email || 'Sem email'}
@@ -1290,59 +1376,96 @@ export default function PlatformAdminConsole() {
                     </div>
 
                     <div className="rounded-xl border border-emerald-400/10 bg-emerald-400/[0.025] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-200">Dados enviados no checkout</p>
-                        <p className="mt-1 text-[11px] text-zinc-600">
-                          Snapshot preenchido pelo cliente no momento do pedido.
-                        </p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-200">
+                            Dados enviados no checkout
+                          </p>
+                          <p className="mt-1 text-[11px] text-zinc-600">
+                            Snapshot preenchido pelo cliente no momento do
+                            pedido.
+                          </p>
+                        </div>
+                        {selectedRequest.submitted_at ? (
+                          <span className="text-[10px] text-zinc-600">
+                            {formatDate(selectedRequest.submitted_at)}
+                          </span>
+                        ) : null}
                       </div>
-                      {selectedRequest.submitted_at ? (
-                        <span className="text-[10px] text-zinc-600">
-                          {formatDate(selectedRequest.submitted_at)}
-                        </span>
-                      ) : null}
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                            Faturação
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-300">
+                            {selectedRequest.billing_name || '—'}
+                          </p>
+                          <p className="mt-0.5 break-all text-xs text-zinc-500">
+                            {selectedRequest.billing_email || '—'}
+                          </p>
+                          <p className="mt-0.5 text-xs text-zinc-500">
+                            {selectedRequest.tax_id || 'Sem NIF/VAT'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                            Contacto
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-300">
+                            {selectedRequest.phone || '—'}
+                          </p>
+                          <p className="mt-0.5 break-all text-xs text-zinc-500">
+                            {selectedRequest.website || 'Sem website'}
+                          </p>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                            Morada
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-300">
+                            {[
+                              selectedRequest.address_line1,
+                              selectedRequest.address_line2,
+                            ]
+                              .filter(Boolean)
+                              .join(', ') || '—'}
+                          </p>
+                          <p className="mt-0.5 text-xs text-zinc-500">
+                            {[
+                              selectedRequest.postal_code,
+                              selectedRequest.city,
+                              selectedRequest.country,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ') || '—'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                            Operação
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-300">
+                            {selectedRequest.business_type || '—'} ·{' '}
+                            {selectedRequest.location_count ?? '—'} localizações
+                          </p>
+                          <p className="mt-0.5 text-xs text-zinc-500">
+                            {selectedRequest.team_size ?? '—'} elementos na
+                            equipa
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                            Mensagem
+                          </p>
+                          <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                            {selectedRequest.customer_message ||
+                              'Sem mensagem adicional.'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Faturação</p>
-                        <p className="mt-1 text-xs text-zinc-300">{selectedRequest.billing_name || '—'}</p>
-                        <p className="mt-0.5 break-all text-xs text-zinc-500">{selectedRequest.billing_email || '—'}</p>
-                        <p className="mt-0.5 text-xs text-zinc-500">{selectedRequest.tax_id || 'Sem NIF/VAT'}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Contacto</p>
-                        <p className="mt-1 text-xs text-zinc-300">{selectedRequest.phone || '—'}</p>
-                        <p className="mt-0.5 break-all text-xs text-zinc-500">{selectedRequest.website || 'Sem website'}</p>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Morada</p>
-                        <p className="mt-1 text-xs text-zinc-300">
-                          {[selectedRequest.address_line1, selectedRequest.address_line2].filter(Boolean).join(', ') || '—'}
-                        </p>
-                        <p className="mt-0.5 text-xs text-zinc-500">
-                          {[selectedRequest.postal_code, selectedRequest.city, selectedRequest.country].filter(Boolean).join(' · ') || '—'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Operação</p>
-                        <p className="mt-1 text-xs text-zinc-300">
-                          {selectedRequest.business_type || '—'} · {selectedRequest.location_count ?? '—'} localizações
-                        </p>
-                        <p className="mt-0.5 text-xs text-zinc-500">
-                          {selectedRequest.team_size ?? '—'} elementos na equipa
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">Mensagem</p>
-                        <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-400">
-                          {selectedRequest.customer_message || 'Sem mensagem adicional.'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                         <p className="text-[10px] uppercase tracking-wide text-zinc-600">
                           Plano
@@ -1379,7 +1502,8 @@ export default function PlatformAdminConsole() {
                         className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
                       />
                       <p className="text-[11px] leading-5 text-zinc-600">
-                        O servidor valida o URL antes de o guardar e enviar. O cliente nunca pode escolher o preço deste pedido.
+                        O servidor valida o URL antes de o guardar e enviar. O
+                        cliente nunca pode escolher o preço deste pedido.
                       </p>
                     </label>
 
@@ -1389,7 +1513,9 @@ export default function PlatformAdminConsole() {
                       </span>
                       <textarea
                         value={rejectReason}
-                        onChange={(event) => setRejectReason(event.target.value)}
+                        onChange={(event) =>
+                          setRejectReason(event.target.value)
+                        }
                         maxLength={500}
                         rows={3}
                         placeholder="Ex.: pagamento não identificado, dados incorretos…"
@@ -1495,7 +1621,9 @@ export default function PlatformAdminConsole() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold">Pedidos de subscrição</h2>
+                  <h2 className="text-lg font-semibold">
+                    Pedidos de subscrição
+                  </h2>
                   <p className="mt-1 text-xs text-zinc-500">
                     Pedidos do fluxo de pagamento manual e respetivo histórico.
                   </p>
@@ -1537,7 +1665,9 @@ export default function PlatformAdminConsole() {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-zinc-100">
-                          {request.customer?.name_complete || request.customer?.email || 'Cliente'}
+                          {request.customer?.name_complete ||
+                            request.customer?.email ||
+                            'Cliente'}
                         </p>
                         <p className="mt-1 truncate text-xs text-zinc-500">
                           {request.barbershop?.name || request.barbershop_id} ·{' '}
@@ -1548,13 +1678,16 @@ export default function PlatformAdminConsole() {
                         <span className="text-sm font-semibold text-zinc-200">
                           {formatMoney(request.price, request.currency)}
                         </span>
-                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                          request.status === 'PAID'
-                            ? 'bg-emerald-400/10 text-emerald-200'
-                            : request.status === 'REJECTED' || request.status === 'EXPIRED'
-                              ? 'bg-red-400/10 text-red-200'
-                              : 'bg-amber-400/10 text-amber-200'
-                        }`}>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                            request.status === 'PAID'
+                              ? 'bg-emerald-400/10 text-emerald-200'
+                              : request.status === 'REJECTED' ||
+                                  request.status === 'EXPIRED'
+                                ? 'bg-red-400/10 text-red-200'
+                                : 'bg-amber-400/10 text-amber-200'
+                          }`}
+                        >
                           {request.status.replace('_', ' ')}
                         </span>
                       </div>
@@ -1584,33 +1717,47 @@ export default function PlatformAdminConsole() {
                       {selectedRequest.customer?.email || 'Sem email'}
                     </p>
                     <p className="mt-3 text-xs text-zinc-500">
-                      {selectedRequest.barbershop?.name || selectedRequest.barbershop_id}
+                      {selectedRequest.barbershop?.name ||
+                        selectedRequest.barbershop_id}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">Plano</p>
+                      <p className="text-[10px] uppercase text-zinc-600">
+                        Plano
+                      </p>
                       <p className="mt-1 text-sm font-semibold uppercase">
                         {selectedRequest.plan}
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">Estado</p>
+                      <p className="text-[10px] uppercase text-zinc-600">
+                        Estado
+                      </p>
                       <p className="mt-1 text-sm font-semibold">
                         {selectedRequest.status}
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">Preço</p>
+                      <p className="text-[10px] uppercase text-zinc-600">
+                        Preço
+                      </p>
                       <p className="mt-1 text-sm font-semibold">
-                        {formatMoney(selectedRequest.price, selectedRequest.currency)}
+                        {formatMoney(
+                          selectedRequest.price,
+                          selectedRequest.currency,
+                        )}
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">Período</p>
+                      <p className="text-[10px] uppercase text-zinc-600">
+                        Período
+                      </p>
                       <p className="mt-1 text-sm font-semibold">
-                        {selectedRequest.billing_interval === 'year' ? 'Anual' : 'Mensal'}
+                        {selectedRequest.billing_interval === 'year'
+                          ? 'Anual'
+                          : 'Mensal'}
                       </p>
                     </div>
                   </div>
@@ -1624,7 +1771,12 @@ export default function PlatformAdminConsole() {
                       onChange={(event) => setPaymentLink(event.target.value)}
                       placeholder="https://..."
                       maxLength={2048}
-                      disabled={paymentAction || !['PENDING', 'PAYMENT_SENT'].includes(selectedRequest.status)}
+                      disabled={
+                        paymentAction ||
+                        !['PENDING', 'PAYMENT_SENT'].includes(
+                          selectedRequest.status,
+                        )
+                      }
                       className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30 disabled:opacity-50"
                     />
                   </label>
@@ -1673,7 +1825,8 @@ export default function PlatformAdminConsole() {
                     <button
                       type="button"
                       disabled={
-                        paymentAction || selectedRequest.status !== 'PAYMENT_SENT'
+                        paymentAction ||
+                        selectedRequest.status !== 'PAYMENT_SENT'
                       }
                       onClick={() =>
                         void runManualRequestAction(

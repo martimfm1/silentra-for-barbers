@@ -586,7 +586,9 @@ export class BarbershopStripeService {
     if (subscription.payment_method === 'MANUAL') {
       if (
         subscription.plan === PLANS.FREE ||
-        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(subscription.status)
+        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(
+          subscription.status,
+        )
       )
         throw new BillingError(
           'No active paid subscription was found.',
@@ -607,16 +609,18 @@ export class BarbershopStripeService {
           'DB_WRITE_FAILED',
         );
 
-      await createAdminClient().from('audit_logs').insert({
-        action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED',
-        entity_type: 'subscription',
-        entity_id: subscription.id,
-        metadata: {
-          actor_user_id: userId,
-          barbershop_id: tenant.barbershopId,
-        },
-        created_at: now,
-      });
+      await createAdminClient()
+        .from('audit_logs')
+        .insert({
+          action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED',
+          entity_type: 'subscription',
+          entity_id: subscription.id,
+          metadata: {
+            actor_user_id: userId,
+            barbershop_id: tenant.barbershopId,
+          },
+          created_at: now,
+        });
       return;
     }
 
@@ -659,7 +663,9 @@ export class BarbershopStripeService {
     if (subscription.payment_method === 'MANUAL') {
       if (
         subscription.plan === PLANS.FREE ||
-        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(subscription.status)
+        !(PLAN_ACCESS_STATUSES as readonly string[]).includes(
+          subscription.status,
+        )
       )
         throw new BillingError(
           'No active paid subscription was found.',
@@ -680,16 +686,18 @@ export class BarbershopStripeService {
           'DB_WRITE_FAILED',
         );
 
-      await createAdminClient().from('audit_logs').insert({
-        action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REVOKED',
-        entity_type: 'subscription',
-        entity_id: subscription.id,
-        metadata: {
-          actor_user_id: userId,
-          barbershop_id: tenant.barbershopId,
-        },
-        created_at: now,
-      });
+      await createAdminClient()
+        .from('audit_logs')
+        .insert({
+          action: 'MANUAL_SUBSCRIPTION_CANCELLATION_REVOKED',
+          entity_type: 'subscription',
+          entity_id: subscription.id,
+          metadata: {
+            actor_user_id: userId,
+            barbershop_id: tenant.barbershopId,
+          },
+          created_at: now,
+        });
       return;
     }
 

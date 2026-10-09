@@ -2,7 +2,11 @@
 
 import { useEffect, useId, useState } from 'react';
 import Particles from '@tsparticles/react';
-import { type Container, type ISourceOptions, tsParticles } from '@tsparticles/engine';
+import {
+  type Container,
+  type ISourceOptions,
+  tsParticles,
+} from '@tsparticles/engine';
 import { loadSlim } from '@tsparticles/slim';
 import { cn } from '@/lib/utils';
 import { motion, useAnimation } from 'motion/react';

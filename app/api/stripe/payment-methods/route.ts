@@ -6,9 +6,7 @@ import {
   billingErrorResponse,
   readJsonObject,
 } from '@/services/billing/http';
-import {
-  assertStripeBillingAvailableForUser,
-} from '@/services/billing/payment-mode.service';
+import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
@@ -22,10 +20,7 @@ export async function POST(request: Request) {
     } = await (await createClient()).auth.getUser();
 
     if (error || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await assertStripeBillingAvailableForUser(user.id);

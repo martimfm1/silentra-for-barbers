@@ -9,10 +9,7 @@ export interface UseCheckoutParams {
 export function useCheckout() {
   const router = useRouter();
   const checkoutMutation = useMutation({
-    mutationFn: async ({
-      plan,
-      interval = 'month',
-    }: UseCheckoutParams) => {
+    mutationFn: async ({ plan, interval = 'month' }: UseCheckoutParams) => {
       const response = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: {
@@ -30,9 +27,7 @@ export function useCheckout() {
       };
 
       if (!response.ok) {
-        throw new Error(
-          body.error ?? 'Não foi possível iniciar a subscrição.',
-        );
+        throw new Error(body.error ?? 'Não foi possível iniciar a subscrição.');
       }
 
       if (typeof body.redirectUrl !== 'string') {

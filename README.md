@@ -76,16 +76,16 @@ Regras de negócio, autorização, isolamento de tenants e entitlements são dec
 
 O acesso às funcionalidades é baseado em entitlements verificados no backend.
 
-| Área | Free | Pro | Enterprise |
-| --- | :---: | :---: | :---: |
-| Marcações | ✓ | ✓ | ✓ |
-| Clientes e serviços | ✓ | ✓ | ✓ |
-| Profissionais | ✓ | ✓ | ✓ |
-| Dashboard | ✓ | ✓ | ✓ |
-| Funcionalidades avançadas | — | ✓ | ✓ |
-| Marketing e automações | — | ✓ | ✓ |
-| Analytics avançado | — | ✓ | ✓ |
-| Funcionalidades Enterprise | — | — | ✓ |
+| Área                       | Free | Pro | Enterprise |
+| -------------------------- | :--: | :-: | :--------: |
+| Marcações                  |  ✓   |  ✓  |     ✓      |
+| Clientes e serviços        |  ✓   |  ✓  |     ✓      |
+| Profissionais              |  ✓   |  ✓  |     ✓      |
+| Dashboard                  |  ✓   |  ✓  |     ✓      |
+| Funcionalidades avançadas  |  —   |  ✓  |     ✓      |
+| Marketing e automações     |  —   |  ✓  |     ✓      |
+| Analytics avançado         |  —   |  ✓  |     ✓      |
+| Funcionalidades Enterprise |  —   |  —  |     ✓      |
 
 Os contratos de planos são validados por QA e as APIs não devem confiar no estado enviado pelo cliente.
 
@@ -223,16 +223,16 @@ A referência canónica é [.env.example](.env.example).
 
 Principais grupos:
 
-| Grupo | Variáveis |
-| --- | --- |
-| Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
-| Stripe | `STRIPE_SECRET_KEY`, webhook secret e price IDs |
-| Manual billing | `MANUAL_PRICE_*`, `MANUAL_PAYMENT_ALLOWED_HOSTS` |
-| Brevo | `BREVO_API_KEY`, sender e webhook secret |
-| Workers | `CRON_SECRET` |
-| Abuse protection | `RATE_LIMIT_SECRET` |
-| App | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL` |
-| Storage opcional | `AWS_*` |
+| Grupo            | Variáveis                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| Supabase         | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
+| Stripe           | `STRIPE_SECRET_KEY`, webhook secret e price IDs                                          |
+| Manual billing   | `MANUAL_PRICE_*`, `MANUAL_PAYMENT_ALLOWED_HOSTS`                                         |
+| Brevo            | `BREVO_API_KEY`, sender e webhook secret                                                 |
+| Workers          | `CRON_SECRET`                                                                            |
+| Abuse protection | `RATE_LIMIT_SECRET`                                                                      |
+| App              | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`                                            |
+| Storage opcional | `AWS_*`                                                                                  |
 
 Secrets server-side nunca devem usar `NEXT_PUBLIC_`.
 
@@ -331,13 +331,13 @@ Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Documentação
 
-| Documento | Conteúdo |
-| --- | --- |
+| Documento                            | Conteúdo                                       |
+| ------------------------------------ | ---------------------------------------------- |
 | [Architecture](docs/ARCHITECTURE.md) | Arquitetura, camadas e isolamento multi-tenant |
-| [Development](docs/DEVELOPMENT.md) | Setup local, env e workflow |
-| [Billing](docs/BILLING.md) | Stripe e pagamentos manuais |
-| [Security](docs/SECURITY.md) | Segurança, auth, RLS, APIs e embeds |
-| [Deployment](docs/DEPLOYMENT.md) | Release, Vercel, Supabase e produção |
+| [Development](docs/DEVELOPMENT.md)   | Setup local, env e workflow                    |
+| [Billing](docs/BILLING.md)           | Stripe e pagamentos manuais                    |
+| [Security](docs/SECURITY.md)         | Segurança, auth, RLS, APIs e embeds            |
+| [Deployment](docs/DEPLOYMENT.md)     | Release, Vercel, Supabase e produção           |
 
 ## Estado do projeto
 

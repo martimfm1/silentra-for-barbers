@@ -41,10 +41,12 @@ Webhooks Stripe devem validar assinatura, identificar o evento, verificar a subs
 ## Mudança de modo
 
 Manual → Stripe:
+
 - novas subscrições seguem Stripe;
 - subscrições Manual existentes continuam Manual.
 
 Stripe → Manual:
+
 - novas subscrições seguem Manual;
 - subscrições Stripe existentes continuam Stripe.
 
