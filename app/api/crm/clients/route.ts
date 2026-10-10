@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   requireModuleContext,
@@ -6,7 +7,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+async function GET__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients');
     const url = new URL(req.url);
@@ -60,3 +61,5 @@ export async function GET(req: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/crm/clients', GET__unobserved);

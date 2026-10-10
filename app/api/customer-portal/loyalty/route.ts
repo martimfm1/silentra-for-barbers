@@ -1,10 +1,11 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GET__unobserved() {
   const session = await getPortalSession();
   if (!session)
     return NextResponse.json({ authenticated: false }, { status: 401 });
@@ -75,3 +76,5 @@ export async function GET() {
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
+
+export const GET = withApiObservability('/api/customer-portal/loyalty', GET__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -26,7 +27,7 @@ function parseDays(value: string | null): number {
     : DEFAULT_DAYS;
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -157,3 +158,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/crm/segments', GET__unobserved);

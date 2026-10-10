@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -31,7 +32,7 @@ function rateLimitKey(request: Request, email: string): string {
     .digest('hex');
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   const genericResponse = NextResponse.json({
     success: true,
     message:
@@ -130,3 +131,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/customer-portal/request-code', POST__unobserved);

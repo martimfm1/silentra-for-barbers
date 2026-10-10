@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -21,7 +22,7 @@ async function tenant(req: Request) {
   return { admin, barbershopId: data.barbershop_id };
 }
 
-export async function POST(req: Request, { params }: Params) {
+async function POST__unobserved(req: Request, { params }: Params) {
   const t = await tenant(req);
   if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { clientId } = await params;
@@ -69,7 +70,7 @@ export async function POST(req: Request, { params }: Params) {
   return NextResponse.json({ success: true }, { status: 201 });
 }
 
-export async function DELETE(req: Request, { params }: Params) {
+async function DELETE__unobserved(req: Request, { params }: Params) {
   const t = await tenant(req);
   if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { clientId } = await params;
@@ -89,3 +90,6 @@ export async function DELETE(req: Request, { params }: Params) {
     );
   return NextResponse.json({ success: true });
 }
+
+export const POST = withApiObservability('/api/crm/clients/[clientId]/tags', POST__unobserved);
+export const DELETE = withApiObservability('/api/crm/clients/[clientId]/tags', DELETE__unobserved);

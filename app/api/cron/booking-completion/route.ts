@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -13,7 +14,7 @@ function authorized(request: Request): boolean {
   );
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   if (!authorized(request))
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -50,3 +51,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/cron/booking-completion', GET__unobserved);
