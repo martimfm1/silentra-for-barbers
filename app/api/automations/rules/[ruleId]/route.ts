@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requireModuleContext } from '@/services/modules/authorization';
 
@@ -16,7 +17,7 @@ function isUuid(value: string) {
   );
 }
 
-export async function PATCH(
+async function PATCH__unobserved(
   request: Request,
   context: { params: Promise<{ ruleId: string }> },
 ) {
@@ -95,7 +96,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
+async function DELETE__unobserved(
   request: Request,
   context: { params: Promise<{ ruleId: string }> },
 ) {
@@ -122,3 +123,6 @@ export async function DELETE(
     );
   }
 }
+
+export const PATCH = withApiObservability('/api/automations/rules/[ruleId]', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/automations/rules/[ruleId]', DELETE__unobserved);

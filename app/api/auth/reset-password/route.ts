@@ -1,8 +1,9 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const body: unknown = await request.json();
     const password =
@@ -86,3 +87,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/auth/reset-password', POST__unobserved);

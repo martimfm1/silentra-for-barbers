@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthCallbackUrl } from '@/lib/auth/email-confirmation';
@@ -61,7 +62,7 @@ function genericSuccessResponse() {
   );
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const body: unknown = await request.json();
     const rawEmail =
@@ -148,3 +149,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/auth/forgot-password', POST__unobserved);

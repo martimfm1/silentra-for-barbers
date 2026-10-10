@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { isRecord, UUID_PATTERN } from '@/lib/validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
@@ -11,7 +12,7 @@ const APPOINTMENT_WRITE_ROLES = [
   'staff',
 ] as const;
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const tenant = await requireTenantAuthorization(
       request,
@@ -156,3 +157,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/appointments', POST__unobserved);

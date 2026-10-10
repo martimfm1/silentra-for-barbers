@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -5,7 +6,7 @@ import { NextResponse } from 'next/server';
 
 const allowedTypes = new Set<EmailOtpType>(['email']);
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   const requestUrl = new URL(request.url);
   const tokenHash = requestUrl.searchParams.get('token_hash');
   const typeValue = requestUrl.searchParams.get('type');
@@ -61,3 +62,5 @@ export async function GET(request: Request) {
 
   return NextResponse.redirect(new URL('/email-confirmed', origin));
 }
+
+export const GET = withApiObservability('/api/auth/confirm', GET__unobserved);

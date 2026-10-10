@@ -1,10 +1,11 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { isRecord } from '@/lib/validation';
 
-export async function POST(
+async function POST__unobserved(
   request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -190,3 +191,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiObservability('/api/appointments/[appointmentId]/complete', POST__unobserved);
