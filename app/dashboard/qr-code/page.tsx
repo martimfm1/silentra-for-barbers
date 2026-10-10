@@ -111,12 +111,65 @@ export default function QrCodePage() {
     }
   };
   const print = () => {
-    const page = window.open('', '_blank', 'noopener,noreferrer');
+    const page = window.open('about:blank', '_blank');
     if (!page) return toast.error('Permite pop-ups para imprimir.');
-    page.document.write(
-      `<html><body style="font-family:Arial;display:grid;place-items:center;min-height:100vh"><main style="text-align:center;padding:36px;border:1px solid #ddd;border-radius:16px"><h1>${name.replaceAll('<', '&lt;')}</h1><img style="width:360px;max-width:80vw" src="${png}" alt="Codigo QR"><p>${text.replaceAll('<', '&lt;')}</p><small>${publicUrl}</small></main><script>window.print()</script></body></html>`,
-    );
-    page.document.close();
+
+    page.opener = null;
+    const doc = page.document;
+    doc.title = `${name} — Código QR`;
+
+    const styles = doc.createElement('style');
+    styles.textContent = `
+      @page { margin: 12mm; }
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      main {
+        padding: 36px;
+        border: 1px solid #ddd;
+        border-radius: 16px;
+        text-align: center;
+      }
+      img {
+        width: 360px;
+        max-width: 80vw;
+      }
+      p {
+        overflow-wrap: anywhere;
+      }
+    `;
+    doc.head.append(styles);
+
+    const main = doc.createElement('main');
+    const heading = doc.createElement('h1');
+    heading.textContent = name;
+
+    const image = doc.createElement('img');
+    image.src = png;
+    image.alt = 'Código QR';
+
+    const paragraph = doc.createElement('p');
+    paragraph.textContent = text;
+
+    const url = doc.createElement('small');
+    url.textContent = publicUrl;
+
+    main.append(heading, image, paragraph, url);
+    doc.body.append(main);
+
+    let printStarted = false;
+    const printPage = () => {
+      if (printStarted) return;
+      printStarted = true;
+      page.print();
+    };
+    image.addEventListener('load', printPage, { once: true });
+    image.addEventListener('error', printPage, { once: true });
+    if (image.complete) page.setTimeout(printPage, 0);
   };
   return (
     <main className="dashboard-page py-6 sm:py-8 mt-8">
