@@ -1,7 +1,8 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body: unknown = await request.json();
     if (typeof body !== 'object' || body === null) {
@@ -87,3 +88,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/auth/login', POSTHandler);
