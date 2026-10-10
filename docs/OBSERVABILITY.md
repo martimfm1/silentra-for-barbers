@@ -42,3 +42,22 @@ API handlers should:
 - never log the complete Supabase, Stripe or provider object.
 
 Expected user-facing errors are not exceptional and should generally not be logged as server errors (for example, invalid form input or an occupied booking slot).
+
+
+## Silentra Admin — Saúde da API
+
+The `/silentra-admin?tab=api_health` view reads from the private
+`platform_api_logs` table and shows HTTP request volume, 5xx rate, latency
+(p95 over the retained sample), route-level metrics, request IDs, and recent
+status/error records. API route handlers use `withApiObservability` from
+`lib/observability/api.ts`.
+
+The telemetry record intentionally stores only the normalized route template,
+HTTP method/status, elapsed handler time, a generated request ID, environment,
+region, and a safe error code. It never stores request/response bodies, query
+strings, cookies, authorization headers, IP addresses, email addresses or phone
+numbers. The table is service-role-only and requires the
+`platform_api_observability` migration.
+
+INFO records are written as structured JSON to stdout, while warnings and errors
+remain visible in platform runtime logs.

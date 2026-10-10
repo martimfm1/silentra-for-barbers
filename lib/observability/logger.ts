@@ -1,7 +1,7 @@
 type LogContext = Record<string, unknown>;
 
 const SENSITIVE_KEY =
-  /(password|token|secret|authorization|cookie|api[_-]?key|email|phone|birth|qr|otp|code)/i;
+  /(password|token|secret|authorization|cookie|api[_-]?key|email|phone|birth|qr|otp|verification[_-]?code|recovery[_-]?code)/i;
 const MAX_STRING_LENGTH = 500;
 
 function sanitizeValue(value: unknown): unknown {
@@ -53,7 +53,11 @@ function write(
 
   if (level === 'error') console.error('[SILENTRA]', payload);
   else if (level === 'warn') console.warn('[SILENTRA]', payload);
-  else if (process.env.NODE_ENV !== 'test') console.info('[SILENTRA]', payload);
+  else if (process.env.NODE_ENV !== 'test') {
+    // Generic console.info is silenced by instrumentation.ts in production.
+    // Write JSON directly so INFO-level operational logs remain visible.
+    process.stdout.write(`[SILENTRA] ${JSON.stringify(payload)}\n`);
+  }
 }
 
 export const productionLogger = {

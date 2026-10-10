@@ -30,7 +30,62 @@ type AuditEvent = {
   entity_type: string;
   entity_id: string | null;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 };
+
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  'platform.plan_assignment.updated': 'Plano da barbearia atualizado',
+  'platform.plan_assignment.cleared': 'Atribuição manual de plano removida',
+  PAYMENT_LINK_SENT: 'Link de pagamento enviado',
+  PAYMENT_CONFIRMED: 'Pagamento confirmado',
+  SUBSCRIPTION_ACTIVATED: 'Subscrição ativada',
+  MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED: 'Cancelamento de subscrição solicitado',
+  loyalty_redemption_validated: 'Recompensa de fidelização validada',
+  'professional.created': 'Profissional adicionado à barbearia',
+};
+
+const AUDIT_ENTITY_LABELS: Record<string, string> = {
+  barbershop: 'Barbearia',
+  subscription: 'Subscrição',
+  subscription_request: 'Pedido de subscrição',
+  loyalty_redemption: 'Recompensa de fidelização',
+  professional: 'Profissional',
+};
+
+function describeAuditEvent(event: AuditEvent) {
+  const metadata = event.metadata ?? {};
+  const detailParts: string[] = [];
+  if (typeof metadata.plan === 'string') {
+    const plan = metadata.plan.toLowerCase();
+    detailParts.push(`Plano ${plan.charAt(0).toUpperCase()}${plan.slice(1)}`);
+  }
+  if (metadata.billing_interval === 'month') detailParts.push('Mensal');
+  if (metadata.billing_interval === 'year') detailParts.push('Anual');
+  if (typeof metadata.request_type === 'string') {
+    const requestTypes: Record<string, string> = {
+      NEW: 'Nova subscrição',
+      RENEWAL: 'Renovação',
+      CHANGE: 'Alteração de plano',
+    };
+    if (requestTypes[metadata.request_type]) detailParts.push(requestTypes[metadata.request_type]);
+  }
+  if (typeof metadata.price === 'number' && typeof metadata.currency === 'string') {
+    try {
+      detailParts.push(new Intl.NumberFormat('pt-PT', {
+        style: 'currency', currency: metadata.currency, maximumFractionDigits: 2,
+      }).format(metadata.price));
+    } catch {
+      // Ignore unknown currency metadata rather than displaying raw provider data.
+    }
+  }
+  const rawAction = event.action.replace(/[._-]+/g, ' ').trim();
+  const fallback = rawAction ? rawAction.charAt(0).toUpperCase() + rawAction.slice(1) : 'Atividade registada';
+  return {
+    label: AUDIT_ACTION_LABELS[event.action] ?? fallback,
+    entityLabel: AUDIT_ENTITY_LABELS[event.entity_type] ?? 'Plataforma',
+    detail: detailParts.join(' · '),
+  };
+}
 
 export async function GET(request: Request) {
   try {
@@ -185,7 +240,7 @@ export async function GET(request: Request) {
         .gte('updated_at', new Date(Date.now() - 30 * 86400000).toISOString()),
       admin
         .from('audit_logs')
-        .select('action,entity_type,entity_id,created_at')
+        .select('action,entity_type,entity_id,created_at,metadata')
         .order('created_at', { ascending: false })
         .limit(12),
     ]);
@@ -340,14 +395,16 @@ export async function GET(request: Request) {
           process.env.MANUAL_PAYMENT_ALLOWED_HOSTS?.trim(),
         ),
       },
-      activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map(
-        (event) => ({
+      activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map((event) => {
+        const description = describeAuditEvent(event);
+        return {
           action: event.action,
-          entityType: event.entity_type,
-          entityId: event.entity_id,
+          label: description.label,
+          entityLabel: description.entityLabel,
+          detail: description.detail,
           createdAt: event.created_at,
-        }),
-      ),
+        };
+      }),
       plans,
       recentShops: rows,
     });
