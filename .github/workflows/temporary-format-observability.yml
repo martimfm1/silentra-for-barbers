@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           git fetch origin main
-          git diff --name-only -z origin/main...HEAD -- '*.ts' '*.tsx' '*.sql' '*.md' > /tmp/format-files
+          git diff --name-only -z origin/main...HEAD -- '*.ts' '*.tsx' '*.md' > /tmp/format-files
           if [ -s /tmp/format-files ]; then
             xargs -0 -r pnpm exec prettier --write < /tmp/format-files
           fi
