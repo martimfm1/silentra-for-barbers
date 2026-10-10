@@ -2,6 +2,12 @@ type LogContext = Record<string, unknown>;
 
 const SENSITIVE_KEY =
   /(password|token|secret|authorization|cookie|api[_-]?key|email|phone|birth|qr|otp|verification[_-]?code|recovery[_-]?code)/i;
+const CODE_KEY_EXCEPTIONS = /^(?:status|error)[_-]?code$/i;
+
+function shouldRedactKey(key: string) {
+  if (CODE_KEY_EXCEPTIONS.test(key)) return false;
+  return SENSITIVE_KEY.test(key) || /code/i.test(key);
+}
 const MAX_STRING_LENGTH = 500;
 
 function sanitizeValue(value: unknown): unknown {
@@ -18,7 +24,7 @@ function sanitizeObject(
 ): Record<string, unknown> {
   const output: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(context)) {
-    if (SENSITIVE_KEY.test(key)) {
+    if (shouldRedactKey(key)) {
       output[key] = '[REDACTED]';
       continue;
     }
