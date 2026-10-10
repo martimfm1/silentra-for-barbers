@@ -1,0 +1,41 @@
+name: Temporary formatter for API observability
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format observability changes and remove this temporary workflow
+        shell: bash
+        run: |
+          git diff --name-only -z 53984c70278bf979531a527038db1754180a7e16...HEAD -- '*.ts' '*.tsx' '*.md' > /tmp/format-files
+          if [ -s /tmp/format-files ]; then
+            xargs -0 -r pnpm exec prettier --write < /tmp/format-files
+          fi
+          git rm .github/workflows/temporary-format-observability.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: format API observability changes"
+            git push origin HEAD:main
+          else
+            echo "No formatting changes required."
+          fi
