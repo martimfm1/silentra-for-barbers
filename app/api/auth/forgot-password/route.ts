@@ -6,8 +6,9 @@ function isValidRecoveryEmail(email: string) {
   if (!email || email.length > 254) return false;
 
   const at = email.indexOf('@');
-  if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1)
+  if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1) {
     return false;
+  }
 
   const local = email.slice(0, at);
   const domain = email.slice(at + 1);
@@ -40,7 +41,9 @@ function isValidRecoveryEmail(email: string) {
   const labels = domain.split('.');
   return labels.every(
     (label) =>
-      label.length > 0 && !label.startsWith('-') && !label.endsWith('-'),
+      label.length > 0 &&
+      !label.startsWith('-') &&
+      !label.endsWith('-'),
   );
 }
 
