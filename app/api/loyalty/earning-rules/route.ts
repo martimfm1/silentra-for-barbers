@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requireModuleContext } from '@/services/modules/authorization';
 
@@ -10,7 +11,7 @@ function uuid(value: unknown): string | null {
     : null;
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -45,7 +46,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -166,7 +167,7 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+async function DELETE__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -189,3 +190,8 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/loyalty/earning-rules', GET__unobserved);
+export const POST = withApiObservability('/api/loyalty/earning-rules', POST__unobserved);
+export const PATCH = withApiObservability('/api/loyalty/earning-rules', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/loyalty/earning-rules', DELETE__unobserved);

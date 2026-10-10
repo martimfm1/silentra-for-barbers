@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -25,7 +26,7 @@ function logOtpError(
   console.error('[LOYALTY_OTP_ERROR]', { event, ...details });
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       slug?: unknown;
@@ -182,3 +183,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/loyalty/request-code', POST__unobserved);

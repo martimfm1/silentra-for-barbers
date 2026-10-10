@@ -1,9 +1,10 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GET__unobserved() {
   return NextResponse.json(
     {
       ok: true,
@@ -19,3 +20,5 @@ export async function GET() {
     },
   );
 }
+
+export const GET = withApiObservability('/api/health', GET__unobserved);

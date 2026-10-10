@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -34,7 +35,7 @@ function errorResponse(
   );
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   const requestId = crypto.randomUUID();
   let tenantId: string | null = null;
   let rewardIdForLog: string | null = null;
@@ -268,3 +269,5 @@ export async function POST(request: Request) {
     });
   }
 }
+
+export const POST = withApiObservability('/api/loyalty/redeem', POST__unobserved);

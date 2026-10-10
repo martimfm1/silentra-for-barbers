@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -7,7 +8,7 @@ import { assertWithinLimit } from '@/lib/billing/entitlements';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'multi_location',
@@ -30,7 +31,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const { admin, barbershopId, plan } = await requireModuleContext(
       'multi_location',
@@ -90,3 +91,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/enterprise/locations', GET__unobserved);
+export const POST = withApiObservability('/api/enterprise/locations', POST__unobserved);

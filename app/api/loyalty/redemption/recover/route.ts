@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getLoyaltySession } from '@/lib/loyalty/session';
@@ -15,7 +16,7 @@ function response(body: Record<string, unknown>, status = 200) {
   });
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   const requestId = crypto.randomUUID();
   try {
     const url = new URL(request.url);
@@ -172,3 +173,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/loyalty/redemption/recover', GET__unobserved);

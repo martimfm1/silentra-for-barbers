@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -13,7 +14,7 @@ type RouteContext = {
   params: Promise<{ transactionId: string }>;
 };
 
-export async function POST(request: Request, context: RouteContext) {
+async function POST__unobserved(request: Request, context: RouteContext) {
   try {
     const { admin, barbershopId, userId } = await requireModuleContext(
       'pos',
@@ -76,3 +77,5 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/enterprise/pos/[transactionId]/reversal', POST__unobserved);

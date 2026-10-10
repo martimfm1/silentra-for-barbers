@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { clearLoyaltyCookie, getLoyaltySession } from '@/lib/loyalty/session';
@@ -6,7 +7,7 @@ import { getLoyaltyTenantBySlug } from '@/lib/loyalty/public-tenant';
 
 export const runtime = 'nodejs';
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as { slug?: unknown };
     const slug =
@@ -75,3 +76,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/loyalty/leave', POST__unobserved);

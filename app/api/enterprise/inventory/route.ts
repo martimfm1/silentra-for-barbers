@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -6,7 +7,7 @@ import {
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'inventory',
@@ -29,7 +30,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'inventory',
@@ -78,3 +79,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/enterprise/inventory', GET__unobserved);
+export const POST = withApiObservability('/api/enterprise/inventory', POST__unobserved);
