@@ -153,7 +153,8 @@ const ACTIVITY_ACTION_LABELS: Record<string, string> = {
   PAYMENT_LINK_SENT: 'Link de pagamento enviado ao cliente',
   PAYMENT_CONFIRMED: 'Pagamento confirmado',
   SUBSCRIPTION_ACTIVATED: 'Subscrição ativada',
-  MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED: 'Pedido de cancelamento de subscrição recebido',
+  MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED:
+    'Pedido de cancelamento de subscrição recebido',
   manual_email_sent: 'Email enviado manualmente',
   loyalty_redemption_validated: 'Resgate de pontos validado',
   SUBSCRIPTION_EXPIRED: 'Subscrição expirada',

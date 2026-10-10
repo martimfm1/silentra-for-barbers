@@ -47,9 +47,7 @@ function auditDetail(
 ): string | null {
   const metadata = auditMetadata(event);
   const metadataShopId =
-    typeof metadata.barbershop_id === 'string'
-      ? metadata.barbershop_id
-      : null;
+    typeof metadata.barbershop_id === 'string' ? metadata.barbershop_id : null;
   const shopId =
     metadataShopId ??
     (event.entity_type === 'barbershop' ? event.entity_id : null);
@@ -58,8 +56,7 @@ function auditDetail(
       ? metadata.shop_name.trim().slice(0, 100)
       : '';
   const shopName =
-    metadataShopName ||
-    (shopId ? (shopNamesById.get(shopId) ?? '') : '');
+    metadataShopName || (shopId ? (shopNamesById.get(shopId) ?? '') : '');
   const details: string[] = [];
 
   if (shopName) details.push(shopName);
