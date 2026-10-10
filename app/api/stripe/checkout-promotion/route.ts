@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -6,7 +7,7 @@ import { getStripeClient } from '@/lib/stripe/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function GETHandler() {
   try {
     const supabase = await createClient();
     const {
@@ -124,3 +125,6 @@ export async function GET() {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/stripe/checkout-promotion', GETHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requireModuleContext } from '@/services/modules/authorization';
 
@@ -17,7 +18,7 @@ function parseId(value: unknown) {
     : null;
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const { admin, userId, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCHHandler(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -182,7 +183,7 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+async function DELETEHandler(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'loyalty',
@@ -210,3 +211,8 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/loyalty/rewards', POSTHandler);
+export const PATCH = withApiLogging('/api/loyalty/rewards', PATCHHandler);
+export const DELETE = withApiLogging('/api/loyalty/rewards', DELETEHandler);

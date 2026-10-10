@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   clearPortalCookie,
@@ -6,7 +7,7 @@ import {
 } from '@/lib/customer-booking-portal';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-export async function POST() {
+async function POSTHandler() {
   const session = await getPortalSession();
   if (session) {
     const admin = createAdminClient();
@@ -22,3 +23,6 @@ export async function POST() {
   await clearPortalCookie();
   return NextResponse.json({ success: true });
 }
+
+
+export const POST = withApiLogging('/api/customer-portal/logout', POSTHandler);

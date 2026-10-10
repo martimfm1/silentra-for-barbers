@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -38,7 +39,7 @@ function isValidHttpsUrl(value: string | null): boolean {
   }
 }
 
-export async function GET() {
+async function GETHandler() {
   try {
     const supabase = await createClient();
     const {
@@ -79,7 +80,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCHHandler(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -227,3 +228,7 @@ export async function PATCH(request: Request) {
     return jsonError('Não foi possível atualizar a presença online.', 500);
   }
 }
+
+
+export const GET = withApiLogging('/api/barbershops/public-profile', GETHandler);
+export const PATCH = withApiLogging('/api/barbershops/public-profile', PATCHHandler);

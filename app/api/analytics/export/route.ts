@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requireModuleContext } from '@/services/modules/authorization';
 import { PLANS } from '@/lib/stripe/constants';
@@ -201,7 +202,7 @@ function response(filename: string, html: string) {
   });
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     const { admin, barbershopId, plan } = await requireModuleContext(
       'advanced_analytics',
@@ -419,3 +420,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/analytics/export', GETHandler);

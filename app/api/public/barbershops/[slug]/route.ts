@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
@@ -19,7 +20,7 @@ function notFound() {
   );
 }
 
-export async function GET(
+async function GETHandler(
   _request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
@@ -105,3 +106,6 @@ export async function GET(
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/public/barbershops/[slug]', GETHandler);

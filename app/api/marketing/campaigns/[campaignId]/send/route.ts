@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextRequest, NextResponse } from 'next/server';
 import { queueCampaign } from '@/lib/marketing/dispatcher';
 import {
@@ -5,7 +6,7 @@ import {
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function POST(
+async function POSTHandler(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> },
 ) {
@@ -55,3 +56,6 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/marketing/campaigns/[campaignId]/send', POSTHandler);

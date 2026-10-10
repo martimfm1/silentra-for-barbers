@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -66,7 +67,7 @@ function ageGroup(age: number) {
   return '65+';
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     const { admin, barbershopId, plan } =
       await requireModuleContext('advanced_analytics');
@@ -316,3 +317,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/analytics', GETHandler);

@@ -1,9 +1,10 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const url = new URL(request.url);
   const q = url.searchParams.get('q')?.trim() ?? '';
   const category = url.searchParams.get('category')?.trim() ?? '';
@@ -89,3 +90,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ products: visible, categories, shops });
 }
+
+
+export const GET = withApiLogging('/api/marketplace/products', GETHandler);

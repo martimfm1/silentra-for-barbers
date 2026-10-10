@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 
 const MAX_QUERY_LENGTH = 256;
@@ -33,7 +34,7 @@ function firstContextName(
   return '';
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const { searchParams } = new URL(request.url);
   const token = process.env.MAPBOX_ACCESS_TOKEN?.trim();
   const query = searchParams.get('q')?.trim() ?? '';
@@ -168,3 +169,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/address/search', GETHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -32,7 +33,7 @@ function rateLimitKey(request: Request, email: string): string {
     .digest('hex');
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       email?: unknown;
@@ -137,3 +138,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/customer-portal/verify-code', POSTHandler);

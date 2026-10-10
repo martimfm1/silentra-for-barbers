@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -38,7 +39,7 @@ async function getTenant(req: Request, barbershopId: string) {
   return { admin, shop };
 }
 
-export async function GET(
+async function GETHandler(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -66,3 +67,6 @@ export async function GET(
     created_at: tenant.shop.created_at,
   });
 }
+
+
+export const GET = withApiLogging('/api/barbershops/[barbershopId]', GETHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -17,7 +18,7 @@ export const runtime = 'nodejs';
 const VERIFY_RATE_LIMIT = 12;
 const VERIFY_RATE_WINDOW_SECONDS = 15 * 60;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       slug?: unknown;
@@ -164,3 +165,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/loyalty/verify-code', POSTHandler);

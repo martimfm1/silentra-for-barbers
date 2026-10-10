@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -13,7 +14,7 @@ const CONFIRM_ROLES = new Set([
   'barber',
 ]);
 
-export async function POST(
+async function POSTHandler(
   request: Request,
   context: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -239,3 +240,6 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/appointments/[appointmentId]/confirm', POSTHandler);

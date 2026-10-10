@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getLoyaltySession } from '@/lib/loyalty/session';
@@ -32,7 +33,7 @@ type LoyaltyRedemption = {
   validated_at: string | null;
 };
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const slug =
     new URL(request.url).searchParams.get('slug')?.trim().toLowerCase() || '';
 
@@ -144,3 +145,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/loyalty/me', GETHandler);

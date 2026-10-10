@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requireModuleFeature } from '@/services/billing/module-guard';
 import { getModuleFeature } from '@/services/modules/module-config';
@@ -26,7 +27,7 @@ const MODULES = [
   'enterpriseReports',
 ] as const;
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     await requireTenantAuthorization();
   } catch (error) {
@@ -85,3 +86,6 @@ export async function GET(request: Request) {
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
+
+
+export const GET = withApiLogging('/api/modules/access', GETHandler);

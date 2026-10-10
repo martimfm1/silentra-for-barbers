@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 
@@ -11,7 +12,7 @@ function result(name: string, ok: boolean, ms: number, detail?: string) {
   return { name, ok, ms, detail: detail ?? null };
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const started = performance.now();
   try {
     const { admin } = await requirePlatformAdmin();
@@ -141,3 +142,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/silentra-admin/diagnostics', GETHandler);

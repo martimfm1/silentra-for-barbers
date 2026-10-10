@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -13,7 +14,7 @@ function authorized(request: Request): boolean {
   );
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   if (!authorized(request))
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -50,3 +51,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/cron/booking-completion', GETHandler);

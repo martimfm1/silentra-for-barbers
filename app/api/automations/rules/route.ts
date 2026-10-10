@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -13,7 +14,7 @@ const TRIGGERS = [
   'birthday',
 ] as const;
 
-export async function GET() {
+async function GETHandler() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'automated_followups',
@@ -36,7 +37,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const { admin, barbershopId, userId } = await requireModuleContext(
       'automated_followups',
@@ -92,3 +93,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/automations/rules', GETHandler);
+export const POST = withApiLogging('/api/automations/rules', POSTHandler);

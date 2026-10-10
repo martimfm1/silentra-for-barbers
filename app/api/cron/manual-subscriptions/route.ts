@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -13,7 +14,7 @@ function authorized(request: Request): boolean {
   );
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   if (!authorized(request))
     return NextResponse.json(
       { ok: false, error: 'Unauthorized' },
@@ -55,3 +56,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/cron/manual-subscriptions', GETHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -10,7 +11,7 @@ function getSafeNext(value: string | null): string {
   return value;
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = getSafeNext(requestUrl.searchParams.get('next'));
@@ -55,3 +56,6 @@ export async function GET(request: Request) {
     new URL('/login?error=Link+inv%C3%A1lido+ou+expirado', origin),
   );
 }
+
+
+export const GET = withApiLogging('/api/auth/callback', GETHandler);

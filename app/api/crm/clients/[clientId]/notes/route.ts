@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -21,7 +22,7 @@ async function tenant(req: Request) {
   return { admin, userId: authUser.id, barbershopId: data.barbershop_id };
 }
 
-export async function POST(req: Request, { params }: Params) {
+async function POSTHandler(req: Request, { params }: Params) {
   const t = await tenant(req);
   if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { clientId } = await params;
@@ -59,3 +60,6 @@ export async function POST(req: Request, { params }: Params) {
     );
   return NextResponse.json({ note: data }, { status: 201 });
 }
+
+
+export const POST = withApiLogging('/api/crm/clients/[clientId]/notes', POSTHandler);

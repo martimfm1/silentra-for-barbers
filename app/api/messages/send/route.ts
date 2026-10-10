@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   requireModuleContext,
@@ -46,7 +47,7 @@ function getTemplate(
   };
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const tenant = await requireModuleContext('messaging', 'messages');
     let payload: unknown;
@@ -166,3 +167,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/messages/send', POSTHandler);

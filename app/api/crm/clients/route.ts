@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   requireModuleContext,
@@ -6,7 +7,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients');
     const url = new URL(req.url);
@@ -60,3 +61,6 @@ export async function GET(req: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/crm/clients', GETHandler);

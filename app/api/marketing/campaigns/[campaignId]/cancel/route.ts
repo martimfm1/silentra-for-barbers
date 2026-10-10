@@ -1,10 +1,11 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function POST(
+async function POSTHandler(
   _request: Request,
   { params }: { params: Promise<{ campaignId: string }> },
 ) {
@@ -89,3 +90,6 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/marketing/campaigns/[campaignId]/cancel', POSTHandler);

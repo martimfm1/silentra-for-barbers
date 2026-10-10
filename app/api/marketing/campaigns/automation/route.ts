@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   requireModuleContext,
@@ -13,7 +14,7 @@ const MODES = ['manual', 'interval', 'event', 'birthday'] as const;
 const CAMPAIGN_SELECT =
   'id,name,channel,trigger_type,interval_value,interval_unit,next_run_at,event_name,birthday_offset_days,birthday_reward_type,birthday_reward_service_id,active,status,updated_at';
 
-export async function GET() {
+async function GETHandler() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -85,7 +86,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+async function PATCHHandler(request: NextRequest) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -249,3 +250,7 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/marketing/campaigns/automation', GETHandler);
+export const PATCH = withApiLogging('/api/marketing/campaigns/automation', PATCHHandler);

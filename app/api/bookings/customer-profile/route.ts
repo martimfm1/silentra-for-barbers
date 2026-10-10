@@ -1,10 +1,11 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import { isRecord, normalizeText, UUID_PATTERN } from '@/lib/validation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const payload: unknown = await request.json().catch(() => null);
     if (!isRecord(payload)) {
@@ -58,3 +59,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/bookings/customer-profile', POSTHandler);

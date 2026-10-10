@@ -1,9 +1,10 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthCallbackUrl } from '@/lib/auth/email-confirmation';
 import { isRecord, normalizeText } from '@/lib/validation';
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body: unknown = await request.json();
     if (!isRecord(body)) {
@@ -121,3 +122,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/auth/register', POSTHandler);

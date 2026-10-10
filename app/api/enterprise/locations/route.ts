@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -7,7 +8,7 @@ import { assertWithinLimit } from '@/lib/billing/entitlements';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GETHandler() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'multi_location',
@@ -30,7 +31,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const { admin, barbershopId, plan } = await requireModuleContext(
       'multi_location',
@@ -90,3 +91,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/enterprise/locations', GETHandler);
+export const POST = withApiLogging('/api/enterprise/locations', POSTHandler);

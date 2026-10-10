@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 
@@ -32,7 +33,7 @@ type AuditEvent = {
   created_at: string;
 };
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     const { admin } = await requirePlatformAdmin();
     const url = new URL(request.url);
@@ -361,3 +362,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/silentra-admin/overview', GETHandler);

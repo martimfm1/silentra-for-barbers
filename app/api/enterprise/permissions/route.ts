@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -19,7 +20,7 @@ const PERMISSIONS = [
   'team',
 ] as const;
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'advanced_permissions',
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+async function PUTHandler(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'advanced_permissions',
@@ -98,3 +99,7 @@ export async function PUT(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/enterprise/permissions', GETHandler);
+export const PUT = withApiLogging('/api/enterprise/permissions', PUTHandler);

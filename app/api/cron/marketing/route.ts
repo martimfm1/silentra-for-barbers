@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   processQueuedCampaignRecipients,
@@ -17,7 +18,7 @@ function authorized(request: Request) {
   );
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   if (!authorized(request)) {
     return NextResponse.json(
       { ok: false, error: 'Unauthorized' },
@@ -65,3 +66,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/cron/marketing', GETHandler);

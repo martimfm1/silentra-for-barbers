@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -215,7 +216,7 @@ async function getAvailability(
   return { availableSlots: slots, closedDay: false, blockedIntervals };
 }
 
-export async function GET(
+async function GETHandler(
   request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -244,7 +245,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(
+async function DELETEHandler(
   _request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -311,7 +312,7 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
+async function PATCHHandler(
   request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -411,3 +412,8 @@ export async function PATCH(
     return jsonError('Não foi possível reagendar a marcação.', 500);
   }
 }
+
+
+export const GET = withApiLogging('/api/customer-portal/appointments/[appointmentId]', GETHandler);
+export const DELETE = withApiLogging('/api/customer-portal/appointments/[appointmentId]', DELETEHandler);
+export const PATCH = withApiLogging('/api/customer-portal/appointments/[appointmentId]', PATCHHandler);

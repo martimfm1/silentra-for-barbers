@@ -1,9 +1,13 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextRequest } from 'next/server';
 import { handleBrevoWebhook } from '@/lib/marketing/brevo-webhook';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   return handleBrevoWebhook(request, 'email');
 }
+
+
+export const POST = withApiLogging('/api/webhooks/brevo/email', POSTHandler);

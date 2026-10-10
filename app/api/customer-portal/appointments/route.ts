@@ -1,8 +1,9 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-export async function GET() {
+async function GETHandler() {
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json(
@@ -160,3 +161,6 @@ export async function GET() {
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
+
+
+export const GET = withApiLogging('/api/customer-portal/appointments', GETHandler);

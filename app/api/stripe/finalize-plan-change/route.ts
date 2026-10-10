@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -9,7 +10,7 @@ import { assertSameOrigin } from '@/services/billing/http';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     assertSameOrigin(request);
 
@@ -125,3 +126,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/stripe/finalize-plan-change', POSTHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -9,7 +10,7 @@ export const runtime = 'nodejs';
 const MODES = ['physical_only', 'physical_and_online'] as const;
 type MarketplaceSalesMode = (typeof MODES)[number];
 
-export async function GET() {
+async function GETHandler() {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { data, error } = await admin
@@ -34,7 +35,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCHHandler(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const body = (await request.json().catch(() => null)) as {
@@ -74,3 +75,7 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/marketplace/manage/settings', GETHandler);
+export const PATCH = withApiLogging('/api/marketplace/manage/settings', PATCHHandler);

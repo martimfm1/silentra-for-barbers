@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { hashLoyaltyToken } from '@/lib/loyalty/session';
 import {
@@ -11,7 +12,7 @@ export const runtime = 'nodejs';
 const VALIDATION_RATE_LIMIT = 40;
 const VALIDATION_RATE_WINDOW_SECONDS = 60;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const context = await requireModuleContext('loyalty', 'loyalty');
     const body = (await request.json().catch(() => ({}))) as {
@@ -104,3 +105,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/loyalty/validate', POSTHandler);

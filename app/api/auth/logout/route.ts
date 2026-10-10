@@ -1,7 +1,8 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST() {
+async function POSTHandler() {
   try {
     const supabase = await createClient();
 
@@ -13,3 +14,6 @@ export async function POST() {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
+
+export const POST = withApiLogging('/api/auth/logout', POSTHandler);

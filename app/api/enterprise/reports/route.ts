@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -15,7 +16,7 @@ const REPORT_TYPES = [
   'commissions',
 ] as const;
 
-export async function GET() {
+async function GETHandler() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'advanced_reports',
@@ -38,7 +39,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const { admin, barbershopId, userId } = await requireModuleContext(
       'advanced_reports',
@@ -88,3 +89,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/enterprise/reports', GETHandler);
+export const POST = withApiLogging('/api/enterprise/reports', POSTHandler);

@@ -1,10 +1,11 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function GET(
+async function GETHandler(
   _request: Request,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
@@ -67,3 +68,6 @@ export async function GET(
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/marketplace/orders/[orderId]/events', GETHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { UUID_PATTERN } from '@/lib/validation';
 import { assertWithinLimit } from '@/lib/billing/entitlements';
@@ -36,7 +37,7 @@ async function contextFor(barbershopId: string) {
   }
 }
 
-export async function GET(
+async function GETHandler(
   _request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -56,7 +57,7 @@ export async function GET(
   return NextResponse.json({ data: data ?? [] });
 }
 
-export async function POST(
+async function POSTHandler(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -128,7 +129,7 @@ export async function POST(
   return NextResponse.json({ data }, { status: 201 });
 }
 
-export async function PATCH(
+async function PATCHHandler(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -173,7 +174,7 @@ export async function PATCH(
   return NextResponse.json({ data });
 }
 
-export async function DELETE(
+async function DELETEHandler(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -205,3 +206,9 @@ export async function DELETE(
     );
   return NextResponse.json({ success: true });
 }
+
+
+export const GET = withApiLogging('/api/barbershops/[barbershopId]/locations', GETHandler);
+export const POST = withApiLogging('/api/barbershops/[barbershopId]/locations', POSTHandler);
+export const PATCH = withApiLogging('/api/barbershops/[barbershopId]/locations', PATCHHandler);
+export const DELETE = withApiLogging('/api/barbershops/[barbershopId]/locations', DELETEHandler);

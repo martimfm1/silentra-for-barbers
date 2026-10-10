@@ -1,8 +1,9 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { isRecord } from '@/lib/validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
-export async function PATCH(request: Request) {
+async function PATCHHandler(request: Request) {
   const tenant = await requireTenantAuthorization(request, ['owner', 'admin']);
   if (!tenant.ok)
     return NextResponse.json(
@@ -49,3 +50,6 @@ export async function PATCH(request: Request) {
   }
   return NextResponse.json({ success: true, avatarUrl });
 }
+
+
+export const PATCH = withApiLogging('/api/barbershops/avatar', PATCHHandler);

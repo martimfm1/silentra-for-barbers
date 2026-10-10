@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -20,7 +21,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-export async function PATCH(request: Request) {
+async function PATCHHandler(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin, user } = await requirePlatformAdmin();
@@ -108,7 +109,7 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+async function DELETEHandler(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin, user } = await requirePlatformAdmin();
@@ -158,3 +159,7 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+
+export const PATCH = withApiLogging('/api/silentra-admin/plan', PATCHHandler);
+export const DELETE = withApiLogging('/api/silentra-admin/plan', DELETEHandler);

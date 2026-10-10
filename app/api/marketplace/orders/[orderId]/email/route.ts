@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -16,7 +17,7 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#039;');
 }
 
-export async function POST(
+async function POSTHandler(
   request: Request,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
@@ -130,3 +131,6 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/marketplace/orders/[orderId]/email', POSTHandler);

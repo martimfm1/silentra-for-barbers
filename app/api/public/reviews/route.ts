@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -21,7 +22,7 @@ function cleanString(value: unknown, maxLength: number): string | null {
   return normalized.slice(0, maxLength);
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       barbershopId?: unknown;
@@ -103,3 +104,6 @@ export async function POST(request: Request) {
     return jsonError('Não foi possível processar a avaliação.', 500);
   }
 }
+
+
+export const POST = withApiLogging('/api/public/reviews', POSTHandler);

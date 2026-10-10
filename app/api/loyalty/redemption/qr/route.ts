@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -6,7 +7,7 @@ import { hashLoyaltyToken } from '@/lib/loyalty/session';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   const token = new URL(request.url).searchParams.get('token')?.trim() ?? '';
   if (!token || token.length < 32 || token.length > 256) {
     return new NextResponse('Not found', { status: 404 });
@@ -45,3 +46,6 @@ export async function GET(request: Request) {
     },
   });
 }
+
+
+export const GET = withApiLogging('/api/loyalty/redemption/qr', GETHandler);

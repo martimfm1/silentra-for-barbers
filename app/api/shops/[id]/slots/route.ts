@@ -1,9 +1,10 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateTimeSlots } from '@/app/barbershops/utils/booking-slots';
 import { isSafePublicBookingDate, UUID_PATTERN } from '@/lib/validation';
 
-export async function GET(
+async function GETHandler(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -97,3 +98,6 @@ export async function GET(
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/shops/[id]/slots', GETHandler);

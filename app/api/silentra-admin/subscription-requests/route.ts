@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
@@ -15,7 +16,7 @@ const statuses = new Set<ManualRequestStatus>([
   'CANCELLED',
 ]);
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   try {
     await requirePlatformAdmin();
     const statusParam = new URL(request.url).searchParams.get('status');
@@ -71,3 +72,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/silentra-admin/subscription-requests', GETHandler);

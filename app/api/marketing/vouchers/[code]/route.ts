@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -6,7 +7,7 @@ import {
 
 export const runtime = 'nodejs';
 
-export async function POST(
+async function POSTHandler(
   request: NextRequest,
   context: { params: Promise<{ code: string }> },
 ) {
@@ -166,3 +167,6 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/marketing/vouchers/[code]', POSTHandler);

@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -65,7 +66,7 @@ const ROLE_PERMISSIONS: Record<TeamRole, string[]> = {
   staff: ['dashboard', 'agenda', 'clients'],
 };
 
-export async function GET() {
+async function GETHandler() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -159,3 +160,6 @@ export async function GET() {
     },
   );
 }
+
+
+export const GET = withApiLogging('/api/navigation/context', GETHandler);

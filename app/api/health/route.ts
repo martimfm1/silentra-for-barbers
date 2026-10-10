@@ -1,9 +1,10 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GETHandler() {
   return NextResponse.json(
     {
       ok: true,
@@ -19,3 +20,6 @@ export async function GET() {
     },
   );
 }
+
+
+export const GET = withApiLogging('/api/health', GETHandler);

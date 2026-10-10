@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
@@ -26,7 +27,7 @@ function replaceTokens(
     );
 }
 
-export async function GET(request: Request) {
+async function GETHandler(request: Request) {
   if (!authorized(request))
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const admin = createAdminClient();
@@ -168,3 +169,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/cron/automations', GETHandler);

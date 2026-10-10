@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
@@ -87,3 +88,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/silentra-admin/loyalty/points', POSTHandler);

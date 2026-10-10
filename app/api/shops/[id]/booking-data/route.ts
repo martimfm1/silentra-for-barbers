@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -79,7 +80,7 @@ function normalizeClosedDays(value: unknown): Set<number> {
   return result;
 }
 
-export async function GET(
+async function GETHandler(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -411,3 +412,6 @@ export async function GET(
     );
   }
 }
+
+
+export const GET = withApiLogging('/api/shops/[id]/booking-data', GETHandler);
