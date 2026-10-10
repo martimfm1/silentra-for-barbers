@@ -60,3 +60,26 @@ numbers. The table is service-role-only and requires the
 
 INFO records are written as structured JSON to stdout, while warnings and errors
 remain visible in platform runtime logs.
+
+## Dashboard checks and interpretation
+
+- The dashboard checks Supabase tables used by the core product and performs
+  read-only GET requests to the configured Stripe and Brevo account endpoints.
+  It does not create charges, update configuration, or send email.
+- HTTP 4xx responses are presented separately from 5xx responses so invalid or
+  unauthorized requests are not confused with application/server failures.
+- Route-level latency and error percentages are calculated from the recent
+  telemetry sample. The aggregate request count uses database counts when
+  available; latency percentiles describe the sample loaded by the dashboard,
+  not all requests ever received.
+- The current view reads the previous 24 hours and loads up to 2,000 records.
+  This table does not imply automatic retention or deletion; retention needs an
+  explicit policy before a cleanup job is enabled.
+- Historical API logs only begin after the route instrumentation and migration
+  have been deployed. A newly enabled dashboard cannot reconstruct older
+  requests.
+
+Request logging is scheduled after the handler response so the Supabase insert
+does not add database round-trip latency to the client-facing response. If
+persistence fails, the request itself still succeeds or fails according to its
+normal handler result, and a safe logger event records the telemetry failure.
