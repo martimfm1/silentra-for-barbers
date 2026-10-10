@@ -27,6 +27,7 @@ import {
   Wrench,
   XCircle,
 } from 'lucide-react';
+import ObservabilityPanel from '@/app/_silentra-admin/observability-panel';
 
 type Plan = 'free' | 'pro' | 'enterprise';
 type Overview = {
@@ -90,6 +91,7 @@ const tabs = [
   { id: 'payments', label: 'Pagamentos', icon: CreditCard },
   { id: 'payment_requests', label: 'Pedidos de pagamento', icon: MailCheck },
   { id: 'subscriptions', label: 'Subscrições', icon: Database },
+  { id: 'observability', label: 'Saúde & Logs', icon: Activity },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
 ] as const;
 
@@ -143,6 +145,56 @@ type ManualRequest = {
   barbershop: { id: string; name: string } | null;
 };
 
+const ACTIVITY_ACTION_LABELS: Record<string, string> = {
+  'platform.plan_assignment.updated': 'Plano de uma barbearia atualizado',
+  'platform.plan_assignment.cleared': 'Atribuição manual de plano removida',
+  PAYMENT_MODE_CHANGED: 'Método de pagamento da plataforma alterado',
+  PAYMENT_LINK_SENT: 'Link de pagamento enviado ao cliente',
+  manual_email_sent: 'Email enviado manualmente',
+  loyalty_redemption_validated: 'Resgate de pontos validado',
+  SUBSCRIPTION_EXPIRED: 'Subscrição expirada',
+  SUBSCRIPTION_CREATED: 'Subscrição criada',
+  SUBSCRIPTION_CANCELLED: 'Subscrição cancelada',
+  SUBSCRIPTION_CANCELED: 'Subscrição cancelada',
+  'professional.created': 'Profissional adicionado à barbearia',
+  'appointment.created': 'Marcação criada',
+  'appointment.cancelled': 'Marcação cancelada',
+  'appointment.completed': 'Marcação concluída',
+};
+
+const ACTIVITY_ENTITY_LABELS: Record<string, string> = {
+  barbershop: 'Barbearia',
+  subscription_request: 'Pedido de subscrição',
+  subscription: 'Subscrição',
+  platform_settings: 'Definições da plataforma',
+  loyalty_redemption: 'Resgate de pontos',
+  user: 'Utilizador',
+  appointment: 'Marcação',
+  professional: 'Profissional',
+  payment: 'Pagamento',
+};
+
+function activityActionLabel(action: string) {
+  const known = ACTIVITY_ACTION_LABELS[action];
+  if (known) return known;
+  const translations: Record<string, string> = {
+    created: 'criado', create: 'criar', updated: 'atualizado', update: 'atualizar',
+    deleted: 'removido', delete: 'remover', cleared: 'removido', sent: 'enviado',
+    send: 'enviar', confirmed: 'confirmado', confirm: 'confirmar', rejected: 'rejeitado',
+    reject: 'rejeitar', cancelled: 'cancelado', canceled: 'cancelado', completed: 'concluído',
+    expired: 'expirado', payment: 'pagamento', plan: 'plano', assignment: 'atribuição',
+    subscription: 'subscrição', request: 'pedido', user: 'utilizador', barbershop: 'barbearia',
+    professional: 'profissional', appointment: 'marcação', loyalty: 'fidelização',
+    redemption: 'resgate', manual: 'manual', email: 'email', changed: 'alterado',
+    mode: 'método', failed: 'falhou',
+  };
+  const words = action.replace(/^platform\\./, '').replace(/[._-]+/g, ' ').toLowerCase().split(/\\s+/);
+  return words.map((word) => translations[word] ?? word).join(' ').replace(/^\\w/, (first) => first.toLocaleUpperCase('pt-PT'));
+}
+
+function activityEntityLabel(entityType: string) {
+  return ACTIVITY_ENTITY_LABELS[entityType] ?? entityType.replace(/[._-]+/g, ' ').toLocaleLowerCase('pt-PT');
+}
 function formatMoney(value: number, currency = 'EUR') {
   return new Intl.NumberFormat('pt-PT', {
     style: 'currency',
@@ -781,18 +833,15 @@ export default function PlatformAdminConsole() {
                 <div className="mt-4 space-y-1">
                   {data.activity.map((event) => (
                     <div
-                      key={`${event.createdAt}-${event.action}-${event.entityId ?? 'none'}`}
+                      key={`${event.createdAt}-${activityActionLabel(event.action)}-${event.entityId ?? 'none'}`}
                       className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-xs font-medium text-zinc-300">
+                        <p className="truncate text-xs font-medium text-zinc-200">
                           {event.action}
                         </p>
-                        <p className="truncate text-[10px] text-zinc-700">
-                          {event.entityType}
-                          {event.entityId
-                            ? ` · ${event.entityId.slice(0, 8)}`
-                            : ''}
+                        <p className="truncate text-[10px] text-zinc-500">
+                          {activityEntityLabel(event.entityType)}
                         </p>
                       </div>
                       <span className="shrink-0 text-[10px] text-zinc-700">
@@ -1886,6 +1935,8 @@ export default function PlatformAdminConsole() {
             </div>
           </section>
         ) : null}
+
+        {tab === 'observability' ? <ObservabilityPanel /> : null}
 
         {tab === 'diagnostics' ? (
           <section className="grid gap-5 lg:grid-cols-2">
