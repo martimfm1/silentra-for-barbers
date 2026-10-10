@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   MARKETING_CHANNELS,
@@ -13,7 +14,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/;
 const CAMPAIGN_SELECT =
   'id,name,channel,subject,body,segment,status,scheduled_at,started_at,completed_at,created_at,updated_at,trigger_type,interval_value,interval_unit,next_run_at,event_name,birthday_offset_days,birthday_reward_type,birthday_reward_service_id,active,total_recipients,sent_count,failed_count';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -54,7 +55,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function POST__unobserved(request: NextRequest) {
   try {
     const { admin, userId, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -175,7 +176,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+async function PATCH__unobserved(request: NextRequest) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -276,7 +277,7 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+async function DELETE__unobserved(request: NextRequest) {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -326,3 +327,8 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/marketing/campaigns', GET__unobserved);
+export const POST = withApiObservability('/api/marketing/campaigns', POST__unobserved);
+export const PATCH = withApiObservability('/api/marketing/campaigns', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/marketing/campaigns', DELETE__unobserved);

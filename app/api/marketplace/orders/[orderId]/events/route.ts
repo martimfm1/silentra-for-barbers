@@ -1,10 +1,11 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function GET(
+async function GET__unobserved(
   _request: Request,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
@@ -67,3 +68,5 @@ export async function GET(
     );
   }
 }
+
+export const GET = withApiObservability('/api/marketplace/orders/[orderId]/events', GET__unobserved);

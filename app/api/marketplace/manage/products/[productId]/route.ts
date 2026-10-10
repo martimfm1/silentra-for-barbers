@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -23,7 +24,7 @@ const normalize = (body: Record<string, unknown> | null) => ({
   marketplace_featured: body?.marketplaceFeatured === true,
 });
 
-export async function PATCH(
+async function PATCH__unobserved(
   request: Request,
   { params }: { params: Promise<{ productId: string }> },
 ) {
@@ -75,7 +76,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
+async function DELETE__unobserved(
   _request: Request,
   { params }: { params: Promise<{ productId: string }> },
 ) {
@@ -102,3 +103,6 @@ export async function DELETE(
     );
   }
 }
+
+export const PATCH = withApiObservability('/api/marketplace/manage/products/[productId]', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/marketplace/manage/products/[productId]', DELETE__unobserved);

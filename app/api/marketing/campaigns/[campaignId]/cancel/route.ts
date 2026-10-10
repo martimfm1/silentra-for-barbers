@@ -1,10 +1,11 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function POST(
+async function POST__unobserved(
   _request: Request,
   { params }: { params: Promise<{ campaignId: string }> },
 ) {
@@ -89,3 +90,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiObservability('/api/marketing/campaigns/[campaignId]/cancel', POST__unobserved);

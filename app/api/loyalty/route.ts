@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { getAccessPlanForRequest } from '@/services/billing/plan-access.guard';
 import { assertFeature } from '@/lib/billing/entitlements';
@@ -31,7 +32,7 @@ async function ensureAccess() {
   return { context } as const;
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const result = await ensureAccess();
     if ('response' in result) return result.response;
@@ -80,7 +81,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   try {
     const result = await ensureAccess();
     if ('response' in result) return result.response;
@@ -143,3 +144,6 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/loyalty', GET__unobserved);
+export const PATCH = withApiObservability('/api/loyalty', PATCH__unobserved);

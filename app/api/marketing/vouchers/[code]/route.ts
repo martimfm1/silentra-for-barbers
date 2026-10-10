@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -6,7 +7,7 @@ import {
 
 export const runtime = 'nodejs';
 
-export async function POST(
+async function POST__unobserved(
   request: NextRequest,
   context: { params: Promise<{ code: string }> },
 ) {
@@ -166,3 +167,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiObservability('/api/marketing/vouchers/[code]', POST__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextRequest, NextResponse } from 'next/server';
 import { queueCampaign } from '@/lib/marketing/dispatcher';
 import {
@@ -5,7 +6,7 @@ import {
   requireModuleContext,
 } from '@/services/modules/authorization';
 
-export async function POST(
+async function POST__unobserved(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> },
 ) {
@@ -55,3 +56,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiObservability('/api/marketing/campaigns/[campaignId]/send', POST__unobserved);

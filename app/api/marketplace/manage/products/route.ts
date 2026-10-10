@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -41,7 +42,7 @@ function validate(product: ReturnType<typeof parsePayload>) {
   );
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { data, error } = await admin
@@ -61,7 +62,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const body = (await request.json().catch(() => null)) as Record<
@@ -90,3 +91,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/marketplace/manage/products', GET__unobserved);
+export const POST = withApiObservability('/api/marketplace/manage/products', POST__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import {
@@ -96,7 +97,7 @@ async function notifyCustomer(
   }
 }
 
-export async function PATCH(
+async function PATCH__unobserved(
   request: Request,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
@@ -211,3 +212,5 @@ export async function PATCH(
     );
   }
 }
+
+export const PATCH = withApiObservability('/api/marketplace/orders/[orderId]', PATCH__unobserved);
