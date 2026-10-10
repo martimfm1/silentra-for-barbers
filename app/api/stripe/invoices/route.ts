@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
@@ -7,7 +8,7 @@ import { billingErrorResponse } from '@/services/billing/http';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const {
       data: { user },
@@ -28,3 +29,5 @@ export async function GET() {
     return billingErrorResponse(error);
   }
 }
+
+export const GET = withApiObservability('/api/stripe/invoices', GET__unobserved);

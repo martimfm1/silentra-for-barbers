@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
@@ -39,7 +40,7 @@ function defaultPermissionsForRole(role: string) {
   return { ...DEFAULT_PERMISSIONS };
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   const tenant = await requireTenantAuthorization(request, TEAM_VIEW_ROLES);
   if (!tenant.ok) {
     return NextResponse.json(
@@ -200,7 +201,7 @@ export async function GET(request: Request) {
   );
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -264,7 +265,7 @@ export async function PATCH(request: Request) {
   return NextResponse.json({ success: true });
 }
 
-export async function DELETE(request: Request) {
+async function DELETE__unobserved(request: Request) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -297,3 +298,7 @@ export async function DELETE(request: Request) {
   }
   return NextResponse.json({ success: true });
 }
+
+export const GET = withApiObservability('/api/team/members', GET__unobserved);
+export const PATCH = withApiObservability('/api/team/members', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/team/members', DELETE__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
@@ -9,7 +10,7 @@ import { PaymentModeService } from '@/services/billing/payment-mode.service';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const supabase = await createClient();
     const {
@@ -48,3 +49,5 @@ export async function GET() {
     return NextResponse.json({ eligible: false }, { status: 500 });
   }
 }
+
+export const GET = withApiObservability('/api/stripe/trial-eligibility', GET__unobserved);

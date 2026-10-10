@@ -1,7 +1,8 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+async function POST__unobserved() {
   try {
     const supabase = await createClient();
     const {
@@ -64,3 +65,5 @@ export async function POST() {
     );
   }
 }
+
+export const POST = withApiObservability('/api/team/invite', POST__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import type Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -126,7 +127,7 @@ async function processCheckoutSessionCompleted(
   );
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   const signature = request.headers.get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!signature || !webhookSecret)
@@ -229,3 +230,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/stripe/webhook', POST__unobserved);

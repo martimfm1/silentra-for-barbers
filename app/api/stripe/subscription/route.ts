@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -11,7 +12,7 @@ import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -262,3 +263,5 @@ export async function GET(request: Request) {
     return billingErrorResponse(error);
   }
 }
+
+export const GET = withApiObservability('/api/stripe/subscription', GET__unobserved);

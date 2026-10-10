@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
@@ -9,7 +10,7 @@ import { assertStripeBillingAvailableForUser } from '@/services/billing/payment-
 
 export const runtime = 'nodejs';
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
 
@@ -41,3 +42,5 @@ export async function POST(request: Request) {
     return billingErrorResponse(error);
   }
 }
+
+export const POST = withApiObservability('/api/stripe/setup-intent', POST__unobserved);

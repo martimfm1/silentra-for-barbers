@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { StripePriceService } from '@/services/billing/stripe-price.service';
 import { getManualPrices } from '@/lib/billing/manual-pricing';
@@ -6,7 +7,7 @@ import { PaymentModeService } from '@/services/billing/payment-mode.service';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const paymentMode = await PaymentModeService.getPaymentMode();
     if (paymentMode === 'MANUAL') {
@@ -42,3 +43,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withApiObservability('/api/stripe/prices', GET__unobserved);
