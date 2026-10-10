@@ -32,7 +32,7 @@ export function withApiLogging<TArgs extends RouteArguments>(
     const request = args[0];
     const startedAt = performance.now();
     const requestId = crypto.randomUUID();
-    let response: Response | void;
+    let response: Response | void = undefined;
     let thrown: unknown;
 
     try {
