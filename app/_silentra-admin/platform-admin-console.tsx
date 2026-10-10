@@ -188,8 +188,8 @@ function activityActionLabel(action: string) {
     redemption: 'resgate', manual: 'manual', email: 'email', changed: 'alterado',
     mode: 'método', failed: 'falhou',
   };
-  const words = action.replace(/^platform\\./, '').replace(/[._-]+/g, ' ').toLowerCase().split(/\\s+/);
-  return words.map((word) => translations[word] ?? word).join(' ').replace(/^\\w/, (first) => first.toLocaleUpperCase('pt-PT'));
+  const words = action.replace(/^platform\./, '').replace(/[._-]+/g, ' ').toLowerCase().split(/\s+/);
+  return words.map((word) => translations[word] ?? word).join(' ').replace(/^\w/, (first) => first.toLocaleUpperCase('pt-PT'));
 }
 
 function activityEntityLabel(entityType: string) {
