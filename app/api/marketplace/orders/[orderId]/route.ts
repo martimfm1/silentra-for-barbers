@@ -213,5 +213,7 @@ async function PATCHHandler(
   }
 }
 
-
-export const PATCH = withApiLogging('/api/marketplace/orders/[orderId]', PATCHHandler);
+export const PATCH = withApiLogging(
+  '/api/marketplace/orders/[orderId]',
+  PATCHHandler,
+);

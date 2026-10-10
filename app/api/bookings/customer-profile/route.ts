@@ -60,5 +60,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/bookings/customer-profile', POSTHandler);
+export const POST = withApiLogging(
+  '/api/bookings/customer-profile',
+  POSTHandler,
+);

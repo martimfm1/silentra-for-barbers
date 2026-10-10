@@ -175,5 +175,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/stripe/checkout-complete', POSTHandler);
+export const POST = withApiLogging(
+  '/api/stripe/checkout-complete',
+  POSTHandler,
+);

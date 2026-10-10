@@ -47,5 +47,4 @@ async function GETHandler(request: Request) {
   });
 }
 
-
 export const GET = withApiLogging('/api/loyalty/redemption/qr', GETHandler);

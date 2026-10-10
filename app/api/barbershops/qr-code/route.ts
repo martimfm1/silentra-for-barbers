@@ -70,6 +70,5 @@ async function PATCHHandler(request: Request) {
   return NextResponse.json({ text: text || DEFAULT_QR_TEXT });
 }
 
-
 export const GET = withApiLogging('/api/barbershops/qr-code', GETHandler);
 export const PATCH = withApiLogging('/api/barbershops/qr-code', PATCHHandler);

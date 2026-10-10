@@ -268,5 +268,4 @@ async function GETHandler() {
   }
 }
 
-
 export const GET = withApiLogging('/api/stripe/billing-summary', GETHandler);

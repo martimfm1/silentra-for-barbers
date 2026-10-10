@@ -125,5 +125,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/onboarding/join-v2', POSTHandler);

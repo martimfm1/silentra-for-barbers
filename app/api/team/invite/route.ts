@@ -66,5 +66,4 @@ async function POSTHandler() {
   }
 }
 
-
 export const POST = withApiLogging('/api/team/invite', POSTHandler);

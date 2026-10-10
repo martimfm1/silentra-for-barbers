@@ -96,6 +96,5 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/enterprise/commissions', GETHandler);
 export const POST = withApiLogging('/api/enterprise/commissions', POSTHandler);

@@ -24,5 +24,4 @@ async function POSTHandler() {
   return NextResponse.json({ success: true });
 }
 
-
 export const POST = withApiLogging('/api/customer-portal/logout', POSTHandler);

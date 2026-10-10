@@ -168,5 +168,4 @@ async function POSTHandler(req: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/messages/send', POSTHandler);

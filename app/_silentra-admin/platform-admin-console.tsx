@@ -178,22 +178,56 @@ function activityActionLabel(action: string) {
   const known = ACTIVITY_ACTION_LABELS[action];
   if (known) return known;
   const translations: Record<string, string> = {
-    created: 'criado', create: 'criar', updated: 'atualizado', update: 'atualizar',
-    deleted: 'removido', delete: 'remover', cleared: 'removido', sent: 'enviado',
-    send: 'enviar', confirmed: 'confirmado', confirm: 'confirmar', rejected: 'rejeitado',
-    reject: 'rejeitar', cancelled: 'cancelado', canceled: 'cancelado', completed: 'concluído',
-    expired: 'expirado', payment: 'pagamento', plan: 'plano', assignment: 'atribuição',
-    subscription: 'subscrição', request: 'pedido', user: 'utilizador', barbershop: 'barbearia',
-    professional: 'profissional', appointment: 'marcação', loyalty: 'fidelização',
-    redemption: 'resgate', manual: 'manual', email: 'email', changed: 'alterado',
-    mode: 'método', failed: 'falhou',
+    created: 'criado',
+    create: 'criar',
+    updated: 'atualizado',
+    update: 'atualizar',
+    deleted: 'removido',
+    delete: 'remover',
+    cleared: 'removido',
+    sent: 'enviado',
+    send: 'enviar',
+    confirmed: 'confirmado',
+    confirm: 'confirmar',
+    rejected: 'rejeitado',
+    reject: 'rejeitar',
+    cancelled: 'cancelado',
+    canceled: 'cancelado',
+    completed: 'concluído',
+    expired: 'expirado',
+    payment: 'pagamento',
+    plan: 'plano',
+    assignment: 'atribuição',
+    subscription: 'subscrição',
+    request: 'pedido',
+    user: 'utilizador',
+    barbershop: 'barbearia',
+    professional: 'profissional',
+    appointment: 'marcação',
+    loyalty: 'fidelização',
+    redemption: 'resgate',
+    manual: 'manual',
+    email: 'email',
+    changed: 'alterado',
+    mode: 'método',
+    failed: 'falhou',
   };
-  const words = action.replace(/^platform\./, '').replace(/[._-]+/g, ' ').toLowerCase().split(/\s+/);
-  return words.map((word) => translations[word] ?? word).join(' ').replace(/^\w/, (first) => first.toLocaleUpperCase('pt-PT'));
+  const words = action
+    .replace(/^platform\./, '')
+    .replace(/[._-]+/g, ' ')
+    .toLowerCase()
+    .split(/\s+/);
+  return words
+    .map((word) => translations[word] ?? word)
+    .join(' ')
+    .replace(/^\w/, (first) => first.toLocaleUpperCase('pt-PT'));
 }
 
 function activityEntityLabel(entityType: string) {
-  return ACTIVITY_ENTITY_LABELS[entityType] ?? entityType.replace(/[._-]+/g, ' ').toLocaleLowerCase('pt-PT');
+  return (
+    ACTIVITY_ENTITY_LABELS[entityType] ??
+    entityType.replace(/[._-]+/g, ' ').toLocaleLowerCase('pt-PT')
+  );
 }
 function formatMoney(value: number, currency = 'EUR') {
   return new Intl.NumberFormat('pt-PT', {

@@ -413,5 +413,4 @@ async function GETHandler(
   }
 }
 
-
 export const GET = withApiLogging('/api/shops/[id]/booking-data', GETHandler);

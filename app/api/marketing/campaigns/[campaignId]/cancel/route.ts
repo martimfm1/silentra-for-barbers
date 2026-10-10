@@ -91,5 +91,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/marketing/campaigns/[campaignId]/cancel', POSTHandler);
+export const POST = withApiLogging(
+  '/api/marketing/campaigns/[campaignId]/cancel',
+  POSTHandler,
+);

@@ -51,7 +51,8 @@ export function withApiLogging<TArgs extends RouteArguments>(
           ? (thrown as { code?: unknown; name?: unknown })
           : null;
       const errorCode =
-        candidate && typeof candidate.code === 'string' &&
+        candidate &&
+        typeof candidate.code === 'string' &&
         /^[A-Za-z0-9_:-]{1,80}$/.test(candidate.code)
           ? candidate.code
           : thrown && candidate && typeof candidate.name === 'string'
@@ -89,7 +90,9 @@ export function withApiLogging<TArgs extends RouteArguments>(
       after(async () => {
         try {
           const admin = createAdminClient();
-          const { error } = await admin.from('platform_api_logs').insert(record);
+          const { error } = await admin
+            .from('platform_api_logs')
+            .insert(record);
           if (
             error &&
             error.code !== '42P01' &&

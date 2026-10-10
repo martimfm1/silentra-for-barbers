@@ -68,5 +68,7 @@ async function GETHandler(
   });
 }
 
-
-export const GET = withApiLogging('/api/barbershops/[barbershopId]', GETHandler);
+export const GET = withApiLogging(
+  '/api/barbershops/[barbershopId]',
+  GETHandler,
+);

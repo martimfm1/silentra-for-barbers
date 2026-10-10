@@ -74,6 +74,5 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/crm/tags', GETHandler);
 export const POST = withApiLogging('/api/crm/tags', POSTHandler);

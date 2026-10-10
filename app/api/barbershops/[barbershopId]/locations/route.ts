@@ -207,8 +207,19 @@ async function DELETEHandler(
   return NextResponse.json({ success: true });
 }
 
-
-export const GET = withApiLogging('/api/barbershops/[barbershopId]/locations', GETHandler);
-export const POST = withApiLogging('/api/barbershops/[barbershopId]/locations', POSTHandler);
-export const PATCH = withApiLogging('/api/barbershops/[barbershopId]/locations', PATCHHandler);
-export const DELETE = withApiLogging('/api/barbershops/[barbershopId]/locations', DELETEHandler);
+export const GET = withApiLogging(
+  '/api/barbershops/[barbershopId]/locations',
+  GETHandler,
+);
+export const POST = withApiLogging(
+  '/api/barbershops/[barbershopId]/locations',
+  POSTHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/barbershops/[barbershopId]/locations',
+  PATCHHandler,
+);
+export const DELETE = withApiLogging(
+  '/api/barbershops/[barbershopId]/locations',
+  DELETEHandler,
+);

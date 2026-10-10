@@ -86,5 +86,4 @@ async function GETHandler(req: Request, { params }: Params) {
   });
 }
 
-
 export const GET = withApiLogging('/api/crm/clients/[clientId]', GETHandler);

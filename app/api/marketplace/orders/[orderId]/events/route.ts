@@ -69,5 +69,7 @@ async function GETHandler(
   }
 }
 
-
-export const GET = withApiLogging('/api/marketplace/orders/[orderId]/events', GETHandler);
+export const GET = withApiLogging(
+  '/api/marketplace/orders/[orderId]/events',
+  GETHandler,
+);

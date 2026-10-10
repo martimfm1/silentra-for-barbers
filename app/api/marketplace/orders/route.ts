@@ -290,6 +290,5 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/marketplace/orders', GETHandler);
 export const POST = withApiLogging('/api/marketplace/orders', POSTHandler);

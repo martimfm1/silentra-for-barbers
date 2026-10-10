@@ -63,5 +63,4 @@ async function GETHandler(request: Request) {
   return NextResponse.redirect(new URL('/email-confirmed', origin));
 }
 
-
 export const GET = withApiLogging('/api/auth/confirm', GETHandler);

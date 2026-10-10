@@ -92,6 +92,11 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/marketplace/manage/products', GETHandler);
-export const POST = withApiLogging('/api/marketplace/manage/products', POSTHandler);
+export const GET = withApiLogging(
+  '/api/marketplace/manage/products',
+  GETHandler,
+);
+export const POST = withApiLogging(
+  '/api/marketplace/manage/products',
+  POSTHandler,
+);

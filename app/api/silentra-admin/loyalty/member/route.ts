@@ -40,5 +40,7 @@ async function GETHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/silentra-admin/loyalty/member', GETHandler);
+export const GET = withApiLogging(
+  '/api/silentra-admin/loyalty/member',
+  GETHandler,
+);

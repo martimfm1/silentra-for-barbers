@@ -94,6 +94,5 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/automations/rules', GETHandler);
 export const POST = withApiLogging('/api/automations/rules', POSTHandler);

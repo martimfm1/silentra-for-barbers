@@ -106,5 +106,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/loyalty/validate', POSTHandler);

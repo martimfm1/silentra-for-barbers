@@ -269,5 +269,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/barbershops/[barbershopId]/professionals', POSTHandler);
+export const POST = withApiLogging(
+  '/api/barbershops/[barbershopId]/professionals',
+  POSTHandler,
+);

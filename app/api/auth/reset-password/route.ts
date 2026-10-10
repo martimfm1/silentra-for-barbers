@@ -88,5 +88,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/auth/reset-password', POSTHandler);

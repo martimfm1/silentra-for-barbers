@@ -87,5 +87,4 @@ async function GETHandler(request: Request) {
   );
 }
 
-
 export const GET = withApiLogging('/api/modules/access', GETHandler);

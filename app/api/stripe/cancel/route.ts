@@ -27,5 +27,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/stripe/cancel', POSTHandler);

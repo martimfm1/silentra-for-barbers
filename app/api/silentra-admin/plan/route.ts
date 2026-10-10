@@ -160,6 +160,5 @@ async function DELETEHandler(request: Request) {
   }
 }
 
-
 export const PATCH = withApiLogging('/api/silentra-admin/plan', PATCHHandler);
 export const DELETE = withApiLogging('/api/silentra-admin/plan', DELETEHandler);

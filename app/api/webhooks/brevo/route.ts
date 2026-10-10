@@ -9,5 +9,4 @@ async function POSTHandler(request: NextRequest) {
   return handleBrevoWebhook(request);
 }
 
-
 export const POST = withApiLogging('/api/webhooks/brevo', POSTHandler);

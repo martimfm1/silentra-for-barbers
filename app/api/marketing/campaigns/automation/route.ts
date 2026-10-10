@@ -251,6 +251,11 @@ async function PATCHHandler(request: NextRequest) {
   }
 }
 
-
-export const GET = withApiLogging('/api/marketing/campaigns/automation', GETHandler);
-export const PATCH = withApiLogging('/api/marketing/campaigns/automation', PATCHHandler);
+export const GET = withApiLogging(
+  '/api/marketing/campaigns/automation',
+  GETHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/marketing/campaigns/automation',
+  PATCHHandler,
+);

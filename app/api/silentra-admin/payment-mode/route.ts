@@ -100,6 +100,11 @@ async function PATCHHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/silentra-admin/payment-mode', GETHandler);
-export const PATCH = withApiLogging('/api/silentra-admin/payment-mode', PATCHHandler);
+export const GET = withApiLogging(
+  '/api/silentra-admin/payment-mode',
+  GETHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/silentra-admin/payment-mode',
+  PATCHHandler,
+);

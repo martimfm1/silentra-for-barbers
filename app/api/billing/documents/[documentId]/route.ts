@@ -94,6 +94,11 @@ async function POSTHandler(request: Request, { params }: Params) {
   }
 }
 
-
-export const GET = withApiLogging('/api/billing/documents/[documentId]', GETHandler);
-export const POST = withApiLogging('/api/billing/documents/[documentId]', POSTHandler);
+export const GET = withApiLogging(
+  '/api/billing/documents/[documentId]',
+  GETHandler,
+);
+export const POST = withApiLogging(
+  '/api/billing/documents/[documentId]',
+  POSTHandler,
+);

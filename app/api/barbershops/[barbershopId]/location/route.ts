@@ -115,5 +115,7 @@ async function PATCHHandler(
   }
 }
 
-
-export const PATCH = withApiLogging('/api/barbershops/[barbershopId]/location', PATCHHandler);
+export const PATCH = withApiLogging(
+  '/api/barbershops/[barbershopId]/location',
+  PATCHHandler,
+);

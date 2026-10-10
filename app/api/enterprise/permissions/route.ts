@@ -100,6 +100,5 @@ async function PUTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/enterprise/permissions', GETHandler);
 export const PUT = withApiLogging('/api/enterprise/permissions', PUTHandler);

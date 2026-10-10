@@ -57,5 +57,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/marketing/campaigns/[campaignId]/send', POSTHandler);
+export const POST = withApiLogging(
+  '/api/marketing/campaigns/[campaignId]/send',
+  POSTHandler,
+);

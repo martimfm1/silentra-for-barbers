@@ -62,5 +62,4 @@ async function GETHandler(req: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/crm/clients', GETHandler);

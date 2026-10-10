@@ -99,5 +99,4 @@ async function GETHandler(
   }
 }
 
-
 export const GET = withApiLogging('/api/shops/[id]/slots', GETHandler);

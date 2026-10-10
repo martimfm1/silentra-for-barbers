@@ -229,6 +229,11 @@ async function PATCHHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/barbershops/public-profile', GETHandler);
-export const PATCH = withApiLogging('/api/barbershops/public-profile', PATCHHandler);
+export const GET = withApiLogging(
+  '/api/barbershops/public-profile',
+  GETHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/barbershops/public-profile',
+  PATCHHandler,
+);

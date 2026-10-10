@@ -180,5 +180,7 @@ async function PATCHHandler(request: Request, { params }: Params) {
   }
 }
 
-
-export const PATCH = withApiLogging('/api/silentra-admin/subscription-requests/[requestId]', PATCHHandler);
+export const PATCH = withApiLogging(
+  '/api/silentra-admin/subscription-requests/[requestId]',
+  PATCHHandler,
+);

@@ -78,5 +78,7 @@ async function POSTHandler(request: Request, context: RouteContext) {
   }
 }
 
-
-export const POST = withApiLogging('/api/enterprise/pos/[transactionId]/reversal', POSTHandler);
+export const POST = withApiLogging(
+  '/api/enterprise/pos/[transactionId]/reversal',
+  POSTHandler,
+);

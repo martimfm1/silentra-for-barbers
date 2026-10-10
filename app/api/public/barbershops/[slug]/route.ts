@@ -107,5 +107,4 @@ async function GETHandler(
   }
 }
 
-
 export const GET = withApiLogging('/api/public/barbershops/[slug]', GETHandler);

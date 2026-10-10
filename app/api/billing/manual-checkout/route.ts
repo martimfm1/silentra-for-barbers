@@ -313,5 +313,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/billing/manual-checkout', POSTHandler);

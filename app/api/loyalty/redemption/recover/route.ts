@@ -174,5 +174,7 @@ async function GETHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/loyalty/redemption/recover', GETHandler);
+export const GET = withApiLogging(
+  '/api/loyalty/redemption/recover',
+  GETHandler,
+);

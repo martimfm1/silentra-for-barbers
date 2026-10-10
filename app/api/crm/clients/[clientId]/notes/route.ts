@@ -61,5 +61,7 @@ async function POSTHandler(req: Request, { params }: Params) {
   return NextResponse.json({ note: data }, { status: 201 });
 }
 
-
-export const POST = withApiLogging('/api/crm/clients/[clientId]/notes', POSTHandler);
+export const POST = withApiLogging(
+  '/api/crm/clients/[clientId]/notes',
+  POSTHandler,
+);

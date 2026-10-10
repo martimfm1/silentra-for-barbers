@@ -76,6 +76,11 @@ async function PATCHHandler(request: Request) {
   }
 }
 
-
-export const GET = withApiLogging('/api/marketplace/manage/settings', GETHandler);
-export const PATCH = withApiLogging('/api/marketplace/manage/settings', PATCHHandler);
+export const GET = withApiLogging(
+  '/api/marketplace/manage/settings',
+  GETHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/marketplace/manage/settings',
+  PATCHHandler,
+);

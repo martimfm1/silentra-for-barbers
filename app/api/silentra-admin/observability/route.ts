@@ -39,11 +39,11 @@ function percentile(values: number[], percentileValue: number) {
 function isMissingLogTable(error: { code?: string; message?: string } | null) {
   return Boolean(
     error &&
-      (error.code === '42P01' ||
-        error.code === 'PGRST205' ||
-        /platform_api_logs.*(not exist|schema cache)|relation .*platform_api_logs.*does not exist/i.test(
-          error.message ?? '',
-        )),
+    (error.code === '42P01' ||
+      error.code === 'PGRST205' ||
+      /platform_api_logs.*(not exist|schema cache)|relation .*platform_api_logs.*does not exist/i.test(
+        error.message ?? '',
+      )),
   );
 }
 
@@ -60,14 +60,18 @@ export async function GET() {
     ): Promise<void> => {
       const started = performance.now();
       try {
-        const { error } = await admin.from(table).select('*', { count: 'exact', head: true });
+        const { error } = await admin
+          .from(table)
+          .select('*', { count: 'exact', head: true });
         const durationMs = Math.round(performance.now() - started);
         checks.push({
           id,
           label,
           state: error ? 'error' : 'ok',
           durationMs,
-          detail: error ? 'A consulta à base de dados falhou.' : 'Ligação e consulta confirmadas.',
+          detail: error
+            ? 'A consulta à base de dados falhou.'
+            : 'Ligação e consulta confirmadas.',
         });
       } catch {
         checks.push({
@@ -81,45 +85,44 @@ export async function GET() {
     };
 
     await Promise.all([
-        checkTable('barbershops', 'Barbearias', 'barbershops'),
-        checkTable('users', 'Utilizadores', 'users'),
-        checkTable('appointments', 'Marcações', 'appointments'),
-        checkTable('subscriptions', 'Subscrições', 'subscriptions'),
-      ]);
+      checkTable('barbershops', 'Barbearias', 'barbershops'),
+      checkTable('users', 'Utilizadores', 'users'),
+      checkTable('appointments', 'Marcações', 'appointments'),
+      checkTable('subscriptions', 'Subscrições', 'subscriptions'),
+    ]);
 
     const now = Date.now();
     const since24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
     const since5m = new Date(now - 5 * 60 * 1000).toISOString();
 
     const logsStarted = performance.now();
-    const [
-      historyResult,
-      fourXXResult,
-      fiveXXResult,
-      requests5mResult,
-    ] = await Promise.all([
-      admin
-        .from('platform_api_logs')
-        .select('id,occurred_at,request_id,method,route,status_code,duration_ms,level,error_code,message', { count: 'exact' })
-        .gte('occurred_at', since24h)
-        .order('occurred_at', { ascending: false })
-        .limit(2000),
-      admin
-        .from('platform_api_logs')
-        .select('id', { count: 'exact', head: true })
-        .gte('occurred_at', since24h)
-        .gte('status_code', 400)
-        .lt('status_code', 500),
-      admin
-        .from('platform_api_logs')
-        .select('id', { count: 'exact', head: true })
-        .gte('occurred_at', since24h)
-        .gte('status_code', 500),
-      admin
-        .from('platform_api_logs')
-        .select('id', { count: 'exact', head: true })
-        .gte('occurred_at', since5m),
-    ]);
+    const [historyResult, fourXXResult, fiveXXResult, requests5mResult] =
+      await Promise.all([
+        admin
+          .from('platform_api_logs')
+          .select(
+            'id,occurred_at,request_id,method,route,status_code,duration_ms,level,error_code,message',
+            { count: 'exact' },
+          )
+          .gte('occurred_at', since24h)
+          .order('occurred_at', { ascending: false })
+          .limit(2000),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('occurred_at', since24h)
+          .gte('status_code', 400)
+          .lt('status_code', 500),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('occurred_at', since24h)
+          .gte('status_code', 500),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('occurred_at', since5m),
+      ]);
 
     const logReadDuration = Math.round(performance.now() - logsStarted);
     const logsError = historyResult.error;
@@ -129,7 +132,11 @@ export async function GET() {
     checks.push({
       id: 'api_logs',
       label: 'Histórico de pedidos da API',
-      state: logsAvailable ? 'ok' : migrationMissing ? 'not_configured' : 'error',
+      state: logsAvailable
+        ? 'ok'
+        : migrationMissing
+          ? 'not_configured'
+          : 'error',
       durationMs: logReadDuration,
       detail: logsAvailable
         ? 'O histórico de pedidos está acessível.'
@@ -208,16 +215,31 @@ export async function GET() {
     const history = (historyResult.data ?? []) as ApiLog[];
     const totalRequests24h = historyResult.count ?? history.length;
     const errors24h =
-      (fourXXResult.count ?? history.filter((row) => row.status_code >= 400 && row.status_code < 500).length) +
-      (fiveXXResult.count ?? history.filter((row) => row.status_code >= 500).length);
-    const requests5m = requests5mResult.error ? history.filter((row) => Date.parse(row.occurred_at) >= now - 5 * 60 * 1000).length : (requests5mResult.count ?? 0);
+      (fourXXResult.count ??
+        history.filter((row) => row.status_code >= 400 && row.status_code < 500)
+          .length) +
+      (fiveXXResult.count ??
+        history.filter((row) => row.status_code >= 500).length);
+    const requests5m = requests5mResult.error
+      ? history.filter(
+          (row) => Date.parse(row.occurred_at) >= now - 5 * 60 * 1000,
+        ).length
+      : (requests5mResult.count ?? 0);
     const latencyValues = history.map((row) => Number(row.duration_ms) || 0);
     const averageLatencyMs = latencyValues.length
-      ? Math.round(latencyValues.reduce((sum, value) => sum + value, 0) / latencyValues.length)
+      ? Math.round(
+          latencyValues.reduce((sum, value) => sum + value, 0) /
+            latencyValues.length,
+        )
       : 0;
     const p95LatencyMs = percentile(latencyValues, 95);
-    const fiveXX24h = fiveXXResult.count ?? history.filter((row) => row.status_code >= 500).length;
-    const fourXX24h = fourXXResult.count ?? history.filter((row) => row.status_code >= 400 && row.status_code < 500).length;
+    const fiveXX24h =
+      fiveXXResult.count ??
+      history.filter((row) => row.status_code >= 500).length;
+    const fourXX24h =
+      fourXXResult.count ??
+      history.filter((row) => row.status_code >= 400 && row.status_code < 500)
+        .length;
 
     const byRoute = new Map<string, ApiLog[]>();
     for (const item of history) {
@@ -234,7 +256,10 @@ export async function GET() {
           requests: items.length,
           errors: failed,
           errorRate: Math.round((failed / items.length) * 1000) / 10,
-          averageLatencyMs: Math.round(durations.reduce((sum, value) => sum + value, 0) / Math.max(items.length, 1)),
+          averageLatencyMs: Math.round(
+            durations.reduce((sum, value) => sum + value, 0) /
+              Math.max(items.length, 1),
+          ),
           p95LatencyMs: percentile(durations, 95),
           lastStatusCode: items[0]?.status_code ?? 0,
           lastSeenAt: items[0]?.occurred_at ?? null,
@@ -255,7 +280,9 @@ export async function GET() {
           errors24h,
           fiveXX24h,
           fourXX24h,
-          errorRate24h: totalRequests24h ? Math.round((errors24h / totalRequests24h) * 1000) / 10 : 0,
+          errorRate24h: totalRequests24h
+            ? Math.round((errors24h / totalRequests24h) * 1000) / 10
+            : 0,
           averageLatencyMs,
           p95LatencyMs,
           sampledRequests: history.length,
@@ -269,11 +296,17 @@ export async function GET() {
     );
   } catch (error) {
     if (error instanceof Error && error.name === 'PlatformAdminError') {
-      return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+      return NextResponse.json(
+        { error: 'Not found' },
+        { status: 404, headers: { 'Cache-Control': 'no-store' } },
+      );
     }
     console.error('[SILENTRA_ADMIN_OBSERVABILITY]', {
       error_code:
-        error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        typeof error.code === 'string'
           ? error.code
           : 'UNKNOWN',
     });

@@ -51,5 +51,4 @@ async function PATCHHandler(request: Request) {
   return NextResponse.json({ success: true, avatarUrl });
 }
 
-
 export const PATCH = withApiLogging('/api/barbershops/avatar', PATCHHandler);

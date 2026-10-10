@@ -15,5 +15,4 @@ async function POSTHandler() {
   }
 }
 
-
 export const POST = withApiLogging('/api/auth/logout', POSTHandler);

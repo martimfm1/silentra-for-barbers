@@ -67,5 +67,4 @@ async function GETHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/cron/marketing', GETHandler);

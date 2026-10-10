@@ -212,7 +212,6 @@ async function DELETEHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/loyalty/rewards', POSTHandler);
 export const PATCH = withApiLogging('/api/loyalty/rewards', PATCHHandler);
 export const DELETE = withApiLogging('/api/loyalty/rewards', DELETEHandler);

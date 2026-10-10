@@ -89,5 +89,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/silentra-admin/loyalty/points', POSTHandler);
+export const POST = withApiLogging(
+  '/api/silentra-admin/loyalty/points',
+  POSTHandler,
+);

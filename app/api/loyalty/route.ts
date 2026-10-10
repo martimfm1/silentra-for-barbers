@@ -145,6 +145,5 @@ async function PATCHHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/loyalty', GETHandler);
 export const PATCH = withApiLogging('/api/loyalty', PATCHHandler);

@@ -124,6 +124,11 @@ async function DELETEHandler(
   }
 }
 
-
-export const PATCH = withApiLogging('/api/automations/rules/[ruleId]', PATCHHandler);
-export const DELETE = withApiLogging('/api/automations/rules/[ruleId]', DELETEHandler);
+export const PATCH = withApiLogging(
+  '/api/automations/rules/[ruleId]',
+  PATCHHandler,
+);
+export const DELETE = withApiLogging(
+  '/api/automations/rules/[ruleId]',
+  DELETEHandler,
+);

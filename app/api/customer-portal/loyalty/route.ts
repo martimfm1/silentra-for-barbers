@@ -77,5 +77,4 @@ async function GETHandler() {
   );
 }
 
-
 export const GET = withApiLogging('/api/customer-portal/loyalty', GETHandler);

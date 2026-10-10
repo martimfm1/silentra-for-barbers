@@ -126,5 +126,4 @@ async function GETHandler() {
   }
 }
 
-
 export const GET = withApiLogging('/api/stripe/checkout-promotion', GETHandler);

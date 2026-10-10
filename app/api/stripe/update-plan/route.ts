@@ -63,5 +63,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/stripe/update-plan', POSTHandler);

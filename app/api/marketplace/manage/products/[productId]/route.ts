@@ -104,6 +104,11 @@ async function DELETEHandler(
   }
 }
 
-
-export const PATCH = withApiLogging('/api/marketplace/manage/products/[productId]', PATCHHandler);
-export const DELETE = withApiLogging('/api/marketplace/manage/products/[productId]', DELETEHandler);
+export const PATCH = withApiLogging(
+  '/api/marketplace/manage/products/[productId]',
+  PATCHHandler,
+);
+export const DELETE = withApiLogging(
+  '/api/marketplace/manage/products/[productId]',
+  DELETEHandler,
+);

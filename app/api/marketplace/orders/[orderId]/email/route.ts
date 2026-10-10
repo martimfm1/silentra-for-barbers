@@ -132,5 +132,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/marketplace/orders/[orderId]/email', POSTHandler);
+export const POST = withApiLogging(
+  '/api/marketplace/orders/[orderId]/email',
+  POSTHandler,
+);

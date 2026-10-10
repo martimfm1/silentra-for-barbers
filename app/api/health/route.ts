@@ -21,5 +21,4 @@ async function GETHandler() {
   );
 }
 
-
 export const GET = withApiLogging('/api/health', GETHandler);

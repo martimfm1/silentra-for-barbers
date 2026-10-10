@@ -90,5 +90,7 @@ async function GETHandler(
   });
 }
 
-
-export const GET = withApiLogging('/api/calendar/appointments/[appointmentId]', GETHandler);
+export const GET = withApiLogging(
+  '/api/calendar/appointments/[appointmentId]',
+  GETHandler,
+);

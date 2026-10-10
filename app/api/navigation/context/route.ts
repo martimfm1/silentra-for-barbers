@@ -161,5 +161,4 @@ async function GETHandler() {
   );
 }
 
-
 export const GET = withApiLogging('/api/navigation/context', GETHandler);

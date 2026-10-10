@@ -168,5 +168,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/marketing/vouchers/[code]', POSTHandler);
+export const POST = withApiLogging(
+  '/api/marketing/vouchers/[code]',
+  POSTHandler,
+);

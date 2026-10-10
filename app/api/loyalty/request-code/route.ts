@@ -184,5 +184,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/loyalty/request-code', POSTHandler);

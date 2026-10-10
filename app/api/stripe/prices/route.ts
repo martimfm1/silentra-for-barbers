@@ -44,5 +44,4 @@ async function GETHandler() {
   }
 }
 
-
 export const GET = withApiLogging('/api/stripe/prices', GETHandler);

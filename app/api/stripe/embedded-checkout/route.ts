@@ -398,5 +398,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/stripe/embedded-checkout', POSTHandler);
+export const POST = withApiLogging(
+  '/api/stripe/embedded-checkout',
+  POSTHandler,
+);

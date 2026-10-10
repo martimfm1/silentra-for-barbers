@@ -363,5 +363,4 @@ async function GETHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/silentra-admin/overview', GETHandler);

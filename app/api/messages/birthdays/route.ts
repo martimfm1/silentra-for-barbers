@@ -195,6 +195,5 @@ async function PATCHHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/messages/birthdays', GETHandler);
 export const PATCH = withApiLogging('/api/messages/birthdays', PATCHHandler);

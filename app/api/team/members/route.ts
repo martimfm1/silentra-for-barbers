@@ -299,7 +299,6 @@ async function DELETEHandler(request: Request) {
   return NextResponse.json({ success: true });
 }
 
-
 export const GET = withApiLogging('/api/team/members', GETHandler);
 export const PATCH = withApiLogging('/api/team/members', PATCHHandler);
 export const DELETE = withApiLogging('/api/team/members', DELETEHandler);

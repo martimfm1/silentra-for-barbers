@@ -127,5 +127,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/stripe/finalize-plan-change', POSTHandler);
+export const POST = withApiLogging(
+  '/api/stripe/finalize-plan-change',
+  POSTHandler,
+);

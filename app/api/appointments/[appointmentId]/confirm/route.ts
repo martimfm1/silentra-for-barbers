@@ -241,5 +241,7 @@ async function POSTHandler(
   }
 }
 
-
-export const POST = withApiLogging('/api/appointments/[appointmentId]/confirm', POSTHandler);
+export const POST = withApiLogging(
+  '/api/appointments/[appointmentId]/confirm',
+  POSTHandler,
+);

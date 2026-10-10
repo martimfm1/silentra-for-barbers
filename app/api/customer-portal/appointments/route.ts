@@ -162,5 +162,7 @@ async function GETHandler() {
   );
 }
 
-
-export const GET = withApiLogging('/api/customer-portal/appointments', GETHandler);
+export const GET = withApiLogging(
+  '/api/customer-portal/appointments',
+  GETHandler,
+);

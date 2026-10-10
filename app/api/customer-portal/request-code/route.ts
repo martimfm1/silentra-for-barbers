@@ -132,5 +132,7 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
-export const POST = withApiLogging('/api/customer-portal/request-code', POSTHandler);
+export const POST = withApiLogging(
+  '/api/customer-portal/request-code',
+  POSTHandler,
+);

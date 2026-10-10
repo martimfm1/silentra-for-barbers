@@ -91,6 +91,11 @@ async function DELETEHandler(req: Request, { params }: Params) {
   return NextResponse.json({ success: true });
 }
 
-
-export const POST = withApiLogging('/api/crm/clients/[clientId]/tags', POSTHandler);
-export const DELETE = withApiLogging('/api/crm/clients/[clientId]/tags', DELETEHandler);
+export const POST = withApiLogging(
+  '/api/crm/clients/[clientId]/tags',
+  POSTHandler,
+);
+export const DELETE = withApiLogging(
+  '/api/crm/clients/[clientId]/tags',
+  DELETEHandler,
+);

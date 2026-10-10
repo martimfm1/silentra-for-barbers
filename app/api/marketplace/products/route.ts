@@ -91,5 +91,4 @@ async function GETHandler(request: Request) {
   return NextResponse.json({ products: visible, categories, shops });
 }
 
-
 export const GET = withApiLogging('/api/marketplace/products', GETHandler);

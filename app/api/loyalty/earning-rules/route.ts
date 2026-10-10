@@ -191,8 +191,10 @@ async function DELETEHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/loyalty/earning-rules', GETHandler);
 export const POST = withApiLogging('/api/loyalty/earning-rules', POSTHandler);
 export const PATCH = withApiLogging('/api/loyalty/earning-rules', PATCHHandler);
-export const DELETE = withApiLogging('/api/loyalty/earning-rules', DELETEHandler);
+export const DELETE = withApiLogging(
+  '/api/loyalty/earning-rules',
+  DELETEHandler,
+);

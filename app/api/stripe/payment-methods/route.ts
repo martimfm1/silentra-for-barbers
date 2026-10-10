@@ -58,5 +58,4 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const POST = withApiLogging('/api/stripe/payment-methods', POSTHandler);

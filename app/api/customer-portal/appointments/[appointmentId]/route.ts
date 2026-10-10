@@ -413,7 +413,15 @@ async function PATCHHandler(
   }
 }
 
-
-export const GET = withApiLogging('/api/customer-portal/appointments/[appointmentId]', GETHandler);
-export const DELETE = withApiLogging('/api/customer-portal/appointments/[appointmentId]', DELETEHandler);
-export const PATCH = withApiLogging('/api/customer-portal/appointments/[appointmentId]', PATCHHandler);
+export const GET = withApiLogging(
+  '/api/customer-portal/appointments/[appointmentId]',
+  GETHandler,
+);
+export const DELETE = withApiLogging(
+  '/api/customer-portal/appointments/[appointmentId]',
+  DELETEHandler,
+);
+export const PATCH = withApiLogging(
+  '/api/customer-portal/appointments/[appointmentId]',
+  PATCHHandler,
+);

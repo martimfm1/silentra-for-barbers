@@ -129,5 +129,4 @@ async function POSTHandler(request: NextRequest) {
   }
 }
 
-
 export const POST = withApiLogging('/api/notifications/email', POSTHandler);

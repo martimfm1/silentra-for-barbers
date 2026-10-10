@@ -80,6 +80,5 @@ async function POSTHandler(request: Request) {
   }
 }
 
-
 export const GET = withApiLogging('/api/enterprise/inventory', GETHandler);
 export const POST = withApiLogging('/api/enterprise/inventory', POSTHandler);

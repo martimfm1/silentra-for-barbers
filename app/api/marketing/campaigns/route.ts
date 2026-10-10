@@ -328,7 +328,6 @@ async function DELETEHandler(request: NextRequest) {
   }
 }
 
-
 export const GET = withApiLogging('/api/marketing/campaigns', GETHandler);
 export const POST = withApiLogging('/api/marketing/campaigns', POSTHandler);
 export const PATCH = withApiLogging('/api/marketing/campaigns', PATCHHandler);
