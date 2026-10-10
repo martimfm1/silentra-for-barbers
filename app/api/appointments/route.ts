@@ -1,3 +1,4 @@
+import { withApiLogging } from '@/lib/observability/api-request';
 import { NextResponse } from 'next/server';
 import { isRecord, UUID_PATTERN } from '@/lib/validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
@@ -11,7 +12,7 @@ const APPOINTMENT_WRITE_ROLES = [
   'staff',
 ] as const;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const tenant = await requireTenantAuthorization(
       request,
@@ -156,3 +157,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export const POST = withApiLogging('/api/appointments', POSTHandler);
