@@ -70,8 +70,7 @@ export async function GET() {
       });
     };
 
-    const [barbershopsCheck, usersCheck, appointmentsCheck, subscriptionsCheck] =
-      await Promise.all([
+    await Promise.all([
         checkTable('barbershops', 'Barbearias', 'barbershops'),
         checkTable('users', 'Utilizadores', 'users'),
         checkTable('appointments', 'Marcações', 'appointments'),
