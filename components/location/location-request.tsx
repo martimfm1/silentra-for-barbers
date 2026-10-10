@@ -17,34 +17,6 @@ type LocationState =
 
 const AUTO_REQUEST_KEY = 'silentra:location-auto-requested';
 
-function readStoredLocation(): UserCoordinates | null {
-  try {
-    const raw = sessionStorage.getItem('silentra:user-location');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as UserCoordinates;
-    if (
-      Number.isFinite(parsed.latitude) &&
-      Number.isFinite(parsed.longitude) &&
-      parsed.latitude >= -90 &&
-      parsed.latitude <= 90 &&
-      parsed.longitude >= -180 &&
-      parsed.longitude <= 180
-    )
-      return parsed;
-  } catch {
-    // Optional client storage.
-  }
-  return null;
-}
-
-function storeLocation(location: UserCoordinates) {
-  try {
-    sessionStorage.setItem('silentra:user-location', JSON.stringify(location));
-  } catch {
-    // Optional client storage.
-  }
-}
-
 function wasAutoRequestStarted() {
   try {
     return sessionStorage.getItem(AUTO_REQUEST_KEY) === '1';
@@ -85,7 +57,6 @@ export function LocationRequest({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
-        storeLocation(location);
         onChange(location);
         setState('granted');
       },
@@ -98,12 +69,13 @@ export function LocationRequest({
   }, [onChange, state]);
 
   useEffect(() => {
-    const stored = value ?? readStoredLocation();
-    if (stored && !value) {
-      onChange(stored);
-      setState('granted');
-      return;
+    // Remove coordinates saved by older versions; precise location stays in memory only.
+    try {
+      sessionStorage.removeItem('silentra:user-location');
+    } catch {
+      // Optional client storage.
     }
+
     if (
       autoRequest &&
       !value &&
@@ -136,7 +108,6 @@ export function LocationRequest({
           <button
             type="button"
             onClick={() => {
-              sessionStorage.removeItem('silentra:user-location');
               onChange(null);
               setState('idle');
               requestedRef.current = false;
