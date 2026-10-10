@@ -87,7 +87,6 @@ export async function GET() {
       historyResult,
       errorsResult,
       requests5mResult,
-      logsTableCheck,
     ] = await Promise.all([
       admin
         .from('platform_api_logs')
@@ -104,8 +103,7 @@ export async function GET() {
         .from('platform_api_logs')
         .select('id', { count: 'exact', head: true })
         .gte('occurred_at', since5m),
-      Promise.resolve(null),
-    ]).then((results) => results);
+    ]);
 
     const logReadDuration = Math.round(performance.now() - logsStarted);
     const logsError = historyResult.error;
