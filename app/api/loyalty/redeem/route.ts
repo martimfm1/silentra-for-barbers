@@ -9,16 +9,17 @@ import { sendLoyaltyRedemptionEmail } from '@/lib/brevo/loyalty';
 import { requireTenantAuthorization } from '@/lib/security/tenant-guard';
 import { getLoyaltyTenantBySlug } from '@/lib/loyalty/public-tenant';
 import { encryptRedemptionSecret } from '@/lib/loyalty/redemption-secret';
-import { randomBytes } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 
 export const runtime = 'nodejs';
 const REDEMPTION_TTL_MS = 60 * 60 * 1000;
 
 function generateHumanCode(): string {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const bytes = randomBytes(8);
   let value = '';
-  for (let i = 0; i < 8; i += 1) value += alphabet[bytes[i] % alphabet.length];
+  for (let i = 0; i < 8; i += 1) {
+    value += alphabet[randomInt(alphabet.length)];
+  }
   return value;
 }
 
