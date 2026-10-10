@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requireModuleFeature } from '@/services/billing/module-guard';
 import { getModuleFeature } from '@/services/modules/module-config';
@@ -26,7 +27,7 @@ const MODULES = [
   'enterpriseReports',
 ] as const;
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     await requireTenantAuthorization();
   } catch (error) {
@@ -85,3 +86,5 @@ export async function GET(request: Request) {
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
+
+export const GET = withApiObservability('/api/modules/access', GET__unobserved);

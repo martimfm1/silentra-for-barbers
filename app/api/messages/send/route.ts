@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   requireModuleContext,
@@ -46,7 +47,7 @@ function getTemplate(
   };
 }
 
-export async function POST(req: Request) {
+async function POST__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('messaging', 'messages');
     let payload: unknown;
@@ -166,3 +167,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/messages/send', POST__unobserved);

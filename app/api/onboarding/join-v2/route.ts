@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -18,7 +19,7 @@ function normalizeInviteCode(value: unknown): string | null {
   return null;
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const supabase = await createClient();
     const body: unknown = await request.json().catch(() => null);
@@ -123,3 +124,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/onboarding/join-v2', POST__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -65,7 +66,7 @@ const ROLE_PERMISSIONS: Record<TeamRole, string[]> = {
   staff: ['dashboard', 'agenda', 'clients'],
 };
 
-export async function GET() {
+async function GET__unobserved() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -159,3 +160,5 @@ export async function GET() {
     },
   );
 }
+
+export const GET = withApiObservability('/api/navigation/context', GET__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -40,7 +41,7 @@ async function getBirthdayCampaign(admin: AdminClient, barbershopId: string) {
   return data;
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -95,7 +96,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   try {
     const { admin, userId, barbershopId } = await requireModuleContext(
       'marketing_campaigns',
@@ -193,3 +194,6 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/messages/birthdays', GET__unobserved);
+export const PATCH = withApiObservability('/api/messages/birthdays', PATCH__unobserved);

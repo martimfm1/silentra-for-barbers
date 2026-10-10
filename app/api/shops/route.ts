@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type {
@@ -103,7 +104,7 @@ function hasAvailableSlot(
   return false;
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const rawQuery = searchParams.get('query')?.trim() ?? '';
@@ -247,3 +248,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/shops', GET__unobserved);

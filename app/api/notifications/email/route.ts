@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -10,7 +11,7 @@ import { UUID_PATTERN } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 
-export async function POST(request: NextRequest) {
+async function POST__unobserved(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       appointmentId?: unknown;
@@ -127,3 +128,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/notifications/email', POST__unobserved);

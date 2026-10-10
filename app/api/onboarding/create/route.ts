@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isRecord, normalizeText } from '@/lib/validation';
@@ -15,7 +16,7 @@ function parseTime(value: string): string | null {
   return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   const supabase = await createClient();
 
   try {
@@ -134,3 +135,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/onboarding/create', POST__unobserved);

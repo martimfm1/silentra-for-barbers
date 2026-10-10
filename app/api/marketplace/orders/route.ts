@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
@@ -64,7 +65,7 @@ function buildOrderReceiptEmail(input: {
   return `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5;"><div style="max-width:620px;margin:0 auto;padding:40px 20px;"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px;"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399;">SILENTRA · COMPROVATIVO</div><h1 style="margin:10px 0 0;font-size:28px;line-height:1.15;color:#fff;">Encomenda recebida</h1><p style="margin:14px 0 0;color:#a1a1aa;line-height:1.6;">Olá ${escapeHtml(input.customerName)}, recebemos a tua encomenda na <strong style="color:#e4e4e7;">${escapeHtml(input.shopName)}</strong>.</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;"><div style="font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Pedido</div><div style="margin-top:5px;font-family:monospace;color:#fff;">${escapeHtml(input.orderId)}</div><div style="margin-top:12px;font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Forma</div><div style="margin-top:5px;color:#fff;">${fulfillmentLabel}</div></div><table style="width:100%;margin-top:24px;border-collapse:collapse;"><tbody>${itemsHtml}</tbody></table><div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #27272a;font-size:18px;"><span style="color:#a1a1aa;">Total</span><strong style="color:#fff;">${formatMoney(input.total)}</strong></div>${shippingHtml}<p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#71717a;">Este email é um comprovativo da encomenda, não uma fatura. Qualquer questão sobre pagamento, entrega ou devolução deve ser tratada diretamente com a barbearia.</p></div><p style="padding:20px 8px 0;text-align:center;font-size:11px;color:#52525b;">SILENTRA · You think. We do.</p></div></body></html>`;
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { data, error } = await admin
@@ -85,7 +86,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as Record<
       string,
@@ -288,3 +289,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/marketplace/orders', GET__unobserved);
+export const POST = withApiObservability('/api/marketplace/orders', POST__unobserved);
