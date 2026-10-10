@@ -3,7 +3,7 @@
 ## Requisitos
 
 - Node.js 22
-- pnpm 11.28.2
+- pnpm 12.10.1
 - Supabase
 - Stripe para billing
 - Brevo para email

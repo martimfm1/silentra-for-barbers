@@ -10,7 +10,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)](https://supabase.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-Billing-635BFF?logo=stripe)](https://stripe.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Deployment-black?logo=vercel)](https://vercel.com/)
-[![pnpm](https://img.shields.io/badge/pnpm-11.28.2-F69220?logo=pnpm)](https://pnpm.io/)
+[![pnpm](https://img.shields.io/badge/pnpm-12.10.1-F69220?logo=pnpm)](https://pnpm.io/)
 
 ## O que é
 
@@ -149,7 +149,7 @@ Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - Leaflet / React Leaflet
 - Vercel Analytics + Speed Insights
 - Vercel
-- pnpm 11.28.2
+- pnpm 12.10.1
 
 ## Estrutura
 
@@ -179,7 +179,7 @@ types/                       # tipos partilhados
 ### Requisitos
 
 - Node.js 22
-- pnpm 11.28.2
+- pnpm 12.10.1
 - Projeto Supabase
 - Stripe para billing
 - Brevo para email
