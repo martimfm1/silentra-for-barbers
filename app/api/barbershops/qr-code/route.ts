@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
@@ -5,7 +6,7 @@ const QR_MANAGE_ROLES = ['owner', 'admin'] as const;
 const DEFAULT_QR_TEXT =
   'Scaneia para conhecer a nossa barbearia e marcar o teu proximo servico.';
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   const tenant = await requireTenantAuthorization(request, QR_MANAGE_ROLES);
   if (!tenant.ok)
     return NextResponse.json(
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
   );
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   const tenant = await requireTenantAuthorization(request, QR_MANAGE_ROLES);
   if (!tenant.ok)
     return NextResponse.json(
@@ -68,3 +69,6 @@ export async function PATCH(request: Request) {
     );
   return NextResponse.json({ text: text || DEFAULT_QR_TEXT });
 }
+
+export const GET = withApiObservability('/api/barbershops/qr-code', GET__unobserved);
+export const PATCH = withApiObservability('/api/barbershops/qr-code', PATCH__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
@@ -52,7 +53,7 @@ function website(value: string | null) {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -311,3 +312,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/billing/manual-checkout', POST__unobserved);

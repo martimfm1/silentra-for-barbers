@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isRecord, normalizeText } from '@/lib/validation';
@@ -15,7 +16,7 @@ function validCoordinates(lat: unknown, lng: unknown) {
   );
 }
 
-export async function PATCH(
+async function PATCH__unobserved(
   request: Request,
   context: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -113,3 +114,5 @@ export async function PATCH(
     );
   }
 }
+
+export const PATCH = withApiObservability('/api/barbershops/[barbershopId]/location', PATCH__unobserved);

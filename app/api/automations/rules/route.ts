@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
   moduleErrorResponse,
@@ -13,7 +14,7 @@ const TRIGGERS = [
   'birthday',
 ] as const;
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext(
       'automated_followups',
@@ -36,7 +37,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const { admin, barbershopId, userId } = await requireModuleContext(
       'automated_followups',
@@ -92,3 +93,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/automations/rules', GET__unobserved);
+export const POST = withApiObservability('/api/automations/rules', POST__unobserved);

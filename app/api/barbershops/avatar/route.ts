@@ -1,8 +1,9 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { isRecord } from '@/lib/validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   const tenant = await requireTenantAuthorization(request, ['owner', 'admin']);
   if (!tenant.ok)
     return NextResponse.json(
@@ -49,3 +50,5 @@ export async function PATCH(request: Request) {
   }
   return NextResponse.json({ success: true, avatarUrl });
 }
+
+export const PATCH = withApiObservability('/api/barbershops/avatar', PATCH__unobserved);

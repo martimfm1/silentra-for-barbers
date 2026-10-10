@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/stripe/constants';
@@ -27,7 +28,7 @@ function modeLabel(mode: PaymentMode) {
   return mode === 'MANUAL' ? 'Pagamento Manual' : 'Stripe';
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -192,3 +193,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/billing/subscribe', POST__unobserved);

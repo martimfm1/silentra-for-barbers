@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyCalendarToken } from '@/lib/email/calendar-link';
@@ -20,7 +21,7 @@ function formatUtc(date: Date): string {
     .replace(/\.\d{3}Z$/, 'Z');
 }
 
-export async function GET(
+async function GET__unobserved(
   request: Request,
   context: { params: Promise<{ appointmentId: string }> },
 ) {
@@ -88,3 +89,5 @@ export async function GET(
     },
   });
 }
+
+export const GET = withApiObservability('/api/calendar/appointments/[appointmentId]', GET__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { UUID_PATTERN } from '@/lib/validation';
 import { assertWithinLimit } from '@/lib/billing/entitlements';
@@ -36,7 +37,7 @@ async function contextFor(barbershopId: string) {
   }
 }
 
-export async function GET(
+async function GET__unobserved(
   _request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -56,7 +57,7 @@ export async function GET(
   return NextResponse.json({ data: data ?? [] });
 }
 
-export async function POST(
+async function POST__unobserved(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -128,7 +129,7 @@ export async function POST(
   return NextResponse.json({ data }, { status: 201 });
 }
 
-export async function PATCH(
+async function PATCH__unobserved(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -173,7 +174,7 @@ export async function PATCH(
   return NextResponse.json({ data });
 }
 
-export async function DELETE(
+async function DELETE__unobserved(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -205,3 +206,8 @@ export async function DELETE(
     );
   return NextResponse.json({ success: true });
 }
+
+export const GET = withApiObservability('/api/barbershops/[barbershopId]/locations', GET__unobserved);
+export const POST = withApiObservability('/api/barbershops/[barbershopId]/locations', POST__unobserved);
+export const PATCH = withApiObservability('/api/barbershops/[barbershopId]/locations', PATCH__unobserved);
+export const DELETE = withApiObservability('/api/barbershops/[barbershopId]/locations', DELETE__unobserved);

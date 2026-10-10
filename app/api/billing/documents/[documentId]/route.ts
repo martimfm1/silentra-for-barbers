@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ documentId: string }> };
 
-export async function GET(request: Request, { params }: Params) {
+async function GET__unobserved(request: Request, { params }: Params) {
   const { documentId } = await params;
   try {
     const supabase = await createClient();
@@ -56,7 +57,7 @@ export async function GET(request: Request, { params }: Params) {
   }
 }
 
-export async function POST(request: Request, { params }: Params) {
+async function POST__unobserved(request: Request, { params }: Params) {
   try {
     assertSameOrigin(request);
     await requirePlatformAdmin();
@@ -92,3 +93,6 @@ export async function POST(request: Request, { params }: Params) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/billing/documents/[documentId]', GET__unobserved);
+export const POST = withApiObservability('/api/billing/documents/[documentId]', POST__unobserved);

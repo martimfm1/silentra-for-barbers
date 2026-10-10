@@ -1,10 +1,11 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import { isRecord, normalizeText, UUID_PATTERN } from '@/lib/validation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const payload: unknown = await request.json().catch(() => null);
     if (!isRecord(payload)) {
@@ -58,3 +59,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/bookings/customer-profile', POST__unobserved);

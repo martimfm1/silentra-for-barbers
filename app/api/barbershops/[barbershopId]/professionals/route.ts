@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -65,7 +66,7 @@ async function canManageProfessionals(
       };
 }
 
-export async function POST(
+async function POST__unobserved(
   request: Request,
   { params }: { params: Promise<{ barbershopId: string }> },
 ) {
@@ -267,3 +268,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiObservability('/api/barbershops/[barbershopId]/professionals', POST__unobserved);

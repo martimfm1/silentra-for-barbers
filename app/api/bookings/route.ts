@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -114,7 +115,7 @@ async function enforcePublicBookingRateLimit(
   return allowed === true;
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     const payload: unknown = await request.json();
     if (!isRecord(payload))
@@ -488,3 +489,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/bookings', POST__unobserved);
