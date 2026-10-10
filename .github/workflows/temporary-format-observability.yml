@@ -1,0 +1,43 @@
+name: Temporary formatter for observability PR
+
+on:
+  push:
+    branches:
+      - feat/silentra-admin-observability
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.event.head_commit.message != 'chore: format observability changes'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only changed source and documentation files
+        shell: bash
+        run: |
+          git fetch origin main
+          git diff --name-only -z origin/main...HEAD -- '*.ts' '*.tsx' '*.sql' '*.md' > /tmp/format-files
+          if [ -s /tmp/format-files ]; then
+            xargs -0 -r pnpm exec prettier --write < /tmp/format-files
+          fi
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add --all
+            git commit -m "chore: format observability changes"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          else
+            echo "All changed files already match Prettier."
+          fi
