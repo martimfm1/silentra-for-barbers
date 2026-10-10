@@ -30,8 +30,124 @@ type AuditEvent = {
   action: string;
   entity_type: string;
   entity_id: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 };
+
+function auditMetadata(event: AuditEvent) {
+  const metadata = event.metadata;
+  return metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata
+    : {};
+}
+
+function auditDetail(
+  event: AuditEvent,
+  shopNamesById: Map<string, string>,
+): string | null {
+  const metadata = auditMetadata(event);
+  const metadataShopId =
+    typeof metadata.barbershop_id === 'string'
+      ? metadata.barbershop_id
+      : null;
+  const shopId =
+    metadataShopId ??
+    (event.entity_type === 'barbershop' ? event.entity_id : null);
+  const metadataShopName =
+    typeof metadata.shop_name === 'string'
+      ? metadata.shop_name.trim().slice(0, 100)
+      : '';
+  const shopName =
+    metadataShopName ||
+    (shopId ? (shopNamesById.get(shopId) ?? '') : '');
+  const details: string[] = [];
+
+  if (shopName) details.push(shopName);
+
+  const planLabels: Record<string, string> = {
+    free: 'Free',
+    pro: 'Pro',
+    enterprise: 'Enterprise',
+  };
+  const plan =
+    typeof metadata.plan === 'string'
+      ? planLabels[metadata.plan.toLowerCase()]
+      : undefined;
+  const intervalLabels: Record<string, string> = {
+    month: 'mensal',
+    monthly: 'mensal',
+    year: 'anual',
+    yearly: 'anual',
+  };
+  const interval =
+    typeof metadata.billing_interval === 'string'
+      ? intervalLabels[metadata.billing_interval.toLowerCase()]
+      : undefined;
+
+  if (event.action === 'platform.plan_assignment.updated' && plan) {
+    details.push(`Plano ${plan}`);
+  }
+
+  if (
+    event.action === 'PAYMENT_CONFIRMED' ||
+    event.action === 'SUBSCRIPTION_ACTIVATED'
+  ) {
+    if (plan) details.push(`Plano ${plan}`);
+    if (interval) details.push(`cobrança ${interval}`);
+
+    if (event.action === 'PAYMENT_CONFIRMED') {
+      const price = Number(metadata.price);
+      const currency =
+        typeof metadata.currency === 'string' &&
+        /^[A-Z]{3}$/.test(metadata.currency)
+          ? metadata.currency
+          : 'EUR';
+      if (Number.isFinite(price) && price >= 0) {
+        try {
+          details.push(
+            new Intl.NumberFormat('pt-PT', {
+              style: 'currency',
+              currency,
+            }).format(price),
+          );
+        } catch {
+          // Ignore invalid currency metadata rather than breaking the admin view.
+        }
+      }
+    }
+  }
+
+  if (event.action === 'PAYMENT_LINK_SENT') {
+    const requestTypes: Record<string, string> = {
+      NEW: 'nova subscrição',
+      RENEWAL: 'renovação',
+      CHANGE: 'alteração de plano',
+    };
+    const requestType =
+      typeof metadata.request_type === 'string'
+        ? requestTypes[metadata.request_type.toUpperCase()]
+        : undefined;
+    if (requestType) details.push(requestType);
+  }
+
+  if (
+    event.action === 'platform.plan_assignment.updated' ||
+    event.action === 'SUBSCRIPTION_ACTIVATED'
+  ) {
+    if (typeof metadata.expires_at === 'string') {
+      const expiresAt = new Date(metadata.expires_at);
+      if (!Number.isNaN(expiresAt.getTime())) {
+        details.push(
+          `até ${new Intl.DateTimeFormat('pt-PT', {
+            dateStyle: 'medium',
+          }).format(expiresAt)}`,
+        );
+      }
+    }
+  }
+
+  return details.length > 0 ? details.join(' · ').slice(0, 220) : null;
+}
 
 async function GETHandler(request: Request) {
   try {
@@ -186,7 +302,7 @@ async function GETHandler(request: Request) {
         .gte('updated_at', new Date(Date.now() - 30 * 86400000).toISOString()),
       admin
         .from('audit_logs')
-        .select('action,entity_type,entity_id,created_at')
+        .select('action,entity_type,entity_id,metadata,created_at')
         .order('created_at', { ascending: false })
         .limit(12),
     ]);
@@ -220,6 +336,43 @@ async function GETHandler(request: Request) {
       recentAuditEvents,
     ]) {
       if (result.error) throw result.error;
+    }
+
+    const auditEvents = (recentAuditEvents.data ?? []) as AuditEvent[];
+    const auditShopIds = [
+      ...new Set(
+        auditEvents
+          .map((event) => {
+            const metadataShopId = auditMetadata(event).barbershop_id;
+            if (
+              typeof metadataShopId === 'string' &&
+              UUID_RE.test(metadataShopId)
+            ) {
+              return metadataShopId;
+            }
+            return event.entity_type === 'barbershop' &&
+              event.entity_id &&
+              UUID_RE.test(event.entity_id)
+              ? event.entity_id
+              : null;
+          })
+          .filter((id): id is string => id !== null),
+      ),
+    ];
+    const shopNamesById = new Map<string, string>();
+
+    if (auditShopIds.length > 0) {
+      const auditShops = await admin
+        .from('barbershops')
+        .select('id,name')
+        .in('id', auditShopIds);
+      if (!auditShops.error) {
+        for (const shop of auditShops.data ?? []) {
+          if (typeof shop.name === 'string' && shop.name.trim()) {
+            shopNamesById.set(shop.id, shop.name.trim().slice(0, 100));
+          }
+        }
+      }
     }
 
     const paidActiveSubscriptions = (subscriptions.data ?? []).filter(
@@ -341,14 +494,13 @@ async function GETHandler(request: Request) {
           process.env.MANUAL_PAYMENT_ALLOWED_HOSTS?.trim(),
         ),
       },
-      activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map(
-        (event) => ({
-          action: event.action,
-          entityType: event.entity_type,
-          entityId: event.entity_id,
-          createdAt: event.created_at,
-        }),
-      ),
+      activity: auditEvents.map((event) => ({
+        action: event.action,
+        entityType: event.entity_type,
+        entityId: event.entity_id,
+        detail: auditDetail(event, shopNamesById),
+        createdAt: event.created_at,
+      })),
       plans,
       recentShops: rows,
     });
