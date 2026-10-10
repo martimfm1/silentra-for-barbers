@@ -2,12 +2,17 @@ import { after } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { productionLogger } from '@/lib/observability/logger';
 
+type ApiHandler = (
+  ...args: never[]
+) => Response | void | Promise<Response | void>;
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SAFE_CODE_PATTERN = /^[A-Za-z0-9_.:-]{1,80}$/;
 
 function safeErrorCode(error: unknown) {
   if (!error || typeof error !== 'object') return 'UNHANDLED_EXCEPTION';
+
   const candidate = error as { code?: unknown; name?: unknown };
   if (
     typeof candidate.code === 'string' &&
@@ -66,21 +71,13 @@ async function persistApiLog(row: ApiLogRow) {
   }
 }
 
-/**
- * Captures operational metadata only. Body/query/header contents and personal
- * data are deliberately excluded from persisted telemetry.
- *
- * Persistence is scheduled after the response so database logging does not
- * add latency to bookings, login, or payment operations.
- */
-export function withApiObservability<
-  TArgs extends unknown[],
-  TResult extends Response | void,
->(
+export function withApiObservability<T extends ApiHandler>(
   route: string,
-  handler: (...args: TArgs) => TResult | Promise<TResult>,
-): (...args: TArgs) => Promise<TResult> {
-  return async (...args: TArgs): Promise<TResult> => {
+  handler: T,
+): T {
+  const wrapped = async (
+    ...args: Parameters<T>
+  ): Promise<Response | void> => {
     const possibleRequest: unknown = args[0];
     const request =
       typeof Request !== 'undefined' && possibleRequest instanceof Request
@@ -99,8 +96,8 @@ export function withApiObservability<
 
     try {
       const response = await handler(...args);
+      statusCode = response instanceof Response ? response.status : 500;
       if (response instanceof Response) {
-        statusCode = response.status;
         try {
           response.headers.set('x-request-id', requestId);
         } catch {
@@ -158,17 +155,10 @@ export function withApiObservability<
         region: process.env.VERCEL_REGION?.slice(0, 80) ?? null,
       };
 
-      try {
-        after(() => persistApiLog(row));
-      } catch {
-        // Preserve the API response if the post-response hook is unavailable.
-        productionLogger.warn('observability.api_log_schedule_failed', {
-          route,
-          method,
-          status_code: statusCode,
-          request_id: requestId,
-        });
-      }
+      after(async () => {
+        await persistApiLog(row);
+      });
     }
   };
+  return wrapped as T;
 }
