@@ -872,7 +872,7 @@ export default function PlatformAdminConsole() {
                 <div className="mt-4 space-y-1">
                   {data.activity.map((event) => (
                     <div
-                      key={`${event.createdAt}-${event.action}-${event.entityId ?? 'none'}`}
+                      key={`${event.createdAt}-${event.action}`}
                       className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]"
                     >
                       <div className="min-w-0">

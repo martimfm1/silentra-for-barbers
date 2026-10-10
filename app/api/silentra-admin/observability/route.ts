@@ -44,7 +44,9 @@ async function providerCheck(provider: 'stripe' | 'brevo', key: string | undefin
     detail: `${provider === 'stripe' ? 'Stripe' : 'Brevo'} não está configurado no ambiente.`,
   };
   const url = provider === 'stripe' ? 'https://api.stripe.com/v1/account' : 'https://api.brevo.com/v3/account';
-  const headers = provider === 'stripe' ? { Authorization: `Bearer ${key}` } : { 'api-key': key };
+  const headers: Record<string, string> = provider === 'stripe'
+    ? { Authorization: `Bearer ${key}` }
+    : { 'api-key': key };
   try {
     const response = await fetch(url, { method: 'GET', headers, cache: 'no-store', signal: AbortSignal.timeout(4500) });
     return { ok: response.ok, status: response.ok ? 'healthy' as const : 'failed' as const, detail: safeProviderDetail(response.status) };
