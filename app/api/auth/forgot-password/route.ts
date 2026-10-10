@@ -41,9 +41,7 @@ function isValidRecoveryEmail(email: string) {
   const labels = domain.split('.');
   return labels.every(
     (label) =>
-      label.length > 0 &&
-      !label.startsWith('-') &&
-      !label.endsWith('-'),
+      label.length > 0 && !label.startsWith('-') && !label.endsWith('-'),
   );
 }
 
@@ -74,8 +72,7 @@ export async function POST(request: Request) {
       typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
     // Do not reveal whether an account exists for a given email address.
-    if (!isValidRecoveryEmail(email))
-      return genericSuccessResponse();
+    if (!isValidRecoveryEmail(email)) return genericSuccessResponse();
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
