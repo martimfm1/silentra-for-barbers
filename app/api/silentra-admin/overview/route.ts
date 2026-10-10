@@ -54,9 +54,33 @@ const AUDIT_ENTITY_LABELS: Record<string, string> = {
   professional: 'Profissional',
 };
 
-function describeAuditEvent(event: AuditEvent) {
+function describeAuditEvent(
+  event: AuditEvent,
+  shopNamesById: Map<string, string>,
+) {
   const metadata = event.metadata ?? {};
   const detailParts: string[] = [];
+  const metadataShopName =
+    typeof metadata.shop_name === 'string' ? metadata.shop_name.trim() : '';
+  const metadataShopId =
+    typeof metadata.barbershop_id === 'string' &&
+    UUID_RE.test(metadata.barbershop_id)
+      ? metadata.barbershop_id
+      : null;
+  const entityShopId =
+    event.entity_type === 'barbershop' &&
+    event.entity_id &&
+    UUID_RE.test(event.entity_id)
+      ? event.entity_id
+      : null;
+  const shopName =
+    metadataShopName ||
+    (metadataShopId
+      ? (shopNamesById.get(metadataShopId) ?? '')
+      : entityShopId
+        ? (shopNamesById.get(entityShopId) ?? '')
+        : '');
+  if (shopName) detailParts.push(shopName.slice(0, 100));
   if (typeof metadata.plan === 'string') {
     const plan = metadata.plan.toLowerCase();
     detailParts.push(`Plano ${plan.charAt(0).toUpperCase()}${plan.slice(1)}`);
@@ -288,6 +312,40 @@ async function GET__unobserved(request: Request) {
       if (result.error) throw result.error;
     }
 
+    const auditEvents = (recentAuditEvents.data ?? []) as AuditEvent[];
+    const auditShopIds = [
+      ...new Set(
+        auditEvents
+          .map((event) => {
+            const metadataShopId = event.metadata?.barbershop_id;
+            const candidate =
+              typeof metadataShopId === 'string'
+                ? metadataShopId
+                : event.entity_type === 'barbershop'
+                  ? event.entity_id
+                  : null;
+            return candidate && UUID_RE.test(candidate) ? candidate : null;
+          })
+          .filter((id): id is string => id !== null),
+      ),
+    ];
+    const shopNamesById = new Map<string, string>();
+
+    if (auditShopIds.length > 0) {
+      const auditShops = await admin
+        .from('barbershops')
+        .select('id,name')
+        .in('id', auditShopIds);
+
+      if (!auditShops.error) {
+        for (const shop of auditShops.data ?? []) {
+          if (typeof shop.name === 'string' && shop.name.trim()) {
+            shopNamesById.set(shop.id, shop.name.trim().slice(0, 100));
+          }
+        }
+      }
+    }
+
     const paidActiveSubscriptions = (subscriptions.data ?? []).filter(
       (subscription) =>
         ['pro', 'enterprise'].includes(subscription.plan ?? '') &&
@@ -407,9 +465,8 @@ async function GET__unobserved(request: Request) {
           process.env.MANUAL_PAYMENT_ALLOWED_HOSTS?.trim(),
         ),
       },
-      activity: ((recentAuditEvents.data ?? []) as AuditEvent[]).map(
-        (event) => {
-          const description = describeAuditEvent(event);
+      activity: auditEvents.map((event) => {
+        const description = describeAuditEvent(event, shopNamesById);
           return {
             action: event.action,
             label: description.label,
