@@ -68,6 +68,7 @@ type Overview = {
     action: string;
     entityType: string;
     entityId: string | null;
+    detail: string | null;
     createdAt: string;
   }>;
   plans: { free: number; pro: number; enterprise: number };
@@ -875,10 +876,11 @@ export default function PlatformAdminConsole() {
                     >
                       <div className="min-w-0">
                         <p className="truncate text-xs font-medium text-zinc-200">
-                          {event.action}
+                          {activityActionLabel(event.action)}
                         </p>
                         <p className="truncate text-[10px] text-zinc-500">
                           {activityEntityLabel(event.entityType)}
+                          {event.detail ? ` · ${event.detail}` : ''}
                         </p>
                       </div>
                       <span className="shrink-0 text-[10px] text-zinc-700">
