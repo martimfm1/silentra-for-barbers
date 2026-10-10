@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -23,7 +24,7 @@ function fail(message: string, status: number) {
   );
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
 
@@ -173,3 +174,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability('/api/stripe/checkout-complete', POST__unobserved);

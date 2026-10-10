@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -20,7 +21,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-export async function PATCH(request: Request, { params }: Params) {
+async function PATCH__unobserved(request: Request, { params }: Params) {
   try {
     assertSameOrigin(request);
     const { user } = await requirePlatformAdmin();
@@ -178,3 +179,5 @@ export async function PATCH(request: Request, { params }: Params) {
     );
   }
 }
+
+export const PATCH = withApiObservability('/api/silentra-admin/subscription-requests/[requestId]', PATCH__unobserved);

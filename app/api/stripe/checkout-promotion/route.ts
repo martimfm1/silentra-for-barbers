@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -6,7 +7,7 @@ import { getStripeClient } from '@/lib/stripe/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const supabase = await createClient();
     const {
@@ -124,3 +125,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withApiObservability('/api/stripe/checkout-promotion', GET__unobserved);

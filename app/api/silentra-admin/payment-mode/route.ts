@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -15,7 +16,7 @@ import {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     await requirePlatformAdmin();
     const paymentMode = await PaymentModeService.getPaymentMode();
@@ -31,7 +32,7 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin, user } = await requirePlatformAdmin();
@@ -98,3 +99,6 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/silentra-admin/payment-mode', GET__unobserved);
+export const PATCH = withApiObservability('/api/silentra-admin/payment-mode', PATCH__unobserved);

@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 
@@ -6,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const { admin } = await requirePlatformAdmin();
     const email =
@@ -38,3 +39,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/silentra-admin/loyalty/member', GET__unobserved);

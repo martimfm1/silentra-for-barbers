@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 
@@ -8,7 +9,7 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ACTIVE_STATUSES = ['pending', 'scheduled'] as const;
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const { admin } = await requirePlatformAdmin();
     const barbershopId =
@@ -210,3 +211,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withApiObservability('/api/silentra-admin/shop', GET__unobserved);
