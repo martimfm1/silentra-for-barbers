@@ -34,6 +34,73 @@ function escapeHtml(value: string) {
   );
 }
 
+function htmlFragmentToPlainText(value: string) {
+  const withoutTags: string[] = [];
+  let insideTag = false;
+
+  for (const character of value) {
+    if (character === '<') {
+      insideTag = true;
+      continue;
+    }
+    if (character === '>' && insideTag) {
+      insideTag = false;
+      withoutTags.push('\n');
+      continue;
+    }
+    if (!insideTag) withoutTags.push(character);
+  }
+
+  const entities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&#x27;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+  };
+  const source = withoutTags.join('');
+  const decoded: string[] = [];
+
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === '&') {
+      const semicolon = source.indexOf(';', index + 1);
+      if (semicolon !== -1 && semicolon - index <= 6) {
+        const entity = source.slice(index, semicolon + 1);
+        const replacement = entities[entity];
+        if (replacement !== undefined) {
+          decoded.push(replacement);
+          index = semicolon;
+          continue;
+        }
+      }
+    }
+    decoded.push(source[index]);
+  }
+
+  let result = '';
+  let pendingSpace = false;
+  for (const character of decoded.join('')) {
+    if (character === ' ' || character === '\t' || character === '\r') {
+      pendingSpace = true;
+      continue;
+    }
+    if (character === '\n') {
+      while (result.endsWith(' ')) result = result.slice(0, -1);
+      if (result && !result.endsWith('\n')) result += '\n';
+      pendingSpace = false;
+      continue;
+    }
+    if (pendingSpace && result && !result.endsWith('\n')) result += ' ';
+    result += character;
+    pendingSpace = false;
+  }
+
+  return result.trim();
+}
+
 function safeUrl(value: string | null | undefined): string | null {
   if (!value) return null;
 
@@ -159,9 +226,9 @@ function shell(input: {
 </html>`,
     text: `${input.title}
 
-${input.intro.replace(/<[^>]+>/g, '')}
+${htmlFragmentToPlainText(input.intro)}
 
-${input.content.replace(/<[^>]+>/g, '')}
+${htmlFragmentToPlainText(input.content)}
 
 ${input.cta ? `${input.cta.label}: ${input.cta.href}` : ''}
 
