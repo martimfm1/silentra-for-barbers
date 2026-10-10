@@ -467,15 +467,14 @@ async function GET__unobserved(request: Request) {
       },
       activity: auditEvents.map((event) => {
         const description = describeAuditEvent(event, shopNamesById);
-          return {
-            action: event.action,
-            label: description.label,
-            entityLabel: description.entityLabel,
-            detail: description.detail,
-            createdAt: event.created_at,
-          };
-        },
-      ),
+        return {
+          action: event.action,
+          label: description.label,
+          entityLabel: description.entityLabel,
+          detail: description.detail,
+          createdAt: event.created_at,
+        };
+      }),
       plans,
       recentShops: rows,
     });
