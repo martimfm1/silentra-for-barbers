@@ -73,4 +73,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/silentra-admin/subscription-requests', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/silentra-admin/subscription-requests',
+  GET__unobserved,
+);

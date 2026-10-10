@@ -180,4 +180,7 @@ async function PATCH__unobserved(request: Request, { params }: Params) {
   }
 }
 
-export const PATCH = withApiObservability('/api/silentra-admin/subscription-requests/[requestId]', PATCH__unobserved);
+export const PATCH = withApiObservability(
+  '/api/silentra-admin/subscription-requests/[requestId]',
+  PATCH__unobserved,
+);

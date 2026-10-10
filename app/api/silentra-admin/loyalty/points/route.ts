@@ -89,4 +89,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/silentra-admin/loyalty/points', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/silentra-admin/loyalty/points',
+  POST__unobserved,
+);

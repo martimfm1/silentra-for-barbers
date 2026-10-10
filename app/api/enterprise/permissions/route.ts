@@ -100,5 +100,11 @@ async function PUT__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/enterprise/permissions', GET__unobserved);
-export const PUT = withApiObservability('/api/enterprise/permissions', PUT__unobserved);
+export const GET = withApiObservability(
+  '/api/enterprise/permissions',
+  GET__unobserved,
+);
+export const PUT = withApiObservability(
+  '/api/enterprise/permissions',
+  PUT__unobserved,
+);

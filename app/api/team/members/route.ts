@@ -300,5 +300,11 @@ async function DELETE__unobserved(request: Request) {
 }
 
 export const GET = withApiObservability('/api/team/members', GET__unobserved);
-export const PATCH = withApiObservability('/api/team/members', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/team/members', DELETE__unobserved);
+export const PATCH = withApiObservability(
+  '/api/team/members',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/team/members',
+  DELETE__unobserved,
+);

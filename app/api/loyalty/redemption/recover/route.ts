@@ -174,4 +174,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/loyalty/redemption/recover', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/loyalty/redemption/recover',
+  GET__unobserved,
+);

@@ -328,7 +328,19 @@ async function DELETE__unobserved(request: NextRequest) {
   }
 }
 
-export const GET = withApiObservability('/api/marketing/campaigns', GET__unobserved);
-export const POST = withApiObservability('/api/marketing/campaigns', POST__unobserved);
-export const PATCH = withApiObservability('/api/marketing/campaigns', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/marketing/campaigns', DELETE__unobserved);
+export const GET = withApiObservability(
+  '/api/marketing/campaigns',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/marketing/campaigns',
+  POST__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/marketing/campaigns',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/marketing/campaigns',
+  DELETE__unobserved,
+);

@@ -40,4 +40,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/silentra-admin/loyalty/member', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/silentra-admin/loyalty/member',
+  GET__unobserved,
+);

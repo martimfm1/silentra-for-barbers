@@ -90,4 +90,7 @@ async function GET__unobserved(
   });
 }
 
-export const GET = withApiObservability('/api/calendar/appointments/[appointmentId]', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/calendar/appointments/[appointmentId]',
+  GET__unobserved,
+);

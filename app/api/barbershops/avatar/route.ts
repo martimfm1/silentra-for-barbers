@@ -51,4 +51,7 @@ async function PATCH__unobserved(request: Request) {
   return NextResponse.json({ success: true, avatarUrl });
 }
 
-export const PATCH = withApiObservability('/api/barbershops/avatar', PATCH__unobserved);
+export const PATCH = withApiObservability(
+  '/api/barbershops/avatar',
+  PATCH__unobserved,
+);

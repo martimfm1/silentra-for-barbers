@@ -78,4 +78,7 @@ async function POST__unobserved(request: Request, context: RouteContext) {
   }
 }
 
-export const POST = withApiObservability('/api/enterprise/pos/[transactionId]/reversal', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/enterprise/pos/[transactionId]/reversal',
+  POST__unobserved,
+);

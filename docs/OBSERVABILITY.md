@@ -43,7 +43,6 @@ API handlers should:
 
 Expected user-facing errors are not exceptional and should generally not be logged as server errors (for example, invalid form input or an occupied booking slot).
 
-
 ## Silentra Admin — Saúde da API
 
 The `/silentra-admin?tab=api_health` view reads from the private

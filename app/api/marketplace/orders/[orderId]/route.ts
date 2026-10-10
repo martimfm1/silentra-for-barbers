@@ -213,4 +213,7 @@ async function PATCH__unobserved(
   }
 }
 
-export const PATCH = withApiObservability('/api/marketplace/orders/[orderId]', PATCH__unobserved);
+export const PATCH = withApiObservability(
+  '/api/marketplace/orders/[orderId]',
+  PATCH__unobserved,
+);

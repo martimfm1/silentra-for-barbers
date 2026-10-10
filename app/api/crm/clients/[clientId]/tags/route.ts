@@ -91,5 +91,11 @@ async function DELETE__unobserved(req: Request, { params }: Params) {
   return NextResponse.json({ success: true });
 }
 
-export const POST = withApiObservability('/api/crm/clients/[clientId]/tags', POST__unobserved);
-export const DELETE = withApiObservability('/api/crm/clients/[clientId]/tags', DELETE__unobserved);
+export const POST = withApiObservability(
+  '/api/crm/clients/[clientId]/tags',
+  POST__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/crm/clients/[clientId]/tags',
+  DELETE__unobserved,
+);

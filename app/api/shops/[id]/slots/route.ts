@@ -99,4 +99,7 @@ async function GET__unobserved(
   }
 }
 
-export const GET = withApiObservability('/api/shops/[id]/slots', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/shops/[id]/slots',
+  GET__unobserved,
+);

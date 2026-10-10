@@ -195,5 +195,11 @@ async function PATCH__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/messages/birthdays', GET__unobserved);
-export const PATCH = withApiObservability('/api/messages/birthdays', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/messages/birthdays',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/messages/birthdays',
+  PATCH__unobserved,
+);

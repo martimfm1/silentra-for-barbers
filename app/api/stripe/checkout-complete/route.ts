@@ -175,4 +175,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/checkout-complete', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/checkout-complete',
+  POST__unobserved,
+);

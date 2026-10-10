@@ -61,4 +61,7 @@ async function POST__unobserved(req: Request, { params }: Params) {
   return NextResponse.json({ note: data }, { status: 201 });
 }
 
-export const POST = withApiObservability('/api/crm/clients/[clientId]/notes', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/crm/clients/[clientId]/notes',
+  POST__unobserved,
+);

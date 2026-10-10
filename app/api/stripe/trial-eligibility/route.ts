@@ -50,4 +50,7 @@ async function GET__unobserved() {
   }
 }
 
-export const GET = withApiObservability('/api/stripe/trial-eligibility', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/stripe/trial-eligibility',
+  GET__unobserved,
+);

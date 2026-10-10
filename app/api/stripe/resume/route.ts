@@ -26,4 +26,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/resume', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/resume',
+  POST__unobserved,
+);

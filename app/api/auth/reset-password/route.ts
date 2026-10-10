@@ -88,4 +88,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/auth/reset-password', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/auth/reset-password',
+  POST__unobserved,
+);

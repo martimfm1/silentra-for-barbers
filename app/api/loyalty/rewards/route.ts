@@ -212,6 +212,15 @@ async function DELETE__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/loyalty/rewards', POST__unobserved);
-export const PATCH = withApiObservability('/api/loyalty/rewards', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/loyalty/rewards', DELETE__unobserved);
+export const POST = withApiObservability(
+  '/api/loyalty/rewards',
+  POST__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/loyalty/rewards',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/loyalty/rewards',
+  DELETE__unobserved,
+);

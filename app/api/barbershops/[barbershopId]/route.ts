@@ -68,4 +68,7 @@ async function GET__unobserved(
   });
 }
 
-export const GET = withApiObservability('/api/barbershops/[barbershopId]', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/barbershops/[barbershopId]',
+  GET__unobserved,
+);

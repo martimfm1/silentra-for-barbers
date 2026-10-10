@@ -92,5 +92,11 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/enterprise/locations', GET__unobserved);
-export const POST = withApiObservability('/api/enterprise/locations', POST__unobserved);
+export const GET = withApiObservability(
+  '/api/enterprise/locations',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/enterprise/locations',
+  POST__unobserved,
+);

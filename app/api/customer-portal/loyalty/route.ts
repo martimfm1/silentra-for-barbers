@@ -77,4 +77,7 @@ async function GET__unobserved() {
   );
 }
 
-export const GET = withApiObservability('/api/customer-portal/loyalty', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/customer-portal/loyalty',
+  GET__unobserved,
+);

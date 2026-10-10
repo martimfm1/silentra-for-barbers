@@ -57,4 +57,7 @@ async function POST__unobserved(
   }
 }
 
-export const POST = withApiObservability('/api/marketing/campaigns/[campaignId]/send', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/marketing/campaigns/[campaignId]/send',
+  POST__unobserved,
+);

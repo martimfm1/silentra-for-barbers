@@ -115,4 +115,7 @@ async function PATCH__unobserved(
   }
 }
 
-export const PATCH = withApiObservability('/api/barbershops/[barbershopId]/location', PATCH__unobserved);
+export const PATCH = withApiObservability(
+  '/api/barbershops/[barbershopId]/location',
+  PATCH__unobserved,
+);

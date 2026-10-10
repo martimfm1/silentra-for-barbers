@@ -24,4 +24,7 @@ async function POST__unobserved() {
   return NextResponse.json({ success: true });
 }
 
-export const POST = withApiObservability('/api/customer-portal/logout', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/customer-portal/logout',
+  POST__unobserved,
+);

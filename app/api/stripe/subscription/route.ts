@@ -264,4 +264,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/stripe/subscription', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/stripe/subscription',
+  GET__unobserved,
+);

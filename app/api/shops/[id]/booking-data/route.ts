@@ -413,4 +413,7 @@ async function GET__unobserved(
   }
 }
 
-export const GET = withApiObservability('/api/shops/[id]/booking-data', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/shops/[id]/booking-data',
+  GET__unobserved,
+);

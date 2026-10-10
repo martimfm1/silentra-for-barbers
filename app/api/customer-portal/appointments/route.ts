@@ -162,4 +162,7 @@ async function GET__unobserved() {
   );
 }
 
-export const GET = withApiObservability('/api/customer-portal/appointments', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/customer-portal/appointments',
+  GET__unobserved,
+);

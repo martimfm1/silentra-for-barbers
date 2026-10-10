@@ -132,4 +132,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/customer-portal/request-code', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/customer-portal/request-code',
+  POST__unobserved,
+);

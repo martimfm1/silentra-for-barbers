@@ -229,5 +229,11 @@ async function PATCH__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/barbershops/public-profile', GET__unobserved);
-export const PATCH = withApiObservability('/api/barbershops/public-profile', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/barbershops/public-profile',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/barbershops/public-profile',
+  PATCH__unobserved,
+);

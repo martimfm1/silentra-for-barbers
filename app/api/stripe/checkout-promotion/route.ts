@@ -126,4 +126,7 @@ async function GET__unobserved() {
   }
 }
 
-export const GET = withApiObservability('/api/stripe/checkout-promotion', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/stripe/checkout-promotion',
+  GET__unobserved,
+);

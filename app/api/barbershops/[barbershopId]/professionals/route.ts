@@ -269,4 +269,7 @@ async function POST__unobserved(
   }
 }
 
-export const POST = withApiObservability('/api/barbershops/[barbershopId]/professionals', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/barbershops/[barbershopId]/professionals',
+  POST__unobserved,
+);

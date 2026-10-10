@@ -60,4 +60,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/bookings/customer-profile', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/bookings/customer-profile',
+  POST__unobserved,
+);

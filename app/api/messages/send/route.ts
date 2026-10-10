@@ -168,4 +168,7 @@ async function POST__unobserved(req: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/messages/send', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/messages/send',
+  POST__unobserved,
+);

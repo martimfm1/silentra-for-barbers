@@ -94,5 +94,11 @@ async function POST__unobserved(request: Request, { params }: Params) {
   }
 }
 
-export const GET = withApiObservability('/api/billing/documents/[documentId]', GET__unobserved);
-export const POST = withApiObservability('/api/billing/documents/[documentId]', POST__unobserved);
+export const GET = withApiObservability(
+  '/api/billing/documents/[documentId]',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/billing/documents/[documentId]',
+  POST__unobserved,
+);

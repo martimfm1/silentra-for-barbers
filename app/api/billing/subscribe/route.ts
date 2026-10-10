@@ -194,4 +194,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/billing/subscribe', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/billing/subscribe',
+  POST__unobserved,
+);

@@ -9,4 +9,7 @@ async function POST__unobserved(request: NextRequest) {
   return handleBrevoWebhook(request, 'sms');
 }
 
-export const POST = withApiObservability('/api/webhooks/brevo/sms', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/webhooks/brevo/sms',
+  POST__unobserved,
+);

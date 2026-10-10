@@ -86,4 +86,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
   });
 }
 
-export const GET = withApiObservability('/api/crm/clients/[clientId]', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/crm/clients/[clientId]',
+  GET__unobserved,
+);

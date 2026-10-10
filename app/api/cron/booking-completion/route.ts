@@ -52,4 +52,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/cron/booking-completion', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/cron/booking-completion',
+  GET__unobserved,
+);

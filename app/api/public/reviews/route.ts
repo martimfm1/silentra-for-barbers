@@ -105,4 +105,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/public/reviews', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/public/reviews',
+  POST__unobserved,
+);

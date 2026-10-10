@@ -421,4 +421,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/analytics/export', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/analytics/export',
+  GET__unobserved,
+);

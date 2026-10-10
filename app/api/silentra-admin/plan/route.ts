@@ -160,5 +160,11 @@ async function DELETE__unobserved(request: Request) {
   }
 }
 
-export const PATCH = withApiObservability('/api/silentra-admin/plan', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/silentra-admin/plan', DELETE__unobserved);
+export const PATCH = withApiObservability(
+  '/api/silentra-admin/plan',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/silentra-admin/plan',
+  DELETE__unobserved,
+);

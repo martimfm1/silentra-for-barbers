@@ -207,7 +207,19 @@ async function DELETE__unobserved(
   return NextResponse.json({ success: true });
 }
 
-export const GET = withApiObservability('/api/barbershops/[barbershopId]/locations', GET__unobserved);
-export const POST = withApiObservability('/api/barbershops/[barbershopId]/locations', POST__unobserved);
-export const PATCH = withApiObservability('/api/barbershops/[barbershopId]/locations', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/barbershops/[barbershopId]/locations', DELETE__unobserved);
+export const GET = withApiObservability(
+  '/api/barbershops/[barbershopId]/locations',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/barbershops/[barbershopId]/locations',
+  POST__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/barbershops/[barbershopId]/locations',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/barbershops/[barbershopId]/locations',
+  DELETE__unobserved,
+);

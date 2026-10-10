@@ -273,10 +273,14 @@ export default function PlatformAdminConsole() {
     latencyMs: number;
     ok: boolean;
   } | null>(null);
-  const [observability, setObservability] = useState<Observability | null>(null);
+  const [observability, setObservability] = useState<Observability | null>(
+    null,
+  );
   const [observabilityLoading, setObservabilityLoading] = useState(false);
   const [logSearch, setLogSearch] = useState('');
-  const [logLevelFilter, setLogLevelFilter] = useState<'ALL' | 'info' | 'warn' | 'error'>('ALL');
+  const [logLevelFilter, setLogLevelFilter] = useState<
+    'ALL' | 'info' | 'warn' | 'error'
+  >('ALL');
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('MANUAL');
   const [paymentModeLoading, setPaymentModeLoading] = useState(true);
   const [changingPaymentMode, setChangingPaymentMode] = useState(false);
@@ -319,14 +323,22 @@ export default function PlatformAdminConsole() {
   const loadObservability = useCallback(async () => {
     setObservabilityLoading(true);
     try {
-      const response = await fetch('/api/silentra-admin/observability', { cache: 'no-store' });
+      const response = await fetch('/api/silentra-admin/observability', {
+        cache: 'no-store',
+      });
       const payload = (await response.json()) as Observability & ApiResponse;
       if (!response.ok || !payload.metrics || !Array.isArray(payload.checks)) {
-        throw new Error(payload.error || 'Não foi possível carregar a saúde da API.');
+        throw new Error(
+          payload.error || 'Não foi possível carregar a saúde da API.',
+        );
       }
       setObservability(payload);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao carregar a saúde da API.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Falha ao carregar a saúde da API.',
+      );
     } finally {
       setObservabilityLoading(false);
     }
@@ -336,11 +348,18 @@ export default function PlatformAdminConsole() {
     const logs = observability?.logs ?? [];
     const normalizedQuery = logSearch.trim().toLowerCase();
     return logs.filter((log) => {
-      const levelMatches = logLevelFilter === 'ALL' || log.level === logLevelFilter;
-      const searchMatches = !normalizedQuery || [
-        log.route, log.method, log.requestId, log.errorCode ?? '',
-        String(log.statusCode), log.region ?? '',
-      ].some((value) => value.toLowerCase().includes(normalizedQuery));
+      const levelMatches =
+        logLevelFilter === 'ALL' || log.level === logLevelFilter;
+      const searchMatches =
+        !normalizedQuery ||
+        [
+          log.route,
+          log.method,
+          log.requestId,
+          log.errorCode ?? '',
+          String(log.statusCode),
+          log.region ?? '',
+        ].some((value) => value.toLowerCase().includes(normalizedQuery));
       return levelMatches && searchMatches;
     });
   }, [observability, logLevelFilter, logSearch]);
@@ -880,7 +899,8 @@ export default function PlatformAdminConsole() {
                           {event.label}
                         </p>
                         <p className="truncate text-[10px] text-zinc-600">
-                          {event.entityLabel}{event.detail ? ` · ${event.detail}` : ''}
+                          {event.entityLabel}
+                          {event.detail ? ` · ${event.detail}` : ''}
                         </p>
                       </div>
                       <span className="shrink-0 text-[10px] text-zinc-700">
@@ -1981,80 +2001,223 @@ export default function PlatformAdminConsole() {
               <div>
                 <div className="flex items-center gap-2">
                   <Activity className="size-4 text-emerald-300" />
-                  <h2 className="text-lg font-semibold">Saúde operacional da API</h2>
-                  <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase ${observability?.overall === 'healthy' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : observability?.overall === 'unhealthy' ? 'border-red-400/20 bg-red-400/10 text-red-200' : 'border-amber-400/20 bg-amber-400/10 text-amber-200'}`}>
-                    {observability?.overall === 'healthy' ? 'Operacional' : observability?.overall === 'unhealthy' ? 'Indisponível' : 'Atenção'}
+                  <h2 className="text-lg font-semibold">
+                    Saúde operacional da API
+                  </h2>
+                  <span
+                    className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase ${observability?.overall === 'healthy' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : observability?.overall === 'unhealthy' ? 'border-red-400/20 bg-red-400/10 text-red-200' : 'border-amber-400/20 bg-amber-400/10 text-amber-200'}`}
+                  >
+                    {observability?.overall === 'healthy'
+                      ? 'Operacional'
+                      : observability?.overall === 'unhealthy'
+                        ? 'Indisponível'
+                        : 'Atenção'}
                   </span>
                 </div>
                 <p className="mt-1 text-xs leading-5 text-zinc-500">
-                  Tráfego, erros, latência, dependências e registos HTTP das últimas 24 horas.
+                  Tráfego, erros, latência, dependências e registos HTTP das
+                  últimas 24 horas.
                 </p>
-                {observability ? <p className="mt-1 text-[11px] text-zinc-600">Atualizado: {formatDate(observability.generatedAt)} · modo de pagamentos: {observability.paymentMode === 'STRIPE' ? 'Stripe' : 'Manual'}</p> : null}
+                {observability ? (
+                  <p className="mt-1 text-[11px] text-zinc-600">
+                    Atualizado: {formatDate(observability.generatedAt)} · modo
+                    de pagamentos:{' '}
+                    {observability.paymentMode === 'STRIPE'
+                      ? 'Stripe'
+                      : 'Manual'}
+                  </p>
+                ) : null}
               </div>
-              <button type="button" onClick={() => void loadObservability()} disabled={observabilityLoading} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm hover:bg-white/[0.08] disabled:opacity-50">
-                <RefreshCw className={`size-4 ${observabilityLoading ? 'animate-spin' : ''}`} />
+              <button
+                type="button"
+                onClick={() => void loadObservability()}
+                disabled={observabilityLoading}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm hover:bg-white/[0.08] disabled:opacity-50"
+              >
+                <RefreshCw
+                  className={`size-4 ${observabilityLoading ? 'animate-spin' : ''}`}
+                />
                 Atualizar diagnóstico
               </button>
             </div>
 
             {!observability && observabilityLoading ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-10 text-center text-sm text-zinc-500">A recolher métricas e a testar os serviços…</div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-10 text-center text-sm text-zinc-500">
+                A recolher métricas e a testar os serviços…
+              </div>
             ) : null}
             {observability ? (
               <>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <StatCard label="Pedidos HTTP · 24h" value={observability.metrics.requests24h.toLocaleString('pt-PT')} meta={`${observability.metrics.logSampleCount.toLocaleString('pt-PT')} registos analisados`} />
-                  <StatCard label="Erros de servidor · 24h" value={observability.metrics.errors5xx24h.toLocaleString('pt-PT')} meta={`${observability.metrics.clientErrors24h.toLocaleString('pt-PT')} respostas 4xx`} tone={observability.metrics.errors5xx24h > 0 ? 'bad' : 'good'} />
-                  <StatCard label="Taxa de erro 5xx" value={`${observability.metrics.errorRate.toLocaleString('pt-PT', { maximumFractionDigits: 2 })}%`} meta="sobre pedidos HTTP registados" tone={observability.metrics.errorRate >= 5 ? 'bad' : observability.metrics.errorRate > 0 ? 'warn' : 'good'} />
-                  <StatCard label="Latência p95" value={`${observability.metrics.p95LatencyMs} ms`} meta={`média ${observability.metrics.avgLatencyMs} ms`} tone={observability.metrics.p95LatencyMs >= 1500 ? 'warn' : 'good'} />
+                  <StatCard
+                    label="Pedidos HTTP · 24h"
+                    value={observability.metrics.requests24h.toLocaleString(
+                      'pt-PT',
+                    )}
+                    meta={`${observability.metrics.logSampleCount.toLocaleString('pt-PT')} registos analisados`}
+                  />
+                  <StatCard
+                    label="Erros de servidor · 24h"
+                    value={observability.metrics.errors5xx24h.toLocaleString(
+                      'pt-PT',
+                    )}
+                    meta={`${observability.metrics.clientErrors24h.toLocaleString('pt-PT')} respostas 4xx`}
+                    tone={
+                      observability.metrics.errors5xx24h > 0 ? 'bad' : 'good'
+                    }
+                  />
+                  <StatCard
+                    label="Taxa de erro 5xx"
+                    value={`${observability.metrics.errorRate.toLocaleString('pt-PT', { maximumFractionDigits: 2 })}%`}
+                    meta="sobre pedidos HTTP registados"
+                    tone={
+                      observability.metrics.errorRate >= 5
+                        ? 'bad'
+                        : observability.metrics.errorRate > 0
+                          ? 'warn'
+                          : 'good'
+                    }
+                  />
+                  <StatCard
+                    label="Latência p95"
+                    value={`${observability.metrics.p95LatencyMs} ms`}
+                    meta={`média ${observability.metrics.avgLatencyMs} ms`}
+                    tone={
+                      observability.metrics.p95LatencyMs >= 1500
+                        ? 'warn'
+                        : 'good'
+                    }
+                  />
                 </div>
                 <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="font-semibold">Verificações de serviços</h3>
-                      <p className="mt-1 text-xs text-zinc-500">Testes reais de ligação à base de dados e aos fornecedores configurados. Não fazem alterações nem cobranças.</p>
+                      <h3 className="font-semibold">
+                        Verificações de serviços
+                      </h3>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Testes reais de ligação à base de dados e aos
+                        fornecedores configurados. Não fazem alterações nem
+                        cobranças.
+                      </p>
                     </div>
-                    <span className="text-xs text-zinc-500">{observability.checks.filter((check) => check.ok).length}/{observability.checks.length} verificações OK</span>
+                    <span className="text-xs text-zinc-500">
+                      {observability.checks.filter((check) => check.ok).length}/
+                      {observability.checks.length} verificações OK
+                    </span>
                   </div>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                     {observability.checks.map((check) => (
-                      <div key={check.id} className={`rounded-xl border p-3 ${check.ok ? 'border-emerald-400/15 bg-emerald-400/[0.035]' : check.critical ? 'border-red-400/20 bg-red-400/[0.04]' : 'border-amber-400/15 bg-amber-400/[0.035]'}`}>
+                      <div
+                        key={check.id}
+                        className={`rounded-xl border p-3 ${check.ok ? 'border-emerald-400/15 bg-emerald-400/[0.035]' : check.critical ? 'border-red-400/20 bg-red-400/[0.04]' : 'border-amber-400/15 bg-amber-400/[0.035]'}`}
+                      >
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-zinc-200">{check.label}</p>
-                          <span className={`shrink-0 text-[10px] font-semibold uppercase ${check.ok ? 'text-emerald-300' : check.critical ? 'text-red-300' : 'text-amber-300'}`}>{check.status === 'not_configured' ? 'Não configurado' : check.ok ? 'OK' : 'Falha'}</span>
+                          <p className="text-sm font-medium text-zinc-200">
+                            {check.label}
+                          </p>
+                          <span
+                            className={`shrink-0 text-[10px] font-semibold uppercase ${check.ok ? 'text-emerald-300' : check.critical ? 'text-red-300' : 'text-amber-300'}`}
+                          >
+                            {check.status === 'not_configured'
+                              ? 'Não configurado'
+                              : check.ok
+                                ? 'OK'
+                                : 'Falha'}
+                          </span>
                         </div>
-                        <p className="mt-2 text-xs text-zinc-500">{check.detail || (check.ok ? 'Ligação verificada.' : 'Verificação falhou.')}</p>
-                        <p className="mt-2 font-mono text-[10px] text-zinc-600">{check.durationMs} ms</p>
+                        <p className="mt-2 text-xs text-zinc-500">
+                          {check.detail ||
+                            (check.ok
+                              ? 'Ligação verificada.'
+                              : 'Verificação falhou.')}
+                        </p>
+                        <p className="mt-2 font-mono text-[10px] text-zinc-600">
+                          {check.durationMs} ms
+                        </p>
                       </div>
                     ))}
                   </div>
-                  {!observability.telemetryAvailable ? <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3 text-xs text-amber-200">O armazenamento de logs API não está disponível. Confirma a migração da tabela de telemetria na base de dados.</p> : null}
+                  {!observability.telemetryAvailable ? (
+                    <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3 text-xs text-amber-200">
+                      O armazenamento de logs API não está disponível. Confirma
+                      a migração da tabela de telemetria na base de dados.
+                    </p>
+                  ) : null}
                 </section>
                 <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h3 className="font-semibold">Endpoints com tráfego</h3>
-                      <p className="mt-1 text-xs text-zinc-500">Agrupados pela rota e método, sem guardar query strings, corpos de pedidos ou identificadores dos clientes.</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Agrupados pela rota e método, sem guardar query strings,
+                        corpos de pedidos ou identificadores dos clientes.
+                      </p>
                     </div>
-                    <span className="text-xs text-zinc-600">{observability.routes.length} endpoints observados</span>
+                    <span className="text-xs text-zinc-600">
+                      {observability.routes.length} endpoints observados
+                    </span>
                   </div>
                   <div className="mt-4 overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left text-xs">
                       <thead className="text-[10px] uppercase tracking-wider text-zinc-600">
-                        <tr><th className="pb-3 pr-4">Endpoint</th><th className="pb-3 pr-4">Pedidos</th><th className="pb-3 pr-4">Erros 5xx</th><th className="pb-3 pr-4">Taxa de erro</th><th className="pb-3 pr-4">p95</th><th className="pb-3">Último pedido</th></tr>
+                        <tr>
+                          <th className="pb-3 pr-4">Endpoint</th>
+                          <th className="pb-3 pr-4">Pedidos</th>
+                          <th className="pb-3 pr-4">Erros 5xx</th>
+                          <th className="pb-3 pr-4">Taxa de erro</th>
+                          <th className="pb-3 pr-4">p95</th>
+                          <th className="pb-3">Último pedido</th>
+                        </tr>
                       </thead>
                       <tbody>
                         {observability.routes.map((route) => (
-                          <tr key={`${route.method}-${route.route}`} className="border-t border-white/[0.06]">
-                            <td className="py-3 pr-4"><span className="mr-2 rounded bg-white/[0.06] px-1.5 py-1 font-mono text-[10px] text-zinc-400">{route.method}</span><code className="text-zinc-200">{route.route}</code></td>
-                            <td className="py-3 pr-4 tabular-nums">{route.requests}</td>
-                            <td className={`py-3 pr-4 tabular-nums ${route.errors ? 'text-red-300' : 'text-zinc-400'}`}>{route.errors}</td>
-                            <td className={`py-3 pr-4 tabular-nums ${route.errorRate > 0 ? 'text-amber-300' : 'text-emerald-300'}`}>{route.errorRate.toLocaleString('pt-PT', { maximumFractionDigits: 1 })}%</td>
-                            <td className="py-3 pr-4 font-mono text-zinc-400">{route.p95LatencyMs} ms</td>
-                            <td className="py-3 text-zinc-500">{formatDate(route.lastSeenAt)}</td>
+                          <tr
+                            key={`${route.method}-${route.route}`}
+                            className="border-t border-white/[0.06]"
+                          >
+                            <td className="py-3 pr-4">
+                              <span className="mr-2 rounded bg-white/[0.06] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
+                                {route.method}
+                              </span>
+                              <code className="text-zinc-200">
+                                {route.route}
+                              </code>
+                            </td>
+                            <td className="py-3 pr-4 tabular-nums">
+                              {route.requests}
+                            </td>
+                            <td
+                              className={`py-3 pr-4 tabular-nums ${route.errors ? 'text-red-300' : 'text-zinc-400'}`}
+                            >
+                              {route.errors}
+                            </td>
+                            <td
+                              className={`py-3 pr-4 tabular-nums ${route.errorRate > 0 ? 'text-amber-300' : 'text-emerald-300'}`}
+                            >
+                              {route.errorRate.toLocaleString('pt-PT', {
+                                maximumFractionDigits: 1,
+                              })}
+                              %
+                            </td>
+                            <td className="py-3 pr-4 font-mono text-zinc-400">
+                              {route.p95LatencyMs} ms
+                            </td>
+                            <td className="py-3 text-zinc-500">
+                              {formatDate(route.lastSeenAt)}
+                            </td>
                           </tr>
                         ))}
-                        {observability.routes.length === 0 ? <tr><td colSpan={6} className="py-8 text-center text-zinc-600">Ainda não existem pedidos registados no período.</td></tr> : null}
+                        {observability.routes.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="py-8 text-center text-zinc-600"
+                            >
+                              Ainda não existem pedidos registados no período.
+                            </td>
+                          </tr>
+                        ) : null}
                       </tbody>
                     </table>
                   </div>
@@ -2063,36 +2226,84 @@ export default function PlatformAdminConsole() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <h3 className="font-semibold">Logs de pedidos HTTP</h3>
-                      <p className="mt-1 text-xs text-zinc-500">Até 2.000 registos recentes, com data, endpoint, estado, duração, request ID e código de erro seguro.</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Até 2.000 registos recentes, com data, endpoint, estado,
+                        duração, request ID e código de erro seguro.
+                      </p>
                     </div>
-                    <span className="text-xs text-zinc-600">{visibleApiLogs.length} apresentados · {observability.logs.length} carregados</span>
+                    <span className="text-xs text-zinc-600">
+                      {visibleApiLogs.length} apresentados ·{' '}
+                      {observability.logs.length} carregados
+                    </span>
                   </div>
                   <div className="mt-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_160px]">
-                    <input value={logSearch} onChange={(event) => setLogSearch(event.target.value)} placeholder="Pesquisar endpoint, request ID, estado ou código de erro" className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs outline-none focus:border-emerald-400/30" />
-                    <select value={logLevelFilter} onChange={(event) => setLogLevelFilter(event.target.value as 'ALL' | 'info' | 'warn' | 'error')} className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-300 outline-none">
-                      <option value="ALL">Todos os níveis</option><option value="error">Erro</option><option value="warn">Aviso</option><option value="info">Informação</option>
+                    <input
+                      value={logSearch}
+                      onChange={(event) => setLogSearch(event.target.value)}
+                      placeholder="Pesquisar endpoint, request ID, estado ou código de erro"
+                      className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs outline-none focus:border-emerald-400/30"
+                    />
+                    <select
+                      value={logLevelFilter}
+                      onChange={(event) =>
+                        setLogLevelFilter(
+                          event.target.value as
+                            'ALL' | 'info' | 'warn' | 'error',
+                        )
+                      }
+                      className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-300 outline-none"
+                    >
+                      <option value="ALL">Todos os níveis</option>
+                      <option value="error">Erro</option>
+                      <option value="warn">Aviso</option>
+                      <option value="info">Informação</option>
                     </select>
                   </div>
                   <div className="mt-4 max-h-[620px] space-y-2 overflow-auto pr-1">
                     {visibleApiLogs.map((log) => (
-                      <div key={log.id} className="rounded-xl border border-white/[0.07] bg-black/20 p-3">
+                      <div
+                        key={log.id}
+                        className="rounded-xl border border-white/[0.07] bg-black/20 p-3"
+                      >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className={`rounded px-1.5 py-1 font-mono text-[10px] ${log.statusCode >= 500 ? 'bg-red-400/10 text-red-200' : log.statusCode >= 400 ? 'bg-amber-400/10 text-amber-200' : 'bg-emerald-400/10 text-emerald-200'}`}>{log.statusCode}</span>
-                              <span className="rounded bg-white/[0.05] px-1.5 py-1 font-mono text-[10px] text-zinc-400">{log.method}</span>
-                              <code className="break-all text-xs text-zinc-200">{log.route}</code>
+                              <span
+                                className={`rounded px-1.5 py-1 font-mono text-[10px] ${log.statusCode >= 500 ? 'bg-red-400/10 text-red-200' : log.statusCode >= 400 ? 'bg-amber-400/10 text-amber-200' : 'bg-emerald-400/10 text-emerald-200'}`}
+                              >
+                                {log.statusCode}
+                              </span>
+                              <span className="rounded bg-white/[0.05] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
+                                {log.method}
+                              </span>
+                              <code className="break-all text-xs text-zinc-200">
+                                {log.route}
+                              </code>
                             </div>
-                            <p className="mt-2 break-all font-mono text-[10px] text-zinc-600">ID: {log.requestId}{log.errorCode ? ` · Código: ${log.errorCode}` : ''}{log.region ? ` · Região: ${log.region}` : ''}</p>
+                            <p className="mt-2 break-all font-mono text-[10px] text-zinc-600">
+                              ID: {log.requestId}
+                              {log.errorCode
+                                ? ` · Código: ${log.errorCode}`
+                                : ''}
+                              {log.region ? ` · Região: ${log.region}` : ''}
+                            </p>
                           </div>
                           <div className="shrink-0 text-right">
-                            <p className="font-mono text-xs text-zinc-300">{log.durationMs} ms</p>
-                            <p className="mt-1 text-[10px] text-zinc-600">{formatDate(log.createdAt)}</p>
+                            <p className="font-mono text-xs text-zinc-300">
+                              {log.durationMs} ms
+                            </p>
+                            <p className="mt-1 text-[10px] text-zinc-600">
+                              {formatDate(log.createdAt)}
+                            </p>
                           </div>
                         </div>
                       </div>
                     ))}
-                    {visibleApiLogs.length === 0 ? <p className="rounded-xl border border-dashed border-white/10 py-10 text-center text-xs text-zinc-600">Não foram encontrados logs com estes filtros.</p> : null}
+                    {visibleApiLogs.length === 0 ? (
+                      <p className="rounded-xl border border-dashed border-white/10 py-10 text-center text-xs text-zinc-600">
+                        Não foram encontrados logs com estes filtros.
+                      </p>
+                    ) : null}
                   </div>
                 </section>
               </>

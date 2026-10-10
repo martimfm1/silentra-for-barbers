@@ -166,4 +166,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/loyalty/verify-code', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/loyalty/verify-code',
+  POST__unobserved,
+);

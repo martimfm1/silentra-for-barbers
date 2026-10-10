@@ -191,7 +191,19 @@ async function DELETE__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/loyalty/earning-rules', GET__unobserved);
-export const POST = withApiObservability('/api/loyalty/earning-rules', POST__unobserved);
-export const PATCH = withApiObservability('/api/loyalty/earning-rules', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/loyalty/earning-rules', DELETE__unobserved);
+export const GET = withApiObservability(
+  '/api/loyalty/earning-rules',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/loyalty/earning-rules',
+  POST__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/loyalty/earning-rules',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/loyalty/earning-rules',
+  DELETE__unobserved,
+);

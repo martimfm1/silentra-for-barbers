@@ -53,4 +53,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/customer-portal', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/customer-portal',
+  POST__unobserved,
+);

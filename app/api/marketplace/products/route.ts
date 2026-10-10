@@ -91,4 +91,7 @@ async function GET__unobserved(request: Request) {
   return NextResponse.json({ products: visible, categories, shops });
 }
 
-export const GET = withApiObservability('/api/marketplace/products', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/marketplace/products',
+  GET__unobserved,
+);

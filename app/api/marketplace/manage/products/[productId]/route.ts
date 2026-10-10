@@ -104,5 +104,11 @@ async function DELETE__unobserved(
   }
 }
 
-export const PATCH = withApiObservability('/api/marketplace/manage/products/[productId]', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/marketplace/manage/products/[productId]', DELETE__unobserved);
+export const PATCH = withApiObservability(
+  '/api/marketplace/manage/products/[productId]',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/marketplace/manage/products/[productId]',
+  DELETE__unobserved,
+);

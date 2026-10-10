@@ -76,5 +76,11 @@ async function PATCH__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/marketplace/manage/settings', GET__unobserved);
-export const PATCH = withApiObservability('/api/marketplace/manage/settings', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/marketplace/manage/settings',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/marketplace/manage/settings',
+  PATCH__unobserved,
+);

@@ -75,9 +75,7 @@ export function withApiObservability<T extends ApiHandler>(
   route: string,
   handler: T,
 ): T {
-  const wrapped = async (
-    ...args: Parameters<T>
-  ): Promise<Response | void> => {
+  const wrapped = async (...args: Parameters<T>): Promise<Response | void> => {
     const possibleRequest: unknown = args[0];
     const request =
       typeof Request !== 'undefined' && possibleRequest instanceof Request
@@ -110,10 +108,7 @@ export function withApiObservability<T extends ApiHandler>(
       errorCode = safeErrorCode(error);
       throw error;
     } finally {
-      const durationMs = Math.max(
-        0,
-        Math.round(performance.now() - startedAt),
-      );
+      const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
       const expectedClientError = [400, 401, 403, 404, 409, 422].includes(
         statusCode,
       );

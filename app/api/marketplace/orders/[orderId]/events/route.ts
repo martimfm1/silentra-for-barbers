@@ -69,4 +69,7 @@ async function GET__unobserved(
   }
 }
 
-export const GET = withApiObservability('/api/marketplace/orders/[orderId]/events', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/marketplace/orders/[orderId]/events',
+  GET__unobserved,
+);

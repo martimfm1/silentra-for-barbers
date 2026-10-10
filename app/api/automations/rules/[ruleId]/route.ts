@@ -124,5 +124,11 @@ async function DELETE__unobserved(
   }
 }
 
-export const PATCH = withApiObservability('/api/automations/rules/[ruleId]', PATCH__unobserved);
-export const DELETE = withApiObservability('/api/automations/rules/[ruleId]', DELETE__unobserved);
+export const PATCH = withApiObservability(
+  '/api/automations/rules/[ruleId]',
+  PATCH__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/automations/rules/[ruleId]',
+  DELETE__unobserved,
+);

@@ -70,5 +70,11 @@ async function PATCH__unobserved(request: Request) {
   return NextResponse.json({ text: text || DEFAULT_QR_TEXT });
 }
 
-export const GET = withApiObservability('/api/barbershops/qr-code', GET__unobserved);
-export const PATCH = withApiObservability('/api/barbershops/qr-code', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/barbershops/qr-code',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/barbershops/qr-code',
+  PATCH__unobserved,
+);

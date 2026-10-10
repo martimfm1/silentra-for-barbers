@@ -30,4 +30,7 @@ async function GET__unobserved() {
   }
 }
 
-export const GET = withApiObservability('/api/stripe/invoices', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/stripe/invoices',
+  GET__unobserved,
+);

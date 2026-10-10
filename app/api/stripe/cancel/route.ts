@@ -27,4 +27,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/cancel', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/cancel',
+  POST__unobserved,
+);

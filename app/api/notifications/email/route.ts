@@ -129,4 +129,7 @@ async function POST__unobserved(request: NextRequest) {
   }
 }
 
-export const POST = withApiObservability('/api/notifications/email', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/notifications/email',
+  POST__unobserved,
+);

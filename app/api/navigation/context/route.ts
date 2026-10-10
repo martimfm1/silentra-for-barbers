@@ -161,4 +161,7 @@ async function GET__unobserved() {
   );
 }
 
-export const GET = withApiObservability('/api/navigation/context', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/navigation/context',
+  GET__unobserved,
+);

@@ -251,5 +251,11 @@ async function PATCH__unobserved(request: NextRequest) {
   }
 }
 
-export const GET = withApiObservability('/api/marketing/campaigns/automation', GET__unobserved);
-export const PATCH = withApiObservability('/api/marketing/campaigns/automation', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/marketing/campaigns/automation',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/marketing/campaigns/automation',
+  PATCH__unobserved,
+);

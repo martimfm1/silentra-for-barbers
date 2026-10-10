@@ -107,4 +107,7 @@ async function GET__unobserved(
   }
 }
 
-export const GET = withApiObservability('/api/public/barbershops/[slug]', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/public/barbershops/[slug]',
+  GET__unobserved,
+);

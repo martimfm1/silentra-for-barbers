@@ -398,4 +398,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/embedded-checkout', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/embedded-checkout',
+  POST__unobserved,
+);

@@ -63,4 +63,7 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const POST = withApiObservability('/api/stripe/update-plan', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/stripe/update-plan',
+  POST__unobserved,
+);

@@ -413,6 +413,15 @@ async function PATCH__unobserved(
   }
 }
 
-export const GET = withApiObservability('/api/customer-portal/appointments/[appointmentId]', GET__unobserved);
-export const DELETE = withApiObservability('/api/customer-portal/appointments/[appointmentId]', DELETE__unobserved);
-export const PATCH = withApiObservability('/api/customer-portal/appointments/[appointmentId]', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/customer-portal/appointments/[appointmentId]',
+  GET__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/customer-portal/appointments/[appointmentId]',
+  DELETE__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/customer-portal/appointments/[appointmentId]',
+  PATCH__unobserved,
+);

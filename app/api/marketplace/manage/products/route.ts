@@ -92,5 +92,11 @@ async function POST__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/marketplace/manage/products', GET__unobserved);
-export const POST = withApiObservability('/api/marketplace/manage/products', POST__unobserved);
+export const GET = withApiObservability(
+  '/api/marketplace/manage/products',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/marketplace/manage/products',
+  POST__unobserved,
+);

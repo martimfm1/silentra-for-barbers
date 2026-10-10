@@ -132,4 +132,7 @@ async function POST__unobserved(
   }
 }
 
-export const POST = withApiObservability('/api/marketplace/orders/[orderId]/email', POST__unobserved);
+export const POST = withApiObservability(
+  '/api/marketplace/orders/[orderId]/email',
+  POST__unobserved,
+);

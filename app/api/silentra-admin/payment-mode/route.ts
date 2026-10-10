@@ -100,5 +100,11 @@ async function PATCH__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/silentra-admin/payment-mode', GET__unobserved);
-export const PATCH = withApiObservability('/api/silentra-admin/payment-mode', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/silentra-admin/payment-mode',
+  GET__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/silentra-admin/payment-mode',
+  PATCH__unobserved,
+);
