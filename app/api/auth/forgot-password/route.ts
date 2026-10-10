@@ -2,7 +2,56 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthCallbackUrl } from '@/lib/auth/email-confirmation';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidRecoveryEmail(email: string) {
+  if (!email || email.length > 254) return false;
+
+  const at = email.indexOf('@');
+  if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1)
+    return false;
+
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  if (
+    local.length > 64 ||
+    local.startsWith('.') ||
+    local.endsWith('.') ||
+    local.includes('..') ||
+    !domain.includes('.') ||
+    domain.startsWith('.') ||
+    domain.endsWith('.') ||
+    domain.includes('..')
+  ) {
+    return false;
+  }
+
+  for (const character of email) {
+    const code = character.charCodeAt(0);
+    if (
+      code <= 32 ||
+      code === 127 ||
+      character === '<' ||
+      character === '>' ||
+      character === '"'
+    ) {
+      return false;
+    }
+  }
+
+  const labels = domain.split('.');
+  return labels.every(
+    (label) =>
+      label.length > 0 && !label.startsWith('-') && !label.endsWith('-'),
+  );
+}
+
+function escapeHtmlAttribute(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
 
 function genericSuccessResponse() {
   return NextResponse.json(
@@ -22,7 +71,7 @@ export async function POST(request: Request) {
       typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
     // Do not reveal whether an account exists for a given email address.
-    if (!EMAIL_PATTERN.test(email) || email.length > 254)
+    if (!isValidRecoveryEmail(email))
       return genericSuccessResponse();
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -70,7 +119,7 @@ export async function POST(request: Request) {
         sender: { name: 'Suporte', email: senderEmail },
         to: [{ email }],
         subject: 'Redefinir a tua palavra-passe',
-        htmlContent: `<div style="background:#09090b;color:#f4f4f5;padding:32px;font-family:sans-serif;border-radius:12px;max-width:480px;margin:0 auto"><h2>Redefinir palavra-passe</h2><p style="color:#a1a1aa;font-size:14px">Recebemos um pedido para alterar a tua palavra-passe. Clica no botÃ£o abaixo para prosseguir:</p><a href="${data.properties.action_link}" style="background:#fff;color:#09090b;padding:12px 24px;border-radius:99px;font-weight:bold;text-decoration:none;display:inline-block;margin:16px 0;font-size:13px">Redefinir palavra-passe</a><p style="color:#71717a;font-size:12px;margin-bottom:0">Se nÃ£o solicitaste esta alteraÃ§Ã£o, podes ignorar esta mensagem.</p></div>`,
+        htmlContent: `<div style="background:#09090b;color:#f4f4f5;padding:32px;font-family:sans-serif;border-radius:12px;max-width:480px;margin:0 auto"><h2>Redefinir palavra-passe</h2><p style="color:#a1a1aa;font-size:14px">Recebemos um pedido para alterar a tua palavra-passe. Clica no botÃ£o abaixo para prosseguir:</p><a href="${escapeHtmlAttribute(data.properties.action_link)}" style="background:#fff;color:#09090b;padding:12px 24px;border-radius:99px;font-weight:bold;text-decoration:none;display:inline-block;margin:16px 0;font-size:13px">Redefinir palavra-passe</a><p style="color:#71717a;font-size:12px;margin-bottom:0">Se nÃ£o solicitaste esta alteraÃ§Ã£o, podes ignorar esta mensagem.</p></div>`,
       }),
     });
 
