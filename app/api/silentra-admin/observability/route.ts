@@ -59,15 +59,25 @@ export async function GET() {
       table: string,
     ): Promise<void> => {
       const started = performance.now();
-      const { error } = await admin.from(table).select('*', { count: 'exact', head: true });
-      const durationMs = Math.round(performance.now() - started);
-      checks.push({
-        id,
-        label,
-        state: error ? 'error' : 'ok',
-        durationMs,
-        detail: error ? 'A consulta à base de dados falhou.' : 'Ligação e consulta confirmadas.',
-      });
+      try {
+        const { error } = await admin.from(table).select('*', { count: 'exact', head: true });
+        const durationMs = Math.round(performance.now() - started);
+        checks.push({
+          id,
+          label,
+          state: error ? 'error' : 'ok',
+          durationMs,
+          detail: error ? 'A consulta à base de dados falhou.' : 'Ligação e consulta confirmadas.',
+        });
+      } catch {
+        checks.push({
+          id,
+          label,
+          state: 'error',
+          durationMs: Math.round(performance.now() - started),
+          detail: 'Não foi possível executar a verificação à base de dados.',
+        });
+      }
     };
 
     await Promise.all([
@@ -84,7 +94,8 @@ export async function GET() {
     const logsStarted = performance.now();
     const [
       historyResult,
-      errorsResult,
+      fourXXResult,
+      fiveXXResult,
       requests5mResult,
     ] = await Promise.all([
       admin
@@ -97,7 +108,13 @@ export async function GET() {
         .from('platform_api_logs')
         .select('id', { count: 'exact', head: true })
         .gte('occurred_at', since24h)
-        .gte('status_code', 400),
+        .gte('status_code', 400)
+        .lt('status_code', 500),
+      admin
+        .from('platform_api_logs')
+        .select('id', { count: 'exact', head: true })
+        .gte('occurred_at', since24h)
+        .gte('status_code', 500),
       admin
         .from('platform_api_logs')
         .select('id', { count: 'exact', head: true })
@@ -121,47 +138,86 @@ export async function GET() {
           : 'Não foi possível consultar o histórico de pedidos.',
     });
 
-    const envChecks: Array<{ id: string; label: string; ok: boolean; detail: string }> = [
-      {
-        id: 'supabase_config',
-        label: 'Configuração Supabase',
-        ok: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
-        detail: 'Verifica apenas a presença das variáveis necessárias.',
-      },
-      {
-        id: 'stripe_config',
-        label: 'Configuração Stripe',
-        ok: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
-        detail: 'Credencial configurada; esta verificação não executa pagamentos.',
-      },
-      {
-        id: 'email_config',
-        label: 'Configuração de email',
-        ok: Boolean(process.env.BREVO_API_KEY?.trim() && (process.env.BREVO_FROM_EMAIL?.trim() || process.env.SENDER_EMAIL?.trim())),
-        detail: 'Credenciais configuradas; não envia email de teste.',
-      },
-    ];
-    for (const check of envChecks) {
-      checks.push({
-        id: check.id,
-        label: check.label,
-        state: check.ok ? 'ok' : 'warn',
-        durationMs: null,
-        detail: check.detail,
-      });
-    }
+    const probeExternalService = async (options: {
+      id: string;
+      label: string;
+      url: string;
+      headers: Record<string, string>;
+      configured: boolean;
+    }) => {
+      if (!options.configured) {
+        checks.push({
+          id: options.id,
+          label: options.label,
+          state: 'not_configured',
+          durationMs: null,
+          detail: 'As credenciais necessárias não estão configuradas.',
+        });
+        return;
+      }
+
+      const started = performance.now();
+      try {
+        const response = await fetch(options.url, {
+          method: 'GET',
+          headers: options.headers,
+          cache: 'no-store',
+          signal: AbortSignal.timeout(4500),
+        });
+        checks.push({
+          id: options.id,
+          label: options.label,
+          state: response.ok ? 'ok' : response.status >= 500 ? 'warn' : 'error',
+          durationMs: Math.round(performance.now() - started),
+          detail: response.ok
+            ? 'O fornecedor respondeu ao pedido de verificação.'
+            : response.status === 401 || response.status === 403
+              ? 'O fornecedor recusou a autenticação.'
+              : `O fornecedor respondeu com HTTP ${response.status}.`,
+        });
+      } catch {
+        checks.push({
+          id: options.id,
+          label: options.label,
+          state: 'warn',
+          durationMs: Math.round(performance.now() - started),
+          detail: 'O serviço externo não respondeu dentro do limite de tempo.',
+        });
+      }
+    };
+
+    const stripeSecret = process.env.STRIPE_SECRET_KEY?.trim() || '';
+    const brevoApiKey = process.env.BREVO_API_KEY?.trim() || '';
+    await Promise.all([
+      probeExternalService({
+        id: 'stripe_api',
+        label: 'API Stripe',
+        url: 'https://api.stripe.com/v1/balance',
+        headers: { Authorization: `Bearer ${stripeSecret}` },
+        configured: Boolean(stripeSecret),
+      }),
+      probeExternalService({
+        id: 'brevo_api',
+        label: 'API Brevo / Email',
+        url: 'https://api.brevo.com/v3/account',
+        headers: { 'api-key': brevoApiKey, accept: 'application/json' },
+        configured: Boolean(brevoApiKey),
+      }),
+    ]);
 
     const history = (historyResult.data ?? []) as ApiLog[];
     const totalRequests24h = historyResult.count ?? history.length;
-    const errors24h = errorsResult.error ? history.filter((row) => row.status_code >= 400).length : (errorsResult.count ?? 0);
+    const errors24h =
+      (fourXXResult.count ?? history.filter((row) => row.status_code >= 400 && row.status_code < 500).length) +
+      (fiveXXResult.count ?? history.filter((row) => row.status_code >= 500).length);
     const requests5m = requests5mResult.error ? history.filter((row) => Date.parse(row.occurred_at) >= now - 5 * 60 * 1000).length : (requests5mResult.count ?? 0);
     const latencyValues = history.map((row) => Number(row.duration_ms) || 0);
     const averageLatencyMs = latencyValues.length
       ? Math.round(latencyValues.reduce((sum, value) => sum + value, 0) / latencyValues.length)
       : 0;
     const p95LatencyMs = percentile(latencyValues, 95);
-    const fiveXX24h = history.filter((row) => row.status_code >= 500).length;
-    const fourXX24h = history.filter((row) => row.status_code >= 400 && row.status_code < 500).length;
+    const fiveXX24h = fiveXXResult.count ?? history.filter((row) => row.status_code >= 500).length;
+    const fourXX24h = fourXXResult.count ?? history.filter((row) => row.status_code >= 400 && row.status_code < 500).length;
 
     const byRoute = new Map<string, ApiLog[]>();
     for (const item of history) {
@@ -189,7 +245,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        ok: checks.every((check) => check.state === 'ok' || check.state === 'not_configured'),
+        ok: checks.every((check) => check.state === 'ok'),
         generatedAt,
         logsAvailable,
         migrationMissing,
