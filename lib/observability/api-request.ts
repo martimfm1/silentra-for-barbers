@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 type ApiLogLevel = 'info' | 'warn' | 'error';
@@ -14,21 +15,24 @@ type ApiLogRecord = {
 };
 
 type RouteArguments = [Request, ...unknown[]];
+type RouteResult = Response | void | Promise<Response | void>;
 
 /**
- * Records request metadata without storing request bodies, cookies, IP addresses,
- * query strings, or user-provided values. The database write is best-effort so
- * observability can never turn a successful business operation into a failure.
+ * Captures metadata for API requests without recording bodies, cookies, IPs,
+ * query strings, credentials, or user-provided values.
+ *
+ * The log write runs with Next's post-response lifecycle so analytics do not
+ * add database latency to booking, authentication, and payment operations.
  */
 export function withApiLogging<TArgs extends RouteArguments>(
   route: string,
-  handler: (...args: TArgs) => Response | Promise<Response>,
-): (...args: TArgs) => Promise<Response> {
+  handler: (...args: TArgs) => RouteResult,
+): (...args: TArgs) => Promise<Response | void> {
   return async (...args: TArgs) => {
     const request = args[0];
     const startedAt = performance.now();
     const requestId = crypto.randomUUID();
-    let response: Response | undefined;
+    let response: Response | void;
     let thrown: unknown;
 
     try {
@@ -38,7 +42,7 @@ export function withApiLogging<TArgs extends RouteArguments>(
       thrown = error;
       throw error;
     } finally {
-      const statusCode = response?.status ?? 500;
+      const statusCode = response instanceof Response ? response.status : 500;
       const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
       const level: ApiLogLevel =
         statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
@@ -52,13 +56,15 @@ export function withApiLogging<TArgs extends RouteArguments>(
           ? candidate.code
           : thrown && candidate && typeof candidate.name === 'string'
             ? candidate.name.slice(0, 80)
-            : null;
+            : response === undefined
+              ? 'EMPTY_RESPONSE'
+              : null;
 
-      if (response) {
+      if (response instanceof Response) {
         try {
           response.headers.set('x-silentra-request-id', requestId);
         } catch {
-          // Some framework-managed responses can expose immutable headers.
+          // Framework-managed response headers may be immutable.
         }
       }
 
@@ -71,30 +77,34 @@ export function withApiLogging<TArgs extends RouteArguments>(
         level,
         error_code: errorCode,
         message:
-          statusCode >= 500
-            ? 'Erro interno ao processar o pedido.'
-            : statusCode >= 400
-              ? 'O pedido terminou com uma resposta de erro.'
-              : 'Pedido processado com sucesso.',
+          thrown || statusCode >= 500
+            ? 'A API não conseguiu concluir o pedido.'
+            : response === undefined
+              ? 'A rota terminou sem produzir uma resposta HTTP.'
+              : statusCode >= 400
+                ? 'O pedido terminou com uma resposta de erro HTTP.'
+                : 'Pedido processado com sucesso.',
       };
 
-      try {
-        const admin = createAdminClient();
-        const { error } = await admin.from('platform_api_logs').insert(record);
-        if (
-          error &&
-          error.code !== '42P01' &&
-          error.code !== 'PGRST205' &&
-          process.env.NODE_ENV !== 'test'
-        ) {
-          console.error('[SILENTRA_API_LOG_WRITE_FAILED]', {
-            route,
-            error_code: error.code ?? 'UNKNOWN',
-          });
+      after(async () => {
+        try {
+          const admin = createAdminClient();
+          const { error } = await admin.from('platform_api_logs').insert(record);
+          if (
+            error &&
+            error.code !== '42P01' &&
+            error.code !== 'PGRST205' &&
+            process.env.NODE_ENV !== 'test'
+          ) {
+            console.error('[SILENTRA_API_LOG_WRITE_FAILED]', {
+              route,
+              error_code: error.code ?? 'UNKNOWN',
+            });
+          }
+        } catch {
+          // Observability must never change the business operation's result.
         }
-      } catch {
-        // Logging must remain fail-open even when Supabase is unavailable.
-      }
+      });
     }
   };
 }
