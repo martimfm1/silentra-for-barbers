@@ -20,12 +20,15 @@ import {
   Settings,
   ShieldCheck,
   Store,
-  UserCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { cn } from '@/lib/utils';
+import {
+  DEFAULT_BARBERSHOP_AVATAR,
+  DEFAULT_BARBERSHOP_BANNER,
+} from '@/lib/barbershops/default-media';
 import { processAndUploadImage } from '@/lib/utils/upload-image';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
 import { authService } from '@/app/dashboard/_services/auth.service';
@@ -173,6 +176,8 @@ export default function SettingsPageOrganized() {
   const [suggestion, setSuggestion] = useState<AddressSuggestion | null>(null);
   const [avatarTick, setAvatarTick] = useState(0);
   const [bannerTick, setBannerTick] = useState(0);
+  const [avatarPreviewError, setAvatarPreviewError] = useState(false);
+  const [bannerPreviewError, setBannerPreviewError] = useState(false);
   const [uploading, setUploading] = useState<'avatar' | 'banner' | null>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
@@ -346,8 +351,10 @@ export default function SettingsPageOrganized() {
         r.error.message || 'Não foi possível atualizar a imagem.',
       );
     if (type === 'avatar') {
+      setAvatarPreviewError(false);
       setAvatarTick(Date.now());
     } else {
+      setBannerPreviewError(false);
       setBannerTick(Date.now());
     }
     toast.success(
@@ -809,29 +816,33 @@ export default function SettingsPageOrganized() {
                 <CardContent>
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
                     <div className="relative h-52">
-                      {banner ? (
-                        <Image
-                          src={banner}
-                          alt="Capa da barbearia"
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : null}
+                      <Image
+                        src={
+                          bannerPreviewError || !banner
+                            ? DEFAULT_BARBERSHOP_BANNER
+                            : banner
+                        }
+                        alt="Capa predefinida ou personalizada da barbearia"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                        onError={() => setBannerPreviewError(true)}
+                      />
                       <div className="absolute inset-x-4 bottom-4 flex items-end justify-between">
                         <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
-                          {avatar ? (
-                            <Image
-                              src={avatar}
-                              alt="Logótipo"
-                              width={128}
-                              height={128}
-                              className="h-full w-full object-cover"
-                              unoptimized
-                            />
-                          ) : (
-                            <UserCircle2 className="m-auto size-8 text-zinc-600" />
-                          )}
+                          <Image
+                            src={
+                              avatarPreviewError || !avatar
+                                ? DEFAULT_BARBERSHOP_AVATAR
+                                : avatar
+                            }
+                            alt="Logótipo predefinido ou personalizado"
+                            width={128}
+                            height={128}
+                            className="h-full w-full object-cover"
+                            unoptimized
+                            onError={() => setAvatarPreviewError(true)}
+                          />
                         </div>
                         <div className="flex gap-2">
                           <Button

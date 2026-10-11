@@ -9,6 +9,7 @@ import {
   isValidPublicProfileSlug,
 } from '@/lib/barbershops/public-profile';
 import { normalizeBarbershopAmenities } from '@/lib/barbershops/amenities';
+import { DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
 import BarbershopPublicPage from './public-barbershop-page';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
@@ -50,7 +51,10 @@ export async function generateMetadata({
     profile.seo_description?.trim() ||
     `Consulta serviços, preços, horário e localização da ${profile.name}. Marca o teu próximo serviço online em poucos segundos.`;
   const image =
-    profile.og_image_url || profile.cover_url || profile.avatar_url || null;
+    profile.og_image_url ||
+    profile.cover_url ||
+    profile.avatar_url ||
+    absoluteUrl(DEFAULT_BARBERSHOP_BANNER);
   return {
     title,
     description,
@@ -253,7 +257,10 @@ export default async function BarbershopPage({ params }: BarbershopPageProps) {
   const initialData = await getInitialPublicDetails(profile);
   const canonicalUrl = absoluteUrl(getResolvedProfileUrl(profile));
   const image =
-    profile.og_image_url || profile.cover_url || profile.avatar_url || null;
+    profile.og_image_url ||
+    profile.cover_url ||
+    profile.avatar_url ||
+    absoluteUrl(DEFAULT_BARBERSHOP_BANNER);
 
   return (
     <>

@@ -19,7 +19,6 @@ import {
   GlassWater,
   MapPin,
   Phone,
-  Scissors,
   Star,
   Toilet,
   Wifi,
@@ -30,6 +29,10 @@ import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
 import { publicBarbershopService } from './services/public-barbershop.service';
 import { formatClosedDays } from '@/lib/utils/format-closed-days';
+import {
+  DEFAULT_BARBERSHOP_AVATAR,
+  DEFAULT_BARBERSHOP_BANNER,
+} from '@/lib/barbershops/default-media';
 
 const BookingDrawer = dynamic(
   () =>
@@ -122,10 +125,16 @@ export default function BarbershopPublicPageFinal({
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [reviewSent, setReviewSent] = useState(false);
+  const [avatarImageError, setAvatarImageError] = useState(false);
+  const [bannerImageError, setBannerImageError] = useState(false);
 
   const targetId = shop.barbershop_id || shop.id;
   const avatarUrl = storageUrl('avatar', shop.avatar_url, targetId);
   const bannerUrl = storageUrl('banner', shop.cover_url, targetId);
+  const displayedAvatarUrl =
+    avatarImageError || !avatarUrl ? DEFAULT_BARBERSHOP_AVATAR : avatarUrl;
+  const displayedBannerUrl =
+    bannerImageError || !bannerUrl ? DEFAULT_BARBERSHOP_BANNER : bannerUrl;
   const amenities = shop.amenities;
   const rating = Number(shop.rating ?? 0);
 
@@ -181,21 +190,16 @@ export default function BarbershopPublicPageFinal({
   return (
     <main className="silentra-page-shell pb-24 text-foreground">
       <section className="relative h-64 overflow-hidden border-b border-white/[0.08] sm:h-80">
-        {bannerUrl ? (
-          <Image
-            src={bannerUrl}
-            alt={`Imagem da ${shop.name}`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-45"
-          />
-        ) : (
-          <div
-            className="h-full w-full bg-[radial-gradient(circle_at_70%_20%,rgba(16,185,129,0.14),transparent_30%),linear-gradient(135deg,#18181b,#09090b)]"
-            aria-hidden="true"
-          />
-        )}
+        <Image
+          src={displayedBannerUrl}
+          alt={`Banner da ${shop.name}`}
+          fill
+          priority
+          sizes="100vw"
+          unoptimized
+          onError={() => setBannerImageError(true)}
+          className="object-cover opacity-45"
+        />
         <div
           className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent"
           aria-hidden="true"
@@ -214,22 +218,15 @@ export default function BarbershopPublicPageFinal({
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="flex min-w-0 items-end gap-4">
                 <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl border-4 border-zinc-950 bg-zinc-900 shadow-2xl sm:size-32">
-                  {avatarUrl ? (
-                    <Image
-                      src={avatarUrl}
-                      alt=""
-                      fill
-                      sizes="128px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="grid h-full place-items-center">
-                      <Scissors
-                        className="size-9 text-zinc-500"
-                        aria-hidden="true"
-                      />
-                    </div>
-                  )}
+                  <Image
+                    src={displayedAvatarUrl}
+                    alt={`Logótipo de ${shop.name}`}
+                    fill
+                    sizes="128px"
+                    unoptimized
+                    onError={() => setAvatarImageError(true)}
+                    className="object-cover"
+                  />
                 </div>
                 <div className="min-w-0 pb-1">
                   <div className="flex flex-wrap items-center gap-2">

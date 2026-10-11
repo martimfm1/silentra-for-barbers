@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import type { FeatureKey } from '@/lib/billing/plan-features';
-import { BarberIcon } from '@/components/BarberIcon';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { DEFAULT_BARBERSHOP_AVATAR } from '@/lib/barbershops/default-media';
 
 interface SidebarItem {
   href: string;
@@ -41,6 +41,12 @@ interface SidebarItem {
 type BrandAvatarProps = { mobile?: boolean; avatarUrl: string | null };
 
 function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const displayedAvatarUrl =
+    avatarUrl && failedImageUrl !== avatarUrl
+      ? avatarUrl
+      : DEFAULT_BARBERSHOP_AVATAR;
+
   return (
     <span
       className={cn(
@@ -48,21 +54,17 @@ function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
         mobile ? 'size-8' : 'size-9',
       )}
     >
-      {avatarUrl ? (
-        <Image
-          src={avatarUrl}
-          alt="Avatar da barbearia"
-          fill
-          sizes={mobile ? '32px' : '36px'}
-          className="object-cover"
-          unoptimized
-        />
-      ) : (
-        <BarberIcon
-          className={cn(mobile ? 'size-4' : 'size-5')}
-          aria-hidden="true"
-        />
-      )}
+      <Image
+        src={displayedAvatarUrl}
+        alt="Avatar da barbearia"
+        fill
+        sizes={mobile ? '32px' : '36px'}
+        className="object-cover"
+        unoptimized
+        onError={() =>
+          setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)
+        }
+      />
     </span>
   );
 }

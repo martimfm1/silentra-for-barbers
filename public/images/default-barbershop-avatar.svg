@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Avatar predefinido de barbearia</title>
+  <desc id="desc">Ícone minimalista de tesoura sobre fundo escuro e verde profundo.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#202b27"/>
+      <stop offset="1" stop-color="#0b0f0e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="28%" r="74%">
+      <stop offset="0" stop-color="#8dd8b2" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#8dd8b2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <rect x="22" y="22" width="468" height="468" rx="92" fill="none" stroke="#c0e6d1" stroke-opacity=".14" stroke-width="2"/>
+  <circle cx="192" cy="328" r="48" fill="none" stroke="#c3ead4" stroke-width="17"/>
+  <circle cx="320" cy="328" r="48" fill="none" stroke="#c3ead4" stroke-width="17"/>
+  <path d="M222 294 353 163a21 21 0 0 1 30 30L260 316M290 294 159 163a21 21 0 0 0-30 30l123 123" fill="none" stroke="#e5f3eb" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="12" fill="#8dd8b2"/>
+  <path d="M206 112h100" stroke="#8dd8b2" stroke-opacity=".8" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="256" cy="112" r="5" fill="#8dd8b2"/>
+</svg>
