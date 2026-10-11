@@ -20,13 +20,15 @@ import {
   Settings,
   ShieldCheck,
   Store,
-  UserCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { cn } from '@/lib/utils';
-import { DEFAULT_BARBERSHOP_AVATAR, DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
+import {
+  DEFAULT_BARBERSHOP_AVATAR,
+  DEFAULT_BARBERSHOP_BANNER,
+} from '@/lib/barbershops/default-media';
 import { processAndUploadImage } from '@/lib/utils/upload-image';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
 import { authService } from '@/app/dashboard/_services/auth.service';
