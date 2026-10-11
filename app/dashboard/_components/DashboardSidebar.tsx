@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   BarChart3,
   Megaphone,
@@ -41,11 +41,11 @@ interface SidebarItem {
 type BrandAvatarProps = { mobile?: boolean; avatarUrl: string | null };
 
 function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
-  const [imageError, setImageError] = useState(false);
-
-  useEffect(() => {
-    setImageError(false);
-  }, [avatarUrl]);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const displayedAvatarUrl =
+    avatarUrl && failedImageUrl !== avatarUrl
+      ? avatarUrl
+      : DEFAULT_BARBERSHOP_AVATAR;
 
   return (
     <span
@@ -55,13 +55,13 @@ function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
       )}
     >
       <Image
-        src={avatarUrl && !imageError ? avatarUrl : DEFAULT_BARBERSHOP_AVATAR}
+        src={displayedAvatarUrl}
         alt="Avatar da barbearia"
         fill
         sizes={mobile ? '32px' : '36px'}
         className="object-cover"
         unoptimized
-        onError={() => setImageError(true)}
+        onError={() => setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)}
       />
     </span>
   );
