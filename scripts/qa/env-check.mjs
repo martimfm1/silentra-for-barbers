@@ -5,6 +5,7 @@ const required = [
   'STRIPE_SECRET_KEY',
   'STRIPE_WEBHOOK_SECRET',
   'BREVO_API_KEY',
+  'RATE_LIMIT_SECRET',
 ];
 
 const publicOnly = new Set([
@@ -22,6 +23,7 @@ const placeholderPatterns = [
 const missing = [];
 const placeholders = [];
 const unsafePublicSecrets = [];
+const weakSecrets = [];
 
 for (const name of required) {
   const value = process.env[name]?.trim();
@@ -31,6 +33,8 @@ for (const name of required) {
   }
   if (placeholderPatterns.some((pattern) => pattern.test(value)))
     placeholders.push(name);
+  if (name === 'RATE_LIMIT_SECRET' && value.length < 32)
+    weakSecrets.push(name);
 }
 
 for (const [name, value] of Object.entries(process.env)) {
@@ -43,11 +47,13 @@ for (const [name, value] of Object.entries(process.env)) {
   }
 }
 
-if (missing.length || placeholders.length || unsafePublicSecrets.length) {
+if (missing.length || placeholders.length || unsafePublicSecrets.length || weakSecrets.length) {
   console.error('Production environment validation failed.');
   if (missing.length) console.error(`Missing: ${missing.join(', ')}`);
   if (placeholders.length)
     console.error(`Placeholder values: ${placeholders.join(', ')}`);
+  if (weakSecrets.length)
+    console.error(`Secrets with insufficient length (minimum 32 characters): ${weakSecrets.join(', ')}`);
   if (unsafePublicSecrets.length)
     console.error(
       `Potential public secrets: ${unsafePublicSecrets.join(', ')}`,
