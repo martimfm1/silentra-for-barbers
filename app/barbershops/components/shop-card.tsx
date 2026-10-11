@@ -2,10 +2,13 @@
 
 import Image from 'next/image';
 import React, { useState, useMemo } from 'react';
-import { MapPin, Clock, Star, Scissors, ArrowRight, Eye } from 'lucide-react';
+import { MapPin, Clock, Star, ArrowRight, Eye } from 'lucide-react';
 import type { ShopCardProps } from '@/types/marketplace/components';
 import type { BarbershopPublicDetails } from '@/app/barbershops/[slug]/services/public-barbershop.service';
-import { DEFAULT_BARBERSHOP_AVATAR, DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
+import {
+  DEFAULT_BARBERSHOP_AVATAR,
+  DEFAULT_BARBERSHOP_BANNER,
+} from '@/lib/barbershops/default-media';
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(
   /\/$/,
