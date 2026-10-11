@@ -19,7 +19,6 @@ import {
   GlassWater,
   MapPin,
   Phone,
-  Scissors,
   Star,
   Toilet,
   Wifi,
@@ -30,7 +29,10 @@ import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
 import { publicBarbershopService } from './services/public-barbershop.service';
 import { formatClosedDays } from '@/lib/utils/format-closed-days';
-import { DEFAULT_BARBERSHOP_AVATAR, DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
+import {
+  DEFAULT_BARBERSHOP_AVATAR,
+  DEFAULT_BARBERSHOP_BANNER,
+} from '@/lib/barbershops/default-media';
 
 const BookingDrawer = dynamic(
   () =>
