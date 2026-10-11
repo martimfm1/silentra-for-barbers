@@ -47,13 +47,21 @@ for (const [name, value] of Object.entries(process.env)) {
   }
 }
 
-if (missing.length || placeholders.length || unsafePublicSecrets.length || weakSecrets.length) {
+if (
+  missing.length ||
+  placeholders.length ||
+  unsafePublicSecrets.length ||
+  weakSecrets.length
+) {
   console.error('Production environment validation failed.');
   if (missing.length) console.error(`Missing: ${missing.join(', ')}`);
   if (placeholders.length)
     console.error(`Placeholder values: ${placeholders.join(', ')}`);
-  if (weakSecrets.length)
-    console.error(`Secrets with insufficient length (minimum 32 characters): ${weakSecrets.join(', ')}`);
+  if (weakSecrets.length) {
+    console.error(
+      `Secrets with insufficient length (minimum 32 characters): ${weakSecrets.join(', ')}`,
+    );
+  }
   if (unsafePublicSecrets.length)
     console.error(
       `Potential public secrets: ${unsafePublicSecrets.join(', ')}`,
