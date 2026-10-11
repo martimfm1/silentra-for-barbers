@@ -54,6 +54,25 @@ const specializedGuards = [
   },
 ];
 
+const routeSecurityChecks = [
+  {
+    pattern: /\/marketplace\/products\/route\.ts$/,
+    markers: [
+      'MAX_QUERY_LENGTH = 80',
+      'consumePublicRateLimit',
+      "'marketplace-products'",
+      'CATALOG_RATE_LIMIT = 120',
+      'status: 429',
+      'UUID_PATTERN.test(shopId)',
+      'normalizeSearchQuery(rawQuery)',
+      'if (!SORT_MODES.includes(rawSort as SortMode))',
+      'barbershops!inner',
+      ".eq('barbershops.is_public_in_directory', true)",
+      ".eq('barbershops.marketplace_sales_mode', 'physical_and_online')",
+    ],
+  },
+];
+
 function walk(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
@@ -73,8 +92,21 @@ for (const file of routes) {
   const relative = path.relative(process.cwd(), file).replaceAll(path.sep, '/');
   const source = fs.readFileSync(file, 'utf8');
 
-  // The marketplace catalog is intentionally public. Its route applies
-  // server-side visibility, active, stock and public-sales-mode filters.
+  const routeSecurityCheck = routeSecurityChecks.find(({ pattern }) =>
+    pattern.test(relative),
+  );
+  if (routeSecurityCheck) {
+    const missingMarkers = routeSecurityCheck.markers.filter(
+      (marker) => !source.includes(marker),
+    );
+    if (missingMarkers.length) {
+      failures.push(
+        `${relative}: missing public-route hardening markers: ${missingMarkers.join(', ')}`,
+      );
+    }
+    continue;
+  }
+
   if (publicRoutePatterns.some((pattern) => pattern.test(relative))) continue;
 
   const aliasRoute = aliasRoutes.find(({ pattern }) => pattern.test(relative));

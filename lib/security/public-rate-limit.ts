@@ -1,13 +1,24 @@
 import { createHmac } from 'node:crypto';
+import { isIP } from 'node:net';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export function getClientIp(request: Request): string {
+  // On Vercel and other trusted ingress platforms, x-real-ip is populated by
+  // the edge with the observed client address. Validate it rather than taking
+  // arbitrary header text as a rate-limit key.
+  const real = request.headers.get('x-real-ip')?.trim();
+  if (real && isIP(real)) return real;
+
+  // Proxies append the observed address to X-Forwarded-For. Never use the
+  // leftmost value: it can be supplied by the caller and would let a client
+  // rotate rate-limit buckets by forging the header.
   const forwarded = request.headers
     .get('x-forwarded-for')
-    ?.split(',')[0]
-    ?.trim();
-  const real = request.headers.get('x-real-ip')?.trim();
-  return forwarded || real || 'unknown';
+    ?.split(',')
+    .map((value) => value.trim())
+    .filter((value) => isIP(value));
+
+  return forwarded?.at(-1) ?? 'unknown';
 }
 
 function getRateLimitSecret(): string {

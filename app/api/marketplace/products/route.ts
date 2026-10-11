@@ -1,28 +1,124 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 
 export const runtime = 'nodejs';
 
+const MAX_QUERY_LENGTH = 80;
+const CATALOG_RATE_LIMIT = 120;
+const CATALOG_RATE_WINDOW_SECONDS = 60;
+const MAX_CATEGORY_LENGTH = 80;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SORT_MODES = ['featured', 'price_asc', 'price_desc', 'newest'] as const;
+type SortMode = (typeof SORT_MODES)[number];
+
+function normalizeSearchQuery(value: string): string {
+  // Keep user input out of the PostgREST filter grammar. Only letters,
+  // numbers, spaces, apostrophes and hyphens can reach the text filter.
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s'-]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function GET__unobserved(request: Request) {
   const url = new URL(request.url);
-  const q = url.searchParams.get('q')?.trim() ?? '';
-  const category = url.searchParams.get('category')?.trim() ?? '';
-  const sort = url.searchParams.get('sort') ?? 'featured';
+  const rawQuery = url.searchParams.get('q')?.trim() ?? '';
+  const rawCategory = url.searchParams.get('category')?.trim() ?? '';
+  const rawSort = url.searchParams.get('sort') ?? 'featured';
   const shopId = url.searchParams.get('shop')?.trim() ?? '';
 
+  if (rawQuery.length > MAX_QUERY_LENGTH) {
+    return NextResponse.json(
+      { error: 'A pesquisa excede o limite permitido.' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  if (rawCategory.length > MAX_CATEGORY_LENGTH) {
+    return NextResponse.json(
+      { error: 'A categoria selecionada não é válida.' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  if (!SORT_MODES.includes(rawSort as SortMode)) {
+    return NextResponse.json(
+      { error: 'A ordenação selecionada não é válida.' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  if (shopId && !UUID_PATTERN.test(shopId)) {
+    return NextResponse.json(
+      { error: 'A barbearia selecionada não é válida.' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  const q = normalizeSearchQuery(rawQuery);
+  if (rawQuery && !q) {
+    return NextResponse.json(
+      { error: 'A pesquisa não contém caracteres válidos.' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  let allowed: boolean;
+  try {
+    allowed = await consumePublicRateLimit(
+      request,
+      'marketplace-products',
+      'catalog',
+      CATALOG_RATE_LIMIT,
+      CATALOG_RATE_WINDOW_SECONDS,
+    );
+  } catch {
+    console.error('[MARKETPLACE_PRODUCTS_RATE_LIMIT]', 'unavailable');
+    return NextResponse.json(
+      { error: 'O marketplace está temporariamente indisponível.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Demasiadas pesquisas. Tenta novamente dentro de um minuto.' },
+      {
+        status: 429,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Retry-After': String(CATALOG_RATE_WINDOW_SECONDS),
+        },
+      },
+    );
+  }
+
+  const category = rawCategory || '';
+  const sort = rawSort as SortMode;
   const db = createAdminClient();
   let query = db
     .from('inventory_products')
     .select(
-      'id,barbershop_id,name,description,category,image_url,unit_price,compare_at_price,stock_quantity,marketplace_featured,barbershops(name,slug,is_public_in_directory,marketplace_sales_mode)',
+      'id,barbershop_id,name,description,category,image_url,unit_price,compare_at_price,stock_quantity,marketplace_featured,barbershops!inner(name,slug,is_public_in_directory,marketplace_sales_mode)',
     )
     .eq('active', true)
     .eq('marketplace_visible', true)
     .gt('stock_quantity', 0)
+    // Keep tenant visibility restrictions inside the database query, before
+    // service-role results are materialized in the application.
+    .eq('barbershops.is_public_in_directory', true)
+    .eq('barbershops.marketplace_sales_mode', 'physical_and_online')
     .limit(100);
 
-  if (q) query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+  if (q) {
+    // normalizeSearchQuery removes PostgREST grammar delimiters and
+    // wildcard characters before this OR filter is assembled.
+    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+  }
   if (category) query = query.eq('category', category);
   if (shopId) query = query.eq('barbershop_id', shopId);
 
@@ -39,19 +135,21 @@ async function GET__unobserved(request: Request) {
 
   const { data, error } = await query;
   if (error) {
-    console.error('[MARKETPLACE_PRODUCTS_API]', error);
+    console.error('[MARKETPLACE_PRODUCTS_API]', error.name ?? 'database_error');
     return NextResponse.json(
       { error: 'Não foi possível carregar o marketplace.' },
-      { status: 500 },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 
+  // Defense in depth: retain the public visibility check before constructing
+  // the response even though the same restrictions apply in the SQL query.
   const visible = (data ?? []).filter((item) => {
     const relation = Array.isArray(item.barbershops)
       ? item.barbershops[0]
       : item.barbershops;
     return (
-      relation?.is_public_in_directory !== false &&
+      relation?.is_public_in_directory === true &&
       relation?.marketplace_sales_mode === 'physical_and_online'
     );
   });
@@ -88,7 +186,10 @@ async function GET__unobserved(request: Request) {
     ).values(),
   ].sort((a, b) => a.name.localeCompare(b.name, 'pt-PT'));
 
-  return NextResponse.json({ products: visible, categories, shops });
+  return NextResponse.json(
+    { products: visible, categories, shops },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 }
 
 export const GET = withApiObservability(

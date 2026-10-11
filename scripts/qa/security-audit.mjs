@@ -83,6 +83,43 @@ for (const file of sourceFiles) {
   }
 }
 
+const routeSecurityChecks = [
+  {
+    file: 'app/api/stripe/subscription/route.ts',
+    markers: [
+      'sessionUserId !== user.id',
+      'expectedCustomerId !== sessionCustomerId',
+      'stripeSubscriptionCustomerId !== sessionCustomerId',
+      'previousCustomerId !== sessionCustomerId',
+    ],
+    label: 'Checkout Session ownership binding',
+  },
+  {
+    file: 'lib/security/public-rate-limit.ts',
+    markers: ['isIP(real)', 'filter((value) => isIP(value))', '.at(-1)'],
+    label: 'Spoof-resistant client IP rate limiting',
+  },
+  {
+    file: 'scripts/qa/env-check.mjs',
+    markers: [
+      "'RATE_LIMIT_SECRET'",
+      "name === 'RATE_LIMIT_SECRET' && value.length < 32",
+    ],
+    label: 'Rate limit secret environment validation',
+  },
+];
+
+for (const check of routeSecurityChecks) {
+  const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
+    encoding: 'utf8',
+  });
+  for (const marker of check.markers) {
+    if (!source.includes(marker)) {
+      findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
+    }
+  }
+}
+
 if (findings.length) {
   console.error('Static security audit failed:');
   for (const finding of findings) console.error(`- ${finding}`);

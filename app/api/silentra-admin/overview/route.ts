@@ -167,7 +167,10 @@ function describeAuditEvent(
     renewed: 'renovado',
     renewal: 'renovação',
   };
-  const rawWords = event.action.toLowerCase().replace(/[._-]+/g, ' ').trim();
+  const rawWords = event.action
+    .toLowerCase()
+    .replace(/[._-]+/g, ' ')
+    .trim();
   const fallback = rawWords
     ? rawWords
         .split(/\s+/)
