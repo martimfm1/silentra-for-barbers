@@ -1,10 +1,13 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 
 export const runtime = 'nodejs';
 
 const MAX_QUERY_LENGTH = 80;
+const CATALOG_RATE_LIMIT = 120;
+const CATALOG_RATE_WINDOW_SECONDS = 60;
 const MAX_CATEGORY_LENGTH = 80;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -61,6 +64,36 @@ async function GET__unobserved(request: Request) {
     return NextResponse.json(
       { error: 'A pesquisa não contém caracteres válidos.' },
       { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  let allowed: boolean;
+  try {
+    allowed = await consumePublicRateLimit(
+      request,
+      'marketplace-products',
+      'catalog',
+      CATALOG_RATE_LIMIT,
+      CATALOG_RATE_WINDOW_SECONDS,
+    );
+  } catch {
+    console.error('[MARKETPLACE_PRODUCTS_RATE_LIMIT]', 'unavailable');
+    return NextResponse.json(
+      { error: 'O marketplace está temporariamente indisponível.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Demasiadas pesquisas. Tenta novamente dentro de um minuto.' },
+      {
+        status: 429,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Retry-After': String(CATALOG_RATE_WINDOW_SECONDS),
+        },
+      },
     );
   }
 
