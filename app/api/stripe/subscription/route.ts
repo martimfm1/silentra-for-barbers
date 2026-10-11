@@ -66,11 +66,62 @@ async function GET__unobserved(request: Request) {
         checkoutSessionId,
         { expand: ['subscription'] },
       );
+      // Treat the browser-supplied session ID as an untrusted reference.
+      // Bind it to the authenticated user, tenant and persisted Stripe customer
+      // before allowing any billing state to be reconciled.
+      const sessionUserId =
+        session.metadata?.user_id?.trim() ||
+        session.metadata?.billing_owner_user_id?.trim() ||
+        null;
       const metadataBarbershopId =
-        session.metadata?.barbershop_id ?? session.client_reference_id ?? null;
-      if (metadataBarbershopId && metadataBarbershopId !== barbershopId) {
+        session.metadata?.barbershop_id?.trim() || null;
+      const sessionCustomerId =
+        typeof session.customer === 'string'
+          ? session.customer
+          : session.customer?.id ?? null;
+      const referenceId = session.client_reference_id;
+
+      if (
+        sessionUserId !== user.id ||
+        (metadataBarbershopId && metadataBarbershopId !== barbershopId) ||
+        !sessionCustomerId ||
+        (referenceId !== barbershopId && referenceId !== user.id)
+      ) {
         throw new BillingError(
-          'Checkout session does not belong to this barbershop.',
+          'Checkout session does not belong to this account.',
+          'SUBSCRIPTION_NOT_ACTIVE',
+        );
+      }
+
+      const [billingAccountResult, legacyCustomerResult] = await Promise.all([
+        database
+          .from('barbershop_billing_accounts')
+          .select('stripe_customer_id')
+          .eq('barbershop_id', barbershopId)
+          .maybeSingle(),
+        database
+          .from('customers')
+          .select('stripe_customer_id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+      ]);
+
+      if (billingAccountResult.error || legacyCustomerResult.error) {
+        throw new BillingError(
+          'Could not verify the Checkout customer mapping.',
+          'DB_READ_FAILED',
+        );
+      }
+
+      // Prefer the canonical tenant mapping. Fall back to the legacy user
+      // mapping only when no canonical Stripe customer has been linked yet.
+      const expectedCustomerId =
+        billingAccountResult.data?.stripe_customer_id ??
+        legacyCustomerResult.data?.stripe_customer_id ??
+        null;
+      if (!expectedCustomerId || expectedCustomerId !== sessionCustomerId) {
+        throw new BillingError(
+          'Checkout customer does not match this barbershop.',
           'SUBSCRIPTION_NOT_ACTIVE',
         );
       }
@@ -99,6 +150,17 @@ async function GET__unobserved(request: Request) {
           );
         }
 
+        const stripeSubscriptionCustomerId =
+          typeof stripeSubscription.customer === 'string'
+            ? stripeSubscription.customer
+            : stripeSubscription.customer.id;
+        if (stripeSubscriptionCustomerId !== sessionCustomerId) {
+          throw new BillingError(
+            'Checkout subscription does not match the verified customer.',
+            'SUBSCRIPTION_NOT_ACTIVE',
+          );
+        }
+
         const previousSubscriptionId =
           session.metadata?.previous_subscription_id;
         const isPlanChange = session.metadata?.is_plan_change === 'true';
@@ -119,6 +181,22 @@ async function GET__unobserved(request: Request) {
             const previous = await getStripeClient().subscriptions.retrieve(
               previousSubscriptionId,
             );
+            const previousCustomerId =
+              typeof previous.customer === 'string'
+                ? previous.customer
+                : previous.customer.id;
+            if (
+              previousCustomerId !== sessionCustomerId ||
+              (previous.metadata?.barbershop_id &&
+                previous.metadata.barbershop_id !== barbershopId) ||
+              (previous.metadata?.user_id &&
+                previous.metadata.user_id !== user.id)
+            ) {
+              throw new BillingError(
+                'The previous subscription does not belong to this billing account.',
+                'SUBSCRIPTION_NOT_ACTIVE',
+              );
+            }
             const cancellableStatuses = [
               'active',
               'trialing',
