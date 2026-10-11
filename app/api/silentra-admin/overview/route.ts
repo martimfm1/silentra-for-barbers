@@ -158,12 +158,10 @@ function describeAuditEvent(
     changed: 'alterado',
     mode: 'método',
     failed: 'falhou',
-    sent: 'enviado',
     customer: 'cliente',
     portal: 'portal',
     campaign: 'campanha',
     marketing: 'marketing',
-    created: 'criado',
     exported: 'exportado',
     export: 'exportação',
     renewed: 'renovado',
@@ -172,10 +170,10 @@ function describeAuditEvent(
   const rawWords = event.action.toLowerCase().replace(/[._-]+/g, ' ').trim();
   const fallback = rawWords
     ? rawWords
-        .split(/\\s+/)
+        .split(/\s+/)
         .map((word) => actionWords[word] ?? word)
         .join(' ')
-        .replace(/^\\w/, (first) => first.toLocaleUpperCase('pt-PT'))
+        .replace(/^\w/, (first) => first.toLocaleUpperCase('pt-PT'))
     : 'Atividade registada';
   return {
     label: AUDIT_ACTION_LABELS[event.action] ?? fallback,
