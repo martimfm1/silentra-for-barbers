@@ -56,7 +56,7 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
-    pattern: /\\/marketplace\\/products\\/route\\.ts$/,
+    pattern: /\/marketplace\/products\/route\.ts$/,
     markers: [
       'MAX_QUERY_LENGTH = 80',
       'UUID_PATTERN.test(shopId)',
