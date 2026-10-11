@@ -78,7 +78,7 @@ async function GET__unobserved(request: Request) {
       const sessionCustomerId =
         typeof session.customer === 'string'
           ? session.customer
-          : session.customer?.id ?? null;
+          : (session.customer?.id ?? null);
       const referenceId = session.client_reference_id;
 
       if (

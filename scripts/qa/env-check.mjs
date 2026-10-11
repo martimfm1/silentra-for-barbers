@@ -33,8 +33,7 @@ for (const name of required) {
   }
   if (placeholderPatterns.some((pattern) => pattern.test(value)))
     placeholders.push(name);
-  if (name === 'RATE_LIMIT_SECRET' && value.length < 32)
-    weakSecrets.push(name);
+  if (name === 'RATE_LIMIT_SECRET' && value.length < 32) weakSecrets.push(name);
 }
 
 for (const [name, value] of Object.entries(process.env)) {
