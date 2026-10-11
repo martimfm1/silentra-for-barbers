@@ -61,7 +61,9 @@ function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
         sizes={mobile ? '32px' : '36px'}
         className="object-cover"
         unoptimized
-        onError={() => setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)}
+        onError={() =>
+          setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)
+        }
       />
     </span>
   );
