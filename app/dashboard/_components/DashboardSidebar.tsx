@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BarChart3,
   Megaphone,
@@ -30,6 +30,7 @@ import type { FeatureKey } from '@/lib/billing/plan-features';
 import { BarberIcon } from '@/components/BarberIcon';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { DEFAULT_BARBERSHOP_AVATAR } from '@/lib/barbershops/default-media';
 
 interface SidebarItem {
   href: string;
@@ -41,6 +42,12 @@ interface SidebarItem {
 type BrandAvatarProps = { mobile?: boolean; avatarUrl: string | null };
 
 function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarUrl]);
+
   return (
     <span
       className={cn(
@@ -48,21 +55,15 @@ function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
         mobile ? 'size-8' : 'size-9',
       )}
     >
-      {avatarUrl ? (
-        <Image
-          src={avatarUrl}
-          alt="Avatar da barbearia"
-          fill
-          sizes={mobile ? '32px' : '36px'}
-          className="object-cover"
-          unoptimized
-        />
-      ) : (
-        <BarberIcon
-          className={cn(mobile ? 'size-4' : 'size-5')}
-          aria-hidden="true"
-        />
-      )}
+      <Image
+        src={avatarUrl && !imageError ? avatarUrl : DEFAULT_BARBERSHOP_AVATAR}
+        alt="Avatar da barbearia"
+        fill
+        sizes={mobile ? '32px' : '36px'}
+        className="object-cover"
+        unoptimized
+        onError={() => setImageError(true)}
+      />
     </span>
   );
 }
