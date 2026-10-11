@@ -99,6 +99,14 @@ const routeSecurityChecks = [
     markers: ['isIP(real)', 'filter((value) => isIP(value))', '.at(-1)'],
     label: 'Spoof-resistant client IP rate limiting',
   },
+  {
+    file: 'scripts/qa/env-check.mjs',
+    markers: [
+      "'RATE_LIMIT_SECRET'",
+      "name === 'RATE_LIMIT_SECRET' && value.length < 32",
+    ],
+    label: 'Rate limit secret environment validation',
+  },
 ];
 
 for (const check of routeSecurityChecks) {
