@@ -12,12 +12,11 @@ const SORT_MODES = ['featured', 'price_asc', 'price_desc', 'newest'] as const;
 type SortMode = (typeof SORT_MODES)[number];
 
 function normalizeSearchQuery(value: string): string {
-  // Keep search terms out of the PostgREST filter grammar. Unsupported
-  // punctuation is treated as whitespace; wildcard characters are escaped.
+  // Keep user input out of the PostgREST filter grammar. Only letters,
+  // numbers, spaces, apostrophes and hyphens can reach the text filter.
   return value
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
-    .replace(/[^\p{L}\p{N}\s.'_-]/gu, ' ')
-    .replace(/[\\%_]/g, '\\$&')
+    .replace(/[^\p{L}\p{N}\s'-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
