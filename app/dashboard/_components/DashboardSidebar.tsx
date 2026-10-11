@@ -27,7 +27,6 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import type { FeatureKey } from '@/lib/billing/plan-features';
-import { BarberIcon } from '@/components/BarberIcon';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { DEFAULT_BARBERSHOP_AVATAR } from '@/lib/barbershops/default-media';
