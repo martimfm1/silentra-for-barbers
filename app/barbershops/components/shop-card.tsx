@@ -5,6 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { MapPin, Clock, Star, Scissors, ArrowRight, Eye } from 'lucide-react';
 import type { ShopCardProps } from '@/types/marketplace/components';
 import type { BarbershopPublicDetails } from '@/app/barbershops/[slug]/services/public-barbershop.service';
+import { DEFAULT_BARBERSHOP_AVATAR, DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(
   /\/$/,
@@ -96,6 +97,10 @@ export const ShopCard: React.FC<ShopCardProps> = ({
         : null,
     [shop, barbershopId],
   );
+  const displayedAvatarUrl =
+    avatarError || !avatarUrl ? DEFAULT_BARBERSHOP_AVATAR : avatarUrl;
+  const displayedBannerUrl =
+    bannerError || !bannerUrl ? DEFAULT_BARBERSHOP_BANNER : bannerUrl;
 
   if (!shop)
     return (
@@ -114,40 +119,33 @@ export const ShopCard: React.FC<ShopCardProps> = ({
         aria-label={`Ver detalhes de ${shop.name}`}
       >
         <div className="relative h-32 w-full overflow-hidden border-b border-white/10 bg-zinc-900 sm:h-36">
-          {bannerUrl && !bannerError ? (
-            <Image
-              src={bannerUrl}
-              alt={`Banner ${shop.name || ''}`}
-              fill
-              sizes="(max-width: 767px) 100vw, 50vw"
-              quality={60}
-              unoptimized
-              loading="lazy"
-              onError={() => setBannerError(true)}
-              className="object-cover opacity-50 transition-transform duration-500 sm:group-hover:scale-105"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900" />
-          )}
+          <Image
+            src={displayedBannerUrl}
+            alt={`Banner ${shop.name || ''}`}
+            fill
+            sizes="(max-width: 767px) 100vw, 50vw"
+            quality={60}
+            unoptimized
+            loading="lazy"
+            onError={() => setBannerError(true)}
+            className="object-cover opacity-50 transition-transform duration-500 sm:group-hover:scale-105"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
         </div>
         <div className="relative px-4 pb-4 sm:p-5 sm:pt-0">
           <div className="-mt-7 mb-3 flex items-end justify-between gap-2">
             <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-900 text-zinc-300 shadow-xl sm:h-15 sm:w-15">
-              {avatarUrl && !avatarError ? (
-                <Image
-                  src={avatarUrl}
-                  alt={shop.name || 'Barbearia'}
-                  fill
-                  sizes="60px"
-                  quality={65}
-                  loading="lazy"
-                  onError={() => setAvatarError(true)}
-                  className="object-cover"
-                />
-              ) : (
-                <Scissors className="h-6 w-6 text-zinc-500" />
-              )}
+              <Image
+                src={displayedAvatarUrl}
+                alt={`Logótipo de ${shop.name || 'barbearia'}`}
+                fill
+                sizes="60px"
+                quality={65}
+                unoptimized
+                loading="lazy"
+                onError={() => setAvatarError(true)}
+                className="object-cover"
+              />
             </div>
             <div className="flex min-h-9 shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-zinc-950/90 px-2.5 py-1 text-xs font-semibold shadow-sm">
               <Star
