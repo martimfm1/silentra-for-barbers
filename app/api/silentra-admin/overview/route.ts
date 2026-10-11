@@ -37,13 +37,20 @@ type AuditEvent = {
 const AUDIT_ACTION_LABELS: Record<string, string> = {
   'platform.plan_assignment.updated': 'Plano da barbearia atualizado',
   'platform.plan_assignment.cleared': 'Atribuição manual de plano removida',
-  PAYMENT_LINK_SENT: 'Link de pagamento enviado',
+  PAYMENT_MODE_CHANGED: 'Método de pagamento da plataforma alterado',
+  PAYMENT_LINK_SENT: 'Link de pagamento enviado ao cliente',
   PAYMENT_CONFIRMED: 'Pagamento confirmado',
   SUBSCRIPTION_ACTIVATED: 'Subscrição ativada',
+  SUBSCRIPTION_EXPIRED: 'Subscrição expirada',
   MANUAL_SUBSCRIPTION_CANCELLATION_REQUESTED:
     'Cancelamento de subscrição solicitado',
+  customer_portal_cancel: 'Cliente cancelou uma marcação',
+  manual_email_sent: 'Email enviado manualmente a um cliente',
   loyalty_redemption_validated: 'Recompensa de fidelização validada',
   'professional.created': 'Profissional adicionado à barbearia',
+  'appointment.created': 'Marcação criada',
+  'appointment.cancelled': 'Marcação cancelada',
+  'appointment.completed': 'Marcação concluída',
 };
 
 const AUDIT_ENTITY_LABELS: Record<string, string> = {
@@ -52,6 +59,12 @@ const AUDIT_ENTITY_LABELS: Record<string, string> = {
   subscription_request: 'Pedido de subscrição',
   loyalty_redemption: 'Recompensa de fidelização',
   professional: 'Profissional',
+  platform_settings: 'Definições da plataforma',
+  user: 'Utilizador',
+  client: 'Cliente',
+  appointment: 'Marcação',
+  payment: 'Pagamento',
+  marketing_campaign: 'Campanha de marketing',
 };
 
 function describeAuditEvent(
@@ -112,9 +125,57 @@ function describeAuditEvent(
       // Ignore unknown currency metadata rather than displaying raw provider data.
     }
   }
-  const rawAction = event.action.replace(/[._-]+/g, ' ').trim();
-  const fallback = rawAction
-    ? rawAction.charAt(0).toUpperCase() + rawAction.slice(1)
+  const actionWords: Record<string, string> = {
+    platform: 'plataforma',
+    plan: 'plano',
+    assignment: 'atribuição',
+    updated: 'atualizado',
+    update: 'atualizar',
+    created: 'criado',
+    create: 'criar',
+    deleted: 'removido',
+    delete: 'remover',
+    cleared: 'removido',
+    sent: 'enviado',
+    send: 'enviar',
+    confirmed: 'confirmado',
+    rejected: 'rejeitado',
+    cancelled: 'cancelado',
+    canceled: 'cancelado',
+    completed: 'concluído',
+    expired: 'expirada',
+    payment: 'pagamento',
+    subscription: 'subscrição',
+    request: 'pedido',
+    user: 'utilizador',
+    barbershop: 'barbearia',
+    professional: 'profissional',
+    appointment: 'marcação',
+    loyalty: 'fidelização',
+    redemption: 'resgate',
+    manual: 'manual',
+    email: 'email',
+    changed: 'alterado',
+    mode: 'método',
+    failed: 'falhou',
+    sent: 'enviado',
+    customer: 'cliente',
+    portal: 'portal',
+    campaign: 'campanha',
+    marketing: 'marketing',
+    created: 'criado',
+    exported: 'exportado',
+    export: 'exportação',
+    renewed: 'renovado',
+    renewal: 'renovação',
+  };
+  const rawWords = event.action.toLowerCase().replace(/[._-]+/g, ' ').trim();
+  const fallback = rawWords
+    ? rawWords
+        .split(/\\s+/)
+        .map((word) => actionWords[word] ?? word)
+        .join(' ')
+        .replace(/^\\w/, (first) => first.toLocaleUpperCase('pt-PT'))
     : 'Atividade registada';
   return {
     label: AUDIT_ACTION_LABELS[event.action] ?? fallback,
