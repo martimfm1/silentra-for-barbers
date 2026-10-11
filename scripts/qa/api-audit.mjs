@@ -59,6 +59,10 @@ const routeSecurityChecks = [
     pattern: /\/marketplace\/products\/route\.ts$/,
     markers: [
       'MAX_QUERY_LENGTH = 80',
+      'consumePublicRateLimit',
+      "'marketplace-products'",
+      'CATALOG_RATE_LIMIT = 120',
+      'status: 429',
       'UUID_PATTERN.test(shopId)',
       'normalizeSearchQuery(rawQuery)',
       'if (!SORT_MODES.includes(rawSort as SortMode))',
