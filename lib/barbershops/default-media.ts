@@ -3,5 +3,7 @@
  * These are presentation fallbacks only; uploaded URLs and storage objects
  * remain untouched.
  */
-export const DEFAULT_BARBERSHOP_AVATAR = '/images/default-barbershop-avatar.svg';
-export const DEFAULT_BARBERSHOP_BANNER = '/images/default-barbershop-banner.svg';
+export const DEFAULT_BARBERSHOP_AVATAR =
+  '/images/default-barbershop-avatar.svg';
+export const DEFAULT_BARBERSHOP_BANNER =
+  '/images/default-barbershop-banner.svg';
