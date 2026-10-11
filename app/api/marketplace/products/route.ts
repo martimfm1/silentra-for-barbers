@@ -117,9 +117,7 @@ async function GET__unobserved(request: Request) {
   if (q) {
     // normalizeSearchQuery removes PostgREST grammar delimiters and escapes
     // LIKE wildcards before this OR filter is assembled.
-    query = query.or(
-      `name.ilike.%${q}%,description.ilike.%${q}%`,
-    );
+    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
   }
   if (category) query = query.eq('category', category);
   if (shopId) query = query.eq('barbershop_id', shopId);
