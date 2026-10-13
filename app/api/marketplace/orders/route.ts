@@ -212,12 +212,20 @@ async function POST__unobserved(request: Request) {
     });
 
     if (error || !data) {
-      const message = error?.message ?? 'Não foi possível criar a encomenda.';
+      const databaseMessage = error?.message ?? '';
+      const stockConflict = /stock|unavailable/i.test(databaseMessage);
+
+      console.error('[MARKETPLACE_ORDER_CREATE_FAILED]', {
+        shopId,
+        code: error?.code ?? 'NO_ORDER_RETURNED',
+        reason: stockConflict ? 'stock_conflict' : 'order_creation_rejected',
+      });
+
       return NextResponse.json(
         {
-          error: /stock|unavailable/i.test(message)
+          error: stockConflict
             ? 'Um dos produtos deixou de ter stock suficiente. Atualiza o carrinho e tenta novamente.'
-            : message,
+            : 'Não foi possível criar a encomenda. Confirma os dados e tenta novamente.',
         },
         { status: 409 },
       );
