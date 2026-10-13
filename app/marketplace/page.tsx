@@ -142,6 +142,11 @@ export default function MarketplacePage() {
   }
 
   useEffect(() => {
+    const initialShop = new URLSearchParams(window.location.search).get('shop');
+    if (initialShop) setShopId(initialShop);
+  }, []);
+
+  useEffect(() => {
     try {
       const stored = window.sessionStorage.getItem('silentra-marketplace-cart');
       if (stored) {
