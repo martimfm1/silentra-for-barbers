@@ -1,0 +1,52 @@
+name: one-time marketplace manual email formatter
+
+on:
+  push:
+    branches:
+      - feat/marketplace-order-tracking-production
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-remove-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/marketplace-order-tracking-production
+          persist-credentials: true
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format final files
+        id: format
+        continue-on-error: true
+        run: |
+          pnpm exec prettier --write \
+            app/api/marketplace/orders/\[orderId\]/email/route.ts \
+            scripts/qa/product-contracts.mjs \
+            docs/marketplace-qa-checklist.md
+      - name: Push format result and remove workflow
+        env:
+          FORMAT_OUTCOME: ${{ steps.format.outcome }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/format-marketplace-manual-email-once.yml
+          git add \
+            app/api/marketplace/orders/\[orderId\]/email/route.ts \
+            scripts/qa/product-contracts.mjs \
+            docs/marketplace-qa-checklist.md
+          git commit -m "chore(format): format seller tracking email changes"
+          git push origin HEAD:feat/marketplace-order-tracking-production
+          test "$FORMAT_OUTCOME" = "success"
