@@ -9,6 +9,29 @@ revoke all on function public.create_professional_with_quota(uuid, uuid, text, n
 grant execute on function public.create_professional_with_quota(uuid, uuid, text, numeric, boolean)
   to service_role;
 
+-- These count/limit helpers are called by trusted server routes or other
+-- SECURITY DEFINER functions. Client roles must not query arbitrary tenants'
+-- seat counts or plan limits directly.
+revoke all on function public.get_effective_professional_count(uuid)
+  from public, anon, authenticated;
+grant execute on function public.get_effective_professional_count(uuid)
+  to service_role;
+
+revoke all on function public.get_effective_team_limit(uuid)
+  from public, anon, authenticated;
+grant execute on function public.get_effective_team_limit(uuid)
+  to service_role;
+
+revoke all on function public.get_effective_team_member_count(uuid)
+  from public, anon, authenticated;
+grant execute on function public.get_effective_team_member_count(uuid)
+  to service_role;
+
+revoke all on function public.get_effective_team_seat_count(uuid)
+  from public, anon, authenticated;
+grant execute on function public.get_effective_team_seat_count(uuid)
+  to service_role;
+
 -- These functions are only invoked by database triggers/event triggers. They
 -- must not be callable as standalone PostgREST RPCs by client roles.
 revoke all on function public.ensure_shop_slug() from public, anon, authenticated;
