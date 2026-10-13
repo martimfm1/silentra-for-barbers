@@ -115,6 +115,17 @@ const routeSecurityChecks = [
     ],
     label: 'Public rate-limit RPC service-role permission',
   },
+  {
+    file: 'supabase/migrations/20261013020000_harden_public_security_definer_privileges.sql',
+    markers: [
+      'revoke all on function public.create_professional_with_quota',
+      'from public, anon, authenticated;',
+      'alter function public.create_professional_with_quota',
+      'set search_path = public;',
+      'Intentional public review-submission RPC',
+    ],
+    label: 'Public SECURITY DEFINER RPC privilege hardening',
+  },
 ];
 
 for (const check of routeSecurityChecks) {
