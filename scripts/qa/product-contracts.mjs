@@ -201,7 +201,16 @@ const checks = [
       source.includes('createMarketplaceTrackingToken()') &&
       source.includes('hashMarketplaceTrackingToken(') &&
       source.includes("from('marketplace_order_tracking_tokens')") &&
-      source.includes('buildMarketplaceTrackingUrl'),
+      source.includes('buildMarketplaceTrackingUrl') &&
+      source.includes('contactPixelTrackingConsent: false'),
+  },
+  {
+    name: 'Brevo passes per-recipient consent without making tracking mandatory',
+    file: 'lib/email/brevo.ts',
+    test: (source) =>
+      source.includes('contactPixelTrackingConsent?: boolean;') &&
+      source.includes('contactPixelTrackingConsent:') &&
+      source.includes('input.contactPixelTrackingConsent'),
   },
   {
     name: 'Customer tracking API resolves revocable tokens and returns status history',
@@ -223,6 +232,7 @@ const checks = [
       source.includes("from('marketplace_order_tracking_tokens')") &&
       source.includes('buildMarketplaceTrackingUrl(token)') &&
       source.includes('Acompanhar encomenda') &&
+      source.includes('contactPixelTrackingConsent: false') &&
       source.includes("completed: 'A sua encomenda foi concluída'"),
   },
   {
