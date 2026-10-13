@@ -85,6 +85,7 @@ export default function MarketplacePage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState<boolean | null>(null);
   const [customer, setCustomer] = useState<CheckoutForm>(EMPTY_CHECKOUT);
   const [saving, setSaving] = useState(false);
@@ -235,6 +236,7 @@ export default function MarketplacePage() {
       if (!response.ok)
         throw new Error(json.error || 'Não foi possível criar a encomenda.');
       setSubmitted(json.order.id);
+      setTrackingToken(typeof json.trackingToken === 'string' ? json.trackingToken : null);
       setEmailSent(json.emailSent ?? null);
       setCart([]);
       setCustomer(EMPTY_CHECKOUT);
@@ -436,10 +438,15 @@ export default function MarketplacePage() {
                   ? 'Não conseguimos enviar o email de confirmação, mas a encomenda ficou registada.'
                   : 'Enviámos o comprovativo para o teu email.'}
               </p>
+              {trackingToken && (
+                <a href={'/marketplace/track#token=' + encodeURIComponent(trackingToken)} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/15">
+                  Acompanhar encomenda <ArrowRight className="size-4" />
+                </a>
+              )}
             </div>
             <button
               type="button"
-              onClick={() => setSubmitted(null)}
+              onClick={() => { setSubmitted(null); setTrackingToken(null); }}
               className="ml-auto shrink-0 text-zinc-600 hover:text-white"
               aria-label="Fechar confirmação"
             >
