@@ -331,7 +331,11 @@ export default function MarketplaceOrderTrackingClient() {
   }, [token, loadOrder]);
 
   const steps =
-    order?.fulfillmentMethod === 'delivery' ? DELIVERY_STEPS : PICKUP_STEPS;
+    order?.fulfillmentMethod === 'delivery' ||
+    order?.status === 'shipped' ||
+    order?.status === 'delivered'
+      ? DELIVERY_STEPS
+      : PICKUP_STEPS;
   const activeStep = order ? steps.indexOf(order.status) : -1;
   const cancelled = order?.status === 'cancelled';
 
