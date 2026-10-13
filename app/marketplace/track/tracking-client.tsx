@@ -1,5 +1,11 @@
 'use client';
 
+declare global {
+  interface Window {
+    __SILENTRA_MARKETPLACE_TRACKING_TOKEN__?: string;
+  }
+}
+
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -289,14 +295,26 @@ export default function MarketplaceOrderTrackingClient() {
     // Keep the first fragment in a ref so that replay after URL scrubbing does
     // not incorrectly conclude that the customer opened a bare tracking page.
     if (!fragmentProcessedRef.current) {
-      initialTokenRef.current = new URLSearchParams(
+      const fragmentToken = new URLSearchParams(
         window.location.hash.slice(1),
       ).get('token');
+      initialTokenRef.current =
+        fragmentToken ??
+        window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__ ??
+        null;
+
+      // Consume the early bootstrap value immediately so no other client code
+      // can accidentally reuse or retain this capability.
+      delete window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__;
       fragmentProcessedRef.current = true;
 
-      // Remove the bearer credential from the address bar/history before making
-      // any network request. The fragment is never sent with the document request.
-      window.history.replaceState(null, '', window.location.pathname);
+      // Defence in depth: the root bootstrap normally scrubs this before GTM,
+      // Whop Pixel and hydration; repeat the operation before any API call.
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + window.location.search,
+      );
     }
 
     const tokenFromFragment = initialTokenRef.current;
