@@ -184,20 +184,67 @@ async function GET__unobserved(request: Request) {
     );
   }
 
+  let catalog = visible;
+
   if (sort === 'featured') {
-    visible.sort(
-      (a, b) =>
-        Number(b.marketplace_featured) - Number(a.marketplace_featured) ||
-        Date.parse(b.updated_at ?? '') - Date.parse(a.updated_at ?? ''),
-    );
+    // Query active boosts separately so a popular product can be promoted even
+    // when its updated_at would otherwise put it outside the first 100 results.
+    // Expired boosts are excluded in SQL; legacy boolean flags cannot keep an
+    // expired listing permanently above unfeatured products.
+    let featuredQuery = db
+      .from('inventory_products')
+      .select(
+        'id,barbershop_id,name,description,category,image_url,unit_price,compare_at_price,stock_quantity,marketplace_featured,marketplace_published_at,marketplace_featured_until,created_at,updated_at,barbershops!inner(name,slug,is_public_in_directory,marketplace_sales_mode)',
+      )
+      .eq('active', true)
+      .eq('marketplace_visible', true)
+      .eq('marketplace_featured', true)
+      .gt('marketplace_featured_until', new Date().toISOString())
+      .gt('stock_quantity', 0)
+      .eq('barbershops.is_public_in_directory', true)
+      .eq('barbershops.marketplace_sales_mode', 'physical_and_online');
+
+    if (q) featuredQuery = featuredQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+    if (category) featuredQuery = featuredQuery.eq('category', category);
+    if (shopId) featuredQuery = featuredQuery.eq('barbershop_id', shopId);
+
+    const { data: featuredData, error: featuredError } = await featuredQuery
+      .order('marketplace_featured_until', { ascending: false })
+      .order('updated_at', { ascending: false })
+      .limit(100);
+
+    if (featuredError) {
+      console.error('[MARKETPLACE_FEATURED_PRODUCTS_API]', featuredError.name ?? 'database_error');
+      return NextResponse.json(
+        { error: 'Não foi possível carregar os produtos em destaque.' },
+        { status: 500, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    const activeFeatured = (featuredData ?? [])
+      .filter((item) => {
+        const relation = Array.isArray(item.barbershops)
+          ? item.barbershops[0]
+          : item.barbershops;
+        return (
+          relation?.is_public_in_directory === true &&
+          relation?.marketplace_sales_mode === 'physical_and_online'
+        );
+      })
+      .map((item) => ({ ...item, marketplace_featured: true }));
+    const featuredIds = new Set(activeFeatured.map((item) => item.id));
+    catalog = [
+      ...activeFeatured,
+      ...visible.filter((item) => !featuredIds.has(item.id)),
+    ].slice(0, 100);
   }
 
   const categories = [
-    ...new Set(visible.map((item) => item.category).filter(Boolean)),
+    ...new Set(catalog.map((item) => item.category).filter(Boolean)),
   ].sort();
   const shops = [
     ...new Map(
-      visible
+      catalog
         .map((item) => {
           const relation = Array.isArray(item.barbershops)
             ? item.barbershops[0]
@@ -225,7 +272,7 @@ async function GET__unobserved(request: Request) {
   ].sort((a, b) => a.name.localeCompare(b.name, 'pt-PT'));
 
   return NextResponse.json(
-    { products: visible, categories, shops },
+    { products: catalog, categories, shops },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
