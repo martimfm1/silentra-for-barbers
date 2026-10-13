@@ -80,19 +80,29 @@ async function notifyCustomer(
   const subject =
     subjectByStatus[order.status] || 'Atualização da sua encomenda';
 
-  const result = await sendBrevoEmail({
-    to: order.customer_email,
-    toName: order.customer_name,
-    subject: `${subject} · ${shopName}`,
-    senderName: shopName,
-    htmlContent: `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">Olá ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div><p style="margin:20px 0 0;font-size:12px;color:#71717a">Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.</p></div></div></body></html>`,
-  });
+  try {
+    const result = await sendBrevoEmail({
+      to: order.customer_email,
+      toName: order.customer_name,
+      subject: `${subject} · ${shopName}`,
+      senderName: shopName,
+      htmlContent: `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">Olá ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div><p style="margin:20px 0 0;font-size:12px;color:#71717a">Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.</p></div></div></body></html>`,
+    });
 
-  if (!result.success) {
+    if (!result.success) {
+      console.error('[MARKETPLACE_STATUS_EMAIL_FAILED]', {
+        orderId: order.id,
+        status: order.status,
+        reason: 'provider_rejected',
+      });
+    }
+  } catch {
+    // The status transition is already committed; an email outage must not
+    // make the API report that the order update itself failed.
     console.error('[MARKETPLACE_STATUS_EMAIL_FAILED]', {
       orderId: order.id,
       status: order.status,
-      error: result.error,
+      reason: 'provider_unavailable',
     });
   }
 }
