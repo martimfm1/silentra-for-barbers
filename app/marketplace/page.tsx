@@ -154,7 +154,11 @@ export default function MarketplacePage() {
         if (Array.isArray(parsed)) setCart(parsed.filter(isStoredCartItem));
       }
     } catch {
-      window.sessionStorage.removeItem('silentra-marketplace-cart');
+      try {
+        window.sessionStorage.removeItem('silentra-marketplace-cart');
+      } catch {
+        // Storage can be disabled by browser privacy settings.
+      }
     } finally {
       setCartRestored(true);
     }
