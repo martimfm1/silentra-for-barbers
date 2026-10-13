@@ -8,6 +8,10 @@ const required = [
   'RATE_LIMIT_SECRET',
 ];
 
+const configuredAppUrl =
+  process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+  process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
 const publicOnly = new Set([
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -24,6 +28,20 @@ const missing = [];
 const placeholders = [];
 const unsafePublicSecrets = [];
 const weakSecrets = [];
+const invalidAppUrls = [];
+
+if (!configuredAppUrl) {
+  missing.push('NEXT_PUBLIC_APP_URL or NEXT_PUBLIC_SITE_URL');
+} else {
+  try {
+    const appUrl = new URL(configuredAppUrl);
+    if (appUrl.protocol !== 'https:' || appUrl.username || appUrl.password) {
+      invalidAppUrls.push('NEXT_PUBLIC_APP_URL/NEXT_PUBLIC_SITE_URL');
+    }
+  } catch {
+    invalidAppUrls.push('NEXT_PUBLIC_APP_URL/NEXT_PUBLIC_SITE_URL');
+  }
+}
 
 for (const name of required) {
   const value = process.env[name]?.trim();
@@ -50,7 +68,8 @@ if (
   missing.length ||
   placeholders.length ||
   unsafePublicSecrets.length ||
-  weakSecrets.length
+  weakSecrets.length ||
+  invalidAppUrls.length
 ) {
   console.error('Production environment validation failed.');
   if (missing.length) console.error(`Missing: ${missing.join(', ')}`);
@@ -64,6 +83,10 @@ if (
   if (unsafePublicSecrets.length)
     console.error(
       `Potential public secrets: ${unsafePublicSecrets.join(', ')}`,
+    );
+  if (invalidAppUrls.length)
+    console.error(
+      `Invalid canonical application URL (HTTPS required): ${invalidAppUrls.join(', ')}`,
     );
   process.exit(1);
 }
