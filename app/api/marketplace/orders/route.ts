@@ -245,19 +245,21 @@ async function POST__unobserved(request: Request) {
 
     const order = Array.isArray(data) ? data[0] : data;
     const candidateTrackingToken = randomBytes(32).toString('hex');
-    const { error: trackingError } = await db
+    const { data: trackingRow, error: trackingError } = await db
       .from('marketplace_orders')
       .update({ tracking_token_hash: hashTrackingToken(candidateTrackingToken) })
       .eq('id', order.id)
-      .eq('barbershop_id', shopId);
+      .eq('barbershop_id', shopId)
+      .select('id')
+      .maybeSingle();
 
     // The order is already committed. A tracking-token failure must not make
     // checkout look unsuccessful and encourage the customer to place it again.
-    const trackingToken = trackingError ? null : candidateTrackingToken;
+    const trackingToken = trackingError || !trackingRow ? null : candidateTrackingToken;
     if (trackingError) {
       console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', {
         orderId: order.id,
-        code: trackingError.code ?? 'UNKNOWN',
+        code: trackingError?.code ?? 'NO_ORDER_UPDATED',
       });
     }
     const configuredAppUrl =
@@ -343,9 +345,26 @@ async function POST__unobserved(request: Request) {
       });
     }
 
-    return NextResponse.json({ order: { id: order.id, status: order.status, total: order.total, created_at: order.created_at }, trackingToken, emailSent }, { status: 201 });
+    return NextResponse.json(
+      {
+        order: {
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          created_at: order.created_at,
+        },
+        trackingToken: trackingToken ?? undefined,
+        emailSent,
+      },
+      {
+        status: 201,
+        headers: { 'Cache-Control': 'no-store, private' },
+      },
+    );
   } catch (error) {
-    console.error('[MARKETPLACE_ORDER_API]', error);
+    console.error('[MARKETPLACE_ORDER_API_FAILED]', {
+      reason: error instanceof Error ? error.name : 'UNKNOWN',
+    });
     return NextResponse.json(
       { error: 'Não foi possível concluir a encomenda.' },
       { status: 500 },
