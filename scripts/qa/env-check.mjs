@@ -16,6 +16,8 @@ const required = [
 const configuredAppUrl =
   process.env.NEXT_PUBLIC_APP_URL?.trim() ||
   process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const configuredEmailSender =
+  process.env.SENDER_EMAIL?.trim() || process.env.BREVO_FROM_EMAIL?.trim();
 
 const publicOnly = new Set([
   'NEXT_PUBLIC_SUPABASE_URL',
@@ -37,7 +39,11 @@ const invalidAppUrls = [];
 
 if (!configuredAppUrl) {
   missing.push('NEXT_PUBLIC_APP_URL or NEXT_PUBLIC_SITE_URL');
-} else {
+}
+if (!configuredEmailSender) {
+  missing.push('SENDER_EMAIL or BREVO_FROM_EMAIL');
+}
+if (configuredAppUrl) {
   try {
     const appUrl = new URL(configuredAppUrl);
     if (appUrl.protocol !== 'https:' || appUrl.username || appUrl.password) {
