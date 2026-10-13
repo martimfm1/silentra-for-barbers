@@ -7,6 +7,7 @@ This checklist must be completed before enabling customer traffic on a release.
 - [ ] CI on the exact release commit is green: typecheck, lint, API/security/product QA, dependency audit, format check, production build and smoke QA.
 - [ ] Review the PR diff and confirm no secrets, customer data or production credentials were committed.
 - [ ] Confirm Vercel is deploying the intended commit and production domain.
+- [ ] Review Supabase Security and Performance Advisors. Classify intentional service-role-only tables without client policies separately from genuine access-control defects; review exposed `SECURITY DEFINER` RPCs before release.
 
 ## 2. Environment
 
@@ -23,8 +24,11 @@ Apply pending migrations in chronological order using the project's normal migra
 - `20260813190000_public_booking_rate_limit.sql`
 - `20261013000000_marketplace_order_tracking_tokens.sql`
 - `20261013010000_grant_public_rate_limit_service_role.sql`
+- `20261013020000_harden_public_security_definer_privileges.sql`
 
 The tracking-token migration stores only the SHA-256 hash of the random tracking capability. The rate-limit grant is required for the service-role client to invoke the protected database function after public execution was revoked.
+
+The security hardening migration also removes anonymous execution from a legacy professional-creation RPC and trigger-only functions, and pins search paths for functions flagged by the production advisor. Public review submission remains intentionally public and performs its own validation.
 
 Do not mark this step complete based only on files existing in GitHub; confirm the migration history and SQL execution in the target Supabase project.
 
