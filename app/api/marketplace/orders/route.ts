@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -19,6 +20,10 @@ type NormalizedOrderItem = {
   productId: string;
   quantity: number;
 };
+
+function hashTrackingToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -46,6 +51,7 @@ function buildOrderReceiptEmail(input: {
   shippingCity?: string | null;
   shippingPostalCode?: string | null;
   items: Array<{ product_name: string; quantity: number; total: number }>;
+  trackingUrl?: string;
 }) {
   const fulfillmentLabel =
     input.fulfillmentMethod === 'delivery'
@@ -62,7 +68,7 @@ function buildOrderReceiptEmail(input: {
       ? `<div style="margin-top:20px;padding:16px;border:1px solid #27272a;border-radius:14px;background:#18181b;"><div style="font-size:12px;font-weight:700;color:#a1a1aa;text-transform:uppercase;letter-spacing:.08em;">Entrega</div><div style="margin-top:8px;color:#f4f4f5;line-height:1.6;">${escapeHtml(input.shippingAddress ?? '')}<br>${escapeHtml(input.shippingPostalCode ?? '')} ${escapeHtml(input.shippingCity ?? '')}</div><div style="margin-top:8px;font-size:12px;color:#a1a1aa;">O envio é tratado diretamente pela barbearia.</div></div>`
       : `<div style="margin-top:20px;padding:16px;border:1px solid #27272a;border-radius:14px;background:#18181b;"><div style="font-size:12px;font-weight:700;color:#a1a1aa;text-transform:uppercase;letter-spacing:.08em;">Levantamento</div><div style="margin-top:8px;color:#f4f4f5;">A ${escapeHtml(input.shopName)} vai contactar-te quando a encomenda estiver pronta.</div></div>`;
 
-  return `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5;"><div style="max-width:620px;margin:0 auto;padding:40px 20px;"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px;"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399;">SILENTRA · COMPROVATIVO</div><h1 style="margin:10px 0 0;font-size:28px;line-height:1.15;color:#fff;">Encomenda recebida</h1><p style="margin:14px 0 0;color:#a1a1aa;line-height:1.6;">Olá ${escapeHtml(input.customerName)}, recebemos a tua encomenda na <strong style="color:#e4e4e7;">${escapeHtml(input.shopName)}</strong>.</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;"><div style="font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Pedido</div><div style="margin-top:5px;font-family:monospace;color:#fff;">${escapeHtml(input.orderId)}</div><div style="margin-top:12px;font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Forma</div><div style="margin-top:5px;color:#fff;">${fulfillmentLabel}</div></div><table style="width:100%;margin-top:24px;border-collapse:collapse;"><tbody>${itemsHtml}</tbody></table><div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #27272a;font-size:18px;"><span style="color:#a1a1aa;">Total</span><strong style="color:#fff;">${formatMoney(input.total)}</strong></div>${shippingHtml}<p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#71717a;">Este email é um comprovativo da encomenda, não uma fatura. Qualquer questão sobre pagamento, entrega ou devolução deve ser tratada diretamente com a barbearia.</p></div><p style="padding:20px 8px 0;text-align:center;font-size:11px;color:#52525b;">SILENTRA · You think. We do.</p></div></body></html>`;
+  return `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5;"><div style="max-width:620px;margin:0 auto;padding:40px 20px;"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px;"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399;">SILENTRA · COMPROVATIVO</div><h1 style="margin:10px 0 0;font-size:28px;line-height:1.15;color:#fff;">Encomenda recebida</h1><p style="margin:14px 0 0;color:#a1a1aa;line-height:1.6;">Olá ${escapeHtml(input.customerName)}, recebemos a tua encomenda na <strong style="color:#e4e4e7;">${escapeHtml(input.shopName)}</strong>.</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;"><div style="font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Pedido</div><div style="margin-top:5px;font-family:monospace;color:#fff;">${escapeHtml(input.orderId)}</div><div style="margin-top:12px;font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;">Forma</div><div style="margin-top:5px;color:#fff;">${fulfillmentLabel}</div></div><table style="width:100%;margin-top:24px;border-collapse:collapse;"><tbody>${itemsHtml}</tbody></table><div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #27272a;font-size:18px;"><span style="color:#a1a1aa;">Total</span><strong style="color:#fff;">${formatMoney(input.total)}</strong></div>${shippingHtml}${input.trackingUrl ? `<div style="margin-top:22px;text-align:center;"><a href="${escapeHtml(input.trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none;">Acompanhar encomenda</a><p style="margin:10px 0 0;font-size:11px;color:#71717a;">Guarda este link. Permite consultar o estado sem criar conta.</p></div>` : ''}<p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#71717a;">Este email é um comprovativo da encomenda, não uma fatura. Qualquer questão sobre pagamento, entrega ou devolução deve ser tratada diretamente com a barbearia.</p></div><p style="padding:20px 8px 0;text-align:center;font-size:11px;color:#52525b;">SILENTRA · You think. We do.</p></div></body></html>`;
 }
 
 async function GET__unobserved() {
@@ -238,6 +244,18 @@ async function POST__unobserved(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
+    const trackingToken = randomBytes(32).toString('hex');
+    const { error: trackingError } = await db
+      .from('marketplace_orders')
+      .update({ tracking_token_hash: hashTrackingToken(trackingToken) })
+      .eq('id', order.id)
+      .eq('barbershop_id', shopId);
+
+    if (trackingError) {
+      console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', { orderId: order.id, code: trackingError.code ?? 'UNKNOWN' });
+      return NextResponse.json({ error: 'A encomenda foi registada, mas não foi possível preparar o acompanhamento. Contacta a barbearia com a referência da encomenda.' }, { status: 503 });
+    }
+    const trackingUrl = new URL('/marketplace/track#token=' + trackingToken, request.url).toString();
     const { data: details } = await db
       .from('marketplace_orders')
       .select('*, marketplace_order_items(*), barbershops(name)')
@@ -268,6 +286,7 @@ async function POST__unobserved(request: Request) {
           shippingAddress: order.shipping_address,
           shippingCity: order.shipping_city,
           shippingPostalCode: order.shipping_postal_code,
+          trackingUrl,
           items: itemsForEmail.map(
             (item: {
               product_name: string;
@@ -294,7 +313,7 @@ async function POST__unobserved(request: Request) {
       });
     }
 
-    return NextResponse.json({ order, emailSent }, { status: 201 });
+    return NextResponse.json({ order: { id: order.id, status: order.status, total: order.total, created_at: order.created_at }, trackingToken, emailSent }, { status: 201 });
   } catch (error) {
     console.error('[MARKETPLACE_ORDER_API]', error);
     return NextResponse.json(
