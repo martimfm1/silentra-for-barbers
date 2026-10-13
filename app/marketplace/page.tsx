@@ -187,9 +187,8 @@ export default function MarketplacePage() {
     const productId = url.searchParams.get('add');
     if (!productId) return;
 
-    const product = products.find((item) => item.id === productId);
-    url.searchParams.delete('add');
     const requestedQuantity = Number(url.searchParams.get('qty') ?? '1');
+    url.searchParams.delete('add');
     url.searchParams.delete('qty');
     window.history.replaceState(
       {},
@@ -197,44 +196,72 @@ export default function MarketplacePage() {
       url.pathname + url.search + url.hash,
     );
 
-    if (!product || product.stock_quantity <= 0) {
-      setError('Este produto já não está disponível para adicionar ao carrinho.');
-      return;
+    async function addRequestedProduct() {
+      let product = products.find((item) => item.id === productId);
+      if (!product) {
+        try {
+          const response = await fetch(
+            `/api/marketplace/products?id=${encodeURIComponent(productId)}`,
+            { cache: 'no-store' },
+          );
+          const json = await response.json();
+          if (response.ok && json.product) {
+            product = json.product as Product;
+            setProducts((current) =>
+              current.some((item) => item.id === productId)
+                ? current
+                : [...current, product!],
+            );
+          }
+        } catch {
+          // The product may have been unpublished or removed since the detail page was opened.
+        }
+      }
+
+      if (!product || product.stock_quantity <= 0) {
+        setError('Este produto já não está disponível para adicionar ao carrinho.');
+        return;
+      }
+
+      const quantity = Math.min(
+        Math.max(
+          1,
+          Number.isInteger(requestedQuantity) ? requestedQuantity : 1,
+        ),
+        Number(product.stock_quantity),
+      );
+      const switchingShop =
+        cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
+      if (
+        switchingShop &&
+        !window.confirm(
+          'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+        )
+      ) {
+        return;
+      }
+
+      setCart((current) => {
+        if (switchingShop) return [{ ...product!, quantity }];
+        const existing = current.find((item) => item.id === product!.id);
+        return existing
+          ? current.map((item) =>
+              item.id === product!.id
+                ? {
+                    ...item,
+                    quantity: Math.min(
+                      Number(product!.stock_quantity),
+                      item.quantity + quantity,
+                    ),
+                  }
+                : item,
+            )
+          : [...current, { ...product!, quantity }];
+      });
+      setCartOpen(true);
     }
 
-    const quantity = Math.min(
-      Math.max(1, Number.isInteger(requestedQuantity) ? requestedQuantity : 1),
-      Number(product.stock_quantity),
-    );
-    const switchingShop =
-      cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
-    if (
-      switchingShop &&
-      !window.confirm(
-        'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
-      )
-    ) {
-      return;
-    }
-
-    setCart((current) => {
-      if (switchingShop) return [{ ...product, quantity }];
-      const existing = current.find((item) => item.id === product.id);
-      return existing
-        ? current.map((item) =>
-            item.id === product.id
-              ? {
-                  ...item,
-                  quantity: Math.min(
-                    Number(product.stock_quantity),
-                    item.quantity + quantity,
-                  ),
-                }
-              : item,
-          )
-        : [...current, { ...product, quantity }];
-    });
-    setCartOpen(true);
+    void addRequestedProduct();
   }, [cart, cartRestored, loading, products]);
 
   const total = useMemo(
