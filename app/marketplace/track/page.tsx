@@ -51,6 +51,14 @@ export default function MarketplaceOrderTrackingPage() {
       };
     }
 
+    // The token is a bearer credential. Remove it from the visible URL and
+    // current history entry as soon as the page has read it.
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search,
+    );
+
     void (async () => {
       try {
         const response = await fetch('/api/marketplace/orders/track', {
