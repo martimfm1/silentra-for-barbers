@@ -189,7 +189,10 @@ async function PATCH__unobserved(
       );
     }
     if (current.status === status) {
-      return NextResponse.json({ order: sanitizeOrderPayload(current) });
+      return NextResponse.json(
+        { order: sanitizeOrderPayload(current) },
+        { headers: { 'Cache-Control': 'no-store, private' } },
+      );
     }
 
     let updated: unknown;
@@ -268,9 +271,10 @@ async function PATCH__unobserved(
             : 'UNKNOWN',
       });
     }
-    return NextResponse.json({
-      order: sanitizeOrderPayload(order as Record<string, unknown>),
-    });
+    return NextResponse.json(
+      { order: sanitizeOrderPayload(order as Record<string, unknown>) },
+      { headers: { 'Cache-Control': 'no-store, private' } },
+    );
   } catch (error) {
     const response = moduleErrorResponse(error);
     if (response) return response;
