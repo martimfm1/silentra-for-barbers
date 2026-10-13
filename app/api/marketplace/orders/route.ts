@@ -245,29 +245,52 @@ async function POST__unobserved(request: Request) {
 
     const order = Array.isArray(data) ? data[0] : data;
     const candidateTrackingToken = randomBytes(32).toString('hex');
-    const { error: trackingError } = await db
+    const { data: trackingRow, error: trackingError } = await db
       .from('marketplace_orders')
       .update({
         tracking_token_hash: hashTrackingToken(candidateTrackingToken),
       })
       .eq('id', order.id)
-      .eq('barbershop_id', shopId);
+      .eq('barbershop_id', shopId)
+      .select('id')
+      .maybeSingle();
 
     // The order is already committed. A tracking-token failure must not make
     // checkout look unsuccessful and encourage the customer to place it again.
-    const trackingToken = trackingError ? null : candidateTrackingToken;
+    const trackingToken =
+      trackingError || !trackingRow ? null : candidateTrackingToken;
     if (trackingError) {
       console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', {
         orderId: order.id,
-        code: trackingError.code ?? 'UNKNOWN',
+        code: trackingError?.code ?? 'NO_ORDER_UPDATED',
       });
     }
-    const trackingUrl = trackingToken
-      ? new URL(
-          '/marketplace/track#token=' + trackingToken,
-          request.url,
-        ).toString()
-      : undefined;
+    const configuredAppUrl =
+      process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
+    let trackingUrl: string | undefined;
+    if (trackingToken && configuredAppUrl) {
+      try {
+        const appUrl = new URL(configuredAppUrl);
+        if (
+          appUrl.protocol === 'https:' ||
+          (process.env.NODE_ENV !== 'production' &&
+            appUrl.protocol === 'http:' &&
+            ['localhost', '127.0.0.1'].includes(appUrl.hostname))
+        ) {
+          trackingUrl = new URL(
+            '/marketplace/track#token=' + trackingToken,
+            appUrl.origin,
+          ).toString();
+        }
+      } catch {
+        console.error('[MARKETPLACE_TRACKING_BASE_URL_INVALID]');
+      }
+    }
+    if (trackingToken && !trackingUrl) {
+      console.error('[MARKETPLACE_TRACKING_LINK_UNAVAILABLE]', {
+        orderId: order.id,
+      });
+    }
     const { data: details } = await db
       .from('marketplace_orders')
       .select('*, marketplace_order_items(*), barbershops(name)')
@@ -333,13 +356,18 @@ async function POST__unobserved(request: Request) {
           total: order.total,
           created_at: order.created_at,
         },
-        trackingToken,
+        trackingToken: trackingToken ?? undefined,
         emailSent,
       },
-      { status: 201 },
+      {
+        status: 201,
+        headers: { 'Cache-Control': 'no-store, private' },
+      },
     );
   } catch (error) {
-    console.error('[MARKETPLACE_ORDER_API]', error);
+    console.error('[MARKETPLACE_ORDER_API_FAILED]', {
+      reason: error instanceof Error ? error.name : 'UNKNOWN',
+    });
     return NextResponse.json(
       { error: 'Não foi possível concluir a encomenda.' },
       { status: 500 },

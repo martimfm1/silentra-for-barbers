@@ -13,6 +13,7 @@ type TrackedOrder = {
   shopName: string;
   items: Array<{ name: string; quantity: number; total: number }>;
 };
+
 const STATUS_LABELS: Record<string, string> = {
   pending: 'A aguardar confirmação',
   confirmed: 'Confirmada',
@@ -23,20 +24,24 @@ const STATUS_LABELS: Record<string, string> = {
   completed: 'Concluída',
   cancelled: 'Cancelada',
 };
+
 const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(
-    Number(value) || 0,
-  );
+  new Intl.NumberFormat('pt-PT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(value) || 0);
 
 export default function MarketplaceOrderTrackingPage() {
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     let active = true;
     const token = new URLSearchParams(window.location.hash.slice(1)).get(
       'token',
     );
+
     if (!token) {
       setError(
         'Abre o link de acompanhamento completo que recebeste por email.',
@@ -46,6 +51,15 @@ export default function MarketplaceOrderTrackingPage() {
         active = false;
       };
     }
+
+    // The token is a bearer credential. Remove it from the visible URL and
+    // current history entry as soon as the page has read it.
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search,
+    );
+
     void (async () => {
       try {
         const response = await fetch('/api/marketplace/orders/track', {
@@ -55,35 +69,41 @@ export default function MarketplaceOrderTrackingPage() {
           body: JSON.stringify({ token }),
         });
         const json = await response.json();
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(
             json.error || 'Não foi possível consultar a encomenda.',
           );
+        }
         if (active) setOrder(json.order as TrackedOrder);
       } catch (cause) {
-        if (active)
+        if (active) {
           setError(
             cause instanceof Error
               ? cause.message
               : 'Não foi possível consultar a encomenda.',
           );
+        }
       } finally {
         if (active) setLoading(false);
       }
     })();
+
     return () => {
       active = false;
     };
   }, []);
+
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-50 sm:py-16">
       <div className="mx-auto max-w-2xl">
-        <Link
+        <a
           href="/marketplace"
           className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
         >
-          <ArrowLeft className="size-4" /> Marketplace
-        </Link>
+          <ArrowLeft className="size-4" />
+          Marketplace
+        </a>
+
         <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
             <PackageCheck className="size-6" />
@@ -94,10 +114,10 @@ export default function MarketplaceOrderTrackingPage() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">
             Acompanhar encomenda
           </h1>
+
           {loading ? (
             <p className="mt-6 flex items-center gap-2 text-sm text-zinc-400">
-              <RefreshCw className="size-4 animate-spin" /> A consultar o
-              estado…
+              <RefreshCw className="size-4 animate-spin" />A consultar o estado…
             </p>
           ) : error ? (
             <p
@@ -118,6 +138,7 @@ export default function MarketplaceOrderTrackingPage() {
                   </p>
                   <p className="mt-1 text-sm text-zinc-400">{order.shopName}</p>
                 </div>
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-white/10 p-4">
                     <p className="text-xs text-zinc-500">Data</p>
@@ -134,6 +155,7 @@ export default function MarketplaceOrderTrackingPage() {
                     </p>
                   </div>
                 </div>
+
                 <div>
                   <h2 className="font-semibold">Produtos</h2>
                   <div className="mt-3 divide-y divide-white/10">
@@ -157,6 +179,7 @@ export default function MarketplaceOrderTrackingPage() {
                     <span>{money(order.total)}</span>
                   </div>
                 </div>
+
                 <p className="text-xs leading-5 text-zinc-500">
                   A entrega e o levantamento são tratados diretamente pela
                   barbearia. Este link é privado: não o partilhes com outras

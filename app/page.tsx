@@ -20,7 +20,7 @@ function HomeStructuredData() {
       '@id': 'https://barbers.silentra.me/#website',
       url: 'https://barbers.silentra.me/',
       name: 'Silentra for Barbers',
-      alternateName: 'Silentra',
+      alternateName: 'Silentra for Barbers',
       inLanguage: ['pt-PT', 'en'],
     },
     {
@@ -28,7 +28,7 @@ function HomeStructuredData() {
       '@id': 'https://barbers.silentra.me/#organization',
       url: 'https://barbers.silentra.me/',
       name: 'Silentra for Barbers',
-      alternateName: 'Silentra',
+      alternateName: 'Silentra for Barbers',
       logo: 'https://barbers.silentra.me/icon-2.png',
     },
   ];

@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid.supabase.co
@@ -39,23 +39,6 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-
-      - name: Refresh lockfile
-        run: pnpm install --lockfile-only
-
-      - name: Persist refreshed lockfile
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            echo "Lockfile already up to date."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore(deps): refresh pnpm lockfile"
-          git push
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -71,7 +71,9 @@ export async function sendBrevoEmail(input: {
       };
     return { success: true, messageId: data.messageId };
   } catch (error) {
-    console.error('[BREVO_EMAIL_ERROR]', error);
+    console.error('[BREVO_EMAIL_ERROR]', {
+      reason: error instanceof Error ? error.name : 'UNKNOWN',
+    });
     return { success: false, error: 'Unable to send email.' };
   }
 }
