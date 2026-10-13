@@ -12,7 +12,10 @@ const normalize = (body: Record<string, unknown> | null) => ({
   description:
     typeof body?.description === 'string' ? body.description.trim() : null,
   category: typeof body?.category === 'string' ? body.category.trim() : null,
-  image_url: typeof body?.imageUrl === 'string' ? body.imageUrl.trim() : null,
+  image_url:
+    typeof body?.imageUrl === 'string' && body.imageUrl.trim()
+      ? body.imageUrl.trim()
+      : null,
   sku: typeof body?.sku === 'string' ? body.sku.trim() : null,
   unit_price: Number(body?.unitPrice),
   stock_quantity: Number(body?.stockQuantity),
