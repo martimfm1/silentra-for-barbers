@@ -101,15 +101,17 @@ async function GET__unobserved() {
       );
     }
 
+    const plan = typeof planData === 'string' ? planData : 'free';
     const products = (data ?? []).map((item) => ({
       ...item,
-      marketplace_featured: currentlyFeatured(item),
+      marketplace_featured:
+        plan === 'enterprise' && currentlyFeatured(item),
     }));
 
     return NextResponse.json(
       {
         products,
-        plan: typeof planData === 'string' ? planData : 'free',
+        plan,
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
