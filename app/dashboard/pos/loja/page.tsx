@@ -935,7 +935,6 @@ export default function POSStorePage() {
                     disabled={
                       plan !== 'enterprise' ||
                       !product.marketplaceVisible ||
-                      !product.active ||
                       Number(product.stockQuantity) <= 0 ||
                       Boolean(
                         editing?.marketplace_published_at &&
