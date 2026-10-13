@@ -1,0 +1,58 @@
+name: final one-time marketplace tracking formatter
+
+on:
+  push:
+    branches:
+      - feat/marketplace-order-tracking-production
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-remove-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/marketplace-order-tracking-production
+          persist-credentials: true
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format final tracking changes
+        id: format
+        continue-on-error: true
+        run: |
+          pnpm exec prettier --write \
+            next.config.ts \
+            scripts/qa/product-contracts.mjs \
+            lib/email/brevo.ts \
+            app/api/marketplace/orders/route.ts \
+            app/api/marketplace/orders/\[orderId\]/route.ts \
+            docs/PRODUCTION-RELEASE-CHECKLIST.md
+      - name: Push formatted files and remove workflow
+        env:
+          FORMAT_OUTCOME: ${{ steps.format.outcome }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/format-marketplace-final-once.yml
+          git add \
+            next.config.ts \
+            scripts/qa/product-contracts.mjs \
+            lib/email/brevo.ts \
+            app/api/marketplace/orders/route.ts \
+            app/api/marketplace/orders/\[orderId\]/route.ts \
+            docs/PRODUCTION-RELEASE-CHECKLIST.md
+          git commit -m "chore(format): finish marketplace tracking quality pass"
+          git push origin HEAD:feat/marketplace-order-tracking-production
+          test "$FORMAT_OUTCOME" = "success"
