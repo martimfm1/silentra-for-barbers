@@ -2,6 +2,11 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import {
+  buildMarketplaceTrackingUrl,
+  createMarketplaceTrackingToken,
+  hashMarketplaceTrackingToken,
+} from '@/lib/marketplace/tracking';
+import {
   moduleErrorResponse,
   requireModuleContext,
 } from '@/services/modules/authorization';
@@ -33,6 +38,8 @@ const customerMessage = (status: Status) => {
       return 'A tua encomenda foi enviada.';
     case 'delivered':
       return 'A tua encomenda foi entregue.';
+    case 'completed':
+      return 'A tua encomenda foi concluída.';
     case 'cancelled':
       return 'A tua encomenda foi cancelada.';
     default:
@@ -75,10 +82,39 @@ async function notifyCustomer(
     ready: 'A sua encomenda está pronta',
     shipped: 'A sua encomenda foi enviada',
     delivered: 'A sua encomenda foi entregue',
+    completed: 'A sua encomenda foi concluída',
     cancelled: 'A sua encomenda foi cancelada',
   };
   const subject =
     subjectByStatus[order.status] || 'Atualização da sua encomenda';
+
+  // Issue a fresh capability per status notification. Old receipt and status
+  // links remain valid because each hash has its own row.
+  let trackingUrl: string | null = null;
+  const token = createMarketplaceTrackingToken();
+  const candidateUrl = buildMarketplaceTrackingUrl(token);
+  if (candidateUrl) {
+    const { error: tokenError } = await admin
+      .from('marketplace_order_tracking_tokens')
+      .insert({
+        order_id: order.id,
+        token_hash: hashMarketplaceTrackingToken(token),
+      });
+    if (tokenError) {
+      console.error('[MARKETPLACE_STATUS_TRACKING_TOKEN_SAVE_FAILED]', {
+        orderId: order.id,
+        status: order.status,
+        code: tokenError.code ?? 'UNKNOWN',
+      });
+    } else {
+      trackingUrl = candidateUrl;
+    }
+  } else {
+    console.error('[MARKETPLACE_STATUS_TRACKING_LINK_UNAVAILABLE]', {
+      orderId: order.id,
+      status: order.status,
+    });
+  }
 
   try {
     const result = await sendBrevoEmail({
@@ -86,7 +122,7 @@ async function notifyCustomer(
       toName: order.customer_name,
       subject: `${subject} · ${shopName}`,
       senderName: shopName,
-      htmlContent: `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">Olá ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div><p style="margin:20px 0 0;font-size:12px;color:#71717a">Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.</p></div></div></body></html>`,
+      htmlContent: `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">Olá ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div>${trackingUrl ? `<div style="margin-top:22px;text-align:center"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none">Acompanhar encomenda</a><p style="margin:10px 0 0;font-size:11px;color:#71717a">Link privado, sem necessidade de criar conta.</p></div>` : ''}<p style="margin:20px 0 0;font-size:12px;color:#71717a">Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.</p></div></div></body></html>`,
     });
 
     if (!result.success) {
