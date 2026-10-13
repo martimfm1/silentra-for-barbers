@@ -123,11 +123,17 @@ async function POST__unobserved(request: Request) {
 
     if (
       customerName.length < 2 ||
+      customerName.length > 120 ||
       customerEmail.length < 5 ||
-      !customerEmail.includes('@') ||
+      customerEmail.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) ||
       customerPhone.length < 6 ||
+      customerPhone.length > 40 ||
+      notes.length > 2000 ||
       !shopId ||
-      items.length === 0
+      items.length === 0 ||
+      !Array.isArray(body?.items) ||
+      body.items.length > 30
     )
       return NextResponse.json(
         { error: 'Preenche os teus dados e adiciona pelo menos um produto.' },
@@ -279,12 +285,12 @@ async function POST__unobserved(request: Request) {
       if (!email.success)
         console.error('[MARKETPLACE_RECEIPT_EMAIL_FAILED]', {
           orderId: order.id,
-          error: email.error,
+          reason: 'provider_rejected',
         });
-    } catch (emailError) {
+    } catch {
       console.error('[MARKETPLACE_RECEIPT_EMAIL_FAILED]', {
         orderId: order.id,
-        error: emailError,
+        reason: 'provider_unavailable',
       });
     }
 
