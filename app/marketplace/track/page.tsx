@@ -96,13 +96,13 @@ export default function MarketplaceOrderTrackingPage() {
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-50 sm:py-16">
       <div className="mx-auto max-w-2xl">
-        <a
+        <Link
           href="/marketplace"
           className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
         >
           <ArrowLeft className="size-4" />
           Marketplace
-        </a>
+        </Link>
 
         <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
