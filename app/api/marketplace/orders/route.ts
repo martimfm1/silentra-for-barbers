@@ -328,6 +328,8 @@ async function POST__unobserved(request: Request) {
         toName: customerName,
         subject: `Comprovativo da encomenda #${order.id.slice(0, 8)} · ${shopName}`,
         senderName: shopName,
+        // Capability links must not be used for recipient click/open analytics.
+        contactPixelTrackingConsent: false,
         htmlContent: buildOrderReceiptEmail({
           customerName,
           shopName,
