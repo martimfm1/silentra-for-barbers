@@ -100,6 +100,19 @@ const routeSecurityChecks = [
     label: 'Spoof-resistant client IP rate limiting',
   },
   {
+    file: 'lib/security/public-rate-limit.ts',
+    markers: [
+      "process.env.NODE_ENV === 'development'",
+      'consumeInMemoryRateLimit',
+      'return consumeInMemoryRateLimit(localKey, limit, windowSeconds);',
+      'const admin = createAdminClient();',
+      "admin.rpc('consume_public_rate_limit'",
+      'getRateLimitSecret()',
+    ],
+    label:
+      'Development-only in-memory fallback preserves persistent production rate limiting',
+  },
+  {
     file: 'scripts/qa/env-check.mjs',
     markers: [
       "'RATE_LIMIT_SECRET'",
