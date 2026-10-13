@@ -96,7 +96,11 @@ const checks = [
     test: (source) =>
       source.includes("requireModuleContext('pos', 'pos')") &&
       source.includes(".eq('barbershop_id', barbershopId)") &&
-      source.includes('sendBrevoEmail'),
+      source.includes('sendBrevoEmail') &&
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes('marketplace_order_tracking_tokens') &&
+      source.includes('contactPixelTrackingConsent: false') &&
+      source.includes('Acompanhar encomenda'),
   },
   {
     name: 'Public booking has mobile-safe horizontal overflow rules',
