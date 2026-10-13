@@ -607,7 +607,12 @@ export default function MarketplaceProductsPage() {
                     step="1"
                     value={form.stockQuantity}
                     onChange={(event) =>
-                      setForm({ ...form, stockQuantity: event.target.value })
+                      setForm({
+                        ...form,
+                        stockQuantity: event.target.value,
+                        marketplaceFeatured:
+                          Number(event.target.value) > 0 && form.marketplaceFeatured,
+                      })
                     }
                   />
                 </label>
