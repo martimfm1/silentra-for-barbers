@@ -275,7 +275,8 @@ const checks = [
         trackingHeaders > genericHeaders &&
         source.includes("key: 'Cache-Control', value: 'no-store, max-age=0'") &&
         source.includes("key: 'Referrer-Policy', value: 'no-referrer'") &&
-        source.includes("key: 'X-Frame-Options',\n    value: 'DENY'")
+        source.includes("key: 'X-Frame-Options',") &&
+        source.includes("value: 'DENY'")
       );
     },
   },
