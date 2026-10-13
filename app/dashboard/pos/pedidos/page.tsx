@@ -149,8 +149,8 @@ export default function MarketplaceOrdersPage() {
   const [emailMessage, setEmailMessage] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
 
-  async function load() {
-    setLoading(true);
+  async function load(showLoading = true) {
+    if (showLoading) setLoading(true);
     try {
       const response = await fetch('/api/marketplace/orders', {
         cache: 'no-store',
@@ -168,7 +168,7 @@ export default function MarketplaceOrdersPage() {
           : 'Não foi possível carregar as encomendas.',
       );
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }
 
@@ -212,6 +212,13 @@ export default function MarketplaceOrdersPage() {
   );
 
   async function changeStatus(order: Order, next: Status) {
+    if (next === 'cancelled') {
+      const confirmed = window.confirm(
+        `Tens a certeza de que queres cancelar a encomenda #${order.id.slice(0, 8)} de ${order.customer_name}? Esta ação não deve ser usada para corrigir apenas o estado.`,
+      );
+      if (!confirmed) return;
+    }
+
     setUpdating(order.id);
     try {
       const response = await fetch(`/api/marketplace/orders/${order.id}`, {
@@ -243,7 +250,7 @@ export default function MarketplaceOrdersPage() {
           ? 'Encomenda cancelada.'
           : `Encomenda marcada como ${statusMeta[next].label.toLowerCase()}.`,
       );
-      await load();
+      await load(false);
     } catch (error) {
       toast.error(
         error instanceof Error
