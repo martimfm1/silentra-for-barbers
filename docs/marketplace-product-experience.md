@@ -100,7 +100,6 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - Uma falha de email não apaga a encomenda nem é apresentada como sucesso de envio.
 - Os fluxos principais funcionam por teclado, têm labels acessíveis e mantêm estados de erro compreensíveis.
 
-
 ## Página de produto e destaque Enterprise
 
 - Cada produto público tem uma página própria em `/marketplace/[productId]`, com imagem, descrição, categoria, vendedor, preço, preço anterior quando aplicável, stock e seleção de quantidade.
