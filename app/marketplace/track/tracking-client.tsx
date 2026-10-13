@@ -218,6 +218,8 @@ export default function MarketplaceOrderTrackingClient() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const requestInFlight = useRef(false);
   const activeRef = useRef(true);
+  const initialTokenRef = useRef<string | null>(null);
+  const fragmentProcessedRef = useRef(false);
 
   const loadOrder = useCallback(async (capability: string, quiet = false) => {
     if (requestInFlight.current) return;
@@ -241,6 +243,7 @@ export default function MarketplaceOrderTrackingClient() {
       });
       const payload: unknown = await response.json().catch(() => null);
       if (!response.ok) {
+        if (response.status === 404 && activeRef.current) setOrder(null);
         const message =
           isRecord(payload) && typeof payload.error === 'string'
             ? payload.error
@@ -281,14 +284,22 @@ export default function MarketplaceOrderTrackingClient() {
 
   useEffect(() => {
     activeRef.current = true;
-    const tokenFromFragment = new URLSearchParams(
-      window.location.hash.slice(1),
-    ).get('token');
 
-    // Remove the bearer credential from the address bar/history before making
-    // any network request. The fragment is never sent with the document request.
-    window.history.replaceState(null, '', window.location.pathname);
+    // Effects are intentionally replayed by React Strict Mode in development.
+    // Keep the first fragment in a ref so that replay after URL scrubbing does
+    // not incorrectly conclude that the customer opened a bare tracking page.
+    if (!fragmentProcessedRef.current) {
+      initialTokenRef.current = new URLSearchParams(
+        window.location.hash.slice(1),
+      ).get('token');
+      fragmentProcessedRef.current = true;
 
+      // Remove the bearer credential from the address bar/history before making
+      // any network request. The fragment is never sent with the document request.
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
+    const tokenFromFragment = initialTokenRef.current;
     if (!tokenFromFragment) {
       setError(
         'Para proteger os teus dados, abre o link completo de acompanhamento que recebeste por email.',
@@ -462,38 +473,34 @@ export default function MarketplaceOrderTrackingClient() {
                   <h2 className="text-sm font-semibold text-white">
                     Progresso da encomenda
                   </h2>
-                  <div className="mt-5 grid gap-4 sm:grid-cols-5">
+                  <ol className="mt-5 space-y-3">
                     {steps.map((step, index) => {
                       const isDone = index <= activeStep;
                       const isCurrent = step === order.status;
                       return (
-                        <div key={step} className="flex gap-3 sm:block">
-                          <div className="flex flex-col items-center sm:items-start">
-                            <span
-                              className={`flex size-9 shrink-0 items-center justify-center rounded-full border ${
-                                isDone
-                                  ? 'border-emerald-300/30 bg-emerald-300/10 text-emerald-200'
-                                  : 'border-white/10 bg-white/[0.02] text-zinc-600'
-                              }`}
-                              aria-current={isCurrent ? 'step' : undefined}
-                            >
-                              {isDone ? (
-                                <CheckCircle2 className="size-4" />
-                              ) : (
-                                <Clock3 className="size-4" />
-                              )}
-                            </span>
-                            {index < steps.length - 1 && (
-                              <span
-                                className={`mt-2 hidden h-0.5 w-full sm:block ${
-                                  index < activeStep
-                                    ? 'bg-emerald-300/40'
-                                    : 'bg-white/10'
-                                }`}
-                              />
+                        <li
+                          key={step}
+                          className={`flex items-center gap-3 rounded-xl border p-3 ${
+                            isCurrent
+                              ? 'border-emerald-300/20 bg-emerald-300/[0.04]'
+                              : 'border-white/[0.06] bg-white/[0.015]'
+                          }`}
+                          aria-current={isCurrent ? 'step' : undefined}
+                        >
+                          <span
+                            className={`flex size-8 shrink-0 items-center justify-center rounded-full border ${
+                              isDone
+                                ? 'border-emerald-300/30 bg-emerald-300/10 text-emerald-200'
+                                : 'border-white/10 bg-white/[0.02] text-zinc-600'
+                            }`}
+                          >
+                            {isDone ? (
+                              <CheckCircle2 className="size-4" />
+                            ) : (
+                              <Clock3 className="size-4" />
                             )}
-                          </div>
-                          <div className="pt-1 sm:mt-3">
+                          </span>
+                          <div className="min-w-0 flex-1">
                             <p
                               className={`text-sm font-medium ${
                                 isCurrent
@@ -511,10 +518,15 @@ export default function MarketplaceOrderTrackingClient() {
                               </p>
                             )}
                           </div>
-                        </div>
+                          {isCurrent && (
+                            <span className="shrink-0 rounded-full bg-emerald-300/10 px-2 py-1 text-[10px] font-semibold text-emerald-200">
+                              Atual
+                            </span>
+                          )}
+                        </li>
                       );
                     })}
-                  </div>
+                  </ol>
                 </div>
               )}
             </section>
