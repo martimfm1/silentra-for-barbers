@@ -9,6 +9,49 @@ export const runtime = 'nodejs';
 const TOKEN_PATTERN = /^[a-f0-9]{64}$/;
 const MAX_BODY_BYTES = 512;
 
+async function readSmallJsonBody(
+  request: Request,
+): Promise<
+  | { kind: 'ok'; value: unknown }
+  | { kind: 'invalid' }
+  | { kind: 'too-large' }
+> {
+  const reader = request.body?.getReader();
+  if (!reader) return { kind: 'invalid' };
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_BODY_BYTES) {
+        await reader.cancel();
+        return { kind: 'too-large' };
+      }
+      chunks.push(value);
+    }
+
+    const bytes = new Uint8Array(totalBytes);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+
+    try {
+      return { kind: 'ok', value: JSON.parse(new TextDecoder().decode(bytes)) };
+    } catch {
+      return { kind: 'invalid' };
+    }
+  } catch {
+    return { kind: 'invalid' };
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 async function POST__unobserved(request: Request) {
   try {
     const contentLength = Number(request.headers.get('content-length') ?? 0);
@@ -42,9 +85,20 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const body = (await request.json().catch(() => null)) as {
-      token?: unknown;
-    } | null;
+    const parsedBody = await readSmallJsonBody(request);
+    if (parsedBody.kind === 'too-large') {
+      return NextResponse.json(
+        { error: 'Pedido demasiado grande.' },
+        { status: 413, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    if (parsedBody.kind !== 'ok') {
+      return NextResponse.json(
+        { error: 'Pedido inválido.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    const body = parsedBody.value as { token?: unknown } | null;
     const token = typeof body?.token === 'string' ? body.token : '';
     if (!TOKEN_PATTERN.test(token)) {
       return NextResponse.json(
