@@ -161,7 +161,18 @@ async function POST__unobserved(request: Request) {
       ) {
         return notFound();
       }
+
       orderId = capability.order_id;
+      const { error: usageError } = await db
+        .from('marketplace_order_tracking_tokens')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('id', capability.id);
+      if (usageError) {
+        // Usage telemetry is best-effort; never block the customer-facing read.
+        console.error('[MARKETPLACE_TRACKING_LAST_USED_UPDATE_FAILED]', {
+          code: usageError.code ?? 'UNKNOWN',
+        });
+      }
     }
 
     if (!orderId) {
