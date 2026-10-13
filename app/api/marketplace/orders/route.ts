@@ -81,13 +81,16 @@ async function GET__unobserved() {
       .order('created_at', { ascending: false })
       .limit(200);
     if (error) throw error;
-    return NextResponse.json({ orders: data ?? [] });
+    return NextResponse.json(
+      { orders: data ?? [] },
+      { headers: { 'Cache-Control': 'no-store, private', 'X-Content-Type-Options': 'nosniff' } },
+    );
   } catch (error) {
     const response = moduleErrorResponse(error);
     if (response) return response;
     return NextResponse.json(
       { error: 'Não foi possível carregar as encomendas.' },
-      { status: 500 },
+      { status: 500, headers: { 'Cache-Control': 'no-store, private' } },
     );
   }
 }
