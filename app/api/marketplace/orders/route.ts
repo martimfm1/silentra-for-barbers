@@ -260,9 +260,32 @@ async function POST__unobserved(request: Request) {
         code: trackingError.code ?? 'UNKNOWN',
       });
     }
-    const trackingUrl = trackingToken
-      ? new URL('/marketplace/track#token=' + trackingToken, request.url).toString()
-      : undefined;
+    const configuredAppUrl =
+      process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
+    let trackingUrl: string | undefined;
+    if (trackingToken && configuredAppUrl) {
+      try {
+        const appUrl = new URL(configuredAppUrl);
+        if (
+          appUrl.protocol === 'https:' ||
+          (process.env.NODE_ENV !== 'production' &&
+            appUrl.protocol === 'http:' &&
+            ['localhost', '127.0.0.1'].includes(appUrl.hostname))
+        ) {
+          trackingUrl = new URL(
+            '/marketplace/track#token=' + trackingToken,
+            appUrl.origin,
+          ).toString();
+        }
+      } catch {
+        console.error('[MARKETPLACE_TRACKING_BASE_URL_INVALID]');
+      }
+    }
+    if (trackingToken && !trackingUrl) {
+      console.error('[MARKETPLACE_TRACKING_LINK_UNAVAILABLE]', {
+        orderId: order.id,
+      });
+    }
     const { data: details } = await db
       .from('marketplace_orders')
       .select('*, marketplace_order_items(*), barbershops(name)')
