@@ -99,3 +99,13 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - O vendedor consegue compreender rapidamente o que exige ação e atualizar a encomenda com um histórico auditável.
 - Uma falha de email não apaga a encomenda nem é apresentada como sucesso de envio.
 - Os fluxos principais funcionam por teclado, têm labels acessíveis e mantêm estados de erro compreensíveis.
+
+
+## Página de produto e destaque Enterprise
+
+- Cada produto público tem uma página própria em `/marketplace/[productId]`, com imagem, descrição, categoria, vendedor, preço, preço anterior quando aplicável, stock e seleção de quantidade.
+- A passagem entre a página de produto e o carrinho deve preservar os artigos existentes e validar novamente a disponibilidade do produto.
+- O formulário do vendedor deve recolher o nome, preço, stock, descrição, categoria, imagem opcional, SKU opcional, preço anterior e limiar de alerta de stock; o preço e o stock continuam a ser autoritativos no servidor.
+- O destaque só pode ser ativado no servidor para lojas com plano efetivo `enterprise`, produtos publicados com stock e dentro das primeiras 72 horas desde a primeira publicação.
+- A data original de publicação deve manter-se nas edições. A expiração não pode ser prolongada por editar o produto ou retirar e voltar a ativar o destaque.
+- Antes do deploy, aplicar a migration `20261013160000_marketplace_product_publication_boost.sql` e executar os testes de tipo, lint, auditoria de API, contratos de produto, formatação, build e smoke tests.
