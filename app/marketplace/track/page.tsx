@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, PackageCheck, RefreshCw } from 'lucide-react';
 

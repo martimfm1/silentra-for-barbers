@@ -38,6 +38,8 @@ type Product = {
   active: boolean;
   marketplace_visible: boolean;
   marketplace_featured: boolean;
+  marketplace_published_at?: string | null;
+  marketplace_featured_until?: string | null;
   updated_at?: string;
 };
 
@@ -126,6 +128,7 @@ export default function POSStorePage() {
   const allowed = hasFeature('pos');
   const [tab, setTab] = useState<'products' | 'orders'>('products');
   const [products, setProducts] = useState<Product[]>([]);
+  const [plan, setPlan] = useState('free');
   const [orders, setOrders] = useState<Order[]>([]);
   const [query, setQuery] = useState('');
   const [showInactive, setShowInactive] = useState(false);
@@ -144,6 +147,7 @@ export default function POSStorePage() {
     if (!response.ok)
       throw new Error(json.error || 'Não foi possível carregar os produtos.');
     setProducts(json.products ?? []);
+    setPlan(typeof json.plan === 'string' ? json.plan : 'free');
   }
 
   async function loadOrders() {
@@ -862,7 +866,13 @@ export default function POSStorePage() {
                     step="1"
                     value={product.stockQuantity}
                     onChange={(e) =>
-                      setProduct({ ...product, stockQuantity: e.target.value })
+                      setProduct({
+                        ...product,
+                        stockQuantity: e.target.value,
+                        marketplaceFeatured:
+                          Number(e.target.value) > 0 &&
+                          product.marketplaceFeatured,
+                      })
                     }
                   />
                 </label>
@@ -904,6 +914,8 @@ export default function POSStorePage() {
                       setProduct({
                         ...product,
                         marketplaceVisible: e.target.checked,
+                        marketplaceFeatured:
+                          e.target.checked && product.marketplaceFeatured,
                       })
                     }
                     className="size-4 accent-emerald-400"
@@ -917,24 +929,46 @@ export default function POSStorePage() {
                     </span>
                   </span>
                 </label>
-                <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:col-span-2">
+                <label className="flex items-center gap-3 rounded-2xl border border-amber-300/15 bg-amber-300/[0.035] p-3 sm:col-span-2">
                   <input
                     type="checkbox"
                     checked={product.marketplaceFeatured}
+                    disabled={
+                      plan !== 'enterprise' ||
+                      !product.marketplaceVisible ||
+                      Number(product.stockQuantity) <= 0 ||
+                      Boolean(
+                        editing?.marketplace_published_at &&
+                        Date.now() >=
+                          Date.parse(editing.marketplace_published_at) +
+                            3 * 24 * 60 * 60 * 1000,
+                      )
+                    }
                     onChange={(e) =>
                       setProduct({
                         ...product,
                         marketplaceFeatured: e.target.checked,
                       })
                     }
-                    className="size-4 accent-amber-300"
+                    className="size-4 accent-amber-300 disabled:opacity-40"
                   />
                   <span>
-                    <strong className="block text-sm text-white">
-                      Marcar como destaque
+                    <strong className="flex items-center gap-2 text-sm text-white">
+                      Destaque Enterprise · 3 dias
                     </strong>
-                    <span className="text-xs text-zinc-500">
-                      Coloca o anúncio entre os primeiros resultados.
+                    <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                      {plan !== 'enterprise'
+                        ? 'Disponível exclusivamente no plano Enterprise.'
+                        : !product.marketplaceVisible
+                          ? 'Ativa primeiro a publicação online.'
+                          : Number(product.stockQuantity) <= 0
+                            ? 'O produto tem de estar ativo e ter stock disponível.'
+                            : editing?.marketplace_published_at &&
+                                Date.now() >=
+                                  Date.parse(editing.marketplace_published_at) +
+                                    3 * 24 * 60 * 60 * 1000
+                              ? 'A janela de destaque deste produto já terminou.'
+                              : 'Coloca o produto em destaque até 3 dias após a primeira publicação.'}
                     </span>
                   </span>
                 </label>

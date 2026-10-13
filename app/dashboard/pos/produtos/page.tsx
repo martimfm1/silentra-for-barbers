@@ -35,6 +35,8 @@ type Product = {
   active: boolean;
   marketplace_visible: boolean;
   marketplace_featured: boolean;
+  marketplace_published_at?: string | null;
+  marketplace_featured_until?: string | null;
 };
 type SalesMode = 'physical_only' | 'physical_and_online';
 
@@ -76,6 +78,7 @@ export default function MarketplaceProductsPage() {
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
   const [products, setProducts] = useState<Product[]>([]);
+  const [plan, setPlan] = useState('free');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -97,6 +100,7 @@ export default function MarketplaceProductsPage() {
       if (!response.ok)
         throw new Error(json.error || 'Não foi possível carregar os produtos.');
       setProducts(json.products ?? []);
+      setPlan(typeof json.plan === 'string' ? json.plan : 'free');
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -138,6 +142,28 @@ export default function MarketplaceProductsPage() {
       void loadSettings();
     }
   }, [accessLoading, allowed]);
+
+  const boostWindowOpen =
+    !editing?.marketplace_published_at ||
+    (Number.isFinite(Date.parse(editing.marketplace_published_at)) &&
+      Date.now() <
+        Date.parse(editing.marketplace_published_at) + 3 * 24 * 60 * 60 * 1000);
+  const canToggleBoost =
+    plan === 'enterprise' &&
+    boostWindowOpen &&
+    form.marketplaceVisible &&
+    form.active &&
+    Number(form.stockQuantity) > 0;
+  const boostHint =
+    plan !== 'enterprise'
+      ? 'O destaque está disponível exclusivamente no plano Enterprise.'
+      : !form.marketplaceVisible
+        ? 'Ativa primeiro a publicação online.'
+        : !form.active || Number(form.stockQuantity) <= 0
+          ? 'O produto tem de estar ativo e ter stock disponível.'
+          : !boostWindowOpen
+            ? 'A janela de destaque deste produto já terminou.'
+            : 'O produto fica em destaque até 3 dias após a primeira publicação.';
 
   const categories = useMemo(
     () =>
@@ -488,7 +514,8 @@ export default function MarketplaceProductsPage() {
                 {editing ? `Editar ${editing.name}` : 'Novo produto'}
               </CardTitle>
               <p className="text-sm text-zinc-500">
-                O produto usa o mesmo stock no POS e no marketplace.
+                Preenche a informação pública, preço, imagem e stock. O mesmo
+                stock é usado no POS e no marketplace.
               </p>
             </CardHeader>
             <CardContent>
@@ -581,7 +608,13 @@ export default function MarketplaceProductsPage() {
                     step="1"
                     value={form.stockQuantity}
                     onChange={(event) =>
-                      setForm({ ...form, stockQuantity: event.target.value })
+                      setForm({
+                        ...form,
+                        stockQuantity: event.target.value,
+                        marketplaceFeatured:
+                          Number(event.target.value) > 0 &&
+                          form.marketplaceFeatured,
+                      })
                     }
                   />
                 </label>
@@ -623,27 +656,51 @@ export default function MarketplaceProductsPage() {
                     <CheckBox
                       checked={form.active}
                       onChange={(checked) =>
-                        setForm({ ...form, active: checked })
+                        setForm({
+                          ...form,
+                          active: checked,
+                          marketplaceFeatured:
+                            checked && form.marketplaceFeatured,
+                        })
                       }
                       title="Produto ativo"
                     />
                     <CheckBox
                       checked={form.marketplaceVisible}
                       onChange={(checked) =>
-                        setForm({ ...form, marketplaceVisible: checked })
+                        setForm({
+                          ...form,
+                          marketplaceVisible: checked,
+                          marketplaceFeatured:
+                            checked && form.marketplaceFeatured,
+                        })
                       }
                       title="Publicar online"
                       accent
                     />
-                    <CheckBox
-                      checked={form.marketplaceFeatured}
-                      onChange={(checked) =>
-                        setForm({ ...form, marketplaceFeatured: checked })
-                      }
-                      title="Destaque no marketplace"
-                      accent
-                      icon={Star}
-                    />
+                    <label className="flex items-start gap-3 rounded-xl border border-amber-300/15 bg-amber-300/[0.035] p-3 sm:col-span-3">
+                      <input
+                        type="checkbox"
+                        checked={form.marketplaceFeatured}
+                        disabled={!canToggleBoost}
+                        onChange={(event) =>
+                          setForm({
+                            ...form,
+                            marketplaceFeatured: event.target.checked,
+                          })
+                        }
+                        className="mt-0.5 size-4 accent-amber-300 disabled:opacity-40"
+                      />
+                      <span>
+                        <strong className="flex items-center gap-2 text-sm text-white">
+                          <Star className="size-4 text-amber-200" />
+                          Destaque Enterprise · 3 dias
+                        </strong>
+                        <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                          {boostHint}
+                        </span>
+                      </span>
+                    </label>
                   </div>
                 </fieldset>
                 <div className="flex flex-col-reverse gap-2 md:col-span-2 sm:flex-row sm:justify-end">

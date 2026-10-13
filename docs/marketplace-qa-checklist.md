@@ -34,3 +34,11 @@
 - [ ] Executar os testes de API, segurança e produto disponíveis.
 - [ ] Testar o percurso completo: catálogo, carrinho, encomenda, atualização de estado e email.
 - [ ] Registar resultados reais; não considerar a checklist aprovada apenas por revisão de código.
+
+## Página de produto e destaque Enterprise
+
+- [ ] Abrir um produto pelo catálogo e confirmar imagem, descrição, preço, vendedor, stock e quantidade.
+- [ ] Adicionar um produto pela página de detalhe e confirmar que o carrinho preserva os artigos e quantidades existentes.
+- [ ] Confirmar que produtos ocultos, inativos ou de barbearias sem vendas online não podem ser consultados pela página pública.
+- [ ] Confirmar que apenas Enterprise consegue ativar o destaque e que o servidor recusa tentativas fora das primeiras 72 horas da publicação.
+- [ ] Editar um produto destacado e confirmar que a data original de publicação e a data de expiração não são prolongadas.

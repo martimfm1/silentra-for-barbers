@@ -7,12 +7,17 @@ import {
 
 export const runtime = 'nodejs';
 
+const BOOST_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+
 const parsePayload = (body: Record<string, unknown> | null) => ({
   name: typeof body?.name === 'string' ? body.name.trim() : '',
   description:
     typeof body?.description === 'string' ? body.description.trim() : null,
   category: typeof body?.category === 'string' ? body.category.trim() : null,
-  image_url: typeof body?.imageUrl === 'string' ? body.imageUrl.trim() : null,
+  image_url:
+    typeof body?.imageUrl === 'string' && body.imageUrl.trim()
+      ? body.imageUrl.trim()
+      : null,
   sku: typeof body?.sku === 'string' ? body.sku.trim() : null,
   unit_price: Number(body?.unitPrice),
   stock_quantity: Number(body?.stockQuantity),
@@ -27,37 +32,100 @@ const parsePayload = (body: Record<string, unknown> | null) => ({
 });
 
 function validate(product: ReturnType<typeof parsePayload>) {
+  const validImageUrl =
+    product.image_url == null ||
+    (product.image_url.length <= 2048 &&
+      (() => {
+        try {
+          const url = new URL(product.image_url);
+          return url.protocol === 'https:' || url.protocol === 'http:';
+        } catch {
+          return false;
+        }
+      })());
+
   return (
     product.name.length >= 1 &&
     product.name.length <= 160 &&
+    (product.description == null || product.description.length <= 5000) &&
+    (product.category == null || product.category.length <= 80) &&
+    (product.sku == null || product.sku.length <= 80) &&
+    validImageUrl &&
     Number.isFinite(product.unit_price) &&
     product.unit_price >= 0 &&
     Number.isFinite(product.stock_quantity) &&
     product.stock_quantity >= 0 &&
+    Number.isInteger(product.stock_quantity) &&
     Number.isFinite(product.low_stock_threshold) &&
     product.low_stock_threshold >= 0 &&
+    Number.isInteger(product.low_stock_threshold) &&
     (product.compare_at_price == null ||
       (Number.isFinite(product.compare_at_price) &&
         product.compare_at_price >= product.unit_price))
   );
 }
 
+function currentlyFeatured<
+  T extends {
+    marketplace_featured?: boolean | null;
+    marketplace_featured_until?: string | null;
+  },
+>(product: T) {
+  return (
+    product.marketplace_featured === true &&
+    typeof product.marketplace_featured_until === 'string' &&
+    Date.parse(product.marketplace_featured_until) > Date.now()
+  );
+}
+
 async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
-    const { data, error } = await admin
-      .from('inventory_products')
-      .select('*')
-      .eq('barbershop_id', barbershopId)
-      .order('updated_at', { ascending: false });
+    const [{ data, error }, { data: planData, error: planError }] =
+      await Promise.all([
+        admin
+          .from('inventory_products')
+          .select('*')
+          .eq('barbershop_id', barbershopId)
+          .order('updated_at', { ascending: false }),
+        admin.rpc('get_effective_billing_plan_for_barbershop', {
+          p_barbershop_id: barbershopId,
+        }),
+      ]);
+
     if (error) throw error;
-    return NextResponse.json({ products: data ?? [] });
+    if (planError) {
+      console.error('[MARKETPLACE_MANAGE_PLAN_LOOKUP_FAILED]', {
+        code: planError.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        { error: 'Não foi possível verificar o plano da barbearia.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    const plan = typeof planData === 'string' ? planData : 'free';
+    const products = (data ?? []).map((item) => ({
+      ...item,
+      marketplace_featured: plan === 'enterprise' && currentlyFeatured(item),
+    }));
+
+    return NextResponse.json(
+      {
+        products,
+        plan,
+      },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     const response = moduleErrorResponse(error);
     if (response) return response;
+    console.error('[MARKETPLACE_MANAGE_PRODUCTS_LIST_FAILED]', {
+      reason: error instanceof Error ? error.name : 'UNKNOWN',
+    });
     return NextResponse.json(
       { error: 'Não foi possível carregar os produtos.' },
-      { status: 500 },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }
@@ -70,21 +138,82 @@ async function POST__unobserved(request: Request) {
       unknown
     > | null;
     const product = parsePayload(body);
-    if (!validate(product))
+
+    if (!validate(product)) {
       return NextResponse.json(
         { error: 'Verifica os dados do produto.' },
         { status: 400 },
       );
+    }
+    if (product.marketplace_featured && !product.marketplace_visible) {
+      return NextResponse.json(
+        { error: 'Publica o produto antes de ativar o destaque.' },
+        { status: 400 },
+      );
+    }
+    if (
+      product.marketplace_featured &&
+      (!product.active || product.stock_quantity <= 0)
+    ) {
+      return NextResponse.json(
+        { error: 'O destaque requer um produto ativo com stock disponível.' },
+        { status: 400 },
+      );
+    }
+
+    const { data: planData, error: planError } = await admin.rpc(
+      'get_effective_billing_plan_for_barbershop',
+      { p_barbershop_id: barbershopId },
+    );
+    if (planError) {
+      console.error('[MARKETPLACE_MANAGE_PLAN_LOOKUP_FAILED]', {
+        code: planError.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        { error: 'Não foi possível verificar o plano da barbearia.' },
+        { status: 503 },
+      );
+    }
+
+    const plan = typeof planData === 'string' ? planData : 'free';
+    if (product.marketplace_featured && plan !== 'enterprise') {
+      return NextResponse.json(
+        {
+          error:
+            'O destaque de 3 dias está disponível apenas no plano Enterprise.',
+        },
+        { status: 403 },
+      );
+    }
+
+    const now = new Date();
+    const publishedAt = product.marketplace_visible ? now.toISOString() : null;
+    const featuredUntil = product.marketplace_featured
+      ? new Date(now.getTime() + BOOST_WINDOW_MS).toISOString()
+      : null;
+
     const { data, error } = await admin
       .from('inventory_products')
-      .insert({ ...product, barbershop_id: barbershopId })
+      .insert({
+        ...product,
+        barbershop_id: barbershopId,
+        marketplace_published_at: publishedAt,
+        marketplace_featured_until: featuredUntil,
+      })
       .select('*')
       .single();
     if (error) throw error;
-    return NextResponse.json({ product: data }, { status: 201 });
+
+    return NextResponse.json(
+      { product: { ...data, marketplace_featured: currentlyFeatured(data) } },
+      { status: 201, headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     const response = moduleErrorResponse(error);
     if (response) return response;
+    console.error('[MARKETPLACE_MANAGE_PRODUCT_CREATE_FAILED]', {
+      reason: error instanceof Error ? error.name : 'UNKNOWN',
+    });
     return NextResponse.json(
       { error: 'Não foi possível criar o produto.' },
       { status: 500 },

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -36,6 +37,9 @@ type Product = {
   compare_at_price: number | null;
   stock_quantity: number;
   marketplace_featured: boolean;
+  marketplace_published_at?: string | null;
+  marketplace_featured_until?: string | null;
+  updated_at?: string;
   barbershops: Shop | Shop[];
 };
 type CartItem = Product & { quantity: number };
@@ -70,6 +74,21 @@ const getShop = (product: Product) =>
     ? product.barbershops[0]
     : product.barbershops;
 
+function isStoredCartItem(value: unknown): value is CartItem {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Partial<CartItem>;
+  return (
+    typeof item.id === 'string' &&
+    typeof item.barbershop_id === 'string' &&
+    typeof item.name === 'string' &&
+    Number.isFinite(Number(item.unit_price)) &&
+    Number.isFinite(Number(item.stock_quantity)) &&
+    Number.isInteger(item.quantity) &&
+    Number(item.quantity) > 0 &&
+    (item.barbershops == null || typeof item.barbershops === 'object')
+  );
+}
+
 export default function MarketplacePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -82,6 +101,7 @@ export default function MarketplacePage() {
   const [shopId, setShopId] = useState('');
   const [sort, setSort] = useState('featured');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartRestored, setCartRestored] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [submitted, setSubmitted] = useState<string | null>(null);
@@ -122,9 +142,130 @@ export default function MarketplacePage() {
   }
 
   useEffect(() => {
+    const initialShop = new URLSearchParams(window.location.search).get('shop');
+    if (initialShop) setShopId(initialShop);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.sessionStorage.getItem('silentra-marketplace-cart');
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (Array.isArray(parsed)) setCart(parsed.filter(isStoredCartItem));
+      }
+    } catch {
+      try {
+        window.sessionStorage.removeItem('silentra-marketplace-cart');
+      } catch {
+        // Storage can be disabled by browser privacy settings.
+      }
+    } finally {
+      setCartRestored(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!cartRestored) return;
+    try {
+      if (cart.length) {
+        window.sessionStorage.setItem(
+          'silentra-marketplace-cart',
+          JSON.stringify(cart),
+        );
+      } else {
+        window.sessionStorage.removeItem('silentra-marketplace-cart');
+      }
+    } catch {
+      // The cart still works for the current page if session storage is unavailable.
+    }
+  }, [cart, cartRestored]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => void load(), q ? 220 : 0);
     return () => window.clearTimeout(timer);
   }, [q, category, shopId, sort]);
+
+  useEffect(() => {
+    if (loading || !cartRestored) return;
+    const url = new URL(window.location.href);
+    const productId = url.searchParams.get('add');
+    if (!productId) return;
+
+    const requestedProductId = productId;
+    const requestedQuantity = Number(url.searchParams.get('qty') ?? '1');
+    url.searchParams.delete('add');
+    url.searchParams.delete('qty');
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+
+    async function addRequestedProduct() {
+      let product = products.find((item) => item.id === requestedProductId);
+      if (!product) {
+        try {
+          const response = await fetch(
+            `/api/marketplace/products?id=${encodeURIComponent(requestedProductId)}`,
+            { cache: 'no-store' },
+          );
+          const json = await response.json();
+          if (response.ok && json.product) {
+            product = json.product as Product;
+            setProducts((current) =>
+              current.some((item) => item.id === requestedProductId)
+                ? current
+                : [...current, product!],
+            );
+          }
+        } catch {
+          // The product may have been unpublished or removed since the detail page was opened.
+        }
+      }
+
+      if (!product || product.stock_quantity <= 0) {
+        setError(
+          'Este produto já não está disponível para adicionar ao carrinho.',
+        );
+        return;
+      }
+
+      const quantity = Math.min(
+        Math.max(
+          1,
+          Number.isInteger(requestedQuantity) ? requestedQuantity : 1,
+        ),
+        Number(product.stock_quantity),
+      );
+      const switchingShop =
+        cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
+      if (
+        switchingShop &&
+        !window.confirm(
+          'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+        )
+      ) {
+        return;
+      }
+
+      setCart((current) => {
+        if (switchingShop) return [{ ...product!, quantity }];
+        const existing = current.find((item) => item.id === product!.id);
+        return existing
+          ? current.map((item) =>
+              item.id === product!.id
+                ? {
+                    ...item,
+                    quantity: Math.min(
+                      Number(product!.stock_quantity),
+                      item.quantity + quantity,
+                    ),
+                  }
+                : item,
+            )
+          : [...current, { ...product!, quantity }];
+      });
+      setCartOpen(true);
+    }
+
+    void addRequestedProduct();
+  }, [cart, cartRestored, loading, products]);
 
   const total = useMemo(
     () =>
@@ -552,13 +693,24 @@ export default function MarketplacePage() {
                       {product.category || 'Produto'}
                     </p>
                     <h3 className="mt-2 min-h-12 text-base font-semibold text-zinc-100">
-                      {product.name}
+                      <Link
+                        href={`/marketplace/${product.id}`}
+                        className="transition hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                      >
+                        {product.name}
+                      </Link>
                     </h3>
                     <p className="mt-2 min-h-10 line-clamp-2 text-xs leading-5 text-zinc-500">
                       {product.description ||
                         'Produto selecionado pela tua barbearia.'}
                     </p>
-                    <p className="mt-3 text-[11px] text-zinc-600">
+                    <Link
+                      href={`/marketplace/${product.id}`}
+                      className="mt-3 inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-emerald-300 transition hover:text-emerald-200"
+                    >
+                      Ver detalhes <ArrowRight className="size-3.5" />
+                    </Link>
+                    <p className="mt-1 text-[11px] text-zinc-600">
                       {productShop?.name || 'Barbearia'}
                     </p>
                     <div className="mt-4 flex items-end justify-between gap-3">

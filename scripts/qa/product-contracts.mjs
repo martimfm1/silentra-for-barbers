@@ -106,6 +106,84 @@ const checks = [
       source.includes('safe-area-inset-bottom') &&
       source.includes("nav[aria-label='Navegação rápida']"),
   },
+  {
+    name: 'Marketplace product publication migration caps boost at three days',
+    file: 'supabase/migrations/20261013160000_marketplace_product_publication_boost.sql',
+    test: (source) =>
+      source.includes('marketplace_published_at') &&
+      source.includes('marketplace_featured_until') &&
+      source.includes('coalesce(created_at, updated_at, now())') &&
+      source.includes("interval '3 days'") &&
+      source.includes('inventory_products_marketplace_featured_window_check'),
+  },
+  {
+    name: 'Marketplace product creation verifies Enterprise entitlement server-side',
+    file: 'app/api/marketplace/manage/products/route.ts',
+    test: (source) =>
+      source.includes("rpc('get_effective_billing_plan_for_barbershop'") &&
+      source.includes("plan !== 'enterprise'") &&
+      source.includes('marketplace_published_at: publishedAt') &&
+      source.includes('marketplace_featured_until: featuredUntil'),
+  },
+  {
+    name: 'Marketplace sellers can publish products without an optional image URL',
+    file: 'app/api/marketplace/manage/products/route.ts',
+    test: (source) =>
+      source.includes(
+        "typeof body?.imageUrl === 'string' && body.imageUrl.trim()",
+      ) &&
+      source.includes(': null,') &&
+      source.includes('product.name.length >= 1') &&
+      source.includes('product.unit_price >= 0') &&
+      source.includes('Number.isInteger(product.stock_quantity)'),
+  },
+  {
+    name: 'Marketplace product update enforces the original three-day publication window',
+    file: 'app/api/marketplace/manage/products/[productId]/route.ts',
+    test: (source) =>
+      source.includes("plan !== 'enterprise'") &&
+      source.includes('Date.parse(publishedAt) + BOOST_WINDOW_MS') &&
+      source.includes('O destaque só pode ser ativado nos primeiros 3 dias'),
+  },
+  {
+    name: 'Marketplace public product detail checks UUID and seller visibility',
+    file: 'app/api/marketplace/products/route.ts',
+    test: (source) =>
+      source.includes('productId && !UUID_PATTERN.test(productId)') &&
+      source.includes('marketplace_featured_until') &&
+      source.includes('relation?.is_public_in_directory === true') &&
+      source.includes(
+        "relation?.marketplace_sales_mode === 'physical_and_online'",
+      ) &&
+      source.includes('Produto não encontrado ou indisponível.'),
+  },
+  {
+    name: 'Marketplace prioritizes only unexpired Enterprise boosts',
+    file: 'app/api/marketplace/products/route.ts',
+    test: (source) =>
+      source.includes(
+        ".gt('marketplace_featured_until', new Date().toISOString())",
+      ) &&
+      source.includes('...activeFeatured') &&
+      source.includes('visible.filter((item) => !featuredIds.has(item.id))'),
+  },
+  {
+    name: 'Marketplace has dedicated product pages and add-to-cart handoff',
+    file: 'app/marketplace/[productId]/page.tsx',
+    test: (source) =>
+      source.includes('/api/marketplace/products?id=') &&
+      source.includes("searchParams.set('add', product.id)") &&
+      source.includes('searchParams.set(') &&
+      source.includes('Adicionar ao carrinho'),
+  },
+  {
+    name: 'Marketplace catalog cards link to product detail pages and persist cart',
+    file: 'app/marketplace/page.tsx',
+    test: (source) =>
+      source.includes('href={`/marketplace/${product.id}`}') &&
+      source.includes('silentra-marketplace-cart') &&
+      source.includes("url.searchParams.get('add')"),
+  },
 ];
 
 let failed = 0;
