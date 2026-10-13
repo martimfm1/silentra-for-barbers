@@ -76,7 +76,7 @@ async function GET__unobserved() {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { data, error } = await admin
       .from('marketplace_orders')
-      .select('*, marketplace_order_items(*), marketplace_order_events(*)')
+      .select('id, barbershop_id, customer_name, customer_email, customer_phone, notes, subtotal, total, fulfillment_method, status, created_at, updated_at, shipping_address, shipping_city, shipping_postal_code, shipping_country, marketplace_order_items(*), marketplace_order_events(*)')
       .eq('barbershop_id', barbershopId)
       .order('created_at', { ascending: false })
       .limit(200);
