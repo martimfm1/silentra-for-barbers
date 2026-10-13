@@ -187,6 +187,7 @@ export default function MarketplacePage() {
     const productId = url.searchParams.get('add');
     if (!productId) return;
 
+    const requestedProductId = productId;
     const requestedQuantity = Number(url.searchParams.get('qty') ?? '1');
     url.searchParams.delete('add');
     url.searchParams.delete('qty');
@@ -197,18 +198,18 @@ export default function MarketplacePage() {
     );
 
     async function addRequestedProduct() {
-      let product = products.find((item) => item.id === productId);
+      let product = products.find((item) => item.id === requestedProductId);
       if (!product) {
         try {
           const response = await fetch(
-            `/api/marketplace/products?id=${encodeURIComponent(productId)}`,
+            `/api/marketplace/products?id=${encodeURIComponent(requestedProductId)}`,
             { cache: 'no-store' },
           );
           const json = await response.json();
           if (response.ok && json.product) {
             product = json.product as Product;
             setProducts((current) =>
-              current.some((item) => item.id === productId)
+              current.some((item) => item.id === requestedProductId)
                 ? current
                 : [...current, product!],
             );
