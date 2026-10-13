@@ -9,6 +9,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 ## Experiência do consumidor
 
 ### Descoberta
+
 - Pesquisa por nome e descrição, disponível também em ecrãs móveis.
 - Filtros por categoria e barbearia; ordenação por destaque, novidade e preço.
 - Só apresentar produtos ativos, publicados, com stock e pertencentes a barbearias com catálogo público e vendas online ativas.
@@ -17,6 +18,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - Nunca apresentar dados internos da barbearia nem confiar em filtros de tenant enviados pelo browser.
 
 ### Compra sem fricção
+
 - Carrinho de uma única barbearia por encomenda, com indicação clara quando trocar de vendedor substitui o carrinho atual.
 - Quantidades limitadas pelo stock visível; preço, stock e total recalculados no servidor.
 - Checkout sem obrigar à criação de conta: nome, email e telefone.
@@ -28,6 +30,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - O comprovativo de encomenda não deve ser apresentado como fatura.
 
 ### Pós-compra
+
 - Email de confirmação com referência, artigos, total, vendedor e instruções de levantamento/entrega.
 - Futuro acompanhamento por ligação privada, imprevisível, revogável e com validade; nunca permitir consultar encomendas só com um ID sequencial ou email.
 - Mensagens de estado coerentes entre email, página pública e painel do vendedor.
@@ -37,6 +40,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 ## Experiência do vendedor
 
 ### Catálogo e inventário
+
 - Criar, editar, arquivar e publicar produtos.
 - Nome, descrição, categoria, imagens, SKU opcional, preço, preço promocional, stock e limiar de stock baixo.
 - Alternar entre venda apenas presencial e venda presencial + online.
@@ -46,6 +50,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - Operações sempre limitadas à barbearia autenticada no servidor.
 
 ### Operação de encomendas
+
 - Lista pesquisável e filtrável por estado e método de entrega.
 - Estados de negócio explícitos: recebida, confirmada, em preparação, pronta, enviada, entregue, concluída e cancelada.
 - Transições validadas no servidor; não aceitar saltos arbitrários de estado.
@@ -56,6 +61,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - Não inventar integração de tracking ou transportadora; a barbearia gere o envio por sua conta.
 
 ### Visão de negócio
+
 - Métricas separadas: encomendas abertas, concluídas, valor de encomendas não canceladas e unidades vendidas.
 - Período selecionável para relatórios e comparação justa com o período anterior.
 - Receita bruta não deve ser confundida com lucro, pagamentos recebidos ou faturação fiscal.

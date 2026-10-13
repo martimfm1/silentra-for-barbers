@@ -247,7 +247,9 @@ async function POST__unobserved(request: Request) {
     const candidateTrackingToken = randomBytes(32).toString('hex');
     const { data: trackingRow, error: trackingError } = await db
       .from('marketplace_orders')
-      .update({ tracking_token_hash: hashTrackingToken(candidateTrackingToken) })
+      .update({
+        tracking_token_hash: hashTrackingToken(candidateTrackingToken),
+      })
       .eq('id', order.id)
       .eq('barbershop_id', shopId)
       .select('id')
@@ -255,7 +257,8 @@ async function POST__unobserved(request: Request) {
 
     // The order is already committed. A tracking-token failure must not make
     // checkout look unsuccessful and encourage the customer to place it again.
-    const trackingToken = trackingError || !trackingRow ? null : candidateTrackingToken;
+    const trackingToken =
+      trackingError || !trackingRow ? null : candidateTrackingToken;
     if (trackingError) {
       console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', {
         orderId: order.id,

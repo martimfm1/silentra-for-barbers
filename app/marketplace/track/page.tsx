@@ -116,8 +116,7 @@ export default function MarketplaceOrderTrackingPage() {
 
           {loading ? (
             <p className="mt-6 flex items-center gap-2 text-sm text-zinc-400">
-              <RefreshCw className="size-4 animate-spin" />
-              A consultar o estado…
+              <RefreshCw className="size-4 animate-spin" />A consultar o estado…
             </p>
           ) : error ? (
             <p
@@ -136,9 +135,7 @@ export default function MarketplaceOrderTrackingPage() {
                   <p className="mt-2 text-xl font-semibold">
                     {STATUS_LABELS[order.status] ?? 'Estado atualizado'}
                   </p>
-                  <p className="mt-1 text-sm text-zinc-400">
-                    {order.shopName}
-                  </p>
+                  <p className="mt-1 text-sm text-zinc-400">{order.shopName}</p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">

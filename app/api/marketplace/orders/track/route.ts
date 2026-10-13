@@ -12,9 +12,7 @@ const MAX_BODY_BYTES = 512;
 async function readSmallJsonBody(
   request: Request,
 ): Promise<
-  | { kind: 'ok'; value: unknown }
-  | { kind: 'invalid' }
-  | { kind: 'too-large' }
+  { kind: 'ok'; value: unknown } | { kind: 'invalid' } | { kind: 'too-large' }
 > {
   const reader = request.body?.getReader();
   if (!reader) return { kind: 'invalid' };
