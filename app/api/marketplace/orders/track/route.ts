@@ -143,7 +143,7 @@ async function POST__unobserved(request: Request) {
     // do not invalidate the original receipt link.
     const { data: capability, error: capabilityError } = await db
       .from('marketplace_order_tracking_tokens')
-      .select('id, order_id, revoked_at')
+      .select('id, order_id, revoked_at, expires_at')
       .eq('token_hash', tokenHash)
       .maybeSingle();
 
@@ -154,7 +154,13 @@ async function POST__unobserved(request: Request) {
         code: capabilityError.code ?? 'UNKNOWN',
       });
     } else if (capability) {
-      if (capability.revoked_at) return notFound();
+      if (
+        capability.revoked_at ||
+        !capability.expires_at ||
+        Date.parse(capability.expires_at) <= Date.now()
+      ) {
+        return notFound();
+      }
       orderId = capability.order_id;
     }
 
@@ -176,6 +182,20 @@ async function POST__unobserved(request: Request) {
       }
       if (!legacyOrder) return notFound();
       orderId = legacyOrder.id;
+
+      // A legacy token can be created during a rolling deployment. Register it
+      // with the new expiry/revocation model on first successful use when the
+      // capability table is available. A concurrent insert is harmless.
+      if (!capabilityError) {
+        const { error: registerError } = await db
+          .from('marketplace_order_tracking_tokens')
+          .insert({ order_id: orderId, token_hash: tokenHash });
+        if (registerError && registerError.code !== '23505') {
+          console.error('[MARKETPLACE_TRACKING_LEGACY_CAPABILITY_REGISTER_FAILED]', {
+            code: registerError.code ?? 'UNKNOWN',
+          });
+        }
+      }
     }
 
     const { data: order, error: orderError } = await db
