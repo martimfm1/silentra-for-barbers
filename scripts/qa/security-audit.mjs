@@ -107,6 +107,14 @@ const routeSecurityChecks = [
     ],
     label: 'Rate limit secret environment validation',
   },
+  {
+    file: 'supabase/migrations/20261013010000_grant_public_rate_limit_service_role.sql',
+    markers: [
+      'public.consume_public_rate_limit(text, integer, integer)',
+      'to service_role;',
+    ],
+    label: 'Public rate-limit RPC service-role permission',
+  },
 ];
 
 for (const check of routeSecurityChecks) {
