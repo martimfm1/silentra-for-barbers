@@ -1,0 +1,73 @@
+name: Final marketplace formatting
+
+on:
+  push:
+    branches:
+      - marketplace-product-detail-and-boost
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(style):') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: marketplace-product-detail-and-boost
+          persist-credentials: true
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format marketplace sources and docs
+        run: |
+          pnpm exec prettier --write \
+            app/api/marketplace/manage/products/route.ts \
+            'app/api/marketplace/manage/products/[productId]/route.ts' \
+            app/api/marketplace/products/route.ts \
+            app/api/marketplace/orders/route.ts \
+            app/api/marketplace/orders/track/route.ts \
+            'app/marketplace/[productId]/page.tsx' \
+            app/marketplace/page.tsx \
+            app/marketplace/track/page.tsx \
+            app/dashboard/pos/loja/page.tsx \
+            app/dashboard/pos/produtos/page.tsx \
+            scripts/qa/product-contracts.mjs \
+            scripts/qa/api-audit.mjs \
+            docs/marketplace-product-experience.md \
+            docs/marketplace-qa-checklist.md
+      - name: Commit formatting and remove this workflow
+        run: |
+          rm .github/workflows/marketplace-final-format.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/api/marketplace/manage/products/route.ts
+          git add 'app/api/marketplace/manage/products/[productId]/route.ts'
+          git add app/api/marketplace/products/route.ts
+          git add app/api/marketplace/orders/route.ts
+          git add app/api/marketplace/orders/track/route.ts
+          git add 'app/marketplace/[productId]/page.tsx'
+          git add app/marketplace/page.tsx
+          git add app/marketplace/track/page.tsx
+          git add app/dashboard/pos/loja/page.tsx
+          git add app/dashboard/pos/produtos/page.tsx
+          git add scripts/qa/product-contracts.mjs
+          git add scripts/qa/api-audit.mjs
+          git add docs/marketplace-product-experience.md
+          git add docs/marketplace-qa-checklist.md
+          git add .github/workflows/marketplace-final-format.yml
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(style): final marketplace formatting"
+            git push origin marketplace-product-detail-and-boost
+          fi
