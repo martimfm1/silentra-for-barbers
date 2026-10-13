@@ -41,7 +41,6 @@ jobs:
             app/dashboard/pos/loja/page.tsx \
             app/dashboard/pos/produtos/page.tsx \
             scripts/qa/product-contracts.mjs \
-            supabase/migrations/20261013160000_marketplace_product_publication_boost.sql
       - name: Commit formatting and remove this workflow
         run: |
           rm .github/workflows/format-marketplace-once.yml
