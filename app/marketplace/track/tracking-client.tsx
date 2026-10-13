@@ -2,7 +2,7 @@
 
 declare global {
   interface Window {
-    __SILENTRA_MARKETPLACE_TRACKING_TOKEN__?: string;
+    __SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__?: () => string | null;
   }
 }
 
@@ -304,12 +304,10 @@ export default function MarketplaceOrderTrackingClient() {
       const fragmentToken = new URLSearchParams(
         window.location.hash.slice(1),
       ).get('token');
-      initialTokenRef.current =
-        fragmentToken ?? window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__ ?? null;
-
-      // Consume the early bootstrap value immediately so no other client code
-      // can accidentally reuse or retain this capability.
-      delete window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__;
+      const bootstrapToken =
+        window.__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__?.() ?? null;
+      delete window.__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__;
+      initialTokenRef.current = fragmentToken ?? bootstrapToken;
       fragmentProcessedRef.current = true;
 
       // Defence in depth: the root bootstrap normally scrubs this before GTM,
