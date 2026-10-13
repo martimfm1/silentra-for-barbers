@@ -4,9 +4,11 @@ alter table public.inventory_products
   add column if not exists marketplace_published_at timestamptz,
   add column if not exists marketplace_featured_until timestamptz;
 
--- Existing listings receive their historical publication date where possible.
+-- The old schema did not retain a publication timestamp. Use created_at as a
+-- conservative lower bound rather than updated_at, which may have changed after
+-- publication and could incorrectly grant an old listing a new boost window.
 update public.inventory_products
-set marketplace_published_at = coalesce(updated_at, now())
+set marketplace_published_at = coalesce(created_at, updated_at, now())
 where marketplace_visible = true
   and marketplace_published_at is null;
 
