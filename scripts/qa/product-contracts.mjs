@@ -126,6 +126,16 @@ const checks = [
       source.includes('marketplace_featured_until: featuredUntil'),
   },
   {
+    name: 'Marketplace sellers can publish products without an optional image URL',
+    file: 'app/api/marketplace/manage/products/route.ts',
+    test: (source) =>
+      source.includes("typeof body?.imageUrl === 'string' && body.imageUrl.trim()") &&
+      source.includes(': null,') &&
+      source.includes('product.name.length >= 1') &&
+      source.includes('product.unit_price >= 0') &&
+      source.includes('Number.isInteger(product.stock_quantity)'),
+  },
+  {
     name: 'Marketplace product update enforces the original three-day publication window',
     file: 'app/api/marketplace/manage/products/[productId]/route.ts',
     test: (source) =>
