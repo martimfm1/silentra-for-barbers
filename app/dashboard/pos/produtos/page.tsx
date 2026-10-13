@@ -514,7 +514,8 @@ export default function MarketplaceProductsPage() {
                 {editing ? `Editar ${editing.name}` : 'Novo produto'}
               </CardTitle>
               <p className="text-sm text-zinc-500">
-                Preenche a informação pública, preço, imagem e stock. O mesmo stock é usado no POS e no marketplace.
+                Preenche a informação pública, preço, imagem e stock. O mesmo
+                stock é usado no POS e no marketplace.
               </p>
             </CardHeader>
             <CardContent>
@@ -611,7 +612,8 @@ export default function MarketplaceProductsPage() {
                         ...form,
                         stockQuantity: event.target.value,
                         marketplaceFeatured:
-                          Number(event.target.value) > 0 && form.marketplaceFeatured,
+                          Number(event.target.value) > 0 &&
+                          form.marketplaceFeatured,
                       })
                     }
                   />
@@ -657,7 +659,8 @@ export default function MarketplaceProductsPage() {
                         setForm({
                           ...form,
                           active: checked,
-                          marketplaceFeatured: checked && form.marketplaceFeatured,
+                          marketplaceFeatured:
+                            checked && form.marketplaceFeatured,
                         })
                       }
                       title="Produto ativo"
@@ -668,7 +671,8 @@ export default function MarketplaceProductsPage() {
                         setForm({
                           ...form,
                           marketplaceVisible: checked,
-                          marketplaceFeatured: checked && form.marketplaceFeatured,
+                          marketplaceFeatured:
+                            checked && form.marketplaceFeatured,
                         })
                       }
                       title="Publicar online"

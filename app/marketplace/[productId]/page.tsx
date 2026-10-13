@@ -206,7 +206,8 @@ export default function MarketplaceProductPage() {
             {shop && (
               <p className="mt-3 flex items-center gap-2 text-sm text-zinc-500">
                 <Store className="size-4" />
-                Vendido por <span className="font-medium text-zinc-300">{shop.name}</span>
+                Vendido por{' '}
+                <span className="font-medium text-zinc-300">{shop.name}</span>
               </p>
             )}
 
@@ -220,7 +221,8 @@ export default function MarketplaceProductPage() {
                     {money(product.compare_at_price!)}
                   </span>
                   <span className="rounded-full bg-rose-400/15 px-2.5 py-1 text-xs font-semibold text-rose-200">
-                    Poupa {money(product.compare_at_price! - product.unit_price)}
+                    Poupa{' '}
+                    {money(product.compare_at_price! - product.unit_price)}
                   </span>
                 </>
               )}
@@ -229,14 +231,17 @@ export default function MarketplaceProductPage() {
             <div className="mt-6 h-px bg-white/10" />
             <h2 className="mt-6 text-sm font-semibold text-white">Descrição</h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
-              {product.description || 'A barbearia ainda não adicionou uma descrição para este produto.'}
+              {product.description ||
+                'A barbearia ainda não adicionou uma descrição para este produto.'}
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <div className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                 <PackageCheck className="mt-0.5 size-5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-200">Stock disponível</p>
+                  <p className="text-sm font-semibold text-zinc-200">
+                    Stock disponível
+                  </p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {product.stock_quantity > 0
                       ? `${Number(product.stock_quantity)} unidade(s) disponíveis`
@@ -247,7 +252,9 @@ export default function MarketplaceProductPage() {
               <div className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                 <Truck className="mt-0.5 size-5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-200">Entrega pela barbearia</p>
+                  <p className="text-sm font-semibold text-zinc-200">
+                    Entrega pela barbearia
+                  </p>
                   <p className="mt-1 text-xs text-zinc-500">
                     Levantamento ou envio conforme as opções do vendedor.
                   </p>
@@ -259,7 +266,9 @@ export default function MarketplaceProductPage() {
               <div className="mt-7 rounded-3xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-white">Quantidade</p>
+                    <p className="text-sm font-semibold text-white">
+                      Quantidade
+                    </p>
                     <p className="mt-1 text-xs text-zinc-500">
                       Máximo de {Number(product.stock_quantity)} unidade(s)
                     </p>
@@ -267,7 +276,9 @@ export default function MarketplaceProductPage() {
                   <div className="inline-flex items-center rounded-xl border border-white/10 bg-zinc-950 p-1">
                     <button
                       type="button"
-                      onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                      onClick={() =>
+                        setQuantity((value) => Math.max(1, value - 1))
+                      }
                       disabled={quantity <= 1}
                       className="flex size-9 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 disabled:opacity-30"
                       aria-label="Diminuir quantidade"
@@ -303,7 +314,8 @@ export default function MarketplaceProductPage() {
               </div>
             ) : (
               <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-sm text-zinc-500">
-                Este produto está esgotado. Consulta o marketplace para veres alternativas.
+                Este produto está esgotado. Consulta o marketplace para veres
+                alternativas.
               </div>
             )}
 
@@ -318,7 +330,8 @@ export default function MarketplaceProductPage() {
         </section>
 
         <footer className="mt-14 border-t border-white/10 pt-6 text-xs text-zinc-600">
-          O pagamento e o cumprimento da encomenda são tratados diretamente pela barbearia vendedora.
+          O pagamento e o cumprimento da encomenda são tratados diretamente pela
+          barbearia vendedora.
         </footer>
       </div>
     </main>

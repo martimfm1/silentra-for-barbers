@@ -870,7 +870,8 @@ export default function POSStorePage() {
                         ...product,
                         stockQuantity: e.target.value,
                         marketplaceFeatured:
-                          Number(e.target.value) > 0 && product.marketplaceFeatured,
+                          Number(e.target.value) > 0 &&
+                          product.marketplaceFeatured,
                       })
                     }
                   />
@@ -938,9 +939,9 @@ export default function POSStorePage() {
                       Number(product.stockQuantity) <= 0 ||
                       Boolean(
                         editing?.marketplace_published_at &&
-                          Date.now() >=
-                            Date.parse(editing.marketplace_published_at) +
-                              3 * 24 * 60 * 60 * 1000,
+                        Date.now() >=
+                          Date.parse(editing.marketplace_published_at) +
+                            3 * 24 * 60 * 60 * 1000,
                       )
                     }
                     onChange={(e) =>

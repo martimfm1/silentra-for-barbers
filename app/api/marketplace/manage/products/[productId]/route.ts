@@ -63,10 +63,12 @@ function validate(product: ReturnType<typeof normalize>) {
   );
 }
 
-function currentlyFeatured<T extends {
-  marketplace_featured?: boolean | null;
-  marketplace_featured_until?: string | null;
-}>(product: T) {
+function currentlyFeatured<
+  T extends {
+    marketplace_featured?: boolean | null;
+    marketplace_featured_until?: string | null;
+  },
+>(product: T) {
   return (
     product.marketplace_featured === true &&
     typeof product.marketplace_featured_until === 'string' &&
@@ -111,7 +113,9 @@ async function PATCH__unobserved(
 
     const { data: existing, error: existingError } = await admin
       .from('inventory_products')
-      .select('id, marketplace_published_at, marketplace_visible, marketplace_featured_until')
+      .select(
+        'id, marketplace_published_at, marketplace_visible, marketplace_featured_until',
+      )
       .eq('id', productId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
@@ -146,7 +150,10 @@ async function PATCH__unobserved(
       const plan = typeof planData === 'string' ? planData : 'free';
       if (plan !== 'enterprise') {
         return NextResponse.json(
-          { error: 'O destaque de 3 dias está disponível apenas no plano Enterprise.' },
+          {
+            error:
+              'O destaque de 3 dias está disponível apenas no plano Enterprise.',
+          },
           { status: 403 },
         );
       }
@@ -159,7 +166,10 @@ async function PATCH__unobserved(
       const deadline = Date.parse(publishedAt) + BOOST_WINDOW_MS;
       if (now.getTime() >= deadline) {
         return NextResponse.json(
-          { error: 'O destaque só pode ser ativado nos primeiros 3 dias após a publicação.' },
+          {
+            error:
+              'O destaque só pode ser ativado nos primeiros 3 dias após a publicação.',
+          },
           { status: 400 },
         );
       }

@@ -138,8 +138,10 @@ const checks = [
     test: (source) =>
       source.includes('productId && !UUID_PATTERN.test(productId)') &&
       source.includes('marketplace_featured_until') &&
-      source.includes("relation?.is_public_in_directory === true") &&
-      source.includes("relation?.marketplace_sales_mode === 'physical_and_online'") &&
+      source.includes('relation?.is_public_in_directory === true') &&
+      source.includes(
+        "relation?.marketplace_sales_mode === 'physical_and_online'",
+      ) &&
       source.includes('Produto não encontrado ou indisponível.'),
   },
   {
@@ -148,7 +150,7 @@ const checks = [
     test: (source) =>
       source.includes('/api/marketplace/products?id=') &&
       source.includes("searchParams.set('add', product.id)") &&
-      source.includes("searchParams.set(") &&
+      source.includes('searchParams.set(') &&
       source.includes('Adicionar ao carrinho'),
   },
   {

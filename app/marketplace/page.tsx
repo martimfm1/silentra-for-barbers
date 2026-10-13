@@ -191,11 +191,7 @@ export default function MarketplacePage() {
     const requestedQuantity = Number(url.searchParams.get('qty') ?? '1');
     url.searchParams.delete('add');
     url.searchParams.delete('qty');
-    window.history.replaceState(
-      {},
-      '',
-      url.pathname + url.search + url.hash,
-    );
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
 
     async function addRequestedProduct() {
       let product = products.find((item) => item.id === requestedProductId);
@@ -220,7 +216,9 @@ export default function MarketplacePage() {
       }
 
       if (!product || product.stock_quantity <= 0) {
-        setError('Este produto já não está disponível para adicionar ao carrinho.');
+        setError(
+          'Este produto já não está disponível para adicionar ao carrinho.',
+        );
         return;
       }
 
@@ -375,7 +373,9 @@ export default function MarketplacePage() {
       if (!response.ok)
         throw new Error(json.error || 'Não foi possível criar a encomenda.');
       setSubmitted(json.order.id);
-      setTrackingToken(typeof json.trackingToken === 'string' ? json.trackingToken : null);
+      setTrackingToken(
+        typeof json.trackingToken === 'string' ? json.trackingToken : null,
+      );
       setEmailSent(json.emailSent ?? null);
       setCart([]);
       setCustomer(EMPTY_CHECKOUT);
@@ -578,14 +578,23 @@ export default function MarketplacePage() {
                   : 'Enviámos o comprovativo para o teu email.'}
               </p>
               {trackingToken && (
-                <a href={'/marketplace/track#token=' + encodeURIComponent(trackingToken)} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/15">
+                <a
+                  href={
+                    '/marketplace/track#token=' +
+                    encodeURIComponent(trackingToken)
+                  }
+                  className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/15"
+                >
                   Acompanhar encomenda <ArrowRight className="size-4" />
                 </a>
               )}
             </div>
             <button
               type="button"
-              onClick={() => { setSubmitted(null); setTrackingToken(null); }}
+              onClick={() => {
+                setSubmitted(null);
+                setTrackingToken(null);
+              }}
               className="ml-auto shrink-0 text-zinc-600 hover:text-white"
               aria-label="Fechar confirmação"
             >

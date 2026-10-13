@@ -204,7 +204,10 @@ async function GET__unobserved(request: Request) {
       .eq('barbershops.is_public_in_directory', true)
       .eq('barbershops.marketplace_sales_mode', 'physical_and_online');
 
-    if (q) featuredQuery = featuredQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+    if (q)
+      featuredQuery = featuredQuery.or(
+        `name.ilike.%${q}%,description.ilike.%${q}%`,
+      );
     if (category) featuredQuery = featuredQuery.eq('category', category);
     if (shopId) featuredQuery = featuredQuery.eq('barbershop_id', shopId);
 
@@ -214,7 +217,10 @@ async function GET__unobserved(request: Request) {
       .limit(100);
 
     if (featuredError) {
-      console.error('[MARKETPLACE_FEATURED_PRODUCTS_API]', featuredError.name ?? 'database_error');
+      console.error(
+        '[MARKETPLACE_FEATURED_PRODUCTS_API]',
+        featuredError.name ?? 'database_error',
+      );
       return NextResponse.json(
         { error: 'Não foi possível carregar os produtos em destaque.' },
         { status: 500, headers: { 'Cache-Control': 'no-store' } },

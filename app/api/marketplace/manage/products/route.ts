@@ -65,10 +65,12 @@ function validate(product: ReturnType<typeof parsePayload>) {
   );
 }
 
-function currentlyFeatured<T extends {
-  marketplace_featured?: boolean | null;
-  marketplace_featured_until?: string | null;
-}>(product: T) {
+function currentlyFeatured<
+  T extends {
+    marketplace_featured?: boolean | null;
+    marketplace_featured_until?: string | null;
+  },
+>(product: T) {
   return (
     product.marketplace_featured === true &&
     typeof product.marketplace_featured_until === 'string' &&
@@ -79,19 +81,17 @@ function currentlyFeatured<T extends {
 async function GET__unobserved() {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
-    const [
-      { data, error },
-      { data: planData, error: planError },
-    ] = await Promise.all([
-      admin
-        .from('inventory_products')
-        .select('*')
-        .eq('barbershop_id', barbershopId)
-        .order('updated_at', { ascending: false }),
-      admin.rpc('get_effective_billing_plan_for_barbershop', {
-        p_barbershop_id: barbershopId,
-      }),
-    ]);
+    const [{ data, error }, { data: planData, error: planError }] =
+      await Promise.all([
+        admin
+          .from('inventory_products')
+          .select('*')
+          .eq('barbershop_id', barbershopId)
+          .order('updated_at', { ascending: false }),
+        admin.rpc('get_effective_billing_plan_for_barbershop', {
+          p_barbershop_id: barbershopId,
+        }),
+      ]);
 
     if (error) throw error;
     if (planError) {
@@ -107,8 +107,7 @@ async function GET__unobserved() {
     const plan = typeof planData === 'string' ? planData : 'free';
     const products = (data ?? []).map((item) => ({
       ...item,
-      marketplace_featured:
-        plan === 'enterprise' && currentlyFeatured(item),
+      marketplace_featured: plan === 'enterprise' && currentlyFeatured(item),
     }));
 
     return NextResponse.json(
@@ -179,7 +178,10 @@ async function POST__unobserved(request: Request) {
     const plan = typeof planData === 'string' ? planData : 'free';
     if (product.marketplace_featured && plan !== 'enterprise') {
       return NextResponse.json(
-        { error: 'O destaque de 3 dias está disponível apenas no plano Enterprise.' },
+        {
+          error:
+            'O destaque de 3 dias está disponível apenas no plano Enterprise.',
+        },
         { status: 403 },
       );
     }
