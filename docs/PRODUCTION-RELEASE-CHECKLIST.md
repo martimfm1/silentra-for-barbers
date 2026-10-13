@@ -4,7 +4,7 @@ This checklist must be completed before enabling customer traffic on a release.
 
 ## 1. Code and CI
 
-- [ ] CI on the exact release commit is green: typecheck, lint, API/security/product QA, dependency audit, format check, production build and smoke QA.
+- [ ] CI on the exact release commit is green: typecheck, lint, API/security/product QA, dependency audit, Prettier format check, production build and smoke QA.
 - [ ] Review the PR diff and confirm no secrets, customer data or production credentials were committed.
 - [ ] Confirm Vercel is deploying the intended commit and production domain.
 - [ ] Review Supabase Security and Performance Advisors. Classify intentional service-role-only tables without client policies separately from genuine access-control defects; review exposed `SECURITY DEFINER` RPCs before release.
