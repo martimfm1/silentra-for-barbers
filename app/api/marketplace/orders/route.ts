@@ -247,7 +247,9 @@ async function POST__unobserved(request: Request) {
     const candidateTrackingToken = randomBytes(32).toString('hex');
     const { error: trackingError } = await db
       .from('marketplace_orders')
-      .update({ tracking_token_hash: hashTrackingToken(candidateTrackingToken) })
+      .update({
+        tracking_token_hash: hashTrackingToken(candidateTrackingToken),
+      })
       .eq('id', order.id)
       .eq('barbershop_id', shopId);
 
@@ -261,7 +263,10 @@ async function POST__unobserved(request: Request) {
       });
     }
     const trackingUrl = trackingToken
-      ? new URL('/marketplace/track#token=' + trackingToken, request.url).toString()
+      ? new URL(
+          '/marketplace/track#token=' + trackingToken,
+          request.url,
+        ).toString()
       : undefined;
     const { data: details } = await db
       .from('marketplace_orders')
@@ -320,7 +325,19 @@ async function POST__unobserved(request: Request) {
       });
     }
 
-    return NextResponse.json({ order: { id: order.id, status: order.status, total: order.total, created_at: order.created_at }, trackingToken, emailSent }, { status: 201 });
+    return NextResponse.json(
+      {
+        order: {
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          created_at: order.created_at,
+        },
+        trackingToken,
+        emailSent,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('[MARKETPLACE_ORDER_API]', error);
     return NextResponse.json(
