@@ -1,9 +1,13 @@
-import { createHash, randomBytes } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
+import {
+  buildMarketplaceTrackingUrl,
+  createMarketplaceTrackingToken,
+  hashMarketplaceTrackingToken,
+} from '@/lib/marketplace/tracking';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -20,10 +24,6 @@ type NormalizedOrderItem = {
   productId: string;
   quantity: number;
 };
-
-function hashTrackingToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
 
 function escapeHtml(value: string): string {
   return value
@@ -244,12 +244,33 @@ async function POST__unobserved(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
-    const candidateTrackingToken = randomBytes(32).toString('hex');
+    const candidateTrackingToken = createMarketplaceTrackingToken();
+    const candidateTrackingHash = hashMarketplaceTrackingToken(
+      candidateTrackingToken,
+    );
+
+    // Keep a multi-token capability row for receipts and later status emails.
+    // The legacy hash remains populated for backwards compatibility during
+    // rolling deployments and for older tracking links.
+    const { data: capabilityRow, error: capabilityError } = await db
+      .from('marketplace_order_tracking_tokens')
+      .insert({
+        order_id: order.id,
+        token_hash: candidateTrackingHash,
+      })
+      .select('id')
+      .maybeSingle();
+
+    if (capabilityError) {
+      console.error('[MARKETPLACE_TRACKING_CAPABILITY_SAVE_FAILED]', {
+        orderId: order.id,
+        code: capabilityError.code ?? 'UNKNOWN',
+      });
+    }
+
     const { data: trackingRow, error: trackingError } = await db
       .from('marketplace_orders')
-      .update({
-        tracking_token_hash: hashTrackingToken(candidateTrackingToken),
-      })
+      .update({ tracking_token_hash: candidateTrackingHash })
       .eq('id', order.id)
       .eq('barbershop_id', shopId)
       .select('id')
@@ -258,34 +279,19 @@ async function POST__unobserved(request: Request) {
     // The order is already committed. A tracking-token failure must not make
     // checkout look unsuccessful and encourage the customer to place it again.
     const trackingToken =
-      trackingError || !trackingRow ? null : candidateTrackingToken;
+      (!capabilityError && capabilityRow) || (!trackingError && trackingRow)
+        ? candidateTrackingToken
+        : null;
     if (trackingError) {
-      console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', {
+      console.error('[MARKETPLACE_TRACKING_LEGACY_HASH_SAVE_FAILED]', {
         orderId: order.id,
-        code: trackingError?.code ?? 'NO_ORDER_UPDATED',
+        code: trackingError.code ?? 'NO_ORDER_UPDATED',
       });
     }
-    const configuredAppUrl =
-      process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
-    let trackingUrl: string | undefined;
-    if (trackingToken && configuredAppUrl) {
-      try {
-        const appUrl = new URL(configuredAppUrl);
-        if (
-          appUrl.protocol === 'https:' ||
-          (process.env.NODE_ENV !== 'production' &&
-            appUrl.protocol === 'http:' &&
-            ['localhost', '127.0.0.1'].includes(appUrl.hostname))
-        ) {
-          trackingUrl = new URL(
-            '/marketplace/track#token=' + trackingToken,
-            appUrl.origin,
-          ).toString();
-        }
-      } catch {
-        console.error('[MARKETPLACE_TRACKING_BASE_URL_INVALID]');
-      }
-    }
+
+    const trackingUrl = trackingToken
+      ? buildMarketplaceTrackingUrl(trackingToken) ?? undefined
+      : undefined;
     if (trackingToken && !trackingUrl) {
       console.error('[MARKETPLACE_TRACKING_LINK_UNAVAILABLE]', {
         orderId: order.id,
