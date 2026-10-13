@@ -263,6 +263,22 @@ const checks = [
       );
     },
   },
+  {
+    name: 'Private order tracking page overrides public page headers',
+    file: 'next.config.ts',
+    test: (source) => {
+      const genericHeaders = source.indexOf("source: '/:path*'");
+      const trackingHeaders = source.indexOf(
+        "source: '/marketplace/track/:path*'",
+      );
+      return (
+        trackingHeaders > genericHeaders &&
+        source.includes("key: 'Cache-Control', value: 'no-store, max-age=0'") &&
+        source.includes("key: 'Referrer-Policy', value: 'no-referrer'") &&
+        source.includes("key: 'X-Frame-Options',\n    value: 'DENY'")
+      );
+    },
+  },
 ];
 
 let failed = 0;
