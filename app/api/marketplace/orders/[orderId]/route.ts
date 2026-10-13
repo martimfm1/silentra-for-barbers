@@ -56,6 +56,12 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#039;');
 }
 
+function sanitizeOrderPayload(order: Record<string, unknown>) {
+  const safe = { ...order };
+  delete safe.tracking_token_hash;
+  return safe;
+}
+
 async function notifyCustomer(
   admin: Awaited<ReturnType<typeof requireModuleContext>>['admin'],
   order: {
@@ -183,7 +189,7 @@ async function PATCH__unobserved(
       );
     }
     if (current.status === status) {
-      return NextResponse.json({ order: current });
+      return NextResponse.json({ order: sanitizeOrderPayload(current) });
     }
 
     let updated: unknown;
@@ -247,8 +253,24 @@ async function PATCH__unobserved(
     }
 
     const order = updated as typeof current;
-    await notifyCustomer(admin, order, barbershopId);
-    return NextResponse.json({ order });
+    try {
+      await notifyCustomer(admin, order, barbershopId);
+    } catch (notificationError) {
+      // A committed status transition must remain successful even if preparing
+      // its notification unexpectedly throws. The seller can safely retry the
+      // notification separately rather than repeating the transition.
+      console.error('[MARKETPLACE_STATUS_NOTIFICATION_FAILED]', {
+        orderId: order.id,
+        status: order.status,
+        reason:
+          notificationError instanceof Error
+            ? notificationError.name
+            : 'UNKNOWN',
+      });
+    }
+    return NextResponse.json({
+      order: sanitizeOrderPayload(order as Record<string, unknown>),
+    });
   } catch (error) {
     const response = moduleErrorResponse(error);
     if (response) return response;
