@@ -48,6 +48,7 @@ Use a test barbershop and non-customer test data.
 - [ ] The tracking page removes the token fragment from browser history, disables referrer leakage and is excluded from search indexing.
 - [ ] The response is not cached; IP-wide and per-capability rate limits are exercised.
 - [ ] Receipt and status emails link to the canonical HTTPS origin, not a request-supplied Host header.
+- [ ] Verify Brevo transactional tracking settings for capability-bearing emails; both receipt and status emails pass `contactPixelTrackingConsent: false`, and production tests confirm link handling does not leak or strip the tracking fragment.
 - [ ] Email provider failure does not create duplicate orders or report a committed order as failed.
 - [ ] Dashboard status transitions preserve the allowed lifecycle, tenant boundaries, stock restoration on cancellation and status-event history.
 
