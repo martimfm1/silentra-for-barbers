@@ -9,8 +9,11 @@ create table if not exists public.marketplace_order_tracking_tokens (
   token_hash text not null unique
     check (token_hash ~ '^[a-f0-9]{64}$'),
   created_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '365 days'),
   revoked_at timestamptz,
-  last_used_at timestamptz
+  last_used_at timestamptz,
+  constraint marketplace_order_tracking_token_expiry_check
+    check (expires_at > created_at)
 );
 
 create index if not exists marketplace_order_tracking_tokens_order_idx
@@ -28,12 +31,14 @@ grant select, insert, update, delete on table public.marketplace_order_tracking_
 insert into public.marketplace_order_tracking_tokens (
   order_id,
   token_hash,
-  created_at
+  created_at,
+  expires_at
 )
 select
   id,
   tracking_token_hash,
-  coalesce(created_at, now())
+  coalesce(created_at, now()),
+  now() + interval '365 days'
 from public.marketplace_orders
 where tracking_token_hash is not null
   and tracking_token_hash ~ '^[a-f0-9]{64}$'
@@ -43,6 +48,8 @@ comment on table public.marketplace_order_tracking_tokens is
   'Private tracking capabilities for marketplace orders. Only token hashes are persisted; service-role access only.';
 comment on column public.marketplace_order_tracking_tokens.token_hash is
   'SHA-256 hash of a random 256-bit bearer token. Never store the raw capability.';
+comment on column public.marketplace_order_tracking_tokens.expires_at is
+  'The tracking capability expires one year after issue; notifications may issue a fresh independent capability.';
 comment on column public.marketplace_order_tracking_tokens.revoked_at is
   'When set, the token is no longer valid even if a legacy hash is present.';
 
