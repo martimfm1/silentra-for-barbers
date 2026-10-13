@@ -250,6 +250,7 @@ async function POST__unobserved(request: Request) {
         'id, previous_status, new_status, customer_message, source, created_at',
       )
       .eq('order_id', order.id)
+      .neq('source', 'manual_email')
       .order('created_at', { ascending: true })
       .limit(100);
 
