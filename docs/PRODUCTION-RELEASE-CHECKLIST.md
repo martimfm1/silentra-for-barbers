@@ -23,10 +23,11 @@ Apply pending migrations in chronological order using the project's normal migra
 
 - `20260813190000_public_booking_rate_limit.sql`
 - `20261013000000_marketplace_order_tracking_tokens.sql`
+- `20261013180000_marketplace_order_tracking_capabilities.sql`
 - `20261013010000_grant_public_rate_limit_service_role.sql`
 - `20261013020000_harden_public_security_definer_privileges.sql`
 
-The tracking-token migration stores only the SHA-256 hash of the random tracking capability. The rate-limit grant is required for the service-role client to invoke the protected database function after public execution was revoked.
+The tracking-token migrations store only SHA-256 hashes of random tracking capabilities. The capabilities migration backfills previously issued links, supports a separate valid link per status notification, allows revocation, and expires links after one year. Ensure this migration is applied before deploying the code that issues multi-token links. The rate-limit grant is required for the service-role client to invoke the protected database function after public execution was revoked.
 
 The security hardening migration also removes anonymous execution from a legacy professional-creation RPC and trigger-only functions, and pins search paths for functions flagged by the production advisor. Public review submission remains intentionally public and performs its own validation.
 
@@ -41,9 +42,12 @@ Use a test barbershop and non-customer test data.
 - [ ] Products from another barbershop cannot be ordered by changing request IDs.
 - [ ] Invalid customer fields, malformed UUIDs, excessive items and invalid quantities are rejected.
 - [ ] Missing/invalid tracking tokens do not reveal whether a specific order exists or any customer details.
-- [ ] A valid tracking link shows only the order reference, status, product lines, total, shop and fulfillment method.
-- [ ] The response is not cached; repeated invalid lookups are rate limited.
-- [ ] The receipt email links to the canonical HTTPS origin, not a request-supplied Host header.
+- [ ] A valid tracking link shows the order reference, status, product lines, total, seller, fulfillment details and chronological status history.
+- [ ] Receipt and status-notification links work independently; issuing a new link does not invalidate older links.
+- [ ] Expired and revoked links return the same generic not-found response as unknown links.
+- [ ] The tracking page removes the token fragment from browser history, disables referrer leakage and is excluded from search indexing.
+- [ ] The response is not cached; IP-wide and per-capability rate limits are exercised.
+- [ ] Receipt and status emails link to the canonical HTTPS origin, not a request-supplied Host header.
 - [ ] Email provider failure does not create duplicate orders or report a committed order as failed.
 - [ ] Dashboard status transitions preserve the allowed lifecycle, tenant boundaries, stock restoration on cancellation and status-event history.
 
