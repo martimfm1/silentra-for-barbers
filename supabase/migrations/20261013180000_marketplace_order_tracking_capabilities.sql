@@ -11,7 +11,6 @@ create table if not exists public.marketplace_order_tracking_tokens (
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '365 days'),
   revoked_at timestamptz,
-  last_used_at timestamptz,
   constraint marketplace_order_tracking_token_expiry_check
     check (expires_at > created_at)
 );
