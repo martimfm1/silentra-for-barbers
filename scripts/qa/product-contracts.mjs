@@ -98,6 +98,7 @@ const checks = [
       source.includes(".eq('barbershop_id', barbershopId)") &&
       source.includes('sendBrevoEmail') &&
       source.includes('createMarketplaceTrackingToken()') &&
+      source.includes('hashMarketplaceTrackingToken(trackingToken)') &&
       source.includes('marketplace_order_tracking_tokens') &&
       source.includes('contactPixelTrackingConsent: false') &&
       source.includes('Acompanhar encomenda'),
