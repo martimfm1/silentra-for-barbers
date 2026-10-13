@@ -280,6 +280,21 @@ export default function MarketplacePage() {
             )}
           </button>
         </div>
+        <div className="px-4 pb-3 md:hidden sm:px-6">
+          <label className="relative block">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600"
+              aria-hidden="true"
+            />
+            <input
+              value={q}
+              onChange={(event) => setQ(event.target.value)}
+              aria-label="Pesquisar produtos"
+              placeholder="Pesquisar produtos, barbearias e categorias"
+              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm outline-none transition focus:border-emerald-400/40 focus:bg-white/[0.06]"
+            />
+          </label>
+        </div>
       </header>
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_46%)]" />
