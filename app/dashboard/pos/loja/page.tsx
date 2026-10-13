@@ -960,7 +960,7 @@ export default function POSStorePage() {
                         ? 'Disponível exclusivamente no plano Enterprise.'
                         : !product.marketplaceVisible
                           ? 'Ativa primeiro a publicação online.'
-                          : !product.active || Number(product.stockQuantity) <= 0
+                          : Number(product.stockQuantity) <= 0
                             ? 'O produto tem de estar ativo e ter stock disponível.'
                             : editing?.marketplace_published_at &&
                                 Date.now() >=
