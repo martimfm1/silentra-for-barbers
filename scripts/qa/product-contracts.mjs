@@ -249,12 +249,14 @@ const checks = [
     name: 'Marketplace tracking token is scrubbed before analytics and pixels execute',
     file: 'app/layout.tsx',
     test: (source) => {
-      const bootstrap = source.indexOf('id="marketplace-tracking-token-bootstrap"');
+      const bootstrap = source.indexOf(
+        'id="marketplace-tracking-token-bootstrap"',
+      );
       const whopPixel = source.indexOf('id="whop-pixel"');
       return (
         source.includes('TRACKING_TOKEN_BOOTSTRAP_SCRIPT') &&
         source.includes('__SILENTRA_MARKETPLACE_TRACKING_TOKEN__') &&
-        source.includes("window.history.replaceState") &&
+        source.includes('window.history.replaceState') &&
         bootstrap >= 0 &&
         whopPixel > bootstrap &&
         source.includes('GoogleTagManager gtmId="GTM-PBCWTRT5"')
