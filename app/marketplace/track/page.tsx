@@ -3,7 +3,8 @@ import MarketplaceOrderTrackingClient from './tracking-client';
 
 export const metadata: Metadata = {
   title: 'Acompanhar encomenda | Silentra Marketplace',
-  description: 'Consulta o estado e o histórico da tua encomenda no Silentra Marketplace.',
+  description:
+    'Consulta o estado e o histórico da tua encomenda no Silentra Marketplace.',
   robots: {
     index: false,
     follow: false,

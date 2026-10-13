@@ -18,9 +18,7 @@ const PRIVATE_HEADERS = {
 };
 
 type ParsedBody =
-  | { kind: 'ok'; value: unknown }
-  | { kind: 'invalid' }
-  | { kind: 'too-large' };
+  { kind: 'ok'; value: unknown } | { kind: 'invalid' } | { kind: 'too-large' };
 
 async function readSmallJsonBody(request: Request): Promise<ParsedBody> {
   const reader = request.body?.getReader();
@@ -90,7 +88,10 @@ async function POST__unobserved(request: Request) {
     );
     if (!ipAllowed) {
       return NextResponse.json(
-        { error: 'Demasiadas tentativas. Aguarda alguns minutos e tenta novamente.' },
+        {
+          error:
+            'Demasiadas tentativas. Aguarda alguns minutos e tenta novamente.',
+        },
         {
           status: 429,
           headers: { ...PRIVATE_HEADERS, 'Retry-After': '300' },
@@ -128,7 +129,9 @@ async function POST__unobserved(request: Request) {
     );
     if (!tokenAllowed) {
       return NextResponse.json(
-        { error: 'Demasiadas consultas para este link. Aguarda alguns minutos.' },
+        {
+          error: 'Demasiadas consultas para este link. Aguarda alguns minutos.',
+        },
         {
           status: 429,
           headers: { ...PRIVATE_HEADERS, 'Retry-After': '300' },
@@ -152,8 +155,7 @@ async function POST__unobserved(request: Request) {
       // absent during a rolling deployment. Never bypass expiry/revocation on
       // permission, connectivity or other database failures.
       const missingCapabilityTable =
-        capabilityError.code === '42P01' ||
-        capabilityError.code === 'PGRST205';
+        capabilityError.code === '42P01' || capabilityError.code === 'PGRST205';
       console.error('[MARKETPLACE_TRACKING_CAPABILITY_LOOKUP_FAILED]', {
         code: capabilityError.code ?? 'UNKNOWN',
         compatibilityFallback: missingCapabilityTable,
@@ -213,9 +215,12 @@ async function POST__unobserved(request: Request) {
           .from('marketplace_order_tracking_tokens')
           .insert({ order_id: orderId, token_hash: tokenHash });
         if (registerError && registerError.code !== '23505') {
-          console.error('[MARKETPLACE_TRACKING_LEGACY_CAPABILITY_REGISTER_FAILED]', {
-            code: registerError.code ?? 'UNKNOWN',
-          });
+          console.error(
+            '[MARKETPLACE_TRACKING_LEGACY_CAPABILITY_REGISTER_FAILED]',
+            {
+              code: registerError.code ?? 'UNKNOWN',
+            },
+          );
         }
       }
     }
@@ -241,7 +246,9 @@ async function POST__unobserved(request: Request) {
 
     const { data: eventRows, error: eventError } = await db
       .from('marketplace_order_events')
-      .select('id, previous_status, new_status, customer_message, source, created_at')
+      .select(
+        'id, previous_status, new_status, customer_message, source, created_at',
+      )
       .eq('order_id', order.id)
       .order('created_at', { ascending: true })
       .limit(100);
@@ -284,14 +291,15 @@ async function POST__unobserved(request: Request) {
           createdAt: order.created_at,
           updatedAt: order.updated_at,
           fulfillmentMethod: order.fulfillment_method,
-          shipping: order.fulfillment_method === 'delivery'
-            ? {
-                address: order.shipping_address,
-                city: order.shipping_city,
-                postalCode: order.shipping_postal_code,
-                country: order.shipping_country,
-              }
-            : null,
+          shipping:
+            order.fulfillment_method === 'delivery'
+              ? {
+                  address: order.shipping_address,
+                  city: order.shipping_city,
+                  postalCode: order.shipping_postal_code,
+                  country: order.shipping_country,
+                }
+              : null,
           shopName: typeof shop?.name === 'string' ? shop.name : 'Barbearia',
           items: (order.marketplace_order_items ?? []).map(
             (item: {

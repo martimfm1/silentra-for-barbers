@@ -76,7 +76,8 @@ const STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
   shipped: 'A encomenda foi enviada pela barbearia.',
   delivered: 'A encomenda foi marcada como entregue.',
   completed: 'Esta encomenda está concluída.',
-  cancelled: 'Esta encomenda foi cancelada. Contacta a barbearia se precisares de ajuda.',
+  cancelled:
+    'Esta encomenda foi cancelada. Contacta a barbearia se precisares de ajuda.',
 };
 
 const PICKUP_STEPS: OrderStatus[] = [
@@ -128,37 +129,41 @@ function parseTrackedOrder(value: unknown): TrackedOrder | null {
     return null;
   }
 
-  const items = value.items.filter(
-    (item): item is Record<string, unknown> =>
-      isRecord(item) &&
-      typeof item.name === 'string' &&
-      Number.isFinite(Number(item.quantity)) &&
-      Number(item.quantity) > 0 &&
-      Number.isFinite(Number(item.total)),
-  ).map((item) => ({
-    name: item.name as string,
-    quantity: Number(item.quantity),
-    total: Number(item.total),
-  }));
+  const items = value.items
+    .filter(
+      (item): item is Record<string, unknown> =>
+        isRecord(item) &&
+        typeof item.name === 'string' &&
+        Number.isFinite(Number(item.quantity)) &&
+        Number(item.quantity) > 0 &&
+        Number.isFinite(Number(item.total)),
+    )
+    .map((item) => ({
+      name: item.name as string,
+      quantity: Number(item.quantity),
+      total: Number(item.total),
+    }));
 
-  const history = value.history.filter(
-    (event): event is Record<string, unknown> =>
-      isRecord(event) &&
-      typeof event.id === 'string' &&
-      typeof event.status === 'string' &&
-      VALID_STATUSES.has(event.status as OrderStatus) &&
-      typeof event.createdAt === 'string',
-  ).map((event) => ({
-    id: event.id as string,
-    previousStatus:
-      typeof event.previousStatus === 'string' &&
-      VALID_STATUSES.has(event.previousStatus as OrderStatus)
-        ? (event.previousStatus as OrderStatus)
-        : null,
-    status: event.status as OrderStatus,
-    message: typeof event.message === 'string' ? event.message : null,
-    createdAt: event.createdAt as string,
-  }));
+  const history = value.history
+    .filter(
+      (event): event is Record<string, unknown> =>
+        isRecord(event) &&
+        typeof event.id === 'string' &&
+        typeof event.status === 'string' &&
+        VALID_STATUSES.has(event.status as OrderStatus) &&
+        typeof event.createdAt === 'string',
+    )
+    .map((event) => ({
+      id: event.id as string,
+      previousStatus:
+        typeof event.previousStatus === 'string' &&
+        VALID_STATUSES.has(event.previousStatus as OrderStatus)
+          ? (event.previousStatus as OrderStatus)
+          : null,
+      status: event.status as OrderStatus,
+      message: typeof event.message === 'string' ? event.message : null,
+      createdAt: event.createdAt as string,
+    }));
 
   let shipping: TrackedOrder['shipping'] = null;
   if (isRecord(value.shipping)) {
@@ -167,7 +172,8 @@ function parseTrackedOrder(value: unknown): TrackedOrder | null {
         typeof value.shipping.address === 'string'
           ? value.shipping.address
           : null,
-      city: typeof value.shipping.city === 'string' ? value.shipping.city : null,
+      city:
+        typeof value.shipping.city === 'string' ? value.shipping.city : null,
       postalCode:
         typeof value.shipping.postalCode === 'string'
           ? value.shipping.postalCode
@@ -299,9 +305,7 @@ export default function MarketplaceOrderTrackingClient() {
         window.location.hash.slice(1),
       ).get('token');
       initialTokenRef.current =
-        fragmentToken ??
-        window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__ ??
-        null;
+        fragmentToken ?? window.__SILENTRA_MARKETPLACE_TRACKING_TOKEN__ ?? null;
 
       // Consume the early bootstrap value immediately so no other client code
       // can accidentally reuse or retain this capability.
@@ -411,8 +415,8 @@ export default function MarketplaceOrderTrackingClient() {
             aria-live="polite"
           >
             <div className="flex items-center gap-3 text-sm text-zinc-400">
-              <RefreshCw className="size-4 animate-spin text-emerald-300" />
-              A consultar o estado da encomenda…
+              <RefreshCw className="size-4 animate-spin text-emerald-300" />A
+              consultar o estado da encomenda…
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <div className="h-20 animate-pulse rounded-2xl bg-white/[0.04]" />
@@ -472,7 +476,8 @@ export default function MarketplaceOrderTrackingClient() {
                     className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-2 text-sm font-semibold ${
                       cancelled
                         ? 'border-rose-300/20 bg-rose-300/[0.06] text-rose-200'
-                        : order.status === 'completed' || order.status === 'delivered'
+                        : order.status === 'completed' ||
+                            order.status === 'delivered'
                           ? 'border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-200'
                           : 'border-sky-300/20 bg-sky-300/[0.06] text-sky-200'
                     }`}
@@ -596,7 +601,8 @@ export default function MarketplaceOrderTrackingClient() {
                               {STATUS_LABELS[event.status]}
                             </p>
                             <p className="mt-1 text-sm leading-6 text-zinc-400">
-                              {event.message || STATUS_DESCRIPTIONS[event.status]}
+                              {event.message ||
+                                STATUS_DESCRIPTIONS[event.status]}
                             </p>
                             <time
                               dateTime={event.createdAt}
@@ -664,7 +670,9 @@ export default function MarketplaceOrderTrackingClient() {
                         className="flex items-start justify-between gap-3 text-sm"
                       >
                         <div className="min-w-0">
-                          <p className="break-words text-zinc-200">{item.name}</p>
+                          <p className="break-words text-zinc-200">
+                            {item.name}
+                          </p>
                           <p className="mt-1 text-xs text-zinc-600">
                             Quantidade: {item.quantity}
                           </p>

@@ -76,14 +76,21 @@ async function GET__unobserved() {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { data, error } = await admin
       .from('marketplace_orders')
-      .select('id, barbershop_id, customer_name, customer_email, customer_phone, notes, subtotal, total, fulfillment_method, status, created_at, updated_at, shipping_address, shipping_city, shipping_postal_code, shipping_country, marketplace_order_items(*), marketplace_order_events(*)')
+      .select(
+        'id, barbershop_id, customer_name, customer_email, customer_phone, notes, subtotal, total, fulfillment_method, status, created_at, updated_at, shipping_address, shipping_city, shipping_postal_code, shipping_country, marketplace_order_items(*), marketplace_order_events(*)',
+      )
       .eq('barbershop_id', barbershopId)
       .order('created_at', { ascending: false })
       .limit(200);
     if (error) throw error;
     return NextResponse.json(
       { orders: data ?? [] },
-      { headers: { 'Cache-Control': 'no-store, private', 'X-Content-Type-Options': 'nosniff' } },
+      {
+        headers: {
+          'Cache-Control': 'no-store, private',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      },
     );
   } catch (error) {
     const response = moduleErrorResponse(error);
@@ -293,7 +300,7 @@ async function POST__unobserved(request: Request) {
     }
 
     const trackingUrl = trackingToken
-      ? buildMarketplaceTrackingUrl(trackingToken) ?? undefined
+      ? (buildMarketplaceTrackingUrl(trackingToken) ?? undefined)
       : undefined;
     if (trackingToken && !trackingUrl) {
       console.error('[MARKETPLACE_TRACKING_LINK_UNAVAILABLE]', {
