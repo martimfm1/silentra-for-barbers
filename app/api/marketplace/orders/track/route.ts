@@ -286,7 +286,7 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         order: {
-          reference: order.id.slice(0, 8).toUpperCase(),
+          reference: order.id.slice(0, 8),
           status: order.status,
           total: Number(order.total),
           createdAt: order.created_at,
