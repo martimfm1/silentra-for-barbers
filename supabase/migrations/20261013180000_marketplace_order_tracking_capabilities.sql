@@ -37,8 +37,8 @@ insert into public.marketplace_order_tracking_tokens (
 select
   id,
   tracking_token_hash,
-  coalesce(created_at, now()),
-  now() + interval '365 days'
+  greatest(coalesce(created_at, now()), now()),
+  greatest(coalesce(created_at, now()), now()) + interval '365 days'
 from public.marketplace_orders
 where tracking_token_hash is not null
   and tracking_token_hash ~ '^[a-f0-9]{64}$'
