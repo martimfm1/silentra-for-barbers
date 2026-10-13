@@ -28,6 +28,7 @@
 - [ ] Confirmar que só o hash SHA-256 da capacidade é persistido e que o token não aparece nos logs.
 - [ ] Confirmar que o cliente vê o estado atual, histórico cronológico, produtos, total e método/dados de entrega.
 - [ ] Confirmar que as notificações de mudança de estado enviam uma nova ligação sem invalidar a ligação anterior.
+- [ ] Confirmar que as mensagens manuais enviadas pela barbearia também incluem uma ligação privada válida, sem invalidar o comprovativo ou notificações anteriores.
 - [ ] Confirmar que tokens expirados ou revogados não revelam detalhes e apresentam resposta genérica.
 - [ ] Confirmar que abrir a ligação remove o fragmento da barra de endereço/histórico e não envia Referer.
 - [ ] Testar limite por IP e por token, atualização manual, atualização automática com página visível e recuperação após erro.
