@@ -56,6 +56,16 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
+    pattern: /\/marketplace\/orders\/track\/route\.ts$/,
+    markers: [
+      'consumePublicRateLimit',
+      "'marketplace-order-track'",
+      'createHash',
+      'tracking_token_hash',
+      'Cache-Control',
+    ],
+  },
+  {
     pattern: /\/marketplace\/products\/route\.ts$/,
     markers: [
       'MAX_QUERY_LENGTH = 80',
