@@ -184,6 +184,67 @@ const checks = [
       source.includes('silentra-marketplace-cart') &&
       source.includes("url.searchParams.get('add')"),
   },
+  {
+    name: 'Marketplace tracking capability migration hashes links, preserves legacy links, and expires tokens',
+    file: 'supabase/migrations/20261013180000_marketplace_order_tracking_capabilities.sql',
+    test: (source) =>
+      source.includes('marketplace_order_tracking_tokens') &&
+      source.includes('token_hash text not null unique') &&
+      source.includes("now() + interval '365 days'") &&
+      source.includes('revoked_at') &&
+      source.includes('tracking_token_hash'),
+  },
+  {
+    name: 'Marketplace order creation stores hash-only tracking capabilities',
+    file: 'app/api/marketplace/orders/route.ts',
+    test: (source) =>
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes('hashMarketplaceTrackingToken(') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('buildMarketplaceTrackingUrl'),
+  },
+  {
+    name: 'Customer tracking API resolves revocable tokens and returns status history',
+    file: 'app/api/marketplace/orders/track/route.ts',
+    test: (source) =>
+      source.includes('isMarketplaceTrackingToken(token)') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('capability.revoked_at') &&
+      source.includes('capability.expires_at') &&
+      source.includes("from('marketplace_order_events')") &&
+      source.includes("event.source !== 'manual_email'") &&
+      source.includes("'Referrer-Policy': 'no-referrer'"),
+  },
+  {
+    name: 'Marketplace status notification emails issue independent tracking links',
+    file: 'app/api/marketplace/orders/[orderId]/route.ts',
+    test: (source) =>
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('buildMarketplaceTrackingUrl(token)') &&
+      source.includes('Acompanhar encomenda') &&
+      source.includes("completed: 'A sua encomenda foi concluída'"),
+  },
+  {
+    name: 'Customer tracking experience shows progress, history, delivery and manual refresh',
+    file: 'app/marketplace/track/tracking-client.tsx',
+    test: (source) =>
+      source.includes('Progresso da encomenda') &&
+      source.includes('Histórico') &&
+      source.includes('Dados de entrega') &&
+      source.includes('Atualizar estado') &&
+      source.includes('setInterval') &&
+      source.includes("referrerPolicy: 'no-referrer'") &&
+      source.includes('replaceState'),
+  },
+  {
+    name: 'Tracking page is excluded from indexing and disables referrer leakage',
+    file: 'app/marketplace/track/page.tsx',
+    test: (source) =>
+      source.includes('index: false') &&
+      source.includes('follow: false') &&
+      source.includes("referrer: 'no-referrer'"),
+  },
 ];
 
 let failed = 0;
