@@ -141,9 +141,22 @@ export default function MarketplacePage() {
 
   function add(product: Product) {
     const existing = cart.find((item) => item.id === product.id);
-    if (cart.length && cart[0].barbershop_id !== product.barbershop_id)
+    const switchingShop =
+      cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
+
+    // Each order belongs to one seller. Never discard the current cart silently.
+    if (
+      switchingShop &&
+      !window.confirm(
+        'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+      )
+    ) {
+      return;
+    }
+
+    if (switchingShop) {
       setCart([productWithQty(product)]);
-    else
+    } else {
       setCart((current) =>
         existing
           ? current.map((item) =>
@@ -159,6 +172,7 @@ export default function MarketplacePage() {
             )
           : [...current, productWithQty(product)],
       );
+    }
     setCustomer((current) => ({ ...current, fulfillmentMethod: 'pickup' }));
     setCartOpen(true);
   }
