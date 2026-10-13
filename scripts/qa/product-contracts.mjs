@@ -112,7 +112,7 @@ const checks = [
     test: (source) =>
       source.includes('marketplace_published_at') &&
       source.includes('marketplace_featured_until') &&
-      source.includes("coalesce(created_at, updated_at, now())") &&
+      source.includes('coalesce(created_at, updated_at, now())') &&
       source.includes("interval '3 days'") &&
       source.includes('inventory_products_marketplace_featured_window_check'),
   },
@@ -149,7 +149,9 @@ const checks = [
     name: 'Marketplace prioritizes only unexpired Enterprise boosts',
     file: 'app/api/marketplace/products/route.ts',
     test: (source) =>
-      source.includes(".gt('marketplace_featured_until', new Date().toISOString())") &&
+      source.includes(
+        ".gt('marketplace_featured_until', new Date().toISOString())",
+      ) &&
       source.includes('...activeFeatured') &&
       source.includes('visible.filter((item) => !featuredIds.has(item.id))'),
   },
