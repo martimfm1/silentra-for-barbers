@@ -148,11 +148,22 @@ async function POST__unobserved(request: Request) {
       .maybeSingle();
 
     if (capabilityError) {
-      // Rolling deployments may briefly run against a schema before the new
-      // table is available. Fall back to the legacy column for old receipt links.
+      // Permit a compatibility fallback only while the table is genuinely
+      // absent during a rolling deployment. Never bypass expiry/revocation on
+      // permission, connectivity or other database failures.
+      const missingCapabilityTable =
+        capabilityError.code === '42P01' ||
+        capabilityError.code === 'PGRST205';
       console.error('[MARKETPLACE_TRACKING_CAPABILITY_LOOKUP_FAILED]', {
         code: capabilityError.code ?? 'UNKNOWN',
+        compatibilityFallback: missingCapabilityTable,
       });
+      if (!missingCapabilityTable) {
+        return NextResponse.json(
+          { error: 'Não foi possível consultar a encomenda neste momento.' },
+          { status: 503, headers: PRIVATE_HEADERS },
+        );
+      }
     } else if (capability) {
       if (
         capability.revoked_at ||
