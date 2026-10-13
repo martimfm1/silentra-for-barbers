@@ -244,18 +244,25 @@ async function POST__unobserved(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
-    const trackingToken = randomBytes(32).toString('hex');
+    const candidateTrackingToken = randomBytes(32).toString('hex');
     const { error: trackingError } = await db
       .from('marketplace_orders')
-      .update({ tracking_token_hash: hashTrackingToken(trackingToken) })
+      .update({ tracking_token_hash: hashTrackingToken(candidateTrackingToken) })
       .eq('id', order.id)
       .eq('barbershop_id', shopId);
 
+    // The order is already committed. A tracking-token failure must not make
+    // checkout look unsuccessful and encourage the customer to place it again.
+    const trackingToken = trackingError ? null : candidateTrackingToken;
     if (trackingError) {
-      console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', { orderId: order.id, code: trackingError.code ?? 'UNKNOWN' });
-      return NextResponse.json({ error: 'A encomenda foi registada, mas não foi possível preparar o acompanhamento. Contacta a barbearia com a referência da encomenda.' }, { status: 503 });
+      console.error('[MARKETPLACE_TRACKING_TOKEN_SAVE_FAILED]', {
+        orderId: order.id,
+        code: trackingError.code ?? 'UNKNOWN',
+      });
     }
-    const trackingUrl = new URL('/marketplace/track#token=' + trackingToken, request.url).toString();
+    const trackingUrl = trackingToken
+      ? new URL('/marketplace/track#token=' + trackingToken, request.url).toString()
+      : undefined;
     const { data: details } = await db
       .from('marketplace_orders')
       .select('*, marketplace_order_items(*), barbershops(name)')
