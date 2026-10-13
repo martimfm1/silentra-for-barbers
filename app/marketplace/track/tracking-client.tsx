@@ -454,7 +454,7 @@ export default function MarketplaceOrderTrackingClient() {
         )}
 
         {order && !loading && (
-          <div className="mt-8 space-y-5" aria-live="polite">
+          <div className="mt-8 space-y-5">
             <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]">
               <div className="border-b border-white/10 p-5 sm:p-7">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -471,6 +471,9 @@ export default function MarketplaceOrderTrackingClient() {
                     </div>
                   </div>
                   <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
                     className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-2 text-sm font-semibold ${
                       cancelled
                         ? 'border-rose-300/20 bg-rose-300/[0.06] text-rose-200'
