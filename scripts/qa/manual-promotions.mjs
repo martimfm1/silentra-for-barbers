@@ -95,4 +95,6 @@ if (process.exitCode) {
   );
 }
 
-console.log(`Manual promotion contract checks passed: ${checks.length} checks.`);
+console.log(
+  `Manual promotion contract checks passed: ${checks.length} checks.`,
+);
