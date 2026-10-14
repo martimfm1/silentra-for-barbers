@@ -275,6 +275,13 @@ export function SiteNavbar() {
         href: '/barbershops',
       },
       {
+        label:
+          locale === 'pt'
+            ? 'Software para barbearias'
+            : 'Barbershop software',
+        href: '/software-gestao-barbearia',
+      },
+      {
         label: t('nav.plans', { defaultValue: 'Planos' }),
         href: '/plans',
       },
@@ -287,7 +294,7 @@ export function SiteNavbar() {
         href: '/registo',
       },
     ],
-    [t],
+    [t, locale],
   );
 
   const links = !user
