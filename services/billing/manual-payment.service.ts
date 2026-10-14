@@ -10,6 +10,7 @@ import {
   adminPaymentRequestEmail,
   customerPaymentLinkEmail,
   customerSubscriptionActivatedEmail,
+  customerFreeTrialActivatedEmail,
   customerPaymentRejectedEmail,
   getBillingEmailBaseUrl,
 } from '@/services/billing/email-templates';
@@ -277,6 +278,133 @@ export class ManualPaymentService {
       );
 
     return (data as ManualSubscriptionRequest | null) ?? null;
+  }
+
+  /**
+   * Redeems a validated zero-price TRIALPRO request. The database procedure
+   * rechecks eligibility and activates the one-month grant atomically.
+   */
+  static async redeemManualProTrial(
+    requestId: string,
+    actorUserId: string,
+  ) {
+    const row = await this.getRequest(requestId);
+    if (
+      !row ||
+      row.user_id !== actorUserId ||
+      row.plan !== 'pro' ||
+      row.billing_interval !== 'month' ||
+      row.promotion_code !== NEW_MEMBER_PRO_PROMOTION_CODE ||
+      row.price !== 0
+    ) {
+      throw new BillingError(
+        'O pedido não é elegível para a oferta TRIALPRO.',
+        'PROMOTION_NOT_ELIGIBLE',
+      );
+    }
+
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc('redeem_manual_pro_trial', {
+      p_request_id: requestId,
+      p_actor_user_id: actorUserId,
+    });
+
+    if (error) {
+      const promotionErrors = new Set([
+        'TRIAL_REQUEST_INVALID',
+        'TRIAL_NOT_ELIGIBLE',
+        'TRIAL_HISTORY_EXISTS',
+        'ACTIVE_SUBSCRIPTION_EXISTS',
+      ]);
+      const rejected = promotionErrors.has(error.message ?? '');
+      console.error('[MANUAL_PRO_TRIAL_REDEEM_ERROR]', {
+        requestId,
+        actorUserId,
+        code: error.code ?? null,
+        reason: error.message ?? null,
+      });
+      throw new BillingError(
+        rejected
+          ? 'O código TRIALPRO já não está disponível para esta conta.'
+          : 'Não foi possível ativar a oferta TRIALPRO. Tenta novamente ou contacta o suporte.',
+        rejected ? 'PROMOTION_NOT_ELIGIBLE' : 'DB_WRITE_FAILED',
+      );
+    }
+
+    const confirmation = Array.isArray(data) ? data[0] : data;
+    if (!confirmation) {
+      throw new BillingError(
+        'A ativação da oferta TRIALPRO não devolveu o estado da subscrição.',
+        'DB_WRITE_FAILED',
+      );
+    }
+
+    let emailSent = false;
+    try {
+      const [{ data: customer }, { data: shop }] = await Promise.all([
+        admin
+          .from('users')
+          .select('id, name_complete, email')
+          .eq('id', row.user_id)
+          .maybeSingle(),
+        admin
+          .from('barbershops')
+          .select('name')
+          .eq('id', row.barbershop_id)
+          .maybeSingle(),
+      ]);
+
+      const recipientEmail = row.billing_email || customer?.email || null;
+      if (recipientEmail) {
+        const template = customerFreeTrialActivatedEmail({
+          customerName:
+            row.billing_name || customer?.name_complete || recipientEmail,
+          customerEmail: recipientEmail,
+          barbershopName: shop?.name ?? 'Barbearia',
+          plan: 'pro',
+          billingInterval: 'month',
+          price: 0,
+          currency: 'EUR',
+          requestId: row.id,
+          startedAt: confirmation.started_at,
+          expiresAt: confirmation.expires_at,
+          dashboardUrl: new URL(
+            '/dashboard/billing',
+            getBillingEmailBaseUrl(),
+          ).toString(),
+        });
+        const result = await sendEmail(
+          {
+            email: recipientEmail,
+            userId: row.user_id,
+          },
+          {
+            subject: 'O teu mês grátis do Barbers Pro começou — Silentra',
+            body: template.text,
+            html: template.html,
+            senderName: 'Silentra',
+          },
+        );
+        emailSent = result.success;
+        if (!result.success) {
+          console.error('[MANUAL_PRO_TRIAL_EMAIL_ERROR]', {
+            requestId,
+            error: result.error ?? 'EMAIL_SEND_FAILED',
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error('[MANUAL_PRO_TRIAL_EMAIL_ERROR]', {
+        requestId,
+        error:
+          emailError instanceof Error ? emailError.name : 'UNKNOWN',
+      });
+    }
+
+    return {
+      ...confirmation,
+      emailSent,
+    };
   }
 
   static async createRequest(input: {
