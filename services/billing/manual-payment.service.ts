@@ -170,6 +170,7 @@ export class ManualPaymentService {
       subscriptionsByUser,
       subscriptionsByShop,
       previousRequests,
+      existingPlanAssignment,
       billingAccountByUser,
       billingAccountByShop,
       legacyCustomer,
@@ -184,6 +185,11 @@ export class ManualPaymentService {
         .from('subscription_requests')
         .select('id')
         .eq('user_id', userId)
+        .limit(1),
+      admin
+        .from('barbershop_plan_assignments')
+        .select('barbershop_id')
+        .eq('barbershop_id', barbershopId)
         .limit(1),
       admin
         .from('barbershop_billing_accounts')
@@ -202,6 +208,7 @@ export class ManualPaymentService {
       subscriptionsByUser,
       subscriptionsByShop,
       previousRequests,
+      existingPlanAssignment,
       billingAccountByUser,
       billingAccountByShop,
       legacyCustomer,
