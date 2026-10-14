@@ -341,6 +341,13 @@ export const pt = {
     emailConfirmedSubtitle: 'O teu endereço de email foi confirmado. Já podes iniciar sessão.',
     emailConfirmationErrorTitle: 'Não foi possível confirmar o email',
     emailConfirmationErrorSubtitle: 'O link pode ter expirado ou já ter sido utilizado. Pede um novo email de confirmação.',
+    confirmEmailInstructions: 'Abre o email e clica no link de confirmação para ativares a tua conta. Se não o encontrares, verifica também a pasta de spam.',
+    resendEmail: 'Reenviar email de confirmação',
+    emailConfirmedTag: 'Conta confirmada',
+    emailConfirmedBody: 'A tua conta está confirmada. Já podes iniciar sessão para entrares no painel da tua barbearia.',
+    goToSignIn: 'Ir para iniciar sessão',
+    emailConfirmationErrorBody: 'O link de confirmação pode ter expirado, já ter sido utilizado ou não ser válido. Pede um novo email de confirmação e tenta novamente.',
+    latestConfirmationEmail: 'Se continuares com problemas, verifica se estás a utilizar o email de confirmação mais recente.',
   },
   onboarding: {
     title: 'Vamos configurar a tua barbearia',
