@@ -24,8 +24,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiteNavbar } from '@/components/site-navbar';
 import { useLanguage } from '@/context/LanguageContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
   const { t } = useLanguage();
   const router = useRouter();
   const [password, setPassword] = useState('');
@@ -68,13 +70,13 @@ export default function ResetPasswordPage() {
           >
             <CardHeader className="gap-2 pb-2 px-6 pt-6">
               <Badge className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] text-zinc-300">
-                New Credentials
+                {t('auth.resetPasswordNewTitle')}
               </Badge>
               <CardTitle className="font-heading text-xl text-zinc-50 tracking-tight">
-                Set new password
+                {t('auth.resetPasswordNewTitle')}
               </CardTitle>
               <CardDescription className="text-xs text-zinc-400">
-                Enter your new password below to secure your workspace.
+                {t('auth.resetPasswordNewSubtitle')}
               </CardDescription>
             </CardHeader>
 
@@ -101,7 +103,7 @@ export default function ResetPasswordPage() {
                         htmlFor="new-password"
                         className="text-xs font-medium text-zinc-300"
                       >
-                        New Password
+                        {t('auth.newPassword')}
                       </Label>
                     </FieldLabel>
                     <FieldContent>
@@ -123,8 +125,8 @@ export default function ResetPasswordPage() {
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={
                             showPassword
-                              ? 'Ocultar palavra-passe'
-                              : 'Mostrar palavra-passe'
+                              ? t('auth.hidePassword')
+                              : t('auth.showPassword')
                           }
                           className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-zinc-400 hover:text-zinc-100"
                         >
@@ -148,7 +150,7 @@ export default function ResetPasswordPage() {
                     <Spinner className="size-4 text-zinc-950" />
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      Update Password <ArrowRight className="size-4" />
+                      {t('auth.savePassword')} <ArrowRight className="size-4" />
                     </span>
                   )}
                 </Button>
