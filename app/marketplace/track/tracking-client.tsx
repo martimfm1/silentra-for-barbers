@@ -250,11 +250,7 @@ export default function MarketplaceOrderTrackingClient() {
       const payload: unknown = await response.json().catch(() => null);
       if (!response.ok) {
         if (response.status === 404 && activeRef.current) setOrder(null);
-        const message =
-          isRecord(payload) && typeof payload.error === 'string'
-            ? payload.error
-            : t('orderTracking.loadError');
-        throw new Error(message);
+        throw new Error(t('orderTracking.loadError'));
       }
 
       const parsed = isRecord(payload)
@@ -286,7 +282,7 @@ export default function MarketplaceOrderTrackingClient() {
         setRefreshing(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     activeRef.current = true;
