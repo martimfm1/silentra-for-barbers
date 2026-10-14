@@ -499,6 +499,9 @@ export const pt = {
     lastChecked: 'Última consulta: {date}',
     lastChanged: 'Última alteração: {date}',
     privacyNotice: 'Este link é privado e permite consultar os dados desta encomenda. Não o partilhes. Por segurança, o link não fica guardado no navegador depois de aberto.',
+    invalidResponse: 'Recebemos uma resposta inválida. Tenta novamente.',
+    timeout: 'A consulta demorou demasiado tempo. Verifica a ligação e tenta novamente.',
+    missingToken: 'Para proteger os teus dados, abre o link completo de acompanhamento que recebeste por email.',
     unavailable: 'Não foi possível obter os dados da encomenda.',
     status: {
       pending: 'A aguardar confirmação',
