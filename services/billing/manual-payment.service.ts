@@ -294,10 +294,7 @@ export class ManualPaymentService {
    * Redeems a validated zero-price TRIALPRO request. The database procedure
    * rechecks eligibility and activates the one-month grant atomically.
    */
-  static async redeemManualProTrial(
-    requestId: string,
-    actorUserId: string,
-  ) {
+  static async redeemManualProTrial(requestId: string, actorUserId: string) {
     const row = await this.getRequest(requestId);
     if (
       !row ||
@@ -406,8 +403,7 @@ export class ManualPaymentService {
     } catch (emailError) {
       console.error('[MANUAL_PRO_TRIAL_EMAIL_ERROR]', {
         requestId,
-        error:
-          emailError instanceof Error ? emailError.name : 'UNKNOWN',
+        error: emailError instanceof Error ? emailError.name : 'UNKNOWN',
       });
     }
 
@@ -453,12 +449,9 @@ export class ManualPaymentService {
           input.barbershopId,
         )
       : false;
-    const quote = quoteManualPrice(
-      input.plan,
-      interval,
-      input.promotionCode,
-      { newMemberEligible: trialEligible },
-    );
+    const quote = quoteManualPrice(input.plan, interval, input.promotionCode, {
+      newMemberEligible: trialEligible,
+    });
 
     if (!price) {
       throw new BillingError(
