@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import {
@@ -48,6 +49,7 @@ import { PLAN_NAMES } from '@/lib/billing/plan-features';
 const getDayIndex = (value: string) => (new Date(value).getDay() + 6) % 7;
 
 export default function DashboardPage() {
+  const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const { plan } = useFeatureAccess();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -78,7 +80,7 @@ export default function DashboardPage() {
       setClients(clientsRes.data ?? []);
     } catch (error) {
       console.error('[Dashboard Sync Error]:', error);
-      toast.error('Não foi possível atualizar os dados. Tenta novamente.');
+      toast.error(t('common.retry'));
     } finally {
       setLoadingInitial(false);
     }
@@ -102,7 +104,7 @@ export default function DashboardPage() {
 
   const chartConfig = {
     revenue: { label: 'Receita', color: '#34d399' },
-    bookings: { label: 'Marcações', color: '#60a5fa' },
+    bookings: { label: t('dashboard.appointmentsLabel'), color: '#60a5fa' },
   } satisfies ChartConfig;
 
   const dynamicChartData = useMemo(() => {
@@ -154,7 +156,7 @@ export default function DashboardPage() {
   const hasBusinessSetup = services.length > 0 && professionals.length > 0;
   const setupSteps = [
     {
-      label: 'Adicionar um serviço',
+      label: t('dashboard.addService'),
       done: services.length > 0,
       href: '/dashboard/servicos',
     },
@@ -164,7 +166,7 @@ export default function DashboardPage() {
       href: '/dashboard/equipa',
     },
     {
-      label: 'Criar a primeira marcação',
+      label: t('dashboard.firstBooking'),
       done: appointments.length > 0,
       href: '/dashboard/agenda',
     },
@@ -189,7 +191,7 @@ export default function DashboardPage() {
   const quickActions = [
     {
       href: '/dashboard/agenda',
-      label: 'Nova marcação',
+      label: t('dashboard.newBooking'),
       icon: CalendarPlus,
       color: 'emerald' as const,
     },
@@ -201,7 +203,7 @@ export default function DashboardPage() {
     },
     {
       href: '/dashboard/servicos',
-      label: 'Serviços',
+      label: t('dashboard.services'),
       icon: Scissors,
       color: 'amber' as const,
     },
@@ -213,7 +215,7 @@ export default function DashboardPage() {
     },
     {
       href: '/dashboard/stats',
-      label: 'Estatísticas',
+      label: t('dashboard.stats'),
       icon: Clock,
       color: 'blue' as const,
     },
@@ -271,16 +273,16 @@ export default function DashboardPage() {
                     <span className="flex size-7 items-center justify-center rounded-full bg-emerald-500/15">
                       {setupCompleted + 1}
                     </span>
-                    Configuração inicial
+                    {t('dashboard.setupTitle')}
                   </div>
                   <h2
                     id="setup-title"
                     className="mt-3 text-xl font-semibold tracking-tight text-zinc-50"
                   >
-                    A tua barbearia já começou. Vamos acabar o essencial.
+                    {t('dashboard.setupSubtitle')}
                   </h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-                    {setupCompleted} de {setupSteps.length} passos concluídos.
+                    {t('dashboard.setupProgress', { completed: setupCompleted, total: setupSteps.length })}
                     Só falta completar o próximo passo para começares a aceitar
                     marcações.
                   </p>
@@ -290,7 +292,7 @@ export default function DashboardPage() {
                     aria-valuenow={setupCompleted}
                     aria-valuemin={0}
                     aria-valuemax={setupSteps.length}
-                    aria-label={`Configuração: ${setupCompleted} de ${setupSteps.length} passos`}
+                    aria-label={t('dashboard.setupProgress', { completed: setupCompleted, total: setupSteps.length })}
                   >
                     <div
                       className="h-full rounded-full bg-emerald-400 transition-all duration-500"
@@ -311,7 +313,7 @@ export default function DashboardPage() {
             </section>
           )}
 
-          <section aria-label="Ações rápidas" className="pb-5">
+          <section aria-label={t('dashboard.quickActions')} className="pb-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
                 O que precisas de fazer?
@@ -366,7 +368,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
-                      Próxima marcação
+                      {t('dashboard.nextAppointment')}
                     </p>
                     <h2
                       id="next-appointment-title"
@@ -377,9 +379,9 @@ export default function DashboardPage() {
                         'Cliente'}
                     </h2>
                     <p className="mt-1 truncate text-sm text-zinc-400">
-                      {nextAppointment.services?.name || 'Serviço'} ·{' '}
+                      {nextAppointment.services?.name || t('dashboard.service')} ·{' '}
                       {nextAppointment.professionals?.name ||
-                        'Sem barbeiro atribuído'}
+                        t('dashboard.noBarberAssigned')}
                     </p>
                   </div>
                 </div>
@@ -400,7 +402,7 @@ export default function DashboardPage() {
                 id="business-overview"
                 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400"
               >
-                Resumo do negócio
+                {t('dashboard.businessSummary')}
               </h2>
               {!loadingInitial && (
                 <span className="text-xs text-zinc-500">
@@ -470,14 +472,14 @@ export default function DashboardPage() {
                       Atividade semanal
                     </CardTitle>
                     <CardDescription className="mt-1 text-zinc-500">
-                      Compara rapidamente as marcações e a receita de cada dia.
+                      {t('dashboard.compareDaily')}
                     </CardDescription>
                   </div>
                   <Link
                     href="/dashboard/stats"
                     className="text-xs font-medium text-zinc-500 hover:text-zinc-200"
                   >
-                    Ver análise
+                    {t('dashboard.viewAnalytics')}
                   </Link>
                 </div>
               </CardHeader>
@@ -531,7 +533,7 @@ export default function DashboardPage() {
               </CardContent>
               <div
                 className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
-                aria-label="Legenda do gráfico"
+                aria-label={t('dashboard.chartLegend')}
               >
                 <span className="inline-flex items-center gap-2">
                   <span
@@ -545,7 +547,7 @@ export default function DashboardPage() {
                     className="size-2.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.4)]"
                     aria-hidden="true"
                   />
-                  <span className="text-zinc-300">Marcações</span>
+                  <span className="text-zinc-300">{t('dashboard.appointmentsLabel')}</span>
                 </span>
               </div>
             </Card>
@@ -557,7 +559,7 @@ export default function DashboardPage() {
                     className="size-4 text-emerald-400"
                     aria-hidden="true"
                   />
-                  Próximas marcações
+                  {t('dashboard.upcomingAppointments')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-2">
@@ -577,7 +579,7 @@ export default function DashboardPage() {
                       Tudo tranquilo por agora
                     </p>
                     <p className="mt-1 text-xs text-zinc-500">
-                      As próximas marcações vão aparecer aqui.
+                      {t('dashboard.upcomingAppointmentsEmpty')}
                     </p>
                   </div>
                 ) : (
@@ -609,7 +611,7 @@ export default function DashboardPage() {
                               'Cliente'}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-zinc-500">
-                            {appointment.services?.name || 'Serviço'}
+                            {appointment.services?.name || t('dashboard.service')}
                           </p>
                         </div>
                         <ChevronRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />
