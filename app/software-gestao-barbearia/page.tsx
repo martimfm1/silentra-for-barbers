@@ -250,7 +250,14 @@ const content = {
   },
 } as const;
 
-const featureIcons = [CalendarDays, UsersRound, Scissors, Mail, Gift, BarChart3];
+const featureIcons = [
+  CalendarDays,
+  UsersRound,
+  Scissors,
+  Mail,
+  Gift,
+  BarChart3,
+];
 
 export default async function BarbershopManagementSoftwarePage() {
   const locale = (await cookies()).get('locale')?.value === 'en' ? 'en' : 'pt';
@@ -488,9 +495,7 @@ export default async function BarbershopManagementSoftwarePage() {
                 className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
               >
                 <h3 className="font-semibold text-white">{question}</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  {answer}
-                </p>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{answer}</p>
               </article>
             ))}
           </div>
