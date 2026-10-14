@@ -274,7 +274,7 @@ export default async function EnterpriseBarbershopLandingPage({
             Website oficial
           </span>
         </header>
-  
+
         <section
           className="mx-auto flex min-h-[500px] w-full max-w-7xl items-center rounded-[2rem] border border-white/10 bg-zinc-900/60 px-6 py-14 sm:px-10 lg:min-h-[600px] lg:px-16"
           style={heroBackground}
@@ -314,7 +314,7 @@ export default async function EnterpriseBarbershopLandingPage({
             </div>
           </div>
         </section>
-  
+
         <section
           id="servicos"
           className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:py-20"
@@ -332,7 +332,7 @@ export default async function EnterpriseBarbershopLandingPage({
               Preços e duração disponíveis antes de marcares.
             </p>
           </div>
-  
+
           {data.services.length ? (
             <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {data.services.map((service) => (
@@ -372,7 +372,7 @@ export default async function EnterpriseBarbershopLandingPage({
             </p>
           )}
         </section>
-  
+
         <section className="mx-auto grid w-full max-w-7xl gap-3 px-5 pb-16 sm:grid-cols-2 sm:px-8">
           <article className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
@@ -387,14 +387,15 @@ export default async function EnterpriseBarbershopLandingPage({
               Localização
             </p>
             <p className="mt-3 text-base font-semibold text-white">
-              {profile.address || 'Contacta a barbearia para confirmar a morada'}
+              {profile.address ||
+                'Contacta a barbearia para confirmar a morada'}
             </p>
             {profile.city && (
               <p className="mt-1 text-sm text-zinc-500">{profile.city}</p>
             )}
           </article>
         </section>
-  
+
         <footer className="border-t border-white/10 px-5 py-7 text-center text-xs text-zinc-600">
           Website criado com{' '}
           <span className="font-semibold text-zinc-400">
