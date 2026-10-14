@@ -1,6 +1,7 @@
 'use client';
 
-import { type FormEvent, type ReactNode, useMemo, useState } from 'react';
+import { type FormEvent, type ReactNode, useState } from 'react';
+import type { ManualPricingQuote } from '@/lib/billing/manual-promotions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -84,20 +85,38 @@ function Field({
 const inputClass =
   'min-h-12 w-full rounded-xl border border-white/10 bg-zinc-950/70 px-3.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-emerald-300/35 focus:ring-2 focus:ring-emerald-300/10';
 
+function formatMoney(amount: number, currency = 'EUR') {
+  return new Intl.NumberFormat('pt-PT', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
 export function ManualCheckout({
   checkoutToken,
   plan,
   interval,
+  initialPricing,
 }: {
   checkoutToken: string;
   plan: Plan;
   interval: 'month' | 'year';
+  initialPricing: ManualPricingQuote;
 }) {
   const router = useRouter();
   const copy = COPY[plan];
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState('PT');
+  const [pricing, setPricing] = useState(initialPricing);
+  const [promotionCode, setPromotionCode] = useState('');
+  const [appliedPromotionCode, setAppliedPromotionCode] = useState<
+    string | null
+  >(null);
+  const [promotionLoading, setPromotionLoading] = useState(false);
+  const [promotionError, setPromotionError] = useState<string | null>(null);
+  const [promotionMessage, setPromotionMessage] = useState<string | null>(null);
   const [form, setForm] = useState({
     billingName: '',
     taxId: '',
@@ -114,18 +133,75 @@ export function ManualCheckout({
     customerMessage: '',
   });
 
-  const price = useMemo(() => {
-    if (plan === 'pro')
-      return interval === 'year' ? '99,00 € / ano' : '9,90 € / mês';
-    return interval === 'year' ? '299,00 € / ano' : '29,90 € / mês';
-  }, [interval, plan]);
-
   const set = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
+
+  async function applyPromotion() {
+    const code = promotionCode.trim();
+    setPromotionError(null);
+    setPromotionMessage(null);
+
+    if (!code) {
+      setPricing(initialPricing);
+      setAppliedPromotionCode(null);
+      setPromotionCode('');
+      return;
+    }
+
+    setPromotionLoading(true);
+    try {
+      const response = await fetch('/api/billing/manual-promotion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+        body: JSON.stringify({ checkoutToken, promotionCode: code }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || !body?.pricing) {
+        throw new Error(
+          typeof body?.error === 'string'
+            ? body.error
+            : 'Não foi possível validar o código promocional.',
+        );
+      }
+
+      const quote = body.pricing as ManualPricingQuote;
+      setPricing(quote);
+      setAppliedPromotionCode(quote.promotionCode);
+      setPromotionCode(quote.promotionCode ?? '');
+      setPromotionMessage(
+        quote.discountAmount > 0
+          ? `Código ${quote.promotionCode} aplicado: ${quote.discountDescription}.`
+          : 'Este código não altera o preço do plano.',
+      );
+    } catch (err) {
+      setPricing(initialPricing);
+      setAppliedPromotionCode(null);
+      setPromotionError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível validar o código promocional.',
+      );
+    } finally {
+      setPromotionLoading(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
+    if (
+      promotionCode.trim() &&
+      promotionCode.trim().toUpperCase() !== appliedPromotionCode
+    ) {
+      setError(
+        'Aplica o código promocional ou limpa o campo antes de continuar.',
+      );
+      return;
+    }
     setError(null);
     setSubmitting(true);
 
@@ -139,6 +215,7 @@ export function ManualCheckout({
         cache: 'no-store',
         body: JSON.stringify({
           checkoutToken,
+          promotionCode: appliedPromotionCode,
           details: { ...form, country },
         }),
       });
@@ -195,9 +272,18 @@ export function ManualCheckout({
                 <span className="text-sm text-zinc-300">
                   {interval === 'year' ? 'Faturação anual' : 'Faturação mensal'}
                 </span>
-                <span className="text-xl font-semibold text-white">
-                  {price}
-                </span>
+                <div className="text-right">
+                  {pricing.discountAmount > 0 ? (
+                    <p className="text-xs text-zinc-500 line-through">
+                      {formatMoney(pricing.originalPrice)} /{' '}
+                      {interval === 'year' ? 'ano' : 'mês'}
+                    </p>
+                  ) : null}
+                  <p className="text-xl font-semibold text-white">
+                    {formatMoney(pricing.finalPrice)} /{' '}
+                    {interval === 'year' ? 'ano' : 'mês'}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -440,6 +526,69 @@ export function ManualCheckout({
                   </select>
                 </Field>
               </div>
+            </section>
+
+            <section
+              className="rounded-3xl border border-emerald-400/15 bg-emerald-400/[0.025] p-5 sm:p-7"
+              aria-label="Código promocional"
+            >
+              <h2 className="text-sm font-semibold text-white">
+                Código promocional
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-zinc-500">
+                Introduz um código válido para atualizar automaticamente o total
+                apresentado.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  className={inputClass}
+                  value={promotionCode}
+                  maxLength={100}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  aria-label="Código promocional"
+                  placeholder="Ex.: WELCOME10"
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setPromotionCode(value);
+                    setPromotionError(null);
+                    setPromotionMessage(null);
+                    if (appliedPromotionCode) {
+                      setAppliedPromotionCode(null);
+                      setPricing(initialPricing);
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => void applyPromotion()}
+                  disabled={promotionLoading || submitting}
+                  className="min-h-12 shrink-0 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-5 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-60"
+                >
+                  {promotionLoading ? 'A validar…' : 'Aplicar código'}
+                </button>
+              </div>
+              {promotionError ? (
+                <p role="alert" className="mt-3 text-xs leading-5 text-red-300">
+                  {promotionError}
+                </p>
+              ) : null}
+              {promotionMessage ? (
+                <p
+                  role="status"
+                  className="mt-3 text-xs leading-5 text-emerald-200"
+                >
+                  {promotionMessage}
+                </p>
+              ) : null}
+              {pricing.discountAmount > 0 ? (
+                <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
+                  <span className="text-zinc-400">Desconto aplicado</span>
+                  <span className="font-semibold text-emerald-200">
+                    −{formatMoney(pricing.discountAmount)}
+                  </span>
+                </div>
+              ) : null}
             </section>
 
             <section className="rounded-3xl border border-white/10 bg-white/[0.018] p-5 sm:p-7">

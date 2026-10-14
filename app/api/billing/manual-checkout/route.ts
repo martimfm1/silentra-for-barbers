@@ -7,6 +7,8 @@ import { PaymentModeService } from '@/services/billing/payment-mode.service';
 import { BillingError } from '@/types/stripe';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { PLANS } from '@/lib/stripe/constants';
+import { assertSameOrigin } from '@/services/billing/http';
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 
 type Details = {
   billingName?: unknown;
@@ -55,6 +57,8 @@ function website(value: string | null) {
 
 async function POST__unobserved(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -70,10 +74,20 @@ async function POST__unobserved(request: Request) {
 
     const body = (await request.json().catch(() => null)) as {
       checkoutToken?: unknown;
+      promotionCode?: unknown;
       details?: Details;
     } | null;
 
     const token = clean(body?.checkoutToken, 4096);
+    const rawPromotionCode =
+      typeof body?.promotionCode === 'string' ? body.promotionCode.trim() : '';
+    if (rawPromotionCode.length > 100) {
+      return NextResponse.json(
+        { error: 'O código promocional é demasiado longo.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    const promotionCode = rawPromotionCode || null;
     const intent = token ? verifyCheckoutIntent(token) : null;
 
     if (!intent || intent.sub !== user.id) {
@@ -237,6 +251,7 @@ async function POST__unobserved(request: Request) {
       barbershopId: profile.barbershop_id,
       plan,
       billingInterval: intent.interval,
+      promotionCode,
       requestType,
       details: {
         billingName,
@@ -255,6 +270,40 @@ async function POST__unobserved(request: Request) {
         customerMessage,
       },
     });
+
+    if (
+      row.promotion_code === NEW_MEMBER_PRO_PROMOTION_CODE &&
+      row.plan === PLANS.PRO &&
+      row.billing_interval === 'month' &&
+      row.price === 0
+    ) {
+      const trial = await ManualPaymentService.redeemManualProTrial(
+        row.id,
+        user.id,
+      );
+
+      return NextResponse.json(
+        {
+          ok: true,
+          request: {
+            id: row.id,
+            status: 'TRIAL',
+            plan: row.plan,
+            billingInterval: row.billing_interval,
+            price: 0,
+            currency: row.currency,
+          },
+          freeTrial: {
+            active: true,
+            months: 1,
+            expiresAt: trial.expires_at,
+            activationEmailSent: trial.emailSent,
+          },
+          redirectUrl: `/dashboard/billing?manual=trial_activated&request_id=${encodeURIComponent(row.id)}`,
+        },
+        { status: 201, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
 
     const { data: shop } = await admin
       .from('barbershops')
@@ -286,15 +335,21 @@ async function POST__unobserved(request: Request) {
       { status: 201, headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
-    const status =
-      error instanceof BillingError && ['INVALID_PRICE'].includes(error.code)
-        ? 400
-        : error instanceof BillingError &&
-            ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
-              error.code,
-            )
-          ? 409
-          : 500;
+    const status = (() => {
+      if (!(error instanceof BillingError)) return 500;
+      if (error.code === 'INVALID_PRICE') return 400;
+      if (error.code === 'PROMOTION_NOT_ELIGIBLE') return 409;
+      if (error.code === 'CSRF_VALIDATION_FAILED') return 403;
+      if (error.code === 'BILLING_NOT_CONFIGURED') return 503;
+      if (
+        ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
+          error.code,
+        )
+      ) {
+        return 409;
+      }
+      return 500;
+    })();
 
     console.error('[MANUAL_CHECKOUT]', {
       error: error instanceof Error ? error.name : 'UNKNOWN',

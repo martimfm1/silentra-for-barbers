@@ -7,6 +7,9 @@ export type BillingEmailContext = {
   plan: Exclude<BillingPlan, 'free'>;
   billingInterval: 'month' | 'year';
   price: number;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+  promotionCode?: string | null;
   currency?: string;
   requestId?: string | null;
   createdAt?: string | null;
@@ -250,13 +253,28 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
     safeUrl(context.adminUrl) ??
     new URL('/silentra-admin', getBaseUrl()).toString();
   const name = context.customerName || context.customerEmail || 'Cliente';
+  const promotionDetails: Array<[string, string]> =
+    (context.discountAmount ?? 0) > 0
+      ? [
+          [
+            'Preço original',
+            money(context.originalPrice ?? context.price, context.currency),
+          ],
+          ['Código promocional', context.promotionCode || '—'],
+          [
+            'Desconto',
+            `−${money(context.discountAmount ?? 0, context.currency)}`,
+          ],
+        ]
+      : [];
   const content = details([
     ['Cliente', name],
     ['Email', context.customerEmail || '—'],
     ['Barbearia', context.barbershopName || '—'],
     ['Plano', planLabel(context.plan)],
     ['Período', intervalLabel(context.billingInterval)],
-    ['Valor', money(context.price, context.currency)],
+    ...promotionDetails,
+    ['Total a cobrar', money(context.price, context.currency)],
     ['Referência', reference(context.requestId)],
     ['Criado em', dateTime(context.createdAt)],
   ]);
@@ -277,12 +295,27 @@ export function customerPaymentLinkEmail(context: BillingEmailContext) {
   const name = context.customerName || 'Cliente';
   const link = safeUrl(context.paymentLink);
   const requestRef = reference(context.requestId);
+  const promotionDetails: Array<[string, string]> =
+    (context.discountAmount ?? 0) > 0
+      ? [
+          [
+            'Preço original',
+            money(context.originalPrice ?? context.price, context.currency),
+          ],
+          ['Código promocional', context.promotionCode || '—'],
+          [
+            'Desconto',
+            `−${money(context.discountAmount ?? 0, context.currency)}`,
+          ],
+        ]
+      : [];
 
   const content =
     details([
       ['Plano', planLabel(context.plan)],
       ['Período', intervalLabel(context.billingInterval)],
-      ['Valor', money(context.price, context.currency)],
+      ...promotionDetails,
+      ['Total a pagar', money(context.price, context.currency)],
       ['Referência', requestRef],
     ]) +
     `<p style="margin:18px 0 0;color:#71717a;font-size:12px;line-height:1.7">Usa apenas o botão acima para concluir o pagamento. A Silentra nunca te pede a palavra-passe ou códigos de autenticação através deste email.</p>`;
@@ -323,6 +356,31 @@ export function customerSubscriptionActivatedEmail(
     cta: { label: 'Abrir faturação', href: dashboardUrl },
     footer:
       'Podes consultar o estado da tua subscrição e a próxima renovação na área de faturação.',
+  });
+}
+
+export function customerFreeTrialActivatedEmail(context: BillingEmailContext) {
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
+  const name = context.customerName || 'Cliente';
+  const content = details([
+    ['Plano', 'Barbers Pro'],
+    ['Benefício', '1 mês grátis'],
+    ['Ativado em', dateTime(context.startedAt)],
+    ['Acesso disponível até', dateTime(context.expiresAt)],
+    ['Referência', reference(context.requestId)],
+  ]);
+
+  return shell({
+    preheader: 'O teu mês gratuito do Barbers Pro já está ativo.',
+    eyebrow: 'Billing · Oferta de novos clientes',
+    title: 'O teu mês grátis começou',
+    intro: `Olá, ${escapeHtml(name)}. O código TRIALPRO foi validado e o teu acesso ao Barbers Pro está ativo durante um mês. Não foi cobrado qualquer valor.`,
+    content,
+    cta: { label: 'Abrir o BarbersPro', href: dashboardUrl },
+    footer:
+      'Este benefício é válido uma única vez por cliente. Para continuar com funcionalidades Pro depois do período gratuito, visita a página de planos.',
   });
 }
 

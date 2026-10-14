@@ -127,7 +127,21 @@ export class BillingService {
         { userId },
       );
 
-    // First check: local billing history. Second check: Stripe history.
+    const { data: manualRequests, error: manualRequestsError } = await database
+      .from('subscription_requests')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1);
+
+    if (manualRequestsError)
+      throw new BillingError(
+        'Could not verify manual billing history for trial eligibility.',
+        'DB_READ_FAILED',
+        { userId },
+      );
+
+    // Local subscriptions and manual requests are permanent history signals.
+    // Stripe records are checked as an independent second source.
     // Clearing or desynchronizing local rows can never restore the new-member offer.
     const { data: account, error: accountError } = await database
       .from('barbershop_billing_accounts')
@@ -142,7 +156,8 @@ export class BillingService {
         { userId },
       );
 
-    if (!account?.stripe_customer_id) return data.length === 0;
+    if (!account?.stripe_customer_id)
+      return data.length === 0 && manualRequests.length === 0;
 
     const stripe = getStripeClient();
     const [subscriptions, invoices] = await Promise.all([
@@ -159,6 +174,7 @@ export class BillingService {
 
     return (
       data.length === 0 &&
+      manualRequests.length === 0 &&
       subscriptions.data.length === 0 &&
       invoices.data.length === 0
     );

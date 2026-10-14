@@ -407,12 +407,22 @@ export function BillingHub() {
             </div>
             {manualRequest ? (
               <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
-                {manualRequest.status.replace('_', ' ')}
+                {manualRequest.status === 'TRIAL'
+                  ? 'Mês grátis ativo'
+                  : manualRequest.status.replace('_', ' ')}
               </span>
             ) : null}
           </div>
           <div className="mt-5">
-            {manualRequest?.status === 'PENDING' ? (
+            {manualRequest?.status === 'TRIAL' ? (
+              <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4 text-sm leading-6 text-emerald-100/80">
+                O código TRIALPRO ativou o teu primeiro mês de Barbers Pro sem
+                qualquer cobrança.
+                {manualRequest.expiresAt
+                  ? ` O acesso gratuito termina em ${new Date(manualRequest.expiresAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })}.`
+                  : ''}
+              </div>
+            ) : manualRequest?.status === 'PENDING' ? (
               <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
                 O pedido foi recebido. A equipa irá preparar o pagamento e
                 enviar-te as instruções para o email associado à tua conta.

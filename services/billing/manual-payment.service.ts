@@ -4,21 +4,33 @@ import {
   getManualPrice,
   type ManualBillingInterval,
 } from '@/lib/billing/manual-pricing';
-import { PLANS, type BillingPlan } from '@/lib/stripe/constants';
+import {
+  NEW_MEMBER_PRO_PROMOTION_CODE,
+  PLANS,
+  type BillingPlan,
+} from '@/lib/stripe/constants';
 import { sendEmail } from '@/lib/notifications';
 import {
   adminPaymentRequestEmail,
   customerPaymentLinkEmail,
   customerSubscriptionActivatedEmail,
+  customerFreeTrialActivatedEmail,
   customerPaymentRejectedEmail,
   getBillingEmailBaseUrl,
 } from '@/services/billing/email-templates';
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
+import { quoteManualPrice } from '@/lib/billing/manual-promotions';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
-  'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+  | 'PENDING'
+  | 'PAYMENT_SENT'
+  | 'PAID'
+  | 'TRIAL'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'CANCELLED';
 
 export interface ManualSubscriptionRequest {
   id: string;
@@ -31,6 +43,9 @@ export interface ManualSubscriptionRequest {
   status: ManualRequestStatus;
   payment_method: 'MANUAL';
   price: number;
+  original_price: number;
+  discount_amount: number;
+  promotion_code: string | null;
   currency: 'EUR';
   payment_link: string | null;
   payment_sent_at: string | null;
@@ -144,6 +159,74 @@ export function validatePaymentLink(value: string): string {
 }
 
 export class ManualPaymentService {
+  /**
+   * Manual TRIALPRO eligibility is deliberately database-only. Manual checkout
+   * must never need Stripe network calls, and any local billing/request history
+   * disqualifies the account, including expired or rejected prior requests.
+   */
+  static async isEligibleForManualProTrial(
+    userId: string,
+    barbershopId: string,
+  ): Promise<boolean> {
+    const admin = createAdminClient();
+    const [
+      subscriptionsByUser,
+      subscriptionsByShop,
+      previousRequests,
+      existingPlanAssignment,
+      billingAccountByUser,
+      billingAccountByShop,
+      legacyCustomer,
+    ] = await Promise.all([
+      admin.from('subscriptions').select('id').eq('user_id', userId).limit(1),
+      admin
+        .from('subscriptions')
+        .select('id')
+        .eq('barbershop_id', barbershopId)
+        .limit(1),
+      admin
+        .from('subscription_requests')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1),
+      admin
+        .from('barbershop_plan_assignments')
+        .select('barbershop_id')
+        .eq('barbershop_id', barbershopId)
+        .limit(1),
+      admin
+        .from('barbershop_billing_accounts')
+        .select('barbershop_id')
+        .eq('billing_owner_user_id', userId)
+        .limit(1),
+      admin
+        .from('barbershop_billing_accounts')
+        .select('barbershop_id')
+        .eq('barbershop_id', barbershopId)
+        .limit(1),
+      admin.from('customers').select('user_id').eq('user_id', userId).limit(1),
+    ]);
+
+    const results = [
+      subscriptionsByUser,
+      subscriptionsByShop,
+      previousRequests,
+      existingPlanAssignment,
+      billingAccountByUser,
+      billingAccountByShop,
+      legacyCustomer,
+    ];
+    if (results.some((result) => result.error)) {
+      throw new BillingError(
+        'Não foi possível verificar se a oferta de novos clientes está disponível.',
+        'DB_READ_FAILED',
+        { userId, barbershopId },
+      );
+    }
+
+    return results.every((result) => !result.data?.length);
+  }
+
   static async getRequestForUser(
     userId: string,
   ): Promise<ManualSubscriptionRequest | null> {
@@ -207,11 +290,135 @@ export class ManualPaymentService {
     return (data as ManualSubscriptionRequest | null) ?? null;
   }
 
+  /**
+   * Redeems a validated zero-price TRIALPRO request. The database procedure
+   * rechecks eligibility and activates the one-month grant atomically.
+   */
+  static async redeemManualProTrial(requestId: string, actorUserId: string) {
+    const row = await this.getRequest(requestId);
+    if (
+      !row ||
+      row.user_id !== actorUserId ||
+      row.plan !== 'pro' ||
+      row.billing_interval !== 'month' ||
+      row.promotion_code !== NEW_MEMBER_PRO_PROMOTION_CODE ||
+      row.price !== 0
+    ) {
+      throw new BillingError(
+        'O pedido não é elegível para a oferta TRIALPRO.',
+        'PROMOTION_NOT_ELIGIBLE',
+      );
+    }
+
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc('redeem_manual_pro_trial', {
+      p_request_id: requestId,
+      p_actor_user_id: actorUserId,
+    });
+
+    if (error) {
+      const promotionErrors = new Set([
+        'TRIAL_REQUEST_INVALID',
+        'TRIAL_NOT_ELIGIBLE',
+        'TRIAL_HISTORY_EXISTS',
+        'ACTIVE_SUBSCRIPTION_EXISTS',
+      ]);
+      const rejected = promotionErrors.has(error.message ?? '');
+      console.error('[MANUAL_PRO_TRIAL_REDEEM_ERROR]', {
+        requestId,
+        actorUserId,
+        code: error.code ?? null,
+        reason: error.message ?? null,
+      });
+      throw new BillingError(
+        rejected
+          ? 'O código TRIALPRO já não está disponível para esta conta.'
+          : 'Não foi possível ativar a oferta TRIALPRO. Tenta novamente ou contacta o suporte.',
+        rejected ? 'PROMOTION_NOT_ELIGIBLE' : 'DB_WRITE_FAILED',
+      );
+    }
+
+    const confirmation = Array.isArray(data) ? data[0] : data;
+    if (!confirmation) {
+      throw new BillingError(
+        'A ativação da oferta TRIALPRO não devolveu o estado da subscrição.',
+        'DB_WRITE_FAILED',
+      );
+    }
+
+    let emailSent = false;
+    try {
+      const [{ data: customer }, { data: shop }] = await Promise.all([
+        admin
+          .from('users')
+          .select('id, name_complete, email')
+          .eq('id', row.user_id)
+          .maybeSingle(),
+        admin
+          .from('barbershops')
+          .select('name')
+          .eq('id', row.barbershop_id)
+          .maybeSingle(),
+      ]);
+
+      const recipientEmail = row.billing_email || customer?.email || null;
+      if (recipientEmail) {
+        const template = customerFreeTrialActivatedEmail({
+          customerName:
+            row.billing_name || customer?.name_complete || recipientEmail,
+          customerEmail: recipientEmail,
+          barbershopName: shop?.name ?? 'Barbearia',
+          plan: 'pro',
+          billingInterval: 'month',
+          price: 0,
+          currency: 'EUR',
+          requestId: row.id,
+          startedAt: confirmation.started_at,
+          expiresAt: confirmation.expires_at,
+          dashboardUrl: new URL(
+            '/dashboard/billing',
+            getBillingEmailBaseUrl(),
+          ).toString(),
+        });
+        const result = await sendEmail(
+          {
+            email: recipientEmail,
+            userId: row.user_id,
+          },
+          {
+            subject: 'O teu mês grátis do Barbers Pro começou — Silentra',
+            body: template.text,
+            html: template.html,
+            senderName: 'Silentra',
+          },
+        );
+        emailSent = result.success;
+        if (!result.success) {
+          console.error('[MANUAL_PRO_TRIAL_EMAIL_ERROR]', {
+            requestId,
+            error: result.error ?? 'EMAIL_SEND_FAILED',
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error('[MANUAL_PRO_TRIAL_EMAIL_ERROR]', {
+        requestId,
+        error: emailError instanceof Error ? emailError.name : 'UNKNOWN',
+      });
+    }
+
+    return {
+      ...confirmation,
+      emailSent,
+    };
+  }
+
   static async createRequest(input: {
     userId: string;
     barbershopId: string;
     plan: Exclude<BillingPlan, 'free'>;
     billingInterval?: ManualBillingInterval;
+    promotionCode?: string | null;
     requestType?: ManualRequestType;
     details?: {
       billingName: string;
@@ -233,6 +440,18 @@ export class ManualPaymentService {
     const interval = input.billingInterval ?? 'month';
     const requestType = input.requestType ?? 'NEW';
     const price = getManualPrice(input.plan, interval);
+    const normalizedPromotionCode = input.promotionCode?.trim().toUpperCase();
+    const isTrialPromotion =
+      normalizedPromotionCode === NEW_MEMBER_PRO_PROMOTION_CODE;
+    const trialEligible = isTrialPromotion
+      ? await ManualPaymentService.isEligibleForManualProTrial(
+          input.userId,
+          input.barbershopId,
+        )
+      : false;
+    const quote = quoteManualPrice(input.plan, interval, input.promotionCode, {
+      newMemberEligible: trialEligible,
+    });
 
     if (!price) {
       throw new BillingError(
@@ -312,8 +531,11 @@ export class ManualPaymentService {
         billing_interval: interval,
         status: 'PENDING',
         payment_method: 'MANUAL',
-        price: Number(price.unitAmount.toFixed(2)),
-        currency: price.currency,
+        price: quote.finalPrice,
+        original_price: quote.originalPrice,
+        discount_amount: quote.discountAmount,
+        promotion_code: quote.promotionCode,
+        currency: quote.currency,
         billing_name: input.details?.billingName ?? null,
         tax_id: input.details?.taxId ?? null,
         billing_email: input.details?.billingEmail ?? null,
@@ -406,6 +628,9 @@ export class ManualPaymentService {
       plan: requestRow.plan,
       billingInterval: requestRow.billing_interval,
       price: requestRow.price,
+      originalPrice: requestRow.original_price,
+      discountAmount: requestRow.discount_amount,
+      promotionCode: requestRow.promotion_code,
       currency: requestRow.currency,
       requestId: requestRow.id,
       createdAt: requestRow.created_at,
@@ -503,6 +728,9 @@ export class ManualPaymentService {
       plan: row.plan,
       billingInterval: row.billing_interval,
       price: row.price,
+      originalPrice: row.original_price,
+      discountAmount: row.discount_amount,
+      promotionCode: row.promotion_code,
       currency: row.currency,
       requestId: row.id,
       paymentLink: link,

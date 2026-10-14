@@ -67,6 +67,9 @@ jobs:
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
 
+      - name: Manual promotion contracts
+        run: pnpm qa:manual-promotions
+
       - name: Dependency audit
         run: pnpm qa:deps
 

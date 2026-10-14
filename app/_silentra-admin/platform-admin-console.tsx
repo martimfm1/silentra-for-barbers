@@ -162,7 +162,13 @@ type ManualRequest = {
   plan: 'pro' | 'enterprise';
   billing_interval: 'month' | 'year';
   status:
-    'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+    | 'PENDING'
+    | 'PAYMENT_SENT'
+    | 'PAID'
+    | 'TRIAL'
+    | 'REJECTED'
+    | 'EXPIRED'
+    | 'CANCELLED';
   payment_method: 'MANUAL';
   price: number;
   currency: string;
@@ -1749,6 +1755,7 @@ export default function PlatformAdminConsole() {
                   <option value="PENDING">Pendentes</option>
                   <option value="PAYMENT_SENT">Pagamento enviado</option>
                   <option value="PAID">Pagos</option>
+                  <option value="TRIAL">Mês grátis (TRIALPRO)</option>
                   <option value="REJECTED">Rejeitados</option>
                   <option value="EXPIRED">Expirados</option>
                   <option value="CANCELLED">Cancelados</option>
@@ -1788,7 +1795,8 @@ export default function PlatformAdminConsole() {
                         </span>
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                            request.status === 'PAID'
+                            request.status === 'PAID' ||
+                            request.status === 'TRIAL'
                               ? 'bg-emerald-400/10 text-emerald-200'
                               : request.status === 'REJECTED' ||
                                   request.status === 'EXPIRED'
@@ -1796,7 +1804,9 @@ export default function PlatformAdminConsole() {
                                 : 'bg-amber-400/10 text-amber-200'
                           }`}
                         >
-                          {request.status.replace('_', ' ')}
+                          {request.status === 'TRIAL'
+                            ? 'TRIALPRO · MÊS GRÁTIS'
+                            : request.status.replace('_', ' ')}
                         </span>
                       </div>
                     </div>
