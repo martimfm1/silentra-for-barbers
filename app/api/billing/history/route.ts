@@ -127,7 +127,7 @@ async function GET__unobserved() {
     const { data: documents, error: documentsError } = await admin
       .from('billing_documents')
       .select(
-        'id, document_number, issued_at, plan, description, currency, total, user_id, barbershop_id',
+        'id, document_number, issued_at, plan, billing_interval, currency, total, user_id, barbershop_id',
       )
       .eq('barbershop_id', barbershopId)
       .eq('user_id', user.id)
@@ -153,7 +153,7 @@ async function GET__unobserved() {
         amount: Math.round(Number(document.total) * 100),
         currency: String(document.currency ?? 'EUR').toUpperCase(),
         status: 'Pago',
-        plan: planLabel(String(document.plan ?? 'subscrição')),
+        plan: `${planLabel(String(document.plan ?? 'subscrição'))} · ${document.billing_interval === 'year' ? 'Anual' : 'Mensal'}`,
         date: formatDate(issuedAt),
         issued_at: issuedAt.toISOString(),
         invoice_pdf: null,
@@ -258,8 +258,7 @@ async function GET__unobserved() {
           new Date(right.issued_at).getTime() -
           new Date(left.issued_at).getTime(),
       )
-      .slice(0, MAX_HISTORY_ITEMS)
-      .map(({ issued_at: _issuedAt, ...invoice }) => invoice);
+      .slice(0, MAX_HISTORY_ITEMS);
 
     return NextResponse.json(
       { invoices },
