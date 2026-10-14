@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import { StarfieldBackground } from '@/components/ui/starfield';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function EmailConfirmedPage() {
+  const { t } = useLanguage();
   return (
     <main className="min-h-screen bg-background px-4 py-10 sm:px-6 lg:px-8">
       <StarfieldBackground>
@@ -18,18 +23,18 @@ export default function EmailConfirmedPage() {
               <CheckCircle2 className="h-7 w-7" strokeWidth={2} />
             </div>
 
+            <div className="mb-4 flex justify-end"><LanguageSwitcher /></div>
             <p className="mb-2 text-sm font-medium text-primary">
-              Conta confirmada
+              {t('auth.emailConfirmedTag')}
             </p>
             <h1
               id="email-confirmed-title"
               className="text-2xl font-semibold tracking-tight sm:text-3xl"
             >
-              O teu email foi confirmado
+              {t('auth.emailConfirmedTitle')}
             </h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
-              A tua conta está confirmada. Já podes iniciar sessão para entrares
-              no painel da tua barbearia.
+              {t('auth.emailConfirmedBody')}
             </p>
 
             <Link
