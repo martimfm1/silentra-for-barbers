@@ -431,6 +431,11 @@ export const en = {
     openFilters: 'Open filters',
     availability: 'Availability',
     viewDetails: 'View details for {shop}',
+    nearMe: 'Near me',
+    nearYou: 'Near you',
+    topRated: 'Top rated',
+    nearMeShort: 'Near me',
+    noLocation: 'Enable location to find nearby barbershops.',
     shopLogo: 'Logo for {shop}',
   },
   storefront: {
