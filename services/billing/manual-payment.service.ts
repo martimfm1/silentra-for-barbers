@@ -4,7 +4,11 @@ import {
   getManualPrice,
   type ManualBillingInterval,
 } from '@/lib/billing/manual-pricing';
-import { PLANS, type BillingPlan } from '@/lib/stripe/constants';
+import {
+  NEW_MEMBER_PRO_PROMOTION_CODE,
+  PLANS,
+  type BillingPlan,
+} from '@/lib/stripe/constants';
 import { sendEmail } from '@/lib/notifications';
 import {
   adminPaymentRequestEmail,
@@ -17,7 +21,6 @@ import {
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
-import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
