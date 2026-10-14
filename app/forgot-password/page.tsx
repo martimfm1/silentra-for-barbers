@@ -29,8 +29,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiteNavbar } from '@/components/site-navbar';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -54,13 +56,13 @@ export default function ForgotPasswordPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Não foi possível processar o pedido.');
+        throw new Error(t('auth.resendFailed'));
       }
 
       setIsSent(true);
     } catch {
       setErrorMsg(
-        'Não foi possível processar o pedido. Tenta novamente daqui a pouco.',
+        t('auth.resendFailed'),
       );
     } finally {
       setIsSubmitting(false);
@@ -83,7 +85,7 @@ export default function ForgotPasswordPage() {
                 <CardHeader className="gap-2 pb-2 px-5 sm:px-6 pt-6 sm:pt-7">
                   <div className="flex justify-start">
                     <Badge className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] text-zinc-300 select-none">
-                      Segurança da conta
+                      {t('auth.accountSecurity')}
                     </Badge>
                   </div>
                   <CardTitle className="font-heading text-xl sm:text-2xl text-zinc-50 tracking-tight mt-1">
@@ -93,8 +95,8 @@ export default function ForgotPasswordPage() {
                   </CardTitle>
                   <CardDescription className="text-xs text-zinc-400 leading-relaxed">
                     {isSent
-                      ? `Se existir uma conta associada a ${email}, enviámos instruções para definir uma nova palavra-passe.`
-                      : 'Indica o email da tua conta e enviaremos instruções para redefinir a palavra-passe.'}
+                      ? t('auth.resetEmailSent')
+                      : t('auth.resetPasswordSubtitle')}
                   </CardDescription>
                 </CardHeader>
 
@@ -155,14 +157,14 @@ export default function ForgotPasswordPage() {
                                     <button
                                       type="button"
                                       tabIndex={-1}
-                                      aria-label="Informações sobre o email"
+                                      aria-label="{t('auth.emailAddress')}"
                                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-1"
                                     >
                                       <Info className="size-3.5" />
                                     </button>
                                   </TooltipTrigger>
                                   <TooltipContent id={emailHintId} side="top">
-                                    Usa o email associado à tua conta Silentra.
+                                    {t('auth.useAccountEmail')}
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
@@ -190,7 +192,7 @@ export default function ForgotPasswordPage() {
                             href="/login"
                             className="inline-flex items-center justify-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-100 transition-colors min-h-[44px] px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-md"
                           >
-                            <ArrowLeft className="size-3.5" /> Voltar ao login
+                            <ArrowLeft className="size-3.5" /> {t('auth.backToLogin')}
                           </Link>
                         </div>
                       </motion.form>
@@ -206,8 +208,7 @@ export default function ForgotPasswordPage() {
                           <CheckCircle2 className="size-6" />
                         </div>
                         <p className="text-xs text-zinc-300">
-                          Não recebeste o email? Verifica o spam ou tenta
-                          novamente.
+                          {t('auth.resendNotReceived')}
                         </p>
                         <div className="w-full space-y-3 pt-2">
                           <Button
