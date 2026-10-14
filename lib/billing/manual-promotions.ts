@@ -160,6 +160,7 @@ export function quoteManualPrice(
   plan: ManualPromotionPlan,
   interval: ManualBillingInterval,
   promotionCode?: string | null,
+  options: { newMemberEligible?: boolean } = {},
 ): ManualPricingQuote {
   const configuredPrice = getManualPrice(plan, interval);
   if (!configuredPrice) {
@@ -196,10 +197,22 @@ export function quoteManualPrice(
 
   if (promotion.type === 'free_month') {
     if (plan !== 'pro' || interval !== 'month') invalidPromotion();
-    throw new BillingError(
-      'O código TRIALPRO só pode ser aplicado a novos clientes elegíveis do plano Pro mensal.',
-      'PROMOTION_NOT_ELIGIBLE',
-    );
+    if (!options.newMemberEligible) {
+      throw new BillingError(
+        'O código TRIALPRO é exclusivo para novos clientes elegíveis do plano Pro mensal.',
+        'PROMOTION_NOT_ELIGIBLE',
+      );
+    }
+
+    return {
+      promotionCode: normalizedCode,
+      originalPrice: euroAmount(originalCents),
+      discountAmount: euroAmount(originalCents),
+      finalPrice: 0,
+      currency: 'EUR',
+      discountDescription: '1 mês grátis',
+      freeTrial: true,
+    };
   }
 
   const requestedDiscountCents =
