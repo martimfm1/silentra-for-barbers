@@ -9,6 +9,7 @@ function read(relative) {
 
 const promotionService = read('lib/billing/manual-promotions.ts');
 const previewRoute = read('app/api/billing/manual-promotion/route.ts');
+const stripeCheckout = read('app/api/stripe/embedded-checkout/route.ts');
 const manualRoute = read('app/api/billing/manual-checkout/route.ts');
 const manualService = read('services/billing/manual-payment.service.ts');
 const checkoutUi = read('components/billing/manual-checkout.tsx');
@@ -99,6 +100,12 @@ const checks = [
       ) &&
       trialMigration.includes("status = 'TRIAL'") &&
       trialMigration.includes("'trialing'"),
+  ],
+  [
+    'Stripe TRIALPRO is restricted to new Pro monthly customers',
+    stripeCheckout.includes("intent.interval === 'month'") &&
+      stripeCheckout.includes('requestedPlan === PLANS.PRO') &&
+      stripeCheckout.includes('!hasBillingHistory'),
   ],
   [
     'Trial expiry is handled by the manual subscription worker',
