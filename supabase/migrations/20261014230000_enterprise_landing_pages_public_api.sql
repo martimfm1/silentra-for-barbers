@@ -53,7 +53,7 @@ begin
       when s.status in ('active', 'trialing')
        and (
          case
-           when s.plan_override::text in ('free', 'pro', 'enterprise')
+           when s.plan_override::text in ('pro', 'enterprise')
              then s.plan_override::text
            else s.plan::text
          end
