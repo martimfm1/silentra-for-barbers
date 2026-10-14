@@ -64,7 +64,7 @@ export const guestMetadata: Metadata = {
   },
 
   openGraph: {
-    title: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
+    title: 'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
     description:
       'Agenda, marcações online e gestão da barbearia num único painel. Os clientes reservam pelo browser, sem conta nem aplicação.',
     url: base.url,
