@@ -79,6 +79,9 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: SEO foundation contracts
+        run: pnpm qa:seo
+
       - name: Build
         run: pnpm build
 
