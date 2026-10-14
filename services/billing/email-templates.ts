@@ -359,9 +359,7 @@ export function customerSubscriptionActivatedEmail(
   });
 }
 
-export function customerFreeTrialActivatedEmail(
-  context: BillingEmailContext,
-) {
+export function customerFreeTrialActivatedEmail(context: BillingEmailContext) {
   const dashboardUrl =
     safeUrl(context.dashboardUrl) ??
     new URL('/dashboard/billing', getBaseUrl()).toString();
