@@ -207,9 +207,9 @@ function dateTime(value: string, locale: string): string {
   }).format(date);
 }
 
-function countryLabel(value: string | null, locale: string): string {
+function countryLabel(value: string | null): string {
   if (!value) return '';
-  if (value.toUpperCase() === 'PT') return locale === 'pt-PT' ? 'Portugal' : 'Portugal';
+  if (value.toUpperCase() === 'PT') return 'Portugal';
   return value;
 }
 
@@ -261,7 +261,7 @@ export default function MarketplaceOrderTrackingClient() {
         ? parseTrackedOrder(payload.order)
         : null;
       if (!parsed) {
-        throw new Error('Recebemos uma resposta inválida. Tenta novamente.');
+        throw new Error(t('orderTracking.invalidResponse'));
       }
       if (activeRef.current) {
         setOrder(parsed);
@@ -272,7 +272,7 @@ export default function MarketplaceOrderTrackingClient() {
       if (activeRef.current) {
         setError(
           cause instanceof Error && cause.name === 'AbortError'
-            ? 'A consulta demorou demasiado tempo. Verifica a ligação e tenta novamente.'
+            ? t('orderTracking.timeout')
             : cause instanceof Error
               ? cause.message
               : t('orderTracking.loadError'),
@@ -316,7 +316,7 @@ export default function MarketplaceOrderTrackingClient() {
     const tokenFromFragment = initialTokenRef.current;
     if (!tokenFromFragment) {
       setError(
-        'Para proteger os teus dados, abre o link completo de acompanhamento que recebeste por email.',
+        t('orderTracking.missingToken'),
       );
       setLoading(false);
       return () => {
@@ -637,7 +637,7 @@ export default function MarketplaceOrderTrackingClient() {
                               .filter(Boolean)
                               .join(' ')}
                           </p>
-                          {countryLabel(order.shipping.country, formatLocale) && (
+                          {countryLabel(order.shipping.country) && (
                             <p>{countryLabel(order.shipping.country, formatLocale)}</p>
                           )}
                         </div>
