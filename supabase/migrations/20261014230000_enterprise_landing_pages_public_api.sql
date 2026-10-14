@@ -27,6 +27,8 @@ comment on column public.barbershop_landing_pages.template_version is
   'Version of the managed landing-page template used for rendering.';
 
 create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
+grant usage on schema private to service_role;
 
 create or replace function private.sync_barbershop_landing_page_entitlement(
   p_barbershop_id uuid
