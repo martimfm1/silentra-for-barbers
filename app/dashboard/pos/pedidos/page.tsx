@@ -217,7 +217,7 @@ export default function MarketplaceOrdersPage() {
   async function changeStatus(order: Order, next: Status) {
     if (next === 'cancelled') {
       const confirmed = window.confirm(
-        `Tens a certeza de que queres cancelar a encomenda #${order.id.slice(0, 8)} de ${order.customer_name}? Esta ação não deve ser usada para corrigir apenas o estado.`,
+        t('orderManagement.cancelOrderConfirm', { reference: order.id.slice(0, 8), customer: order.customer_name }),
       );
       if (!confirmed) return;
     }
