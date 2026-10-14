@@ -95,6 +95,23 @@ jobs:
             echo "PRETTIER_B64_END:$file"
           done
 
+      - name: Format corrections diagnostic
+        run: |
+          pnpm exec prettier --write \
+            app/api/billing/manual-promotion/route.ts \
+            components/billing/manual-checkout.tsx \
+            lib/billing/manual-promotions.ts \
+            scripts/qa/manual-promotions.mjs \
+            services/billing/email-templates.ts \
+            services/billing/manual-payment.service.ts
+          git diff --unified=2 -- \
+            app/api/billing/manual-promotion/route.ts \
+            components/billing/manual-checkout.tsx \
+            lib/billing/manual-promotions.ts \
+            scripts/qa/manual-promotions.mjs \
+            services/billing/email-templates.ts \
+            services/billing/manual-payment.service.ts
+
       - name: Format check
         run: pnpm format:check
 
