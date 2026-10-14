@@ -80,11 +80,11 @@ export default function DashboardPage() {
       setClients(clientsRes.data ?? []);
     } catch (error) {
       console.error('[Dashboard Sync Error]:', error);
-      toast.error(t('common.retry'));
+      toast.error(t('dashboard.updateError'));
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
@@ -103,12 +103,20 @@ export default function DashboardPage() {
   }, []);
 
   const chartConfig = {
-    revenue: { label: 'Receita', color: '#34d399' },
+    revenue: { label: t('dashboard.revenueLabel'), color: '#34d399' },
     bookings: { label: t('dashboard.appointmentsLabel'), color: '#60a5fa' },
   } satisfies ChartConfig;
 
   const dynamicChartData = useMemo(() => {
-    const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const days = [
+      t('dashboard.dayMon'),
+      t('dashboard.dayTue'),
+      t('dashboard.dayWed'),
+      t('dashboard.dayThu'),
+      t('dashboard.dayFri'),
+      t('dashboard.daySat'),
+      t('dashboard.daySun'),
+    ];
     return days.map((day, index) => ({
       day,
       revenue: appointments
@@ -119,7 +127,7 @@ export default function DashboardPage() {
       bookings: appointments.filter((a) => getDayIndex(a.date_hour) === index)
         .length,
     }));
-  }, [appointments]);
+  }, [appointments, locale, t]);
 
   const metrics = useMemo(() => {
     const totalRevenue = appointments
@@ -136,9 +144,10 @@ export default function DashboardPage() {
     };
     return DASHBOARD_METRIC_DESCRIPTORS.map((descriptor) => ({
       ...descriptor,
+      label: t(`dashboard.${descriptor.key}`),
       value: valuesMap[descriptor.key],
     }));
-  }, [appointments, clients, services]);
+  }, [appointments, clients, services, t]);
 
   const upcomingAppointments = useMemo(
     () =>
@@ -161,7 +170,7 @@ export default function DashboardPage() {
       href: '/dashboard/servicos',
     },
     {
-      label: 'Adicionar um barbeiro',
+      label: t('dashboard.addBarber'),
       done: professionals.length > 0,
       href: '/dashboard/equipa',
     },
