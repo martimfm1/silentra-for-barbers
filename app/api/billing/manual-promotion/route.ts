@@ -3,9 +3,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import { PaymentModeService } from '@/services/billing/payment-mode.service';
-import {
-  BarbershopStripeService,
-} from '@/services/billing/barbershop-stripe.service';
+import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import {
   assertSameOrigin,
   billingErrorResponse,
@@ -39,13 +37,9 @@ async function POST__unobserved(request: Request) {
 
     const body = await readJsonObject(request);
     const token =
-      typeof body.checkoutToken === 'string'
-        ? body.checkoutToken.trim()
-        : '';
+      typeof body.checkoutToken === 'string' ? body.checkoutToken.trim() : '';
     const rawCode =
-      typeof body.promotionCode === 'string'
-        ? body.promotionCode.trim()
-        : '';
+      typeof body.promotionCode === 'string' ? body.promotionCode.trim() : '';
 
     if (!token || token.length > 4096) {
       return NextResponse.json(
