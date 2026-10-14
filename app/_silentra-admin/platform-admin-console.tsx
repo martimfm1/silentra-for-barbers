@@ -162,7 +162,13 @@ type ManualRequest = {
   plan: 'pro' | 'enterprise';
   billing_interval: 'month' | 'year';
   status:
-    'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+    | 'PENDING'
+    | 'PAYMENT_SENT'
+    | 'PAID'
+    | 'TRIAL'
+    | 'REJECTED'
+    | 'EXPIRED'
+    | 'CANCELLED';
   payment_method: 'MANUAL';
   price: number;
   currency: string;
