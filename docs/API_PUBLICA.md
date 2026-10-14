@@ -29,10 +29,10 @@ Não é necessário enviar `Authorization`, API key, cookies ou sessão de utili
 
 ## 2. Pedidos e cabeçalhos
 
-| Cabeçalho | Obrigatório | Utilização |
-| --- | --- | --- |
-| `Accept: application/json` | Recomendado | Declara que a aplicação espera JSON. |
-| `If-None-Match` | Opcional | Revalida uma resposta guardada usando o ETag anterior. |
+| Cabeçalho                  | Obrigatório | Utilização                                             |
+| -------------------------- | ----------- | ------------------------------------------------------ |
+| `Accept: application/json` | Recomendado | Declara que a aplicação espera JSON.                   |
+| `If-None-Match`            | Opcional    | Revalida uma resposta guardada usando o ETag anterior. |
 
 A API também aceita `OPTIONS` para preflight CORS. Não existem parâmetros de consulta suportados neste momento.
 
@@ -107,46 +107,46 @@ A resposta bem-sucedida tem sempre a estrutura `apiVersion` + `data`.
 
 ### `data.barbershop`
 
-| Campo | Tipo | Descrição |
-| --- | --- | --- |
-| `id` | string | Identificador público do perfil. |
-| `slug` | string | Slug canónico do perfil público. |
-| `name` | string | Nome da barbearia. |
-| `city` | string ou `null` | Cidade pública, quando disponível. |
-| `address` | string ou `null` | Morada pública. |
-| `phone` | string ou `null` | Telefone público. |
-| `avatarUrl` | string ou `null` | URL pública do avatar/logótipo. |
-| `coverUrl` | string ou `null` | URL pública da imagem de capa. |
-| `tags` | string[] | Etiquetas públicas do perfil. |
-| `publicProfileEnabled` | boolean | Indica que o perfil pode ser publicado. |
-| `seo` | object | Título, descrição e imagem Open Graph públicos; os valores podem ser `null`. |
-| `amenities` | object | Comodidades públicas normalizadas. |
-| `openingHours` | object | Horário de abertura/fecho, pausa de almoço e dias fechados. Os campos podem ser `null`. |
+| Campo                  | Tipo             | Descrição                                                                               |
+| ---------------------- | ---------------- | --------------------------------------------------------------------------------------- |
+| `id`                   | string           | Identificador público do perfil.                                                        |
+| `slug`                 | string           | Slug canónico do perfil público.                                                        |
+| `name`                 | string           | Nome da barbearia.                                                                      |
+| `city`                 | string ou `null` | Cidade pública, quando disponível.                                                      |
+| `address`              | string ou `null` | Morada pública.                                                                         |
+| `phone`                | string ou `null` | Telefone público.                                                                       |
+| `avatarUrl`            | string ou `null` | URL pública do avatar/logótipo.                                                         |
+| `coverUrl`             | string ou `null` | URL pública da imagem de capa.                                                          |
+| `tags`                 | string[]         | Etiquetas públicas do perfil.                                                           |
+| `publicProfileEnabled` | boolean          | Indica que o perfil pode ser publicado.                                                 |
+| `seo`                  | object           | Título, descrição e imagem Open Graph públicos; os valores podem ser `null`.            |
+| `amenities`            | object           | Comodidades públicas normalizadas.                                                      |
+| `openingHours`         | object           | Horário de abertura/fecho, pausa de almoço e dias fechados. Os campos podem ser `null`. |
 
 ### `data.services[]`
 
 A lista contém até 100 serviços, ordenados primeiro pelos populares e depois pelo nome.
 
-| Campo | Tipo | Descrição |
-| --- | --- | --- |
-| `id` | string | Identificador público do serviço. |
-| `name` | string | Nome do serviço. |
-| `price` | number | Preço numérico em euros. |
-| `currency` | string | Atualmente `EUR`. |
-| `durationMinutes` | number | Duração em minutos. |
-| `popular` | boolean | Indica popularidade de acordo com o plano e configuração pública. |
+| Campo             | Tipo    | Descrição                                                         |
+| ----------------- | ------- | ----------------------------------------------------------------- |
+| `id`              | string  | Identificador público do serviço.                                 |
+| `name`            | string  | Nome do serviço.                                                  |
+| `price`           | number  | Preço numérico em euros.                                          |
+| `currency`        | string  | Atualmente `EUR`.                                                 |
+| `durationMinutes` | number  | Duração em minutos.                                               |
+| `popular`         | boolean | Indica popularidade de acordo com o plano e configuração pública. |
 
 ### `data.reviews[]`
 
 A lista contém até 100 avaliações recentes.
 
-| Campo | Tipo | Descrição |
-| --- | --- | --- |
-| `id` | string | Identificador público da avaliação. |
-| `name` | string | Nome apresentado publicamente na avaliação. |
-| `rating` | number | Classificação de 1 a 5. |
-| `comment` | string ou `null` | Comentário público. |
-| `createdAt` | string ou `null` | Data/hora ISO 8601, quando disponível. |
+| Campo       | Tipo             | Descrição                                   |
+| ----------- | ---------------- | ------------------------------------------- |
+| `id`        | string           | Identificador público da avaliação.         |
+| `name`      | string           | Nome apresentado publicamente na avaliação. |
+| `rating`    | number           | Classificação de 1 a 5.                     |
+| `comment`   | string ou `null` | Comentário público.                         |
+| `createdAt` | string ou `null` | Data/hora ISO 8601, quando disponível.      |
 
 `rating` é a classificação agregada da barbearia quando existe; caso contrário é calculada a partir das avaliações devolvidas. `reviewsCount` usa o total agregado guardado quando está disponível, pelo que pode ser superior ao número de objetos dentro do array limitado a 100 avaliações.
 
@@ -161,18 +161,18 @@ A lista contém até 100 avaliações recentes.
 ### JavaScript no browser ou Node.js
 
 ```javascript
-const slug = "barbearia-exemplo";
+const slug = 'barbearia-exemplo';
 const url =
-  "https://barbers.silentra.me/api/v1/public/barbershops/" +
+  'https://barbers.silentra.me/api/v1/public/barbershops/' +
   encodeURIComponent(slug);
 
 const response = await fetch(url, {
-  headers: { Accept: "application/json" }
+  headers: { Accept: 'application/json' },
 });
 
 if (!response.ok) {
   const failure = await response.json().catch(() => ({}));
-  throw new Error(failure.error || "Não foi possível carregar a barbearia.");
+  throw new Error(failure.error || 'Não foi possível carregar a barbearia.');
 }
 
 const { data } = await response.json();
@@ -185,14 +185,14 @@ console.log(data.bookingUrl);
 
 ```typescript
 type PublicBarbershopResponse = {
-  apiVersion: "1";
+  apiVersion: '1';
   data: {
     barbershop: { name: string; slug: string };
     services: Array<{
       id: string;
       name: string;
       price: number;
-      currency: "EUR";
+      currency: 'EUR';
       durationMinutes: number;
       popular: boolean;
     }>;
@@ -203,15 +203,15 @@ type PublicBarbershopResponse = {
 
 export async function getPublicBarbershop(slug: string) {
   const url =
-    "https://barbers.silentra.me/api/v1/public/barbershops/" +
+    'https://barbers.silentra.me/api/v1/public/barbershops/' +
     encodeURIComponent(slug);
   const response = await fetch(url, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 60 }
+    headers: { Accept: 'application/json' },
+    next: { revalidate: 60 },
   });
 
   if (!response.ok) {
-    throw new Error("A API pública respondeu com HTTP " + response.status);
+    throw new Error('A API pública respondeu com HTTP ' + response.status);
   }
 
   return (await response.json()) as PublicBarbershopResponse;
@@ -249,16 +249,16 @@ As respostas de erro usam `Cache-Control: no-store`, salvo o `404`, que pode ser
 
 A API permite inicialmente **120 pedidos por minuto por IP, recurso e slug**.
 
-| Resposta | Significado |
-| --- | --- |
-| `200` | Dados públicos devolvidos. |
-| `304` | O ETag corresponde à representação atual; não há corpo. |
-| `400` | Slug com formato inválido. |
-| `404` | Barbearia inexistente, indisponível ou perfil não público. |
-| `429` | Limite atingido; o cabeçalho `Retry-After` indica quando tentar novamente. |
-| `500` | Erro interno inesperado. |
-| `503` | Serviço temporariamente indisponível ou proteção de pedidos indisponível. |
-| `204` | Resposta a preflight `OPTIONS`. |
+| Resposta | Significado                                                                |
+| -------- | -------------------------------------------------------------------------- |
+| `200`    | Dados públicos devolvidos.                                                 |
+| `304`    | O ETag corresponde à representação atual; não há corpo.                    |
+| `400`    | Slug com formato inválido.                                                 |
+| `404`    | Barbearia inexistente, indisponível ou perfil não público.                 |
+| `429`    | Limite atingido; o cabeçalho `Retry-After` indica quando tentar novamente. |
+| `500`    | Erro interno inesperado.                                                   |
+| `503`    | Serviço temporariamente indisponível ou proteção de pedidos indisponível.  |
+| `204`    | Resposta a preflight `OPTIONS`.                                            |
 
 Quando recebes `429`, respeita `Retry-After`, reduz a frequência de consulta e considera cachear a resposta. Evita loops de repetição imediata.
 
