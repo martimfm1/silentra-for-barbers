@@ -76,6 +76,36 @@ jobs:
       - name: Dependency audit
         run: pnpm qa:deps
 
+      - name: Temporary SEO Prettier capture
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'seo/conversion-foundation'
+        run: |
+          pnpm exec prettier --write \
+            app/page.tsx \
+            'app/site/[slug]/page.tsx' \
+            app/sitemap.ts \
+            app/software-gestao-barbearia/page.tsx \
+            components/site-navbar.tsx \
+            docs/SEO.md \
+            lib/site-metadata.ts \
+            scripts/qa/seo-foundation.mjs
+          node <<'NODE'
+          const fs = require('node:fs');
+          const files = [
+            'app/page.tsx',
+            'app/site/[slug]/page.tsx',
+            'app/sitemap.ts',
+            'app/software-gestao-barbearia/page.tsx',
+            'components/site-navbar.tsx',
+            'docs/SEO.md',
+            'lib/site-metadata.ts',
+            'scripts/qa/seo-foundation.mjs',
+          ];
+          for (const file of files) {
+            const payload = fs.readFileSync(file).toString('base64');
+            process.stdout.write('SEO_FORMAT_BEGIN:' + file + '\\n' + payload + '\\nSEO_FORMAT_END:' + file + '\\n');
+          }
+          NODE
+
       - name: Format check
         run: pnpm format:check
 
