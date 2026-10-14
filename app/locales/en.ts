@@ -339,6 +339,13 @@ export const en = {
     emailConfirmedSubtitle: 'Your email address has been confirmed. You can now sign in.',
     emailConfirmationErrorTitle: 'We could not confirm your email',
     emailConfirmationErrorSubtitle: 'The link may have expired or already been used. Request a new confirmation email.',
+    confirmEmailInstructions: 'Open the email and click the confirmation link to activate your account. If you cannot find it, check your spam folder.',
+    resendEmail: 'Resend confirmation email',
+    emailConfirmedTag: 'Account confirmed',
+    emailConfirmedBody: 'Your account is confirmed. You can now sign in to access your barbershop dashboard.',
+    goToSignIn: 'Go to sign in',
+    emailConfirmationErrorBody: 'The confirmation link may have expired, already been used or be invalid. Request a new confirmation email and try again.',
+    latestConfirmationEmail: 'If you still have trouble, make sure you are using the most recent confirmation email.',
   },
   onboarding: {
     title: 'Set up your barbershop',
