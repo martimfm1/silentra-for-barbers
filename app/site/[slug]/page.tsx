@@ -152,6 +152,66 @@ export async function generateMetadata({
   };
 }
 
+function EnterpriseLandingStructuredData({
+  data,
+  canonicalUrl,
+}: {
+  data: LandingPageData;
+  canonicalUrl: string;
+}) {
+  const profile = data.profile;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Barbershop',
+    '@id': canonicalUrl + '#business',
+    name: profile.name,
+    url: canonicalUrl,
+    ...(profile.phone ? { telephone: profile.phone } : {}),
+    ...(data.coverUrl || data.avatarUrl
+      ? { image: [data.coverUrl || data.avatarUrl] }
+      : {}),
+    ...(profile.address || profile.city
+      ? {
+          address: {
+            '@type': 'PostalAddress',
+            ...(profile.address ? { streetAddress: profile.address } : {}),
+            ...(profile.city ? { addressLocality: profile.city } : {}),
+            addressCountry: 'PT',
+          },
+        }
+      : {}),
+    ...(data.services.length
+      ? {
+          hasOfferCatalog: {
+            '@type': 'OfferCatalog',
+            name: 'Serviços',
+            itemListElement: data.services.map((service) => {
+              const price = Number(service.price);
+              return {
+                '@type': 'Offer',
+                ...(Number.isFinite(price) && price >= 0
+                  ? { price: String(price), priceCurrency: 'EUR' }
+                  : {}),
+                itemOffered: {
+                  '@type': 'Service',
+                  name: service.name,
+                  provider: { '@id': canonicalUrl + '#business' },
+                },
+              };
+            }),
+          },
+        }
+      : {}),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 function formatTime(value: string | null): string {
   return value ? value.slice(0, 5) : 'A confirmar';
 }
@@ -188,7 +248,12 @@ export default async function EnterpriseBarbershopLandingPage({
     : undefined;
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-zinc-950 text-zinc-50">
+    <>
+      <EnterpriseLandingStructuredData
+        data={data}
+        canonicalUrl={SITE_ORIGIN + '/site/' + encodeURIComponent(profile.slug)}
+      />
+      <main className="min-h-screen overflow-x-clip bg-zinc-950 text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <Link
           href={canonicalProfileUrl}
@@ -336,6 +401,7 @@ export default async function EnterpriseBarbershopLandingPage({
           Silentra for Barbers
         </span>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }
