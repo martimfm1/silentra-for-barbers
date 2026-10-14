@@ -79,6 +79,20 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Temporary format capture
+        if: always()
+        run: |
+          files=(
+            "app/documentation/page.tsx"
+            "docs/API_PUBLICA.md"
+          )
+          pnpm exec prettier --write "${files[@]}"
+          for file in "${files[@]}"; do
+            printf '\nFORMAT_CAPTURE_START:%s\n' "$file"
+            cat "$file"
+            printf '\nFORMAT_CAPTURE_END:%s\n' "$file"
+          done
+
       - name: Build
         run: pnpm build
 
