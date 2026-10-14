@@ -15,6 +15,9 @@ const checkoutUi = read('components/billing/manual-checkout.tsx');
 const migration = read(
   'supabase/migrations/20261014221500_manual_checkout_promotion_codes.sql',
 );
+const trialMigration = read(
+  'supabase/migrations/20261014223000_manual_trialpro_free_month.sql',
+);
 const envTemplate = read('.env.example');
 
 const checks = [
@@ -49,9 +52,9 @@ const checks = [
     'Final manual request validates the code again',
     manualRoute.includes('promotionCode,') &&
       manualRoute.includes('assertSameOrigin(request)') &&
-      manualService.includes(
-        'quoteManualPrice(input.plan, interval, input.promotionCode)',
-      ),
+      manualService.includes('quoteManualPrice(') &&
+      manualService.includes('newMemberEligible: trialEligible') &&
+      manualService.includes('isEligibleForManualProTrial'),
   ],
   [
     'Stored request price is the final discounted total',
@@ -75,9 +78,30 @@ const checks = [
       migration.includes('subscription_requests_promotion_price_consistent'),
   ],
   [
-    'Environment template documents server-only promotion config',
+    'Environment template configures TRIALPRO for Pro monthly only',
     envTemplate.includes('MANUAL_PROMO_CODES_JSON=') &&
-      envTemplate.includes('type":"percentage'),
+      envTemplate.includes('"TRIALPRO":{"type":"free_month"') &&
+      envTemplate.includes('"plans":["pro"]') &&
+      envTemplate.includes('"intervals":["month"]'),
+  ],
+  [
+    'TRIALPRO cannot be redeemed without backend eligibility',
+    promotionService.includes("type === 'free_month'") &&
+      promotionService.includes('options.newMemberEligible') &&
+      previewRoute.includes('isEligibleForManualProTrial') &&
+      manualService.includes('isEligibleForManualProTrial'),
+  ],
+  [
+    'TRIALPRO redemption is atomically activated without payment',
+    manualService.includes("admin.rpc('redeem_manual_pro_trial'") &&
+      trialMigration.includes('create or replace function public.redeem_manual_pro_trial') &&
+      trialMigration.includes("status = 'TRIAL'") &&
+      trialMigration.includes("'trialing'"),
+  ],
+  [
+    'Trial expiry is handled by the manual subscription worker',
+    trialMigration.includes("status in ('active', 'trialing')") &&
+      trialMigration.includes("r.status in ('PAID', 'TRIAL')"),
   ],
 ];
 
