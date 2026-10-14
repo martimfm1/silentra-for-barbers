@@ -19,12 +19,16 @@ import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
 interface Invoice {
   id: string;
+  source: 'STRIPE' | 'MANUAL';
+  document_number: string | null;
   amount: number;
   currency: string;
   status: string | null;
   plan: string;
   date: string;
   invoice_pdf: string | null;
+  hosted_invoice_url: string | null;
+  download_url: string | null;
 }
 
 function formatAmount(amount: number, currency: string) {
@@ -97,15 +101,14 @@ export function BillingHub() {
     : '—';
 
   useEffect(() => {
-    if (!isStripeSubscription || isAdministrativePlan) return;
     let cancelled = false;
     setLoadingInvoices(true);
-    fetch('/api/stripe/invoices', { cache: 'no-store' })
+    fetch('/api/billing/history', { cache: 'no-store' })
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            body.error || 'Não foi possível carregar os recibos.',
+            body.error || 'Não foi possível carregar o histórico de faturação.',
           );
         return body.invoices;
       })
@@ -117,7 +120,7 @@ export function BillingHub() {
           toast.error(
             error instanceof Error
               ? error.message
-              : 'Não foi possível carregar os recibos.',
+              : 'Não foi possível carregar o histórico de faturação.',
           );
       })
       .finally(() => {
@@ -126,7 +129,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [isStripeSubscription, isAdministrativePlan]);
+  }, []);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
@@ -494,25 +497,19 @@ export function BillingHub() {
               Histórico de faturação
             </h3>
             <p className="mt-1 text-sm text-zinc-500">
-              Consulta e descarrega os recibos emitidos pela Stripe.
+              Consulta e descarrega as faturas Stripe e os comprovativos dos pagamentos manuais.
             </p>
           </div>
-          {hasSubscription && !isAdministrativePlan && (
-            <span className="text-xs text-zinc-600">Últimos 12</span>
-          )}
+          <span className="text-xs text-zinc-600">Últimos 12 documentos</span>
         </div>
         <div className="mt-5 space-y-2">
           {loadingInvoices ? (
             <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 py-10 text-zinc-500">
               <Loader2 className="size-5 animate-spin" />
             </div>
-          ) : !hasSubscription || isAdministrativePlan ? (
-            <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem recibos de uma subscrição Stripe nesta conta.
-            </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem recibos emitidos.
+              Ainda não existem documentos de faturação emitidos para esta barbearia.
             </div>
           ) : (
             invoices.map((invoice) => (
@@ -525,18 +522,22 @@ export function BillingHub() {
                     <p className="text-sm font-medium text-zinc-100">
                       {invoice.plan}
                     </p>
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-zinc-300">
+                      {invoice.source === 'MANUAL' ? 'Comprovativo manual' : 'Fatura Stripe'}
+                    </span>
                     <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] text-emerald-200">
-                      {invoice.status ?? 'processado'}
+                      {invoice.status ?? 'Emitido'}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
+                    {invoice.document_number ? `${invoice.document_number} · ` : ''}
                     {invoice.date} ·{' '}
                     {formatAmount(invoice.amount, invoice.currency)}
                   </p>
                 </div>
-                {invoice.invoice_pdf ? (
+                {invoice.download_url || invoice.invoice_pdf || invoice.hosted_invoice_url ? (
                   <a
-                    href={invoice.invoice_pdf}
+                    href={invoice.download_url || invoice.invoice_pdf || invoice.hosted_invoice_url || undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
@@ -545,7 +546,7 @@ export function BillingHub() {
                   </a>
                 ) : (
                   <span className="text-xs text-zinc-600">
-                    Recibo indisponível
+                    Documento indisponível
                   </span>
                 )}
               </div>
@@ -554,9 +555,11 @@ export function BillingHub() {
         </div>
       </section>
 
-      <div className="flex items-center gap-2 text-xs text-zinc-600">
-        <Check className="size-3.5 text-emerald-400" /> Pagamentos e recibos
-        processados pela Stripe. A Silentra não guarda dados do cartão.
+      <div className="flex items-start gap-2 text-xs leading-5 text-zinc-600">
+        <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-400" />
+        O histórico reúne faturas disponibilizadas pela Stripe e comprovativos
+        internos de pagamentos manuais. Os comprovativos manuais não substituem
+        uma fatura fiscal. A Silentra não guarda dados do cartão.
       </div>
     </div>
   );
