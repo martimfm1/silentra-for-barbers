@@ -7,6 +7,7 @@ declare global {
 }
 
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -57,28 +58,18 @@ type TrackedOrder = {
   history: TrackingEvent[];
 };
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: 'A aguardar confirmação',
-  confirmed: 'Confirmada',
-  preparing: 'Em preparação',
-  ready: 'Pronta para levantamento',
-  shipped: 'Enviada',
-  delivered: 'Entregue',
-  completed: 'Concluída',
-  cancelled: 'Cancelada',
-};
+type Translate = (
+  key: string,
+  variables?: Record<string, unknown>,
+) => string;
 
-const STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
-  pending: 'A barbearia recebeu o pedido e vai confirmar os próximos passos.',
-  confirmed: 'A barbearia confirmou a tua encomenda.',
-  preparing: 'Os produtos estão a ser preparados.',
-  ready: 'A encomenda está pronta para levantamento.',
-  shipped: 'A encomenda foi enviada pela barbearia.',
-  delivered: 'A encomenda foi marcada como entregue.',
-  completed: 'Esta encomenda está concluída.',
-  cancelled:
-    'Esta encomenda foi cancelada. Contacta a barbearia se precisares de ajuda.',
-};
+function statusLabel(status: OrderStatus, t: Translate): string {
+  return t(`orderTracking.status.${status}`);
+}
+
+function statusDescription(status: OrderStatus, t: Translate): string {
+  return t(`orderTracking.description.${status}`);
+}
 
 const PICKUP_STEPS: OrderStatus[] = [
   'pending',
@@ -199,29 +190,31 @@ function parseTrackedOrder(value: unknown): TrackedOrder | null {
   };
 }
 
-function money(value: number): string {
-  return new Intl.NumberFormat('pt-PT', {
+function money(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
   }).format(Number.isFinite(value) ? value : 0);
 }
 
-function dateTime(value: string): string {
+function dateTime(value: string, locale: string): string {
   const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return 'Data indisponível';
-  return new Intl.DateTimeFormat('pt-PT', {
+  if (!Number.isFinite(date.getTime())) return '—';
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date);
 }
 
-function countryLabel(value: string | null): string {
+function countryLabel(value: string | null, locale: string): string {
   if (!value) return '';
-  if (value.toUpperCase() === 'PT') return 'Portugal';
+  if (value.toUpperCase() === 'PT') return locale === 'pt-PT' ? 'Portugal' : 'Portugal';
   return value;
 }
 
 export default function MarketplaceOrderTrackingClient() {
+  const { locale, t } = useLanguage();
+  const formatLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const [token, setToken] = useState<string | null>(null);
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState('');
@@ -259,7 +252,7 @@ export default function MarketplaceOrderTrackingClient() {
         const message =
           isRecord(payload) && typeof payload.error === 'string'
             ? payload.error
-            : 'Não foi possível consultar a encomenda.';
+            : t('orderTracking.loadError');
         throw new Error(message);
       }
 
@@ -281,7 +274,7 @@ export default function MarketplaceOrderTrackingClient() {
             ? 'A consulta demorou demasiado tempo. Verifica a ligação e tenta novamente.'
             : cause instanceof Error
               ? cause.message
-              : 'Não foi possível consultar a encomenda.',
+              : t('orderTracking.loadError'),
         );
       }
     } finally {
@@ -488,11 +481,11 @@ export default function MarketplaceOrderTrackingClient() {
                     ) : (
                       <PackageCheck className="size-4" />
                     )}
-                    {STATUS_LABELS[order.status]}
+                    {statusLabel(order.status, t)}
                   </div>
                 </div>
                 <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-400">
-                  {STATUS_DESCRIPTIONS[order.status]}
+                  {statusDescription(order.status, t)}
                 </p>
               </div>
 
@@ -538,7 +531,7 @@ export default function MarketplaceOrderTrackingClient() {
                                     : 'text-zinc-600'
                               }`}
                             >
-                              {STATUS_LABELS[step]}
+                              {statusLabel(step, t)}
                             </p>
                             {isCurrent && (
                               <p className="mt-1 text-xs text-zinc-500">
@@ -565,7 +558,7 @@ export default function MarketplaceOrderTrackingClient() {
                   <h2 className="text-base font-semibold">Histórico</h2>
                   <span className="text-xs text-zinc-600">
                     {order.history.length}{' '}
-                    {order.history.length === 1 ? 'registo' : 'registos'}
+                    {order.history.length === 1 ? t('orderTracking.historyCountOne') : t('orderTracking.historyCountMany')}
                   </span>
                 </div>
 
@@ -599,17 +592,17 @@ export default function MarketplaceOrderTrackingClient() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-zinc-100">
-                              {STATUS_LABELS[event.status]}
+                              {statusLabel(event.status, t)}
                             </p>
                             <p className="mt-1 text-sm leading-6 text-zinc-400">
                               {event.message ||
-                                STATUS_DESCRIPTIONS[event.status]}
+                                statusDescription(event.status, t)}
                             </p>
                             <time
                               dateTime={event.createdAt}
                               className="mt-2 block text-xs text-zinc-600"
                             >
-                              {dateTime(event.createdAt)}
+                              {dateTime(event.createdAt, formatLocale)}
                             </time>
                           </div>
                         </li>
@@ -629,8 +622,8 @@ export default function MarketplaceOrderTrackingClient() {
                     )}
                     <h2 className="text-base font-semibold">
                       {order.fulfillmentMethod === 'delivery'
-                        ? 'Dados de entrega'
-                        : 'Levantamento'}
+                        ? t('orderTracking.deliveryDetails')
+                        : t('orderTracking.pickup')}
                     </h2>
                   </div>
                   {order.fulfillmentMethod === 'delivery' ? (
@@ -644,8 +637,8 @@ export default function MarketplaceOrderTrackingClient() {
                               .filter(Boolean)
                               .join(' ')}
                           </p>
-                          {countryLabel(order.shipping.country) && (
-                            <p>{countryLabel(order.shipping.country)}</p>
+                          {countryLabel(order.shipping.country, formatLocale) && (
+                            <p>{countryLabel(order.shipping.country, formatLocale)}</p>
                           )}
                         </div>
                       </div>
@@ -679,7 +672,7 @@ export default function MarketplaceOrderTrackingClient() {
                           </p>
                         </div>
                         <p className="shrink-0 font-medium tabular-nums text-zinc-200">
-                          {money(item.total)}
+                          {money(item.total, formatLocale)}
                         </p>
                       </div>
                     ))}
@@ -687,7 +680,7 @@ export default function MarketplaceOrderTrackingClient() {
                   <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
                     <span className="text-sm text-zinc-500">Total</span>
                     <span className="text-xl font-semibold tabular-nums text-white">
-                      {money(order.total)}
+                      {money(order.total, formatLocale)}
                     </span>
                   </div>
                   <p className="mt-3 text-xs leading-5 text-zinc-600">
@@ -699,11 +692,11 @@ export default function MarketplaceOrderTrackingClient() {
             </div>
 
             <div className="flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
-              <p>Encomenda criada em {dateTime(order.createdAt)}.</p>
+              <p>Encomenda criada em {dateTime(order.createdAt, formatLocale)}.</p>
               <p>
                 {lastUpdated
-                  ? `Última consulta: ${dateTime(lastUpdated)}`
-                  : `Última alteração: ${dateTime(order.updatedAt)}`}
+                  ? `Última consulta: ${dateTime(lastUpdated, formatLocale)}`
+                  : `Última alteração: ${dateTime(order.updatedAt, formatLocale)}`}
               </p>
             </div>
             <p className="text-xs leading-5 text-zinc-700">
