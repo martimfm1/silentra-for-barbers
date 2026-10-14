@@ -23,8 +23,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiteNavbar } from '@/components/site-navbar';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +50,7 @@ export default function ResetPasswordPage() {
 
       router.push('/login?tab=login&reset=success');
     } catch (err: any) {
-      setErrorMsg(err.message || 'Falha ao redefinir a palavra-passe.');
+      setErrorMsg(err.message || t('auth.invalidResetLink'));
     } finally {
       setIsSubmitting(false);
     }
