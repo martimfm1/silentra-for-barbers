@@ -300,19 +300,20 @@ async function POST__unobserved(request: Request) {
       { status: 201, headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
-    const status =
-      error instanceof BillingError && ['INVALID_PRICE'].includes(error.code)
-        ? 400
-        : error instanceof BillingError && error.code === 'CSRF_VALIDATION_FAILED'
-          ? 403
-          : error instanceof BillingError && error.code === 'BILLING_NOT_CONFIGURED'
-            ? 503
-            : error instanceof BillingError &&
-            ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
-              error.code,
-            )
-          ? 409
-          : 500;
+    const status = (() => {
+      if (!(error instanceof BillingError)) return 500;
+      if (error.code === 'INVALID_PRICE') return 400;
+      if (error.code === 'CSRF_VALIDATION_FAILED') return 403;
+      if (error.code === 'BILLING_NOT_CONFIGURED') return 503;
+      if (
+        ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
+          error.code,
+        )
+      ) {
+        return 409;
+      }
+      return 500;
+    })();
 
     console.error('[MANUAL_CHECKOUT]', {
       error: error instanceof Error ? error.name : 'UNKNOWN',
