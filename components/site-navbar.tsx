@@ -276,9 +276,7 @@ export function SiteNavbar() {
       },
       {
         label:
-          locale === 'pt'
-            ? 'Software para barbearias'
-            : 'Barbershop software',
+          locale === 'pt' ? 'Software para barbearias' : 'Barbershop software',
         href: '/software-gestao-barbearia',
       },
       {
