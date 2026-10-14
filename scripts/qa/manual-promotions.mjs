@@ -94,7 +94,9 @@ const checks = [
   [
     'TRIALPRO redemption is atomically activated without payment',
     manualService.includes("admin.rpc('redeem_manual_pro_trial'") &&
-      trialMigration.includes('create or replace function public.redeem_manual_pro_trial') &&
+      trialMigration.includes(
+        'create or replace function public.redeem_manual_pro_trial',
+      ) &&
       trialMigration.includes("status = 'TRIAL'") &&
       trialMigration.includes("'trialing'"),
   ],
