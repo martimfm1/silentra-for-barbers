@@ -472,12 +472,12 @@ export default function MarketplaceOrdersPage() {
                             {order.customer_name}
                           </CardTitle>
                           <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold text-zinc-400">
-                            {isDelivery ? 'Entrega' : 'Levantamento'}
+                            {isDelivery ? t('orderManagement.delivery') : t('orderManagement.pickup')}
                           </span>
                           <span
                             className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${meta.classes}`}
                           >
-                            {t('orderManagement.status.' + key)}
+                            {t('orderManagement.status.' + order.status)}
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">
@@ -485,7 +485,7 @@ export default function MarketplaceOrdersPage() {
                           <span className="font-mono text-zinc-400">
                             #{order.id.slice(0, 8)}
                           </span>{' '}
-                          · {new Date(order.created_at).toLocaleString('pt-PT')}
+                          · {new Date(order.created_at).toLocaleString(formatLocale)}
                         </p>
                       </div>
                     </div>
@@ -576,13 +576,10 @@ export default function MarketplaceOrdersPage() {
                                   className="relative pl-4 text-xs before:absolute before:left-0 before:top-1.5 before:size-1.5 before:rounded-full before:bg-emerald-300"
                                 >
                                   <p className="font-medium text-zinc-300">
-                                    {statusMeta[event.new_status as Status]
-                                      ?.label ?? event.new_status}
+                                    {t('orderManagement.status.' + event.new_status)}
                                   </p>
                                   <p className="mt-0.5 text-zinc-600">
-                                    {new Date(event.created_at).toLocaleString(
-                                      'pt-PT',
-                                    )}
+                                    {new Date(event.created_at).toLocaleString(formatLocale)}
                                   </p>
                                   {event.source === 'manual_email' && (
                                     <p className="mt-1 text-zinc-500">
