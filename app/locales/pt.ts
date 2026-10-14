@@ -433,6 +433,11 @@ export const pt = {
     openFilters: 'Abrir filtros',
     availability: 'Disponibilidade',
     viewDetails: 'Ver detalhes de {shop}',
+    nearMe: 'Perto de mim',
+    nearYou: 'Perto de ti',
+    topRated: 'Melhor avaliadas',
+    nearMeShort: 'Perto de mim',
+    noLocation: 'Ativa a localização para encontrar barbearias próximas.',
     shopLogo: 'Logótipo de {shop}',
   },
   storefront: {
