@@ -16,6 +16,7 @@ import type {
   UserCoordinates,
 } from '@/types/marketplace/filters';
 import type { SearchFilterBarProps } from '@/types/marketplace/components';
+import { useLanguage } from '@/context/LanguageContext';
 
 const DATE_PILLS: MarketplaceDateFilter[] = ['Today', 'Tomorrow'];
 const FILTER_PILLS: MarketplaceSortFilter[] = ['All', 'Near Me', 'Top Rated'];
@@ -32,6 +33,7 @@ export function SearchFilterBar({
   userLocation,
   setUserLocation,
 }: SearchFilterBarProps) {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState(query);
   const [isLocating, setIsLocating] = useState(false);
 
@@ -83,7 +85,7 @@ export function SearchFilterBar({
   return (
     <div
       role="search"
-      aria-label="Pesquisar barbearias"
+      aria-label={t('directory.searchShops')}
       className="glassmorphism flex flex-col gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-3 shadow-xl backdrop-blur-md"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -98,8 +100,8 @@ export function SearchFilterBar({
             enterKeyHint="search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Pesquisar por barbearia, rua ou cidade…"
-            aria-label="Pesquisar por barbearia, rua ou cidade"
+            placeholder={t('directory.searchByAddress')}
+            aria-label={t('directory.searchByAddress')}
             className="ml-2.5 w-full bg-transparent text-base text-zinc-100 outline-none placeholder:text-zinc-500 sm:text-sm"
           />
           {searchTerm ? (
@@ -107,7 +109,7 @@ export function SearchFilterBar({
               type="button"
               onClick={handleClear}
               className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/10 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-              aria-label="Limpar pesquisa"
+              aria-label={t('directory.clearSearch')}
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -117,27 +119,27 @@ export function SearchFilterBar({
         <div
           className="flex shrink-0 items-center rounded-xl bg-white/5 p-1"
           role="group"
-          aria-label="Vista dos resultados"
+          aria-label={t('directory.resultsView')}
         >
           <button
             type="button"
             onClick={() => setView('grid')}
             aria-pressed={view === 'grid'}
-            aria-label="Vista em grelha"
+            aria-label={t('directory.gridView')}
             className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-3 transition-all sm:flex-none ${view === 'grid' ? 'bg-white/15 text-zinc-50 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
             <LayoutGrid className="h-4 w-4" />{' '}
-            <span className="text-xs sm:hidden">Lista</span>
+            <span className="text-xs sm:hidden">{t('directory.list')}</span>
           </button>
           <button
             type="button"
             onClick={() => setView('map')}
             aria-pressed={view === 'map'}
-            aria-label="Vista em mapa"
+            aria-label={t('directory.mapView')}
             className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-3 transition-all sm:flex-none ${view === 'map' ? 'bg-white/15 text-zinc-50 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
             <Map className="h-4 w-4" />{' '}
-            <span className="text-xs sm:hidden">Mapa</span>
+            <span className="text-xs sm:hidden">{t('directory.map')}</span>
           </button>
         </div>
       </div>
@@ -147,19 +149,19 @@ export function SearchFilterBar({
           <div
             className="flex shrink-0 items-center rounded-xl bg-white/5 p-1"
             role="group"
-            aria-label="Dia"
+            aria-label={t('directory.day')}
           >
             {DATE_PILLS.map((pill) => {
               const isActive = activeDate === pill;
               return (
                 <button
-                  key={pill}
+                  key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
                   type="button"
                   onClick={() => setActiveDate(pill)}
                   aria-pressed={isActive}
                   className={`min-h-10 rounded-lg px-3 text-xs font-semibold transition-all ${isActive ? 'bg-zinc-100 text-zinc-950 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
                 >
-                  {pill === 'Today' ? 'Hoje' : 'Amanhã'}
+                  {pill === 'Today' ? t('directory.today') : t('directory.tomorrow')}
                 </button>
               );
             })}
@@ -188,13 +190,13 @@ export function SearchFilterBar({
           <div
             className="flex shrink-0 items-center gap-1 rounded-xl bg-white/5 p-1"
             role="group"
-            aria-label="Filtros"
+            aria-label={t('directory.filters')}
           >
             {FILTER_PILLS.map((pill) => {
               const isActive = activeFilter === pill;
               return (
                 <button
-                  key={pill}
+                  key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
                   type="button"
                   onClick={() => handleFilterClick(pill)}
                   aria-pressed={isActive}
