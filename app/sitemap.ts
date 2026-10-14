@@ -98,7 +98,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Sitemap generation should remain best-effort; private application routes are excluded.
   }
 
-  let enterpriseLandingRoutes: MetadataRoute.Sitemap = [];
+  const enterpriseLandingRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const database = createAdminClient();
