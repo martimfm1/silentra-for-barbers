@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -65,8 +67,8 @@ const EMPTY_CHECKOUT: CheckoutForm = {
   postalCode: '',
   notes: '',
 };
-const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(
+const money = (value: number, locale: string) =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(
     Number(value) || 0,
   );
 const getShop = (product: Product) =>
@@ -90,6 +92,8 @@ function isStoredCartItem(value: unknown): value is CartItem {
 }
 
 export default function MarketplacePage() {
+  const { locale, t } = useLanguage();
+  const formatLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [shops, setShops] = useState<
@@ -127,14 +131,14 @@ export default function MarketplacePage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          json.error || 'Não foi possível carregar o marketplace.',
+          t('storefront.loadError'),
         );
       setProducts(json.products ?? []);
       setCategories(json.categories ?? []);
       setShops(json.shops ?? []);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Erro ao carregar o marketplace.',
+        t('storefront.loadError'),
       );
     } finally {
       setLoading(false);
@@ -183,7 +187,7 @@ export default function MarketplacePage() {
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), q ? 220 : 0);
     return () => window.clearTimeout(timer);
-  }, [q, category, shopId, sort]);
+  }, [q, category, shopId, sort, locale]);
 
   useEffect(() => {
     if (loading || !cartRestored) return;
@@ -221,7 +225,7 @@ export default function MarketplacePage() {
 
       if (!product || product.stock_quantity <= 0) {
         setError(
-          'Este produto já não está disponível para adicionar ao carrinho.',
+          t('storefront.productUnavailableForCart'),
         );
         return;
       }
@@ -238,7 +242,7 @@ export default function MarketplacePage() {
       if (
         switchingShop &&
         !window.confirm(
-          'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+          t('storefront.confirmReplaceCart'),
         )
       ) {
         return;
@@ -265,7 +269,7 @@ export default function MarketplacePage() {
     }
 
     void addRequestedProduct();
-  }, [cart, cartRestored, loading, products]);
+  }, [cart, cartRestored, loading, products, t]);
 
   const total = useMemo(
     () =>
@@ -375,7 +379,7 @@ export default function MarketplacePage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error || 'Não foi possível criar a encomenda.');
+        throw new Error(t('storefront.checkoutError'));
       setSubmitted(json.order.id);
       setTrackingToken(
         typeof json.trackingToken === 'string' ? json.trackingToken : null,
@@ -388,9 +392,7 @@ export default function MarketplacePage() {
       void load();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Não foi possível criar a encomenda.',
+        t('storefront.checkoutError'),
       );
     } finally {
       setSaving(false);
@@ -419,19 +421,20 @@ export default function MarketplacePage() {
               <input
                 value={q}
                 onChange={(event) => setQ(event.target.value)}
-                aria-label="Pesquisar produtos"
-                placeholder="Pesquisar produtos, barbearias e categorias"
+                aria-label={t('storefront.searchProductsLabel')}
+                placeholder={t('storefront.searchProductsShopsPlaceholder')}
                 className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm outline-none transition focus:border-emerald-400/40 focus:bg-white/[0.06]"
               />
             </label>
           </div>
+          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setCartOpen(true)}
             className="relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold transition hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <ShoppingBag className="size-4" />
-            <span className="hidden sm:inline">Carrinho</span>
+            <span className="hidden sm:inline">{t('storefront.cart')}</span>
             {count > 0 && (
               <span className="flex size-5 items-center justify-center rounded-full bg-emerald-400 text-[10px] font-bold text-zinc-950">
                 {count}
@@ -448,8 +451,8 @@ export default function MarketplacePage() {
             <input
               value={q}
               onChange={(event) => setQ(event.target.value)}
-              aria-label="Pesquisar produtos"
-              placeholder="Pesquisar produtos, barbearias e categorias"
+              aria-label={t('storefront.searchProductsLabel')}
+              placeholder={t('storefront.searchProductsShopsPlaceholder')}
               className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm outline-none transition focus:border-emerald-400/40 focus:bg-white/[0.06]"
             />
           </label>
@@ -461,33 +464,30 @@ export default function MarketplacePage() {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
               <Store className="size-3.5" />
-              Produtos das tuas barbearias
+              {t('storefront.catalogTitle')}
             </span>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">
-              Leva o teu estilo{' '}
-              <span className="text-emerald-300">para casa.</span>
+              {locale === 'pt' ? <>Leva o teu estilo <span className="text-emerald-300">para casa.</span></> : <>Bring your style <span className="text-emerald-300">home.</span></>}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-              Encomenda produtos de barbearias que vendem online. A barbearia
-              trata diretamente do levantamento ou do envio — a Silentra trata
-              do catálogo, stock e fluxo de venda.
+              {t('storefront.catalogSubtitle')}
             </p>
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {[
                 {
                   icon: ShoppingBag,
-                  title: 'Encomenda online',
-                  text: 'Compra sem trocar mensagens.',
+                  title: t('storefront.onlineOrder'),
+                  text: t('storefront.buyWithoutMessages'),
                 },
                 {
                   icon: PackageCheck,
-                  title: 'Stock real',
-                  text: 'Só mostramos o que está disponível.',
+                  title: t('storefront.realStock'),
+                  text: t('storefront.onlyAvailable'),
                 },
                 {
                   icon: Truck,
-                  title: 'Envio pela barbearia',
-                  text: 'Sem logística de transporte pela Silentra.',
+                  title: t('storefront.deliveryByShop'),
+                  text: t('storefront.noShippingLogistics'),
                 },
               ].map((item) => (
                 <div
@@ -510,10 +510,10 @@ export default function MarketplacePage() {
           <div
             className="flex gap-2 overflow-x-auto pb-1"
             role="group"
-            aria-label="Filtrar por categoria"
+            aria-label={t('storefront.filterByCategory')}
           >
             <FilterPill active={!category} onClick={() => setCategory('')}>
-              Todos
+              {t('storefront.allProducts')}
             </FilterPill>
             {categories.map((item) => (
               <FilterPill
@@ -529,10 +529,10 @@ export default function MarketplacePage() {
             <select
               value={shopId}
               onChange={(event) => setShopId(event.target.value)}
-              aria-label="Filtrar por barbearia"
+              aria-label={t('storefront.filterByShop')}
               className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm outline-none focus:border-emerald-400/40"
             >
-              <option value="">Todas as barbearias</option>
+              <option value="">{t('storefront.allShops')}</option>
               {shops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
@@ -543,13 +543,13 @@ export default function MarketplacePage() {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
-                aria-label="Ordenar produtos"
+                aria-label={t('storefront.sortProducts')}
                 className="min-h-11 w-full appearance-none rounded-xl border border-white/10 bg-zinc-950 px-3 pr-9 text-sm outline-none focus:border-emerald-400/40"
               >
-                <option value="featured">Destaques</option>
-                <option value="newest">Mais recentes</option>
-                <option value="price_asc">Preço: menor</option>
-                <option value="price_desc">Preço: maior</option>
+                <option value="featured">{t('storefront.featuredProducts')}</option>
+                <option value="newest">{t('storefront.newest')}</option>
+                <option value="price_asc">{t('storefront.priceLowHigh')}</option>
+                <option value="price_desc">{t('storefront.priceHighLow')}</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
             </div>
@@ -570,16 +570,16 @@ export default function MarketplacePage() {
           >
             <Check className="mt-0.5 size-5 shrink-0 text-emerald-300" />
             <div className="min-w-0">
-              <p className="font-semibold">Encomenda criada</p>
+              <p className="font-semibold">{t('storefront.orderCreated')}</p>
               <p className="mt-1 text-sm text-zinc-400">
-                Pedido{' '}
+                {t('storefront.orderReceived')}{' '}
                 <strong className="text-zinc-200">
                   #{submitted.slice(0, 8)}
                 </strong>{' '}
                 recebido.{' '}
                 {emailSent === false
-                  ? 'Não conseguimos enviar o email de confirmação, mas a encomenda ficou registada.'
-                  : 'Enviámos o comprovativo para o teu email.'}
+                  ? t('storefront.orderEmailFailed')
+                  : t('storefront.receiptSent')}
               </p>
               {trackingToken && (
                 <a
@@ -589,7 +589,7 @@ export default function MarketplacePage() {
                   }
                   className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/15"
                 >
-                  Acompanhar encomenda <ArrowRight className="size-4" />
+                  {t('storefront.trackOrder')} <ArrowRight className="size-4" />
                 </a>
               )}
             </div>
@@ -600,7 +600,7 @@ export default function MarketplacePage() {
                 setTrackingToken(null);
               }}
               className="ml-auto shrink-0 text-zinc-600 hover:text-white"
-              aria-label="Fechar confirmação"
+              aria-label={t('storefront.closeConfirmation')}
             >
               <X className="size-4" />
             </button>
@@ -609,15 +609,15 @@ export default function MarketplacePage() {
         <div className="mt-8 flex items-end justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              Catálogo
+              {t('storefront.catalog')}
             </p>
             <h2 className="mt-1 text-2xl font-semibold">
-              Produtos disponíveis
+              {t('storefront.availableProducts')}
             </h2>
           </div>
           <span className="text-xs text-zinc-600">
             {loading
-              ? 'A carregar…'
+              ? t('storefront.loading')
               : `${products.length} produto${products.length === 1 ? '' : 's'}`}
           </span>
         </div>
@@ -634,7 +634,7 @@ export default function MarketplacePage() {
           <div className="mt-6 rounded-3xl border border-dashed border-white/10 p-14 text-center">
             <Search className="mx-auto size-7 text-zinc-700" />
             <p className="mt-4 text-sm text-zinc-500">
-              Não encontrámos produtos com estes filtros.
+              {t('storefront.noFilteredProducts')}
             </p>
           </div>
         ) : (
@@ -669,7 +669,7 @@ export default function MarketplacePage() {
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
                       {product.marketplace_featured && (
                         <span className="rounded-full border border-amber-300/20 bg-zinc-950/75 px-2.5 py-1 text-[10px] font-semibold text-amber-200 backdrop-blur">
-                          Destaque
+                          {t('storefront.featuredProducts')}
                         </span>
                       )}
                       {discounted && (
@@ -708,7 +708,7 @@ export default function MarketplacePage() {
                       href={`/marketplace/${product.id}`}
                       className="mt-3 inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-emerald-300 transition hover:text-emerald-200"
                     >
-                      Ver detalhes <ArrowRight className="size-3.5" />
+                      {t('storefront.details')} <ArrowRight className="size-3.5" />
                     </Link>
                     <p className="mt-1 text-[11px] text-zinc-600">
                       {productShop?.name || 'Barbearia'}
@@ -717,16 +717,16 @@ export default function MarketplacePage() {
                       <div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-xl font-semibold text-white">
-                            {money(product.unit_price)}
+                            {money(product.unit_price, formatLocale)}
                           </span>
                           {discounted && (
                             <span className="text-xs text-zinc-600 line-through">
-                              {money(product.compare_at_price!)}
+                              {money(product.compare_at_price!, formatLocale)}
                             </span>
                           )}
                         </div>
                         <span className="text-[11px] text-zinc-600">
-                          Levantamento ou envio pela barbearia
+                          {t('storefront.pickupOrDelivery')}
                         </span>
                       </div>
                       <button
@@ -735,7 +735,7 @@ export default function MarketplacePage() {
                         className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-emerald-400 px-3 text-xs font-bold text-zinc-950 transition hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                       >
                         <Plus className="size-4" />
-                        Adicionar
+                        {t('storefront.add')}
                       </button>
                     </div>
                   </div>
@@ -757,7 +757,7 @@ export default function MarketplacePage() {
               type="button"
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => setCartOpen(false)}
-              aria-label="Fechar carrinho"
+              aria-label={t('storefront.cart')}
             />
             <motion.aside
               initial={{ x: '100%' }}
@@ -772,14 +772,14 @@ export default function MarketplacePage() {
                     Carrinho
                   </p>
                   <h2 className="mt-1 text-xl font-semibold">
-                    A tua encomenda
+                    {t('storefront.yourOrder')}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setCartOpen(false)}
                   className="flex size-10 items-center justify-center rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white"
-                  aria-label="Fechar carrinho"
+                  aria-label={t('storefront.cart')}
                 >
                   <X className="size-5" />
                 </button>
@@ -791,7 +791,7 @@ export default function MarketplacePage() {
                       <div className="py-16 text-center">
                         <ShoppingBag className="mx-auto size-8 text-zinc-700" />
                         <p className="mt-4 text-sm text-zinc-500">
-                          O carrinho está vazio.
+                          {t('storefront.emptyCart')}
                         </p>
                       </div>
                     ) : (
@@ -817,7 +817,7 @@ export default function MarketplacePage() {
                                   {item.name}
                                 </p>
                                 <p className="mt-1 text-xs text-zinc-500">
-                                  {money(item.unit_price)} ·{' '}
+                                  {money(item.unit_price, formatLocale)} ·{' '}
                                   {getShop(item)?.name}
                                 </p>
                                 <div className="mt-2 flex items-center gap-2">
@@ -825,7 +825,7 @@ export default function MarketplacePage() {
                                     type="button"
                                     onClick={() => change(item.id, -1)}
                                     className="flex size-8 items-center justify-center rounded-lg border border-white/10 hover:bg-white/5"
-                                    aria-label={`Diminuir quantidade de ${item.name}`}
+                                    aria-label={locale === 'pt' ? `Diminuir quantidade de ${item.name}` : `Decrease quantity of ${item.name}`}
                                   >
                                     <Minus className="size-3" />
                                   </button>
@@ -836,7 +836,7 @@ export default function MarketplacePage() {
                                     type="button"
                                     onClick={() => change(item.id, 1)}
                                     className="flex size-8 items-center justify-center rounded-lg border border-white/10 hover:bg-white/5"
-                                    aria-label={`Aumentar quantidade de ${item.name}`}
+                                    aria-label={locale === 'pt' ? `Aumentar quantidade de ${item.name}` : `Increase quantity of ${item.name}`}
                                   >
                                     <Plus className="size-3" />
                                   </button>
@@ -866,7 +866,7 @@ export default function MarketplacePage() {
                     <div className="flex items-end justify-between">
                       <span className="text-sm text-zinc-500">Total</span>
                       <span className="text-2xl font-semibold">
-                        {money(total)}
+                        {money(total, formatLocale)}
                       </span>
                     </div>
                     {cartShop && (
@@ -876,8 +876,7 @@ export default function MarketplacePage() {
                           {cartShop.name}
                         </div>
                         <p className="mt-1">
-                          O levantamento e o envio são tratados diretamente pela
-                          barbearia.
+                          {t('storefront.fulfillmentHandledByShop')}
                         </p>
                       </div>
                     )}
@@ -932,7 +931,7 @@ export default function MarketplacePage() {
                     ))}
                     <fieldset className="grid gap-2">
                       <legend className="text-xs font-semibold text-zinc-300">
-                        Como queres receber?
+                        {t('storefront.receiveHow')}
                       </legend>
                       <div className="grid gap-2 sm:grid-cols-2">
                         <label
@@ -954,11 +953,11 @@ export default function MarketplacePage() {
                           <div className="flex items-center gap-2">
                             <Store className="size-4 text-emerald-300" />
                             <span className="text-sm font-semibold">
-                              Levantar
+                              {t('storefront.pickup')}
                             </span>
                           </div>
                           <p className="mt-1 text-xs leading-5 text-zinc-500">
-                            Levantas diretamente na barbearia.
+                            {t('storefront.pickupDescription')}
                           </p>
                         </label>
                         <label
@@ -980,11 +979,11 @@ export default function MarketplacePage() {
                           <div className="flex items-center gap-2">
                             <Truck className="size-4 text-emerald-300" />
                             <span className="text-sm font-semibold">
-                              Receber
+                              {t('storefront.delivery')}
                             </span>
                           </div>
                           <p className="mt-1 text-xs leading-5 text-zinc-500">
-                            A barbearia trata diretamente do envio.
+                            {t('storefront.deliveryDescription')}
                           </p>
                         </label>
                       </div>
@@ -1082,7 +1081,7 @@ export default function MarketplacePage() {
                     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-zinc-500">Total</span>
-                        <strong className="text-xl">{money(total)}</strong>
+                        <strong className="text-xl">{money(total, formatLocale)}</strong>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500">
                         {customer.fulfillmentMethod === 'delivery' ? (
@@ -1108,7 +1107,7 @@ export default function MarketplacePage() {
                       onClick={() => setCheckoutOpen(false)}
                       className="min-h-10 w-full text-xs font-semibold text-zinc-500 hover:text-white"
                     >
-                      Voltar ao carrinho
+                      {t('storefront.backToCart')}
                     </button>
                   </form>
                 </div>
