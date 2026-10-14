@@ -359,6 +359,33 @@ export function customerSubscriptionActivatedEmail(
   });
 }
 
+export function customerFreeTrialActivatedEmail(
+  context: BillingEmailContext,
+) {
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
+  const name = context.customerName || 'Cliente';
+  const content = details([
+    ['Plano', 'Barbers Pro'],
+    ['Benefício', '1 mês grátis'],
+    ['Ativado em', dateTime(context.startedAt)],
+    ['Acesso disponível até', dateTime(context.expiresAt)],
+    ['Referência', reference(context.requestId)],
+  ]);
+
+  return shell({
+    preheader: 'O teu mês gratuito do Barbers Pro já está ativo.',
+    eyebrow: 'Billing · Oferta de novos clientes',
+    title: 'O teu mês grátis começou',
+    intro: `Olá, ${escapeHtml(name)}. O código TRIALPRO foi validado e o teu acesso ao Barbers Pro está ativo durante um mês. Não foi cobrado qualquer valor.`,
+    content,
+    cta: { label: 'Abrir o BarbersPro', href: dashboardUrl },
+    footer:
+      'Este benefício é válido uma única vez por cliente. Para continuar com funcionalidades Pro depois do período gratuito, visita a página de planos.',
+  });
+}
+
 export function customerPaymentRejectedEmail(context: BillingEmailContext) {
   const dashboardUrl =
     safeUrl(context.dashboardUrl) ??
