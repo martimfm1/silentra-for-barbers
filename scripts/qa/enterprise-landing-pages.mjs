@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
-const migration = read('supabase/migrations/20261014230000_enterprise_landing_pages_public_api.sql');
+const migration = read(
+  'supabase/migrations/20261014230000_enterprise_landing_pages_public_api.sql',
+);
 const features = read('lib/billing/plan-features.ts');
 const landingPage = read('app/site/[slug]/page.tsx');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
@@ -12,14 +14,32 @@ const pricing = read('components/hero/pricing-section.tsx');
 const comparison = read('components/billing/plan-comparison.tsx');
 const apiAudit = read('scripts/qa/api-audit.mjs');
 
-assert.match(migration, /create table if not exists public\.barbershop_landing_pages/i);
+assert.match(
+  migration,
+  /create table if not exists public\.barbershop_landing_pages/i,
+);
 assert.match(migration, /create schema if not exists private/i);
-assert.match(migration, /create or replace function private\.sync_barbershop_landing_page_entitlement/i);
-assert.match(migration, /revoke all on schema private from public, anon, authenticated/i);
-assert.match(migration, /after insert or update or delete on public\.subscriptions/i);
-assert.match(migration, /after insert or update or delete on public\.barbershop_plan_assignments/i);
+assert.match(
+  migration,
+  /create or replace function private\.sync_barbershop_landing_page_entitlement/i,
+);
+assert.match(
+  migration,
+  /revoke all on schema private from public, anon, authenticated/i,
+);
+assert.match(
+  migration,
+  /after insert or update or delete on public\.subscriptions/i,
+);
+assert.match(
+  migration,
+  /after insert or update or delete on public\.barbershop_plan_assignments/i,
+);
 assert.match(migration, /from public, anon, authenticated/i);
-assert.match(migration, /Existing Enterprise tenants receive the same benefit/i);
+assert.match(
+  migration,
+  /Existing Enterprise tenants receive the same benefit/i,
+);
 assert.match(features, /'landing_page'/);
 assert.match(features, /landing_page: 'Landing page profissional incluída'/);
 assert.match(pricing, /Landing page profissional incluída/);

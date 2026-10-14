@@ -73,11 +73,30 @@ components:
           const: '1'
         data:
           type: object
-          required: [barbershop, services, reviews, rating, reviewsCount, bookingUrl, landingPage]
+          required:
+            [
+              barbershop,
+              services,
+              reviews,
+              rating,
+              reviewsCount,
+              bookingUrl,
+              landingPage,
+            ]
           properties:
             barbershop:
               type: object
-              required: [id, slug, name, tags, publicProfileEnabled, amenities, openingHours, seo]
+              required:
+                [
+                  id,
+                  slug,
+                  name,
+                  tags,
+                  publicProfileEnabled,
+                  amenities,
+                  openingHours,
+                  seo,
+                ]
               properties:
                 id:
                   type: string

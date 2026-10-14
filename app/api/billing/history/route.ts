@@ -169,7 +169,8 @@ async function GET__unobserved() {
 
     // The generated Supabase schema may lag this recently-added table. Keep the
     // selected columns and their runtime contract explicit at this boundary.
-    const manualDocuments = (documents ?? []) as unknown as BillingDocumentRecord[];
+    const manualDocuments = (documents ??
+      []) as unknown as BillingDocumentRecord[];
     const manualHistory: HistoryItem[] = manualDocuments.map((document) => {
       const issuedAt = new Date(document.issued_at);
       const intervalLabel =
@@ -250,8 +251,7 @@ async function GET__unobserved() {
               invoice.status === 'draft' ||
               invoice.status === 'open';
             return (
-              !pending ||
-              now - invoice.created * 1000 <= PENDING_INVOICE_TTL_MS
+              !pending || now - invoice.created * 1000 <= PENDING_INVOICE_TTL_MS
             );
           })
           .map((invoice) => {
@@ -264,7 +264,8 @@ async function GET__unobserved() {
               currency: invoice.currency.toUpperCase(),
               status: stripeStatusLabel(invoice.status),
               plan:
-                invoice.lines.data.find((line) => Boolean(line.description))
+                invoice.lines.data
+                  .find((line) => Boolean(line.description))
                   ?.description?.trim() || 'Subscrição Silentra',
               date: formatDate(issuedAt),
               issued_at: issuedAt.toISOString(),

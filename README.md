@@ -76,16 +76,16 @@ Regras de negócio, autorização, isolamento de tenants e entitlements são dec
 
 O acesso às funcionalidades é baseado em entitlements verificados no backend.
 
-| Área                       | Free | Pro | Enterprise |
-| -------------------------- | :--: | :-: | :--------: |
-| Marcações                  |  ✓   |  ✓  |     ✓      |
-| Clientes e serviços        |  ✓   |  ✓  |     ✓      |
-| Profissionais              |  ✓   |  ✓  |     ✓      |
-| Dashboard                  |  ✓   |  ✓  |     ✓      |
-| Funcionalidades avançadas  |  —   |  ✓  |     ✓      |
-| Marketing e automações     |  —   |  ✓  |     ✓      |
-| Analytics avançado         |  —   |  ✓  |     ✓      |
-| Funcionalidades Enterprise |  —   |  —  |     ✓      |
+| Área                               | Free | Pro | Enterprise |
+| ---------------------------------- | :--: | :-: | :--------: |
+| Marcações                          |  ✓   |  ✓  |     ✓      |
+| Clientes e serviços                |  ✓   |  ✓  |     ✓      |
+| Profissionais                      |  ✓   |  ✓  |     ✓      |
+| Dashboard                          |  ✓   |  ✓  |     ✓      |
+| Funcionalidades avançadas          |  —   |  ✓  |     ✓      |
+| Marketing e automações             |  —   |  ✓  |     ✓      |
+| Analytics avançado                 |  —   |  ✓  |     ✓      |
+| Funcionalidades Enterprise         |  —   |  —  |     ✓      |
 | Landing page profissional incluída |  —   |  —  |     ✓      |
 
 Os contratos de planos são validados por QA e as APIs não devem confiar no estado enviado pelo cliente.
@@ -346,7 +346,7 @@ Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 | [Development](docs/DEVELOPMENT.md)   | Setup local, env e workflow                    |
 | [Billing](docs/BILLING.md)           | Stripe e pagamentos manuais                    |
 | [Security](docs/SECURITY.md)         | Segurança, auth, RLS, APIs e embeds            |
-| [API pública](docs/API_PUBLICA.md)   | Endpoints públicos, payloads e limites        |
+| [API pública](docs/API_PUBLICA.md)   | Endpoints públicos, payloads e limites         |
 | [Deployment](docs/DEPLOYMENT.md)     | Release, Vercel, Supabase e produção           |
 
 ## Estado do projeto

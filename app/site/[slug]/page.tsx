@@ -169,7 +169,8 @@ export default async function EnterpriseBarbershopLandingPage({
   }
 
   const profile = data.profile;
-  const canonicalProfileUrl = '/barbershops/' + encodeURIComponent(profile.slug);
+  const canonicalProfileUrl =
+    '/barbershops/' + encodeURIComponent(profile.slug);
   const heroBackground = data.coverUrl
     ? {
         backgroundImage:
@@ -189,7 +190,10 @@ export default async function EnterpriseBarbershopLandingPage({
   return (
     <main className="min-h-screen overflow-x-clip bg-zinc-950 text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-        <Link href={canonicalProfileUrl} className="flex min-w-0 items-center gap-3">
+        <Link
+          href={canonicalProfileUrl}
+          className="flex min-w-0 items-center gap-3"
+        >
           <span
             className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-zinc-900 bg-center bg-no-repeat text-sm font-semibold text-emerald-200"
             style={avatarBackground}
@@ -273,7 +277,9 @@ export default async function EnterpriseBarbershopLandingPage({
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold text-zinc-100">{service.name}</h3>
+                    <h3 className="font-semibold text-zinc-100">
+                      {service.name}
+                    </h3>
                     <p className="mt-2 text-sm text-zinc-500">
                       {service.duration} min
                     </p>
@@ -296,8 +302,8 @@ export default async function EnterpriseBarbershopLandingPage({
           </div>
         ) : (
           <p className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-sm text-zinc-500">
-            A barbearia está a preparar o catálogo de serviços. Consulta o perfil
-            para mais informações.
+            A barbearia está a preparar o catálogo de serviços. Consulta o
+            perfil para mais informações.
           </p>
         )}
       </section>
@@ -318,13 +324,17 @@ export default async function EnterpriseBarbershopLandingPage({
           <p className="mt-3 text-base font-semibold text-white">
             {profile.address || 'Contacta a barbearia para confirmar a morada'}
           </p>
-          {profile.city && <p className="mt-1 text-sm text-zinc-500">{profile.city}</p>}
+          {profile.city && (
+            <p className="mt-1 text-sm text-zinc-500">{profile.city}</p>
+          )}
         </article>
       </section>
 
       <footer className="border-t border-white/10 px-5 py-7 text-center text-xs text-zinc-600">
         Website criado com{' '}
-        <span className="font-semibold text-zinc-400">Silentra for Barbers</span>
+        <span className="font-semibold text-zinc-400">
+          Silentra for Barbers
+        </span>
       </footer>
     </main>
   );

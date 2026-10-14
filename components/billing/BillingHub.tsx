@@ -41,9 +41,7 @@ function formatAmount(amount: number, currency: string) {
 
 function getInvoiceDocumentUrl(invoice: Invoice) {
   return (
-    invoice.download_url ||
-    invoice.invoice_pdf ||
-    invoice.hosted_invoice_url
+    invoice.download_url || invoice.invoice_pdf || invoice.hosted_invoice_url
   );
 }
 
@@ -518,7 +516,8 @@ export function BillingHub() {
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem documentos de faturação emitidos para esta barbearia.
+              Ainda não existem documentos de faturação emitidos para esta
+              barbearia.
             </div>
           ) : (
             invoices.map((invoice) => (
@@ -541,7 +540,9 @@ export function BillingHub() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {invoice.document_number ? `${invoice.document_number} · ` : ''}
+                    {invoice.document_number
+                      ? `${invoice.document_number} · `
+                      : ''}
                     {invoice.date} ·{' '}
                     {formatAmount(invoice.amount, invoice.currency)}
                   </p>
@@ -567,8 +568,8 @@ export function BillingHub() {
       </section>
 
       <div className="flex items-start gap-2 text-xs leading-5 text-zinc-600">
-        <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-400" />
-        O histórico reúne faturas disponibilizadas pela Stripe e comprovativos
+        <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-400" />O
+        histórico reúne faturas disponibilizadas pela Stripe e comprovativos
         internos de pagamentos manuais. Os comprovativos manuais não substituem
         uma fatura fiscal. A Silentra não guarda dados do cartão.
       </div>

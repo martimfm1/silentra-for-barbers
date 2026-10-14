@@ -73,7 +73,10 @@ async function GET__unobserved(
 
   if (!allowed) {
     return jsonResponse(
-      { error: 'Limite de pedidos atingido. Tenta novamente dentro de um minuto.' },
+      {
+        error:
+          'Limite de pedidos atingido. Tenta novamente dentro de um minuto.',
+      },
       429,
       { 'Retry-After': String(RATE_WINDOW_SECONDS) },
     );
@@ -115,7 +118,9 @@ async function GET__unobserved(
         .maybeSingle(),
       database
         .from('barbershops')
-        .select('opening_time, closing_time, lunch_start, lunch_end, closed_days')
+        .select(
+          'opening_time, closing_time, lunch_start, lunch_end, closed_days',
+        )
         .eq('id', barbershopId)
         .maybeSingle(),
     ]);
@@ -215,7 +220,8 @@ async function GET__unobserved(
         reviews: reviewItems,
         rating,
         reviewsCount,
-        bookingUrl: SITE_ORIGIN + '/barbershops/' + encodeURIComponent(profile.slug),
+        bookingUrl:
+          SITE_ORIGIN + '/barbershops/' + encodeURIComponent(profile.slug),
         landingPage: {
           available: landingPath !== null,
           url: landingPath ? SITE_ORIGIN + landingPath : null,

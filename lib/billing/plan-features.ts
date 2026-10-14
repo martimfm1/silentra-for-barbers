@@ -143,7 +143,8 @@ export function hasPlanFeature(
 export const PLAN_DESCRIPTIONS: Record<BillingPlan, string> = {
   free: 'Para uma barbearia pequena começar a gerir tudo gratuitamente.',
   pro: 'Para equipas em crescimento que querem automatizar e fazer crescer o negócio.',
-  enterprise: 'Para operações com várias localizações, gestão avançada e uma landing page profissional incluída.',
+  enterprise:
+    'Para operações com várias localizações, gestão avançada e uma landing page profissional incluída.',
 };
 
 export const PLAN_NAMES: Record<BillingPlan, string> = {
