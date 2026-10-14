@@ -8,6 +8,7 @@ declare global {
 
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -366,6 +367,7 @@ export default function MarketplaceOrderTrackingClient() {
           <span className="text-xs font-semibold tracking-[0.14em] text-zinc-600">
             SILENTRA
           </span>
+          <LanguageSwitcher />
         </div>
       </header>
 
