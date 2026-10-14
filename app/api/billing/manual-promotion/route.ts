@@ -4,7 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import { PaymentModeService } from '@/services/billing/payment-mode.service';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
-import { assertSameOrigin, billingErrorResponse, readJsonObject } from '@/services/billing/http';
+import {
+  assertSameOrigin,
+  billingErrorResponse,
+  readJsonObject,
+} from '@/services/billing/http';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
 import { BillingError } from '@/types/stripe';
@@ -64,7 +68,10 @@ async function POST__unobserved(request: Request) {
     const mode = await PaymentModeService.getPaymentMode();
     if (mode !== 'MANUAL') {
       return NextResponse.json(
-        { error: 'Os códigos promocionais deste checkout só estão disponíveis no pagamento manual.' },
+        {
+          error:
+            'Os códigos promocionais deste checkout só estão disponíveis no pagamento manual.',
+        },
         { status: 409, headers: { 'Cache-Control': 'no-store' } },
       );
     }
@@ -73,7 +80,10 @@ async function POST__unobserved(request: Request) {
     const tenant = await BarbershopStripeService.getTenantContext(user.id);
     if (tenant.barbershopId !== intent.barbershopId) {
       return NextResponse.json(
-        { error: 'A barbearia associada ao checkout mudou. Inicia novamente o checkout.' },
+        {
+          error:
+            'A barbearia associada ao checkout mudou. Inicia novamente o checkout.',
+        },
         { status: 409, headers: { 'Cache-Control': 'no-store' } },
       );
     }
