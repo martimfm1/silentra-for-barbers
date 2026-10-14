@@ -48,6 +48,8 @@ Price IDs, plano, provider, permissões e estado da subscrição devem ser valid
 
 Auditorias automáticas procuram endpoints sem guards reconhecíveis de autenticação/tenant. Fluxos públicos sensíveis devem usar rate limiting e validação rigorosa.
 
+A API pública versionada (/api/v1/public/...) é deliberadamente anónima e só disponibiliza campos aprovados para publicação. Usa rate limiting partilhado no servidor, validação de slug, CORS sem credenciais, ETag e cache HTTP. Nunca inclui IDs de utilizadores proprietários, dados de faturação, tokens privados, clientes ou informação interna de tenant. A chave service-role é utilizada exclusivamente no servidor.
+
 ## Embedding / clickjacking
 
 Páginas públicas podem ser embeddadas para integrações como Silentra e Whop.
