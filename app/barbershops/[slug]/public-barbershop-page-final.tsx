@@ -265,17 +265,27 @@ export default function BarbershopPublicPageFinal({
                   </div>
                 </div>
               </div>
-              <Button
-                type="button"
-                onClick={() => {
-                  setSelectedServiceId(null);
-                  setBookingOpen(true);
-                }}
-                className="min-h-11 rounded-xl bg-zinc-50 px-5 text-sm font-semibold text-zinc-950 hover:bg-white focus-visible:ring-2 focus-visible:ring-emerald-400"
-              >
-                <Calendar className="mr-2 size-4" aria-hidden="true" />
-                Agendar horário
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {shop.landing_page_url && (
+                  <Link
+                    href={shop.landing_page_url}
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                  >
+                    Ver website
+                  </Link>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setSelectedServiceId(null);
+                    setBookingOpen(true);
+                  }}
+                  className="min-h-11 rounded-xl bg-zinc-50 px-5 text-sm font-semibold text-zinc-950 hover:bg-white focus-visible:ring-2 focus-visible:ring-emerald-400"
+                >
+                  <Calendar className="mr-2 size-4" aria-hidden="true" />
+                  Agendar horário
+                </Button>
+              </div>
             </div>
           </div>
         </section>
