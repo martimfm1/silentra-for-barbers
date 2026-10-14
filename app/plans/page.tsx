@@ -11,7 +11,7 @@ import { PricingSection } from '@/components/hero/pricing-section';
 import { PlanComparison } from '@/components/billing/plan-comparison';
 
 export const metadata: Metadata = {
-  title: 'Planos e Preços para Barbearias | Silentra',
+  title: 'Planos e Preços para Barbearias',
   description:
     'Compara os planos da Silentra, funcionalidades, limites e preços para escolher a solução de gestão ideal para a tua barbearia.',
   alternates: {
