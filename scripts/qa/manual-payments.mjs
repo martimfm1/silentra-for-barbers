@@ -181,7 +181,7 @@ const checks = [
     'Billing history scopes manual documents to the owner and barbershop',
     billingHistory.includes(".eq('barbershop_id', barbershopId)") &&
       billingHistory.includes(".eq('user_id', user.id)") &&
-      billingHistory.includes("'/api/billing/documents/"),
+      billingHistory.includes('/api/billing/documents/'),
   ],
   [
     'Billing history does not create Stripe customers when read',
