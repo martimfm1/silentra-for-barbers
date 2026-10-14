@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Item = {
   id: string;
@@ -67,8 +68,8 @@ type Order = {
   marketplace_order_events?: Event[];
 };
 
-const money = (n: number) =>
-  new Intl.NumberFormat('pt-PT', {
+const money = (n: number, locale: string) =>
+  new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
   }).format(Number(n) || 0);
@@ -134,6 +135,8 @@ const canCancel = (status: Status) =>
   ['pending', 'confirmed', 'preparing', 'ready'].includes(status);
 
 export default function MarketplaceOrdersPage() {
+  const { locale, t } = useLanguage();
+  const formatLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
@@ -144,7 +147,7 @@ export default function MarketplaceOrdersPage() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [emailOrder, setEmailOrder] = useState<Order | null>(null);
   const [emailSubject, setEmailSubject] = useState(
-    'Atualização da sua encomenda',
+    t('orderManagement.updateSubject'),
   );
   const [emailMessage, setEmailMessage] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -158,14 +161,14 @@ export default function MarketplaceOrdersPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          json.error || 'Não foi possível carregar as encomendas.',
+          t('orderManagement.loadError'),
         );
       setOrders(json.orders ?? []);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível carregar as encomendas.',
+          : t('orderManagement.loadError'),
       );
     } finally {
       if (showLoading) setLoading(false);
@@ -174,10 +177,10 @@ export default function MarketplaceOrdersPage() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [locale]);
 
   const filtered = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase('pt-PT');
+    const term = query.trim().toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
     return orders.filter((order) => {
       const text =
         `${order.id} ${order.customer_name} ${order.customer_email} ${order.customer_phone}`.toLocaleLowerCase(
@@ -189,7 +192,7 @@ export default function MarketplaceOrdersPage() {
         (fulfillment === 'all' || order.fulfillment_method === fulfillment)
       );
     });
-  }, [orders, query, status, fulfillment]);
+  }, [orders, query, status, fulfillment, locale]);
 
   const stats = useMemo(
     () => ({
@@ -229,7 +232,7 @@ export default function MarketplaceOrdersPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          json.error || 'Não foi possível atualizar a encomenda.',
+          t('orderManagement.updateError'),
         );
       setOrders((current) =>
         current.map((item) =>
@@ -248,14 +251,14 @@ export default function MarketplaceOrdersPage() {
       toast.success(
         next === 'cancelled'
           ? 'Encomenda cancelada.'
-          : `Encomenda marcada como ${statusMeta[next].label.toLowerCase()}.`,
+          : `Encomenda marcada como ${t('orderManagement.status.' + next).toLowerCase()}.`,
       );
       await load(false);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível atualizar a encomenda.',
+          : t('orderManagement.updateError'),
       );
     } finally {
       setUpdating(null);
@@ -266,13 +269,13 @@ export default function MarketplaceOrdersPage() {
     setEmailOrder(order);
     setEmailSubject(
       order.status === 'ready'
-        ? 'A sua encomenda está pronta'
-        : 'Atualização da sua encomenda',
+        ? t('orderManagement.readySubject')
+        : t('orderManagement.updateSubject'),
     );
     setEmailMessage(
       order.status === 'ready'
-        ? 'A sua encomenda está pronta. Pode contactar a barbearia para combinar o levantamento ou envio.'
-        : `Temos uma atualização sobre a sua encomenda #${order.id.slice(0, 8)}.`,
+        ? t('orderManagement.readyMessage')
+        : t('orderManagement.updateMessage', { reference: order.id.slice(0, 8) }),
     );
   }
 
@@ -293,14 +296,14 @@ export default function MarketplaceOrdersPage() {
       );
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error || 'Não foi possível enviar o email.');
+        throw new Error(t('orderManagement.emailError'));
       toast.success('Email enviado ao cliente.');
       setEmailOrder(null);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível enviar o email.',
+          : t('orderManagement.emailError'),
       );
     } finally {
       setSendingEmail(false);
@@ -347,27 +350,27 @@ export default function MarketplaceOrdersPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Summary
             icon={Clock3}
-            label="Em aberto"
+            label={t('orderManagement.open')}
             value={String(stats.open)}
-            detail="precisam de ação"
+            detail={t('orderManagement.needsAction')}
           />
           <Summary
             icon={Truck}
-            label="Para enviar"
+            label={t('orderManagement.toShip')}
             value={String(stats.delivery)}
-            detail="em processo de entrega"
+            detail={t('orderManagement.inDelivery')}
           />
           <Summary
             icon={ClipboardList}
-            label="Valor das encomendas"
-            value={money(stats.orderValue)}
-            detail="não canceladas"
+            label={t('orderManagement.orderValue')}
+            value={money(stats.orderValue, formatLocale)}
+            detail={t('orderManagement.notCancelled')}
           />
           <Summary
             icon={Check}
-            label="Concluídas"
+            label={t('orderManagement.completed')}
             value={String(stats.completed)}
-            detail="entregues ou concluídas"
+            detail={t('orderManagement.deliveredOrCompleted')}
           />
         </div>
 
@@ -382,9 +385,9 @@ export default function MarketplaceOrdersPage() {
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Pesquisar nome, email, telefone ou ID"
+                  placeholder={t('orderManagement.searchPlaceholder')}
                   className="min-h-11 border-white/10 bg-white/[0.03] pl-9"
-                  aria-label="Pesquisar encomendas"
+                  aria-label={t('orderManagement.searchOrders')}
                 />
               </div>
               <select
@@ -394,25 +397,25 @@ export default function MarketplaceOrdersPage() {
                     event.target.value as 'all' | Order['fulfillment_method'],
                   )
                 }
-                aria-label="Filtrar forma de entrega"
+                aria-label={t('orderManagement.filterFulfillment')}
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
-                <option value="all">Todas as formas</option>
-                <option value="pickup">Levantamento</option>
-                <option value="delivery">Entrega</option>
+                <option value="all">{t('orderManagement.allFulfillment')}</option>
+                <option value="pickup">{t('orderManagement.pickup')}</option>
+                <option value="delivery">{t('orderManagement.delivery')}</option>
               </select>
               <select
                 value={status}
                 onChange={(event) =>
                   setStatus(event.target.value as 'all' | Status)
                 }
-                aria-label="Filtrar estado"
+                aria-label={t('orderManagement.filterStatus')}
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
-                <option value="all">Todos os estados</option>
+                <option value="all">{t('orderManagement.allStatuses')}</option>
                 {Object.entries(statusMeta).map(([key, meta]) => (
                   <option key={key} value={key}>
-                    {meta.label}
+                    {t('orderManagement.status.' + key)}
                   </option>
                 ))}
               </select>
@@ -436,7 +439,7 @@ export default function MarketplaceOrdersPage() {
               aria-hidden="true"
             />
             <p className="mt-4 text-sm text-zinc-500">
-              Não há encomendas com estes filtros.
+              {t('orderManagement.empty')}
             </p>
           </div>
         ) : (
@@ -474,7 +477,7 @@ export default function MarketplaceOrdersPage() {
                           <span
                             className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${meta.classes}`}
                           >
-                            {meta.label}
+                            {t('orderManagement.status.' + key)}
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">
@@ -504,7 +507,7 @@ export default function MarketplaceOrdersPage() {
                                 </span>
                               </span>
                               <span className="shrink-0 font-semibold">
-                                {money(item.total)}
+                                {money(item.total, formatLocale)}
                               </span>
                             </div>
                           ))}
@@ -557,7 +560,7 @@ export default function MarketplaceOrdersPage() {
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-zinc-500">Total</span>
                             <strong className="text-xl">
-                              {money(order.total)}
+                              {money(order.total, formatLocale)}
                             </strong>
                           </div>
                         </div>
@@ -604,14 +607,14 @@ export default function MarketplaceOrdersPage() {
                           {next === 'confirmed'
                             ? 'Confirmar encomenda'
                             : next === 'preparing'
-                              ? 'Começar preparação'
+                              ? t('orderManagement.startPreparing')
                               : next === 'ready'
                                 ? 'Marcar como pronta'
                                 : next === 'shipped'
                                   ? 'Marcar como enviada'
                                   : next === 'delivered'
                                     ? 'Marcar como entregue'
-                                    : 'Marcar como concluída'}
+                                    : t('orderManagement.markCompleted')}
                         </Button>
                       )}
                       {canCancel(order.status) && (
@@ -654,7 +657,7 @@ export default function MarketplaceOrdersPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
-                  Comunicação
+                  {t('orderManagement.communication')}
                 </p>
                 <h2
                   id="send-order-email-title"
