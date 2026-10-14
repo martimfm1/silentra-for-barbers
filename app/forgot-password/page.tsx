@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
                                 htmlFor="reset-email"
                                 className="text-xs font-medium text-zinc-300"
                               >
-                                Email
+                                {t('auth.email')}
                               </Label>
                             </FieldLabel>
                             <FieldContent>
@@ -157,7 +157,7 @@ export default function ForgotPasswordPage() {
                                     <button
                                       type="button"
                                       tabIndex={-1}
-                                      aria-label="{t('auth.emailAddress')}"
+                                      aria-label={t('auth.emailAddress')}
                                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-1"
                                     >
                                       <Info className="size-3.5" />
@@ -181,7 +181,7 @@ export default function ForgotPasswordPage() {
                             <Spinner className="size-4 text-zinc-950" />
                           ) : (
                             <span className="flex items-center justify-center gap-2">
-                              Enviar instruções{' '}
+                              {t('auth.sendResetLink')}{' '}
                               <ArrowRight className="size-4" />
                             </span>
                           )}
