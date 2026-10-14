@@ -169,7 +169,7 @@ begin
       expires_at = v_expires,
       notes = pg_catalog.concat_ws(
         E'\n',
-        pg_catalog.nullif(pg_catalog.btrim(notes), ''),
+        nullif(pg_catalog.btrim(notes), ''),
         'TRIALPRO redeemed: one free Pro month; no payment collected.'
       ),
       updated_at = v_start
