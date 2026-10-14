@@ -73,6 +73,21 @@ jobs:
       - name: Dependency audit
         run: pnpm qa:deps
 
+      - name: Format check diagnostics
+        run: |
+          pnpm exec prettier --write \\
+            app/api/billing/manual-checkout/route.ts \\
+            app/api/billing/manual-promotion/route.ts \\
+            components/billing/manual-checkout.tsx \\
+            scripts/qa/manual-promotions.mjs \\
+            services/billing/email-templates.ts
+          git diff --unified=2 -- \\
+            app/api/billing/manual-checkout/route.ts \\
+            app/api/billing/manual-promotion/route.ts \\
+            components/billing/manual-checkout.tsx \\
+            scripts/qa/manual-promotions.mjs \\
+            services/billing/email-templates.ts
+
       - name: Format check
         run: pnpm format:check
 
