@@ -8,6 +8,10 @@ const localeFiles = {
 };
 const localizedSources = [
   'app/marketplace/page.tsx',
+  'app/dashboard/page.tsx',
+  'app/dashboard/agenda/page.tsx',
+  'app/dashboard/pos/pedidos/page.tsx',
+  'app/onboarding/page.tsx',
   'app/marketplace/[productId]/page.tsx',
   'app/marketplace/track/tracking-client.tsx',
   'app/barbershops/page.tsx',
@@ -54,7 +58,7 @@ for (const path of localizedSources) {
   }
 }
 
-for (const section of ['storefront', 'orderTracking', 'directory', 'auth']) {
+for (const section of ['storefront', 'orderTracking', 'directory', 'auth', 'dashboard', 'agenda', 'orderManagement', 'onboarding']) {
   for (const locale of ['pt', 'en']) {
     if (!hasKey(localeSources[locale], section)) {
       failures.push(locale + ': missing translation section "' + section + '"');
