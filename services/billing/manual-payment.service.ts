@@ -16,10 +16,17 @@ import {
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants;
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
-  'PENDING' | 'PAYMENT_SENT' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+  | 'PENDING'
+  | 'PAYMENT_SENT'
+  | 'PAID'
+  | 'TRIAL'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'CANCELLED';
 
 export interface ManualSubscriptionRequest {
   id: string;
@@ -148,6 +155,67 @@ export function validatePaymentLink(value: string): string {
 }
 
 export class ManualPaymentService {
+  /**
+   * Manual TRIALPRO eligibility is deliberately database-only. Manual checkout
+   * must never need Stripe network calls, and any local billing/request history
+   * disqualifies the account, including expired or rejected prior requests.
+   */
+  static async isEligibleForManualProTrial(
+    userId: string,
+    barbershopId: string,
+  ): Promise<boolean> {
+    const admin = createAdminClient();
+    const [
+      subscriptionsByUser,
+      subscriptionsByShop,
+      previousRequests,
+      billingAccountByUser,
+      billingAccountByShop,
+      legacyCustomer,
+    ] = await Promise.all([
+      admin.from('subscriptions').select('id').eq('user_id', userId).limit(1),
+      admin
+        .from('subscriptions')
+        .select('id')
+        .eq('barbershop_id', barbershopId)
+        .limit(1),
+      admin
+        .from('subscription_requests')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1),
+      admin
+        .from('barbershop_billing_accounts')
+        .select('barbershop_id')
+        .eq('billing_owner_user_id', userId)
+        .limit(1),
+      admin
+        .from('barbershop_billing_accounts')
+        .select('barbershop_id')
+        .eq('barbershop_id', barbershopId)
+        .limit(1),
+      admin.from('customers').select('user_id').eq('user_id', userId).limit(1),
+    ]);
+
+    const results = [
+      subscriptionsByUser,
+      subscriptionsByShop,
+      previousRequests,
+      billingAccountByUser,
+      billingAccountByShop,
+      legacyCustomer,
+    ];
+    if (results.some((result) => result.error)) {
+      throw new BillingError(
+        'Não foi possível verificar se a oferta de novos clientes está disponível.',
+        'DB_READ_FAILED',
+        { userId, barbershopId },
+      );
+    }
+
+    return results.every((result) => !result.data?.length);
+  }
+
   static async getRequestForUser(
     userId: string,
   ): Promise<ManualSubscriptionRequest | null> {
@@ -238,7 +306,21 @@ export class ManualPaymentService {
     const interval = input.billingInterval ?? 'month';
     const requestType = input.requestType ?? 'NEW';
     const price = getManualPrice(input.plan, interval);
-    const quote = quoteManualPrice(input.plan, interval, input.promotionCode);
+    const normalizedPromotionCode = input.promotionCode?.trim().toUpperCase();
+    const isTrialPromotion =
+      normalizedPromotionCode === NEW_MEMBER_PRO_PROMOTION_CODE;
+    const trialEligible = isTrialPromotion
+      ? await ManualPaymentService.isEligibleForManualProTrial(
+          input.userId,
+          input.barbershopId,
+        )
+      : false;
+    const quote = quoteManualPrice(
+      input.plan,
+      interval,
+      input.promotionCode,
+      { newMemberEligible: trialEligible },
+    );
 
     if (!price) {
       throw new BillingError(
