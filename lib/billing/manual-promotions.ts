@@ -3,6 +3,10 @@ import {
   type ManualBillingInterval,
 } from '@/lib/billing/manual-pricing';
 import { BillingError } from '@/types/stripe';
+import {
+  NEW_MEMBER_PRO_OFFER_MONTHS,
+  NEW_MEMBER_PRO_PROMOTION_CODE,
+} from '@/lib/stripe/constants';
 
 export type ManualPromotionPlan = 'pro' | 'enterprise';
 
@@ -83,7 +87,7 @@ function parsePromotions(): Map<string, PromotionConfig> {
 
     if (type === 'free_month') {
       if (
-        code !== 'TRIALPRO' ||
+        code !== NEW_MEMBER_PRO_PROMOTION_CODE ||
         value !== undefined ||
         !Array.isArray(config.plans) ||
         config.plans.length !== 1 ||
@@ -199,7 +203,7 @@ export function quoteManualPrice(
     if (plan !== 'pro' || interval !== 'month') invalidPromotion();
     if (!options.newMemberEligible) {
       throw new BillingError(
-        'O código TRIALPRO é exclusivo para novos clientes elegíveis do plano Pro mensal.',
+        `O código ${NEW_MEMBER_PRO_PROMOTION_CODE} é exclusivo para novos clientes elegíveis do plano Pro mensal.`,
         'PROMOTION_NOT_ELIGIBLE',
       );
     }
@@ -210,7 +214,7 @@ export function quoteManualPrice(
       discountAmount: euroAmount(originalCents),
       finalPrice: 0,
       currency: 'EUR',
-      discountDescription: '1 mês grátis',
+      discountDescription: `${NEW_MEMBER_PRO_OFFER_MONTHS} mês grátis`,
       freeTrial: true,
     };
   }
