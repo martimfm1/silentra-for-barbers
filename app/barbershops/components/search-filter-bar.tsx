@@ -155,7 +155,7 @@ export function SearchFilterBar({
               const isActive = activeDate === pill;
               return (
                 <button
-                  key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
+                  key={pill}
                   type="button"
                   onClick={() => setActiveDate(pill)}
                   aria-pressed={isActive}
@@ -196,7 +196,7 @@ export function SearchFilterBar({
               const isActive = activeFilter === pill;
               return (
                 <button
-                  key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
+                  key={pill}
                   type="button"
                   onClick={() => handleFilterClick(pill)}
                   aria-pressed={isActive}
