@@ -106,6 +106,14 @@ begin
 
   if exists (
     select 1
+    from public.barbershop_plan_assignments as a
+    where a.barbershop_id = v_request.barbershop_id
+  ) then
+    raise exception using errcode = 'P0001', message = 'TRIAL_HISTORY_EXISTS';
+  end if;
+
+  if exists (
+    select 1
     from public.subscription_requests as r
     where r.user_id = v_request.user_id
       and r.id <> v_request.id
