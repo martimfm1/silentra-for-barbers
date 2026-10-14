@@ -3,7 +3,9 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { BillingService } from '@/services/billing/billing.service';
 import { PaymentModeService } from '@/services/billing/payment-mode.service';
-import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
+import {
+  BarbershopStripeService,
+} from '@/services/billing/barbershop-stripe.service';
 import {
   assertSameOrigin,
   billingErrorResponse,
