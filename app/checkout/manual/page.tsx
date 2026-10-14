@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { PaymentModeService } from '@/services/billing/payment-mode.service';
 import { ManualCheckout } from '@/components/billing/manual-checkout';
+import { getManualPrice } from '@/lib/billing/manual-pricing';
+import { quoteManualPrice } from '@/lib/billing/manual-promotions';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,11 +57,16 @@ export default async function ManualCheckoutPage({
     redirect('/plans');
   }
 
+  const configuredPrice = getManualPrice(intent.plan, intent.interval);
+  if (!configuredPrice) redirect('/plans?error=price_unavailable');
+  const initialPricing = quoteManualPrice(intent.plan, intent.interval);
+
   return (
     <ManualCheckout
       checkoutToken={token}
       plan={intent.plan}
       interval={intent.interval}
+      initialPricing={initialPricing}
     />
   );
 }
