@@ -166,7 +166,7 @@ export function MobileSearchFilterBar({
         >
           {DATE_PILLS.map((pill) => (
             <button
-              key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
+              key={pill}
               type="button"
               onClick={() => setActiveDate(pill)}
               aria-pressed={activeDate === pill}
@@ -198,7 +198,7 @@ export function MobileSearchFilterBar({
           <div className="grid grid-cols-3 gap-1.5">
             {FILTER_PILLS.map((pill) => (
               <button
-                key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
+                key={pill}
                 type="button"
                 onClick={() => handleFilterClick(pill)}
                 disabled={pill === 'Near Me' && isLocating}
