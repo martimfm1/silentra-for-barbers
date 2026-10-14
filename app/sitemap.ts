@@ -4,6 +4,9 @@ import { getPublicProfileById } from '@/lib/barbershops/public-profile';
 
 const SITE_URL = 'https://barbers.silentra.me';
 
+// Refresh database-backed public profile URLs hourly without querying on every crawler request.
+export const revalidate = 3600;
+
 type ShopSitemapEntry = {
   url: string;
   lastModified: Date;
