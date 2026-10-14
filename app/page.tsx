@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
+    title:
+      'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
     description:
       'Software de gestão para barbearias em Portugal: agenda online, marcações e clientes num só painel. Começa grátis.',
     url: 'https://barbers.silentra.me/',
@@ -30,7 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
+    title:
+      'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
     description:
       'Agenda online, clientes e gestão da barbearia num só painel. Começa grátis.',
     images: ['/og-image.png'],
@@ -62,7 +64,8 @@ function HomeStructuredData() {
       url: 'https://barbers.silentra.me/',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web browser',
-      description: 'Software de gestão para barbearias com agenda online, gestão de clientes e equipa e marcações sem conta do cliente.',
+      description:
+        'Software de gestão para barbearias com agenda online, gestão de clientes e equipa e marcações sem conta do cliente.',
       inLanguage: ['pt-PT', 'en'],
       provider: { '@id': 'https://barbers.silentra.me/#organization' },
       isAccessibleForFree: true,
