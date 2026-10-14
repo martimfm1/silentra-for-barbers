@@ -3,6 +3,31 @@ alter table public.subscription_requests
   add column if not exists discount_amount numeric(10, 2) not null default 0,
   add column if not exists promotion_code text;
 
+-- Keep the migration deployable ahead of the application rollout. The currently
+-- deployed checkout does not send promotion metadata, so backfill original_price
+-- from price for legacy inserts while the new application is rolling out.
+create or replace function public.fill_subscription_request_promotion_defaults()
+returns trigger
+language plpgsql
+set search_path = ''
+as $
+begin
+  if new.original_price is null then
+    new.original_price := new.price;
+  end if;
+  if new.discount_amount is null then
+    new.discount_amount := 0;
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists trg_subscription_request_promotion_defaults
+  on public.subscription_requests;
+create trigger trg_subscription_request_promotion_defaults
+before insert on public.subscription_requests
+for each row execute function public.fill_subscription_request_promotion_defaults();
+
 update public.subscription_requests
 set original_price = price
 where original_price is null;
