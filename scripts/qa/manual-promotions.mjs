@@ -79,6 +79,12 @@ const checks = [
       migration.includes('subscription_requests_promotion_price_consistent'),
   ],
   [
+    'Legacy manual checkout inserts remain compatible during rollout',
+    migration.includes('fill_subscription_request_promotion_defaults') &&
+      migration.includes('new.original_price := new.price') &&
+      migration.includes('before insert on public.subscription_requests'),
+  ],
+  [
     'Environment template configures TRIALPRO for Pro monthly only',
     envTemplate.includes('MANUAL_PROMO_CODES_JSON=') &&
       envTemplate.includes('"TRIALPRO":{"type":"free_month"') &&
