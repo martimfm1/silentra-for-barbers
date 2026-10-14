@@ -13,6 +13,8 @@ import {
 } from '@/services/billing/http';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
+import { ManualPaymentService } from '@/services/billing/manual-payment.service';
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants;
 import { BillingError } from '@/types/stripe';
 
 export const runtime = 'nodejs';
@@ -97,7 +99,17 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const quote = quoteManualPrice(intent.plan, intent.interval, rawCode);
+    const isTrialPromotion =
+      rawCode.toUpperCase() === NEW_MEMBER_PRO_PROMOTION_CODE;
+    const trialEligible = isTrialPromotion
+      ? await ManualPaymentService.isEligibleForManualProTrial(
+          user.id,
+          intent.barbershopId,
+        )
+      : false;
+    const quote = quoteManualPrice(intent.plan, intent.interval, rawCode, {
+      newMemberEligible: trialEligible,
+    });
     return NextResponse.json(
       { ok: true, pricing: quote },
       { headers: { 'Cache-Control': 'no-store' } },
