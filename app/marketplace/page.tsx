@@ -690,7 +690,7 @@ export default function MarketplacePage() {
                   </div>
                   <div className="p-5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
-                      {product.category || 'Produto'}
+                      {product.category || t('storefront.product')}
                     </p>
                     <h3 className="mt-2 min-h-12 text-base font-semibold text-zinc-100">
                       <Link
@@ -701,8 +701,7 @@ export default function MarketplacePage() {
                       </Link>
                     </h3>
                     <p className="mt-2 min-h-10 line-clamp-2 text-xs leading-5 text-zinc-500">
-                      {product.description ||
-                        'Produto selecionado pela tua barbearia.'}
+                      {product.description || (locale === 'pt' ? 'Produto selecionado pela tua barbearia.' : 'A product selected by your barbershop.')}
                     </p>
                     <Link
                       href={`/marketplace/${product.id}`}
@@ -711,7 +710,7 @@ export default function MarketplacePage() {
                       {t('storefront.details')} <ArrowRight className="size-3.5" />
                     </Link>
                     <p className="mt-1 text-[11px] text-zinc-600">
-                      {productShop?.name || 'Barbearia'}
+                      {productShop?.name || t('storefront.barbershop')}
                     </p>
                     <div className="mt-4 flex items-end justify-between gap-3">
                       <div>
@@ -850,7 +849,7 @@ export default function MarketplacePage() {
                                       )
                                     }
                                     className="ml-auto flex size-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-rose-400/10 hover:text-rose-300"
-                                    aria-label={`Remover ${item.name}`}
+                                    aria-label={t('storefront.removeProduct', { product: item.name })}
                                   >
                                     <Trash2 className="size-4" />
                                   </button>
@@ -864,7 +863,7 @@ export default function MarketplacePage() {
                   </div>
                   <div className="border-t border-white/10 p-5">
                     <div className="flex items-end justify-between">
-                      <span className="text-sm text-zinc-500">Total</span>
+                      <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
                       <span className="text-2xl font-semibold">
                         {money(total, formatLocale)}
                       </span>
@@ -886,7 +885,7 @@ export default function MarketplacePage() {
                       onClick={openCheckout}
                       className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 font-bold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Continuar
+                      {t('storefront.continue')}
                       <ArrowRight className="size-4" />
                     </button>
                   </div>
@@ -897,17 +896,16 @@ export default function MarketplacePage() {
                     <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
                       <div className="flex items-center gap-2 text-sm font-semibold">
                         <Clock3 className="size-4 text-emerald-300" />
-                        Encomenda rápida
+                        {t('storefront.quickOrder')}
                       </div>
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
-                        A encomenda fica imediatamente registada. O pagamento e
-                        o envio são tratados diretamente com a barbearia.
+                        {t('storefront.quickOrderNotice')}
                       </p>
                     </div>
                     {[
-                      ['name', 'Nome completo', 'text', 'O teu nome'],
-                      ['email', 'Email', 'email', 'nome@exemplo.pt'],
-                      ['phone', 'Telefone', 'tel', '912 345 678'],
+                      ['name', t('storefront.fullName'), 'text', t('storefront.yourName')],
+                      ['email', t('storefront.email'), 'email', t('storefront.exampleEmail')],
+                      ['phone', t('storefront.phone'), 'tel', '912 345 678'],
                     ].map(([key, label, type, placeholder]) => (
                       <label key={key} className="grid gap-1.5">
                         <span className="text-xs font-medium text-zinc-300">
@@ -992,16 +990,15 @@ export default function MarketplacePage() {
                       <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                         <div>
                           <p className="text-sm font-semibold">
-                            Morada de entrega
+                            {t('storefront.deliveryAddress')}
                           </p>
                           <p className="mt-1 text-xs leading-5 text-zinc-500">
-                            Não calculamos portes nem tratamos transportadoras.
-                            A barbearia combina contigo os detalhes do envio.
+                            {t('storefront.shippingNoRates')}
                           </p>
                         </div>
                         <label className="grid gap-1.5">
                           <span className="text-xs font-medium text-zinc-300">
-                            Morada *
+                            {t('storefront.addressRequired')}
                           </span>
                           <input
                             required
@@ -1013,13 +1010,13 @@ export default function MarketplacePage() {
                               }))
                             }
                             className="min-h-11 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm outline-none focus:border-emerald-400/40"
-                            placeholder="Rua, porta e andar"
+                            placeholder={t('storefront.streetAddress')}
                           />
                         </label>
                         <div className="grid gap-3 sm:grid-cols-2">
                           <label className="grid gap-1.5">
                             <span className="text-xs font-medium text-zinc-300">
-                              Código postal *
+                              {t('storefront.postalCodeRequired')}
                             </span>
                             <input
                               required
@@ -1036,7 +1033,7 @@ export default function MarketplacePage() {
                           </label>
                           <label className="grid gap-1.5">
                             <span className="text-xs font-medium text-zinc-300">
-                              Cidade *
+                              {t('storefront.cityRequired')}
                             </span>
                             <input
                               required
@@ -1048,7 +1045,7 @@ export default function MarketplacePage() {
                                 }))
                               }
                               className="min-h-11 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm outline-none focus:border-emerald-400/40"
-                              placeholder="Lisboa"
+                              placeholder={t('storefront.cityExample')}
                             />
                           </label>
                         </div>
@@ -1056,7 +1053,7 @@ export default function MarketplacePage() {
                     )}
                     <label className="grid gap-1.5">
                       <span className="text-xs font-medium text-zinc-300">
-                        Nota <span className="text-zinc-600">(opcional)</span>
+                        {t('storefront.note')} <span className="text-zinc-600">({t('storefront.optional')})</span>
                       </span>
                       <textarea
                         value={customer.notes}
@@ -1067,7 +1064,7 @@ export default function MarketplacePage() {
                           }))
                         }
                         className="min-h-24 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm outline-none focus:border-emerald-400/40"
-                        placeholder="Ex.: enviar depois das 18h"
+                        placeholder={t('storefront.noteExample')}
                       />
                     </label>
                     {error && (
@@ -1080,7 +1077,7 @@ export default function MarketplacePage() {
                     )}
                     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-zinc-500">Total</span>
+                        <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
                         <strong className="text-xl">{money(total, formatLocale)}</strong>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500">
@@ -1090,8 +1087,8 @@ export default function MarketplacePage() {
                           <Store className="size-3.5" />
                         )}
                         {customer.fulfillmentMethod === 'delivery'
-                          ? 'Envio tratado pela barbearia'
-                          : 'Levantamento na barbearia'}
+                          ? t('storefront.shippingByShop')
+                          : t('storefront.pickupAtShop')}
                       </div>
                     </div>
                     <button
@@ -1099,7 +1096,7 @@ export default function MarketplacePage() {
                       disabled={saving}
                       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 font-bold text-zinc-950 transition hover:bg-emerald-300 disabled:opacity-50"
                     >
-                      {saving ? 'A criar encomenda…' : 'Confirmar encomenda'}
+                      {saving ? t('storefront.creatingOrder') : t('storefront.confirmOrder')}
                       <Check className="size-4" />
                     </button>
                     <button
