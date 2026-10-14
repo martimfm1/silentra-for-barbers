@@ -86,8 +86,17 @@ O acesso às funcionalidades é baseado em entitlements verificados no backend.
 | Marketing e automações     |  —   |  ✓  |     ✓      |
 | Analytics avançado         |  —   |  ✓  |     ✓      |
 | Funcionalidades Enterprise |  —   |  —  |     ✓      |
+| Landing page profissional incluída |  —   |  —  |     ✓      |
 
 Os contratos de planos são validados por QA e as APIs não devem confiar no estado enviado pelo cliente.
+
+### Landing page incluída no Enterprise
+
+Quando o entitlement Enterprise fica ativo — através de Stripe, pagamento manual ou atribuição administrativa — a plataforma provisiona automaticamente uma landing page para a barbearia. A página utiliza o perfil e os serviços públicos existentes, fica ligada ao perfil público e é suspensa quando o acesso Enterprise deixa de estar ativo. Não é necessário configurar uma segunda conta ou associar a página manualmente.
+
+### API pública v1
+
+A API pública disponibiliza dados aprovados para publicação externa, com contrato versionado, cache HTTP, ETag, CORS sem credenciais, rate limiting e resposta allowlist. Consulta a [documentação da API pública](docs/API_PUBLICA.md) e a especificação [OpenAPI](public/openapi-v1.yaml).
 
 ## Billing
 
@@ -337,6 +346,7 @@ Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 | [Development](docs/DEVELOPMENT.md)   | Setup local, env e workflow                    |
 | [Billing](docs/BILLING.md)           | Stripe e pagamentos manuais                    |
 | [Security](docs/SECURITY.md)         | Segurança, auth, RLS, APIs e embeds            |
+| [API pública](docs/API_PUBLICA.md)   | Endpoints públicos, payloads e limites        |
 | [Deployment](docs/DEPLOYMENT.md)     | Release, Vercel, Supabase e produção           |
 
 ## Estado do projeto
