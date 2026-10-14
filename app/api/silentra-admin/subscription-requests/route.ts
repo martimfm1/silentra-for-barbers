@@ -11,6 +11,7 @@ const statuses = new Set<ManualRequestStatus>([
   'PENDING',
   'PAYMENT_SENT',
   'PAID',
+  'TRIAL',
   'REJECTED',
   'EXPIRED',
   'CANCELLED',
