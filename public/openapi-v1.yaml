@@ -46,16 +46,38 @@ paths:
           description: The representation is unchanged
         '400':
           description: Invalid slug
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicApiError'
+              example:
+                error: 'O slug da barbearia não é válido.'
         '404':
           description: Public profile not found or disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicApiError'
+              example:
+                error: 'Barbearia não encontrada.'
         '429':
           description: Rate limit exceeded
           headers:
             Retry-After:
               schema:
                 type: string
+        '500':
+          description: Unexpected internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicApiError'
         '503':
           description: Public API or shared rate limiter temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicApiError'
     options:
       operationId: publicBarbershopCorsPreflight
       summary: CORS preflight
@@ -64,6 +86,13 @@ paths:
           description: CORS preflight accepted
 components:
   schemas:
+    PublicApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Human-readable diagnostic message. Use the HTTP status for application logic.
     PublicBarbershopResponse:
       type: object
       required: [apiVersion, data]

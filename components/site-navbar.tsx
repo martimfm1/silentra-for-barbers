@@ -246,6 +246,10 @@ export function SiteNavbar() {
         href: '/dashboard/settings',
         permission: 'settings',
       },
+      {
+        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        href: '/documentation',
+      },
     ],
     [t],
   );
@@ -264,6 +268,10 @@ export function SiteNavbar() {
         label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
         href: '/#howitworks',
       },
+      {
+        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        href: '/documentation',
+      },
     ],
     [t],
   );
@@ -277,6 +285,10 @@ export function SiteNavbar() {
       {
         label: t('nav.plans', { defaultValue: 'Planos' }),
         href: '/plans',
+      },
+      {
+        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        href: '/documentation',
       },
       {
         label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
