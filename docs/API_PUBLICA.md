@@ -16,7 +16,7 @@ A resposta 200 inclui apiVersion, data.barbershop, data.services, data.reviews, 
 
 - barbershop: nome, slug, cidade, morada, telefone, imagens, tags, SEO, comodidades e horário público.
 - services: ID público do serviço, nome, preço em EUR, duração em minutos e indicação pública de popularidade.
-- reviews: nome apresentado publicamente na avaliação, classificação, comentário e data.
+- reviews: até 100 avaliações recentes, com nome apresentado publicamente, classificação, comentário e data. reviewsCount e rating usam os agregados guardados da barbearia quando disponíveis.
 - landingPage: inclui available=true e URL absoluta quando a barbearia tem Enterprise ativo; caso contrário, available=false e url=null.
 - bookingUrl: URL absoluta do perfil público onde o cliente pode consultar detalhes e fazer a marcação.
 
