@@ -1,0 +1,79 @@
+name: one-time i18n validation
+
+on:
+  push:
+    branches:
+      - feat/full-site-internationalization
+    paths-ignore:
+      - .github/workflows/i18n-validation-once.yml
+
+permissions:
+  contents: read
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-placeholder
+  QA_BASE_URL: http://127.0.0.1:3000
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: API audit
+        run: pnpm qa:api
+      - name: Plan contracts
+        run: pnpm qa:plans
+      - name: Security audit
+        run: pnpm qa:security
+      - name: UI copy audit
+        run: pnpm qa:copy
+      - name: Translation contracts
+        run: pnpm qa:i18n
+      - name: Product contracts
+        run: pnpm qa:product
+      - name: Manual payment contracts
+        run: pnpm qa:manual-payments
+      - name: Dependency audit
+        run: pnpm qa:deps
+      - name: Format check
+        run: pnpm format:check
+      - name: Build
+        run: pnpm build
+      - name: Start production server
+        run: pnpm start > /tmp/silentra-next.log 2>&1 &
+      - name: Wait for production server
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/silentra-next.log
+          exit 1
+      - name: Smoke QA
+        run: pnpm qa:smoke
+      - name: Remove temporary validation workflow
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/i18n-validation-once.yml
+          git commit -m "chore: remove one-time i18n validation workflow"
+          git push origin HEAD:feat/full-site-internationalization
