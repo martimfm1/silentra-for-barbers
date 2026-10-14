@@ -10,7 +10,7 @@ create or replace function public.fill_subscription_request_promotion_defaults()
 returns trigger
 language plpgsql
 set search_path = ''
-as $
+as $$
 begin
   if new.original_price is null then
     new.original_price := new.price;
@@ -20,7 +20,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists trg_subscription_request_promotion_defaults
   on public.subscription_requests;
