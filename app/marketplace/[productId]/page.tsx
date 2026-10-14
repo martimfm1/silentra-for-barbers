@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   ArrowLeft,
   Check,
@@ -37,8 +38,8 @@ type Product = {
   barbershops: Shop | Shop[];
 };
 
-const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', {
+const money = (value: number, locale: string) =>
+  new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
   }).format(Number(value) || 0);
@@ -49,6 +50,8 @@ const getShop = (product: Product) =>
     : product.barbershops;
 
 export default function MarketplaceProductPage() {
+  const { locale, t } = useLanguage();
+  const formatLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const params = useParams<{ productId: string }>();
   const productId = params.productId;
   const [product, setProduct] = useState<Product | null>(null);
@@ -68,7 +71,7 @@ export default function MarketplaceProductPage() {
         );
         const json = await response.json();
         if (!response.ok) {
-          throw new Error(json.error || 'Não foi possível carregar o produto.');
+          throw new Error(t('storefront.loadError'));
         }
         if (active) setProduct(json.product as Product);
       } catch (cause) {
@@ -76,7 +79,7 @@ export default function MarketplaceProductPage() {
           setError(
             cause instanceof Error
               ? cause.message
-              : 'Não foi possível carregar o produto.',
+              : t('storefront.loadError'),
           );
         }
       } finally {
@@ -87,7 +90,7 @@ export default function MarketplaceProductPage() {
     return () => {
       active = false;
     };
-  }, [productId]);
+  }, [productId, t]);
 
   function addToCart() {
     if (!product || product.stock_quantity <= 0) return;
@@ -129,16 +132,16 @@ export default function MarketplaceProductPage() {
       <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-16 text-zinc-100">
         <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-white/[0.025] p-8 text-center">
           <ShoppingBag className="mx-auto size-9 text-zinc-500" />
-          <h1 className="mt-4 text-2xl font-semibold">Produto indisponível</h1>
+          <h1 className="mt-4 text-2xl font-semibold">{t('storefront.unavailable')}</h1>
           <p className="mt-2 text-sm leading-6 text-zinc-500">
-            {error || 'Este produto já não está publicado no marketplace.'}
+            {error || t('storefront.unavailableDescription')}
           </p>
           <Link
             href="/marketplace"
             className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
           >
             <ArrowLeft className="size-4" />
-            Voltar ao marketplace
+            {t('storefront.backToMarketplace')}
           </Link>
         </div>
       </main>
@@ -154,7 +157,7 @@ export default function MarketplaceProductPage() {
             className="inline-flex min-h-10 items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
           >
             <ArrowLeft className="size-4" />
-            Marketplace
+            {t('storefront.marketplace')}
           </Link>
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
             <Store className="size-4" />
@@ -164,12 +167,12 @@ export default function MarketplaceProductPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12">
-        <nav aria-label="Breadcrumb" className="mb-7 text-xs text-zinc-600">
+        <nav aria-label={t('storefront.marketplace')} className="mb-7 text-xs text-zinc-600">
           <Link href="/marketplace" className="transition hover:text-zinc-300">
-            Marketplace
+            {t('storefront.marketplace')}
           </Link>
           <span className="px-2">/</span>
-          <span className="text-zinc-400">{product.category || 'Produto'}</span>
+          <span className="text-zinc-400">{product.category || t('storefront.description')}</span>
         </nav>
 
         <section className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-14">
@@ -191,14 +194,14 @@ export default function MarketplaceProductPage() {
             {product.marketplace_featured && (
               <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-amber-300/25 bg-zinc-950/80 px-3 py-1.5 text-xs font-semibold text-amber-200 backdrop-blur">
                 <Sparkles className="size-3.5" />
-                Produto em destaque
+                {t('storefront.featured')}
               </span>
             )}
           </div>
 
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-              {product.category || 'Coleção da barbearia'}
+              {product.category || t('storefront.categoryCollection')}
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               {product.name}
@@ -206,33 +209,32 @@ export default function MarketplaceProductPage() {
             {shop && (
               <p className="mt-3 flex items-center gap-2 text-sm text-zinc-500">
                 <Store className="size-4" />
-                Vendido por{' '}
+                {t('storefront.soldBy')}{' '}
                 <span className="font-medium text-zinc-300">{shop.name}</span>
               </p>
             )}
 
             <div className="mt-6 flex flex-wrap items-baseline gap-3">
               <span className="text-3xl font-semibold text-white">
-                {money(product.unit_price)}
+                {money(product.unit_price, formatLocale)}
               </span>
               {discounted && (
                 <>
                   <span className="text-base text-zinc-500 line-through">
-                    {money(product.compare_at_price!)}
+                    {money(product.compare_at_price!, formatLocale)}
                   </span>
                   <span className="rounded-full bg-rose-400/15 px-2.5 py-1 text-xs font-semibold text-rose-200">
-                    Poupa{' '}
-                    {money(product.compare_at_price! - product.unit_price)}
+                    {t('storefront.save', { amount: money(product.compare_at_price! - product.unit_price, formatLocale) })}
                   </span>
                 </>
               )}
             </div>
 
             <div className="mt-6 h-px bg-white/10" />
-            <h2 className="mt-6 text-sm font-semibold text-white">Descrição</h2>
+            <h2 className="mt-6 text-sm font-semibold text-white">{t('storefront.description')}</h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
               {product.description ||
-                'A barbearia ainda não adicionou uma descrição para este produto.'}
+                t('storefront.noDescription')}
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -240,12 +242,12 @@ export default function MarketplaceProductPage() {
                 <PackageCheck className="mt-0.5 size-5 shrink-0 text-emerald-300" />
                 <div>
                   <p className="text-sm font-semibold text-zinc-200">
-                    Stock disponível
+                    {t('storefront.stockAvailable')}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {product.stock_quantity > 0
-                      ? `${Number(product.stock_quantity)} unidade(s) disponíveis`
-                      : 'Temporariamente esgotado'}
+                      ? t('storefront.unitsAvailable', { count: Number(product.stock_quantity) })
+                      : t('storefront.soldOutTemporarily')}
                   </p>
                 </div>
               </div>
@@ -253,10 +255,10 @@ export default function MarketplaceProductPage() {
                 <Truck className="mt-0.5 size-5 shrink-0 text-emerald-300" />
                 <div>
                   <p className="text-sm font-semibold text-zinc-200">
-                    Entrega pela barbearia
+                    {t('storefront.shopDelivery')}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Levantamento ou envio conforme as opções do vendedor.
+                    {t('storefront.deliveryOptions')}
                   </p>
                 </div>
               </div>
@@ -267,10 +269,10 @@ export default function MarketplaceProductPage() {
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-semibold text-white">
-                      Quantidade
+                      {t('storefront.quantity')}
                     </p>
                     <p className="mt-1 text-xs text-zinc-500">
-                      Máximo de {Number(product.stock_quantity)} unidade(s)
+                      {t('storefront.maxUnits', { count: Number(product.stock_quantity) })}
                     </p>
                   </div>
                   <div className="inline-flex items-center rounded-xl border border-white/10 bg-zinc-950 p-1">
@@ -281,7 +283,7 @@ export default function MarketplaceProductPage() {
                       }
                       disabled={quantity <= 1}
                       className="flex size-9 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 disabled:opacity-30"
-                      aria-label="Diminuir quantidade"
+                      aria-label={t('storefront.decreaseQuantity')}
                     >
                       <Minus className="size-4" />
                     </button>
@@ -297,7 +299,7 @@ export default function MarketplaceProductPage() {
                       }
                       disabled={quantity >= Number(product.stock_quantity)}
                       className="flex size-9 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 disabled:opacity-30"
-                      aria-label="Aumentar quantidade"
+                      aria-label={t('storefront.increaseQuantity')}
                     >
                       <Plus className="size-4" />
                     </button>
@@ -309,13 +311,12 @@ export default function MarketplaceProductPage() {
                   className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-bold text-zinc-950 transition hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   <ShoppingBag className="size-4" />
-                  Adicionar ao carrinho · {money(product.unit_price * quantity)}
+                  {t('storefront.addToCart')} · {money(product.unit_price * quantity, formatLocale)}
                 </button>
               </div>
             ) : (
               <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-sm text-zinc-500">
-                Este produto está esgotado. Consulta o marketplace para veres
-                alternativas.
+                {t('storefront.outOfStock')}
               </div>
             )}
 
@@ -323,15 +324,14 @@ export default function MarketplaceProductPage() {
               href={`/marketplace?shop=${encodeURIComponent(product.barbershop_id)}`}
               className="mt-5 inline-flex min-h-10 items-center gap-2 text-sm text-zinc-400 transition hover:text-emerald-300"
             >
-              Ver mais produtos desta barbearia
+              {t('storefront.moreFromShop')}
               <span aria-hidden="true">→</span>
             </Link>
           </div>
         </section>
 
         <footer className="mt-14 border-t border-white/10 pt-6 text-xs text-zinc-600">
-          O pagamento e o cumprimento da encomenda são tratados diretamente pela
-          barbearia vendedora.
+          {t('storefront.sellerFulfillmentNotice')}
         </footer>
       </div>
     </main>
