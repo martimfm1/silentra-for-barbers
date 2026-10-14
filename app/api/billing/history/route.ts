@@ -119,7 +119,10 @@ async function GET__unobserved() {
 
     if (!barbershop || barbershop.created_by !== user.id) {
       return NextResponse.json(
-        { error: 'Só o proprietário da barbearia pode consultar o histórico de faturação.' },
+        {
+          error:
+            'Só o proprietário da barbearia pode consultar o histórico de faturação.',
+        },
         { status: 403, headers: { 'Cache-Control': 'no-store' } },
       );
     }
@@ -127,7 +130,17 @@ async function GET__unobserved() {
     const { data: documents, error: documentsError } = await admin
       .from('billing_documents')
       .select(
-        'id, document_number, issued_at, plan, billing_interval, currency, total, user_id, barbershop_id',
+        [
+          'id',
+          'document_number',
+          'issued_at',
+          'plan',
+          'billing_interval',
+          'currency',
+          'total',
+          'user_id',
+          'barbershop_id',
+        ].join(', '),
       )
       .eq('barbershop_id', barbershopId)
       .eq('user_id', user.id)
@@ -146,6 +159,9 @@ async function GET__unobserved() {
 
     const manualHistory: HistoryItem[] = (documents ?? []).map((document) => {
       const issuedAt = new Date(document.issued_at);
+      const intervalLabel =
+        document.billing_interval === 'year' ? 'Anual' : 'Mensal';
+
       return {
         id: document.id,
         source: 'MANUAL',
@@ -153,7 +169,7 @@ async function GET__unobserved() {
         amount: Math.round(Number(document.total) * 100),
         currency: String(document.currency ?? 'EUR').toUpperCase(),
         status: 'Pago',
-        plan: `${planLabel(String(document.plan ?? 'subscrição'))} · ${document.billing_interval === 'year' ? 'Anual' : 'Mensal'}`,
+        plan: `${planLabel(String(document.plan ?? 'subscrição'))} · ${intervalLabel}`,
         date: formatDate(issuedAt),
         issued_at: issuedAt.toISOString(),
         invoice_pdf: null,
