@@ -536,8 +536,8 @@ export function ManualCheckout({
                 Código promocional
               </h2>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Introduz um código válido para atualizar automaticamente o
-                total apresentado.
+                Introduz um código válido para atualizar automaticamente o total
+                apresentado.
               </p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <input
