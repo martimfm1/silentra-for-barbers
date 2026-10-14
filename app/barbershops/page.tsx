@@ -97,7 +97,9 @@ export default function BarbershopsDirectoryPage() {
         if (!unique.has(key)) unique.set(key, tag);
       }
     }
-    return [...unique.values()].sort((a, b) => a.localeCompare(b, locale === 'pt' ? 'pt-PT' : 'en'));
+    return [...unique.values()].sort((a, b) =>
+      a.localeCompare(b, locale === 'pt' ? 'pt-PT' : 'en'),
+    );
   }, [shops, locale]);
 
   useEffect(() => {

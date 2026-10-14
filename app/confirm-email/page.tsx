@@ -54,22 +54,16 @@ export default function ConfirmEmailPage() {
       if (error) {
         console.error('[CONFIRM_EMAIL_RESEND_ERROR]', error);
         setResendStatus('error');
-        setStatusMessage(
-          t('auth.resendFailed'),
-        );
+        setStatusMessage(t('auth.resendFailed'));
         return;
       }
 
       setResendStatus('success');
-      setStatusMessage(
-        t('auth.resendSuccess'),
-      );
+      setStatusMessage(t('auth.resendSuccess'));
     } catch (error) {
       console.error('[CONFIRM_EMAIL_RESEND_ERROR]', error);
       setResendStatus('error');
-      setStatusMessage(
-        t('auth.resendFailed'),
-      );
+      setStatusMessage(t('auth.resendFailed'));
     } finally {
       setIsResending(false);
     }
@@ -161,7 +155,8 @@ export default function ConfirmEmailPage() {
                     className="h-11 w-full rounded-full bg-zinc-50 text-xs font-bold text-zinc-950 hover:bg-white transition-all shadow-md"
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <ArrowLeft className="size-4" aria-hidden="true" /> {t('auth.backToLogin')}
+                      <ArrowLeft className="size-4" aria-hidden="true" />{' '}
+                      {t('auth.backToLogin')}
                     </span>
                   </Button>
                 </Link>

@@ -129,17 +129,12 @@ export default function MarketplacePage() {
         { cache: 'no-store' },
       );
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(
-          t('storefront.loadError'),
-        );
+      if (!response.ok) throw new Error(t('storefront.loadError'));
       setProducts(json.products ?? []);
       setCategories(json.categories ?? []);
       setShops(json.shops ?? []);
     } catch (err) {
-      setError(
-        t('storefront.loadError'),
-      );
+      setError(t('storefront.loadError'));
     } finally {
       setLoading(false);
     }
@@ -224,9 +219,7 @@ export default function MarketplacePage() {
       }
 
       if (!product || product.stock_quantity <= 0) {
-        setError(
-          t('storefront.productUnavailableForCart'),
-        );
+        setError(t('storefront.productUnavailableForCart'));
         return;
       }
 
@@ -241,9 +234,7 @@ export default function MarketplacePage() {
         cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
       if (
         switchingShop &&
-        !window.confirm(
-          t('storefront.confirmReplaceCart'),
-        )
+        !window.confirm(t('storefront.confirmReplaceCart'))
       ) {
         return;
       }
@@ -291,12 +282,7 @@ export default function MarketplacePage() {
       cart.length > 0 && cart[0].barbershop_id !== product.barbershop_id;
 
     // Each order belongs to one seller. Never discard the current cart silently.
-    if (
-      switchingShop &&
-      !window.confirm(
-        t('storefront.confirmReplaceCart'),
-      )
-    ) {
+    if (switchingShop && !window.confirm(t('storefront.confirmReplaceCart'))) {
       return;
     }
 
@@ -378,8 +364,7 @@ export default function MarketplacePage() {
         }),
       });
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(t('storefront.checkoutError'));
+      if (!response.ok) throw new Error(t('storefront.checkoutError'));
       setSubmitted(json.order.id);
       setTrackingToken(
         typeof json.trackingToken === 'string' ? json.trackingToken : null,
@@ -391,9 +376,7 @@ export default function MarketplacePage() {
       setCartOpen(false);
       void load();
     } catch (err) {
-      setError(
-        t('storefront.checkoutError'),
-      );
+      setError(t('storefront.checkoutError'));
     } finally {
       setSaving(false);
     }
@@ -467,7 +450,17 @@ export default function MarketplacePage() {
               {t('storefront.catalogTitle')}
             </span>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">
-              {locale === 'pt' ? <>Leva o teu estilo <span className="text-emerald-300">para casa.</span></> : <>Bring your style <span className="text-emerald-300">home.</span></>}
+              {locale === 'pt' ? (
+                <>
+                  Leva o teu estilo{' '}
+                  <span className="text-emerald-300">para casa.</span>
+                </>
+              ) : (
+                <>
+                  Bring your style{' '}
+                  <span className="text-emerald-300">home.</span>
+                </>
+              )}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
               {t('storefront.catalogSubtitle')}
@@ -546,10 +539,16 @@ export default function MarketplacePage() {
                 aria-label={t('storefront.sortProducts')}
                 className="min-h-11 w-full appearance-none rounded-xl border border-white/10 bg-zinc-950 px-3 pr-9 text-sm outline-none focus:border-emerald-400/40"
               >
-                <option value="featured">{t('storefront.featuredProducts')}</option>
+                <option value="featured">
+                  {t('storefront.featuredProducts')}
+                </option>
                 <option value="newest">{t('storefront.newest')}</option>
-                <option value="price_asc">{t('storefront.priceLowHigh')}</option>
-                <option value="price_desc">{t('storefront.priceHighLow')}</option>
+                <option value="price_asc">
+                  {t('storefront.priceLowHigh')}
+                </option>
+                <option value="price_desc">
+                  {t('storefront.priceHighLow')}
+                </option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
             </div>
@@ -701,13 +700,17 @@ export default function MarketplacePage() {
                       </Link>
                     </h3>
                     <p className="mt-2 min-h-10 line-clamp-2 text-xs leading-5 text-zinc-500">
-                      {product.description || (locale === 'pt' ? 'Produto selecionado pela tua barbearia.' : 'A product selected by your barbershop.')}
+                      {product.description ||
+                        (locale === 'pt'
+                          ? 'Produto selecionado pela tua barbearia.'
+                          : 'A product selected by your barbershop.')}
                     </p>
                     <Link
                       href={`/marketplace/${product.id}`}
                       className="mt-3 inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-emerald-300 transition hover:text-emerald-200"
                     >
-                      {t('storefront.details')} <ArrowRight className="size-3.5" />
+                      {t('storefront.details')}{' '}
+                      <ArrowRight className="size-3.5" />
                     </Link>
                     <p className="mt-1 text-[11px] text-zinc-600">
                       {productShop?.name || t('storefront.barbershop')}
@@ -824,7 +827,11 @@ export default function MarketplacePage() {
                                     type="button"
                                     onClick={() => change(item.id, -1)}
                                     className="flex size-8 items-center justify-center rounded-lg border border-white/10 hover:bg-white/5"
-                                    aria-label={locale === 'pt' ? `Diminuir quantidade de ${item.name}` : `Decrease quantity of ${item.name}`}
+                                    aria-label={
+                                      locale === 'pt'
+                                        ? `Diminuir quantidade de ${item.name}`
+                                        : `Decrease quantity of ${item.name}`
+                                    }
                                   >
                                     <Minus className="size-3" />
                                   </button>
@@ -835,7 +842,11 @@ export default function MarketplacePage() {
                                     type="button"
                                     onClick={() => change(item.id, 1)}
                                     className="flex size-8 items-center justify-center rounded-lg border border-white/10 hover:bg-white/5"
-                                    aria-label={locale === 'pt' ? `Aumentar quantidade de ${item.name}` : `Increase quantity of ${item.name}`}
+                                    aria-label={
+                                      locale === 'pt'
+                                        ? `Aumentar quantidade de ${item.name}`
+                                        : `Increase quantity of ${item.name}`
+                                    }
                                   >
                                     <Plus className="size-3" />
                                   </button>
@@ -849,7 +860,9 @@ export default function MarketplacePage() {
                                       )
                                     }
                                     className="ml-auto flex size-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-rose-400/10 hover:text-rose-300"
-                                    aria-label={t('storefront.removeProduct', { product: item.name })}
+                                    aria-label={t('storefront.removeProduct', {
+                                      product: item.name,
+                                    })}
                                   >
                                     <Trash2 className="size-4" />
                                   </button>
@@ -863,7 +876,9 @@ export default function MarketplacePage() {
                   </div>
                   <div className="border-t border-white/10 p-5">
                     <div className="flex items-end justify-between">
-                      <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
+                      <span className="text-sm text-zinc-500">
+                        {t('orderTracking.total')}
+                      </span>
                       <span className="text-2xl font-semibold">
                         {money(total, formatLocale)}
                       </span>
@@ -903,8 +918,18 @@ export default function MarketplacePage() {
                       </p>
                     </div>
                     {[
-                      ['name', t('storefront.fullName'), 'text', t('storefront.yourName')],
-                      ['email', t('storefront.email'), 'email', t('storefront.exampleEmail')],
+                      [
+                        'name',
+                        t('storefront.fullName'),
+                        'text',
+                        t('storefront.yourName'),
+                      ],
+                      [
+                        'email',
+                        t('storefront.email'),
+                        'email',
+                        t('storefront.exampleEmail'),
+                      ],
                       ['phone', t('storefront.phone'), 'tel', '912 345 678'],
                     ].map(([key, label, type, placeholder]) => (
                       <label key={key} className="grid gap-1.5">
@@ -1053,7 +1078,10 @@ export default function MarketplacePage() {
                     )}
                     <label className="grid gap-1.5">
                       <span className="text-xs font-medium text-zinc-300">
-                        {t('storefront.note')} <span className="text-zinc-600">({t('storefront.optional')})</span>
+                        {t('storefront.note')}{' '}
+                        <span className="text-zinc-600">
+                          ({t('storefront.optional')})
+                        </span>
                       </span>
                       <textarea
                         value={customer.notes}
@@ -1077,8 +1105,12 @@ export default function MarketplacePage() {
                     )}
                     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
-                        <strong className="text-xl">{money(total, formatLocale)}</strong>
+                        <span className="text-sm text-zinc-500">
+                          {t('orderTracking.total')}
+                        </span>
+                        <strong className="text-xl">
+                          {money(total, formatLocale)}
+                        </strong>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500">
                         {customer.fulfillmentMethod === 'delivery' ? (
@@ -1096,7 +1128,9 @@ export default function MarketplacePage() {
                       disabled={saving}
                       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 font-bold text-zinc-950 transition hover:bg-emerald-300 disabled:opacity-50"
                     >
-                      {saving ? t('storefront.creatingOrder') : t('storefront.confirmOrder')}
+                      {saving
+                        ? t('storefront.creatingOrder')
+                        : t('storefront.confirmOrder')}
                       <Check className="size-4" />
                     </button>
                     <button

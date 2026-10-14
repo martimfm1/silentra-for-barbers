@@ -23,7 +23,9 @@ export default function EmailConfirmationErrorPage() {
               <AlertCircle className="h-6 w-6" />
             </div>
 
-            <div className="mb-4 flex justify-end"><LanguageSwitcher /></div>
+            <div className="mb-4 flex justify-end">
+              <LanguageSwitcher />
+            </div>
             <h1
               id="confirmation-error-title"
               className="text-2xl font-semibold tracking-tight"

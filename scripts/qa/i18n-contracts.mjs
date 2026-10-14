@@ -46,7 +46,9 @@ for (const path of localizedSources) {
   for (const key of keys) {
     for (const locale of ['pt', 'en']) {
       if (!hasKey(localeSources[locale], key)) {
-        failures.push(path + ': missing ' + locale + ' translation for "' + key + '"');
+        failures.push(
+          path + ': missing ' + locale + ' translation for "' + key + '"',
+        );
       }
     }
   }

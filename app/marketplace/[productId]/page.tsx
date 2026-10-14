@@ -78,9 +78,7 @@ export default function MarketplaceProductPage() {
       } catch (cause) {
         if (active) {
           setError(
-            cause instanceof Error
-              ? cause.message
-              : t('storefront.loadError'),
+            cause instanceof Error ? cause.message : t('storefront.loadError'),
           );
         }
       } finally {
@@ -133,7 +131,9 @@ export default function MarketplaceProductPage() {
       <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-16 text-zinc-100">
         <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-white/[0.025] p-8 text-center">
           <ShoppingBag className="mx-auto size-9 text-zinc-500" />
-          <h1 className="mt-4 text-2xl font-semibold">{t('storefront.unavailable')}</h1>
+          <h1 className="mt-4 text-2xl font-semibold">
+            {t('storefront.unavailable')}
+          </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-500">
             {error || t('storefront.unavailableDescription')}
           </p>
@@ -169,12 +169,17 @@ export default function MarketplaceProductPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12">
-        <nav aria-label={t('storefront.marketplace')} className="mb-7 text-xs text-zinc-600">
+        <nav
+          aria-label={t('storefront.marketplace')}
+          className="mb-7 text-xs text-zinc-600"
+        >
           <Link href="/marketplace" className="transition hover:text-zinc-300">
             {t('storefront.marketplace')}
           </Link>
           <span className="px-2">/</span>
-          <span className="text-zinc-400">{product.category || t('storefront.description')}</span>
+          <span className="text-zinc-400">
+            {product.category || t('storefront.description')}
+          </span>
         </nav>
 
         <section className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-14">
@@ -226,17 +231,23 @@ export default function MarketplaceProductPage() {
                     {money(product.compare_at_price!, formatLocale)}
                   </span>
                   <span className="rounded-full bg-rose-400/15 px-2.5 py-1 text-xs font-semibold text-rose-200">
-                    {t('storefront.save', { amount: money(product.compare_at_price! - product.unit_price, formatLocale) })}
+                    {t('storefront.save', {
+                      amount: money(
+                        product.compare_at_price! - product.unit_price,
+                        formatLocale,
+                      ),
+                    })}
                   </span>
                 </>
               )}
             </div>
 
             <div className="mt-6 h-px bg-white/10" />
-            <h2 className="mt-6 text-sm font-semibold text-white">{t('storefront.description')}</h2>
+            <h2 className="mt-6 text-sm font-semibold text-white">
+              {t('storefront.description')}
+            </h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
-              {product.description ||
-                t('storefront.noDescription')}
+              {product.description || t('storefront.noDescription')}
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -248,7 +259,9 @@ export default function MarketplaceProductPage() {
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {product.stock_quantity > 0
-                      ? t('storefront.unitsAvailable', { count: Number(product.stock_quantity) })
+                      ? t('storefront.unitsAvailable', {
+                          count: Number(product.stock_quantity),
+                        })
                       : t('storefront.soldOutTemporarily')}
                   </p>
                 </div>
@@ -274,7 +287,9 @@ export default function MarketplaceProductPage() {
                       {t('storefront.quantity')}
                     </p>
                     <p className="mt-1 text-xs text-zinc-500">
-                      {t('storefront.maxUnits', { count: Number(product.stock_quantity) })}
+                      {t('storefront.maxUnits', {
+                        count: Number(product.stock_quantity),
+                      })}
                     </p>
                   </div>
                   <div className="inline-flex items-center rounded-xl border border-white/10 bg-zinc-950 p-1">
@@ -313,7 +328,8 @@ export default function MarketplaceProductPage() {
                   className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-bold text-zinc-950 transition hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   <ShoppingBag className="size-4" />
-                  {t('storefront.addToCart')} · {money(product.unit_price * quantity, formatLocale)}
+                  {t('storefront.addToCart')} ·{' '}
+                  {money(product.unit_price * quantity, formatLocale)}
                 </button>
               </div>
             ) : (

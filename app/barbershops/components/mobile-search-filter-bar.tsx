@@ -172,7 +172,9 @@ export function MobileSearchFilterBar({
               aria-pressed={activeDate === pill}
               className={`min-h-9 min-w-0 rounded-lg px-2 text-[11px] font-semibold transition active:scale-[0.98] ${activeDate === pill ? 'bg-white/15 text-zinc-50' : 'text-zinc-400'}`}
             >
-              {pill === 'Today' ? t('directory.today') : t('directory.tomorrow')}
+              {pill === 'Today'
+                ? t('directory.today')
+                : t('directory.tomorrow')}
             </button>
           ))}
         </div>

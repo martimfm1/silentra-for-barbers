@@ -141,7 +141,9 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-900 text-zinc-300 shadow-xl sm:h-15 sm:w-15">
               <Image
                 src={displayedAvatarUrl}
-                alt={t('directory.shopLogo', { shop: shop.name || t('storefront.barbershop') })}
+                alt={t('directory.shopLogo', {
+                  shop: shop.name || t('storefront.barbershop'),
+                })}
                 fill
                 sizes="60px"
                 quality={65}

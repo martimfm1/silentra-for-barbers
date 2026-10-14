@@ -321,33 +321,46 @@ export const pt = {
     backToLogin: 'Voltar ao início de sessão',
     accountSecurity: 'Segurança da conta',
     useAccountEmail: 'Usa o email associado à tua conta Silentra.',
-    resendNotReceived: 'Não recebeste o email? Verifica o spam ou tenta novamente.',
+    resendNotReceived:
+      'Não recebeste o email? Verifica o spam ou tenta novamente.',
     emailMissing: 'Não foi possível identificar o endereço de e-mail.',
-    resendFailed: 'Não foi possível reenviar o email de confirmação. Tenta novamente dentro de alguns minutos.',
-    resendSuccess: 'Se existir uma conta elegível para este endereço, enviaremos um novo email de confirmação.',
+    resendFailed:
+      'Não foi possível reenviar o email de confirmação. Tenta novamente dentro de alguns minutos.',
+    resendSuccess:
+      'Se existir uma conta elegível para este endereço, enviaremos um novo email de confirmação.',
     resetPasswordTitle: 'Recuperar palavra-passe',
-    resetPasswordSubtitle: 'Enviaremos um link seguro para redefinires a tua palavra-passe.',
+    resetPasswordSubtitle:
+      'Enviaremos um link seguro para redefinires a tua palavra-passe.',
     sendResetLink: 'Enviar link de recuperação',
     sendingResetLink: 'A enviar link…',
-    resetEmailSent: 'Se existir uma conta para este endereço, receberás um email com os próximos passos.',
+    resetEmailSent:
+      'Se existir uma conta para este endereço, receberás um email com os próximos passos.',
     resetPasswordNewTitle: 'Definir nova palavra-passe',
-    resetPasswordNewSubtitle: 'Escolhe uma palavra-passe forte para proteger a tua conta.',
+    resetPasswordNewSubtitle:
+      'Escolhe uma palavra-passe forte para proteger a tua conta.',
     newPassword: 'Nova palavra-passe',
     confirmPassword: 'Confirmar palavra-passe',
     savePassword: 'Guardar palavra-passe',
     passwordUpdated: 'Palavra-passe atualizada com sucesso.',
-    invalidResetLink: 'Este link já não é válido. Pede um novo link de recuperação.',
+    invalidResetLink:
+      'Este link já não é válido. Pede um novo link de recuperação.',
     emailConfirmedTitle: 'Email confirmado',
-    emailConfirmedSubtitle: 'O teu endereço de email foi confirmado. Já podes iniciar sessão.',
+    emailConfirmedSubtitle:
+      'O teu endereço de email foi confirmado. Já podes iniciar sessão.',
     emailConfirmationErrorTitle: 'Não foi possível confirmar o email',
-    emailConfirmationErrorSubtitle: 'O link pode ter expirado ou já ter sido utilizado. Pede um novo email de confirmação.',
-    confirmEmailInstructions: 'Abre o email e clica no link de confirmação para ativares a tua conta. Se não o encontrares, verifica também a pasta de spam.',
+    emailConfirmationErrorSubtitle:
+      'O link pode ter expirado ou já ter sido utilizado. Pede um novo email de confirmação.',
+    confirmEmailInstructions:
+      'Abre o email e clica no link de confirmação para ativares a tua conta. Se não o encontrares, verifica também a pasta de spam.',
     resendEmail: 'Reenviar email de confirmação',
     emailConfirmedTag: 'Conta confirmada',
-    emailConfirmedBody: 'A tua conta está confirmada. Já podes iniciar sessão para entrares no painel da tua barbearia.',
+    emailConfirmedBody:
+      'A tua conta está confirmada. Já podes iniciar sessão para entrares no painel da tua barbearia.',
     goToSignIn: 'Ir para iniciar sessão',
-    emailConfirmationErrorBody: 'O link de confirmação pode ter expirado, já ter sido utilizado ou não ser válido. Pede um novo email de confirmação e tenta novamente.',
-    latestConfirmationEmail: 'Se continuares com problemas, verifica se estás a utilizar o email de confirmação mais recente.',
+    emailConfirmationErrorBody:
+      'O link de confirmação pode ter expirado, já ter sido utilizado ou não ser válido. Pede um novo email de confirmação e tenta novamente.',
+    latestConfirmationEmail:
+      'Se continuares com problemas, verifica se estás a utilizar o email de confirmação mais recente.',
   },
   onboarding: {
     title: 'Vamos configurar a tua barbearia',
@@ -397,7 +410,8 @@ export const pt = {
   directory: {
     title: 'Diretório Silentra',
     subtitle: 'Encontra a barbearia certa e reserva sem complicações.',
-    intro: 'Compara localização, disponibilidade, etiquetas e avaliações. A localização é opcional e podes alterar os critérios quando quiseres.',
+    intro:
+      'Compara localização, disponibilidade, etiquetas e avaliações. A localização é opcional e podes alterar os critérios quando quiseres.',
     categories: 'Categorias e estilos',
     all: 'Todas',
     clear: 'Limpar',
@@ -407,10 +421,12 @@ export const pt = {
     loadingMap: 'A carregar mapa…',
     loadingShops: 'A encontrar barbearias…',
     loadError: 'Não foi possível carregar as barbearias.',
-    loadErrorHint: 'Verifica a ligação e tenta novamente. Os teus filtros serão mantidos.',
+    loadErrorHint:
+      'Verifica a ligação e tenta novamente. Os teus filtros serão mantidos.',
     retry: 'Tentar novamente',
     noResults: 'Não encontrámos resultados.',
-    noResultsHint: 'Tenta remover um filtro, procurar outra zona ou ativar a localização.',
+    noResultsHint:
+      'Tenta remover um filtro, procurar outra zona ou ativar a localização.',
     exploreMap: 'Explora no mapa',
     selectShop: 'Seleciona uma barbearia para abrir a página completa.',
     today: 'Hoje',
@@ -443,14 +459,16 @@ export const pt = {
   storefront: {
     marketplace: 'Marketplace',
     unavailable: 'Produto indisponível',
-    unavailableDescription: 'Este produto já não está publicado no marketplace.',
+    unavailableDescription:
+      'Este produto já não está publicado no marketplace.',
     backToMarketplace: 'Voltar ao marketplace',
     featured: 'Produto em destaque',
     categoryCollection: 'Coleção da barbearia',
     soldBy: 'Vendido por',
     save: 'Poupa {amount}',
     description: 'Descrição',
-    noDescription: 'A barbearia ainda não adicionou uma descrição para este produto.',
+    noDescription:
+      'A barbearia ainda não adicionou uma descrição para este produto.',
     stockAvailable: 'Stock disponível',
     unitsAvailable: '{count} unidade(s) disponíveis',
     soldOutTemporarily: 'Temporariamente esgotado',
@@ -461,11 +479,14 @@ export const pt = {
     decreaseQuantity: 'Diminuir quantidade',
     increaseQuantity: 'Aumentar quantidade',
     addToCart: 'Adicionar ao carrinho',
-    outOfStock: 'Este produto está esgotado. Consulta o marketplace para veres alternativas.',
+    outOfStock:
+      'Este produto está esgotado. Consulta o marketplace para veres alternativas.',
     moreFromShop: 'Ver mais produtos desta barbearia',
-    sellerFulfillmentNotice: 'O pagamento e o cumprimento da encomenda são tratados diretamente pela barbearia vendedora.',
+    sellerFulfillmentNotice:
+      'O pagamento e o cumprimento da encomenda são tratados diretamente pela barbearia vendedora.',
     catalogTitle: 'Produtos das tuas barbearias',
-    catalogSubtitle: 'Encontra os produtos de cuidado e estilo das tuas barbearias favoritas, num só lugar.',
+    catalogSubtitle:
+      'Encontra os produtos de cuidado e estilo das tuas barbearias favoritas, num só lugar.',
     cart: 'Carrinho',
     allProducts: 'Todos',
     allShops: 'Todas as barbearias',
@@ -483,7 +504,8 @@ export const pt = {
     add: 'Adicionar',
     emptyCart: 'O carrinho está vazio.',
     yourOrder: 'A tua encomenda',
-    fulfillmentHandledByShop: 'O levantamento e o envio são tratados diretamente pela barbearia.',
+    fulfillmentHandledByShop:
+      'O levantamento e o envio são tratados diretamente pela barbearia.',
     continue: 'Continuar',
     quickOrder: 'Encomenda rápida',
     receiveHow: 'Como queres receber?',
@@ -513,7 +535,8 @@ export const pt = {
     deliveryByShop: 'Envio pela barbearia',
     noShippingLogistics: 'Sem logística de transporte pela Silentra.',
     searchProductsLabel: 'Pesquisar produtos',
-    searchProductsShopsPlaceholder: 'Pesquisar produtos, barbearias e categorias',
+    searchProductsShopsPlaceholder:
+      'Pesquisar produtos, barbearias e categorias',
     filterByCategory: 'Filtrar por categoria',
     filterByShop: 'Filtrar por barbearia',
     sortProducts: 'Ordenar produtos',
@@ -521,14 +544,18 @@ export const pt = {
     barbershop: 'Barbearia',
     inStock: '{count} em stock',
     closeConfirmation: 'Fechar confirmação',
-    confirmReplaceCart: 'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
-    productUnavailableForCart: 'Este produto já não está disponível para adicionar ao carrinho.',
-    orderEmailFailed: 'Não conseguimos enviar o email de confirmação, mas a encomenda ficou registada.',
+    confirmReplaceCart:
+      'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+    productUnavailableForCart:
+      'Este produto já não está disponível para adicionar ao carrinho.',
+    orderEmailFailed:
+      'Não conseguimos enviar o email de confirmação, mas a encomenda ficou registada.',
     receiptSent: 'Enviámos o comprovativo para o teu email.',
     orderReceived: 'Pedido recebido.',
     productCountOne: '{count} produto',
     productCountMany: '{count} produtos',
-    quickOrderNotice: 'A encomenda fica imediatamente registada. O pagamento e o envio são tratados diretamente com a barbearia.',
+    quickOrderNotice:
+      'A encomenda fica imediatamente registada. O pagamento e o envio são tratados diretamente com a barbearia.',
     fullName: 'Nome completo',
     email: 'Email',
     phone: 'Telefone',
@@ -538,7 +565,8 @@ export const pt = {
     city: 'Cidade',
     cityExample: 'Lisboa',
     noteExample: 'Ex.: enviar depois das 18h',
-    shippingNoRates: 'Não calculamos portes nem tratamos transportadoras. A barbearia combina contigo os detalhes do envio.',
+    shippingNoRates:
+      'Não calculamos portes nem tratamos transportadoras. A barbearia combina contigo os detalhes do envio.',
     shippingByShop: 'Envio tratado pela barbearia',
     pickupAtShop: 'Levantamento na barbearia',
     creatingOrder: 'A criar encomenda…',
@@ -551,7 +579,8 @@ export const pt = {
     marketplace: 'Marketplace',
     privateAccess: 'Acesso privado à encomenda',
     title: 'Acompanhar encomenda',
-    subtitle: 'Consulta o estado, os produtos e o histórico do teu pedido sem precisares de criar uma conta.',
+    subtitle:
+      'Consulta o estado, os produtos e o histórico do teu pedido sem precisares de criar uma conta.',
     refreshStatus: 'Atualizar estado',
     loading: 'A consultar o estado da encomenda…',
     loadError: 'Não foi possível consultar a encomenda',
@@ -563,23 +592,30 @@ export const pt = {
     history: 'Histórico',
     historyCountOne: 'registo',
     historyCountMany: 'registos',
-    noHistory: 'Ainda não existe histórico adicional. Consulta novamente mais tarde para veres as próximas atualizações.',
+    noHistory:
+      'Ainda não existe histórico adicional. Consulta novamente mais tarde para veres as próximas atualizações.',
     deliveryDetails: 'Dados de entrega',
     pickup: 'Levantamento',
     delivery: 'Entrega',
-    shopHandlesDelivery: 'A barbearia trata diretamente dos detalhes de entrega.',
-    pickupPending: 'A barbearia irá confirmar quando a encomenda estiver pronta para levantamento.',
+    shopHandlesDelivery:
+      'A barbearia trata diretamente dos detalhes de entrega.',
+    pickupPending:
+      'A barbearia irá confirmar quando a encomenda estiver pronta para levantamento.',
     summary: 'Resumo',
     quantity: 'Quantidade: {quantity}',
     total: 'Total',
-    fulfillmentNotice: 'O pagamento, levantamento e envio são tratados diretamente com a barbearia.',
+    fulfillmentNotice:
+      'O pagamento, levantamento e envio são tratados diretamente com a barbearia.',
     createdAt: 'Encomenda criada em {date}.',
     lastChecked: 'Última consulta: {date}',
     lastChanged: 'Última alteração: {date}',
-    privacyNotice: 'Este link é privado e permite consultar os dados desta encomenda. Não o partilhes. Por segurança, o link não fica guardado no navegador depois de aberto.',
+    privacyNotice:
+      'Este link é privado e permite consultar os dados desta encomenda. Não o partilhes. Por segurança, o link não fica guardado no navegador depois de aberto.',
     invalidResponse: 'Recebemos uma resposta inválida. Tenta novamente.',
-    timeout: 'A consulta demorou demasiado tempo. Verifica a ligação e tenta novamente.',
-    missingToken: 'Para proteger os teus dados, abre o link completo de acompanhamento que recebeste por email.',
+    timeout:
+      'A consulta demorou demasiado tempo. Verifica a ligação e tenta novamente.',
+    missingToken:
+      'Para proteger os teus dados, abre o link completo de acompanhamento que recebeste por email.',
     unavailable: 'Não foi possível obter os dados da encomenda.',
     status: {
       pending: 'A aguardar confirmação',
@@ -592,14 +628,16 @@ export const pt = {
       cancelled: 'Cancelada',
     },
     description: {
-      pending: 'A barbearia recebeu o pedido e vai confirmar os próximos passos.',
+      pending:
+        'A barbearia recebeu o pedido e vai confirmar os próximos passos.',
       confirmed: 'A barbearia confirmou a tua encomenda.',
       preparing: 'Os produtos estão a ser preparados.',
       ready: 'A encomenda está pronta para levantamento.',
       shipped: 'A encomenda foi enviada pela barbearia.',
       delivered: 'A encomenda foi marcada como entregue.',
       completed: 'Esta encomenda está concluída.',
-      cancelled: 'Esta encomenda foi cancelada. Contacta a barbearia se precisares de ajuda.',
+      cancelled:
+        'Esta encomenda foi cancelada. Contacta a barbearia se precisares de ajuda.',
     },
   },
   marketplace: {

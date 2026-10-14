@@ -61,9 +61,7 @@ export default function ForgotPasswordPage() {
 
       setIsSent(true);
     } catch {
-      setErrorMsg(
-        t('auth.resendFailed'),
-      );
+      setErrorMsg(t('auth.resendFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -192,7 +190,8 @@ export default function ForgotPasswordPage() {
                             href="/login"
                             className="inline-flex items-center justify-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-100 transition-colors min-h-[44px] px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-md"
                           >
-                            <ArrowLeft className="size-3.5" /> {t('auth.backToLogin')}
+                            <ArrowLeft className="size-3.5" />{' '}
+                            {t('auth.backToLogin')}
                           </Link>
                         </div>
                       </motion.form>

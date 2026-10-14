@@ -161,7 +161,9 @@ export function SearchFilterBar({
                   aria-pressed={isActive}
                   className={`min-h-10 rounded-lg px-3 text-xs font-semibold transition-all ${isActive ? 'bg-zinc-100 text-zinc-950 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
                 >
-                  {pill === 'Today' ? t('directory.today') : t('directory.tomorrow')}
+                  {pill === 'Today'
+                    ? t('directory.today')
+                    : t('directory.tomorrow')}
                 </button>
               );
             })}

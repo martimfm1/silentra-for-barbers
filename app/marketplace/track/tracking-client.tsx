@@ -59,10 +59,7 @@ type TrackedOrder = {
   history: TrackingEvent[];
 };
 
-type Translate = (
-  key: string,
-  variables?: Record<string, unknown>,
-) => string;
+type Translate = (key: string, variables?: Record<string, unknown>) => string;
 
 function statusLabel(status: OrderStatus, t: Translate): string {
   return t(`orderTracking.status.${status}`);
@@ -227,62 +224,65 @@ export default function MarketplaceOrderTrackingClient() {
   const initialTokenRef = useRef<string | null>(null);
   const fragmentProcessedRef = useRef(false);
 
-  const loadOrder = useCallback(async (capability: string, quiet = false) => {
-    if (requestInFlight.current) return;
-    requestInFlight.current = true;
-    if (quiet) setRefreshing(true);
-    else setLoading(true);
-    setError('');
+  const loadOrder = useCallback(
+    async (capability: string, quiet = false) => {
+      if (requestInFlight.current) return;
+      requestInFlight.current = true;
+      if (quiet) setRefreshing(true);
+      else setLoading(true);
+      setError('');
 
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 12_000);
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 12_000);
 
-    try {
-      const response = await fetch('/api/marketplace/orders/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-        credentials: 'same-origin',
-        referrerPolicy: 'no-referrer',
-        signal: controller.signal,
-        body: JSON.stringify({ token: capability }),
-      });
-      const payload: unknown = await response.json().catch(() => null);
-      if (!response.ok) {
-        if (response.status === 404 && activeRef.current) setOrder(null);
-        throw new Error(t('orderTracking.loadError'));
-      }
+      try {
+        const response = await fetch('/api/marketplace/orders/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+          credentials: 'same-origin',
+          referrerPolicy: 'no-referrer',
+          signal: controller.signal,
+          body: JSON.stringify({ token: capability }),
+        });
+        const payload: unknown = await response.json().catch(() => null);
+        if (!response.ok) {
+          if (response.status === 404 && activeRef.current) setOrder(null);
+          throw new Error(t('orderTracking.loadError'));
+        }
 
-      const parsed = isRecord(payload)
-        ? parseTrackedOrder(payload.order)
-        : null;
-      if (!parsed) {
-        throw new Error(t('orderTracking.invalidResponse'));
+        const parsed = isRecord(payload)
+          ? parseTrackedOrder(payload.order)
+          : null;
+        if (!parsed) {
+          throw new Error(t('orderTracking.invalidResponse'));
+        }
+        if (activeRef.current) {
+          setOrder(parsed);
+          setLastUpdated(new Date().toISOString());
+          setError('');
+        }
+      } catch (cause) {
+        if (activeRef.current) {
+          setError(
+            cause instanceof Error && cause.name === 'AbortError'
+              ? t('orderTracking.timeout')
+              : cause instanceof Error
+                ? cause.message
+                : t('orderTracking.loadError'),
+          );
+        }
+      } finally {
+        window.clearTimeout(timeout);
+        requestInFlight.current = false;
+        if (activeRef.current) {
+          setLoading(false);
+          setRefreshing(false);
+        }
       }
-      if (activeRef.current) {
-        setOrder(parsed);
-        setLastUpdated(new Date().toISOString());
-        setError('');
-      }
-    } catch (cause) {
-      if (activeRef.current) {
-        setError(
-          cause instanceof Error && cause.name === 'AbortError'
-            ? t('orderTracking.timeout')
-            : cause instanceof Error
-              ? cause.message
-              : t('orderTracking.loadError'),
-        );
-      }
-    } finally {
-      window.clearTimeout(timeout);
-      requestInFlight.current = false;
-      if (activeRef.current) {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    }
-  }, [t]);
+    },
+    [t],
+  );
 
   useEffect(() => {
     activeRef.current = true;
@@ -311,9 +311,7 @@ export default function MarketplaceOrderTrackingClient() {
 
     const tokenFromFragment = initialTokenRef.current;
     if (!tokenFromFragment) {
-      setError(
-        t('orderTracking.missingToken'),
-      );
+      setError(t('orderTracking.missingToken'));
       setLoading(false);
       return () => {
         activeRef.current = false;
@@ -552,10 +550,14 @@ export default function MarketplaceOrderTrackingClient() {
             <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
               <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-7">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-base font-semibold">{t('orderTracking.history')}</h2>
+                  <h2 className="text-base font-semibold">
+                    {t('orderTracking.history')}
+                  </h2>
                   <span className="text-xs text-zinc-600">
                     {order.history.length}{' '}
-                    {order.history.length === 1 ? t('orderTracking.historyCountOne') : t('orderTracking.historyCountMany')}
+                    {order.history.length === 1
+                      ? t('orderTracking.historyCountOne')
+                      : t('orderTracking.historyCountMany')}
                   </span>
                 </div>
 
@@ -634,7 +636,12 @@ export default function MarketplaceOrderTrackingClient() {
                               .join(' ')}
                           </p>
                           {countryLabel(order.shipping.country) && (
-                            <p>{countryLabel(order.shipping.country, formatLocale)}</p>
+                            <p>
+                              {countryLabel(
+                                order.shipping.country,
+                                formatLocale,
+                              )}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -651,7 +658,9 @@ export default function MarketplaceOrderTrackingClient() {
                 </section>
 
                 <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-6">
-                  <h2 className="text-base font-semibold">{t('orderTracking.summary')}</h2>
+                  <h2 className="text-base font-semibold">
+                    {t('orderTracking.summary')}
+                  </h2>
                   <div className="mt-4 space-y-3">
                     {order.items.map((item, index) => (
                       <div
@@ -663,7 +672,9 @@ export default function MarketplaceOrderTrackingClient() {
                             {item.name}
                           </p>
                           <p className="mt-1 text-xs text-zinc-600">
-                            {t('orderTracking.quantity', { quantity: item.quantity })}
+                            {t('orderTracking.quantity', {
+                              quantity: item.quantity,
+                            })}
                           </p>
                         </div>
                         <p className="shrink-0 font-medium tabular-nums text-zinc-200">
@@ -673,7 +684,9 @@ export default function MarketplaceOrderTrackingClient() {
                     ))}
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-                    <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
+                    <span className="text-sm text-zinc-500">
+                      {t('orderTracking.total')}
+                    </span>
                     <span className="text-xl font-semibold tabular-nums text-white">
                       {money(order.total, formatLocale)}
                     </span>
@@ -686,11 +699,19 @@ export default function MarketplaceOrderTrackingClient() {
             </div>
 
             <div className="flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
-              <p>{t('orderTracking.createdAt', { date: dateTime(order.createdAt, formatLocale) })}</p>
+              <p>
+                {t('orderTracking.createdAt', {
+                  date: dateTime(order.createdAt, formatLocale),
+                })}
+              </p>
               <p>
                 {lastUpdated
-                  ? t('orderTracking.lastChecked', { date: dateTime(lastUpdated, formatLocale) })
-                  : t('orderTracking.lastChanged', { date: dateTime(order.updatedAt, formatLocale) })}
+                  ? t('orderTracking.lastChecked', {
+                      date: dateTime(lastUpdated, formatLocale),
+                    })
+                  : t('orderTracking.lastChanged', {
+                      date: dateTime(order.updatedAt, formatLocale),
+                    })}
               </p>
             </div>
             <p className="text-xs leading-5 text-zinc-700">

@@ -318,34 +318,48 @@ export const en = {
     confirmEmailSubtitle: 'We sent a confirmation link to:',
     backToLogin: 'Back to sign in',
     accountSecurity: 'Account security',
-    useAccountEmail: 'Use the email address associated with your Silentra account.',
-    resendNotReceived: "Didn’t receive the email? Check your spam folder or try again.",
+    useAccountEmail:
+      'Use the email address associated with your Silentra account.',
+    resendNotReceived:
+      'Didn’t receive the email? Check your spam folder or try again.',
     emailMissing: 'We could not identify the email address.',
-    resendFailed: 'We could not resend the confirmation email. Please try again in a few minutes.',
-    resendSuccess: 'If an eligible account exists for this address, we will send another confirmation email.',
+    resendFailed:
+      'We could not resend the confirmation email. Please try again in a few minutes.',
+    resendSuccess:
+      'If an eligible account exists for this address, we will send another confirmation email.',
     resetPasswordTitle: 'Reset your password',
-    resetPasswordSubtitle: 'We will send you a secure link to reset your password.',
+    resetPasswordSubtitle:
+      'We will send you a secure link to reset your password.',
     sendResetLink: 'Send recovery link',
     sendingResetLink: 'Sending link…',
-    resetEmailSent: 'If an account exists for this address, you will receive an email with next steps.',
+    resetEmailSent:
+      'If an account exists for this address, you will receive an email with next steps.',
     resetPasswordNewTitle: 'Set a new password',
-    resetPasswordNewSubtitle: 'Choose a strong password to protect your account.',
+    resetPasswordNewSubtitle:
+      'Choose a strong password to protect your account.',
     newPassword: 'New password',
     confirmPassword: 'Confirm password',
     savePassword: 'Save password',
     passwordUpdated: 'Password updated successfully.',
-    invalidResetLink: 'This link is no longer valid. Request a new recovery link.',
+    invalidResetLink:
+      'This link is no longer valid. Request a new recovery link.',
     emailConfirmedTitle: 'Email confirmed',
-    emailConfirmedSubtitle: 'Your email address has been confirmed. You can now sign in.',
+    emailConfirmedSubtitle:
+      'Your email address has been confirmed. You can now sign in.',
     emailConfirmationErrorTitle: 'We could not confirm your email',
-    emailConfirmationErrorSubtitle: 'The link may have expired or already been used. Request a new confirmation email.',
-    confirmEmailInstructions: 'Open the email and click the confirmation link to activate your account. If you cannot find it, check your spam folder.',
+    emailConfirmationErrorSubtitle:
+      'The link may have expired or already been used. Request a new confirmation email.',
+    confirmEmailInstructions:
+      'Open the email and click the confirmation link to activate your account. If you cannot find it, check your spam folder.',
     resendEmail: 'Resend confirmation email',
     emailConfirmedTag: 'Account confirmed',
-    emailConfirmedBody: 'Your account is confirmed. You can now sign in to access your barbershop dashboard.',
+    emailConfirmedBody:
+      'Your account is confirmed. You can now sign in to access your barbershop dashboard.',
     goToSignIn: 'Go to sign in',
-    emailConfirmationErrorBody: 'The confirmation link may have expired, already been used or be invalid. Request a new confirmation email and try again.',
-    latestConfirmationEmail: 'If you still have trouble, make sure you are using the most recent confirmation email.',
+    emailConfirmationErrorBody:
+      'The confirmation link may have expired, already been used or be invalid. Request a new confirmation email and try again.',
+    latestConfirmationEmail:
+      'If you still have trouble, make sure you are using the most recent confirmation email.',
   },
   onboarding: {
     title: 'Set up your barbershop',
@@ -395,7 +409,8 @@ export const en = {
   directory: {
     title: 'Silentra directory',
     subtitle: 'Find the right barbershop and book without hassle.',
-    intro: 'Compare locations, availability, tags and reviews. Location is optional, and you can change your criteria at any time.',
+    intro:
+      'Compare locations, availability, tags and reviews. Location is optional, and you can change your criteria at any time.',
     categories: 'Categories and styles',
     all: 'All',
     clear: 'Clear',
@@ -405,7 +420,8 @@ export const en = {
     loadingMap: 'Loading map…',
     loadingShops: 'Finding barbershops…',
     loadError: 'Unable to load barbershops.',
-    loadErrorHint: 'Check your connection and try again. Your filters will be kept.',
+    loadErrorHint:
+      'Check your connection and try again. Your filters will be kept.',
     retry: 'Try again',
     noResults: 'No results found.',
     noResultsHint: 'Remove a filter, search another area or enable location.',
@@ -441,14 +457,16 @@ export const en = {
   storefront: {
     marketplace: 'Marketplace',
     unavailable: 'Product unavailable',
-    unavailableDescription: 'This product is no longer published on the marketplace.',
+    unavailableDescription:
+      'This product is no longer published on the marketplace.',
     backToMarketplace: 'Back to marketplace',
     featured: 'Featured product',
     categoryCollection: 'Barbershop collection',
     soldBy: 'Sold by',
     save: 'Save {amount}',
     description: 'Description',
-    noDescription: 'The barbershop has not added a description for this product yet.',
+    noDescription:
+      'The barbershop has not added a description for this product yet.',
     stockAvailable: 'Available stock',
     unitsAvailable: '{count} unit(s) available',
     soldOutTemporarily: 'Temporarily out of stock',
@@ -459,11 +477,14 @@ export const en = {
     decreaseQuantity: 'Decrease quantity',
     increaseQuantity: 'Increase quantity',
     addToCart: 'Add to cart',
-    outOfStock: 'This product is out of stock. Browse the marketplace for alternatives.',
+    outOfStock:
+      'This product is out of stock. Browse the marketplace for alternatives.',
     moreFromShop: 'View more products from this barbershop',
-    sellerFulfillmentNotice: 'Payment and fulfilment are handled directly by the selling barbershop.',
+    sellerFulfillmentNotice:
+      'Payment and fulfilment are handled directly by the selling barbershop.',
     catalogTitle: 'Products from your barbershops',
-    catalogSubtitle: 'Discover care and styling products from your favourite barbershops in one place.',
+    catalogSubtitle:
+      'Discover care and styling products from your favourite barbershops in one place.',
     cart: 'Cart',
     allProducts: 'All',
     allShops: 'All barbershops',
@@ -481,7 +502,8 @@ export const en = {
     add: 'Add',
     emptyCart: 'Your cart is empty.',
     yourOrder: 'Your order',
-    fulfillmentHandledByShop: 'Pickup and delivery are handled directly by the barbershop.',
+    fulfillmentHandledByShop:
+      'Pickup and delivery are handled directly by the barbershop.',
     continue: 'Continue',
     quickOrder: 'Quick order',
     receiveHow: 'How would you like to receive it?',
@@ -511,7 +533,8 @@ export const en = {
     deliveryByShop: 'Delivery by the barbershop',
     noShippingLogistics: 'Silentra does not handle shipping logistics.',
     searchProductsLabel: 'Search products',
-    searchProductsShopsPlaceholder: 'Search products, barbershops and categories',
+    searchProductsShopsPlaceholder:
+      'Search products, barbershops and categories',
     filterByCategory: 'Filter by category',
     filterByShop: 'Filter by barbershop',
     sortProducts: 'Sort products',
@@ -519,14 +542,18 @@ export const en = {
     barbershop: 'Barbershop',
     inStock: '{count} in stock',
     closeConfirmation: 'Close confirmation',
-    confirmReplaceCart: 'Your cart contains products from another barbershop. To order from this barbershop, your current cart will be replaced. Continue?',
-    productUnavailableForCart: 'This product is no longer available to add to your cart.',
-    orderEmailFailed: 'We could not send the confirmation email, but your order was recorded.',
+    confirmReplaceCart:
+      'Your cart contains products from another barbershop. To order from this barbershop, your current cart will be replaced. Continue?',
+    productUnavailableForCart:
+      'This product is no longer available to add to your cart.',
+    orderEmailFailed:
+      'We could not send the confirmation email, but your order was recorded.',
     receiptSent: 'We sent the receipt to your email.',
     orderReceived: 'Order received.',
     productCountOne: '{count} product',
     productCountMany: '{count} products',
-    quickOrderNotice: 'Your order is recorded immediately. Payment and delivery are handled directly by the barbershop.',
+    quickOrderNotice:
+      'Your order is recorded immediately. Payment and delivery are handled directly by the barbershop.',
     fullName: 'Full name',
     email: 'Email',
     phone: 'Phone',
@@ -536,7 +563,8 @@ export const en = {
     city: 'City',
     cityExample: 'London',
     noteExample: 'e.g. deliver after 6 pm',
-    shippingNoRates: 'We do not calculate shipping or arrange couriers. The barbershop will agree on delivery details with you.',
+    shippingNoRates:
+      'We do not calculate shipping or arrange couriers. The barbershop will agree on delivery details with you.',
     shippingByShop: 'Delivery arranged by the barbershop',
     pickupAtShop: 'Pickup at the barbershop',
     creatingOrder: 'Creating order…',
@@ -549,7 +577,8 @@ export const en = {
     marketplace: 'Marketplace',
     privateAccess: 'Private order access',
     title: 'Track your order',
-    subtitle: 'Check your order status, products and history without creating an account.',
+    subtitle:
+      'Check your order status, products and history without creating an account.',
     refreshStatus: 'Refresh status',
     loading: 'Checking order status…',
     loadError: 'Unable to retrieve your order',
@@ -561,23 +590,29 @@ export const en = {
     history: 'History',
     historyCountOne: 'event',
     historyCountMany: 'events',
-    noHistory: 'There are no additional updates yet. Check again later to see the latest progress.',
+    noHistory:
+      'There are no additional updates yet. Check again later to see the latest progress.',
     deliveryDetails: 'Delivery details',
     pickup: 'Pickup',
     delivery: 'Delivery',
-    shopHandlesDelivery: 'The barbershop will contact you directly about delivery details.',
-    pickupPending: 'The barbershop will confirm when your order is ready for pickup.',
+    shopHandlesDelivery:
+      'The barbershop will contact you directly about delivery details.',
+    pickupPending:
+      'The barbershop will confirm when your order is ready for pickup.',
     summary: 'Summary',
     quantity: 'Quantity: {quantity}',
     total: 'Total',
-    fulfillmentNotice: 'Payment, pickup and delivery are handled directly by the barbershop.',
+    fulfillmentNotice:
+      'Payment, pickup and delivery are handled directly by the barbershop.',
     createdAt: 'Order placed on {date}.',
     lastChecked: 'Last checked: {date}',
     lastChanged: 'Last updated: {date}',
-    privacyNotice: 'This private link gives access to your order details. Do not share it. For security, the link is not kept in your browser after opening.',
+    privacyNotice:
+      'This private link gives access to your order details. Do not share it. For security, the link is not kept in your browser after opening.',
     invalidResponse: 'We received an invalid response. Please try again.',
     timeout: 'The request took too long. Check your connection and try again.',
-    missingToken: 'To protect your data, open the full tracking link you received by email.',
+    missingToken:
+      'To protect your data, open the full tracking link you received by email.',
     unavailable: 'We could not retrieve your order details.',
     status: {
       pending: 'Awaiting confirmation',
@@ -590,14 +625,16 @@ export const en = {
       cancelled: 'Cancelled',
     },
     description: {
-      pending: 'The barbershop received your order and will confirm the next steps.',
+      pending:
+        'The barbershop received your order and will confirm the next steps.',
       confirmed: 'The barbershop has confirmed your order.',
       preparing: 'Your products are being prepared.',
       ready: 'Your order is ready for pickup.',
       shipped: 'Your order has been shipped by the barbershop.',
       delivered: 'Your order has been marked as delivered.',
       completed: 'This order is complete.',
-      cancelled: 'This order was cancelled. Contact the barbershop if you need help.',
+      cancelled:
+        'This order was cancelled. Contact the barbershop if you need help.',
     },
   },
   marketplace: {

@@ -23,7 +23,9 @@ export default function EmailConfirmedPage() {
               <CheckCircle2 className="h-7 w-7" strokeWidth={2} />
             </div>
 
-            <div className="mb-4 flex justify-end"><LanguageSwitcher /></div>
+            <div className="mb-4 flex justify-end">
+              <LanguageSwitcher />
+            </div>
             <p className="mb-2 text-sm font-medium text-primary">
               {t('auth.emailConfirmedTag')}
             </p>
