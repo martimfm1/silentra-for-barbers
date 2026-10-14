@@ -361,6 +361,7 @@ export const en = {
     unexpectedError: 'Something unexpected happened.',
   },
   orderTracking: {
+    marketplace: 'Marketplace',
     privateAccess: 'Private order access',
     title: 'Track your order',
     subtitle: 'Check your order status, products and history without creating an account.',
