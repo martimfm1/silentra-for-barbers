@@ -38,7 +38,8 @@ export interface PublicProfileRecord {
   og_image_url: string | null;
   theme_config: Record<string, unknown>;
   plan: BillingPlan;
-  owner_user_id: string | null;
+  owner_user_id?: string | null;
+  landing_page_url?: string | null;
 }
 
 type BarbershopRecord = {
