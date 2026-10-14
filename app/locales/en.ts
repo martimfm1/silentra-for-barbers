@@ -497,6 +497,9 @@ export const en = {
     lastChecked: 'Last checked: {date}',
     lastChanged: 'Last updated: {date}',
     privacyNotice: 'This private link gives access to your order details. Do not share it. For security, the link is not kept in your browser after opening.',
+    invalidResponse: 'We received an invalid response. Please try again.',
+    timeout: 'The request took too long. Check your connection and try again.',
+    missingToken: 'To protect your data, open the full tracking link you received by email.',
     unavailable: 'We could not retrieve your order details.',
     status: {
       pending: 'Awaiting confirmation',
