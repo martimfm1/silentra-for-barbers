@@ -26,7 +26,9 @@ comment on column public.barbershop_landing_pages.status is
 comment on column public.barbershop_landing_pages.template_version is
   'Version of the managed landing-page template used for rendering.';
 
-create or replace function public.sync_barbershop_landing_page_entitlement(
+create schema if not exists private;
+
+create or replace function private.sync_barbershop_landing_page_entitlement(
   p_barbershop_id uuid
 )
 returns void
@@ -99,7 +101,7 @@ begin
 end;
 $$;
 
-create or replace function public.trg_sync_barbershop_landing_page_from_subscription()
+create or replace function private.trg_sync_barbershop_landing_page_from_subscription()
 returns trigger
 language plpgsql
 security definer
@@ -107,22 +109,22 @@ set search_path = ''
 as $$
 begin
   if tg_op = 'DELETE' then
-    perform public.sync_barbershop_landing_page_entitlement(old.barbershop_id);
+    perform private.sync_barbershop_landing_page_entitlement(old.barbershop_id);
     return old;
   end if;
 
-  perform public.sync_barbershop_landing_page_entitlement(new.barbershop_id);
+  perform private.sync_barbershop_landing_page_entitlement(new.barbershop_id);
 
   if tg_op = 'UPDATE'
      and new.barbershop_id is distinct from old.barbershop_id then
-    perform public.sync_barbershop_landing_page_entitlement(old.barbershop_id);
+    perform private.sync_barbershop_landing_page_entitlement(old.barbershop_id);
   end if;
 
   return new;
 end;
 $$;
 
-create or replace function public.trg_sync_barbershop_landing_page_from_assignment()
+create or replace function private.trg_sync_barbershop_landing_page_from_assignment()
 returns trigger
 language plpgsql
 security definer
@@ -130,15 +132,15 @@ set search_path = ''
 as $$
 begin
   if tg_op = 'DELETE' then
-    perform public.sync_barbershop_landing_page_entitlement(old.barbershop_id);
+    perform private.sync_barbershop_landing_page_entitlement(old.barbershop_id);
     return old;
   end if;
 
-  perform public.sync_barbershop_landing_page_entitlement(new.barbershop_id);
+  perform private.sync_barbershop_landing_page_entitlement(new.barbershop_id);
 
   if tg_op = 'UPDATE'
      and new.barbershop_id is distinct from old.barbershop_id then
-    perform public.sync_barbershop_landing_page_entitlement(old.barbershop_id);
+    perform private.sync_barbershop_landing_page_entitlement(old.barbershop_id);
   end if;
 
   return new;
@@ -150,22 +152,22 @@ drop trigger if exists subscriptions_sync_landing_page_entitlement
 create trigger subscriptions_sync_landing_page_entitlement
   after insert or update or delete on public.subscriptions
   for each row
-  execute function public.trg_sync_barbershop_landing_page_from_subscription();
+  execute function private.trg_sync_barbershop_landing_page_from_subscription();
 
 drop trigger if exists barbershop_plan_assignments_sync_landing_page_entitlement
   on public.barbershop_plan_assignments;
 create trigger barbershop_plan_assignments_sync_landing_page_entitlement
   after insert or update or delete on public.barbershop_plan_assignments
   for each row
-  execute function public.trg_sync_barbershop_landing_page_from_assignment();
+  execute function private.trg_sync_barbershop_landing_page_from_assignment();
 
-revoke all on function public.sync_barbershop_landing_page_entitlement(uuid)
+revoke all on function private.sync_barbershop_landing_page_entitlement(uuid)
   from public, anon, authenticated;
-grant execute on function public.sync_barbershop_landing_page_entitlement(uuid)
+grant execute on function private.sync_barbershop_landing_page_entitlement(uuid)
   to service_role;
-revoke all on function public.trg_sync_barbershop_landing_page_from_subscription()
+revoke all on function private.trg_sync_barbershop_landing_page_from_subscription()
   from public, anon, authenticated;
-revoke all on function public.trg_sync_barbershop_landing_page_from_assignment()
+revoke all on function private.trg_sync_barbershop_landing_page_from_assignment()
   from public, anon, authenticated;
 
 -- Existing Enterprise tenants receive the same benefit during the migration.
@@ -175,7 +177,7 @@ declare
 begin
   for v_barbershop_id in select id from public.barbershops
   loop
-    perform public.sync_barbershop_landing_page_entitlement(v_barbershop_id);
+    perform private.sync_barbershop_landing_page_entitlement(v_barbershop_id);
   end loop;
 end;
 $$;
