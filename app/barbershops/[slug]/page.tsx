@@ -133,6 +133,7 @@ async function getInitialPublicDetails(
     { data: reviews },
     { data: barbershop },
     { data: shop },
+    { data: landingPage, error: landingPageError },
   ] = await Promise.all([
     database
       .from('services')
@@ -155,7 +156,20 @@ async function getInitialPublicDetails(
       .select('amenities')
       .eq('barbershop_id', barbershopId)
       .maybeSingle(),
+    database
+      .from('barbershop_landing_pages')
+      .select('status')
+      .eq('barbershop_id', barbershopId)
+      .maybeSingle(),
   ]);
+
+  if (landingPageError) {
+    console.error('[PUBLIC_BARBERSHOP]', {
+      event: 'landing_page_entitlement_lookup_failed',
+      slug: profile.slug,
+      code: landingPageError.code ?? 'UNKNOWN',
+    });
+  }
 
   const reviewItems = reviews ?? [];
   const ratingAverage = reviewItems.length
@@ -168,8 +182,14 @@ async function getInitialPublicDetails(
         ).toFixed(1),
       )
     : 0;
+  const { owner_user_id: ownerUserId, ...publicProfile } = profile;
+  void ownerUserId;
   return {
-    ...profile,
+    ...publicProfile,
+    landing_page_url:
+      profile.plan === 'enterprise' && landingPage?.status === 'active'
+        ? '/site/' + encodeURIComponent(profile.slug)
+        : null,
     amenities: normalizeBarbershopAmenities(shop?.amenities),
     services: (services ?? []).map((service) => ({
       ...service,
