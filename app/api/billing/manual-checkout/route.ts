@@ -8,6 +8,7 @@ import { BillingError } from '@/types/stripe';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { PLANS } from '@/lib/stripe/constants';
 import { assertSameOrigin } from '@/services/billing/http';
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 
 type Details = {
   billingName?: unknown;
@@ -269,6 +270,40 @@ async function POST__unobserved(request: Request) {
         customerMessage,
       },
     });
+
+    if (
+      row.promotion_code === NEW_MEMBER_PRO_PROMOTION_CODE &&
+      row.plan === PLANS.PRO &&
+      row.billing_interval === 'month' &&
+      row.price === 0
+    ) {
+      const trial = await ManualPaymentService.redeemManualProTrial(
+        row.id,
+        user.id,
+      );
+
+      return NextResponse.json(
+        {
+          ok: true,
+          request: {
+            id: row.id,
+            status: 'TRIAL',
+            plan: row.plan,
+            billingInterval: row.billing_interval,
+            price: 0,
+            currency: row.currency,
+          },
+          freeTrial: {
+            active: true,
+            months: 1,
+            expiresAt: trial.expires_at,
+            activationEmailSent: trial.emailSent,
+          },
+          redirectUrl: `/dashboard/billing?manual=trial_activated&request_id=${encodeURIComponent(row.id)}`,
+        },
+        { status: 201, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
 
     const { data: shop } = await admin
       .from('barbershops')
