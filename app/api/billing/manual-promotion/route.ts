@@ -14,7 +14,7 @@ import {
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
-import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants;
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 import { BillingError } from '@/types/stripe';
 
 export const runtime = 'nodejs';
