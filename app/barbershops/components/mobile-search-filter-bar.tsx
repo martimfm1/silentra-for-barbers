@@ -17,6 +17,7 @@ import type {
   UserCoordinates,
 } from '@/types/marketplace/filters';
 import type { SearchFilterBarProps } from '@/types/marketplace/components';
+import { useLanguage } from '@/context/LanguageContext';
 
 const DATE_PILLS: MarketplaceDateFilter[] = ['Today', 'Tomorrow'];
 const FILTER_PILLS: MarketplaceSortFilter[] = ['All', 'Near Me', 'Top Rated'];
@@ -33,6 +34,7 @@ export function MobileSearchFilterBar({
   userLocation,
   setUserLocation,
 }: SearchFilterBarProps) {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState(query);
   const [isLocating, setIsLocating] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -80,17 +82,17 @@ export function MobileSearchFilterBar({
   const filterLabel =
     activeFilter === 'Near Me'
       ? userLocation
-        ? 'Perto de si'
-        : 'Perto de mim'
+        ? t('directory.nearYou')
+        : t('directory.nearMe')
       : activeFilter === 'Top Rated'
-        ? 'Melhor avaliadas'
-        : 'Todas';
+        ? t('directory.topRated')
+        : t('directory.all');
   const isCustomDate = /^\d{4}-\d{2}-\d{2}$/.test(activeDate);
 
   return (
     <div
       role="search"
-      aria-label="Pesquisar barbearias"
+      aria-label={t('directory.searchShops')}
       className="glassmorphism w-full min-w-0 rounded-2xl border border-white/10 bg-zinc-900/95 p-2 shadow-xl backdrop-blur-md"
     >
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
@@ -105,8 +107,8 @@ export function MobileSearchFilterBar({
             enterKeyHint="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Pesquisar barbearia"
-            aria-label="Pesquisar barbearia"
+            placeholder={t('directory.searchShop')}
+            aria-label={t('directory.searchShop')}
             className="ml-2 min-w-0 flex-1 bg-transparent py-2.5 text-[16px] text-zinc-100 outline-none placeholder:text-zinc-500"
           />
           {searchTerm ? (
@@ -114,7 +116,7 @@ export function MobileSearchFilterBar({
               type="button"
               onClick={handleClear}
               className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-              aria-label="Limpar pesquisa"
+              aria-label={t('directory.clearSearch')}
             >
               <X className="size-4" />
             </button>
@@ -125,7 +127,7 @@ export function MobileSearchFilterBar({
           onClick={() => setFiltersOpen((value) => !value)}
           aria-expanded={filtersOpen}
           aria-controls="mobile-marketplace-filters"
-          aria-label="Abrir filtros"
+          aria-label={t('directory.openFilters')}
           className={`inline-flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${filtersOpen ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-white/10 bg-white/[0.04] text-zinc-300'}`}
         >
           <SlidersHorizontal className="size-5" />
@@ -136,7 +138,7 @@ export function MobileSearchFilterBar({
         <div
           className="grid grid-cols-2 gap-1 rounded-xl bg-white/5 p-1"
           role="group"
-          aria-label="Vista dos resultados"
+          aria-label={t('directory.resultsView')}
         >
           <button
             type="button"
@@ -145,7 +147,7 @@ export function MobileSearchFilterBar({
             className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold transition active:scale-[0.98] ${view === 'grid' ? 'bg-white text-zinc-950' : 'text-zinc-400'}`}
           >
             <LayoutGrid className="size-3.5" />
-            Lista
+            {t('directory.list')}
           </button>
           <button
             type="button"
@@ -154,23 +156,23 @@ export function MobileSearchFilterBar({
             className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold transition active:scale-[0.98] ${view === 'map' ? 'bg-white text-zinc-950' : 'text-zinc-400'}`}
           >
             <Map className="size-3.5" />
-            Mapa
+            {t('directory.map')}
           </button>
         </div>
         <div
           className="grid grid-cols-2 gap-1 rounded-xl bg-white/5 p-1"
           role="group"
-          aria-label="Disponibilidade"
+          aria-label={t('directory.availability')}
         >
           {DATE_PILLS.map((pill) => (
             <button
-              key={pill}
+              key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
               type="button"
               onClick={() => setActiveDate(pill)}
               aria-pressed={activeDate === pill}
               className={`min-h-9 min-w-0 rounded-lg px-2 text-[11px] font-semibold transition active:scale-[0.98] ${activeDate === pill ? 'bg-white/15 text-zinc-50' : 'text-zinc-400'}`}
             >
-              {pill === 'Today' ? 'Hoje' : 'Amanhã'}
+              {pill === 'Today' ? t('directory.today') : t('directory.tomorrow')}
             </button>
           ))}
         </div>
@@ -196,7 +198,7 @@ export function MobileSearchFilterBar({
           <div className="grid grid-cols-3 gap-1.5">
             {FILTER_PILLS.map((pill) => (
               <button
-                key={pill}
+                key={pill === 'All' ? t('directory.all') : pill === 'Near Me' ? t('directory.nearMe') : t('directory.topRated')}
                 type="button"
                 onClick={() => handleFilterClick(pill)}
                 disabled={pill === 'Near Me' && isLocating}
