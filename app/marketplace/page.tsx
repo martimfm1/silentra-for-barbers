@@ -294,7 +294,7 @@ export default function MarketplacePage() {
     if (
       switchingShop &&
       !window.confirm(
-        'O teu carrinho contém produtos de outra barbearia. Para encomendar nesta barbearia, o carrinho atual será substituído. Queres continuar?',
+        t('storefront.confirmReplaceCart'),
       )
     ) {
       return;
