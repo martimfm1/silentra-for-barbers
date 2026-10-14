@@ -159,16 +159,11 @@ export default function MarketplaceOrdersPage() {
         cache: 'no-store',
       });
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(
-          t('orderManagement.loadError'),
-        );
+      if (!response.ok) throw new Error(t('orderManagement.loadError'));
       setOrders(json.orders ?? []);
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('orderManagement.loadError'),
+        error instanceof Error ? error.message : t('orderManagement.loadError'),
       );
     } finally {
       if (showLoading) setLoading(false);
@@ -180,7 +175,9 @@ export default function MarketplaceOrdersPage() {
   }, [locale]);
 
   const filtered = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
+    const term = query
+      .trim()
+      .toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
     return orders.filter((order) => {
       const text =
         `${order.id} ${order.customer_name} ${order.customer_email} ${order.customer_phone}`.toLocaleLowerCase(
@@ -217,7 +214,10 @@ export default function MarketplaceOrdersPage() {
   async function changeStatus(order: Order, next: Status) {
     if (next === 'cancelled') {
       const confirmed = window.confirm(
-        t('orderManagement.cancelOrderConfirm', { reference: order.id.slice(0, 8), customer: order.customer_name }),
+        t('orderManagement.cancelOrderConfirm', {
+          reference: order.id.slice(0, 8),
+          customer: order.customer_name,
+        }),
       );
       if (!confirmed) return;
     }
@@ -230,10 +230,7 @@ export default function MarketplaceOrdersPage() {
         body: JSON.stringify({ status: next }),
       });
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(
-          t('orderManagement.updateError'),
-        );
+      if (!response.ok) throw new Error(t('orderManagement.updateError'));
       setOrders((current) =>
         current.map((item) =>
           item.id === order.id
@@ -275,7 +272,9 @@ export default function MarketplaceOrdersPage() {
     setEmailMessage(
       order.status === 'ready'
         ? t('orderManagement.readyMessage')
-        : t('orderManagement.updateMessage', { reference: order.id.slice(0, 8) }),
+        : t('orderManagement.updateMessage', {
+            reference: order.id.slice(0, 8),
+          }),
     );
   }
 
@@ -295,8 +294,7 @@ export default function MarketplaceOrdersPage() {
         },
       );
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(t('orderManagement.emailError'));
+      if (!response.ok) throw new Error(t('orderManagement.emailError'));
       toast.success('Email enviado ao cliente.');
       setEmailOrder(null);
     } catch (error) {
@@ -400,9 +398,13 @@ export default function MarketplaceOrdersPage() {
                 aria-label={t('orderManagement.filterFulfillment')}
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
-                <option value="all">{t('orderManagement.allFulfillment')}</option>
+                <option value="all">
+                  {t('orderManagement.allFulfillment')}
+                </option>
                 <option value="pickup">{t('orderManagement.pickup')}</option>
-                <option value="delivery">{t('orderManagement.delivery')}</option>
+                <option value="delivery">
+                  {t('orderManagement.delivery')}
+                </option>
               </select>
               <select
                 value={status}
@@ -472,7 +474,9 @@ export default function MarketplaceOrdersPage() {
                             {order.customer_name}
                           </CardTitle>
                           <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold text-zinc-400">
-                            {isDelivery ? t('orderManagement.delivery') : t('orderManagement.pickup')}
+                            {isDelivery
+                              ? t('orderManagement.delivery')
+                              : t('orderManagement.pickup')}
                           </span>
                           <span
                             className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${meta.classes}`}
@@ -485,7 +489,10 @@ export default function MarketplaceOrdersPage() {
                           <span className="font-mono text-zinc-400">
                             #{order.id.slice(0, 8)}
                           </span>{' '}
-                          · {new Date(order.created_at).toLocaleString(formatLocale)}
+                          ·{' '}
+                          {new Date(order.created_at).toLocaleString(
+                            formatLocale,
+                          )}
                         </p>
                       </div>
                     </div>
@@ -576,10 +583,15 @@ export default function MarketplaceOrdersPage() {
                                   className="relative pl-4 text-xs before:absolute before:left-0 before:top-1.5 before:size-1.5 before:rounded-full before:bg-emerald-300"
                                 >
                                   <p className="font-medium text-zinc-300">
-                                    {t('orderManagement.status.' + event.new_status)}
+                                    {t(
+                                      'orderManagement.status.' +
+                                        event.new_status,
+                                    )}
                                   </p>
                                   <p className="mt-0.5 text-zinc-600">
-                                    {new Date(event.created_at).toLocaleString(formatLocale)}
+                                    {new Date(event.created_at).toLocaleString(
+                                      formatLocale,
+                                    )}
                                   </p>
                                   {event.source === 'manual_email' && (
                                     <p className="mt-1 text-zinc-500">

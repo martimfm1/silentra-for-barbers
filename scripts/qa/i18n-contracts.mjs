@@ -58,7 +58,16 @@ for (const path of localizedSources) {
   }
 }
 
-for (const section of ['storefront', 'orderTracking', 'directory', 'auth', 'dashboard', 'agenda', 'orderManagement', 'onboarding']) {
+for (const section of [
+  'storefront',
+  'orderTracking',
+  'directory',
+  'auth',
+  'dashboard',
+  'agenda',
+  'orderManagement',
+  'onboarding',
+]) {
   for (const locale of ['pt', 'en']) {
     if (!hasKey(localeSources[locale], section)) {
       failures.push(locale + ': missing translation section "' + section + '"');

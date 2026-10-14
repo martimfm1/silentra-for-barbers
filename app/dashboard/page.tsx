@@ -291,7 +291,10 @@ export default function DashboardPage() {
                     {t('dashboard.setupSubtitle')}
                   </h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-                    {t('dashboard.setupProgress', { completed: setupCompleted, total: setupSteps.length })}
+                    {t('dashboard.setupProgress', {
+                      completed: setupCompleted,
+                      total: setupSteps.length,
+                    })}
                     Só falta completar o próximo passo para começares a aceitar
                     marcações.
                   </p>
@@ -301,7 +304,10 @@ export default function DashboardPage() {
                     aria-valuenow={setupCompleted}
                     aria-valuemin={0}
                     aria-valuemax={setupSteps.length}
-                    aria-label={t('dashboard.setupProgress', { completed: setupCompleted, total: setupSteps.length })}
+                    aria-label={t('dashboard.setupProgress', {
+                      completed: setupCompleted,
+                      total: setupSteps.length,
+                    })}
                   >
                     <div
                       className="h-full rounded-full bg-emerald-400 transition-all duration-500"
@@ -388,7 +394,8 @@ export default function DashboardPage() {
                         'Cliente'}
                     </h2>
                     <p className="mt-1 truncate text-sm text-zinc-400">
-                      {nextAppointment.services?.name || t('dashboard.service')} ·{' '}
+                      {nextAppointment.services?.name || t('dashboard.service')}{' '}
+                      ·{' '}
                       {nextAppointment.professionals?.name ||
                         t('dashboard.noBarberAssigned')}
                     </p>
@@ -556,7 +563,9 @@ export default function DashboardPage() {
                     className="size-2.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.4)]"
                     aria-hidden="true"
                   />
-                  <span className="text-zinc-300">{t('dashboard.appointmentsLabel')}</span>
+                  <span className="text-zinc-300">
+                    {t('dashboard.appointmentsLabel')}
+                  </span>
                 </span>
               </div>
             </Card>
@@ -620,7 +629,8 @@ export default function DashboardPage() {
                               'Cliente'}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-zinc-500">
-                            {appointment.services?.name || t('dashboard.service')}
+                            {appointment.services?.name ||
+                              t('dashboard.service')}
                           </p>
                         </div>
                         <ChevronRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />

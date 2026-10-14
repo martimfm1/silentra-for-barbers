@@ -70,7 +70,8 @@ export const en = {
     loyalty: 'Loyalty',
     pos: 'Point of sale',
     setupTitle: 'Initial setup',
-    setupSubtitle: 'Your barbershop is up and running. Let’s finish the essentials.',
+    setupSubtitle:
+      'Your barbershop is up and running. Let’s finish the essentials.',
     setupProgress: '{completed} of {total} steps completed.',
     setupNextStep: 'Complete the next step to start accepting bookings.',
     quickActions: 'Quick actions',
@@ -451,7 +452,8 @@ export const en = {
     tagsHint: 'Choose a few terms to help customers discover your barbershop.',
     servicesFeatures: 'Services / features',
     almostReady: 'Almost ready.',
-    addDetailsLater: 'After creating your barbershop, you can add services, team members, opening hours and other settings in the dashboard.',
+    addDetailsLater:
+      'After creating your barbershop, you can add services, team members, opening hours and other settings in the dashboard.',
     teamAccess: 'Team access',
     haveInvite: 'Already have an invite?',
     enterInvite: 'Enter the invite code you received',
@@ -468,7 +470,8 @@ export const en = {
   agenda: {
     title: 'Bookings',
     eyebrow: 'Today and upcoming',
-    subtitle: 'Search, filter and quickly open the booking that needs your attention.',
+    subtitle:
+      'Search, filter and quickly open the booking that needs your attention.',
     loadingError: 'Unable to update the calendar. Please try again.',
     bookingTodayOne: 'booking today',
     bookingTodayMany: 'bookings today',
@@ -490,7 +493,8 @@ export const en = {
   },
   orderManagement: {
     title: 'Orders',
-    subtitle: 'Track every order from receipt to delivery, with activity history in one place.',
+    subtitle:
+      'Track every order from receipt to delivery, with activity history in one place.',
     open: 'Open',
     needsAction: 'need action',
     toShip: 'To ship',
@@ -512,7 +516,8 @@ export const en = {
     communication: 'Communication',
     startPreparing: 'Start preparing',
     markCompleted: 'Mark as completed',
-    cancelOrderConfirm: 'Are you sure you want to cancel order #{reference} for {customer}? Do not use this action only to correct the status.',
+    cancelOrderConfirm:
+      'Are you sure you want to cancel order #{reference} for {customer}? Do not use this action only to correct the status.',
     loadError: 'Unable to load orders.',
     updateError: 'Unable to update the order.',
     emailError: 'Unable to send the email.',
@@ -528,7 +533,8 @@ export const en = {
     },
     readySubject: 'Your order is ready',
     updateSubject: 'An update about your order',
-    readyMessage: 'Your order is ready. Contact the barbershop to arrange pickup or delivery.',
+    readyMessage:
+      'Your order is ready. Contact the barbershop to arrange pickup or delivery.',
     updateMessage: 'There is an update about your order #{reference}.',
   },
   directory: {

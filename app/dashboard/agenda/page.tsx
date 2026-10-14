@@ -241,7 +241,10 @@ export default function AgendaPage() {
                 <span className="font-semibold text-zinc-200">
                   {metrics.today}
                 </span>{' '}
-                {metrics.today === 1 ? t('agenda.bookingTodayOne') : t('agenda.bookingTodayMany')} ·{' '}
+                {metrics.today === 1
+                  ? t('agenda.bookingTodayOne')
+                  : t('agenda.bookingTodayMany')}{' '}
+                ·{' '}
                 <span className="font-semibold text-amber-200">
                   {metrics.pending}
                 </span>{' '}
@@ -263,7 +266,9 @@ export default function AgendaPage() {
               onClick={() => setShowAddBlockForm((value) => !value)}
             >
               <CalendarOff className="size-4" aria-hidden="true" />
-              {showAddBlockForm ? t('agenda.closeBlock') : t('agenda.blockTime')}
+              {showAddBlockForm
+                ? t('agenda.closeBlock')
+                : t('agenda.blockTime')}
             </Button>
           </div>
         </header>
@@ -393,7 +398,9 @@ export default function AgendaPage() {
               >
                 <div className="flex flex-col gap-3 border-b border-white/[0.075] p-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-5">
                   <div>
-                    <p className="silentra-eyebrow mb-0">{t('agenda.eyebrow')}</p>
+                    <p className="silentra-eyebrow mb-0">
+                      {t('agenda.eyebrow')}
+                    </p>
                     <h2
                       id="agenda-list-title"
                       className="mt-1 text-xl font-semibold tracking-[-0.03em] text-zinc-50 sm:text-2xl"
@@ -472,8 +479,9 @@ export default function AgendaPage() {
               {appointments.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-zinc-600">
                   <Users className="size-3.5" aria-hidden="true" />
-                  {clients.length} {t('agenda.clientsAvailable')} · {services.length}{' '}
-                  {t('agenda.servicesAvailable')} · {professionals.length} {t('agenda.barbersAvailable')}
+                  {clients.length} {t('agenda.clientsAvailable')} ·{' '}
+                  {services.length} {t('agenda.servicesAvailable')} ·{' '}
+                  {professionals.length} {t('agenda.barbersAvailable')}
                 </div>
               )}
             </div>

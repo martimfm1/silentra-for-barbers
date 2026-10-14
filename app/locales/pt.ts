@@ -72,7 +72,8 @@ export const pt = {
     setupTitle: 'Configuração inicial',
     setupSubtitle: 'A tua barbearia já começou. Vamos acabar o essencial.',
     setupProgress: '{completed} de {total} passos concluídos.',
-    setupNextStep: 'Só falta completar o próximo passo para começares a aceitar marcações.',
+    setupNextStep:
+      'Só falta completar o próximo passo para começares a aceitar marcações.',
     quickActions: 'Ações rápidas',
     nextAppointment: 'Próxima marcação',
     service: 'Serviço',
@@ -452,7 +453,8 @@ export const pt = {
     tagsHint: 'Escolhe alguns termos para ajudar a apresentar a tua barbearia.',
     servicesFeatures: 'Serviços / características',
     almostReady: 'Quase pronto.',
-    addDetailsLater: 'Depois de criar a barbearia, podes adicionar serviços, equipa, horários e outras definições no painel.',
+    addDetailsLater:
+      'Depois de criar a barbearia, podes adicionar serviços, equipa, horários e outras definições no painel.',
     teamAccess: 'Acesso à equipa',
     haveInvite: 'Já tens um convite?',
     enterInvite: 'Introduz o código de convite que recebeste',
@@ -469,7 +471,8 @@ export const pt = {
   agenda: {
     title: 'Marcações',
     eyebrow: 'Hoje e próximos',
-    subtitle: 'Pesquisa, filtra e abre rapidamente a marcação que precisa da tua atenção.',
+    subtitle:
+      'Pesquisa, filtra e abre rapidamente a marcação que precisa da tua atenção.',
     loadingError: 'Não foi possível atualizar a agenda. Tenta novamente.',
     bookingTodayOne: 'marcação hoje',
     bookingTodayMany: 'marcações hoje',
@@ -483,7 +486,8 @@ export const pt = {
     filterStatus: 'Estado das marcações',
     noMatches: 'Não encontrámos marcações com estes filtros.',
     emptyTitle: 'A tua agenda está pronta para receber a primeira marcação.',
-    emptySubtitle: 'Cria uma marcação agora e adiciona o resto à medida que precisares.',
+    emptySubtitle:
+      'Cria uma marcação agora e adiciona o resto à medida que precisares.',
     createFirst: 'Criar primeira marcação',
     clientsAvailable: 'clientes disponíveis',
     servicesAvailable: 'serviços',
@@ -491,7 +495,8 @@ export const pt = {
   },
   orderManagement: {
     title: 'Encomendas',
-    subtitle: 'Acompanha cada encomenda desde a receção até à entrega, com o histórico da atividade num só lugar.',
+    subtitle:
+      'Acompanha cada encomenda desde a receção até à entrega, com o histórico da atividade num só lugar.',
     open: 'Em aberto',
     needsAction: 'precisam de ação',
     toShip: 'Para enviar',
@@ -513,7 +518,8 @@ export const pt = {
     communication: 'Comunicação',
     startPreparing: 'Começar preparação',
     markCompleted: 'Marcar como concluída',
-    cancelOrderConfirm: 'Tens a certeza de que queres cancelar a encomenda #{reference} de {customer}? Esta ação não deve ser usada para corrigir apenas o estado.',
+    cancelOrderConfirm:
+      'Tens a certeza de que queres cancelar a encomenda #{reference} de {customer}? Esta ação não deve ser usada para corrigir apenas o estado.',
     loadError: 'Não foi possível carregar as encomendas.',
     updateError: 'Não foi possível atualizar a encomenda.',
     emailError: 'Não foi possível enviar o email.',
@@ -529,7 +535,8 @@ export const pt = {
     },
     readySubject: 'A sua encomenda está pronta',
     updateSubject: 'Atualização da sua encomenda',
-    readyMessage: 'A sua encomenda está pronta. Pode contactar a barbearia para combinar o levantamento ou envio.',
+    readyMessage:
+      'A sua encomenda está pronta. Pode contactar a barbearia para combinar o levantamento ou envio.',
     updateMessage: 'Temos uma atualização sobre a sua encomenda #{reference}.',
   },
   directory: {

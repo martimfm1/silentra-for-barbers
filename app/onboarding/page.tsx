@@ -238,8 +238,7 @@ export default function OnboardingPage() {
       });
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(t('onboarding.unexpectedError'));
+      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
 
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
       router.push('/dashboard');
@@ -266,8 +265,7 @@ export default function OnboardingPage() {
         body: JSON.stringify({ inviteCode: normalizeInviteCode(inviteCode) }),
       });
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(t('onboarding.unexpectedError'));
+      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
 
       toast.success(t('onboarding.inviteSuccess'));
       router.push('/dashboard');
@@ -460,7 +458,9 @@ export default function OnboardingPage() {
                         </div>
                         <div className="grid gap-4">
                           <div className="grid gap-2">
-                            <Label htmlFor="shop-name">{t('onboarding.barbershopName')}</Label>
+                            <Label htmlFor="shop-name">
+                              {t('onboarding.barbershopName')}
+                            </Label>
                             <Input
                               id="shop-name"
                               required
@@ -539,7 +539,9 @@ export default function OnboardingPage() {
                           </div>
                           <div className="grid gap-4 sm:grid-cols-[1fr_160px]">
                             <div className="grid gap-2">
-                              <Label htmlFor="city">{t('onboarding.cityTown')}</Label>
+                              <Label htmlFor="city">
+                                {t('onboarding.cityTown')}
+                              </Label>
                               <Input
                                 id="city"
                                 required
@@ -593,7 +595,9 @@ export default function OnboardingPage() {
                         </div>
                         <div className="grid gap-4 sm:grid-cols-3">
                           <div className="grid gap-2">
-                            <Label htmlFor="price">{t('onboarding.referencePrice')}</Label>
+                            <Label htmlFor="price">
+                              {t('onboarding.referencePrice')}
+                            </Label>
                             <div className="relative">
                               <Euro
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -621,7 +625,9 @@ export default function OnboardingPage() {
                             </p>
                           </div>
                           <div className="grid gap-2">
-                            <Label htmlFor="open-time">{t('onboarding.opening')}</Label>
+                            <Label htmlFor="open-time">
+                              {t('onboarding.opening')}
+                            </Label>
                             <div className="relative">
                               <Clock3
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -643,7 +649,9 @@ export default function OnboardingPage() {
                             </p>
                           </div>
                           <div className="grid gap-2">
-                            <Label htmlFor="close-time">{t('onboarding.closing')}</Label>
+                            <Label htmlFor="close-time">
+                              {t('onboarding.closing')}
+                            </Label>
                             <div className="relative">
                               <Clock3
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -682,7 +690,9 @@ export default function OnboardingPage() {
                             </p>
                           </div>
                         </div>
-                        <Label htmlFor="tags">{t('onboarding.servicesFeatures')}</Label>
+                        <Label htmlFor="tags">
+                          {t('onboarding.servicesFeatures')}
+                        </Label>
                         <Input
                           id="tags"
                           required
@@ -705,7 +715,9 @@ export default function OnboardingPage() {
                     </div>
 
                     <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 text-sm text-zinc-300">
-                      <p className="font-medium text-zinc-100">{t('onboarding.almostReady')}</p>
+                      <p className="font-medium text-zinc-100">
+                        {t('onboarding.almostReady')}
+                      </p>
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
                         Depois de criar a barbearia, pode adicionar serviços,
                         equipa, horários e outras definições no painel.
@@ -760,7 +772,9 @@ export default function OnboardingPage() {
                       </CardDescription>
                     </CardHeader>
                     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-                      <Label htmlFor="invite-code">{t('onboarding.inviteCode')}</Label>
+                      <Label htmlFor="invite-code">
+                        {t('onboarding.inviteCode')}
+                      </Label>
                       <Input
                         id="invite-code"
                         required
