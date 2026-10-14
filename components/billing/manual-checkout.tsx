@@ -111,7 +111,9 @@ export function ManualCheckout({
   const [country, setCountry] = useState('PT');
   const [pricing, setPricing] = useState(initialPricing);
   const [promotionCode, setPromotionCode] = useState('');
-  const [appliedPromotionCode, setAppliedPromotionCode] = useState<string | null>(null);
+  const [appliedPromotionCode, setAppliedPromotionCode] = useState<
+    string | null
+  >(null);
   const [promotionLoading, setPromotionLoading] = useState(false);
   const [promotionError, setPromotionError] = useState<string | null>(null);
   const [promotionMessage, setPromotionMessage] = useState<string | null>(null);
@@ -195,7 +197,9 @@ export function ManualCheckout({
       promotionCode.trim() &&
       promotionCode.trim().toUpperCase() !== appliedPromotionCode
     ) {
-      setError('Aplica o código promocional ou limpa o campo antes de continuar.');
+      setError(
+        'Aplica o código promocional ou limpa o campo antes de continuar.',
+      );
       return;
     }
     setError(null);
@@ -271,11 +275,13 @@ export function ManualCheckout({
                 <div className="text-right">
                   {pricing.discountAmount > 0 ? (
                     <p className="text-xs text-zinc-500 line-through">
-                      {formatMoney(pricing.originalPrice)} / {interval === 'year' ? 'ano' : 'mês'}
+                      {formatMoney(pricing.originalPrice)} /{' '}
+                      {interval === 'year' ? 'ano' : 'mês'}
                     </p>
                   ) : null}
                   <p className="text-xl font-semibold text-white">
-                    {formatMoney(pricing.finalPrice)} / {interval === 'year' ? 'ano' : 'mês'}
+                    {formatMoney(pricing.finalPrice)} /{' '}
+                    {interval === 'year' ? 'ano' : 'mês'}
                   </p>
                 </div>
               </div>
@@ -522,10 +528,16 @@ export function ManualCheckout({
               </div>
             </section>
 
-            <section className="rounded-3xl border border-emerald-400/15 bg-emerald-400/[0.025] p-5 sm:p-7" aria-label="Código promocional">
-              <h2 className="text-sm font-semibold text-white">Código promocional</h2>
+            <section
+              className="rounded-3xl border border-emerald-400/15 bg-emerald-400/[0.025] p-5 sm:p-7"
+              aria-label="Código promocional"
+            >
+              <h2 className="text-sm font-semibold text-white">
+                Código promocional
+              </h2>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Introduz um código válido para atualizar automaticamente o total apresentado.
+                Introduz um código válido para atualizar automaticamente o
+                total apresentado.
               </p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <input
@@ -562,14 +574,19 @@ export function ManualCheckout({
                 </p>
               ) : null}
               {promotionMessage ? (
-                <p role="status" className="mt-3 text-xs leading-5 text-emerald-200">
+                <p
+                  role="status"
+                  className="mt-3 text-xs leading-5 text-emerald-200"
+                >
                   {promotionMessage}
                 </p>
               ) : null}
               {pricing.discountAmount > 0 ? (
                 <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
                   <span className="text-zinc-400">Desconto aplicado</span>
-                  <span className="font-semibold text-emerald-200">−{formatMoney(pricing.discountAmount)}</span>
+                  <span className="font-semibold text-emerald-200">
+                    −{formatMoney(pricing.discountAmount)}
+                  </span>
                 </div>
               ) : null}
             </section>
