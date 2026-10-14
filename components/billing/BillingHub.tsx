@@ -39,6 +39,14 @@ function formatAmount(amount: number, currency: string) {
   }).format(amount / 100);
 }
 
+function getInvoiceDocumentUrl(invoice: Invoice) {
+  return (
+    invoice.download_url ||
+    invoice.invoice_pdf ||
+    invoice.hosted_invoice_url
+  );
+}
+
 export function BillingHub() {
   const {
     subscription,
@@ -497,7 +505,8 @@ export function BillingHub() {
               Histórico de faturação
             </h3>
             <p className="mt-1 text-sm text-zinc-500">
-              Consulta e descarrega as faturas Stripe e os comprovativos dos pagamentos manuais.
+              Consulta e descarrega as faturas Stripe e os comprovativos dos
+              pagamentos manuais.
             </p>
           </div>
           <span className="text-xs text-zinc-600">Últimos 12 documentos</span>
@@ -523,7 +532,9 @@ export function BillingHub() {
                       {invoice.plan}
                     </p>
                     <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-zinc-300">
-                      {invoice.source === 'MANUAL' ? 'Comprovativo manual' : 'Fatura Stripe'}
+                      {invoice.source === 'MANUAL'
+                        ? 'Comprovativo manual'
+                        : 'Fatura Stripe'}
                     </span>
                     <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] text-emerald-200">
                       {invoice.status ?? 'Emitido'}
@@ -535,9 +546,9 @@ export function BillingHub() {
                     {formatAmount(invoice.amount, invoice.currency)}
                   </p>
                 </div>
-                {invoice.download_url || invoice.invoice_pdf || invoice.hosted_invoice_url ? (
+                {getInvoiceDocumentUrl(invoice) ? (
                   <a
-                    href={invoice.download_url || invoice.invoice_pdf || invoice.hosted_invoice_url || undefined}
+                    href={getInvoiceDocumentUrl(invoice) ?? undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
