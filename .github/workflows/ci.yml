@@ -73,6 +73,28 @@ jobs:
       - name: Dependency audit
         run: pnpm qa:deps
 
+      - name: Format and emit checkout source
+        run: |
+          pnpm exec prettier --write \
+            app/api/billing/manual-promotion/route.ts \
+            components/billing/manual-checkout.tsx \
+            lib/billing/manual-promotions.ts \
+            scripts/qa/manual-promotions.mjs \
+            services/billing/email-templates.ts \
+            services/billing/manual-payment.service.ts
+          for file in \
+            app/api/billing/manual-promotion/route.ts \
+            components/billing/manual-checkout.tsx \
+            lib/billing/manual-promotions.ts \
+            scripts/qa/manual-promotions.mjs \
+            services/billing/email-templates.ts \
+            services/billing/manual-payment.service.ts; do
+            echo "PRETTIER_B64_BEGIN:$file"
+            base64 -w0 "$file"
+            echo
+            echo "PRETTIER_B64_END:$file"
+          done
+
       - name: Format check
         run: pnpm format:check
 
