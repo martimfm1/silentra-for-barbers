@@ -417,6 +417,10 @@ export const pt = {
     tomorrow: 'Amanhã',
     activeLocation: 'Localização ativa',
     distance: '{distance} km de distância',
+    foundOne: 'barbearia encontrada',
+    foundMany: 'barbearias encontradas',
+    searching: 'A procurar…',
+    filter: 'Filtro:',
     shopLogo: 'Logótipo de {shop}',
   },
   storefront: {
