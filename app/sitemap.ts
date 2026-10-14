@@ -1,5 +1,4 @@
 import type { MetadataRoute } from 'next';
-import { supabase, listRecords } from '@/lib/db';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPublicProfileById } from '@/lib/barbershops/public-profile';
 
@@ -17,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/`,
-      lastModified: now,
       changeFrequency: 'daily',
       priority: 1.0,
     },
@@ -56,17 +54,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let dynamicShopRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const { data: shops, error } = await listRecords<{
-      id: string;
-      slug?: string;
-      public_profile_enabled?: boolean;
-      updated_at?: string;
-    }>(
-      supabase,
-      'shops',
-      {},
-      { select: 'id, slug, public_profile_enabled, updated_at' },
-    );
+    const database = createAdminClient();
+    const { data: shops, error } = await database
+      .from('shops')
+      .select('slug, public_profile_enabled, updated_at')
+      .limit(50000);
 
     if (!error && shops) {
       const seen = new Set<string>();
@@ -75,13 +67,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const shop of shops) {
         if (!shop.slug || shop.public_profile_enabled === false) continue;
 
-        const slug = shop.slug.trim();
+        const slug = String(shop.slug).trim();
         if (!slug || seen.has(slug)) continue;
         seen.add(slug);
 
         const parsedLastModified = shop.updated_at
-          ? new Date(shop.updated_at)
+          ? new Date(String(shop.updated_at))
           : now;
+
         shopEntries.push({
           url: `${SITE_URL}/barbershops/${encodeURIComponent(slug)}`,
           lastModified: Number.isNaN(parsedLastModified.getTime())
