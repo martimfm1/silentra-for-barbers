@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import {
   ArrowLeft,
   Check,
@@ -163,6 +164,7 @@ export default function MarketplaceProductPage() {
             <Store className="size-4" />
             Silentra Marketplace
           </span>
+          <LanguageSwitcher />
         </div>
       </header>
 
