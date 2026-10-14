@@ -7,6 +7,9 @@ export type BillingEmailContext = {
   plan: Exclude<BillingPlan, 'free'>;
   billingInterval: 'month' | 'year';
   price: number;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+  promotionCode?: string | null;
   currency?: string;
   requestId?: string | null;
   createdAt?: string | null;
@@ -250,13 +253,22 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
     safeUrl(context.adminUrl) ??
     new URL('/silentra-admin', getBaseUrl()).toString();
   const name = context.customerName || context.customerEmail || 'Cliente';
+  const promotionDetails: Array<[string, string]> =
+    (context.discountAmount ?? 0) > 0
+      ? [
+          ['Preço original', money(context.originalPrice ?? context.price, context.currency)],
+          ['Código promocional', context.promotionCode || '—'],
+          ['Desconto', `−${money(context.discountAmount ?? 0, context.currency)}`],
+        ]
+      : [];
   const content = details([
     ['Cliente', name],
     ['Email', context.customerEmail || '—'],
     ['Barbearia', context.barbershopName || '—'],
     ['Plano', planLabel(context.plan)],
     ['Período', intervalLabel(context.billingInterval)],
-    ['Valor', money(context.price, context.currency)],
+    ...promotionDetails,
+    ['Total a cobrar', money(context.price, context.currency)],
     ['Referência', reference(context.requestId)],
     ['Criado em', dateTime(context.createdAt)],
   ]);
@@ -277,12 +289,21 @@ export function customerPaymentLinkEmail(context: BillingEmailContext) {
   const name = context.customerName || 'Cliente';
   const link = safeUrl(context.paymentLink);
   const requestRef = reference(context.requestId);
+  const promotionDetails: Array<[string, string]> =
+    (context.discountAmount ?? 0) > 0
+      ? [
+          ['Preço original', money(context.originalPrice ?? context.price, context.currency)],
+          ['Código promocional', context.promotionCode || '—'],
+          ['Desconto', `−${money(context.discountAmount ?? 0, context.currency)}`],
+        ]
+      : [];
 
   const content =
     details([
       ['Plano', planLabel(context.plan)],
       ['Período', intervalLabel(context.billingInterval)],
-      ['Valor', money(context.price, context.currency)],
+      ...promotionDetails,
+      ['Total a pagar', money(context.price, context.currency)],
       ['Referência', requestRef],
     ]) +
     `<p style="margin:18px 0 0;color:#71717a;font-size:12px;line-height:1.7">Usa apenas o botão acima para concluir o pagamento. A Silentra nunca te pede a palavra-passe ou códigos de autenticação através deste email.</p>`;
