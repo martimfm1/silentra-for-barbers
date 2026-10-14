@@ -38,7 +38,8 @@ export interface PublicProfileRecord {
   og_image_url: string | null;
   theme_config: Record<string, unknown>;
   plan: BillingPlan;
-  owner_user_id: string | null;
+  owner_user_id?: string | null;
+  landing_page_url?: string | null;
 }
 
 type BarbershopRecord = {
@@ -172,60 +173,40 @@ async function getPlanForShop(
   const database = createAdminClient();
   const [
     { data: barbershop, error: barbershopError },
-    { data: assignment, error: assignmentError },
-    { data: subscription, error: subscriptionError },
+    { data: effectivePlan, error: planError },
   ] = await Promise.all([
     database
       .from('barbershops')
       .select('id, created_by')
       .eq('id', barbershopId)
       .maybeSingle(),
-    database
-      .from('barbershop_plan_assignments')
-      .select('plan, expires_at')
-      .eq('barbershop_id', barbershopId)
-      .maybeSingle(),
-    database
-      .from('subscriptions')
-      .select('plan, plan_override, status')
-      .eq('barbershop_id', barbershopId)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    database.rpc('get_effective_billing_plan_for_barbershop', {
+      p_barbershop_id: barbershopId,
+    }),
   ]);
 
-  if (barbershopError || assignmentError || subscriptionError) {
+  if (barbershopError || planError || !barbershop) {
     console.error('[PUBLIC_PROFILE_PLAN_LOOKUP_ERROR]', {
       barbershop: barbershopError?.code ?? null,
-      assignment: assignmentError?.code ?? null,
-      subscription: subscriptionError?.code ?? null,
+      plan: planError?.code ?? null,
+      barbershopFound: Boolean(barbershop),
     });
+    // Public pages fail closed if the canonical plan resolver is unavailable.
+    return {
+      plan: 'free',
+      ownerUserId: barbershop?.created_by ?? null,
+    };
   }
 
-  const ownerUserId = barbershop?.created_by ?? null;
-  if (
-    assignment &&
-    (!assignment.expires_at ||
-      new Date(assignment.expires_at).getTime() > Date.now())
-  ) {
-    return { plan: assignment.plan as BillingPlan, ownerUserId };
-  }
+  const validPlans: readonly string[] = ['free', 'pro', 'enterprise'];
+  const plan = validPlans.includes(String(effectivePlan))
+    ? (effectivePlan as BillingPlan)
+    : 'free';
 
-  const subscriptionPlan =
-    subscription?.plan_override && subscription.plan_override !== 'free'
-      ? subscription.plan_override
-      : subscription?.plan;
-  const paidStatus = ['active', 'trialing'].includes(
-    String(subscription?.status ?? ''),
-  );
-  if (
-    paidStatus &&
-    (subscriptionPlan === 'pro' || subscriptionPlan === 'enterprise')
-  ) {
-    return { plan: subscriptionPlan as BillingPlan, ownerUserId };
-  }
-
-  return { plan: 'free', ownerUserId };
+  return {
+    plan,
+    ownerUserId: barbershop.created_by ?? null,
+  };
 }
 
 function buildPublicProfile(

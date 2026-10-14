@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Silentra for Barbers Public API
+  version: 1.0.0
+  description: Read-only public barbershop profiles, services, reviews, and public links. No authentication is required.
+servers:
+  - url: https://barbers.silentra.me
+paths:
+  /api/v1/public/barbershops/{slug}:
+    get:
+      operationId: getPublicBarbershop
+      summary: Get one public barbershop profile
+      description: Returns only public profile data. Requests are rate-limited and support ETag caching.
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 60
+            pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        - in: header
+          name: If-None-Match
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public profile payload
+          headers:
+            ETag:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            X-API-Version:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicBarbershopResponse'
+        '304':
+          description: The representation is unchanged
+        '400':
+          description: Invalid slug
+        '404':
+          description: Public profile not found or disabled
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: string
+        '503':
+          description: Public API or shared rate limiter temporarily unavailable
+    options:
+      operationId: publicBarbershopCorsPreflight
+      summary: CORS preflight
+      responses:
+        '204':
+          description: CORS preflight accepted
+components:
+  schemas:
+    PublicBarbershopResponse:
+      type: object
+      required: [apiVersion, data]
+      properties:
+        apiVersion:
+          type: string
+          const: '1'
+        data:
+          type: object
+          required:
+            [
+              barbershop,
+              services,
+              reviews,
+              rating,
+              reviewsCount,
+              bookingUrl,
+              landingPage,
+            ]
+          properties:
+            barbershop:
+              type: object
+              required:
+                [
+                  id,
+                  slug,
+                  name,
+                  tags,
+                  publicProfileEnabled,
+                  amenities,
+                  openingHours,
+                  seo,
+                ]
+              properties:
+                id:
+                  type: string
+                  description: Public shop identifier for public integrations.
+                slug:
+                  type: string
+                name:
+                  type: string
+                city:
+                  type: [string, 'null']
+                address:
+                  type: [string, 'null']
+                phone:
+                  type: [string, 'null']
+                avatarUrl:
+                  type: [string, 'null']
+                  format: uri
+                coverUrl:
+                  type: [string, 'null']
+                  format: uri
+                tags:
+                  type: array
+                  items:
+                    type: string
+                publicProfileEnabled:
+                  type: boolean
+                seo:
+                  type: object
+                  properties:
+                    title:
+                      type: [string, 'null']
+                    description:
+                      type: [string, 'null']
+                    imageUrl:
+                      type: [string, 'null']
+                      format: uri
+                amenities:
+                  type: object
+                  additionalProperties: true
+                openingHours:
+                  type: object
+                  properties:
+                    opens:
+                      type: [string, 'null']
+                    closes:
+                      type: [string, 'null']
+                    lunchStarts:
+                      type: [string, 'null']
+                    lunchEnds:
+                      type: [string, 'null']
+                    closedDays:
+                      type: [string, 'null']
+            services:
+              type: array
+              items:
+                type: object
+                required: [id, name, price, currency, durationMinutes, popular]
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  price:
+                    type: number
+                    minimum: 0
+                  currency:
+                    type: string
+                    const: EUR
+                  durationMinutes:
+                    type: number
+                    minimum: 0
+                  popular:
+                    type: boolean
+            reviews:
+              type: array
+              items:
+                type: object
+                required: [id, name, rating, comment, createdAt]
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  rating:
+                    type: number
+                    minimum: 0
+                    maximum: 5
+                  comment:
+                    type: [string, 'null']
+                  createdAt:
+                    type: [string, 'null']
+                    format: date-time
+            rating:
+              type: number
+              minimum: 0
+              maximum: 5
+            reviewsCount:
+              type: integer
+              minimum: 0
+            bookingUrl:
+              type: string
+              format: uri
+            landingPage:
+              type: object
+              required: [available, url]
+              properties:
+                available:
+                  type: boolean
+                url:
+                  type: [string, 'null']
+                  format: uri

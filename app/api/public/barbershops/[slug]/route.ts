@@ -67,6 +67,22 @@ async function GET__unobserved(
       );
     }
 
+    const { data: landingPage, error: landingPageError } =
+      profile.plan === 'enterprise'
+        ? await database
+            .from('barbershop_landing_pages')
+            .select('status')
+            .eq('barbershop_id', barbershopId)
+            .maybeSingle()
+        : { data: null, error: null };
+    if (landingPageError) {
+      console.error('[PUBLIC_BARBERSHOP_API_LANDING_PAGE]', {
+        code: landingPageError.code ?? 'UNKNOWN',
+      });
+    }
+    const { owner_user_id: ownerUserId, ...publicProfile } = profile;
+    void ownerUserId;
+
     const reviewItems = reviews ?? [];
     const ratingAverage = reviewItems.length
       ? Number(
@@ -82,7 +98,11 @@ async function GET__unobserved(
     return NextResponse.json(
       {
         data: {
-          ...profile,
+          ...publicProfile,
+          landing_page_url:
+            profile.plan === 'enterprise' && landingPage?.status === 'active'
+              ? '/site/' + encodeURIComponent(profile.slug)
+              : null,
           amenities: normalizeBarbershopAmenities(shop?.amenities),
           services: (services ?? []).map((service) => ({
             ...service,

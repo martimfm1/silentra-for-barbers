@@ -10,6 +10,16 @@ export const dynamic = 'force-dynamic';
 const MAX_HISTORY_ITEMS = 12;
 const PENDING_INVOICE_TTL_MS = 10 * 60 * 1000;
 
+type BillingDocumentRecord = {
+  id: string;
+  document_number: string | null;
+  issued_at: string;
+  plan: string | null;
+  billing_interval: string | null;
+  currency: string | null;
+  total: number | string;
+};
+
 type HistoryItem = {
   id: string;
   source: 'STRIPE' | 'MANUAL';
@@ -157,7 +167,11 @@ async function GET__unobserved() {
       );
     }
 
-    const manualHistory: HistoryItem[] = (documents ?? []).map((document) => {
+    // The generated Supabase schema may lag this recently-added table. Keep the
+    // selected columns and their runtime contract explicit at this boundary.
+    const manualDocuments = (documents ??
+      []) as unknown as BillingDocumentRecord[];
+    const manualHistory: HistoryItem[] = manualDocuments.map((document) => {
       const issuedAt = new Date(document.issued_at);
       const intervalLabel =
         document.billing_interval === 'year' ? 'Anual' : 'Mensal';
@@ -237,8 +251,7 @@ async function GET__unobserved() {
               invoice.status === 'draft' ||
               invoice.status === 'open';
             return (
-              !pending ||
-              now - invoice.created * 1000 <= PENDING_INVOICE_TTL_MS
+              !pending || now - invoice.created * 1000 <= PENDING_INVOICE_TTL_MS
             );
           })
           .map((invoice) => {
@@ -251,12 +264,13 @@ async function GET__unobserved() {
               currency: invoice.currency.toUpperCase(),
               status: stripeStatusLabel(invoice.status),
               plan:
-                invoice.lines.data.find((line) => Boolean(line.description))
+                invoice.lines.data
+                  .find((line) => Boolean(line.description))
                   ?.description?.trim() || 'Subscrição Silentra',
               date: formatDate(issuedAt),
               issued_at: issuedAt.toISOString(),
-              invoice_pdf: invoice.invoice_pdf,
-              hosted_invoice_url: invoice.hosted_invoice_url,
+              invoice_pdf: invoice.invoice_pdf ?? null,
+              hosted_invoice_url: invoice.hosted_invoice_url ?? null,
               download_url: null,
             };
           });

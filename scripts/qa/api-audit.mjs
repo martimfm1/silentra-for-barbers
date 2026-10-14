@@ -86,6 +86,17 @@ const routeSecurityChecks = [
       ".eq('barbershops.marketplace_sales_mode', 'physical_and_online')",
     ],
   },
+  {
+    pattern: /\/v1\/public\/barbershops\/\[slug\]\/route\.ts$/,
+    markers: [
+      'consumePublicRateLimit',
+      'isValidPublicProfileSlug',
+      'Access-Control-Allow-Origin',
+      'if-none-match',
+      'barbershop_landing_pages',
+      "profile.plan === 'enterprise'",
+    ],
+  },
 ];
 
 function walk(dir) {

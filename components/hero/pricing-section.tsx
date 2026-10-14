@@ -41,6 +41,7 @@ const HERO_FEATURES = {
     'POS, stock e comissões',
     'Permissões e gestão global',
     'Relatórios empresariais avançados',
+    'Landing page profissional incluída',
   ],
 } as const;
 

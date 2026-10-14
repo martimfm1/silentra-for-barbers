@@ -71,6 +71,10 @@ const FEATURE_GROUPS: ReadonlyArray<{
       'pos',
     ],
   },
+  {
+    title: 'Presença online',
+    features: ['landing_page'],
+  },
 ];
 
 function formatLimit(value: number, singular: string, plural: string) {

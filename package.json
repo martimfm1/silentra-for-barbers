@@ -16,12 +16,13 @@
     "qa:api": "node scripts/qa/api-audit.mjs",
     "qa:copy": "node scripts/qa/ui-copy-audit.mjs",
     "qa:product": "node scripts/qa/product-contracts.mjs",
-    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:product && pnpm qa:manual-promotions",
+    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:product && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages",
     "translate": "tsx scripts/translate.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "qa:manual-payments": "node scripts/qa/manual-payments.mjs",
-    "qa:manual-promotions": "node scripts/qa/manual-promotions.mjs"
+    "qa:manual-promotions": "node scripts/qa/manual-promotions.mjs",
+    "qa:enterprise-landing-pages": "node scripts/qa/enterprise-landing-pages.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",

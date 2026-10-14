@@ -42,6 +42,10 @@ const faqs = [
     'Os pagamentos, métodos de pagamento e faturas são processados com segurança pela Stripe através do checkout da Silentra.',
   ],
   [
+    'O Enterprise inclui uma landing page?',
+    'Sim. Quando a subscrição Enterprise fica ativa, a Silentra cria automaticamente uma landing page pública, ligada ao perfil da barbearia e aos seus serviços. A página deixa de estar publicada quando o entitlement Enterprise termina.',
+  ],
+  [
     'O que acontece se cancelar?',
     'Manténs o acesso ao plano atual até ao final do período de faturação em curso, de acordo com as condições da subscrição.',
   ],
