@@ -22,6 +22,7 @@ const requiredFiles = [
   'services/billing/manual-payment-document.ts',
   'services/billing/manual-payment-document.service.ts',
   'app/api/billing/documents/[documentId]/route.ts',
+  'app/api/billing/history/route.ts',
 ];
 
 for (const file of requiredFiles) {
@@ -49,6 +50,8 @@ const documentsMigration = read(
 const documentService = read(
   'services/billing/manual-payment-document.service.ts',
 );
+const billingHistory = read('app/api/billing/history/route.ts');
+const billingHub = read('components/billing/BillingHub.tsx');
 const brevo = read('lib/email/brevo.ts');
 
 const checks = [
@@ -161,6 +164,29 @@ const checks = [
     read('app/api/billing/documents/[documentId]/route.ts').includes(
       'ManualPaymentDocumentService.sendReceipt',
     ),
+  ],
+  [
+    'Billing history authenticates the barbershop owner',
+    billingHistory.includes('supabase.auth.getUser()') &&
+      billingHistory.includes('barbershop.created_by !== user.id'),
+  ],
+  [
+    'Billing history combines Stripe invoices and manual documents',
+    billingHistory.includes("from('billing_documents')") &&
+      billingHistory.includes('stripe.invoices.list') &&
+      billingHub.includes("fetch('/api/billing/history'") &&
+      billingHub.includes('Comprovativo manual'),
+  ],
+  [
+    'Billing history scopes manual documents to the owner and barbershop',
+    billingHistory.includes(".eq('barbershop_id', barbershopId)") &&
+      billingHistory.includes(".eq('user_id', user.id)") &&
+      billingHistory.includes("'/api/billing/documents/"),
+  ],
+  [
+    'Billing history does not create Stripe customers when read',
+    !billingHistory.includes('getOrCreateCustomer') &&
+      billingHistory.includes('stripeCustomerId'),
   ],
 ];
 
