@@ -361,7 +361,7 @@ export default function MarketplaceOrderTrackingClient() {
             className="inline-flex min-h-10 items-center gap-2 rounded-xl text-sm text-zinc-400 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <ArrowLeft className="size-4" />
-            Marketplace
+            {t('orderTracking.marketplace')}
           </Link>
           <span className="text-xs font-semibold tracking-[0.14em] text-zinc-600">
             SILENTRA
@@ -374,14 +374,13 @@ export default function MarketplaceOrderTrackingClient() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-1.5 text-xs font-medium text-emerald-200">
               <ShieldCheck className="size-3.5" />
-              Acesso privado à encomenda
+              {t('orderTracking.privateAccess')}
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Acompanhar encomenda
+              {t('orderTracking.title')}
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
-              Consulta o estado, os produtos e o histórico do teu pedido sem
-              precisares de criar uma conta.
+              {t('orderTracking.subtitle')}
             </p>
           </div>
 
@@ -395,7 +394,7 @@ export default function MarketplaceOrderTrackingClient() {
               <RefreshCw
                 className={`size-4 ${refreshing || loading ? 'animate-spin' : ''}`}
               />
-              Atualizar estado
+              {t('orderTracking.refreshStatus')}
             </button>
           )}
         </div>
@@ -406,8 +405,8 @@ export default function MarketplaceOrderTrackingClient() {
             aria-live="polite"
           >
             <div className="flex items-center gap-3 text-sm text-zinc-400">
-              <RefreshCw className="size-4 animate-spin text-emerald-300" />A
-              consultar o estado da encomenda…
+              <RefreshCw className="size-4 animate-spin text-emerald-300" />
+              {t('orderTracking.loading')}
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <div className="h-20 animate-pulse rounded-2xl bg-white/[0.04]" />
@@ -426,7 +425,7 @@ export default function MarketplaceOrderTrackingClient() {
               <CircleAlert className="mt-0.5 size-5 shrink-0 text-rose-300" />
               <div>
                 <h2 className="font-semibold text-rose-100">
-                  Não foi possível consultar a encomenda
+                  {t('orderTracking.loadError')}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-rose-100/75">
                   {error}
@@ -438,7 +437,7 @@ export default function MarketplaceOrderTrackingClient() {
                     className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-300/20 px-3 text-sm font-semibold text-rose-100 transition hover:bg-rose-300/10"
                   >
                     <RefreshCw className="size-4" />
-                    Tentar novamente
+                    {t('orderTracking.retry')}
                   </button>
                 )}
               </div>
@@ -453,7 +452,7 @@ export default function MarketplaceOrderTrackingClient() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                      Referência da encomenda
+                      {t('orderTracking.reference')}
                     </p>
                     <p className="mt-2 font-mono text-lg font-semibold tracking-wide text-white">
                       #{order.reference}
@@ -492,7 +491,7 @@ export default function MarketplaceOrderTrackingClient() {
               {!cancelled && (
                 <div className="p-5 sm:p-7">
                   <h2 className="text-sm font-semibold text-white">
-                    Progresso da encomenda
+                    {t('orderTracking.progress')}
                   </h2>
                   <ol className="mt-5 space-y-3">
                     {steps.map((step, index) => {
@@ -535,13 +534,13 @@ export default function MarketplaceOrderTrackingClient() {
                             </p>
                             {isCurrent && (
                               <p className="mt-1 text-xs text-zinc-500">
-                                Estado atual
+                                {t('orderTracking.currentStatus')}
                               </p>
                             )}
                           </div>
                           {isCurrent && (
                             <span className="shrink-0 rounded-full bg-emerald-300/10 px-2 py-1 text-[10px] font-semibold text-emerald-200">
-                              Atual
+                              {t('orderTracking.current')}
                             </span>
                           )}
                         </li>
@@ -555,7 +554,7 @@ export default function MarketplaceOrderTrackingClient() {
             <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
               <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-7">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-base font-semibold">Histórico</h2>
+                  <h2 className="text-base font-semibold">{t('orderTracking.history')}</h2>
                   <span className="text-xs text-zinc-600">
                     {order.history.length}{' '}
                     {order.history.length === 1 ? t('orderTracking.historyCountOne') : t('orderTracking.historyCountMany')}
@@ -564,8 +563,7 @@ export default function MarketplaceOrderTrackingClient() {
 
                 {order.history.length === 0 ? (
                   <p className="mt-5 rounded-2xl border border-white/10 p-4 text-sm leading-6 text-zinc-500">
-                    Ainda não existe histórico adicional. Consulta novamente
-                    mais tarde para veres as próximas atualizações.
+                    {t('orderTracking.noHistory')}
                   </p>
                 ) : (
                   <ol className="mt-6 space-y-0">
@@ -644,19 +642,18 @@ export default function MarketplaceOrderTrackingClient() {
                       </div>
                     ) : (
                       <p className="mt-4 text-sm leading-6 text-zinc-500">
-                        A barbearia trata diretamente dos detalhes de entrega.
+                        {t('orderTracking.shopHandlesDelivery')}
                       </p>
                     )
                   ) : (
                     <p className="mt-4 text-sm leading-6 text-zinc-400">
-                      A barbearia irá confirmar quando a encomenda estiver
-                      pronta para levantamento.
+                      {t('orderTracking.pickupPending')}
                     </p>
                   )}
                 </section>
 
                 <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-6">
-                  <h2 className="text-base font-semibold">Resumo</h2>
+                  <h2 className="text-base font-semibold">{t('orderTracking.summary')}</h2>
                   <div className="mt-4 space-y-3">
                     {order.items.map((item, index) => (
                       <div
@@ -668,7 +665,7 @@ export default function MarketplaceOrderTrackingClient() {
                             {item.name}
                           </p>
                           <p className="mt-1 text-xs text-zinc-600">
-                            Quantidade: {item.quantity}
+                            {t('orderTracking.quantity', { quantity: item.quantity })}
                           </p>
                         </div>
                         <p className="shrink-0 font-medium tabular-nums text-zinc-200">
@@ -678,38 +675,35 @@ export default function MarketplaceOrderTrackingClient() {
                     ))}
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-                    <span className="text-sm text-zinc-500">Total</span>
+                    <span className="text-sm text-zinc-500">{t('orderTracking.total')}</span>
                     <span className="text-xl font-semibold tabular-nums text-white">
                       {money(order.total, formatLocale)}
                     </span>
                   </div>
                   <p className="mt-3 text-xs leading-5 text-zinc-600">
-                    O pagamento, levantamento e envio são tratados diretamente
-                    com a barbearia.
+                    {t('orderTracking.fulfillmentNotice')}
                   </p>
                 </section>
               </div>
             </div>
 
             <div className="flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
-              <p>Encomenda criada em {dateTime(order.createdAt, formatLocale)}.</p>
+              <p>{t('orderTracking.createdAt', { date: dateTime(order.createdAt, formatLocale) })}</p>
               <p>
                 {lastUpdated
-                  ? `Última consulta: ${dateTime(lastUpdated, formatLocale)}`
-                  : `Última alteração: ${dateTime(order.updatedAt, formatLocale)}`}
+                  ? t('orderTracking.lastChecked', { date: dateTime(lastUpdated, formatLocale) })
+                  : t('orderTracking.lastChanged', { date: dateTime(order.updatedAt, formatLocale) })}
               </p>
             </div>
             <p className="text-xs leading-5 text-zinc-700">
-              Este link é privado e permite consultar os dados desta encomenda.
-              Não o partilhes. Por segurança, o link não fica guardado no
-              navegador depois de aberto.
+              {t('orderTracking.privacyNotice')}
             </p>
           </div>
         )}
 
         {!loading && !error && !order && (
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.025] p-6 text-sm text-zinc-500">
-            Não foi possível obter os dados da encomenda.
+            {t('orderTracking.unavailable')}
           </div>
         )}
 
