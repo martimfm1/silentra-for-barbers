@@ -17,7 +17,7 @@ import {
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
-import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants;
+import { NEW_MEMBER_PRO_PROMOTION_CODE } from '@/lib/stripe/constants';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
