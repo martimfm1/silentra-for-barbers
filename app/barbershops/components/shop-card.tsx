@@ -182,7 +182,12 @@ export const ShopCard: React.FC<ShopCardProps> = ({
                 <div className="flex items-center gap-1.5 text-emerald-300">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   <span>
-                    {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 1 }).format(shopAsMarket.distanceKm)} {t('directory.distance', { distance: '' }).trim().replace('{distance}', '')}
+                    {t('directory.distance', {
+                      distance: new Intl.NumberFormat(
+                        locale === 'pt' ? 'pt-PT' : 'en-GB',
+                        { maximumFractionDigits: 1 },
+                      ).format(shopAsMarket.distanceKm),
+                    })}
                   </span>
                 </div>
               )}
