@@ -338,6 +338,7 @@ async function POST__unobserved(request: Request) {
     const status = (() => {
       if (!(error instanceof BillingError)) return 500;
       if (error.code === 'INVALID_PRICE') return 400;
+      if (error.code === 'PROMOTION_NOT_ELIGIBLE') return 409;
       if (error.code === 'CSRF_VALIDATION_FAILED') return 403;
       if (error.code === 'BILLING_NOT_CONFIGURED') return 503;
       if (
