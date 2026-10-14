@@ -141,9 +141,11 @@ function parsePromotions(): Map<string, PromotionConfig> {
     }
 
     if (promotions.has(code)) configurationError();
+    const normalizedValue =
+      type === 'free_month' ? undefined : (value as number);
     promotions.set(code, {
       type,
-      value,
+      ...(normalizedValue === undefined ? {} : { value: normalizedValue }),
       ...(plans ? { plans } : {}),
       ...(intervals ? { intervals } : {}),
     });
