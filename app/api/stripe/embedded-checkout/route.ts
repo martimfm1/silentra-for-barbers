@@ -309,7 +309,9 @@ async function POST__unobserved(request: Request) {
       (await hasStripeBillingHistory(customer));
 
     const isNewMemberProOffer =
-      requestedPlan === PLANS.PRO && !hasBillingHistory;
+      requestedPlan === PLANS.PRO &&
+      intent.interval === 'month' &&
+      !hasBillingHistory;
     const promotionCodeId = isNewMemberProOffer
       ? await resolveNewMemberPromotionCodeId()
       : null;
