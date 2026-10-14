@@ -363,6 +363,7 @@ export const pt = {
     unexpectedError: 'Ocorreu um erro inesperado.',
   },
   orderTracking: {
+    marketplace: 'Marketplace',
     privateAccess: 'Acesso privado à encomenda',
     title: 'Acompanhar encomenda',
     subtitle: 'Consulta o estado, os produtos e o histórico do teu pedido sem precisares de criar uma conta.',
