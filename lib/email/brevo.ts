@@ -23,6 +23,7 @@ export async function sendBrevoEmail(input: {
   htmlContent: string;
   senderName?: string;
   attachments?: EmailAttachment[];
+  contactPixelTrackingConsent?: boolean;
 }): Promise<EmailSendResult> {
   if (!input.to || !input.subject || !input.htmlContent)
     return {
@@ -46,7 +47,16 @@ export async function sendBrevoEmail(input: {
           email: senderEmail,
         },
         to: [
-          { email: input.to, ...(input.toName ? { name: input.toName } : {}) },
+          {
+            email: input.to,
+            ...(input.toName ? { name: input.toName } : {}),
+            ...(input.contactPixelTrackingConsent === undefined
+              ? {}
+              : {
+                  contactPixelTrackingConsent:
+                    input.contactPixelTrackingConsent,
+                }),
+          },
         ],
         subject: input.subject,
         htmlContent: input.htmlContent,

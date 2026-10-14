@@ -31,9 +31,12 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 
 ### Pós-compra
 
-- Email de confirmação com referência, artigos, total, vendedor e instruções de levantamento/entrega.
-- Futuro acompanhamento por ligação privada, imprevisível, revogável e com validade; nunca permitir consultar encomendas só com um ID sequencial ou email.
-- Mensagens de estado coerentes entre email, página pública e painel do vendedor.
+- Email de confirmação com referência, artigos, total, vendedor, instruções de levantamento/entrega e ligação privada para acompanhar a encomenda.
+- Página de acompanhamento sem conta com estado atual, progresso, histórico cronológico, resumo dos produtos, total e dados de entrega.
+- Cada ligação usa uma capacidade aleatória de 256 bits; só o hash SHA-256 fica persistido. As ligações expiram ao fim de um ano e podem ser revogadas no servidor. Não permitir consultar encomendas apenas com um ID sequencial ou email.
+- Emails de alteração de estado geram ligações independentes; uma nova notificação não invalida a ligação do comprovativo.
+- A página remove o token da barra de endereço/histórico após a leitura, usa respostas não cacheáveis, não permite indexação e não envia Referer.
+- Mensagens de estado coerentes entre email, página pública e painel do vendedor; a página atualiza manualmente e faz atualização automática moderada enquanto está visível.
 - Cancelamento e devoluções de acordo com as regras publicadas pelo vendedor e com trilho de auditoria.
 - Avaliações verificadas apenas após uma compra concluída, com prevenção de duplicados e moderação.
 
@@ -77,7 +80,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 5. **Validação:** limitar tamanhos de strings, número de artigos, quantidades, UUIDs, métodos de entrega e transições de estado.
 6. **Abuso:** rate limit no catálogo e criação de encomendas, respostas genéricas onde necessário e logs sem emails, telefones, moradas, tokens ou payloads sensíveis.
 7. **Privacidade:** recolher apenas dados necessários, definir retenção e garantir acesso restrito a contactos, moradas e histórico de encomendas.
-8. **Email fiável:** escapar HTML, não incluir segredos em links e separar o estado da encomenda do resultado do envio de email.
+8. **Email fiável:** escapar HTML, não registar tokens nem URLs de acompanhamento, usar apenas a origem HTTPS canónica configurada, separar o estado da encomenda do resultado do envio de email e manter capacidades de acompanhamento diferentes para cada notificação.
 9. **Observabilidade:** logs estruturados com identificador de operação, tenant interno, resultado e código de erro; nunca registar dados pessoais desnecessários.
 10. **Testes:** cobrir isolamento entre barbearias, preço adulterado, stock concorrente, checkout repetido, estados inválidos, vendedor desativado, produto oculto, rate limit e falha de email.
 
@@ -86,7 +89,7 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 1. **Base de experiência:** mobile-first, pesquisa sempre acessível, acessibilidade, loading/error/empty states e carrinho claro.
 2. **Compra segura:** validação de checkout, stock/preços autoritativos, idempotência e confirmação pós-compra.
 3. **Operação do vendedor:** catálogo, estados de encomenda, timeline e notificações fiáveis.
-4. **Pós-compra:** acompanhamento seguro por token e política de cancelamento/devolução.
+4. **Pós-compra:** acompanhamento seguro por token, histórico de estado, notificações com ligações independentes e política de cancelamento/devolução.
 5. **Crescimento:** avaliações verificadas, promoções, favoritos e relatórios por período.
 
 ## Critérios de aceitação
@@ -98,6 +101,8 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - Uma barbearia nunca consegue ler ou alterar produtos, encomendas ou dados pessoais de outra.
 - O vendedor consegue compreender rapidamente o que exige ação e atualizar a encomenda com um histórico auditável.
 - Uma falha de email não apaga a encomenda nem é apresentada como sucesso de envio.
+- Uma ligação de acompanhamento válida apenas revela a encomenda associada à capacidade e não pode ser enumerada por ID; tokens expirados/revogados falham de forma genérica.
+- As mudanças de estado aparecem no histórico do cliente e as novas notificações não invalidam ligações enviadas anteriormente.
 - Os fluxos principais funcionam por teclado, têm labels acessíveis e mantêm estados de erro compreensíveis.
 
 ## Página de produto e destaque Enterprise
@@ -107,4 +112,4 @@ O marketplace público deve continuar acessível sem conta. A Silentra fornece o
 - O formulário do vendedor deve recolher o nome, preço, stock, descrição, categoria, imagem opcional, SKU opcional, preço anterior e limiar de alerta de stock; o preço e o stock continuam a ser autoritativos no servidor.
 - O destaque só pode ser ativado no servidor para lojas com plano efetivo `enterprise`, produtos publicados com stock e dentro das primeiras 72 horas desde a primeira publicação.
 - A data original de publicação deve manter-se nas edições. A expiração não pode ser prolongada por editar o produto ou retirar e voltar a ativar o destaque.
-- Antes do deploy, aplicar a migration `20261013160000_marketplace_product_publication_boost.sql` e executar os testes de tipo, lint, auditoria de API, contratos de produto, formatação, build e smoke tests.
+- Antes do deploy, aplicar as migrations `20261013160000_marketplace_product_publication_boost.sql` e `20261013180000_marketplace_order_tracking_capabilities.sql` e executar os testes de tipo, lint, auditoria de API, contratos de produto, formatação, build e smoke tests.

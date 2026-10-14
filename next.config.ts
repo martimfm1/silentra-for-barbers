@@ -230,6 +230,20 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Tracking links grant access to private order data; unlike the public
+        // product catalogue, this route must not be framed or cached.
+        source: '/marketplace/track/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          ...noFrameHeaders,
+        ],
+      },
     ];
   },
   webpack: (config: WebpackConfig, { isServer }: { isServer: boolean }) => {

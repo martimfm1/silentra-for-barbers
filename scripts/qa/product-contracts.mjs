@@ -96,7 +96,12 @@ const checks = [
     test: (source) =>
       source.includes("requireModuleContext('pos', 'pos')") &&
       source.includes(".eq('barbershop_id', barbershopId)") &&
-      source.includes('sendBrevoEmail'),
+      source.includes('sendBrevoEmail') &&
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes('hashMarketplaceTrackingToken(trackingToken)') &&
+      source.includes('marketplace_order_tracking_tokens') &&
+      source.includes('contactPixelTrackingConsent: false') &&
+      source.includes('Acompanhar encomenda'),
   },
   {
     name: 'Public booking has mobile-safe horizontal overflow rules',
@@ -183,6 +188,112 @@ const checks = [
       source.includes('href={`/marketplace/${product.id}`}') &&
       source.includes('silentra-marketplace-cart') &&
       source.includes("url.searchParams.get('add')"),
+  },
+  {
+    name: 'Marketplace tracking capability migration hashes links, preserves legacy links, and expires tokens',
+    file: 'supabase/migrations/20261013180000_marketplace_order_tracking_capabilities.sql',
+    test: (source) =>
+      source.includes('marketplace_order_tracking_tokens') &&
+      source.includes('token_hash text not null unique') &&
+      source.includes("now() + interval '365 days'") &&
+      source.includes('revoked_at') &&
+      source.includes('tracking_token_hash'),
+  },
+  {
+    name: 'Marketplace order creation stores hash-only tracking capabilities',
+    file: 'app/api/marketplace/orders/route.ts',
+    test: (source) =>
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes('hashMarketplaceTrackingToken(') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('buildMarketplaceTrackingUrl') &&
+      source.includes('contactPixelTrackingConsent: false'),
+  },
+  {
+    name: 'Brevo passes per-recipient consent without making tracking mandatory',
+    file: 'lib/email/brevo.ts',
+    test: (source) =>
+      source.includes('contactPixelTrackingConsent?: boolean;') &&
+      source.includes('contactPixelTrackingConsent:') &&
+      source.includes('input.contactPixelTrackingConsent'),
+  },
+  {
+    name: 'Customer tracking API resolves revocable tokens and returns status history',
+    file: 'app/api/marketplace/orders/track/route.ts',
+    test: (source) =>
+      source.includes('isMarketplaceTrackingToken(token)') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('capability.revoked_at') &&
+      source.includes('capability.expires_at') &&
+      source.includes("from('marketplace_order_events')") &&
+      source.includes("event.source !== 'manual_email'") &&
+      source.includes("'Referrer-Policy': 'no-referrer'"),
+  },
+  {
+    name: 'Marketplace status notification emails issue independent tracking links',
+    file: 'app/api/marketplace/orders/[orderId]/route.ts',
+    test: (source) =>
+      source.includes('createMarketplaceTrackingToken()') &&
+      source.includes("from('marketplace_order_tracking_tokens')") &&
+      source.includes('buildMarketplaceTrackingUrl(token)') &&
+      source.includes('Acompanhar encomenda') &&
+      source.includes('contactPixelTrackingConsent: false') &&
+      source.includes("completed: 'A sua encomenda foi concluída'"),
+  },
+  {
+    name: 'Customer tracking experience shows progress, history, delivery and manual refresh',
+    file: 'app/marketplace/track/tracking-client.tsx',
+    test: (source) =>
+      source.includes('Progresso da encomenda') &&
+      source.includes('Histórico') &&
+      source.includes('Dados de entrega') &&
+      source.includes('Atualizar estado') &&
+      source.includes('setInterval') &&
+      source.includes("referrerPolicy: 'no-referrer'") &&
+      source.includes('replaceState'),
+  },
+  {
+    name: 'Tracking page is excluded from indexing and disables referrer leakage',
+    file: 'app/marketplace/track/page.tsx',
+    test: (source) =>
+      source.includes('index: false') &&
+      source.includes('follow: false') &&
+      source.includes("referrer: 'no-referrer'"),
+  },
+  {
+    name: 'Marketplace tracking token is scrubbed before analytics and pixels execute',
+    file: 'app/layout.tsx',
+    test: (source) => {
+      const bootstrap = source.indexOf(
+        'id="marketplace-tracking-token-bootstrap"',
+      );
+      const whopPixel = source.indexOf('id="whop-pixel"');
+      return (
+        source.includes('TRACKING_TOKEN_BOOTSTRAP_SCRIPT') &&
+        source.includes('__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__') &&
+        source.includes('window.history.replaceState') &&
+        bootstrap >= 0 &&
+        whopPixel > bootstrap &&
+        source.includes('GoogleTagManager gtmId="GTM-PBCWTRT5"')
+      );
+    },
+  },
+  {
+    name: 'Private order tracking page overrides public page headers',
+    file: 'next.config.ts',
+    test: (source) => {
+      const genericHeaders = source.indexOf("source: '/:path*'");
+      const trackingHeaders = source.indexOf(
+        "source: '/marketplace/track/:path*'",
+      );
+      return (
+        trackingHeaders > genericHeaders &&
+        source.includes("key: 'Cache-Control', value: 'no-store, max-age=0'") &&
+        source.includes("key: 'Referrer-Policy', value: 'no-referrer'") &&
+        source.includes("key: 'X-Frame-Options',") &&
+        source.includes("value: 'DENY'")
+      );
+    },
   },
 ];
 
