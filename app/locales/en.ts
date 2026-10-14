@@ -415,6 +415,10 @@ export const en = {
     tomorrow: 'Tomorrow',
     activeLocation: 'Location enabled',
     distance: '{distance} km away',
+    foundOne: 'barbershop found',
+    foundMany: 'barbershops found',
+    searching: 'Searching…',
+    filter: 'Filter:',
     shopLogo: 'Logo for {shop}',
   },
   storefront: {
