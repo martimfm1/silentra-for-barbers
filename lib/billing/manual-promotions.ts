@@ -13,11 +13,12 @@ export type ManualPricingQuote = {
   finalPrice: number;
   currency: 'EUR';
   discountDescription: string | null;
+  freeTrial: boolean;
 };
 
 type PromotionConfig = {
-  type: 'percentage' | 'fixed';
-  value: number;
+  type: 'percentage' | 'fixed' | 'free_month';
+  value?: number;
   plans?: ManualPromotionPlan[];
   intervals?: ManualBillingInterval[];
 };
@@ -73,7 +74,27 @@ function parsePromotions(): Map<string, PromotionConfig> {
     const type = config.type;
     const value = config.value;
     if (
-      (type !== 'percentage' && type !== 'fixed') ||
+      type !== 'percentage' &&
+      type !== 'fixed' &&
+      type !== 'free_month'
+    ) {
+      configurationError();
+    }
+
+    if (type === 'free_month') {
+      if (
+        code !== 'TRIALPRO' ||
+        value !== undefined ||
+        !Array.isArray(config.plans) ||
+        config.plans.length !== 1 ||
+        config.plans[0] !== 'pro' ||
+        !Array.isArray(config.intervals) ||
+        config.intervals.length !== 1 ||
+        config.intervals[0] !== 'month'
+      ) {
+        configurationError();
+      }
+    } else if (
       typeof value !== 'number' ||
       !Number.isFinite(value) ||
       value <= 0 ||
@@ -158,6 +179,7 @@ export function quoteManualPrice(
       finalPrice: euroAmount(originalCents),
       currency: 'EUR',
       discountDescription: null,
+      freeTrial: false,
     };
   }
 
@@ -172,10 +194,18 @@ export function quoteManualPrice(
     invalidPromotion();
   }
 
+  if (promotion.type === 'free_month') {
+    if (plan !== 'pro' || interval !== 'month') invalidPromotion();
+    throw new BillingError(
+      'O código TRIALPRO só pode ser aplicado a novos clientes elegíveis do plano Pro mensal.',
+      'PROMOTION_NOT_ELIGIBLE',
+    );
+  }
+
   const requestedDiscountCents =
     promotion.type === 'percentage'
-      ? Math.round((originalCents * promotion.value) / 100)
-      : Math.round(promotion.value * 100);
+      ? Math.round((originalCents * promotion.value!) / 100)
+      : Math.round(promotion.value! * 100);
   const discountCents = Math.min(originalCents, requestedDiscountCents);
   if (discountCents <= 0 || discountCents >= originalCents) {
     invalidPromotion();
@@ -196,5 +226,6 @@ export function quoteManualPrice(
     finalPrice: euroAmount(originalCents - discountCents),
     currency: 'EUR',
     discountDescription,
+    freeTrial: false,
   };
 }
