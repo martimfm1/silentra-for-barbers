@@ -98,12 +98,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const database = createAdminClient();
-    const { data: activeLandingPages, error: landingPagesError } = await database
-      .from('barbershop_landing_pages')
-      .select('barbershop_id, updated_at')
-      .eq('status', 'active')
-      .order('updated_at', { ascending: false })
-      .limit(1000);
+    const { data: activeLandingPages, error: landingPagesError } =
+      await database
+        .from('barbershop_landing_pages')
+        .select('barbershop_id, updated_at')
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+        .limit(1000);
 
     if (!landingPagesError && activeLandingPages?.length) {
       // Resolve a small batch at a time to avoid thousands of concurrent queries.
@@ -111,7 +112,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const batch = await Promise.all(
           activeLandingPages.slice(offset, offset + 20).map(async (entry) => {
             try {
-              const profile = await getPublicProfileById(String(entry.barbershop_id));
+              const profile = await getPublicProfileById(
+                String(entry.barbershop_id),
+              );
               if (
                 !profile ||
                 profile.plan !== 'enterprise' ||
