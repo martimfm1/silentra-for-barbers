@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -293,9 +294,12 @@ export default function OnboardingPage() {
                   {t('onboarding.editLater')}
                 </p>
               </div>
-              <span className="shrink-0 font-medium tabular-nums text-zinc-400">
-                {progress}%
-              </span>
+              <div className="flex shrink-0 items-center gap-3">
+                <LanguageSwitcher />
+                <span className="font-medium tabular-nums text-zinc-400">
+                  {progress}%
+                </span>
+              </div>
             </div>
             <div
               className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10"
