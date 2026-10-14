@@ -16,8 +16,10 @@ import { getClientAuthCallbackUrl } from '@/lib/auth/email-confirmation';
 import { StarfieldBackground } from '@/components/ui/starfield';
 import { Button } from '@/components/ui/button';
 import { SiteNavbar } from '@/components/site-navbar';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ConfirmEmailPage() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
@@ -30,7 +32,7 @@ export default function ConfirmEmailPage() {
   const handleResendEmail = async () => {
     if (!email) {
       setResendStatus('error');
-      setStatusMessage('Não foi possível identificar o endereço de e-mail.');
+      setStatusMessage(t('auth.emailMissing'));
       return;
     }
 
@@ -53,20 +55,20 @@ export default function ConfirmEmailPage() {
         console.error('[CONFIRM_EMAIL_RESEND_ERROR]', error);
         setResendStatus('error');
         setStatusMessage(
-          'Não foi possível reenviar o email de confirmação. Tenta novamente dentro de alguns minutos.',
+          t('auth.resendFailed'),
         );
         return;
       }
 
       setResendStatus('success');
       setStatusMessage(
-        'Novo email de confirmação enviado. Verifica também a pasta de spam.',
+        t('auth.resendSuccess'),
       );
     } catch (error) {
       console.error('[CONFIRM_EMAIL_RESEND_ERROR]', error);
       setResendStatus('error');
       setStatusMessage(
-        'Não foi possível reenviar o email de confirmação. Tenta novamente mais tarde.',
+        t('auth.resendFailed'),
       );
     } finally {
       setIsResending(false);
@@ -91,11 +93,11 @@ export default function ConfirmEmailPage() {
               </div>
 
               <h1 className="font-heading text-2xl font-bold text-zinc-50 tracking-tight">
-                Verifica a tua caixa de entrada
+                {t('auth.confirmEmailTitle')}
               </h1>
 
               <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-                Enviámos um email com o link de confirmação para:
+                {t('auth.confirmEmailSubtitle')}
               </p>
 
               {email && (
@@ -159,8 +161,7 @@ export default function ConfirmEmailPage() {
                     className="h-11 w-full rounded-full bg-zinc-50 text-xs font-bold text-zinc-950 hover:bg-white transition-all shadow-md"
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <ArrowLeft className="size-4" aria-hidden="true" /> Voltar
-                      ao início de sessão
+                      <ArrowLeft className="size-4" aria-hidden="true" /> {t('auth.backToLogin')}
                     </span>
                   </Button>
                 </Link>
