@@ -105,7 +105,10 @@ async function POST__unobserved(request: Request) {
       error instanceof BillingError
         ? billingErrorResponse(error)
         : NextResponse.json(
-            { error: 'Não foi possível validar o código promocional. Tenta novamente.' },
+            {
+              error:
+                'Não foi possível validar o código promocional. Tenta novamente.',
+            },
             { status: 500 },
           );
     response.headers.set('Cache-Control', 'no-store');
