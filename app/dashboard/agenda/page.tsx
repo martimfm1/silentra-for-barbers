@@ -13,6 +13,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
 import type { Appointment, Client, Professional, Service } from '@/types';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
@@ -31,7 +32,7 @@ const STATUS_FILTERS = [
   { id: 'all', label: 'Todas' },
   { id: 'pending', label: 'Por confirmar' },
   { id: 'scheduled', label: 'Confirmadas' },
-  { id: 'completed', label: 'Concluídas' },
+  { id: 'completed', label: t('agenda.completed') },
   { id: 'cancelled', label: 'Canceladas' },
 ] as const;
 
@@ -47,6 +48,7 @@ function sameLocalDay(value: string, reference: Date) {
 }
 
 export default function AgendaPage() {
+  const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -82,7 +84,7 @@ export default function AgendaPage() {
       setClients(clientsRes.data ?? []);
     } catch (error) {
       console.error('[Agenda Sync Error]:', error);
-      toast.error('Não foi possível atualizar a agenda. Tenta novamente.');
+      toast.error(t('agenda.loadingError'));
     } finally {
       setLoadingInitial(false);
     }
@@ -239,7 +241,7 @@ export default function AgendaPage() {
                 <span className="font-semibold text-zinc-200">
                   {metrics.today}
                 </span>{' '}
-                {metrics.today === 1 ? 'marcação hoje' : 'marcações hoje'} ·{' '}
+                {metrics.today === 1 ? t('agenda.bookingTodayOne') : t('agenda.bookingTodayMany')} ·{' '}
                 <span className="font-semibold text-amber-200">
                   {metrics.pending}
                 </span>{' '}
@@ -254,14 +256,14 @@ export default function AgendaPage() {
               className="border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200 hover:border-emerald-400/30 hover:bg-emerald-400/[0.1]"
             >
               <Plus className="size-4" aria-hidden="true" />
-              {showAddForm ? 'Fechar marcação' : 'Nova marcação'}
+              {showAddForm ? t('agenda.closeBooking') : t('agenda.newBooking')}
             </Button>
             <Button
               variant="outline"
               onClick={() => setShowAddBlockForm((value) => !value)}
             >
               <CalendarOff className="size-4" aria-hidden="true" />
-              {showAddBlockForm ? 'Fechar bloqueio' : 'Bloquear horário'}
+              {showAddBlockForm ? t('agenda.closeBlock') : t('agenda.blockTime')}
             </Button>
           </div>
         </header>
@@ -276,7 +278,7 @@ export default function AgendaPage() {
               {[
                 ['Hoje', metrics.today, CalendarDays, 'text-emerald-300'],
                 [
-                  'Próximas hoje',
+                  t('agenda.upcomingToday'),
                   metrics.upcomingToday,
                   Clock3,
                   'text-sky-300',
@@ -322,7 +324,7 @@ export default function AgendaPage() {
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Pesquisar cliente, serviço, barbeiro ou contacto"
+                  placeholder={t('agenda.searchPlaceholder')}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 text-sm text-zinc-100 outline-none focus:border-emerald-400/30"
                   aria-label="Pesquisar na agenda"
                 />
@@ -330,7 +332,7 @@ export default function AgendaPage() {
               <div
                 className="flex gap-2 overflow-x-auto pb-0.5"
                 role="tablist"
-                aria-label="Estado das marcações"
+                aria-label={t('agenda.filterStatus')}
               >
                 {STATUS_FILTERS.map((filter) => (
                   <button
@@ -391,12 +393,12 @@ export default function AgendaPage() {
               >
                 <div className="flex flex-col gap-3 border-b border-white/[0.075] p-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-5">
                   <div>
-                    <p className="silentra-eyebrow mb-0">Hoje e próximos</p>
+                    <p className="silentra-eyebrow mb-0">{t('agenda.eyebrow')}</p>
                     <h2
                       id="agenda-list-title"
                       className="mt-1 text-xl font-semibold tracking-[-0.03em] text-zinc-50 sm:text-2xl"
                     >
-                      Marcações
+                      {t('agenda.title')}
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-zinc-500">
                       Pesquisa, filtra e abre rapidamente a marcação que precisa
@@ -415,13 +417,13 @@ export default function AgendaPage() {
                     </div>
                     <h2 className="mt-4 text-base font-semibold text-zinc-100">
                       {search || statusFilter !== 'all' || todayOnly
-                        ? 'Não encontrámos marcações com estes filtros.'
-                        : 'A tua agenda está pronta para receber a primeira marcação.'}
+                        ? t('agenda.noMatches')
+                        : t('agenda.emptyTitle')}
                     </h2>
                     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">
                       {search || statusFilter !== 'all' || todayOnly
                         ? 'Experimenta limpar a pesquisa ou escolher outro estado.'
-                        : 'Cria uma marcação agora e adiciona o resto à medida que precisares.'}
+                        : t('agenda.emptySubtitle')}
                     </p>
                     {search || statusFilter !== 'all' || todayOnly ? (
                       <Button
@@ -441,7 +443,7 @@ export default function AgendaPage() {
                         className="mt-5 bg-zinc-50 text-zinc-950 hover:bg-white"
                       >
                         <Plus className="size-4" aria-hidden="true" />
-                        Criar primeira marcação
+                        {t('agenda.createFirst')}
                       </Button>
                     )}
                   </div>
@@ -470,8 +472,8 @@ export default function AgendaPage() {
               {appointments.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-zinc-600">
                   <Users className="size-3.5" aria-hidden="true" />
-                  {clients.length} clientes disponíveis · {services.length}{' '}
-                  serviços · {professionals.length} barbeiros
+                  {clients.length} {t('agenda.clientsAvailable')} · {services.length}{' '}
+                  {t('agenda.servicesAvailable')} · {professionals.length} {t('agenda.barbersAvailable')}
                 </div>
               )}
             </div>
