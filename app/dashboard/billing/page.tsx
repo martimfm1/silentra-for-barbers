@@ -48,9 +48,9 @@ export default function BillingPage() {
               Plano e faturação
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              Resumo do teu plano, estado da subscrição e comprovativos de
-              pagamento. As decisões de compra e mudança de plano acontecem em
-              /plans.
+              Resumo do teu plano, estado da subscrição e histórico dos
+              documentos de faturação emitidos. As decisões de compra e mudança
+              de plano acontecem em /plans.
             </p>
           </div>
           <Button
