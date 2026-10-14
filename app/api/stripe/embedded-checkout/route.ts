@@ -281,8 +281,31 @@ async function POST__unobserved(request: Request) {
       );
     }
 
+    const database = createAdminClient();
+    const [localSubscriptionHistory, manualRequestHistory] = await Promise.all([
+      database
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1),
+      database
+        .from('subscription_requests')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1),
+    ]);
+
+    if (localSubscriptionHistory.error || manualRequestHistory.error) {
+      throw new BillingError(
+        'Não foi possível verificar o histórico da oferta para esta conta.',
+        'DB_READ_FAILED',
+      );
+    }
+
     const hasBillingHistory =
       Boolean(existing?.stripe_subscription_id) ||
+      Boolean(localSubscriptionHistory.data?.length) ||
+      Boolean(manualRequestHistory.data?.length) ||
       (await hasStripeBillingHistory(customer));
 
     const isNewMemberProOffer =
