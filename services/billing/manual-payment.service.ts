@@ -15,6 +15,7 @@ import {
 } from '@/services/billing/email-templates';
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
+import { quoteManualPrice } from '@/lib/billing/manual-promotions';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
@@ -31,6 +32,9 @@ export interface ManualSubscriptionRequest {
   status: ManualRequestStatus;
   payment_method: 'MANUAL';
   price: number;
+  original_price: number;
+  discount_amount: number;
+  promotion_code: string | null;
   currency: 'EUR';
   payment_link: string | null;
   payment_sent_at: string | null;
@@ -212,6 +216,7 @@ export class ManualPaymentService {
     barbershopId: string;
     plan: Exclude<BillingPlan, 'free'>;
     billingInterval?: ManualBillingInterval;
+    promotionCode?: string | null;
     requestType?: ManualRequestType;
     details?: {
       billingName: string;
@@ -233,6 +238,7 @@ export class ManualPaymentService {
     const interval = input.billingInterval ?? 'month';
     const requestType = input.requestType ?? 'NEW';
     const price = getManualPrice(input.plan, interval);
+    const quote = quoteManualPrice(input.plan, interval, input.promotionCode);
 
     if (!price) {
       throw new BillingError(
@@ -312,8 +318,11 @@ export class ManualPaymentService {
         billing_interval: interval,
         status: 'PENDING',
         payment_method: 'MANUAL',
-        price: Number(price.unitAmount.toFixed(2)),
-        currency: price.currency,
+        price: quote.finalPrice,
+        original_price: quote.originalPrice,
+        discount_amount: quote.discountAmount,
+        promotion_code: quote.promotionCode,
+        currency: quote.currency,
         billing_name: input.details?.billingName ?? null,
         tax_id: input.details?.taxId ?? null,
         billing_email: input.details?.billingEmail ?? null,
