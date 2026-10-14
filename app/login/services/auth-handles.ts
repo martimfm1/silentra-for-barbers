@@ -1,6 +1,7 @@
 import { FormEvent } from 'react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { trackMarketingEvent } from '@/lib/analytics/marketing';
 
 /**
  * Compatibility handler for Supabase confirmation links that still use the
@@ -191,7 +192,7 @@ export async function handleRegister({
     });
 
     const contentType = res.headers.get('content-type');
-    let data: { error?: string } = {};
+    let data: { error?: string; requiresEmailConfirmation?: boolean } = {};
 
     if (contentType && contentType.includes('application/json')) {
       data = await res.json();
@@ -205,6 +206,12 @@ export async function handleRegister({
     if (!res.ok) {
       throw new Error(data.error || 'Falha ao criar conta.');
     }
+
+    trackMarketingEvent('sign_up', {
+      method: 'email',
+      registration_step: 'account_created',
+      email_confirmation_required: data.requiresEmailConfirmation ?? true,
+    });
 
     toast.success('Conta criada! Confirma o teu e-mail para continuar.');
 
