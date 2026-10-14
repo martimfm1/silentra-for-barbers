@@ -77,11 +77,7 @@ function parsePromotions(): Map<string, PromotionConfig> {
     const config = rawConfig as Record<string, unknown>;
     const type = config.type;
     const value = config.value;
-    if (
-      type !== 'percentage' &&
-      type !== 'fixed' &&
-      type !== 'free_month'
-    ) {
+    if (type !== 'percentage' && type !== 'fixed' && type !== 'free_month') {
       configurationError();
     }
 
