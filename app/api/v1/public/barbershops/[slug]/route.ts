@@ -110,7 +110,7 @@ async function GET__unobserved(
         .limit(100),
       database
         .from('shops')
-        .select('amenities')
+        .select('amenities, rating, reviews_count')
         .eq('barbershop_id', barbershopId)
         .maybeSingle(),
       database
@@ -155,7 +155,7 @@ async function GET__unobserved(
       comment: review.comment ?? null,
       createdAt: review.created_at,
     }));
-    const rating = reviewItems.length
+    const calculatedRating = reviewItems.length
       ? Number(
           (
             reviewItems.reduce((total, review) => total + review.rating, 0) /
@@ -163,6 +163,14 @@ async function GET__unobserved(
           ).toFixed(1),
         )
       : 0;
+    const rating =
+      typeof shop?.rating === 'number' && Number.isFinite(shop.rating)
+        ? Number(shop.rating.toFixed(1))
+        : calculatedRating;
+    const reviewsCount =
+      typeof shop?.reviews_count === 'number' && shop.reviews_count >= 0
+        ? shop.reviews_count
+        : reviewItems.length;
     const landingPath =
       profile.plan === 'enterprise' && landingEntitlement?.status === 'active'
         ? '/site/' + encodeURIComponent(profile.slug)
@@ -206,7 +214,7 @@ async function GET__unobserved(
         })),
         reviews: reviewItems,
         rating,
-        reviewsCount: reviewItems.length,
+        reviewsCount,
         bookingUrl: SITE_ORIGIN + '/barbershops/' + encodeURIComponent(profile.slug),
         landingPage: {
           available: landingPath !== null,
