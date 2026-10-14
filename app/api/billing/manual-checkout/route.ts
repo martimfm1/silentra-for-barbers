@@ -7,6 +7,7 @@ import { PaymentModeService } from '@/services/billing/payment-mode.service';
 import { BillingError } from '@/types/stripe';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
 import { PLANS } from '@/lib/stripe/constants';
+import { assertSameOrigin } from '@/services/billing/http';
 
 type Details = {
   billingName?: unknown;
@@ -55,6 +56,8 @@ function website(value: string | null) {
 
 async function POST__unobserved(request: Request) {
   try {
+    assertSameOrigin(request);
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -70,10 +73,20 @@ async function POST__unobserved(request: Request) {
 
     const body = (await request.json().catch(() => null)) as {
       checkoutToken?: unknown;
+      promotionCode?: unknown;
       details?: Details;
     } | null;
 
     const token = clean(body?.checkoutToken, 4096);
+    const rawPromotionCode =
+      typeof body?.promotionCode === 'string' ? body.promotionCode.trim() : '';
+    if (rawPromotionCode.length > 100) {
+      return NextResponse.json(
+        { error: 'O código promocional é demasiado longo.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    const promotionCode = rawPromotionCode || null;
     const intent = token ? verifyCheckoutIntent(token) : null;
 
     if (!intent || intent.sub !== user.id) {
@@ -237,6 +250,7 @@ async function POST__unobserved(request: Request) {
       barbershopId: profile.barbershop_id,
       plan,
       billingInterval: intent.interval,
+      promotionCode,
       requestType,
       details: {
         billingName,
@@ -289,7 +303,11 @@ async function POST__unobserved(request: Request) {
     const status =
       error instanceof BillingError && ['INVALID_PRICE'].includes(error.code)
         ? 400
-        : error instanceof BillingError &&
+        : error instanceof BillingError && error.code === 'CSRF_VALIDATION_FAILED'
+          ? 403
+          : error instanceof BillingError && error.code === 'BILLING_NOT_CONFIGURED'
+            ? 503
+            : error instanceof BillingError &&
             ['SUBSCRIPTION_NOT_ACTIVE', 'SUBSCRIPTION_NOT_FOUND'].includes(
               error.code,
             )
