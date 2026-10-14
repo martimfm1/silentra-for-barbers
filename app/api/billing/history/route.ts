@@ -164,7 +164,7 @@ async function GET__unobserved() {
 
       return {
         id: document.id,
-        source: 'MANUAL',
+        source: 'MANUAL' as const,
         document_number: document.document_number,
         amount: Math.round(Number(document.total) * 100),
         currency: String(document.currency ?? 'EUR').toUpperCase(),
