@@ -5,9 +5,9 @@ import { LocalizedHomepage } from '@/components/hero/localized-homepage';
 import { LocalizedPricingSection } from '@/components/hero/localized-pricing-section';
 
 export const metadata: Metadata = {
-  title: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
+  title: 'Software de Gestão e Agendamento para Barbearias',
   description:
-    'Gere a tua barbearia, receba marcações online e acompanha clientes, equipa e receita num único painel com a Silentra.',
+    'Software de gestão para barbearias em Portugal: agenda online, serviços, clientes e equipa num único painel. Os clientes reservam sem conta. Começa grátis.',
   alternates: {
     canonical: 'https://barbers.silentra.me/',
   },
@@ -30,6 +30,18 @@ function HomeStructuredData() {
       name: 'Silentra for Barbers',
       alternateName: 'Silentra for Barbers',
       logo: 'https://barbers.silentra.me/icon-2.png',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': 'https://barbers.silentra.me/#software',
+      name: 'Silentra for Barbers',
+      url: 'https://barbers.silentra.me/',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web browser',
+      description: 'Software de gestão para barbearias com agenda online, gestão de clientes e equipa e marcações sem conta do cliente.',
+      inLanguage: ['pt-PT', 'en'],
+      provider: { '@id': 'https://barbers.silentra.me/#organization' },
+      isAccessibleForFree: true,
     },
   ];
 
