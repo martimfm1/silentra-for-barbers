@@ -261,7 +261,10 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
             money(context.originalPrice ?? context.price, context.currency),
           ],
           ['Código promocional', context.promotionCode || '—'],
-          ['Desconto', `−${money(context.discountAmount ?? 0, context.currency)}`],
+          [
+            'Desconto',
+            `−${money(context.discountAmount ?? 0, context.currency)}`,
+          ],
         ]
       : [];
   const content = details([
@@ -300,7 +303,10 @@ export function customerPaymentLinkEmail(context: BillingEmailContext) {
             money(context.originalPrice ?? context.price, context.currency),
           ],
           ['Código promocional', context.promotionCode || '—'],
-          ['Desconto', `−${money(context.discountAmount ?? 0, context.currency)}`],
+          [
+            'Desconto',
+            `−${money(context.discountAmount ?? 0, context.currency)}`,
+          ],
         ]
       : [];
 
