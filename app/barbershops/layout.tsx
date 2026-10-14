@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Barbearias em Portugal — Encontra e Marca Online | Silentra',
+  title: 'Barbearias em Portugal — Encontra e Marca Online',
   description:
     'Descobre barbearias, compara serviços e disponibilidade e marca online em poucos segundos através da Silentra.',
   alternates: { canonical: 'https://barbers.silentra.me/barbershops' },
