@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { TrackedMarketingLink } from '@/components/marketing/tracked-marketing-link';
 import { useLanguage } from '@/context/LanguageContext';
 import {
   ArrowRight,
@@ -286,13 +287,15 @@ export function LocalizedHomepage() {
               {copy.heroText}
             </p>
             <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <Link
+              <TrackedMarketingLink
                 href="/registo"
+                ctaId="homepage_start_free_hero"
+                ctaLocation="homepage_hero"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950 transition hover:-translate-y-0.5"
               >
                 {copy.barberCta}
                 <ArrowRight className="size-4" />
-              </Link>
+              </TrackedMarketingLink>
               <Link
                 href="/barbershops"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-zinc-100 transition hover:border-white/20 hover:bg-white/[0.07]"
