@@ -256,7 +256,10 @@ export function adminPaymentRequestEmail(context: BillingEmailContext) {
   const promotionDetails: Array<[string, string]> =
     (context.discountAmount ?? 0) > 0
       ? [
-          ['Preço original', money(context.originalPrice ?? context.price, context.currency)],
+          [
+            'Preço original',
+            money(context.originalPrice ?? context.price, context.currency),
+          ],
           ['Código promocional', context.promotionCode || '—'],
           ['Desconto', `−${money(context.discountAmount ?? 0, context.currency)}`],
         ]
