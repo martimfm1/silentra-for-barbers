@@ -70,6 +70,9 @@ jobs:
       - name: Manual promotion contracts
         run: pnpm qa:manual-promotions
 
+      - name: Enterprise landing-page and public API contracts
+        run: pnpm qa:enterprise-landing-pages
+
       - name: Dependency audit
         run: pnpm qa:deps
 
