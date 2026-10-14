@@ -45,36 +45,13 @@ begin
     return;
   end if;
 
-  select a.plan::text
-    into v_effective_plan
-  from public.barbershop_plan_assignments as a
-  where a.barbershop_id = p_barbershop_id
-    and (a.expires_at is null or a.expires_at > pg_catalog.now())
-  limit 1;
-
-  if not found then
-    select case
-      when s.status in ('active', 'trialing')
-       and (
-         case
-           when s.plan_override::text in ('pro', 'enterprise')
-             then s.plan_override::text
-           else s.plan::text
-         end
-       ) = 'enterprise'
-      then 'enterprise'
-      else 'free'
-    end
-      into v_effective_plan
-    from public.subscriptions as s
-    where s.barbershop_id = p_barbershop_id
-    order by s.updated_at desc, s.created_at desc
-    limit 1;
-
-    if not found then
-      v_effective_plan := 'free';
-    end if;
-  end if;
+  -- Reuse the same database-side resolver that protects all plan entitlements,
+  -- so landing-page access cannot drift from the rest of the product.
+  select coalesce(
+    public.get_effective_billing_plan_for_barbershop(p_barbershop_id),
+    'free'::text
+  )
+    into v_effective_plan;
 
   if v_effective_plan = 'enterprise' then
     insert into public.barbershop_landing_pages (
