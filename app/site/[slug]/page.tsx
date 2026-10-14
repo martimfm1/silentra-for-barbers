@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cache } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getPublicProfileBySlug,
@@ -164,6 +164,9 @@ export default async function EnterpriseBarbershopLandingPage({
   const { slug } = await params;
   const data = await getLandingPageData(slug);
   if (!data) notFound();
+  if (slug !== data.profile.slug) {
+    permanentRedirect('/site/' + encodeURIComponent(data.profile.slug));
+  }
 
   const profile = data.profile;
   const canonicalProfileUrl = '/barbershops/' + encodeURIComponent(profile.slug);
