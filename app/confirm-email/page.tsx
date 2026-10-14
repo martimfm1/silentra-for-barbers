@@ -150,7 +150,7 @@ export default function ConfirmEmailPage() {
                   ) : (
                     <span className="flex items-center justify-center gap-2">
                       <RefreshCw className="size-3.5" aria-hidden="true" />{' '}
-                      Reenviar email de confirmação
+                      {t('auth.resendEmail')}
                     </span>
                   )}
                 </Button>
