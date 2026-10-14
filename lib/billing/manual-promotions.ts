@@ -1,4 +1,7 @@
-import { getManualPrice, type ManualBillingInterval } from '@/lib/billing/manual-pricing';
+import {
+  getManualPrice,
+  type ManualBillingInterval,
+} from '@/lib/billing/manual-pricing';
 import { BillingError } from '@/types/stripe';
 
 export type ManualPromotionPlan = 'pro' | 'enterprise';
@@ -74,7 +77,7 @@ function parsePromotions(): Map<string, PromotionConfig> {
       typeof value !== 'number' ||
       !Number.isFinite(value) ||
       value <= 0 ||
-      (type === 'percentage' && value > 100) ||
+      (type === 'percentage' && value >= 100) ||
       (type === 'fixed' && value > 10000)
     ) {
       configurationError();
@@ -174,6 +177,9 @@ export function quoteManualPrice(
       ? Math.round((originalCents * promotion.value) / 100)
       : Math.round(promotion.value * 100);
   const discountCents = Math.min(originalCents, requestedDiscountCents);
+  if (discountCents <= 0 || discountCents >= originalCents) {
+    invalidPromotion();
+  }
   const discountAmount = euroAmount(discountCents);
   const discountDescription =
     promotion.type === 'percentage'
