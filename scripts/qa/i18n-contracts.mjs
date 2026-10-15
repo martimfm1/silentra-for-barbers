@@ -37,11 +37,20 @@ function objectTreeFromFile(path, exportName) {
       ts.isVariableDeclaration(node) &&
       ts.isIdentifier(node.name) &&
       node.name.text === exportName &&
-      node.initializer &&
-      ts.isObjectLiteralExpression(node.initializer)
+      node.initializer
     ) {
-      result = objectTree(node.initializer);
-      return;
+      let initializer = node.initializer;
+      while (
+        ts.isAsExpression(initializer) ||
+        ts.isTypeAssertionExpression(initializer) ||
+        ts.isSatisfiesExpression(initializer)
+      ) {
+        initializer = initializer.expression;
+      }
+      if (ts.isObjectLiteralExpression(initializer)) {
+        result = objectTree(initializer);
+        return;
+      }
     }
     ts.forEachChild(node, visit);
   }
