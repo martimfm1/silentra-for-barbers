@@ -468,7 +468,7 @@ export default function SettingsPageOrganized() {
                       <Icon className="size-4" />
                     </span>
                     <span>
-                      <span className="block text-sm font-medium">{label}</span>
+                      <span className="block text-sm font-medium">{t(`settingsPage.${id}`)}</span>
                       <span className="block truncate text-[11px] text-zinc-600">
                         {t(`settingsPage.${id}Description`)}
                       </span>
@@ -509,7 +509,7 @@ export default function SettingsPageOrganized() {
               >
                 {sections.map(([id, label]) => (
                   <option key={id} value={id}>
-                    {label}
+                    {t(`settingsPage.${id}`)}
                   </option>
                 ))}
               </select>
@@ -518,7 +518,7 @@ export default function SettingsPageOrganized() {
               <Card className={CARD_CLASS}>
                 <CardContent className="p-6 sm:p-8">
                   <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-400">
-                    Centro de definições
+                    {t('settingsPage.overviewEyebrow')}
                   </p>
                   <h2 className="mt-2 text-3xl font-semibold">
                     {t('settingsPage.overviewTitle')}
@@ -534,10 +534,10 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Store className="size-4 text-emerald-400" />
-                    Negócio
+                    {t('settingsPage.business')}
                   </CardTitle>
                   <CardDescription>
-                    Informações públicas da tua barbearia.
+                    {t('settingsPage.publicInfo')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-5 sm:grid-cols-2">
@@ -574,7 +574,7 @@ export default function SettingsPageOrganized() {
                   <div className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div>
                       <p className="text-sm font-medium">
-                        Visibilidade no diretório
+                        {t('settingsPage.directoryVisibility')}
                       </p>
                       <p className="mt-1 text-xs text-zinc-600">
                         Mostra ou esconde a barbearia na descoberta pública.
@@ -596,10 +596,10 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="size-4 text-emerald-400" />
-                    Localização e informações
+                    {t('settingsPage.locationInfo')}
                   </CardTitle>
                   <CardDescription>
-                    Morada, mapa e características do espaço.
+                    {t('settingsPage.locationDescriptionLong')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -619,7 +619,7 @@ export default function SettingsPageOrganized() {
                   />
                   {suggestion && (
                     <p className="text-xs text-emerald-300">
-                      Morada selecionada: {suggestion.fullAddress}
+                      {t('settingsPage.selectedAddress', { address: suggestion.fullAddress })}
                     </p>
                   )}
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -638,7 +638,7 @@ export default function SettingsPageOrganized() {
                             : 'border-white/10 bg-white/[.02] text-zinc-400',
                         )}
                       >
-                        {amenityLabels[k]}
+                        {t(`settingsPage.amenities.${k}`)}
                         {amenities[k] && <Check className="size-4" />}
                       </button>
                     ))}
@@ -681,10 +681,10 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock3 className="size-4 text-blue-400" />
-                    Horários e regras
+                    {t('settingsPage.hoursRules')}
                   </CardTitle>
                   <CardDescription>
-                    Funcionamento, pausas e regras de marcação.
+                    {t('settingsPage.hoursRulesDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -748,10 +748,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Permitir marcações online
+                          {t('settingsPage.allowOnline')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          Aceita novas reservas através da página pública.
+                          {t('settingsPage.allowOnlineDescription')}
                         </p>
                       </div>
                       <Switch
@@ -764,11 +764,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Confirmar automaticamente
+                          {t('settingsPage.autoConfirm')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          As novas reservas ficam confirmadas sem intervenção
-                          manual.
+                          {t('settingsPage.autoConfirmDescription')}
                         </p>
                       </div>
                       <Switch
@@ -784,10 +783,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Concluir automaticamente
+                          {t('settingsPage.autoComplete')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          Conclui a reserva depois da hora prevista.
+                          {t('settingsPage.autoCompleteDescription')}
                         </p>
                       </div>
                       <Switch
@@ -806,7 +805,7 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center gap-2">
                       <CalendarCheck2 className="size-4 text-amber-300" />
                       <p className="text-sm font-medium">
-                        Prazo de cancelamento
+                        {t('settingsPage.cancellationWindow')}
                       </p>
                     </div>
                     <Input
@@ -829,9 +828,9 @@ export default function SettingsPageOrganized() {
             <section id="settings-appearance">
               <Card className={CARD_CLASS}>
                 <CardHeader>
-                  <CardTitle>Aparência</CardTitle>
+                  <CardTitle>{t('settingsPage.appearance')}</CardTitle>
                   <CardDescription>
-                    Imagens usadas na página pública.
+                    {t('settingsPage.appearanceDescriptionLong')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -918,7 +917,7 @@ export default function SettingsPageOrganized() {
                 <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[.16em] text-emerald-400">
-                      Plano e faturação
+                      {t('settingsPage.billing')}
                     </p>
                     <h2 className="mt-1 text-lg font-semibold">
                       {t('settingsPage.billingTitle')}
