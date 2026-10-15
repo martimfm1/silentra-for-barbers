@@ -96,7 +96,7 @@ Quando o entitlement Enterprise fica ativo — através de Stripe, pagamento man
 
 ### API pública v1
 
-A API pública disponibiliza dados aprovados para publicação externa, com contrato versionado, cache HTTP, ETag, CORS sem credenciais, rate limiting e resposta allowlist. Consulta a [documentação da API pública](docs/API_PUBLICA.md) e a especificação [OpenAPI](public/openapi-v1.yaml).
+A API pública disponibiliza dados aprovados para publicação externa, com contrato versionado, cache HTTP, ETag, CORS sem credenciais, rate limiting e resposta allowlist. Consulta o [guia técnico da API](docs/API_PUBLICA.md), a [documentação online](https://barbers.silentra.me/documentation) ou a especificação [OpenAPI 3.1](public/openapi-v1.yaml).
 
 ## Billing
 

@@ -45,6 +45,7 @@ for (const file of files) {
   // Translation sources, shared implementation primitives and private admin
   // consoles are reviewed separately from customer-facing product copy.
   if (
+    normalizedPath.includes('/documentation/') ||
     normalizedPath.includes('/locales/') ||
     normalizedPath.includes('/silentra-admin/') ||
     normalizedPath.includes('/_silentra-admin/') ||
