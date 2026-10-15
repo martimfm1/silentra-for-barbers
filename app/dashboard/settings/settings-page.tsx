@@ -262,7 +262,7 @@ export default function SettingsPageOrganized() {
         config.lunch_end &&
         config.lunch_start >= config.lunch_end)
     )
-      return toast.error(t('settingsPage.lunchInvalid));
+      return toast.error(t('settingsPage.lunchInvalid'));
     setSaving(true);
     try {
       const payload = { ...config };
@@ -561,7 +561,7 @@ export default function SettingsPageOrganized() {
                         {t('settingsPage.directoryVisibility')}
                       </p>
                       <p className="mt-1 text-xs text-zinc-600">
-                        Mostra ou esconde a barbearia na descoberta pública.
+                        {t('settingsPage.directoryDescription')}
                       </p>
                     </div>
                     <Switch
