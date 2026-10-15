@@ -48,7 +48,7 @@ async function POST__unobserved(request: NextRequest) {
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
-        'id,date_hour,duration,manual_name,manual_email,barbershop_id,service:services(name),barbershop:barbershops(name,address)',
+        'id,date_hour,duration,manual_name,manual_email,barbershop_id,service:services(name),barbershop:barbershops(name,address,default_language)',
       )
       .eq('id', appointmentId)
       .eq('barbershop_id', tenant.barbershopId)
@@ -105,6 +105,7 @@ async function POST__unobserved(request: NextRequest) {
       barbershopId: tenant.barbershopId,
       barbershopName: barbershop.name,
       barbershopAddress: barbershop.address,
+      language: barbershop.default_language === 'en' ? 'en' : 'pt',
     });
 
     if (!result.success) {
