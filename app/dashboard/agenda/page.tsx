@@ -29,11 +29,11 @@ import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
 
 const STATUS_FILTERS = [
-  { id: 'all', label: 'Todas' },
-  { id: 'pending', label: 'Por confirmar' },
-  { id: 'scheduled', label: 'Confirmadas' },
-  { id: 'completed', label: t('agenda.completed') },
-  { id: 'cancelled', label: 'Canceladas' },
+  { id: 'all', label: 'agenda.all' },
+  { id: 'pending', label: 'agenda.pending' },
+  { id: 'scheduled', label: 'agenda.confirmed' },
+  { id: 'completed', label: 'agenda.completed' },
+  { id: 'cancelled', label: 'agenda.cancelled' },
 ] as const;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['id'];
@@ -348,7 +348,7 @@ export default function AgendaPage() {
                     onClick={() => setStatusFilter(filter.id)}
                     className={`min-h-10 shrink-0 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${statusFilter === filter.id ? 'border-emerald-400/30 bg-emerald-400/[0.1] text-emerald-200' : 'border-white/10 bg-white/[0.02] text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-300'}`}
                   >
-                    {filter.label}
+                    {t(filter.label)}
                   </button>
                 ))}
               </div>
