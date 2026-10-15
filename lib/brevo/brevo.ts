@@ -110,7 +110,7 @@ export async function sendBookingConfirmationEmail(
         textTitle: 'Booking confirmed', textAt: 'at',
       }
     : {
-        subject: copy.subject,
+        subject: `Agendamento confirmado — ${payload.barbershopName}`,
         title: 'Agendamento confirmado',
         greeting: `Olá <strong style="color:#fff;">${safeClientName}</strong>, a tua marcação ficou confirmada.`,
         service: 'Serviço', date: 'Data', time: 'Hora', location: 'Local',
@@ -169,7 +169,7 @@ ${avatarMarkup}
       body: JSON.stringify({
         sender: { name: payload.barbershopName, email: senderEmail },
         to: [{ email: payload.to, name: payload.clientName }],
-        subject: `Agendamento confirmado — ${payload.barbershopName}`,
+        subject: copy.subject,
         htmlContent,
         textContent: `${copy.textTitle}\n${payload.serviceName}\n${payload.date} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
