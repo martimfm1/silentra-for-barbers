@@ -186,7 +186,7 @@ async function POST__unobserved(request: Request) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select(
-        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days)`,
+        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,default_language)`,
       )
       .eq('id', shopId)
       .maybeSingle();
@@ -450,6 +450,7 @@ async function POST__unobserved(request: Request) {
       barbershopId,
       barbershopName,
       barbershopAddress,
+      language: shopRelation?.default_language === 'en' ? 'en' : 'pt',
     }).catch((err) =>
       console.error(
         '[BACKGROUND_EMAIL_ERROR]',
