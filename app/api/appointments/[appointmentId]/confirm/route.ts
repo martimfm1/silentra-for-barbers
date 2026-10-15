@@ -91,7 +91,7 @@ async function POST__unobserved(
     ] = await Promise.all([
       admin
         .from('barbershops')
-        .select('name,address')
+        .select('name,address,default_language')
         .eq('id', profile.barbershop_id)
         .maybeSingle(),
       appointment.service_id
@@ -194,6 +194,7 @@ async function POST__unobserved(
           barbershopId: profile.barbershop_id,
           barbershopName: barbershop.name,
           barbershopAddress: barbershop.address || 'Endereço sob consulta',
+          language: barbershop.default_language === 'en' ? 'en' : 'pt',
         });
         emailSent = result.success;
         if (!result.success) emailError = result.error;
