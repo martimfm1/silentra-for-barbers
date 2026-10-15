@@ -248,9 +248,13 @@ export default function SettingsPageOrganized() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q
-      ? sections.filter(([, , d]) => `${d}`.toLowerCase().includes(q))
+      ? sections.filter(([id]) => {
+          const label = t(`settingsPage.${id}`).toLowerCase();
+          const description = t(`settingsPage.${id}Description`).toLowerCase();
+          return `${label} ${description}`.includes(q);
+        })
       : sections;
-  }, [search]);
+  }, [search, t]);
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
   function go(s: Section) {
@@ -400,14 +404,14 @@ export default function SettingsPageOrganized() {
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href="/dashboard"
-                aria-label="Voltar ao painel"
+                aria-label={t('settingsPage.backToDashboard')}
                 className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[.03]"
               >
                 <ArrowLeft className="size-4" />
               </Link>
               <div className="min-w-0">
                 <h1 className="truncate text-xl font-semibold sm:text-2xl">
-                  Definições
+                  {t('settingsPage.title')}
                 </h1>
               </div>
             </div>
@@ -418,7 +422,7 @@ export default function SettingsPageOrganized() {
                   onClick={reset}
                   className="hidden sm:inline-flex"
                 >
-                  Descartar
+                  {t('settingsPage.discard')}
                 </Button>
               )}
               <Button
@@ -432,16 +436,16 @@ export default function SettingsPageOrganized() {
                   <Save className="mr-2 size-4" />
                 )}
                 {saving
-                  ? 'A guardar…'
+                  ? t('settingsPage.saving')
                   : dirty
-                    ? 'Guardar alterações'
-                    : 'Tudo guardado'}
+                    ? t('settingsPage.saveChanges')
+                    : t('settingsPage.allSaved')}
               </Button>
             </div>
           </div>
           {dirty && (
             <p className="mt-2 text-right text-[11px] text-amber-300">
-              Tens alterações por guardar.
+              {t('settingsPage.unsavedChanges')}
             </p>
           )}
         </header>
@@ -466,7 +470,7 @@ export default function SettingsPageOrganized() {
                     <span>
                       <span className="block text-sm font-medium">{label}</span>
                       <span className="block truncate text-[11px] text-zinc-600">
-                        {desc}
+                        {t(`settingsPage.${id}Description`)}
                       </span>
                     </span>
                   </button>
@@ -474,7 +478,7 @@ export default function SettingsPageOrganized() {
               </nav>
               <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[.04] p-4">
                 <p className="text-xs font-semibold text-emerald-300">
-                  Configuração
+                  {t('settingsPage.configuration')}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{completion}%</p>
                 <div className="mt-2 h-1.5 rounded-full bg-white/10">
@@ -493,12 +497,12 @@ export default function SettingsPageOrganized() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar definições"
+                  placeholder={t('settingsPage.search')}
                   className={`${INPUT_CLASS} pl-9`}
                 />
               </div>
               <select
-                aria-label="Secção"
+                aria-label={t('settingsPage.section')}
                 value={section}
                 onChange={(e) => go(e.target.value as Section)}
                 className="min-h-11 max-w-[48%] rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
@@ -517,11 +521,10 @@ export default function SettingsPageOrganized() {
                     Centro de definições
                   </p>
                   <h2 className="mt-2 text-3xl font-semibold">
-                    Tudo o que importa, num só lugar.
+                    {t('settingsPage.overviewTitle')}
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">
-                    Altera várias definições e guarda tudo de uma vez. As
-                    alterações só ficam publicadas quando confirmares.
+                    {t('settingsPage.overviewDescription')}
                   </p>
                 </CardContent>
               </Card>
@@ -539,7 +542,7 @@ export default function SettingsPageOrganized() {
                 </CardHeader>
                 <CardContent className="grid gap-5 sm:grid-cols-2">
                   <div className="grid gap-2">
-                    <label>Nome da barbearia</label>
+                    <label>{t('settingsPage.shopName')}</label>
                     <Input
                       value={config.name}
                       onChange={(e) => set({ name: e.target.value })}
@@ -547,7 +550,7 @@ export default function SettingsPageOrganized() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <label>Telefone</label>
+                    <label>{t('settingsPage.phone')}</label>
                     <Input
                       type="tel"
                       value={config.phone}
@@ -611,7 +614,7 @@ export default function SettingsPageOrganized() {
                       set({ address: s.fullAddress || s.streetWithNumber });
                     }}
                     inputId="settings-address"
-                    placeholder="Pesquise a rua, número ou código postal…"
+                    placeholder={t('settingsPage.searchAddress')}
                     className="border-white/10 bg-white/5"
                   />
                   {suggestion && (
@@ -641,13 +644,13 @@ export default function SettingsPageOrganized() {
                     ))}
                   </div>
                   <div className="grid gap-2 sm:max-w-md">
-                    <p className="text-sm font-medium">Estacionamento</p>
+                    <p className="text-sm font-medium">{t('settingsPage.parking')}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {(
                         [
-                          ['none', 'Não tem'],
-                          ['free', 'Gratuito'],
-                          ['paid', 'Pago'],
+                          ['none', t('settingsPage.noParking')],
+                          ['free', t('settingsPage.freeParking')],
+                          ['paid', t('settingsPage.paidParking')],
                         ] as const
                       ).map(([v, l]) => (
                         <button
@@ -714,7 +717,7 @@ export default function SettingsPageOrganized() {
                     />
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {days.map(([v, l]) => {
+                    {days.map(([v]) => {
                       const active = closed.includes(v);
                       return (
                         <button
@@ -840,7 +843,7 @@ export default function SettingsPageOrganized() {
                             ? DEFAULT_BARBERSHOP_BANNER
                             : banner
                         }
-                        alt="Capa predefinida ou personalizada da barbearia"
+                        alt={t('settingsPage.bannerAlt')}
                         fill
                         className="object-cover"
                         unoptimized
@@ -854,7 +857,7 @@ export default function SettingsPageOrganized() {
                                 ? DEFAULT_BARBERSHOP_AVATAR
                                 : avatar
                             }
-                            alt="Logótipo predefinido ou personalizado"
+                            alt={t('settingsPage.avatarAlt')}
                             width={128}
                             height={128}
                             className="h-full w-full object-cover"
@@ -870,7 +873,7 @@ export default function SettingsPageOrganized() {
                             disabled={uploading === 'banner'}
                           >
                             <ImageIcon className="mr-2 size-4" />
-                            Capa
+                            {t('settingsPage.cover')}
                           </Button>
                           <Button
                             type="button"
@@ -879,7 +882,7 @@ export default function SettingsPageOrganized() {
                             disabled={uploading === 'avatar'}
                           >
                             <Camera className="mr-2 size-4" />
-                            Logótipo
+                            {t('settingsPage.logo')}
                           </Button>
                         </div>
                       </div>
@@ -918,11 +921,11 @@ export default function SettingsPageOrganized() {
                       Plano e faturação
                     </p>
                     <h2 className="mt-1 text-lg font-semibold">
-                      Subscrição, faturas e limites.
+                      {t('settingsPage.billingTitle')}
                     </h2>
                   </div>
                   <Button asChild>
-                    <Link href="/dashboard/billing">Abrir faturação</Link>
+                    <Link href="/dashboard/billing">{t('settingsPage.openBilling')}</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -932,7 +935,7 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShieldCheck className="size-4 text-emerald-400" />
-                    Conta e segurança
+                    {t('settingsPage.accountSecurity')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -943,7 +946,7 @@ export default function SettingsPageOrganized() {
                     disabled={logoutLoading}
                   >
                     <LogOut className="mr-2 size-4" />
-                    {logoutLoading ? 'A terminar sessão…' : 'Terminar sessão'}
+                    {logoutLoading ? t('settingsPage.logoutLoading') : t('settingsPage.logout')}
                   </Button>
                 </CardContent>
               </Card>
@@ -955,14 +958,14 @@ export default function SettingsPageOrganized() {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/95 p-3 backdrop-blur-xl sm:hidden">
           <div className="mx-auto flex max-w-xl gap-2">
             <Button variant="ghost" onClick={reset} className="min-h-11 flex-1">
-              Descartar
+              {t('settingsPage.discard')}
             </Button>
             <Button
               onClick={() => void saveAll()}
               disabled={saving}
               className="min-h-11 flex-1 bg-white text-zinc-950"
             >
-              {saving ? 'A guardar…' : 'Guardar alterações'}
+              {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
             </Button>
           </div>
         </div>
