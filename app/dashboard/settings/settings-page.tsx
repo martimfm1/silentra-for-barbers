@@ -181,7 +181,7 @@ export default function SettingsPageOrganized() {
     ]);
     if (c.error)
       toast.error(
-        c.error.message || 'Não foi possível carregar as definições.',
+        c.error.message || t('settingsPage.loadFailed'),
       );
     if (c.data) {
       const n = normalize(c.data);
@@ -196,10 +196,10 @@ export default function SettingsPageOrganized() {
         setInitialAmenities(n);
       }
     } catch {
-      toast.error('Não foi possível carregar as informações públicas.');
+      toast.error(t('settingsPage.publicLoadFailed'));
     }
     setLoading(false);
-  }, [barbershopId]);
+  }, [barbershopId, t]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -253,7 +253,7 @@ export default function SettingsPageOrganized() {
     if (!barbershopId || !dirty || saving) return;
     if (config.opening_time >= config.closing_time)
       return toast.error(
-        'O horário de fecho tem de ser posterior ao horário de abertura.',
+        t('settingsPage.openingAfterClosing'),
       );
     if (
       (config.lunch_start && !config.lunch_end) ||
@@ -262,7 +262,7 @@ export default function SettingsPageOrganized() {
         config.lunch_end &&
         config.lunch_start >= config.lunch_end)
     )
-      return toast.error('Verifica o início e o fim da pausa.');
+      return toast.error(t('settingsPage.lunchInvalid));
     setSaving(true);
     try {
       const payload = { ...config };
@@ -288,7 +288,7 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || 'Não foi possível atualizar a localização.',
+            b.error || t('settingsPage.locationUpdateFailed'),
           );
       }
       if (JSON.stringify(amenities) !== JSON.stringify(initialAmenities)) {
@@ -303,7 +303,7 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || 'Não foi possível guardar as informações do espaço.',
+            b.error || t('settingsPage.amenitiesSaveFailed'),
           );
       }
       const n = normalize(c.data ?? config);
@@ -312,12 +312,12 @@ export default function SettingsPageOrganized() {
       setInitialAmenities(amenities);
       setLocale(n.default_language);
       setSuggestion(null);
-      toast.success('Todas as alterações foram guardadas.');
+      toast.success(t('settingsPage.saved'));
     } catch (e) {
       toast.error(
         e instanceof Error
           ? e.message
-          : 'Não foi possível guardar as alterações.',
+          : t('settingsPage.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -341,7 +341,7 @@ export default function SettingsPageOrganized() {
     setUploading(null);
     if (r.error)
       return toast.error(
-        r.error.message || 'Não foi possível atualizar a imagem.',
+        r.error.message || t('settingsPage.imageUpdateFailed'),
       );
     if (type === 'avatar') {
       setAvatarPreviewError(false);
@@ -351,7 +351,7 @@ export default function SettingsPageOrganized() {
       setBannerTick(Date.now());
     }
     toast.success(
-      type === 'avatar' ? 'Logótipo atualizado.' : 'Capa atualizada.',
+      type === 'avatar' ? t('settingsPage.logoUpdated') : t('settingsPage.coverUpdated'),
     );
   }
   async function logout() {
@@ -361,7 +361,7 @@ export default function SettingsPageOrganized() {
       router.replace('/login');
       router.refresh();
     } catch {
-      toast.error('Não foi possível terminar a sessão.');
+      toast.error(t('settingsPage.logoutFailed'));
       setLogoutLoading(false);
     }
   }
@@ -454,7 +454,7 @@ export default function SettingsPageOrganized() {
                     <span>
                       <span className="block text-sm font-medium">{t(`settingsPage.${id}`)}</span>
                       <span className="block truncate text-[11px] text-zinc-600">
-                        {t(`settingsPage.${id}Description`)}
+                        {t(id === 'overview' ? 'settingsPage.overviewStatus' : `settingsPage.${id}Description`)}
                       </span>
                     </span>
                   </button>
