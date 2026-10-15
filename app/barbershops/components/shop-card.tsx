@@ -65,6 +65,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
   onNavigate,
   onOpenBooking,
 }) => {
+  const { t, locale } = useLanguage();
   const shop = rawShop as unknown as ExtendedBarbershopDetails | undefined;
   const shopAsMarket = rawShop;
   const [avatarError, setAvatarError] = useState(false);
