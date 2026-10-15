@@ -114,22 +114,6 @@ const amenitiesKeys = [
   'pet_friendly',
   'appointment_required',
 ] as const;
-const amenityLabels: Record<(typeof amenitiesKeys)[number], string> = {
-  wifi: 'Wi-Fi',
-  wheelchair_accessible: 'Acesso para cadeira de rodas',
-  accessible_entrance: 'Entrada acessível',
-  accessible_toilet: 'WC acessível',
-  kids_friendly: 'Adequado para crianças',
-  waiting_area: 'Área de espera',
-  restroom: 'Casa de banho',
-  air_conditioning: 'Ar condicionado',
-  card_payments: 'Pagamento por cartão',
-  walk_ins: 'Atendimento sem marcação',
-  coffee: 'Café',
-  water: 'Água',
-  pet_friendly: 'Animais de companhia',
-  appointment_required: 'Agendamento obrigatório',
-};
 const normalize = (v: Partial<Config>): Config => ({
   name: v.name ?? '',
   phone: v.phone ?? '',
