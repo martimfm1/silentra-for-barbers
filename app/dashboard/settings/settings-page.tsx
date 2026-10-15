@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { cn } from '@/lib/utils';
 import {
@@ -77,6 +78,7 @@ type Config = {
   time_limit_cancellation_hours: number;
   auto_confirm_bookings: boolean;
   auto_complete_bookings: boolean;
+  default_language: 'pt' | 'en';
 };
 const sections: [Section, string, string, typeof Settings][] = [
   ['overview', 'Visão geral', 'Estado da configuração', Settings],
@@ -145,6 +147,7 @@ const normalize = (v: Partial<Config>): Config => ({
   ),
   auto_confirm_bookings: v.auto_confirm_bookings === true,
   auto_complete_bookings: v.auto_complete_bookings === true,
+  default_language: v.default_language === 'en' ? 'en' : 'pt',
 });
 const closedList = (v: string) =>
   !v || v === 'None'
@@ -156,6 +159,7 @@ const closedList = (v: string) =>
 
 export default function SettingsPageOrganized() {
   const router = useRouter();
+  const { t, setLocale } = useLanguage();
   const { barbershopId } = useBarbershop();
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
@@ -318,6 +322,7 @@ export default function SettingsPageOrganized() {
       setConfig(n);
       setInitial(n);
       setInitialAmenities(amenities);
+      setLocale(n.default_language);
       setSuggestion(null);
       toast.success('Todas as alterações foram guardadas.');
     } catch (e) {
@@ -549,6 +554,19 @@ export default function SettingsPageOrganized() {
                       onChange={(e) => set({ phone: e.target.value })}
                       className={INPUT_CLASS}
                     />
+                  </div>
+                  <div className="sm:col-span-2 grid gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.03] p-4">
+                    <label htmlFor="settings-default-language" className="text-sm font-medium">{t('settingsLanguage.title')}</label>
+                    <p className="text-xs text-zinc-500">{t('settingsLanguage.description')}</p>
+                    <select
+                      id="settings-default-language"
+                      value={config.default_language}
+                      onChange={(event) => set({ default_language: event.target.value === 'en' ? 'en' : 'pt' })}
+                      className={INPUT_CLASS}
+                    >
+                      <option value="pt">Português (Portugal)</option>
+                      <option value="en">English</option>
+                    </select>
                   </div>
                   <div className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div>
