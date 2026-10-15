@@ -82,7 +82,7 @@ async function POST__unobserved(request: Request) {
         .maybeSingle(),
       admin
         .from('barbershops')
-        .select('name')
+        .select('name,default_language')
         .eq('id', tenant.barbershopId)
         .maybeSingle(),
     ]);
@@ -230,6 +230,7 @@ async function POST__unobserved(request: Request) {
         code,
         qrPayload: token,
         expiresAt,
+        language: barbershop.default_language === 'en' ? 'en' : 'pt',
       });
       emailSent = true;
     } catch (emailError) {
