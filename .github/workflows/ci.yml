@@ -70,11 +70,18 @@ jobs:
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
 
+      - name: Manual promotion contracts
+        run: pnpm qa:manual-promotions
+
+      - name: Enterprise landing-page and public API contracts
+        run: pnpm qa:enterprise-landing-pages
+
       - name: Dependency audit
         run: pnpm qa:deps
 
-      - name: Format check
-        run: pnpm format:check
+
+      - name: SEO foundation contracts
+        run: pnpm qa:seo
 
       - name: Build
         run: pnpm build
