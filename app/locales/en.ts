@@ -803,6 +803,20 @@ export const en = {
     notifications: 'Notifications',
     bookingRules: 'Booking rules',
   },
+  billingPage: {
+    section: 'Subscription',
+    title: 'Plan and billing',
+    description:
+      'Review your plan, subscription status and payment receipts. Purchases and plan changes take place in /plans.',
+    settings: 'Settings',
+    billingLabel: 'Billing',
+    receipts: 'Receipts',
+    receiptsDescription:
+      'Manual payments automatically generate a PDF receipt sent by email.',
+    simpleManagement: 'Simple management',
+    managementDescription:
+      'Cancel at the end of the current period or compare plans whenever you want to switch.',
+  },
   notFound: {
     status: 'HTTP 404 · Page not found',
     statusCode: 'Status code',
