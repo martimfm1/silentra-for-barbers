@@ -61,9 +61,10 @@ async function GET__unobserved(request: Request) {
         .limit(5000);
       const { data: shop } = await admin
         .from('barbershops')
-        .select('name')
+        .select('name,default_language')
         .eq('id', rule.barbershop_id)
         .maybeSingle();
+      const language: 'pt' | 'en' = shop?.default_language === 'en' ? 'en' : 'pt';
       const clientIds = (clients ?? []).map((client) => client.id);
       if (!clientIds.length) continue;
       const { data: recentAppointments } = await admin
@@ -127,8 +128,10 @@ async function GET__unobserved(request: Request) {
                   nome: client.name_complete ?? 'Cliente',
                   barbearia: shop?.name ?? 'A tua barbearia',
                 })
-              : `Sentimos a tua falta — ${shop?.name ?? 'A tua barbearia'}`,
-          htmlContent: `<div style="font-family:Arial,sans-serif;line-height:1.6;white-space:pre-wrap">${replaceTokens(action.body, { nome: client.name_complete ?? 'Cliente', barbearia: shop?.name ?? 'A tua barbearia' }).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c)}</div>`,
+              : language === 'en'
+                ? `We miss you — ${shop?.name ?? 'your barbershop'}`
+                : `Sentimos a tua falta — ${shop?.name ?? 'a tua barbearia'}`,
+          htmlContent: `<html lang="${language === 'en' ? 'en' : 'pt-PT'}"><body><div style="font-family:Arial,sans-serif;line-height:1.6;white-space:pre-wrap">${replaceTokens(action.body, { nome: client.name_complete ?? (language === 'en' ? 'Customer' : 'Cliente'), barbearia: shop?.name ?? (language === 'en' ? 'your barbershop' : 'a tua barbearia') }).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c)}</div></body></html>`,
         });
         await admin
           .from('automation_runs')
