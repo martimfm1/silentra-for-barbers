@@ -7,7 +7,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/dashboard/', '/api/', '/admin/', '/onboarding/'],
+      // Keep pages with noindex directives crawlable so search engines can read them.
+      // API responses are not search content; robots.txt is not an access-control mechanism.
+      disallow: ['/api/'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
