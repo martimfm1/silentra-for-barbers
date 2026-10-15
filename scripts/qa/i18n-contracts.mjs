@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import ts from 'typescript';
 
 const root = process.cwd();
 const localeFiles = {
@@ -26,20 +27,83 @@ const localizedSources = [
 ];
 
 const read = (path) => readFileSync(join(root, path), 'utf8');
-const localeSources = Object.fromEntries(
-  Object.entries(localeFiles).map(([locale, paths]) => [
-    locale,
-    paths.map(read).join('\n'),
-  ]),
-);
 
-function hasKey(source, path) {
-  const key = path.split('.').at(-1);
-  return (
-    typeof key === 'string' &&
-    new RegExp('^\\s{2,}' + key + ':\\s*(?:[\'"`]|\\{)', 'm').test(source)
-  );
+function objectTreeFromFile(path, exportName) {
+  const source = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true);
+  let result;
+
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === exportName &&
+      node.initializer &&
+      ts.isObjectLiteralExpression(node.initializer)
+    ) {
+      result = objectTree(node.initializer);
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(source);
+  if (!result) throw new Error('Could not read locale export "' + exportName + '" from ' + path);
+  return result;
 }
+
+function objectTree(node) {
+  const tree = {};
+  for (const property of node.properties) {
+    if (!ts.isPropertyAssignment(property)) continue;
+    const name = property.name;
+    const key = ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)
+      ? name.text
+      : undefined;
+    if (!key) continue;
+
+    if (ts.isObjectLiteralExpression(property.initializer)) {
+      tree[key] = objectTree(property.initializer);
+    } else {
+      tree[key] = true;
+    }
+  }
+  return tree;
+}
+
+function mergeTrees(base, overrides) {
+  const merged = { ...base };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (
+      value && typeof value === 'object' &&
+      merged[key] && typeof merged[key] === 'object'
+    ) {
+      merged[key] = mergeTrees(merged[key], value);
+    } else {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
+
+function hasPath(tree, path) {
+  return path.split('.').every((segment, index, parts) => {
+    if (!tree || typeof tree !== 'object' || !Object.prototype.hasOwnProperty.call(tree, segment)) {
+      return false;
+    }
+    tree = tree[segment];
+    return index === parts.length - 1 || (tree && typeof tree === 'object');
+  });
+}
+
+const localeTrees = Object.fromEntries(
+  Object.entries(localeFiles).map(([locale, paths]) => {
+    const [basePath, copyPath] = paths;
+    const base = objectTreeFromFile(basePath, locale);
+    const copyExport = locale === 'pt' ? 'ptCopy' : 'enCopy';
+    const copy = objectTreeFromFile(copyPath, copyExport);
+    return [locale, mergeTrees(base, copy)];
+  }),
+);
 
 const failures = [];
 for (const path of localizedSources) {
@@ -49,10 +113,8 @@ for (const path of localizedSources) {
   );
   for (const key of keys) {
     for (const locale of ['pt', 'en']) {
-      if (!hasKey(localeSources[locale], key)) {
-        failures.push(
-          path + ': missing ' + locale + ' translation for "' + key + '"',
-        );
+      if (!hasPath(localeTrees[locale], key)) {
+        failures.push(path + ': missing ' + locale + ' translation for "' + key + '"');
       }
     }
   }
@@ -69,7 +131,7 @@ for (const section of [
   'onboarding',
 ]) {
   for (const locale of ['pt', 'en']) {
-    if (!hasKey(localeSources[locale], section)) {
+    if (!hasPath(localeTrees[locale], section)) {
       failures.push(locale + ': missing translation section "' + section + '"');
     }
   }
