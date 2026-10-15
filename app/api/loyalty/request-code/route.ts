@@ -96,7 +96,7 @@ async function POST__unobserved(request: Request) {
 
     const { data: barbershop, error: barbershopError } = await admin
       .from('barbershops')
-      .select('name')
+      .select('name,default_language')
       .eq('id', tenant.barbershopId)
       .maybeSingle();
 
@@ -145,6 +145,7 @@ async function POST__unobserved(request: Request) {
         email,
         code,
         barbershop?.name ?? 'esta barbearia',
+        barbershop?.default_language === 'en' ? 'en' : 'pt',
       );
     } catch (emailError) {
       await admin
