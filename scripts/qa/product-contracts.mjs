@@ -179,7 +179,8 @@ const checks = [
       source.includes('/api/marketplace/products?id=') &&
       source.includes("searchParams.set('add', product.id)") &&
       source.includes('searchParams.set(') &&
-      source.includes('Adicionar ao carrinho'),
+      (source.includes("t('storefront.addToCart')") ||
+        source.includes('Adicionar ao carrinho')),
   },
   {
     name: 'Marketplace catalog cards link to product detail pages and persist cart',
@@ -244,10 +245,14 @@ const checks = [
     name: 'Customer tracking experience shows progress, history, delivery and manual refresh',
     file: 'app/marketplace/track/tracking-client.tsx',
     test: (source) =>
-      source.includes('Progresso da encomenda') &&
-      source.includes('Histórico') &&
-      source.includes('Dados de entrega') &&
-      source.includes('Atualizar estado') &&
+      (source.includes("t('orderTracking.progress')") ||
+        source.includes('Progresso da encomenda')) &&
+      (source.includes("t('orderTracking.history')") ||
+        source.includes('Histórico')) &&
+      (source.includes("t('orderTracking.deliveryDetails')") ||
+        source.includes('Dados de entrega')) &&
+      (source.includes("t('orderTracking.refreshStatus')") ||
+        source.includes('Atualizar estado')) &&
       source.includes('setInterval') &&
       source.includes("referrerPolicy: 'no-referrer'") &&
       source.includes('replaceState'),
