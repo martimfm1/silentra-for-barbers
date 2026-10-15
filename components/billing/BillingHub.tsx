@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCheckout } from '@/hooks/useCheckout';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Invoice {
   id: string;
@@ -27,8 +28,8 @@ interface Invoice {
   invoice_pdf: string | null;
 }
 
-function formatAmount(amount: number, currency: string) {
-  return new Intl.NumberFormat('pt-PT', {
+function formatAmount(amount: number, currency: string, locale: string) {
+  return new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
     style: 'currency',
     currency,
     maximumFractionDigits: 2,
@@ -36,6 +37,7 @@ function formatAmount(amount: number, currency: string) {
 }
 
 export function BillingHub() {
+  const { t, locale } = useLanguage();
   const {
     subscription,
     cancellation,
@@ -82,14 +84,14 @@ export function BillingHub() {
         : 'pro';
   const currentPeriodEnd = subscription?.current_period_end ?? null;
   const nextRenewal = currentPeriodEnd
-    ? new Date(currentPeriodEnd).toLocaleDateString('pt-PT', {
+    ? new Date(currentPeriodEnd).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
       })
     : '—';
   const cancellationDate = cancellation?.canceledAt
-    ? new Date(cancellation.canceledAt).toLocaleDateString('pt-PT', {
+    ? new Date(cancellation.canceledAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -105,7 +107,7 @@ export function BillingHub() {
         const body = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            body.error || 'Não foi possível carregar os recibos.',
+            body.error || t('billingHub.invoiceLoadFailed'),
           );
         return body.invoices;
       })
@@ -117,7 +119,7 @@ export function BillingHub() {
           toast.error(
             error instanceof Error
               ? error.message
-              : 'Não foi possível carregar os recibos.',
+              : t('billingHub.invoiceLoadFailed'),
           );
       })
       .finally(() => {
@@ -131,20 +133,20 @@ export function BillingHub() {
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
     const confirmed = window.confirm(
-      'Cancelar a subscrição no final do período atual? O acesso mantém-se até à data de renovação.',
+      t('billingHub.cancelConfirm'),
     );
     if (!confirmed) return;
     try {
       setCancelling(true);
       await cancel();
       toast.success(
-        'Cancelamento agendado. O plano continua ativo até ao fim do período atual.',
+        t('billingHub.cancelScheduled'),
       );
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível cancelar a subscrição.',
+          : t('billingHub.cancelFailed'),
       );
     } finally {
       setCancelling(false);
@@ -155,12 +157,12 @@ export function BillingHub() {
     try {
       setResuming(true);
       await resume();
-      toast.success('Subscrição retomada com sucesso.');
+      toast.success(t('billingHub.resumeSuccess'));
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível retomar a subscrição.',
+          : t('billingHub.resumeFailed'),
       );
     } finally {
       setResuming(false);
@@ -177,7 +179,7 @@ export function BillingHub() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível iniciar a nova subscrição.',
+          : t('billingHub.checkoutFailed'),
       );
     }
   };
@@ -193,7 +195,7 @@ export function BillingHub() {
       const body = await response.json().catch(() => ({}));
       if (!response.ok || typeof body.url !== 'string')
         throw new Error(
-          body.error || 'Não foi possível abrir a gestão de faturação.',
+          body.error || t('billingHub.portalFailed'),
         );
       window.location.assign(body.url);
     } catch (error) {
@@ -201,7 +203,7 @@ export function BillingHub() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível abrir o Customer Portal.',
+          : t('billingHub.portalFailed'),
       );
     }
   };
@@ -213,16 +215,16 @@ export function BillingHub() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
-                <ShieldCheck className="size-3.5" /> Subscrição
+                <ShieldCheck className="size-3.5" /> {t('billingHub.subscription')}
               </span>
               {isCanceled && (
                 <span className="rounded-full border border-red-400/20 bg-red-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-200">
-                  Cancelada
+                  {t('billingHub.cancelled')}
                 </span>
               )}
               {isTrial && !isCanceled && (
                 <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-200">
-                  Trial ativo
+                  {t('billingHub.trialActive')}
                 </span>
               )}
             </div>
@@ -236,40 +238,40 @@ export function BillingHub() {
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
               {isCanceled
-                ? `Esta subscrição foi cancelada em ${cancellationDate}${cancellation?.canceledByName ? ` por ${cancellation.canceledByName}` : cancellation?.canceledByEmail ? ` por ${cancellation.canceledByEmail}` : ''}.`
+                ? t('billingHub.cancelledOn').replace('{date}', cancellationDate).replace('{by}', cancellation?.canceledByName ? t('billingHub.cancelledByName').replace('{name}', cancellation.canceledByName) : cancellation?.canceledByEmail ? ` ${cancellation.canceledByEmail}` : '')
                 : isAdministrativePlan
-                  ? 'Plano atribuído pela administração da Silentra e aplicado à barbearia.'
+                  ? t('billingHub.adminPlanDescription')
                   : isManualSubscription
-                    ? 'A subscrição é gerida manualmente pela Silentra e pertence à barbearia.'
+                    ? t('billingHub.manualPlanDescription')
                     : hasSubscription
-                      ? 'A subscrição é sincronizada com a Stripe e pertence à barbearia.'
-                      : 'Plano gratuito, sem subscrição paga ativa.'}
+                      ? t('billingHub.stripePlanDescription')
+                      : t('billingHub.freePlanDescription')}
             </p>
           </div>
 
           <div className="grid min-w-[220px] grid-cols-2 gap-2 text-sm">
             <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                Estado
+                {t('billingHub.state')}
               </p>
               <p className="mt-2 font-medium text-zinc-100">
                 {isAdministrativePlan && !isCanceled
-                  ? 'Atribuído'
+                  ? t('billingHub.assigned')
                   : isCanceled
-                    ? 'Cancelada'
+                    ? t('billingHub.cancelled')
                     : subscription?.cancel_at_period_end
-                      ? 'Cancelamento agendado'
+                      ? t('billingHub.scheduledCancellation')
                       : active
                         ? isTrial
-                          ? 'Em trial'
+                          ? t('billingHub.trial')
                           : 'Ativo'
-                        : 'Gratuito'}
+                        : t('billingHub.free')}
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                {isCanceled ? 'Cancelada em' : 'Renovação'}
+                {isCanceled ? t('billingHub.cancelledOnLabel') : t('billingHub.renewal')}
               </p>
               <p className="mt-2 font-medium text-zinc-100">
                 {isCanceled
@@ -285,7 +287,7 @@ export function BillingHub() {
         {isCanceled && cancellation?.canceledByName ? (
           <div className="mt-3 rounded-2xl border border-white/8 bg-black/20 p-4">
             <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-              Cancelada por
+              {t('billingHub.cancelledBy')}
             </p>
             <p className="mt-1 text-sm font-medium text-zinc-100">
               {cancellation.canceledByName}
@@ -298,13 +300,13 @@ export function BillingHub() {
 
         <div className="mt-6 flex flex-col gap-3 border-t border-white/8 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-zinc-500">
-            Origem:{' '}
+            {t('billingHub.source')}{' '}
             {isAdministrativePlan
-              ? 'Administração Silentra'
+              ? t('billingHub.silentraAdmin')
               : planSource === 'stripe'
                 ? 'Stripe'
                 : planSource === 'manual'
-                  ? 'Pagamento manual'
+                  ? t('billingHub.manualPayment')
                   : 'Plano gratuito'}
           </p>
 
@@ -314,7 +316,7 @@ export function BillingHub() {
                 href="/plans"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.07]"
               >
-                Comparar planos <ArrowRight className="size-4" />
+                {t('billingHub.comparePlans')} <ArrowRight className="size-4" />
               </Link>
             )}
 
@@ -331,8 +333,8 @@ export function BillingHub() {
                   <ArrowUpRight className="size-4" />
                 )}
                 {canceledPlan === 'pro'
-                  ? 'Melhorar para Enterprise'
-                  : `Voltar a subscrever ${PLAN_NAMES[canceledPlan]}`}
+                  ? t('billingHub.upgradeEnterprise')
+                  : t('billingHub.resubscribe').replace('{plan}', PLAN_NAMES[canceledPlan])}
               </button>
             ) : null}
 
@@ -346,7 +348,7 @@ export function BillingHub() {
                 {openingPortal ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : null}
-                Gerir faturação na Stripe
+                {t('billingHub.manageStripe')}
               </button>
             )}
 
@@ -365,7 +367,7 @@ export function BillingHub() {
                   ) : (
                     <XCircle className="size-4" />
                   )}
-                  Cancelar subscrição
+                  {t('billingHub.cancelSubscription')}
                 </button>
               )}
 
@@ -374,7 +376,7 @@ export function BillingHub() {
             !isCanceled ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 text-sm font-medium text-amber-200">
-                  <CalendarDays className="size-4" /> Cancelamento agendado (
+                  <CalendarDays className="size-4" /> {t('billingHub.scheduledCancellation')} (
                   {nextRenewal})
                 </span>
                 <button
@@ -386,7 +388,7 @@ export function BillingHub() {
                   {resuming ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : null}
-                  Retomar subscrição
+                  {t('billingHub.resumeSubscription')}
                 </button>
               </div>
             ) : null}
@@ -414,15 +416,13 @@ export function BillingHub() {
           <div className="mt-5">
             {manualRequest?.status === 'PENDING' ? (
               <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
-                O pedido foi recebido. A equipa irá preparar o pagamento e
-                enviar-te as instruções para o email associado à tua conta.
+                {t('billingHub.requestReceived')}
               </div>
             ) : manualRequest?.status === 'PAYMENT_SENT' &&
               manualRequest.paymentLink ? (
               <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
                 <p className="text-sm leading-6 text-zinc-300">
-                  O link de pagamento já foi enviado. Podes abrir o pagamento
-                  diretamente aqui.
+                  {t('billingHub.paymentLinkSent')}
                 </p>
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <a
@@ -437,21 +437,20 @@ export function BillingHub() {
                     {manualRequest.plan === 'enterprise' ? 'Enterprise' : 'Pro'}{' '}
                     ·{' '}
                     {manualRequest.billingInterval === 'year'
-                      ? 'Anual'
-                      : 'Mensal'}{' '}
+                      ? t('billingHub.yearly')
+                      : t('billingHub.monthly')}{' '}
                     ·{' '}
-                    {formatAmount(manualRequest.price, manualRequest.currency)}
+                    {formatAmount(manualRequest.price, manualRequest.currency, locale)}
                   </span>
                 </div>
               </div>
             ) : manualRequest?.status === 'PAID' ? (
               <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4 text-sm leading-6 text-emerald-100/80">
-                O pagamento foi confirmado e a tua subscrição manual está ativa.
+                {t('billingHub.paymentConfirmed')}
               </div>
             ) : manualRequest?.status === 'EXPIRED' ? (
               <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
-                O período da subscrição terminou. Para continuar, escolhe
-                novamente um plano em{' '}
+                {t('billingHub.expiredRequest)}{' '}
                 <Link
                   href="/plans"
                   className="font-semibold text-emerald-300 hover:text-emerald-200"
@@ -462,12 +461,11 @@ export function BillingHub() {
               </div>
             ) : manualRequest?.status === 'REJECTED' ? (
               <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.04] p-4 text-sm leading-6 text-red-200">
-                O último pedido de pagamento foi rejeitado. Podes criar um novo
-                pedido através da página de planos.
+                {t('billingHub.rejectedRequest')}
               </div>
             ) : (
               <div className="rounded-2xl border border-white/8 bg-black/20 p-4 text-sm text-zinc-500">
-                Não existe nenhum pedido de pagamento manual em curso.
+                {t('billingHub.noPendingRequest')}
               </div>
             )}
           </div>
@@ -488,7 +486,7 @@ export function BillingHub() {
             </p>
           </div>
           {hasSubscription && !isAdministrativePlan && (
-            <span className="text-xs text-zinc-600">Últimos 12</span>
+            <span className="text-xs text-zinc-600">{t('billingHub.last12')}</span>
           )}
         </div>
         <div className="mt-5 space-y-2">
@@ -498,11 +496,11 @@ export function BillingHub() {
             </div>
           ) : !hasSubscription || isAdministrativePlan ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem recibos de uma subscrição Stripe nesta conta.
+              {t('billingHub.noStripeReceipts')}
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              Ainda não existem recibos emitidos.
+              {t('billingHub.noReceipts')}
             </div>
           ) : (
             invoices.map((invoice) => (
@@ -516,12 +514,12 @@ export function BillingHub() {
                       {invoice.plan}
                     </p>
                     <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] text-emerald-200">
-                      {invoice.status ?? 'processado'}
+                      {invoice.status ?? t('billingHub.processed')}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
                     {invoice.date} ·{' '}
-                    {formatAmount(invoice.amount, invoice.currency)}
+                    {formatAmount(invoice.amount, invoice.currency, locale)}
                   </p>
                 </div>
                 {invoice.invoice_pdf ? (
@@ -531,11 +529,11 @@ export function BillingHub() {
                     rel="noreferrer"
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
                   >
-                    <Download className="size-3.5" /> Descarregar
+                    <Download className="size-3.5" /> {t('billingHub.download')}
                   </a>
                 ) : (
                   <span className="text-xs text-zinc-600">
-                    Recibo indisponível
+                    {t('billingHub.receiptUnavailable')}
                   </span>
                 )}
               </div>
@@ -545,8 +543,7 @@ export function BillingHub() {
       </section>
 
       <div className="flex items-center gap-2 text-xs text-zinc-600">
-        <Check className="size-3.5 text-emerald-400" /> Pagamentos e recibos
-        processados pela Stripe. A Silentra não guarda dados do cartão.
+        <Check className="size-3.5 text-emerald-400" /> {t('billingHub.securePayments')}
       </div>
     </div>
   );
