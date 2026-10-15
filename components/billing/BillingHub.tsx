@@ -128,7 +128,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [isStripeSubscription, isAdministrativePlan]);
+  }, [isStripeSubscription, isAdministrativePlan, t]);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
@@ -264,7 +264,7 @@ export function BillingHub() {
                       : active
                         ? isTrial
                           ? t('billingHub.trial')
-                          : 'Ativo'
+                          : t('billingHub.active')
                         : t('billingHub.free')}
               </p>
             </div>
@@ -401,10 +401,10 @@ export function BillingHub() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
-                Pagamento manual
+                {t('billingHub.manualPayment')}
               </p>
               <h3 className="mt-1 text-xl font-semibold text-white">
-                Estado do pedido
+                {t('billingHub.paymentStatus')}
               </h3>
             </div>
             {manualRequest ? (
@@ -431,7 +431,7 @@ export function BillingHub() {
                     rel="noreferrer"
                     className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 px-4 text-sm font-semibold text-zinc-950"
                   >
-                    Pagar agora
+                    {t('billingHub.payNow')}
                   </a>
                   <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 text-xs text-zinc-500">
                     {manualRequest.plan === 'enterprise' ? 'Enterprise' : 'Pro'}{' '}
@@ -450,7 +450,7 @@ export function BillingHub() {
               </div>
             ) : manualRequest?.status === 'EXPIRED' ? (
               <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-sm leading-6 text-amber-100/80">
-                {t('billingHub.expiredRequest)}{' '}
+                {t('billingHub.expiredRequest')}{' '}
                 <Link
                   href="/plans"
                   className="font-semibold text-emerald-300 hover:text-emerald-200"
@@ -476,13 +476,13 @@ export function BillingHub() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
-              Recibos
+              {t('billingHub.receipts')}
             </p>
             <h3 className="mt-1 text-xl font-semibold text-white">
-              Histórico de faturação
+              {t('billingHub.billingHistory')}
             </h3>
             <p className="mt-1 text-sm text-zinc-500">
-              Consulta e descarrega os recibos emitidos pela Stripe.
+              {t('billingHub.receiptsDescription')}
             </p>
           </div>
           {hasSubscription && !isAdministrativePlan && (
