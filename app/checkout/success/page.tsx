@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { trackMarketingEvent } from '@/lib/analytics/marketing';
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
@@ -110,6 +111,28 @@ export default function CheckoutSuccessPage() {
 
             if (active) {
               if (!cancelled) {
+                const conversionKey = stripeSubscriptionId
+                  ? `silentra-subscription-activated:${stripeSubscriptionId}`
+                  : null;
+                let shouldTrackConversion = Boolean(conversionKey);
+                if (conversionKey) {
+                  try {
+                    if (window.sessionStorage.getItem(conversionKey)) {
+                      shouldTrackConversion = false;
+                    } else {
+                      window.sessionStorage.setItem(conversionKey, '1');
+                    }
+                  } catch {
+                    // Tracking must never block the successful checkout experience.
+                  }
+                }
+                if (shouldTrackConversion) {
+                  trackMarketingEvent('silentra_subscription_activated', {
+                    plan: String(plan),
+                    subscription_status: String(subscription.status),
+                  });
+                }
+
                 setPayload({
                   success: true,
                   plan,

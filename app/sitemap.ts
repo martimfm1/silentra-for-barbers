@@ -1,7 +1,11 @@
 import type { MetadataRoute } from 'next';
-import { supabase, listRecords } from '@/lib/db';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { getPublicProfileById } from '@/lib/barbershops/public-profile';
 
 const SITE_URL = 'https://barbers.silentra.me';
+
+// Refresh database-backed public profile URLs hourly without querying on every crawler request.
+export const revalidate = 3600;
 
 type ShopSitemapEntry = {
   url: string;
@@ -15,7 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/`,
-      lastModified: now,
       changeFrequency: 'daily',
       priority: 1.0,
     },
@@ -30,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/software-gestao-barbearia`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: `${SITE_URL}/documentation`,
@@ -54,17 +63,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let dynamicShopRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const { data: shops, error } = await listRecords<{
-      id: string;
-      slug?: string;
-      public_profile_enabled?: boolean;
-      updated_at?: string;
-    }>(
-      supabase,
-      'shops',
-      {},
-      { select: 'id, slug, public_profile_enabled, updated_at' },
-    );
+    const database = createAdminClient();
+    const { data: shops, error } = await database
+      .from('shops')
+      .select('slug, public_profile_enabled, updated_at')
+      .limit(50000);
 
     if (!error && shops) {
       const seen = new Set<string>();
@@ -73,13 +76,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const shop of shops) {
         if (!shop.slug || shop.public_profile_enabled === false) continue;
 
-        const slug = shop.slug.trim();
+        const slug = String(shop.slug).trim();
         if (!slug || seen.has(slug)) continue;
         seen.add(slug);
 
         const parsedLastModified = shop.updated_at
-          ? new Date(shop.updated_at)
+          ? new Date(String(shop.updated_at))
           : now;
+
         shopEntries.push({
           url: `${SITE_URL}/barbershops/${encodeURIComponent(slug)}`,
           lastModified: Number.isNaN(parsedLastModified.getTime())
@@ -96,5 +100,61 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Sitemap generation should remain best-effort; private application routes are excluded.
   }
 
-  return [...staticRoutes, ...dynamicShopRoutes];
+  const enterpriseLandingRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const database = createAdminClient();
+    const { data: activeLandingPages, error: landingPagesError } =
+      await database
+        .from('barbershop_landing_pages')
+        .select('barbershop_id, updated_at')
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+        .limit(1000);
+
+    if (!landingPagesError && activeLandingPages?.length) {
+      // Resolve a small batch at a time to avoid thousands of concurrent queries.
+      for (let offset = 0; offset < activeLandingPages.length; offset += 20) {
+        const batch = await Promise.all(
+          activeLandingPages.slice(offset, offset + 20).map(async (entry) => {
+            try {
+              const profile = await getPublicProfileById(
+                String(entry.barbershop_id),
+              );
+              if (
+                !profile ||
+                profile.plan !== 'enterprise' ||
+                profile.public_profile_enabled === false
+              ) {
+                return null;
+              }
+
+              const parsedLastModified = entry.updated_at
+                ? new Date(entry.updated_at)
+                : now;
+
+              return {
+                url: `${SITE_URL}/site/${encodeURIComponent(profile.slug)}`,
+                lastModified: Number.isNaN(parsedLastModified.getTime())
+                  ? now
+                  : parsedLastModified,
+                changeFrequency: 'weekly' as const,
+                priority: 0.75,
+              };
+            } catch {
+              return null;
+            }
+          }),
+        );
+
+        for (const entry of batch) {
+          if (entry) enterpriseLandingRoutes.push(entry);
+        }
+      }
+    }
+  } catch {
+    // Enterprise URLs are best-effort if the entitlement migration is not deployed yet.
+  }
+
+  return [...staticRoutes, ...dynamicShopRoutes, ...enterpriseLandingRoutes];
 }

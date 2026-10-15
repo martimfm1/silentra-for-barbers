@@ -10,7 +10,7 @@ import {
 const CANONICAL_URL = 'https://barbers.silentra.me/terms';
 
 export const metadata: Metadata = {
-  title: 'Termos e Condições | Silentra for Barbers',
+  title: 'Termos e Condições',
   description:
     'Termos de utilização da plataforma Silentra for Barbers, incluindo acesso, reservas, responsabilidade, comunicação e suporte.',
   alternates: {

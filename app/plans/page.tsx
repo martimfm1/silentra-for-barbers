@@ -11,18 +11,18 @@ import { PricingSection } from '@/components/hero/pricing-section';
 import { PlanComparison } from '@/components/billing/plan-comparison';
 
 export const metadata: Metadata = {
-  title: 'Planos e Preços para Barbearias | Silentra',
+  title: 'Preços e Planos do Software para Barbearias',
   description:
-    'Compara os planos da Silentra, funcionalidades, limites e preços para escolher a solução de gestão ideal para a tua barbearia.',
+    'Compara preços, funcionalidades e limites dos planos da Silentra for Barbers e escolhe o software certo para a tua barbearia.',
   alternates: {
     canonical: 'https://barbers.silentra.me/plans',
   },
   openGraph: {
-    title: 'Planos e Preços para Barbearias | Silentra',
+    title: 'Preços e Planos para Barbearias | Silentra for Barbers',
     description:
-      'Compara planos, funcionalidades e preços da Silentra para gerir a tua barbearia.',
+      'Compara os planos e funcionalidades do software de gestão para barbearias da Silentra for Barbers.',
     url: 'https://barbers.silentra.me/plans',
-    siteName: 'Silentra',
+    siteName: 'Silentra for Barbers',
     locale: 'pt_PT',
     type: 'website',
   },

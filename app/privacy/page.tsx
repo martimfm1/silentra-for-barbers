@@ -10,7 +10,7 @@ import {
 const CANONICAL_URL = 'https://barbers.silentra.me/privacy';
 
 export const metadata: Metadata = {
-  title: 'Privacidade | Silentra for Barbers',
+  title: 'Política de Privacidade',
   description:
     'Política de privacidade da Silentra for Barbers, com dados recolhidos, finalidades, partilha, retenção e direitos.',
   alternates: {

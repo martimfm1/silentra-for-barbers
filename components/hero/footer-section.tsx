@@ -31,6 +31,12 @@ export function FooterSection() {
             </p>
             <div className="mt-4 grid gap-3 text-sm text-zinc-300">
               <Link
+                href="/software-gestao-barbearia"
+                className="transition-colors hover:text-zinc-50"
+              >
+                Software de gestão para barbearias
+              </Link>
+              <Link
                 href="/barbershops"
                 className="transition-colors hover:text-zinc-50"
               >

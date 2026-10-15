@@ -283,12 +283,13 @@ export function SiteNavbar() {
         href: '/barbershops',
       },
       {
-        label: t('nav.plans', { defaultValue: 'Planos' }),
-        href: '/plans',
+        label:
+          locale === 'pt' ? 'Software para barbearias' : 'Barbershop software',
+        href: '/software-gestao-barbearia',
       },
       {
-        label: t('nav.documentation', { defaultValue: 'Documentação' }),
-        href: '/documentation',
+        label: t('nav.plans', { defaultValue: 'Planos' }),
+        href: '/plans',
       },
       {
         label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
@@ -298,8 +299,12 @@ export function SiteNavbar() {
         label: t('nav.forBarbers', { defaultValue: 'Para barbeiros' }),
         href: '/registo',
       },
+      {
+        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        href: '/documentation',
+      },
     ],
-    [t],
+    [t, locale],
   );
 
   const links = !user

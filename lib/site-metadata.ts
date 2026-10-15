@@ -26,32 +26,30 @@ export const guestMetadata: Metadata = {
 
   title: {
     default:
-      'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
+      'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
     template: '%s | Silentra for Barbers',
   },
 
   description:
-    'A plataforma de gestão para barbearias. Os teus clientes agendam em segundos pelo browser — sem app, sem conta, sem fricção.',
+    'Software de gestão para barbearias em Portugal: agenda online, marcações sem conta do cliente, gestão de equipa e clientes, lembretes e fidelização. Começa grátis.',
 
   keywords: [
-    'gestão barbearia',
+    'software de gestão para barbearias',
+    'gestão de barbearia',
     'agendamento online barbearia',
-    'sistema marcações barbearia',
-    'software barbeiro',
-    'silentra barbers',
-    'agendamento sem registo',
-    'barber saas portugal',
-    'plataforma barbeiro online',
+    'programa para barbearia',
+    'software para barbeiros em Portugal',
+    'marcações online para barbearias',
+    'Silentra for Barbers',
   ],
 
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
 
-  alternates: {
-    canonical: SITE_URL,
-    languages: { 'pt-PT': SITE_URL },
-  },
+  verification: process.env.GOOGLE_SITE_VERIFICATION?.trim()
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION.trim() }
+    : undefined,
 
   robots: {
     index: true,
@@ -66,10 +64,10 @@ export const guestMetadata: Metadata = {
   },
 
   openGraph: {
-    title: 'Silentra for Barbers — Gestão e Agendamento Online para Barbearias',
+    title:
+      'Software de Gestão e Agendamento para Barbearias | Silentra for Barbers',
     description:
-      'Gestão completa, faturação e agendamentos sem fricção. O cliente agenda pelo browser em segundos, sem registo nem app.',
-    url: base.url,
+      'Agenda, marcações online e gestão da barbearia num único painel. Os clientes reservam pelo browser, sem conta nem aplicação.',
     siteName: base.siteName,
     locale: base.locale,
     type: 'website',
@@ -80,9 +78,9 @@ export const guestMetadata: Metadata = {
     card: 'summary_large_image',
     site: '@silentra',
     creator: '@silentra',
-    title: 'Silentra for Barbers — Agendamento Online para Barbearias',
+    title: 'Software de Gestão para Barbearias | Silentra for Barbers',
     description:
-      'O teu cliente agenda sem criar conta. Gestão completa da barbearia num único painel.',
+      'Software para agenda, clientes, equipa e reservas online. Começa grátis com a Silentra for Barbers.',
     images: [OG_IMAGE],
   },
 
