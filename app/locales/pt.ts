@@ -940,6 +940,10 @@ export const pt = {
     customerSince: 'Cliente desde',
     styleNotes: 'Notas de estilo',
   },
+  settingsLanguage: {
+    title: 'Idioma predefinido',
+    description: 'Define o idioma da área de gestão e dos emails enviados pela tua barbearia. A alteração é aplicada depois de guardares as definições.',
+  },
   notFound: {
     status: 'HTTP 404 · Página não encontrada',
     statusCode: 'Código de estado',
