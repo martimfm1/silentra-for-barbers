@@ -119,6 +119,7 @@ export async function sendBookingConfirmationEmail(
         description: `Agendamento de ${payload.serviceName} para ${payload.clientName}.`,
         textTitle: 'Agendamento confirmado', textAt: 'às',
       };
+  const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'long', timeZone: 'Europe/Lisbon' }).format(new Date(`${payload.date}T12:00:00`));
   const avatarUrl = getBarbershopAvatarUrl(payload.barbershopId);
   const title = `${payload.serviceName} — ${payload.barbershopName}`;
   const description = copy.description;
@@ -135,7 +136,7 @@ export async function sendBookingConfirmationEmail(
   const appleMaps = `https://maps.apple.com/?address=${encodeURIComponent(payload.barbershopAddress || payload.barbershopName)}`;
 
   const avatarMarkup = avatarUrl
-    ? `<img src="${avatarUrl}" alt="Logótipo da ${safeBarbershopName}" width="64" height="64" style="display:block;width:64px;height:64px;border-radius:16px;object-fit:cover;border:1px solid #27272a;" />`
+    ? `<img src="${avatarUrl}" alt="${isEnglish ? `Logo of ${safeBarbershopName}` : `Logótipo da ${safeBarbershopName}`}" width="64" height="64" style="display:block;width:64px;height:64px;border-radius:16px;object-fit:cover;border:1px solid #27272a;" />`
     : '';
 
   const htmlContent = `<!DOCTYPE html>
@@ -147,7 +148,7 @@ ${avatarMarkup}
 <p style="font-size:12px;color:#a1a1aa;margin:16px 0 0;">${safeBarbershopName}</p>
 <h1 style="font-size:24px;color:#fff;margin:8px 0;">${copy.title}</h1>
 <p style="font-size:14px;line-height:1.6;color:#a1a1aa;margin:0 0 20px;">${copy.greeting}</p>
-<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.date)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
+<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(formattedDate)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
 <div style="height:1px;background:#27272a;margin:20px 0;"></div>
 <p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.addCalendar}</p>
 <a href="${google}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:10px;">Google Calendar</a>
@@ -171,7 +172,7 @@ ${avatarMarkup}
         to: [{ email: payload.to, name: payload.clientName }],
         subject: copy.subject,
         htmlContent,
-        textContent: `${copy.textTitle}\n${payload.serviceName}\n${payload.date} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${payload.serviceName}\n${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {
