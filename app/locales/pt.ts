@@ -807,6 +807,20 @@ export const pt = {
     notifications: 'Notificações',
     bookingRules: 'Regras de reserva',
   },
+  billingPage: {
+    section: 'Subscrição',
+    title: 'Plano e faturação',
+    description:
+      'Resumo do teu plano, estado da subscrição e comprovativos de pagamento. As decisões de compra e mudança de plano acontecem em /plans.',
+    settings: 'Definições',
+    billingLabel: 'Faturação',
+    receipts: 'Recibos',
+    receiptsDescription:
+      'Os pagamentos manuais geram automaticamente um comprovativo em PDF enviado por email.',
+    simpleManagement: 'Gestão simples',
+    managementDescription:
+      'Cancela no fim do período atual ou compara planos quando quiseres mudar.',
+  },
   notFound: {
     status: 'HTTP 404 · Página não encontrada',
     statusCode: 'Código de estado',
