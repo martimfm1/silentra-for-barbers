@@ -176,9 +176,10 @@ const checks = [
     name: 'Marketplace has dedicated product pages and add-to-cart handoff',
     file: 'app/marketplace/[productId]/page.tsx',
     test: (source) =>
-      source.includes('/api/marketplace/products?id=') &&
+      source.includes("new URL('/marketplace', window.location.origin)") &&
       source.includes("searchParams.set('add', product.id)") &&
-      source.includes('searchParams.set(') &&
+      source.includes("searchParams.set(\n      'qty'") &&
+      source.includes('window.location.assign(url.toString())') &&
       (source.includes("t('storefront.addToCart')") ||
         source.includes('Adicionar ao carrinho')),
   },
@@ -253,9 +254,9 @@ const checks = [
         source.includes('Dados de entrega')) &&
       (source.includes("t('orderTracking.refreshStatus')") ||
         source.includes('Atualizar estado')) &&
-      source.includes('setInterval') &&
+      source.includes('window.setInterval') &&
       source.includes("referrerPolicy: 'no-referrer'") &&
-      source.includes('replaceState'),
+      source.includes('window.history.replaceState'),
   },
   {
     name: 'Tracking page is excluded from indexing and disables referrer leakage',
