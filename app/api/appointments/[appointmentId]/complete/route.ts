@@ -122,6 +122,11 @@ async function POST__unobserved(
       .eq('is_active', true)
       .limit(1)
       .maybeSingle();
+    const { data: barbershopLanguage } = await supabase
+      .from('barbershops')
+      .select('default_language')
+      .eq('id', profile.barbershop_id)
+      .maybeSingle();
     let customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
     let customerName = appointment.manual_name?.trim() || 'Cliente';
     if (!customerEmail && appointment.client_id) {
@@ -152,6 +157,7 @@ async function POST__unobserved(
           serviceName,
           barbershopName: shop.name || 'a barbearia',
           reviewUrl,
+          language: barbershopLanguage?.default_language === 'en' ? 'en' : 'pt',
         });
         reviewEmailSent = emailResult.success;
         if (!emailResult.success)
