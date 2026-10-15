@@ -50,7 +50,7 @@ export async function sendBookingReviewRequestEmail(
         footer: 'Your feedback is optional and will only appear on the public barbershop page after you submit it.',
       }
     : {
-        subject: copy.subject,
+        subject: `Como correu a tua experiência em ${payload.barbershopName}?`,
         title: 'Como correu o teu atendimento?',
         greeting: `Olá <strong style="color:#fff">${safeClientName}</strong>, obrigado por escolheres a nossa barbearia. Gostávamos de saber como correu a tua experiência.`,
         button: 'Deixar uma avaliação', service: 'Serviço:',
@@ -100,7 +100,7 @@ export async function sendBookingReviewRequestEmail(
       body: JSON.stringify({
         sender: { name: payload.barbershopName, email: senderEmail },
         to: [{ email: payload.to, name: payload.clientName }],
-        subject: `Como correu a tua experiência em ${payload.barbershopName}?`,
+        subject: copy.subject,
         htmlContent,
       }),
     });
