@@ -26,7 +26,19 @@ type Status = (typeof STATUSES)[number];
 const canCancel = (status: Status) =>
   ['pending', 'confirmed', 'preparing', 'ready'].includes(status);
 
-const customerMessage = (status: Status) => {
+const customerMessage = (status: Status, language: 'pt' | 'en' = 'pt') => {
+  if (language === 'en') {
+    switch (status) {
+      case 'confirmed': return 'Your order has been confirmed.';
+      case 'preparing': return 'Your order is being prepared.';
+      case 'ready': return 'Your order is ready.';
+      case 'shipped': return 'Your order has been shipped.';
+      case 'delivered': return 'Your order has been delivered.';
+      case 'completed': return 'Your order has been completed.';
+      case 'cancelled': return 'Your order has been cancelled.';
+      default: return null;
+    }
+  }
   switch (status) {
     case 'confirmed':
       return 'A tua encomenda foi confirmada.';
@@ -72,27 +84,28 @@ async function notifyCustomer(
   },
   barbershopId: string,
 ) {
-  const message = customerMessage(order.status);
-  if (!message) return;
-
   const { data: shop } = await admin
     .from('barbershops')
-    .select('name')
+    .select('name,default_language')
     .eq('id', barbershopId)
     .maybeSingle();
-  const shopName = shop?.name?.trim() || 'a tua barbearia';
+  const language: 'pt' | 'en' = shop?.default_language === 'en' ? 'en' : 'pt';
+  const message = customerMessage(order.status, language);
+  if (!message) return;
+
+  const shopName = shop?.name?.trim() || (language === 'en' ? 'your barbershop' : 'a tua barbearia');
 
   const subjectByStatus: Partial<Record<Status, string>> = {
-    confirmed: 'A sua encomenda foi confirmada',
-    preparing: 'A sua encomenda está a ser preparada',
-    ready: 'A sua encomenda está pronta',
-    shipped: 'A sua encomenda foi enviada',
-    delivered: 'A sua encomenda foi entregue',
-    completed: 'A sua encomenda foi concluída',
-    cancelled: 'A sua encomenda foi cancelada',
+    confirmed: language === 'en' ? 'Your order has been confirmed' : 'A tua encomenda foi confirmada',
+    preparing: language === 'en' ? 'Your order is being prepared' : 'A tua encomenda está a ser preparada',
+    ready: language === 'en' ? 'Your order is ready' : 'A tua encomenda está pronta',
+    shipped: language === 'en' ? 'Your order has been shipped' : 'A tua encomenda foi enviada',
+    delivered: language === 'en' ? 'Your order has been delivered' : 'A tua encomenda foi entregue',
+    completed: language === 'en' ? 'Your order has been completed' : 'A tua encomenda foi concluída',
+    cancelled: language === 'en' ? 'Your order has been cancelled' : 'A tua encomenda foi cancelada',
   };
   const subject =
-    subjectByStatus[order.status] || 'Atualização da sua encomenda';
+    subjectByStatus[order.status] || (language === 'en' ? 'Order update' : 'Atualização da encomenda');
 
   // Issue a fresh capability per status notification. Old receipt and status
   // links remain valid because each hash has its own row.
@@ -130,7 +143,7 @@ async function notifyCustomer(
       senderName: shopName,
       // Capability links must not be used for recipient click/open analytics.
       contactPixelTrackingConsent: false,
-      htmlContent: `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">Olá ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div>${trackingUrl ? `<div style="margin-top:22px;text-align:center"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none">Acompanhar encomenda</a><p style="margin:10px 0 0;font-size:11px;color:#71717a">Link privado, sem necessidade de criar conta.</p></div>` : ''}<p style="margin:20px 0 0;font-size:12px;color:#71717a">Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.</p></div></div></body></html>`,
+      htmlContent: `<!doctype html><html lang="${language === 'en' ? 'en' : 'pt-PT'}"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7">${language === 'en' ? 'Hello' : 'Olá'} ${escapeHtml(order.customer_name)}, ${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">${language === 'en' ? 'Order' : 'Encomenda'} <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div>${trackingUrl ? `<div style="margin-top:22px;text-align:center"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none">${language === 'en' ? 'Track order' : 'Acompanhar encomenda'}</a><p style="margin:10px 0 0;font-size:11px;color:#71717a">${language === 'en' ? 'Private link, no account required.' : 'Link privado, sem necessidade de criar conta.'}</p></div>` : ''}<p style="margin:20px 0 0;font-size:12px;color:#71717a">${language === 'en' ? 'For questions about payment, collection or delivery, contact the barbershop directly.' : 'Para questões sobre pagamento, levantamento ou entrega, contacta diretamente a barbearia.'}</p></div></div></body></html>`,
     });
 
     if (!result.success) {
