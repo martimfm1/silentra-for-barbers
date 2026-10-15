@@ -181,7 +181,7 @@ export default function SettingsPageOrganized() {
     ]);
     if (c.error)
       toast.error(
-        c.error.message || t('settingsPage.loadFailed'),
+        t('settingsPage.loadFailed'),
       );
     if (c.data) {
       const n = normalize(c.data);
@@ -288,7 +288,7 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || t('settingsPage.locationUpdateFailed'),
+            t('settingsPage.locationUpdateFailed'),
           );
       }
       if (JSON.stringify(amenities) !== JSON.stringify(initialAmenities)) {
@@ -303,7 +303,7 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || t('settingsPage.amenitiesSaveFailed'),
+            t('settingsPage.amenitiesSaveFailed'),
           );
       }
       const n = normalize(c.data ?? config);
@@ -315,9 +315,7 @@ export default function SettingsPageOrganized() {
       toast.success(t('settingsPage.saved'));
     } catch (e) {
       toast.error(
-        e instanceof Error
-          ? e.message
-          : t('settingsPage.saveFailed'),
+        t('settingsPage.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -341,7 +339,7 @@ export default function SettingsPageOrganized() {
     setUploading(null);
     if (r.error)
       return toast.error(
-        r.error.message || t('settingsPage.imageUpdateFailed'),
+        t('settingsPage.imageUpdateFailed'),
       );
     if (type === 'avatar') {
       setAvatarPreviewError(false);
@@ -675,12 +673,14 @@ export default function SettingsPageOrganized() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.openingTime')}
                       value={config.opening_time}
                       onChange={(e) => set({ opening_time: e.target.value })}
                       className={INPUT_CLASS}
                     />
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.closingTime')}
                       value={config.closing_time}
                       onChange={(e) => set({ closing_time: e.target.value })}
                       className={INPUT_CLASS}
@@ -689,12 +689,14 @@ export default function SettingsPageOrganized() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.lunchStart')}
                       value={config.lunch_start}
                       onChange={(e) => set({ lunch_start: e.target.value })}
                       className={INPUT_CLASS}
                     />
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.lunchEnd')}
                       value={config.lunch_end}
                       onChange={(e) => set({ lunch_end: e.target.value })}
                       className={INPUT_CLASS}
