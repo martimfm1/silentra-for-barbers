@@ -24,10 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiteNavbar } from '@/components/site-navbar';
 import { useLanguage } from '@/context/LanguageContext';
-import { useLanguage } from '@/context/LanguageContext';
 
 export default function ResetPasswordPage() {
-  const { t } = useLanguage();
   const { t } = useLanguage();
   const router = useRouter();
   const [password, setPassword] = useState('');
