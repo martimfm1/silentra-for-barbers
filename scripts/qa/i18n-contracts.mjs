@@ -117,9 +117,9 @@ const localeTrees = Object.fromEntries(
 const failures = [];
 for (const path of localizedSources) {
   const source = read(path);
-  const keys = [...source.matchAll(/\bt\(\s*['"]([A-Za-z0-9_.]+)['"]/g)].map(
-    (match) => match[1],
-  );
+  const keys = [...source.matchAll(/\bt\(\s*['"]([A-Za-z0-9_.]+)['"]/g)]
+    .map((match) => match[1])
+    .filter((key) => !key.endsWith('.'));
   for (const key of keys) {
     for (const locale of ['pt', 'en']) {
       if (!hasPath(localeTrees[locale], key)) {
@@ -142,6 +142,25 @@ for (const section of [
   for (const locale of ['pt', 'en']) {
     if (!hasPath(localeTrees[locale], section)) {
       failures.push(locale + ': missing translation section "' + section + '"');
+    }
+  }
+}
+
+
+for (const status of [
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
+  'shipped',
+  'delivered',
+  'completed',
+  'cancelled',
+]) {
+  for (const locale of ['pt', 'en']) {
+    const key = 'orderManagement.status.' + status;
+    if (!hasPath(localeTrees[locale], key)) {
+      failures.push(locale + ': missing translation for dynamic status "' + key + '"');
     }
   }
 }
