@@ -86,8 +86,8 @@ export async function sendLoyaltyCodeEmail(
     subject: `Loyalty access code — ${barbershopName}`, text: `Loyalty access code for ${barbershopName}: ${code}. The code expires in 10 minutes.`,
   } : {
     program: 'Programa de fidelização', title: 'Código de acesso', description: `Usa este código para entrar na fidelização da ${escapeHtml(barbershopName)}.`,
-    expiry: '${copy.expiry}',
-    subject: copy.subject, text: `Código de acesso à fidelização de ${barbershopName}: ${code}. O código expira em 10 minutos.`,
+    expiry: 'O código expira em 10 minutos e só pode ser utilizado uma vez. Se não pediste este código, ignora este email.',
+    subject: `Código da fidelização — ${barbershopName}`, text: `Código de acesso à fidelização de ${barbershopName}: ${code}. O código expira em 10 minutos.`,
   };
   const safeShop = escapeHtml(barbershopName);
   const safeCode = escapeHtml(code);
@@ -100,13 +100,13 @@ export async function sendLoyaltyCodeEmail(
         <div style="text-align:center;background:#09090b;border:1px solid #3f3f46;border-radius:14px;padding:20px;">
           <div style="font-size:32px;font-weight:800;letter-spacing:8px;color:#fff;">${safeCode}</div>
         </div>
-        <p style="font-size:12px;line-height:1.6;color:#71717a;margin:20px 0 0;">O código expira em 10 minutos e só pode ser utilizado uma vez. Se não pediste este código, ignora este email.</p>
+        <p style="font-size:12px;line-height:1.6;color:#71717a;margin:20px 0 0;">${copy.expiry}</p>
       </div>
     </div>`;
 
   await sendBrevoEmail({
     email,
-    subject: `Código da fidelização — ${barbershopName}`,
+    subject: copy.subject,
     htmlContent,
     textContent: copy.text,
   });
@@ -131,13 +131,13 @@ export async function sendLoyaltyRedemptionEmail(
 ): Promise<void> {
   const isEnglish = input.language === 'en';
   const copy = isEnglish ? {
-    greeting: 'Hello', title: 'Your voucher is ready', success: 'your redemption at', created: 'was created successfully.', reward: 'Reward', used: 'points used', remaining: 'points remaining', qrTitle: 'Voucher QR code', qrHelp: 'Show this QR code at the barbershop. The code is also available below as an accessible alternative.', codeTitle: 'Redemption code', codeHelp: 'Show this code if the QR code cannot be scanned.', valid: 'Valid for 1 hour', expires: 'This voucher expires at', expired: 'After this time, it can no longer be used.', warning: 'Do not share this QR code or code. The voucher is single-use and is validated directly by the team at', subject: `Loyalty voucher — ${input.rewardName} — ${input.barbershopName}`,
+    greeting: 'Hello', title: 'Your voucher is ready', success: 'your redemption at', created: 'was created successfully.', reward: 'Reward', used: 'points used', remaining: 'points remaining', qrTitle: 'Voucher QR code', qrHelp: 'Show this QR code at the barbershop. The code is also available below as an accessible alternative.', codeTitle: 'Redemption code', codeHelp: 'Show this code if the QR code cannot be scanned.', valid: 'Valid for 1 hour', expires: 'This voucher expires at', expired: 'After this time, it can no longer be used.', warning: 'Do not share this QR code or code. The voucher is single-use and is validated directly by the team at', textQr: 'The QR code is available in the HTML version of this email.', subject: `Loyalty voucher — ${input.rewardName} — ${input.barbershopName}`,
   } : {
-    greeting: 'Olá', title: 'O teu voucher está pronto', success: 'o teu resgate na', created: 'foi criado com sucesso.', reward: 'Recompensa', used: 'pontos utilizados', remaining: 'pontos restantes', qrTitle: 'QR Code do voucher', qrHelp: '${copy.qrHelp}', codeTitle: 'Código de utilização', codeHelp: '${copy.codeHelp}', valid: 'Válido durante 1 hora', expires: 'Este voucher expira em', expired: 'Depois dessa hora, deixa de poder ser utilizado.', warning: 'Não partilhes este QR ou código. O voucher é de utilização única e é validado diretamente pela equipa da', subject: copy.subject,
+    greeting: 'Olá', title: 'O teu voucher está pronto', success: 'o teu resgate na', created: 'foi criado com sucesso.', reward: 'Recompensa', used: 'pontos utilizados', remaining: 'pontos restantes', qrTitle: 'QR Code do voucher', qrHelp: 'Mostra este QR na barbearia. O código também está disponível abaixo como alternativa acessível.', codeTitle: 'Código de utilização', codeHelp: 'Podes mostrar este código caso o QR não possa ser lido.', valid: 'Válido durante 1 hora', expires: 'Este voucher expira em', expired: 'Depois dessa hora, deixa de poder ser utilizado.', warning: 'Não partilhes este QR ou código. O voucher é de utilização única e é validado diretamente pela equipa da', textQr: copy.textQr, subject: copy.subject,
   };
   const appUrl = getPublicAppUrl();
   const qrImageUrl = `${appUrl}/api/loyalty/redemption/qr?token=${encodeURIComponent(input.qrPayload)}`;
-  const safeName = escapeHtml(input.customerName?.trim() || copy.greeting);
+  const safeName = escapeHtml(input.customerName?.trim() || (isEnglish ? 'there' : 'cliente'));
   const safeShop = escapeHtml(input.barbershopName);
   const safeReward = escapeHtml(input.rewardName);
   const safeDescription = escapeHtml(input.rewardDescription || copy.reward);
@@ -174,7 +174,7 @@ export async function sendLoyaltyRedemptionEmail(
 
             <div style="margin-top:24px;text-align:center;">
               <p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.qrTitle}</p>
-              <p style="font-size:12px;line-height:1.5;color:#a1a1aa;margin:0 0 14px;">Mostra este QR na barbearia. O código também está disponível abaixo como alternativa acessível.</p>
+              <p style="font-size:12px;line-height:1.5;color:#a1a1aa;margin:0 0 14px;">${copy.qrHelp}</p>
               <div style="display:inline-block;background:#fff;border-radius:18px;padding:14px;">
                 <img src="${qrImageUrl}" alt="${isEnglish ? 'QR code to redeem' : 'QR Code para validar'} ${safeReward} ${isEnglish ? 'at' : 'na'} ${safeShop}" width="260" height="260" style="display:block;width:260px;height:260px;max-width:100%;" />
               </div>
@@ -183,7 +183,7 @@ export async function sendLoyaltyRedemptionEmail(
             <div style="margin-top:22px;text-align:center;border:1px solid #27272a;background:#0b0b0d;border-radius:14px;padding:18px;">
               <div style="font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:1px;">${copy.codeTitle}</div>
               <div style="font-size:28px;font-weight:800;letter-spacing:6px;color:#fff;margin-top:8px;">${safeCode}</div>
-              <p style="font-size:12px;line-height:1.5;color:#71717a;margin:10px 0 0;">Podes mostrar este código caso o QR não possa ser lido.</p>
+              <p style="font-size:12px;line-height:1.5;color:#71717a;margin:10px 0 0;">${copy.codeHelp}</p>
             </div>
 
             <div style="margin-top:20px;border:1px solid #7f1d1d;background:#2a0f12;border-radius:12px;padding:14px;">
