@@ -103,10 +103,14 @@ export function LanguageProvider({
         if (!user || !active) return;
         const { data: profile } = await supabase
           .from('users')
-          .select('barbershop_id')
+          .select('barbershop_id,role')
           .eq('id', user.id)
           .maybeSingle();
-        if (!profile?.barbershop_id || !active) return;
+        if (
+          !profile?.barbershop_id ||
+          !['owner', 'admin', 'manager', 'receptionist', 'staff', 'barber', 'professional'].includes(profile.role) ||
+          !active
+        ) return;
         const { data: shop } = await supabase
           .from('barbershops')
           .select('default_language')
