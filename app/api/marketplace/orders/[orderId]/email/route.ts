@@ -80,11 +80,12 @@ async function POST__unobserved(
 
     const { data: shop } = await admin
       .from('barbershops')
-      .select('name')
+      .select('name,default_language')
       .eq('id', barbershopId)
       .maybeSingle();
 
-    const shopName = shop?.name?.trim() || 'a tua barbearia';
+    const language: 'pt' | 'en' = shop?.default_language === 'en' ? 'en' : 'pt';
+    const shopName = shop?.name?.trim() || (language === 'en' ? 'your barbershop' : 'a tua barbearia');
 
     // Give the customer a fresh link in manual messages too. Never replace the
     // legacy token on the order, which would invalidate earlier receipt links.
@@ -110,9 +111,9 @@ async function POST__unobserved(
     }
 
     const trackingHtml = trackingUrl
-      ? `<div style="margin-top:22px;text-align:center"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none">Acompanhar encomenda</a><p style="margin:10px 0 0;font-size:11px;color:#71717a">Link privado, sem necessidade de criar conta.</p></div>`
+      ? `<div style="margin-top:22px;text-align:center"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:13px 18px;border-radius:12px;background:#34d399;color:#052e24;font-weight:700;text-decoration:none">${language === 'en' ? 'Track order' : 'Acompanhar encomenda'}</a><p style="margin:10px 0 0;font-size:11px;color:#71717a">${language === 'en' ? 'Private link, no account required.' : 'Link privado, sem necessidade de criar conta.'}</p></div>`
       : '';
-    const htmlContent = `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7;white-space:pre-wrap">${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">Encomenda <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div>${trackingHtml}</div><p style="padding:20px 8px 0;text-align:center;font-size:11px;color:#52525b">Mensagem enviada pela barbearia através da SILENTRA.</p></div></body></html>`;
+    const htmlContent = `<!doctype html><html lang="${language === 'en' ? 'en' : 'pt-PT'}"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5"><div style="max-width:620px;margin:0 auto;padding:40px 20px"><div style="border:1px solid #27272a;border-radius:24px;background:#0f0f11;padding:28px"><div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#34d399">SILENTRA · ${escapeHtml(shopName)}</div><h1 style="margin:14px 0 0;font-size:26px;color:#fff">${escapeHtml(subject)}</h1><p style="margin:18px 0 0;color:#d4d4d8;line-height:1.7;white-space:pre-wrap">${escapeHtml(message)}</p><div style="margin-top:24px;padding:14px 16px;border-radius:14px;background:#18181b;border:1px solid #27272a;font-size:12px;color:#a1a1aa">${language === 'en' ? 'Order' : 'Encomenda'} <span style="font-family:monospace;color:#fff">#${escapeHtml(order.id.slice(0, 8))}</span></div>${trackingHtml}</div><p style="padding:20px 8px 0;text-align:center;font-size:11px;color:#52525b">${language === 'en' ? 'Message sent by the barbershop through SILENTRA.' : 'Mensagem enviada pela barbearia através da SILENTRA.'}</p></div></body></html>`;
 
     const result = await sendBrevoEmail({
       to: order.customer_email,
