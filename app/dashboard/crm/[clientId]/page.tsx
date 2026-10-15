@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Props {
   params: Promise<{ clientId: string }>;
@@ -46,7 +47,7 @@ async function authHeaders(contentType = false) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error('Sessão expirada.');
+  if (!session?.access_token) throw new Error('Your session expired. Please sign in again.');
   return {
     Authorization: `Bearer ${session.access_token}`,
     ...(contentType ? { 'Content-Type': 'application/json' } : {}),
@@ -54,6 +55,7 @@ async function authHeaders(contentType = false) {
 }
 
 export default function CRMClientPage({ params }: Props) {
+  const { t, locale } = useLanguage();
   const { hasFeature, loading: billingLoading } = useFeatureAccess();
   const allowed = hasFeature('advanced_crm');
   const [clientId, setClientId] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export default function CRMClientPage({ params }: Props) {
         });
         const json = await response.json();
         if (!response.ok)
-          throw new Error(json.error ?? 'Não foi possível carregar o cliente.');
+          throw new Error(json.error ?? t('crmDetail.loadFailed'));
         if (!cancelled) {
           setClient(json.client);
           setAppointments(json.appointments ?? []);
@@ -91,7 +93,7 @@ export default function CRMClientPage({ params }: Props) {
           toast.error(
             error instanceof Error
               ? error.message
-              : 'Erro ao carregar cliente.',
+              : t('crmDetail.loadError'),
           );
       } finally {
         if (!cancelled) setLoading(false);
@@ -100,7 +102,7 @@ export default function CRMClientPage({ params }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [allowed, billingLoading, clientId]);
+  }, [allowed, billingLoading, clientId, t]);
 
   async function addNote(event: React.FormEvent) {
     event.preventDefault();
@@ -114,13 +116,13 @@ export default function CRMClientPage({ params }: Props) {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error ?? 'Não foi possível guardar a nota.');
+        throw new Error(json.error ?? t('crmDetail.saveNoteFailed'));
       setNotes((current) => [json.note, ...current]);
       setNote('');
-      toast.success('Nota guardada.');
+      toast.success(t('crmDetail.noteSaved'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao guardar nota.',
+        error instanceof Error ? error.message : t('crmDetail.saveNoteError'),
       );
     } finally {
       setSaving(false);
@@ -134,12 +136,12 @@ export default function CRMClientPage({ params }: Props) {
         <Card className="mx-auto max-w-2xl border-white/10 bg-white/[0.03]">
           <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
             <Lock className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold">CRM Avançado</h1>
+            <h1 className="text-2xl font-semibold">{t('crmDetail.title')}</h1>
             <p className="text-muted-foreground">
-              Esta área está disponível no plano Pro.
+              {t('crmDetail.planRequired')}
             </p>
             <Button asChild>
-              <Link href="/plans">Ver planos</Link>
+              <Link href="/plans">{t('crmDetail.viewPlans')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -148,7 +150,7 @@ export default function CRMClientPage({ params }: Props) {
   if (loading || !client)
     return (
       <main className="min-h-screen bg-background px-4 py-24 text-center text-muted-foreground">
-        A carregar cliente...
+        {t('crmDetail.loadingClient')}
       </main>
     );
 
@@ -158,16 +160,16 @@ export default function CRMClientPage({ params }: Props) {
         <Button variant="ghost" asChild>
           <Link href="/dashboard/crm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Clientes
+            {t('crmDetail.backToCustomers')}
           </Link>
         </Button>
         <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm text-primary">PERFIL 360º</p>
+            <p className="text-sm text-primary">{t('crmDetail.profile')}</p>
             <h1 className="text-3xl font-semibold">{client.name_complete}</h1>
             <p className="mt-1 text-muted-foreground">
-              {client.email || 'Sem email'} ·{' '}
-              {client.num_phone || 'Sem telefone'}
+              {client.email || t('crmDetail.noEmail')} ·{' '}
+              {client.num_phone || t('crmDetail.noPhone')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -207,7 +209,7 @@ export default function CRMClientPage({ params }: Props) {
                       >
                         <div>
                           <p className="font-medium">
-                            {new Date(item.date_hour).toLocaleString('pt-PT')}
+                            {new Date(item.date_hour).toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {item.status}
@@ -237,7 +239,7 @@ export default function CRMClientPage({ params }: Props) {
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     maxLength={5000}
-                    placeholder="Preferências, observações ou contexto importante..."
+                    placeholder={t('crmDetail.notePlaceholder')}
                   />
                   <Button type="submit" disabled={saving || !note.trim()}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -271,20 +273,20 @@ export default function CRMClientPage({ params }: Props) {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div>
-                <p className="text-muted-foreground">Email</p>
+                <p className="text-muted-foreground">{t('crmDetail.email')}</p>
                 <p>{client.email || '—'}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Telefone</p>
+                <p className="text-muted-foreground">{t('crmDetail.phone')}</p>
                 <p>{client.num_phone || '—'}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Cliente desde</p>
-                <p>{new Date(client.created_at).toLocaleDateString('pt-PT')}</p>
+                <p className="text-muted-foreground">{t('crmDetail.customerSince')}</p>
+                <p>{new Date(client.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT')}</p>
               </div>
               {client.style_notes ? (
                 <div>
-                  <p className="text-muted-foreground">Notas de estilo</p>
+                  <p className="text-muted-foreground">{t('crmDetail.styleNotes')}</p>
                   <p className="whitespace-pre-wrap">{client.style_notes}</p>
                 </div>
               ) : null}
