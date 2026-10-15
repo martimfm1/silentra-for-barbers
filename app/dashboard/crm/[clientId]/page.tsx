@@ -192,13 +192,13 @@ export default function CRMClientPage({ params }: Props) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CalendarDays className="h-5 w-5" />
-                  Histórico de marcações
+                  {t('crmDetail.appointmentHistory')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {appointments.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    Ainda não existem marcações.
+                    {t('crmDetail.noAppointments')}
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -231,7 +231,7 @@ export default function CRMClientPage({ params }: Props) {
             </Card>
             <Card className="border-white/10 bg-white/[0.03]">
               <CardHeader>
-                <CardTitle>Notas internas</CardTitle>
+                <CardTitle>{t('crmDetail.internalNotes')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={addNote} className="space-y-3">
@@ -243,7 +243,7 @@ export default function CRMClientPage({ params }: Props) {
                   />
                   <Button type="submit" disabled={saving || !note.trim()}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Guardar nota
+                    {t('crmDetail.saveNote')}
                   </Button>
                 </form>
                 <div className="mt-6 space-y-3">
@@ -268,7 +268,7 @@ export default function CRMClientPage({ params }: Props) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
-                Dados do cliente
+                {t('crmDetail.customerData')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
