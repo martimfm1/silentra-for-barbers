@@ -637,10 +637,7 @@ export default function MarketplaceOrderTrackingClient() {
                           </p>
                           {countryLabel(order.shipping.country) && (
                             <p>
-                              {countryLabel(
-                                order.shipping.country,
-                                formatLocale,
-                              )}
+                              {countryLabel(order.shipping.country)}
                             </p>
                           )}
                         </div>
