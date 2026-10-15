@@ -936,6 +936,10 @@ export const en = {
     customerSince: 'Customer since',
     styleNotes: 'Style notes',
   },
+  settingsLanguage: {
+    title: 'Default language',
+    description: 'Set the language for the management area and emails sent by your barbershop. The change takes effect after you save the settings.',
+  },
   notFound: {
     status: 'HTTP 404 · Page not found',
     statusCode: 'Status code',
