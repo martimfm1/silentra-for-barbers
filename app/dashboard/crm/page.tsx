@@ -36,7 +36,7 @@ async function authHeaders(): Promise<Record<string, string>> {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token)
-    throw new Error(t('crm.sessionExpired'));
+    throw new Error('Your session expired. Please sign in again.');
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
@@ -209,7 +209,7 @@ export default function CRMPage() {
               </div>
               <Button asChild className="shrink-0">
                 <Link href="/dashboard/agenda">
-                  {t('crm.firstAppointment)}{' '}
+                  {t('crm.firstAppointment')}{' '}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -223,7 +223,7 @@ export default function CRMPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  {t('crm.customerBase)}{' '}
+                  {t('crm.customerBase')}{' '}
                   <span className="text-sm font-normal text-muted-foreground">
                     {clientCountLabel}
                   </span>
