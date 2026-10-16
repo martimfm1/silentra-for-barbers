@@ -41,6 +41,8 @@
 - [x] Alteração do estado de encomendas, emails manuais de encomendas, avatar e ações de faturação manual no admin: allowlists específicas e verificação de contexto/autorização no servidor.
 - [x] Definições do marketplace, consulta pública do perfil de cliente de marcação, validação de resgates Loyalty e criação/edição de regras de pontos: allowlists específicas, limites de corpo e validação do tenant/identificadores no servidor.
 - [x] Criação/edição de recompensas Loyalty: allowlist estrita, validação de tipo/valores e atualização limitada à barbearia autenticada.
+- [x] Regras de automação, definições do código QR e saída do programa Loyalty: allowlists específicas, limites de corpo e validação server-side de campos/contexto.
+- [x] Inventário Enterprise, localizações e comissões: allowlists específicas, limites de corpo, valores numéricos limitados e validação de localização/profissional contra o tenant autenticado.
 - [x] Pedidos/verificação de códigos do portal de clientes e OTP da fidelização, e resgate Loyalty: allowlists estritas, limites de corpo e rate limiting/verificação de sessão ou tenant server-side.
 - [ ] Aplicar o parser comum ou validação equivalente a todos os endpoints mutáveis; inventário completo e testes negativos por rota ainda pendentes.
 - [ ] Revalidar permissões e propriedade dos recursos dentro da mesma transação/RPC para todas as operações sensíveis; validação client-side nunca conta como controlo de segurança.
