@@ -90,6 +90,21 @@ async function POST__unobserved(request: Request) {
         { error: 'Professional not found' },
         { status: 404 },
       );
+    if (appointmentId) {
+      const { data: appointment, error: appointmentError } = await admin
+        .from('appointments')
+        .select('id')
+        .eq('id', appointmentId)
+        .eq('barbershop_id', barbershopId)
+        .eq('professional_id', professionalId)
+        .maybeSingle();
+      if (appointmentError) throw appointmentError;
+      if (!appointment)
+        return NextResponse.json(
+          { error: 'Appointment not found for this professional and shop' },
+          { status: 404 },
+        );
+    }
     const { data, error } = await admin
       .from('commissions')
       .insert({
