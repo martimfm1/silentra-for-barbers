@@ -360,6 +360,18 @@ for (const check of requestValidationChecks) {
 
 const routeSecurityChecks = [
   {
+    file: 'lib/marketing/brevo-webhook.ts',
+    markers: [
+      "contentType !== 'application/json'",
+      'maxBodyBytes = 64 * 1024',
+      'totalBytes > maxBodyBytes',
+      'payloads.length > 100',
+      "errorType: error instanceof Error ? error.name : 'UnknownError'",
+    ],
+    label: 'Brevo webhook bounded payload parsing and non-sensitive error logging',
+  },
+
+  {
     file: 'app/api/stripe/subscription/route.ts',
     markers: [
       'sessionUserId !== user.id',
