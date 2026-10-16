@@ -167,6 +167,13 @@ export function BookingDrawerCanonical({
   const cacheRef = useRef(
     new Map<string, { data: MarketplaceBookingResponse; timestamp: number }>(),
   );
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // Each step starts at the top so mobile users never land below the heading.
+    scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, [isOpen, step]);
 
   const currentDay = days[dayIndex];
   const service = services.find((item) => item.id === serviceId) ?? null;
@@ -404,7 +411,7 @@ export function BookingDrawerCanonical({
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="mx-auto flex h-[82dvh] max-h-[82dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border-white/10 bg-zinc-950 text-zinc-100 sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl">
+      <DrawerContent className="mx-auto flex h-[min(90dvh,48rem)] max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border-white/10 bg-zinc-950 text-zinc-100 sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl">
         <header className="shrink-0 border-b border-white/10 px-4 py-4 sm:px-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -448,7 +455,7 @@ export function BookingDrawerCanonical({
           )}
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5">
+        <div ref={scrollAreaRef} data-booking-scroll-area className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5 [-webkit-overflow-scrolling:touch] sm:px-5 sm:pb-5">
           {error ? (
             <div
               className="flex min-h-56 flex-col items-center justify-center gap-4 text-center"

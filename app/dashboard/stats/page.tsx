@@ -445,7 +445,7 @@ export default function StatsPage() {
               </Card>
 
               {/* GRÁFICO 2: FATURAÇÃO POR BARBEIRO */}
-              <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
+              <Card className="stats-professional-chart border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
                     Faturação por Barbeiro (€)
@@ -478,12 +478,16 @@ export default function StatsPage() {
                             dataKey="name"
                             tickLine={false}
                             axisLine={false}
-                            tick={{ fill: '#a1a1aa', fontSize: 11 }}
+                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
                             dy={6}
-                            interval={0}
+                            angle={-20}
+                            textAnchor="end"
+                            height={48}
+                            interval="preserveStartEnd"
+                            minTickGap={4}
                             tickFormatter={(value: string) =>
-                              value.length > 12
-                                ? `${value.slice(0, 12)}…`
+                              value.length > 10
+                                ? `${value.slice(0, 10)}…`
                                 : value
                             }
                           />

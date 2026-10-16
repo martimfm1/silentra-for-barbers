@@ -15,6 +15,11 @@ canvas {
 }
 
 @media (max-width: 639px) {
+  /* Keep chart labels readable without making the viewport horizontally scrollable. */
+  .stats-professional-chart .recharts-cartesian-axis-tick text {
+    font-size: 9px;
+  }
+
   .silentra-page-content {
     width: min(100% - 1rem, 90rem);
     padding-block: 5rem 2.25rem;
@@ -48,34 +53,49 @@ canvas {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  [data-slot='drawer-content']:has([data-terms-scroll-area]) {
+    height: min(90dvh, 48rem);
+    max-height: 90dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  [data-terms-scroll-area] {
+    min-height: 0;
+    flex: 1 1 auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* The fixed mobile dashboard navigation must never hide the final actions/content. */
   body:has(nav[aria-label='Navegação rápida']) {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 
-  /* Keep scrollable content clear of the fixed mobile navigation. */
   main,
   [role='main'] {
     scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 }
 
-/* Dashboard mobile is a vertical-only surface: prevent viewport-level horizontal panning. */
+/* Dashboard is a vertical-only surface: prevent viewport-level horizontal panning. */
 body:has(.silentra-dashboard-shell),
 .silentra-dashboard-shell {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
 
-.silentra-dashboard-shell * {
+.silentra-dashboard-shell *,
+.silentra-dashboard-main,
+.dashboard-page,
+.dashboard-content {
   min-width: 0;
+  max-width: 100%;
 }
 
-/* The public booking drawer should be a focused sheet, not a full-screen takeover. */
+/* Keep the public booking drawer a focused sheet, not a full-screen takeover. */
 [data-slot='drawer-content'].max-w-lg.rounded-none {
   box-shadow: 0 -18px 60px rgb(0 0 0 / 0.42);
 }
@@ -114,5 +134,90 @@ body:has([data-slot='drawer-content'].max-w-lg.rounded-none)
 
   .aceternity-beam {
     animation: none !important;
+  }
+}
+
+
+/* Mobile UX consistency: fit common surfaces to the viewport instead of introducing X scrolling. */
+@media (max-width: 639px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  main,
+  section,
+  article,
+  aside,
+  [data-slot='card'],
+  [data-slot='card-header'],
+  [data-slot='card-content'],
+  [data-slot='card-footer'] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .silentra-table-wrap,
+  .dashboard-page [data-slot='table-container'] {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .silentra-table-wrap table,
+  .dashboard-page [data-slot='table-container'] table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .silentra-table-wrap th,
+  .silentra-table-wrap td,
+  .dashboard-page [data-slot='table-container'] th,
+  .dashboard-page [data-slot='table-container'] td {
+    min-width: 0;
+    padding-inline: 0.375rem;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .silentra-page-content,
+  .dashboard-page,
+  .dashboard-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .silentra-page-content :is(h1, h2, h3, p, a, span, strong, label),
+  .dashboard-page :is(h1, h2, h3, p, a, span, strong, label) {
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content'],
+  [data-slot='popover-content'] {
+    max-width: calc(100vw - 1rem);
+  }
+
+  [data-slot='tabs-list'],
+  [role='tablist'] {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }

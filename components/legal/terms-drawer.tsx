@@ -31,8 +31,8 @@ export function TermsDrawer({ trigger }: TermsDrawerProps) {
   return (
     <Drawer>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="glassmorphism mx-auto max-h-[85vh] max-w-lg rounded-t-2xl border-white/10 bg-zinc-950 text-zinc-50">
-        <DrawerHeader className="text-left">
+      <DrawerContent className="glassmorphism mx-auto h-[min(90dvh,48rem)] max-h-[90dvh] w-full max-w-lg rounded-t-2xl border-white/10 bg-zinc-950 text-zinc-50 sm:h-[85vh]">
+        <DrawerHeader className="shrink-0 px-5 pb-3 pt-5 text-left sm:px-6">
           <DrawerTitle className="font-heading text-lg">
             {t('legal.termsTitle', { defaultValue: 'Terms & Conditions' })}
           </DrawerTitle>
@@ -44,19 +44,29 @@ export function TermsDrawer({ trigger }: TermsDrawerProps) {
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="scrollbar-thin max-h-[min(60vh,32rem)] space-y-5 overflow-y-auto px-5 pb-8 text-xs leading-relaxed text-zinc-400">
-          <p>{updatedTerms.intro}</p>
+        <div
+          data-terms-scroll-area
+          tabIndex={0}
+          aria-label={t('legal.termsTitle', {
+            defaultValue: 'Terms & Conditions',
+          })}
+          data-vaul-no-drag="true"
+          className="scrollbar-thin min-h-0 flex-1 touch-pan-y overscroll-y-contain overflow-y-scroll [-webkit-overflow-scrolling:touch] px-5 pb-8 text-xs leading-relaxed text-zinc-400 sm:px-6"
+        >
+          <div className="space-y-5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <p>{updatedTerms.intro}</p>
 
-          {updatedTerms.sections.map((section) => (
-            <section key={section.title} className="space-y-2">
-              <h3 className="text-sm font-semibold text-zinc-200">
-                {section.title}
-              </h3>
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </section>
-          ))}
+            {updatedTerms.sections.map((section) => (
+              <section key={section.title} className="space-y-2">
+                <h3 className="text-sm font-semibold text-zinc-200">
+                  {section.title}
+                </h3>
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </section>
+            ))}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

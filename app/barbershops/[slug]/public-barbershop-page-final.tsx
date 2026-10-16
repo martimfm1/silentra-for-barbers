@@ -545,6 +545,20 @@ export default function BarbershopPublicPageFinal({
         )}
       </div>
 
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-2xl sm:hidden">
+        <Button
+          type="button"
+          onClick={() => {
+            setSelectedServiceId(null);
+            setBookingOpen(true);
+          }}
+          className="min-h-12 w-full rounded-xl bg-emerald-300 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-950/20 hover:bg-emerald-200"
+        >
+          <Calendar className="mr-2 size-4" aria-hidden="true" />
+          Agendar horário
+        </Button>
+      </div>
+
       <BookingDrawer
         shop={bookingShop}
         isOpen={bookingOpen}
