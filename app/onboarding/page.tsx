@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -64,6 +66,7 @@ const inputClass =
   'min-h-11 rounded-xl border-white/10 bg-white/[0.04] text-sm text-zinc-50 placeholder:text-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50';
 
 export default function OnboardingPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [step, setStep] = useState<Step>('selection');
   const [loading, setLoading] = useState(false);
@@ -236,8 +239,7 @@ export default function OnboardingPage() {
       });
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || 'Não foi possível criar a barbearia.');
+      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
 
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
       router.push('/dashboard');
@@ -252,7 +254,7 @@ export default function OnboardingPage() {
   async function handleJoinShop(event: React.FormEvent) {
     event.preventDefault();
     if (!inviteCode.trim()) {
-      toast.error('Introduza o código de convite.');
+      toast.error(t('onboarding.inviteRequired'));
       return;
     }
 
@@ -264,10 +266,9 @@ export default function OnboardingPage() {
         body: JSON.stringify({ inviteCode: normalizeInviteCode(inviteCode) }),
       });
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || 'Não foi possível validar o convite.');
+      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
 
-      toast.success('Convite aceite. Bem-vindo à equipa.');
+      toast.success(t('onboarding.inviteSuccess'));
       router.push('/dashboard');
     } catch (error) {
       console.error(error);
@@ -287,15 +288,18 @@ export default function OnboardingPage() {
             <div className="mb-4 flex items-center justify-between gap-4 px-1 text-xs">
               <div>
                 <p className="font-semibold text-zinc-200">
-                  Vamos preparar o seu espaço
+                  {t('onboarding.prepareSpace')}
                 </p>
                 <p className="mt-0.5 text-zinc-500">
-                  Pode alterar estes dados mais tarde nas Definições.
+                  {t('onboarding.editLater')}
                 </p>
               </div>
-              <span className="shrink-0 font-medium tabular-nums text-zinc-400">
-                {progress}%
-              </span>
+              <div className="flex shrink-0 items-center gap-3">
+                <LanguageSwitcher />
+                <span className="font-medium tabular-nums text-zinc-400">
+                  {progress}%
+                </span>
+              </div>
             </div>
             <div
               className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10"
@@ -331,7 +335,7 @@ export default function OnboardingPage() {
                         <Sparkles className="size-6" aria-hidden="true" />
                       </div>
                       <CardTitle className="font-heading text-2xl tracking-tight text-zinc-50 sm:text-3xl">
-                        Comece pelo que precisa hoje.
+                        {t('onboarding.startToday')}
                       </CardTitle>
                       <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
                         Em poucos passos terá um espaço pronto para receber
@@ -355,14 +359,13 @@ export default function OnboardingPage() {
                           />
                         </div>
                         <h2 className="mt-5 font-semibold text-zinc-50">
-                          Criar a minha barbearia
+                          {t('onboarding.createMyShop')}
                         </h2>
                         <p className="mt-1 text-sm leading-5 text-zinc-400">
-                          Recomendado se vai gerir o espaço e definir os
-                          primeiros serviços.
+                          {t('onboarding.createMyShopDescription')}
                         </p>
                         <span className="mt-4 inline-flex text-xs font-medium text-emerald-400">
-                          Cerca de 2 minutos
+                          {t('onboarding.estimatedTime')}
                         </span>
                       </button>
 
@@ -381,14 +384,13 @@ export default function OnboardingPage() {
                           />
                         </div>
                         <h2 className="mt-5 font-semibold text-zinc-50">
-                          Entrar numa barbearia
+                          {t('onboarding.joinShop')}
                         </h2>
                         <p className="mt-1 text-sm leading-5 text-zinc-400">
-                          Use o código de convite que recebeu do proprietário ou
-                          administrador.
+                          {t('onboarding.joinShopDescription')}
                         </p>
                         <span className="mt-4 inline-flex text-xs font-medium text-zinc-500">
-                          Acesso rápido
+                          {t('onboarding.quickAccess')}
                         </span>
                       </button>
                     </div>
@@ -399,14 +401,14 @@ export default function OnboardingPage() {
                           className="size-3.5 text-emerald-400"
                           aria-hidden="true"
                         />
-                        Pode ajustar tudo depois
+                        {t('onboarding.canAdjustLater')}
                       </span>
                       <span className="inline-flex items-center gap-1.5">
                         <Sparkles
                           className="size-3.5 text-zinc-400"
                           aria-hidden="true"
                         />
-                        Começa com valores predefinidos
+                        {t('onboarding.presetValues')}
                       </span>
                     </div>
                   </motion.div>
@@ -431,10 +433,10 @@ export default function OnboardingPage() {
                     </button>
                     <CardHeader className="p-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                        Passo 2 de 2
+                        {t('onboarding.stepTwo')}
                       </p>
                       <CardTitle className="mt-2 font-heading text-2xl tracking-tight text-zinc-50">
-                        Vamos preparar a sua barbearia
+                        {t('onboarding.prepareYourShop')}
                       </CardTitle>
                       <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
                         Preencha apenas o essencial. Os restantes detalhes podem
@@ -451,16 +453,18 @@ export default function OnboardingPage() {
                           />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
-                              Identidade
+                              {t('onboarding.identity')}
                             </h2>
                             <p className="text-xs text-zinc-500">
-                              Como a sua barbearia será apresentada.
+                              {t('onboarding.identityDescription')}
                             </p>
                           </div>
                         </div>
                         <div className="grid gap-4">
                           <div className="grid gap-2">
-                            <Label htmlFor="shop-name">Nome da barbearia</Label>
+                            <Label htmlFor="shop-name">
+                              {t('onboarding.barbershopName')}
+                            </Label>
                             <Input
                               id="shop-name"
                               required
@@ -516,7 +520,7 @@ export default function OnboardingPage() {
                             {suggestions.length > 0 && (
                               <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-xl border border-white/15 bg-zinc-900 p-1 shadow-2xl">
                                 <div className="px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                                  Escolha uma morada
+                                  {t('onboarding.chooseAddress')}
                                 </div>
                                 {suggestions.map((item) => (
                                   <button
@@ -539,7 +543,9 @@ export default function OnboardingPage() {
                           </div>
                           <div className="grid gap-4 sm:grid-cols-[1fr_160px]">
                             <div className="grid gap-2">
-                              <Label htmlFor="city">Cidade / vila</Label>
+                              <Label htmlFor="city">
+                                {t('onboarding.cityTown')}
+                              </Label>
                               <Input
                                 id="city"
                                 required
@@ -555,7 +561,7 @@ export default function OnboardingPage() {
                               <Label htmlFor="door-number">
                                 N.º da porta{' '}
                                 <span className="font-normal text-zinc-600">
-                                  (opcional)
+                                  ({t('onboarding.optional')})
                                 </span>
                               </Label>
                               <div className="relative">
@@ -587,13 +593,15 @@ export default function OnboardingPage() {
                           />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
-                              Configuração inicial
+                              {t('onboarding.initialSetup')}
                             </h2>
                           </div>
                         </div>
                         <div className="grid gap-4 sm:grid-cols-3">
                           <div className="grid gap-2">
-                            <Label htmlFor="price">Preço de referência</Label>
+                            <Label htmlFor="price">
+                              {t('onboarding.referencePrice')}
+                            </Label>
                             <div className="relative">
                               <Euro
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -617,12 +625,13 @@ export default function OnboardingPage() {
                               />
                             </div>
                             <p className="text-[11px] text-zinc-600">
-                              Este valor é apenas uma referência para os
-                              clientes.
+                              {t('onboarding.priceHint')}
                             </p>
                           </div>
                           <div className="grid gap-2">
-                            <Label htmlFor="open-time">Abertura</Label>
+                            <Label htmlFor="open-time">
+                              {t('onboarding.opening')}
+                            </Label>
                             <div className="relative">
                               <Clock3
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -640,11 +649,13 @@ export default function OnboardingPage() {
                               />
                             </div>
                             <p className="text-[11px] text-zinc-600">
-                              Este é o horário de abertura da sua barbearia.
+                              {t('onboarding.openingHint')}
                             </p>
                           </div>
                           <div className="grid gap-2">
-                            <Label htmlFor="close-time">Fecho</Label>
+                            <Label htmlFor="close-time">
+                              {t('onboarding.closing')}
+                            </Label>
                             <div className="relative">
                               <Clock3
                                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
@@ -662,7 +673,7 @@ export default function OnboardingPage() {
                               />
                             </div>
                             <p className="text-[11px] text-zinc-600">
-                              Este é o horário de fecho da sua barbearia.
+                              {t('onboarding.closingHint')}
                             </p>
                           </div>
                         </div>
@@ -676,15 +687,16 @@ export default function OnboardingPage() {
                           />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
-                              Visibilidade
+                              {t('onboarding.visibility')}
                             </h2>
                             <p className="text-xs text-zinc-500">
-                              Escolha alguns termos para ajudar a apresentar a
-                              sua barbearia.
+                              {t('onboarding.tagsHint')}
                             </p>
                           </div>
                         </div>
-                        <Label htmlFor="tags">Serviços / características</Label>
+                        <Label htmlFor="tags">
+                          {t('onboarding.servicesFeatures')}
+                        </Label>
                         <Input
                           id="tags"
                           required
@@ -707,7 +719,9 @@ export default function OnboardingPage() {
                     </div>
 
                     <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 text-sm text-zinc-300">
-                      <p className="font-medium text-zinc-100">Quase pronto.</p>
+                      <p className="font-medium text-zinc-100">
+                        {t('onboarding.almostReady')}
+                      </p>
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
                         Depois de criar a barbearia, pode adicionar serviços,
                         equipa, horários e outras definições no painel.
@@ -726,7 +740,7 @@ export default function OnboardingPage() {
                             className="mr-2 size-4"
                             aria-hidden="true"
                           />
-                          Criar a minha barbearia
+                          {t('onboarding.createMyShop')}
                         </>
                       )}
                     </Button>
@@ -752,17 +766,19 @@ export default function OnboardingPage() {
                     </button>
                     <CardHeader className="p-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                        Acesso à equipa
+                        {t('onboarding.teamAccess')}
                       </p>
                       <CardTitle className="mt-2 font-heading text-2xl tracking-tight text-zinc-50">
-                        Já tem um convite?
+                        {t('onboarding.haveInvite')}
                       </CardTitle>
                       <CardDescription className="mt-2 text-sm leading-6 text-zinc-400">
-                        Introduza o código de convite que recebeu
+                        {t('onboarding.enterInvite')}
                       </CardDescription>
                     </CardHeader>
                     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-                      <Label htmlFor="invite-code">Código de convite</Label>
+                      <Label htmlFor="invite-code">
+                        {t('onboarding.inviteCode')}
+                      </Label>
                       <Input
                         id="invite-code"
                         required
@@ -779,9 +795,9 @@ export default function OnboardingPage() {
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs leading-5 text-zinc-500">
                       <span className="font-medium text-zinc-300">
-                        Não tem um código?
+                        {t('onboarding.noInvite')}
                       </span>{' '}
-                      Peça ao proprietário ou administrador da sua barbearia
+                      {t('onboarding.askOwner')}
                       para gerar um novo convite.
                     </div>
                     <Button
@@ -797,7 +813,7 @@ export default function OnboardingPage() {
                             className="mr-2 size-4"
                             aria-hidden="true"
                           />
-                          Entrar na equipa
+                          {t('onboarding.joinTeam')}
                         </>
                       )}
                     </Button>

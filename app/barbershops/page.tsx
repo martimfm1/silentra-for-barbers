@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, Loader2, MapPin, Search, Tag, X } from 'lucide-react';
 import { SiteNavbar } from '@/components/site-navbar';
+import { useLanguage } from '@/context/LanguageContext';
 import { SearchFilterBar } from './components/search-filter-bar';
 import { MobileSearchFilterBar } from './components/mobile-search-filter-bar';
 import { ShopCard } from './components/shop-card';
@@ -34,6 +35,7 @@ const MapPreview = dynamic(
 );
 
 export default function BarbershopsDirectoryPage() {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [shops, setShops] = useState<MarketplaceShop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,8 +97,10 @@ export default function BarbershopsDirectoryPage() {
         if (!unique.has(key)) unique.set(key, tag);
       }
     }
-    return [...unique.values()].sort((a, b) => a.localeCompare(b, 'pt-PT'));
-  }, [shops]);
+    return [...unique.values()].sort((a, b) =>
+      a.localeCompare(b, locale === 'pt' ? 'pt-PT' : 'en'),
+    );
+  }, [shops, locale]);
 
   useEffect(() => {
     if (
@@ -144,15 +148,13 @@ export default function BarbershopsDirectoryPage() {
                 className="size-3.5 text-emerald-300"
                 aria-hidden="true"
               />
-              Diretório Silentra
+              {t('directory.title')}
             </div>
             <h1 className="mt-4 max-w-2xl text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.055em] text-zinc-50 sm:mt-5 sm:text-5xl">
-              Encontra a barbearia certa e reserva sem complicações.
+              {t('directory.subtitle')}
             </h1>
             <p className="mt-3 max-w-2xl text-[13px] leading-5 text-zinc-400 sm:mt-4 sm:text-base sm:leading-6">
-              Compara localização, disponibilidade, etiquetas e avaliações. A
-              localização é opcional e podes alterar os critérios quando
-              quiseres.
+              {t('directory.intro')}
             </p>
           </div>
 
@@ -197,7 +199,7 @@ export default function BarbershopsDirectoryPage() {
             <div className="glassmorphism mt-2 rounded-2xl border border-white/10 bg-black/15 p-2 sm:mt-4 sm:p-4">
               <div className="mb-2 flex items-center gap-2 px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                 <Tag className="size-3.5" aria-hidden="true" />
-                Categorias e estilos
+                {t('directory.categories')}
               </div>
               <div
                 className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -209,7 +211,7 @@ export default function BarbershopsDirectoryPage() {
                   aria-pressed={activeTag === null}
                   className={`min-h-10 shrink-0 rounded-full border px-3.5 text-xs font-semibold transition active:scale-[0.98] ${activeTag === null ? 'border-white/30 bg-white text-zinc-950' : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:border-white/20 hover:text-zinc-200'}`}
                 >
-                  Todas
+                  {t('directory.all')}
                 </button>
                 {availableTags.map((tag) => {
                   const selected =
@@ -230,7 +232,7 @@ export default function BarbershopsDirectoryPage() {
               {activeTag && (
                 <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/5 pt-2 text-[11px] text-zinc-500">
                   <span className="min-w-0 truncate">
-                    Filtro:{' '}
+                    {t('directory.filter')}{' '}
                     <strong className="text-zinc-300">{activeTag}</strong>
                   </span>
                   <button
@@ -239,7 +241,7 @@ export default function BarbershopsDirectoryPage() {
                     className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200"
                   >
                     <X className="size-3.5" aria-hidden="true" />
-                    Limpar
+                    {t('directory.clear')}
                   </button>
                 </div>
               )}
@@ -250,13 +252,13 @@ export default function BarbershopsDirectoryPage() {
         <section className="mt-5 sm:mt-8">
           <div className="mb-3 flex flex-col gap-2.5 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="silentra-eyebrow mb-1">Resultados</p>
+              <p className="silentra-eyebrow mb-1">{t('directory.results')}</p>
               <p className="text-sm text-zinc-400" aria-live="polite">
                 {isLoading
-                  ? 'A procurar...'
+                  ? t('directory.searching')
                   : loadError
-                    ? 'Não foi possível carregar as barbearias.'
-                    : `${visibleShops.length} ${visibleShops.length === 1 ? 'barbearia encontrada' : 'barbearias encontradas'}`}
+                    ? t('directory.loadError')
+                    : `${visibleShops.length} ${visibleShops.length === 1 ? t('directory.foundOne') : t('directory.foundMany')}`}
               </p>
             </div>
             <div className="grid w-full grid-cols-2 gap-2 sm:hidden">
@@ -266,7 +268,7 @@ export default function BarbershopsDirectoryPage() {
                 aria-pressed={view === 'grid'}
                 className={`min-h-11 rounded-xl border px-3 text-xs font-semibold transition active:scale-[0.98] ${view === 'grid' ? 'border-white/20 bg-white text-zinc-950' : 'border-white/10 bg-white/[0.03] text-zinc-400'}`}
               >
-                Lista
+                {t('directory.list')}
               </button>
               <button
                 type="button"
@@ -274,7 +276,7 @@ export default function BarbershopsDirectoryPage() {
                 aria-pressed={view === 'map'}
                 className={`min-h-11 rounded-xl border px-3 text-xs font-semibold transition active:scale-[0.98] ${view === 'map' ? 'border-white/20 bg-white text-zinc-950' : 'border-white/10 bg-white/[0.03] text-zinc-400'}`}
               >
-                Mapa
+                {t('directory.map')}
               </button>
             </div>
           </div>
@@ -291,7 +293,7 @@ export default function BarbershopsDirectoryPage() {
                       className="size-6 animate-spin text-emerald-300"
                       aria-hidden="true"
                     />
-                    <span>A encontrar barbearias...</span>
+                    <span>{t('directory.loadingShops')}</span>
                   </div>
                 </div>
               ) : loadError ? (
@@ -303,18 +305,17 @@ export default function BarbershopsDirectoryPage() {
                     <AlertTriangle className="size-5" aria-hidden="true" />
                   </div>
                   <p className="mt-4 text-base font-semibold text-zinc-200">
-                    Não foi possível carregar as barbearias.
+                    {t('directory.loadError')}
                   </p>
                   <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500">
-                    Verifica a ligação e tenta novamente. Os teus filtros serão
-                    mantidos.
+                    {t('directory.loadErrorHint')}
                   </p>
                   <button
                     type="button"
                     onClick={retryLoad}
                     className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                   >
-                    Tentar novamente
+                    {t('directory.retry')}
                   </button>
                 </div>
               ) : visibleShops.length === 0 ? (
@@ -323,11 +324,10 @@ export default function BarbershopsDirectoryPage() {
                     <Search className="size-5" aria-hidden="true" />
                   </div>
                   <p className="mt-4 text-base font-semibold text-zinc-200">
-                    Não encontrámos resultados.
+                    {t('directory.noResults')}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-zinc-500">
-                    Tenta remover um filtro, procurar outra zona ou ativar a
-                    localização.
+                    {t('directory.noResultsHint')}
                   </p>
                 </div>
               ) : view === 'map' ? (

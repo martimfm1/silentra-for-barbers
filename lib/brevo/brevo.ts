@@ -14,6 +14,7 @@ export interface BookingEmailPayload {
   barbershopId?: string;
   barbershopName: string;
   barbershopAddress: string;
+  language?: 'pt' | 'en';
 }
 
 export type SendEmailResponse =
@@ -96,9 +97,32 @@ export async function sendBookingConfirmationEmail(
   const safeServiceName = escapeHtml(payload.serviceName);
   const safeBarbershopName = escapeHtml(payload.barbershopName);
   const safeBarbershopAddress = escapeHtml(payload.barbershopAddress);
+  const isEnglish = payload.language === 'en';
+  const copy = isEnglish
+    ? {
+        subject: `Booking confirmed — ${payload.barbershopName}`,
+        title: 'Booking confirmed',
+        greeting: `Hello <strong style="color:#fff;">${safeClientName}</strong>, your booking has been confirmed.`,
+        service: 'Service', date: 'Date', time: 'Time', location: 'Location',
+        addCalendar: 'Add to calendar', openLocation: 'Open location',
+        footer: 'Keep this email as confirmation of your booking.',
+        description: `Booking for ${payload.serviceName} for ${payload.clientName}.`,
+        textTitle: 'Booking confirmed', textAt: 'at',
+      }
+    : {
+        subject: `Agendamento confirmado — ${payload.barbershopName}`,
+        title: 'Agendamento confirmado',
+        greeting: `Olá <strong style="color:#fff;">${safeClientName}</strong>, a tua marcação ficou confirmada.`,
+        service: 'Serviço', date: 'Data', time: 'Hora', location: 'Local',
+        addCalendar: 'Adicionar ao calendário', openLocation: 'Abrir localização',
+        footer: 'Guarda este email como confirmação da tua marcação.',
+        description: `Agendamento de ${payload.serviceName} para ${payload.clientName}.`,
+        textTitle: 'Agendamento confirmado', textAt: 'às',
+      };
+  const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'long', timeZone: 'Europe/Lisbon' }).format(new Date(`${payload.date}T12:00:00`));
   const avatarUrl = getBarbershopAvatarUrl(payload.barbershopId);
   const title = `${payload.serviceName} — ${payload.barbershopName}`;
-  const description = `Agendamento de ${payload.serviceName} para ${payload.clientName}.`;
+  const description = copy.description;
   const location = [payload.barbershopName, payload.barbershopAddress]
     .filter(Boolean)
     .join(', ');
@@ -112,27 +136,27 @@ export async function sendBookingConfirmationEmail(
   const appleMaps = `https://maps.apple.com/?address=${encodeURIComponent(payload.barbershopAddress || payload.barbershopName)}`;
 
   const avatarMarkup = avatarUrl
-    ? `<img src="${avatarUrl}" alt="Logótipo da ${safeBarbershopName}" width="64" height="64" style="display:block;width:64px;height:64px;border-radius:16px;object-fit:cover;border:1px solid #27272a;" />`
+    ? `<img src="${avatarUrl}" alt="${isEnglish ? `Logo of ${safeBarbershopName}` : `Logótipo da ${safeBarbershopName}`}" width="64" height="64" style="display:block;width:64px;height:64px;border-radius:16px;object-fit:cover;border:1px solid #27272a;" />`
     : '';
 
   const htmlContent = `<!DOCTYPE html>
-<html lang="pt-PT">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agendamento confirmado</title></head>
+<html lang="${isEnglish ? 'en' : 'pt-PT'}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${copy.title}</title></head>
 <body style="margin:0;background:#0c0c0e;color:#f4f4f5;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <div style="max-width:540px;margin:0 auto;background:#141417;border:1px solid #27272a;border-radius:16px;padding:28px;">
 ${avatarMarkup}
 <p style="font-size:12px;color:#a1a1aa;margin:16px 0 0;">${safeBarbershopName}</p>
-<h1 style="font-size:24px;color:#fff;margin:8px 0;">Agendamento confirmado</h1>
-<p style="font-size:14px;line-height:1.6;color:#a1a1aa;margin:0 0 20px;">Olá <strong style="color:#fff;">${safeClientName}</strong>, a tua marcação ficou confirmada.</p>
-<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">Serviço</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">Data</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.date)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">Hora</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">Local</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
+<h1 style="font-size:24px;color:#fff;margin:8px 0;">${copy.title}</h1>
+<p style="font-size:14px;line-height:1.6;color:#a1a1aa;margin:0 0 20px;">${copy.greeting}</p>
+<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(formattedDate)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
 <div style="height:1px;background:#27272a;margin:20px 0;"></div>
-<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">Adicionar ao calendário</p>
+<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.addCalendar}</p>
 <a href="${google}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:10px;">Google Calendar</a>
 <a href="${apple}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:18px;">Apple Calendar (.ics)</a>
-<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">Abrir localização</p>
+<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.openLocation}</p>
 <a href="${googleMaps}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:8px;">Google Maps</a>
 <a href="${appleMaps}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:12px 16px;font-size:13px;">Apple Maps</a>
-<p style="font-size:12px;line-height:1.6;color:#71717a;margin:20px 0 0;">Guarda este email como confirmação da tua marcação.</p>
+<p style="font-size:12px;line-height:1.6;color:#71717a;margin:20px 0 0;">${copy.footer}</p>
 </div></body></html>`;
 
   try {
@@ -146,9 +170,9 @@ ${avatarMarkup}
       body: JSON.stringify({
         sender: { name: payload.barbershopName, email: senderEmail },
         to: [{ email: payload.to, name: payload.clientName }],
-        subject: `Agendamento confirmado — ${payload.barbershopName}`,
+        subject: copy.subject,
         htmlContent,
-        textContent: `Agendamento confirmado\n${payload.serviceName}\n${payload.date} às ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${payload.serviceName}\n${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {

@@ -4,6 +4,7 @@ export interface BookingReviewRequestEmailPayload {
   serviceName: string;
   barbershopName: string;
   reviewUrl: string;
+  language?: 'pt' | 'en';
 }
 
 export type ReviewEmailResponse =
@@ -38,14 +39,32 @@ export async function sendBookingReviewRequestEmail(
   const safeServiceName = escapeHtml(payload.serviceName);
   const safeBarbershopName = escapeHtml(payload.barbershopName);
   const safeReviewUrl = escapeHtml(payload.reviewUrl);
+  const isEnglish = payload.language === 'en';
+  const copy = isEnglish
+    ? {
+        subject: `How was your experience at ${payload.barbershopName}?`,
+        title: 'How was your visit?',
+        greeting: `Hi <strong style="color:#fff">${safeClientName}</strong>, thank you for choosing our barbershop. We would love to hear about your experience.`,
+        button: 'Leave a review', service: 'Service:',
+        meta: 'It takes less than a minute and helps us improve.',
+        footer: 'Your feedback is optional and will only appear on the public barbershop page after you submit it.',
+      }
+    : {
+        subject: `Como correu a tua experiência em ${payload.barbershopName}?`,
+        title: 'Como correu o teu atendimento?',
+        greeting: `Olá <strong style="color:#fff">${safeClientName}</strong>, obrigado por escolheres a nossa barbearia. Gostávamos de saber como correu a tua experiência.`,
+        button: 'Deixar uma avaliação', service: 'Serviço:',
+        meta: 'Leva menos de um minuto e ajuda-nos a melhorar.',
+        footer: 'A tua opinião é opcional e será publicada na página pública da barbearia apenas depois de a submeteres.',
+      };
 
   const htmlContent = `
     <!DOCTYPE html>
-    <html lang="pt-PT">
+    <html lang="${isEnglish ? 'en' : 'pt-PT'}">
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Como correu a tua experiência?</title>
+        <title>${copy.title}</title>
         <style>
           body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#0c0c0e;color:#f4f4f5;margin:0;padding:24px 12px; }
           .card { max-width:520px;margin:0 auto;background:#141417;border:1px solid #27272a;border-radius:18px;padding:32px 24px; }
@@ -60,11 +79,11 @@ export async function sendBookingReviewRequestEmail(
       <body>
         <div class="card">
           <div class="eyebrow">${safeBarbershopName}</div>
-          <h1 class="title">Como correu o teu atendimento?</h1>
-          <p class="copy">Olá <strong style="color:#fff">${safeClientName}</strong>, obrigado por escolheres a nossa barbearia. Gostávamos de saber como correu a tua experiência.</p>
-          <a class="button" href="${safeReviewUrl}" target="_blank" rel="noopener noreferrer">Deixar uma avaliação</a>
-          <div class="meta"><strong style="color:#fff">Serviço:</strong> ${safeServiceName}<br>Leva menos de um minuto e ajuda-nos a melhorar.</div>
-          <div class="footer">A tua opinião é opcional e será publicada na página pública da barbearia apenas depois de a submeteres.</div>
+          <h1 class="title">${copy.title}</h1>
+          <p class="copy">${copy.greeting}</p>
+          <a class="button" href="${safeReviewUrl}" target="_blank" rel="noopener noreferrer">${copy.button}</a>
+          <div class="meta"><strong style="color:#fff">${copy.service}</strong> ${safeServiceName}<br>${copy.meta}</div>
+          <div class="footer">${copy.footer}</div>
         </div>
       </body>
     </html>
@@ -81,7 +100,7 @@ export async function sendBookingReviewRequestEmail(
       body: JSON.stringify({
         sender: { name: payload.barbershopName, email: senderEmail },
         to: [{ email: payload.to, name: payload.clientName }],
-        subject: `Como correu a tua experiência em ${payload.barbershopName}?`,
+        subject: copy.subject,
         htmlContent,
       }),
     });

@@ -16,6 +16,7 @@ export interface BarbershopConfigPayload {
   lunch_end?: string;
   is_public_in_directory?: boolean;
   time_limit_cancellation_hours?: number;
+  default_language: 'pt' | 'en';
 }
 
 export type ServiceResponse<T> = { data: T | null; error: Error | null };
@@ -28,7 +29,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, default_language',
       )
       .eq('id', barbershopId)
       .single();
@@ -60,6 +61,7 @@ export async function getBarbershopConfig(
         auto_confirm_bookings: barberData.auto_confirm_bookings ?? undefined,
         auto_complete_bookings: barberData.auto_complete_bookings ?? undefined,
         is_public_in_directory: barberData.is_public_in_directory ?? undefined,
+        default_language: barberData.default_language === 'en' ? 'en' : 'pt',
         time_limit_cancellation_hours: Math.max(
           0,
           Math.min(720, Number(barberData.time_limit_cancellation_hours ?? 24)),

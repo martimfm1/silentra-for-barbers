@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React, { useState, useMemo } from 'react';
 import { MapPin, Clock, Star, ArrowRight, Eye } from 'lucide-react';
 import type { ShopCardProps } from '@/types/marketplace/components';
+import { useLanguage } from '@/context/LanguageContext';
 import type { BarbershopPublicDetails } from '@/app/barbershops/[slug]/services/public-barbershop.service';
 import {
   DEFAULT_BARBERSHOP_AVATAR,
@@ -64,6 +65,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
   onNavigate,
   onOpenBooking,
 }) => {
+  const { t, locale } = useLanguage();
   const shop = rawShop as unknown as ExtendedBarbershopDetails | undefined;
   const shopAsMarket = rawShop;
   const [avatarError, setAvatarError] = useState(false);
@@ -119,7 +121,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
         type="button"
         onClick={() => onNavigate?.(rawShop)}
         className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-inset"
-        aria-label={`Ver detalhes de ${shop.name}`}
+        aria-label={t('directory.viewDetails', { shop: shop.name })}
       >
         <div className="relative h-32 w-full overflow-hidden border-b border-white/10 bg-zinc-900 sm:h-36">
           <Image
@@ -140,7 +142,9 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-900 text-zinc-300 shadow-xl sm:h-15 sm:w-15">
               <Image
                 src={displayedAvatarUrl}
-                alt={`Logótipo de ${shop.name || 'barbearia'}`}
+                alt={t('directory.shopLogo', {
+                  shop: shop.name || t('storefront.barbershop'),
+                })}
                 fill
                 sizes="60px"
                 quality={65}
@@ -181,7 +185,12 @@ export const ShopCard: React.FC<ShopCardProps> = ({
                 <div className="flex items-center gap-1.5 text-emerald-300">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   <span>
-                    {shopAsMarket.distanceKm.toFixed(1)} km de distância
+                    {t('directory.distance', {
+                      distance: new Intl.NumberFormat(
+                        locale === 'pt' ? 'pt-PT' : 'en-GB',
+                        { maximumFractionDigits: 1 },
+                      ).format(shopAsMarket.distanceKm),
+                    })}
                   </span>
                 </div>
               )}
