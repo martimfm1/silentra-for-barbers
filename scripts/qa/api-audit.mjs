@@ -56,7 +56,7 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
-    pattern: /\\/public\\/reviews\\/route\\.ts$/,
+    pattern: /\/public\/reviews\/route\.ts$/,
     markers: [
       'consumePublicRateLimit',
       "'public-review-submit'",
