@@ -339,6 +339,8 @@ for (const check of requestValidationChecks) {
       "'commissionPercentage',",
       ".eq('barbershop_id', barbershopId)",
       'grossAmount > 1_000_000_000',
+      ".eq('professional_id', professionalId)",
+      ".eq('barbershop_id', barbershopId)",
     ],
     label: 'Enterprise commission request validation and tenant binding',
   },
