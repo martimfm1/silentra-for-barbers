@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import { NextResponse } from 'next/server';
@@ -33,16 +34,24 @@ async function POST__unobserved(request: Request) {
       clientName?: unknown;
       rating?: unknown;
       comment?: unknown;
+      reviewToken?: unknown;
     };
 
     const shopId = cleanString(body.barbershopId, 100);
     const clientName = cleanString(body.clientName, MAX_NAME_LENGTH);
     const comment = cleanString(body.comment, MAX_COMMENT_LENGTH);
+    const reviewToken = cleanString(body.reviewToken, 64);
     const rating =
       typeof body.rating === 'number' ? body.rating : Number(body.rating);
 
-    if (!shopId || !UUID_PATTERN.test(shopId) || !clientName)
-      return jsonError('Dados da avaliação inválidos.', 400);
+    if (
+      !shopId ||
+      !UUID_PATTERN.test(shopId) ||
+      !clientName ||
+      !reviewToken ||
+      !/^[A-Za-z0-9_-]{43}$/.test(reviewToken)
+    )
+      return jsonError('Utiliza o link de avaliação recebido após o atendimento.', 400);
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return jsonError('A classificação deve estar entre 1 e 5.', 400);
     }
@@ -80,17 +89,21 @@ async function POST__unobserved(request: Request) {
 
     // Keep review validation and aggregate updates in the database RPC/trigger.
     // Do not write directly with service_role, which bypasses RLS policies.
-    const { data, error } = await database.rpc('submit_public_review', {
-      p_shop_id: shop.id,
-      p_client_name: clientName,
-      p_rating: rating,
-      p_comment: comment,
-    });
+    const { data, error } = await database.rpc(
+      'submit_public_review_with_token',
+      {
+        p_shop_id: shop.id,
+        p_token_hash: createHash('sha256').update(reviewToken).digest('hex'),
+        p_client_name: clientName,
+        p_rating: rating,
+        p_comment: comment,
+      },
+    );
 
     if (error || !data) {
       console.error('[PUBLIC_REVIEW_SUBMIT_FAILED]', error?.code ?? 'UNKNOWN');
       if (error?.code === '42501')
-        return jsonError('Esta barbearia não aceita avaliações públicas.', 403);
+        return jsonError('O link de avaliação é inválido, expirou ou já foi utilizado.', 403);
       if (error?.code === '22023')
         return jsonError('Os dados da avaliação são inválidos.', 400);
       return jsonError('Não foi possível guardar a avaliação.', 500);
