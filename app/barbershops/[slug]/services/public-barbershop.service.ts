@@ -97,6 +97,7 @@ export const publicBarbershopService = {
     client_name: string;
     rating: number;
     comment?: string;
+    review_token: string;
   }) {
     const response = await fetch('/api/public/reviews', {
       method: 'POST',
@@ -109,6 +110,7 @@ export const publicBarbershopService = {
         clientName: payload.client_name,
         rating: payload.rating,
         comment: payload.comment ?? '',
+        reviewToken: payload.review_token,
       }),
     });
 
