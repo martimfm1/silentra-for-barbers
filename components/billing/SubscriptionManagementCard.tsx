@@ -1,3 +1,4 @@
+import Link from 'next/link';
 'use client';
 
 import { useState } from 'react';
@@ -119,14 +120,14 @@ export function SubscriptionManagementCard() {
         </div>
 
         {isCanceled ? (
-          <a
+          <Link
             href="/plans"
             className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
           >
             {shouldUpgrade
               ? 'Melhorar para Enterprise'
               : `Voltar a subscrever ${PLAN_NAMES[displayedPlan]}`}
-          </a>
+          </Link>
         ) : hasStripeSubscription && !isAdministrativePlan ? (
           <button
             type="button"
@@ -142,12 +143,12 @@ export function SubscriptionManagementCard() {
             {openingPortal ? 'A abrir…' : 'Gerir faturação'}
           </button>
         ) : (
-          <a
+          <Link
             href="/plans"
             className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
           >
             Ver planos
-          </a>
+          </Link>
         )}
       </div>
 
