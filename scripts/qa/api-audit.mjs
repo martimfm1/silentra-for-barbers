@@ -56,6 +56,17 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
+    pattern: /\\/public\\/reviews\\/route\\.ts$/,
+    markers: [
+      'consumePublicRateLimit',
+      "'public-review-submit'",
+      'REVIEW_RATE_LIMIT = 5',
+      "rpc('submit_public_review'",
+      'status: 429',
+      'Retry-After',
+    ],
+  },
+  {
     pattern: /\/marketplace\/orders\/track\/route\.ts$/,
     markers: [
       'consumePublicRateLimit',
