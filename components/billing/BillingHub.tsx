@@ -26,6 +26,8 @@ interface Invoice {
   plan: string;
   date: string;
   invoice_pdf: string | null;
+  source?: 'STRIPE' | 'MANUAL';
+  download_url?: string | null;
 }
 
 function formatAmount(amount: number, currency: string, locale: string) {
@@ -99,10 +101,10 @@ export function BillingHub() {
     : '—';
 
   useEffect(() => {
-    if (!isStripeSubscription || isAdministrativePlan) return;
+    if ((!isStripeSubscription && !isManualSubscription) || isAdministrativePlan) return;
     let cancelled = false;
     setLoadingInvoices(true);
-    fetch('/api/stripe/invoices', { cache: 'no-store' })
+    fetch('/api/billing/history', { cache: 'no-store' })
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));
         if (!response.ok)
@@ -128,7 +130,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [isStripeSubscription, isAdministrativePlan, t]);
+  }, [isStripeSubscription, isManualSubscription, isAdministrativePlan, t]);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
@@ -513,6 +515,11 @@ export function BillingHub() {
                     <p className="text-sm font-medium text-zinc-100">
                       {invoice.plan}
                     </p>
+                    {invoice.source === 'MANUAL' ? (
+                      <span className="rounded-full border border-sky-400/15 bg-sky-400/[0.06] px-2 py-0.5 text-[10px] text-sky-200">
+                        {t('billingHub.manualReceipt')}
+                      </span>
+                    ) : null}
                     <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] text-emerald-200">
                       {invoice.status ?? t('billingHub.processed')}
                     </span>
@@ -522,9 +529,9 @@ export function BillingHub() {
                     {formatAmount(invoice.amount, invoice.currency, locale)}
                   </p>
                 </div>
-                {invoice.invoice_pdf ? (
+                {invoice.invoice_pdf || invoice.download_url ? (
                   <a
-                    href={invoice.invoice_pdf}
+                    href={invoice.invoice_pdf ?? invoice.download_url ?? undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
