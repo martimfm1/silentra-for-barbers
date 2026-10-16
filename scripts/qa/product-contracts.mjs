@@ -295,6 +295,21 @@ const checks = [
       );
     },
   },
+  {
+    name: 'Public review inserts are restricted to the validated RPC',
+    file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
+    test: (source) =>
+      source.includes('drop policy if exists "reviews_public_insert" on public.reviews') &&
+      source.includes('revoke insert, update, delete on public.reviews from anon, authenticated') &&
+      source.includes('submit_public_review'),
+  },
+  {
+    name: 'Development origins are not enabled in production',
+    file: 'next.config.ts',
+    test: (source) =>
+      source.includes("process.env.NODE_ENV === 'development'") &&
+      source.includes("      : [],"),
+  },
 ];
 
 let failed = 0;
