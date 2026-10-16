@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -37,22 +38,39 @@ async function POST__unobserved(request: Request) {
       'commissions',
       'commissions',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: [
+        'professionalId',
+        'grossAmount',
+        'commissionPercentage',
+        'appointmentId',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const professionalId =
-      typeof body?.professionalId === 'string' ? body.professionalId : '';
+      typeof body.professionalId === 'string' ? body.professionalId.trim() : '';
     const grossAmount =
-      typeof body?.grossAmount === 'number' ? body.grossAmount : NaN;
+      typeof body.grossAmount === 'number' ? body.grossAmount : NaN;
     const percentage =
-      typeof body?.commissionPercentage === 'number'
+      typeof body.commissionPercentage === 'number'
         ? body.commissionPercentage
         : NaN;
+    const appointmentId =
+      body.appointmentId === undefined || body.appointmentId === null
+        ? null
+        : typeof body.appointmentId === 'string' &&
+            body.appointmentId.length <= 80
+          ? body.appointmentId
+          : '';
     if (
       !professionalId ||
+      professionalId.length > 80 ||
+      appointmentId === '' ||
       !Number.isFinite(grossAmount) ||
       grossAmount < 0 ||
+      grossAmount > 1_000_000_000 ||
       !Number.isFinite(percentage) ||
       percentage < 0 ||
       percentage > 100
@@ -77,8 +95,7 @@ async function POST__unobserved(request: Request) {
       .insert({
         barbershop_id: barbershopId,
         professional_id: professionalId,
-        appointment_id:
-          typeof body?.appointmentId === 'string' ? body.appointmentId : null,
+        appointment_id: appointmentId,
         gross_amount: grossAmount,
         commission_percentage: percentage,
       })
