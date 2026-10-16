@@ -55,7 +55,6 @@ export default function CustomWebsiteDashboardPage() {
   useEffect(() => {
     if (planLoading) return;
     if (plan === 'enterprise') void load();
-    else setLoading(false);
   }, [load, plan, planLoading]);
 
   const activeRequest = requests.find((item) =>
@@ -86,7 +85,7 @@ export default function CustomWebsiteDashboardPage() {
     }
   }
 
-  if (planLoading || loading) {
+  if (planLoading || (plan === 'enterprise' && loading)) {
     return <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8"><div className="flex min-h-64 items-center justify-center text-zinc-500"><Loader2 className="mr-2 size-5 animate-spin" />A carregar os teus sites…</div></main>;
   }
 
