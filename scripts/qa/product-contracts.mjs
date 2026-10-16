@@ -108,9 +108,12 @@ const checks = [
     file: 'components/legal/terms-drawer.tsx',
     test: (source) =>
       source.includes('data-terms-scroll-area') &&
+      source.includes('data-vaul-no-drag="true"') &&
       source.includes('min-h-0 flex-1') &&
       source.includes('touch-pan-y') &&
-      source.includes('overscroll-contain') &&
+      source.includes('overscroll-y-contain') &&
+      source.includes('overflow-y-scroll') &&
+      source.includes('[-webkit-overflow-scrolling:touch]') &&
       source.includes('max-h-[90dvh]'),
   },
   {
