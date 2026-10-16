@@ -51,12 +51,9 @@ async function POST__unobserved(request: Request) {
     const body = bodyResult.value;
     const professionalId =
       typeof body.professionalId === 'string' ? body.professionalId.trim() : '';
-    const grossAmount =
+    let grossAmount =
       typeof body.grossAmount === 'number' ? body.grossAmount : NaN;
-    const percentage =
-      typeof body.commissionPercentage === 'number'
-        ? body.commissionPercentage
-        : NaN;
+    let percentage = NaN;
     const appointmentId =
       body.appointmentId === undefined || body.appointmentId === null
         ? null
@@ -81,7 +78,7 @@ async function POST__unobserved(request: Request) {
       );
     const { data: professional } = await admin
       .from('professionals')
-      .select('id')
+      .select('id, commission_percentage')
       .eq('id', professionalId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
@@ -90,10 +87,11 @@ async function POST__unobserved(request: Request) {
         { error: 'Professional not found' },
         { status: 404 },
       );
+    percentage = Number(professional.commission_percentage ?? 50);
     if (appointmentId) {
       const { data: appointment, error: appointmentError } = await admin
         .from('appointments')
-        .select('id')
+        .select('id, service_id, value_products')
         .eq('id', appointmentId)
         .eq('barbershop_id', barbershopId)
         .eq('professional_id', professionalId)
@@ -104,6 +102,40 @@ async function POST__unobserved(request: Request) {
           { error: 'Appointment not found for this professional and shop' },
           { status: 404 },
         );
+      if (!appointment.service_id)
+        return NextResponse.json(
+          { error: 'Appointment has no service to calculate commission' },
+          { status: 400 },
+        );
+      const { data: service, error: serviceError } = await admin
+        .from('services')
+        .select('price')
+        .eq('id', appointment.service_id)
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle();
+      if (serviceError) throw serviceError;
+      if (!service)
+        return NextResponse.json(
+          { error: 'Appointment service not found for this shop' },
+          { status: 404 },
+        );
+      // When tied to an appointment, authoritative service/product totals and
+      // the professional's stored commission rate override all client values.
+      grossAmount =
+        Number(service.price) + Number(appointment.value_products ?? 0);
+    }
+    if (
+      !Number.isFinite(grossAmount) ||
+      grossAmount < 0 ||
+      grossAmount > 1_000_000_000 ||
+      !Number.isFinite(percentage) ||
+      percentage < 0 ||
+      percentage > 100
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid commission values' },
+        { status: 400 },
+      );
     }
     const { data, error } = await admin
       .from('commissions')
