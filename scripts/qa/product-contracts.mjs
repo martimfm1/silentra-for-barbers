@@ -330,6 +330,8 @@ const checks = [
       source.includes('a.status = \'completed\'::public.appointment_status') &&
       source.includes('t.consumed_at is null') &&
       source.includes('t.expires_at > now()') &&
+      source.includes('length(p_token_hash) <> 64') &&
+      source.includes("translate(p_token_hash, '0123456789abcdef', '') <> ''") &&
       source.includes('set consumed_at = now()') &&
       source.includes('submit_public_review_with_token') &&
       source.includes('revoke all on function public.submit_public_review(uuid, text, integer, text)'),
