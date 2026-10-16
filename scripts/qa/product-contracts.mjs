@@ -117,17 +117,23 @@ const checks = [
       source.includes('max-h-[90dvh]'),
   },
   {
-    name: 'Professional revenue chart hides X axis on mobile',
-    file: 'app/silentra-responsive.css',
-    test: (source) =>
-      source.includes('.stats-professional-chart .recharts-xAxis') &&
-      source.includes('display: none'),
-  },
-  {
-    name: 'Professional revenue chart scopes mobile X axis to the intended chart',
+    name: 'Professional revenue chart keeps a compact X axis on mobile',
     file: 'app/dashboard/stats/page.tsx',
     test: (source) =>
-      source.includes('className="stats-professional-chart border'),
+      source.includes('className="stats-professional-chart border') &&
+      source.includes('angle={-20}') &&
+      source.includes('height={48}') &&
+      source.includes('interval="preserveStartEnd"'),
+  },
+  {
+    name: 'Mobile responsive layer prevents horizontal viewport scrolling and fits tables',
+    file: 'app/silentra-responsive.css',
+    test: (source) =>
+      source.includes('overflow-x: clip') &&
+      source.includes('.silentra-table-wrap table') &&
+      source.includes('min-width: 0') &&
+      source.includes('table-layout: fixed') &&
+      source.includes('max-width: calc(100vw - 1rem)'),
   },
   {
     name: 'Dashboard tabs wrap instead of requiring horizontal scrolling',
