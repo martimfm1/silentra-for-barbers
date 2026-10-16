@@ -204,6 +204,31 @@ const requestValidationChecks = [
     markers: ['readJsonObject(request', "allowedKeys: ['avatarUrl']", 'requireTenantAuthorization(request', 'expectedPath', ".eq('id', tenant.barbershopId)"],
     label: 'Avatar update request validation and tenant-scoped storage path',
   },
+  {
+    file: 'app/api/marketplace/manage/settings/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['marketplaceSalesMode']", "requireModuleContext('pos', 'pos')", 'MODES.includes'],
+    label: 'Marketplace settings request validation and tenant authorization',
+  },
+  {
+    file: 'app/api/bookings/customer-profile/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['shopId', 'email', 'phone']", 'UUID_PATTERN.test(shopId)', 'findPublicBookingCustomer'],
+    label: 'Public booking customer profile request validation',
+  },
+  {
+    file: 'app/api/loyalty/validate/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['identifier']", 'consumePublicRateLimit', 'validate_loyalty_redemption'],
+    label: 'Loyalty redemption validation request envelope and rate limit',
+  },
+  {
+    file: 'app/api/loyalty/earning-rules/route.ts',
+    markers: [
+      "allowedKeys: ['name', 'serviceId', 'points', 'active']",
+      "allowedKeys: ['id', 'name', 'points', 'active', 'serviceId']",
+      ".eq('barbershop_id', barbershopId)",
+      'uuid(body.serviceId)',
+    ],
+    label: 'Loyalty earning rule create/update request validation and tenant binding',
+  },
 ];
 
 for (const check of requestValidationChecks) {
