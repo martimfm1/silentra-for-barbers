@@ -15,9 +15,9 @@ canvas {
 }
 
 @media (max-width: 639px) {
-  /* Keep the professional revenue chart clean on narrow screens: no X-axis labels/baseline. */
-  .stats-professional-chart .recharts-xAxis {
-    display: none;
+  /* Keep chart labels readable without making the viewport horizontally scrollable. */
+  .stats-professional-chart .recharts-cartesian-axis-tick text {
+    font-size: 9px;
   }
 
   .silentra-page-content {
@@ -134,5 +134,90 @@ body:has([data-slot='drawer-content'].max-w-lg.rounded-none)
 
   .aceternity-beam {
     animation: none !important;
+  }
+}
+
+
+/* Mobile UX consistency: fit common surfaces to the viewport instead of introducing X scrolling. */
+@media (max-width: 639px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  main,
+  section,
+  article,
+  aside,
+  [data-slot='card'],
+  [data-slot='card-header'],
+  [data-slot='card-content'],
+  [data-slot='card-footer'] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .silentra-table-wrap,
+  .dashboard-page [data-slot='table-container'] {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .silentra-table-wrap table,
+  .dashboard-page [data-slot='table-container'] table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .silentra-table-wrap th,
+  .silentra-table-wrap td,
+  .dashboard-page [data-slot='table-container'] th,
+  .dashboard-page [data-slot='table-container'] td {
+    min-width: 0;
+    padding-inline: 0.375rem;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .silentra-page-content,
+  .dashboard-page,
+  .dashboard-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .silentra-page-content :is(h1, h2, h3, p, a, span, strong, label),
+  .dashboard-page :is(h1, h2, h3, p, a, span, strong, label) {
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content'],
+  [data-slot='popover-content'] {
+    max-width: calc(100vw - 1rem);
+  }
+
+  [data-slot='tabs-list'],
+  [role='tablist'] {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }
