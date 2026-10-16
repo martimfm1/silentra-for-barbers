@@ -229,6 +229,16 @@ const requestValidationChecks = [
     ],
     label: 'Loyalty earning rule create/update request validation and tenant binding',
   },
+  {
+    file: 'app/api/loyalty/rewards/route.ts',
+    markers: [
+      "allowedKeys: ['name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active']",
+      "allowedKeys: ['id', 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active']",
+      ".eq('barbershop_id', barbershopId)",
+      'REWARD_TYPES.has',
+    ],
+    label: 'Loyalty reward create/update request validation and tenant binding',
+  },
 ];
 
 for (const check of requestValidationChecks) {
