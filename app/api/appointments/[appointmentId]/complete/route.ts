@@ -1,6 +1,8 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { isRecord } from '@/lib/validation';
@@ -117,7 +119,7 @@ async function POST__unobserved(
 
     const { data: shop } = await supabase
       .from('shops')
-      .select('slug,name')
+      .select('id,slug,name')
       .eq('barbershop_id', profile.barbershop_id)
       .eq('is_active', true)
       .limit(1)
@@ -139,31 +141,67 @@ async function POST__unobserved(
       ? appointment.services[0]
       : appointment.services;
     let reviewEmailSent = false;
-    if (customerEmail && shop?.slug) {
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
-        new URL(request.url).origin;
-      const reviewUrl = `${siteUrl}/barbershops/${encodeURIComponent(shop.slug)}`;
-      const serviceName = serviceRelation?.name || 'o teu atendimento';
+    if (customerEmail && shop?.slug && shop.id) {
+      let reviewToken: string | null = null;
       try {
-        const emailResult = await sendBookingReviewRequestEmail({
-          to: customerEmail,
-          clientName: customerName,
-          serviceName,
-          barbershopName: shop.name || 'a barbearia',
-          reviewUrl,
-        });
-        reviewEmailSent = emailResult.success;
-        if (!emailResult.success)
+        const rawToken = randomBytes(32).toString('base64url');
+        const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+        const admin = createAdminClient();
+        const { error: tokenError } = await admin
+          .from('review_submission_tokens')
+          .insert({
+            appointment_id: appointment.id,
+            shop_id: shop.id,
+            token_hash: tokenHash,
+            expires_at: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+          });
+        if (tokenError) {
           console.error(
-            '[BOOKING_REVIEW_EMAIL_ERROR]',
-            emailResult.error ?? 'UNKNOWN',
+            '[BOOKING_REVIEW_TOKEN_CREATE_ERROR]',
+            tokenError.code ?? 'UNKNOWN',
           );
+        } else {
+          reviewToken = rawToken;
+        }
       } catch (error) {
         console.error(
-          '[BOOKING_REVIEW_EMAIL_UNEXPECTED_ERROR]',
+          '[BOOKING_REVIEW_TOKEN_CREATE_UNEXPECTED_ERROR]',
           error instanceof Error ? error.name : 'UNKNOWN',
         );
+      }
+
+      if (reviewToken) {
+        const siteUrl =
+          process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
+          new URL(request.url).origin;
+        const reviewUrlObject = new URL(
+          `/barbershops/${encodeURIComponent(shop.slug)}`,
+          siteUrl,
+        );
+        reviewUrlObject.searchParams.set('review_token', reviewToken);
+        const serviceName = serviceRelation?.name || 'o teu atendimento';
+        try {
+          const emailResult = await sendBookingReviewRequestEmail({
+            to: customerEmail,
+            clientName: customerName,
+            serviceName,
+            barbershopName: shop.name || 'a barbearia',
+            reviewUrl: reviewUrlObject.toString(),
+          });
+          reviewEmailSent = emailResult.success;
+          if (!emailResult.success)
+            console.error(
+              '[BOOKING_REVIEW_EMAIL_ERROR]',
+              emailResult.error ?? 'UNKNOWN',
+            );
+        } catch (error) {
+          console.error(
+            '[BOOKING_REVIEW_EMAIL_UNEXPECTED_ERROR]',
+            error instanceof Error ? error.name : 'UNKNOWN',
+          );
+        }
       }
     }
 
