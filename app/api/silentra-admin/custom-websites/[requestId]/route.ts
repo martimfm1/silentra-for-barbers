@@ -28,6 +28,15 @@ async function PATCH__unobserved(
   context: { params: Promise<{ requestId: string }> },
 ) {
   try {
+    try {
+      const { assertSameOrigin } = await import('@/services/billing/http');
+      assertSameOrigin(request);
+    } catch {
+      return fail('A origem do pedido não pôde ser validada.', 403);
+    }
+    if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
+      return fail('O pedido tem de usar application/json.', 415);
+    }
     const { admin } = await requirePlatformAdmin();
     const { requestId } = await context.params;
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) {
