@@ -154,6 +154,9 @@ async function POST__unobserved(request: Request) {
       .single();
 
     if (error || !data) {
+      if (error?.code === '23505') {
+        return fail('Já existe um pedido de site em aberto para esta barbearia.', 409);
+      }
       console.error('[CUSTOM_WEBSITE_REQUEST_CREATE_FAILED]', { code: error?.code ?? 'UNKNOWN' });
       return fail('Não foi possível registar o pedido. Tenta novamente.', 503);
     }
