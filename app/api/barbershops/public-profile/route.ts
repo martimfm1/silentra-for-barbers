@@ -13,6 +13,7 @@ import {
   normalizeBarbershopAmenities,
 } from '@/lib/barbershops/amenities';
 import { BillingError } from '@/types/stripe';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -90,17 +91,22 @@ async function PATCH__unobserved(request: Request) {
     if (error || !user) return jsonError('Não autenticado.', 401);
     const tenant = await BarbershopStripeService.getTenantContext(user.id);
     const plan = await BarbershopStripeService.getEffectivePlan(user.id);
-    const canCustomizeSlug = planSupportsCustomSlug(plan);
+    const canCustomizeSlug = plan === 'enterprise';
     const canCustomizeEnterprise = plan === 'enterprise';
 
-    const body = (await request.json().catch(() => ({}))) as {
-      slug?: unknown;
-      seoTitle?: unknown;
-      seoDescription?: unknown;
-      ogImageUrl?: unknown;
-      themeConfig?: unknown;
-      amenities?: unknown;
-    };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: [
+        'slug',
+        'seoTitle',
+        'seoDescription',
+        'ogImageUrl',
+        'themeConfig',
+        'amenities',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const database = createAdminClient();
     const { data: currentShop, error: currentError } = await database
       .from('shops')
@@ -125,7 +131,7 @@ async function PATCH__unobserved(request: Request) {
     if (typeof body.slug === 'string') {
       if (!canCustomizeSlug)
         return jsonError(
-          'A personalização do URL público está disponível a partir do plano Pro.',
+          'A alteração do URL público está disponível exclusivamente no plano Enterprise.',
           403,
         );
       const slug = normalizePublicProfileSlug(body.slug);
