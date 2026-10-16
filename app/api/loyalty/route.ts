@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getAccessPlanForRequest } from '@/services/billing/plan-access.guard';
 import { assertFeature } from '@/lib/billing/entitlements';
 import { requireModuleContext } from '@/services/modules/authorization';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 function parseNumber(value: unknown, fallback: number) {
   const number = typeof value === 'number' ? value : Number(value);
@@ -86,20 +87,50 @@ async function PATCH__unobserved(request: Request) {
     const result = await ensureAccess();
     if ('response' in result) return result.response;
     const { admin, barbershopId } = result.context;
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const enabled = body?.enabled === true;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: [
+        'enabled',
+        'points_per_euro',
+        'pointsPerEuro',
+        'welcome_points',
+        'welcomePoints',
+        'referral_points',
+        'referralPoints',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const enabled = body.enabled === true;
+    if (
+      (body.enabled !== undefined && typeof body.enabled !== 'boolean') ||
+      (body.points_per_euro !== undefined &&
+        typeof body.points_per_euro !== 'number') ||
+      (body.pointsPerEuro !== undefined &&
+        typeof body.pointsPerEuro !== 'number') ||
+      (body.welcome_points !== undefined &&
+        typeof body.welcome_points !== 'number') ||
+      (body.welcomePoints !== undefined &&
+        typeof body.welcomePoints !== 'number') ||
+      (body.referral_points !== undefined &&
+        typeof body.referral_points !== 'number') ||
+      (body.referralPoints !== undefined &&
+        typeof body.referralPoints !== 'number')
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid loyalty settings' },
+        { status: 400 },
+      );
+    }
     const pointsPerEuro = parseNumber(
-      body?.points_per_euro ?? body?.pointsPerEuro,
+      body.points_per_euro ?? body.pointsPerEuro,
       1,
     );
     const welcomePoints = Math.floor(
-      parseNumber(body?.welcome_points ?? body?.welcomePoints, 0),
+      parseNumber(body.welcome_points ?? body.welcomePoints, 0),
     );
     const referralPoints = Math.floor(
-      parseNumber(body?.referral_points ?? body?.referralPoints, 0),
+      parseNumber(body.referral_points ?? body.referralPoints, 0),
     );
     if (
       pointsPerEuro <= 0 ||
