@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
@@ -38,12 +39,12 @@ export default async function ManualCheckoutPage({
             Este checkout expirou ou não pertence à tua conta. Volta aos planos
             e inicia um novo pedido.
           </p>
-          <a
+          <Link
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950"
           >
             Voltar aos planos
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -62,11 +63,22 @@ export default async function ManualCheckoutPage({
   const initialPricing = quoteManualPrice(intent.plan, intent.interval);
 
   return (
-    <ManualCheckout
-      checkoutToken={token}
-      plan={intent.plan}
-      interval={intent.interval}
-      initialPricing={initialPricing}
-    />
+    <>
+      {intent.plan === 'enterprise' && (
+        <div className="mx-auto mb-5 flex max-w-6xl flex-col gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.045] p-4 text-zinc-100 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div>
+            <p className="text-sm font-semibold">Queres também um site próprio?</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento.</p>
+          </div>
+          <a href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Contactar a Silentra</a>
+        </div>
+      )}
+      <ManualCheckout
+        checkoutToken={token}
+        plan={intent.plan}
+        interval={intent.interval}
+        initialPricing={initialPricing}
+      />
+    </>
   );
 }

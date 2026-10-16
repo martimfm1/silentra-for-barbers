@@ -352,6 +352,61 @@ const checks = [
         source.includes("value: 'DENY'")
       );
     },
+  },,
+  {
+    name: 'Custom website requests are Enterprise-only and validate user input server-side',
+    file: 'app/api/dashboard/custom-website/route.ts',
+    test: (source) =>
+      source.includes("plan !== 'enterprise'") &&
+      source.includes('RESERVED_SLUGS') &&
+      source.includes('12_000') &&
+      source.includes("from('custom_website_requests')") &&
+      source.includes("context.user.id"),
+  },
+  {
+    name: 'Custom website public route only renders explicitly published paths',
+    file: 'app/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("eq('status', 'published')") &&
+      source.includes("eq('public_slug', slug)") &&
+      source.includes("notFound()") &&
+      source.includes('booking_slug'),
+  },
+  {
+    name: 'Admin website publication requires a unique valid public path and site metadata',
+    file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+    test: (source) =>
+      source.includes('requirePlatformAdmin()') &&
+      source.includes('RESERVED_SLUGS') &&
+      source.includes('nextStatus === \'published\'') &&
+      source.includes('nextSlug') &&
+      source.includes('23505'),
+  },
+  {
+    name: 'Custom website workflow is visible in Enterprise plan and customer dashboard',
+    file: 'lib/billing/plan-features.ts',
+    test: (source) =>
+      source.includes("'custom_website'") &&
+      source.includes("custom_website: 'Site próprio personalizado (por orçamento)'") &&
+      source.includes("'custom_website',"),
+  },
+  {
+    name: 'Enterprise checkout directs bespoke website requests to direct contact',
+    file: 'app/checkout/page.tsx',
+    test: (source) =>
+      source.includes("intent.plan === 'enterprise'") &&
+      source.includes('mailto:silentra.contact@gmail.com') &&
+      source.includes('sujeito a orçamento'),
+  },
+  {
+    name: 'Custom website requests are protected by a service-role-only database table',
+    file: 'supabase/migrations/20261016180000_enterprise_custom_website_requests.sql',
+    test: (source) =>
+      source.includes('custom_website_requests') &&
+      source.includes('enable row level security') &&
+      source.includes('revoke all') &&
+      source.includes('grant all on public.custom_website_requests to service_role') &&
+      source.includes('custom_website_requests_public_slug_unique'),
   },
   {
     name: 'Customer booking drawer resets each step to the top and supports safe-area mobile scrolling',

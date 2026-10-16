@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { CustomCheckout } from '@/components/billing/custom-checkout';
@@ -55,12 +56,12 @@ export default async function CheckoutPage({
             A Stripe terminou o processo de checkout. O estado da subscrição
             será sincronizado automaticamente.
           </p>
-          <a
+          <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Ir para faturação
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -80,12 +81,12 @@ export default async function CheckoutPage({
             Este checkout expirou ou não pertence à tua conta. Inicia um novo
             checkout a partir dos planos.
           </p>
-          <a
+          <Link
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Voltar aos planos
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -106,12 +107,12 @@ export default async function CheckoutPage({
             O checkout não corresponde à barbearia atualmente associada à tua
             conta.
           </p>
-          <a
+          <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Ir para faturação
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -119,6 +120,15 @@ export default async function CheckoutPage({
 
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6 text-zinc-50 sm:px-6 sm:py-10 lg:px-8">
+      {intent.plan === 'enterprise' && (
+        <section className="mx-auto mb-5 flex max-w-6xl flex-col gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div>
+            <p className="text-sm font-semibold text-zinc-100">Queres também um site próprio?</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento.</p>
+          </div>
+          <a href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Contactar a Silentra</a>
+        </section>
+      )}
       <CustomCheckout checkoutToken={token} plan={intent.plan} />
     </main>
   );

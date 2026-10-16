@@ -20,6 +20,7 @@ import {
   X,
   Lock,
   QrCode,
+  Globe2,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
@@ -120,6 +121,7 @@ const secondaryItems: SidebarItem[] = [
   },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/billing', label: 'Plano e pagamentos', icon: CreditCard },
+  { href: '/dashboard/website', label: 'Site próprio', icon: Globe2, feature: 'custom_website' },
   { href: '/dashboard/settings', label: 'Definições', icon: Settings },
 ];
 

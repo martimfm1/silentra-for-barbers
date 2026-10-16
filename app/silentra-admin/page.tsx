@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Gift } from 'lucide-react';
+import { Gift, Globe2 } from 'lucide-react';
 import { getPlatformAdminContext } from '@/lib/internal/platform-admin';
 import PlatformAdminConsole from '@/app/_silentra-admin/platform-admin-console';
 
@@ -47,6 +47,13 @@ export default async function SilentraAdminPage({
   return (
     <div className="relative">
       <PlatformAdminConsole />
+      <Link
+        href="/silentra-admin/websites"
+        className="fixed bottom-20 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/95 px-4 text-xs font-semibold text-zinc-100 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"
+      >
+        <Globe2 className="size-4 text-emerald-300" />
+        Sites Enterprise
+      </Link>
       <Link
         href="/silentra-admin/loyalty"
         className="fixed bottom-5 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-400/20 bg-zinc-950/95 px-4 text-xs font-semibold text-emerald-200 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"

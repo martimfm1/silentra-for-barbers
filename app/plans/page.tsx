@@ -43,7 +43,7 @@ const faqs = [
   ],
   [
     'O Enterprise inclui uma landing page?',
-    'Sim. Quando a subscrição Enterprise fica ativa, a Silentra cria automaticamente uma landing page pública, ligada ao perfil da barbearia e aos seus serviços. A página deixa de estar publicada quando o entitlement Enterprise termina.',
+    'Sim. A subscrição Enterprise inclui uma landing page pública ligada ao perfil e aos serviços. Um site próprio, com design personalizado e endereço /nome-da-barbearia, é um serviço adicional por orçamento: o cliente contacta a Silentra e a publicação só acontece após acordo.',
   ],
   [
     'O que acontece se cancelar?',

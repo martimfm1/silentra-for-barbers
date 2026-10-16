@@ -1,3 +1,4 @@
+import Link from 'next/link';
 'use client';
 
 import { type ProfessionalsListCardProps } from '@/types';
@@ -200,7 +201,7 @@ export function ProfessionalsListCard({
               variant="outline"
               className="shrink-0 border-white/10 rounded-lg"
             >
-              <a href="/plans">Ver planos</a>
+              <Link href="/plans">Ver planos</Link>
             </Button>
           </div>
         )}
