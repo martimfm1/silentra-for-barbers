@@ -264,19 +264,6 @@ const requestValidationChecks = [
     markers: ['readJsonObject(request', "allowedKeys: ['slug', 'email', 'code', 'name']", 'consumePublicRateLimit', 'getLoyaltyTenantBySlug'],
     label: 'Loyalty OTP verification request validation and rate limiting',
   },
-];
-
-for (const check of requestValidationChecks) {
-  const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
-    encoding: 'utf8',
-  });
-  for (const marker of check.markers) {
-    if (!source.includes(marker)) {
-      findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
-    }
-  }
-}
-
   {
     file: 'app/api/automations/rules/route.ts',
     markers: [
@@ -356,6 +343,18 @@ for (const check of requestValidationChecks) {
     ],
     label: 'Loyalty settings request validation and tenant binding',
   },
+];
+
+for (const check of requestValidationChecks) {
+  const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
+    encoding: 'utf8',
+  });
+  for (const marker of check.markers) {
+    if (!source.includes(marker)) {
+      findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
+    }
+  }
+}
 
 const routeSecurityChecks = [
   {
