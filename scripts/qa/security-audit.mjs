@@ -311,6 +311,38 @@ for (const check of requestValidationChecks) {
     label: 'Loyalty exit request validation and server-side session binding',
   },
 
+  {
+    file: 'app/api/enterprise/inventory/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "'locationId',",
+      'Number.isFinite(unitPrice)',
+      ".eq('parent_barbershop_id', barbershopId)",
+      ".eq('barbershop_id', barbershopId)",
+    ],
+    label: 'Inventory input validation and tenant-scoped location binding',
+  },
+  {
+    file: 'app/api/enterprise/locations/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['name', 'slug', 'phone', 'address']",
+      ".eq('parent_barbershop_id', barbershopId)",
+      "assertWithinLimit(plan, 'locations'",
+    ],
+    label: 'Enterprise location request validation, tenant binding and quota',
+  },
+  {
+    file: 'app/api/enterprise/commissions/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "'commissionPercentage',",
+      ".eq('barbershop_id', barbershopId)",
+      'grossAmount > 1_000_000_000',
+    ],
+    label: 'Enterprise commission request validation and tenant binding',
+  },
+
 const routeSecurityChecks = [
   {
     file: 'app/api/stripe/subscription/route.ts',
