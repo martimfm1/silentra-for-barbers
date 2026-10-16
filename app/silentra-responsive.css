@@ -15,6 +15,11 @@ canvas {
 }
 
 @media (max-width: 639px) {
+  /* Keep the professional revenue chart clean on narrow screens: no X-axis labels/baseline. */
+  .stats-professional-chart .recharts-xAxis {
+    display: none;
+  }
+
   .silentra-page-content {
     width: min(100% - 1rem, 90rem);
     padding-block: 5rem 2.25rem;
