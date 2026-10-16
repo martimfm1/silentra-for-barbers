@@ -270,6 +270,8 @@ const checks = [
       const whopPixel = source.indexOf('id="whop-pixel"');
       return (
         source.includes('TRACKING_TOKEN_BOOTSTRAP_SCRIPT') &&
+        source.includes('__SILENTRA_REVIEW_TOKEN__') &&
+        source.includes('review_token') &&
         source.includes('__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__') &&
         source.includes('window.history.replaceState') &&
         bootstrap >= 0 &&
