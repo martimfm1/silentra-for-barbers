@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   LoyaltyEmailDeliveryError,
@@ -28,10 +29,12 @@ function logOtpError(
 
 async function POST__unobserved(request: Request) {
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      slug?: unknown;
-      email?: unknown;
-    };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['slug', 'email'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const slug =
       typeof body.slug === 'string' ? body.slug.trim().toLowerCase() : '';
     const email = normalizeLoyaltyEmail(body.email);
