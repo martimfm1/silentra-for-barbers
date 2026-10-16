@@ -41,8 +41,8 @@
 ## P1 — Reviews / abuso
 
 - [x] Remover a policy pública de reviews com `WITH CHECK (true)` através de migration corretiva; validar a migration em staging antes de produção.
-- [ ] Criar prova de marcação concluída através de token seguro/expirável.
-- [ ] Impedir reviews para marcações inexistentes, não concluídas ou de outro tenant.
+- [x] Token de avaliação aleatório, guardado como hash, associado a marcação concluída, expira em 30 dias e só pode ser usado uma vez; validar o fluxo em staging.
+- [x] RPC valida marcação concluída, tenant/barbearia e token não expirado/não consumido; confirmar testes negativos em staging.
 - [x] Rate limiting distribuído no fluxo público de reviews (5 pedidos/hora por IP e barbearia); prova de marcação concluída continua pendente.
 
 ## P1 — Billing
