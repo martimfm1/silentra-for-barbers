@@ -445,7 +445,7 @@ export default function StatsPage() {
               </Card>
 
               {/* GRÁFICO 2: FATURAÇÃO POR BARBEIRO */}
-              <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
+              <Card className="stats-professional-chart border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
                     Faturação por Barbeiro (€)
