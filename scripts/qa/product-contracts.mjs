@@ -296,6 +296,23 @@ const checks = [
     },
   },
   {
+    name: 'Stripe webhook ledger stores sanitized failure identifiers only',
+    file: 'app/api/stripe/webhook/route.ts',
+    test: (source) => {
+      const start = source.indexOf('async function markWebhookFailed');
+      const end = source.indexOf('async function hydrateBillingMappingFromMetadata');
+      const block = source.slice(start, end);
+      return (
+        start >= 0 &&
+        end > start &&
+        block.includes('safeName') &&
+        block.includes('safeCode') &&
+        block.includes('candidate.code') &&
+        !block.includes('error.message')
+      );
+    },
+  },
+  {
     name: 'Public review inserts are restricted to the validated RPC',
     file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
     test: (source) =>
