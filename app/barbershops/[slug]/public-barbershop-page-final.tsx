@@ -130,10 +130,17 @@ export default function BarbershopPublicPageFinal({
   const [bannerImageError, setBannerImageError] = useState(false);
 
   useEffect(() => {
+    const browserWindow = window as Window & {
+      __SILENTRA_REVIEW_TOKEN__?: string | null;
+    };
     const url = new URL(window.location.href);
-    const token = url.searchParams.get('review_token') || '';
-    if (/^[A-Za-z0-9_-]{43}$/.test(token)) {
-      setReviewToken(token);
+    const token =
+      browserWindow.__SILENTRA_REVIEW_TOKEN__ ||
+      url.searchParams.get('review_token') ||
+      '';
+    browserWindow.__SILENTRA_REVIEW_TOKEN__ = null;
+    if (/^[A-Za-z0-9_-]{43}$/.test(token)) setReviewToken(token);
+    if (url.searchParams.has('review_token')) {
       url.searchParams.delete('review_token');
       window.history.replaceState(
         window.history.state,
