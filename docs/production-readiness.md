@@ -25,22 +25,24 @@
 - [x] `role` e `barbershop_id` do utilizador estão protegidos server-side/database.
 - [x] Índice parcial único protege active double-booking na database.
 - [ ] Corrigir a pré-verificação da API de booking para considerar `professional_id`.
-- [ ] Converter conflito de concorrência `23505` em HTTP 409.
+- [x] Converter conflito de concorrência `23505` em HTTP 409.
 - [ ] Teste real de isolamento multi-tenant A → A permitido / A → B recusado.
 - [ ] Auditar todas as funções `SECURITY DEFINER` da migration history.
 - [ ] Testar Free/Pro/Enterprise na API e database.
 - [ ] Testar quota Free de 1 profissional sob concorrência.
 - [ ] Validar Storage por tenant e conversão de avatar para WebP.
-- [ ] Rate limiting dos endpoints públicos e de mensagens.
+- [ ] Completar auditoria de rate limiting dos restantes endpoints públicos e de mensagens.
+- [x] Rate limiting do fluxo público de reviews.
 - [ ] Error tracking e logs estruturados sem secrets.
-- [ ] Auditar CSP/CORS e `allowedDevOrigins` em produção.
+- [ ] Auditar CSP/CORS em produção.
+- [x] `allowedDevOrigins` limitado ao modo de desenvolvimento.
 
 ## P1 — Reviews / abuso
 
-- [ ] Remover a policy pública de reviews com `WITH CHECK (true)`.
+- [x] Remover a policy pública de reviews com `WITH CHECK (true)` através de migration corretiva; validar a migration em staging antes de produção.
 - [ ] Criar prova de marcação concluída através de token seguro/expirável.
 - [ ] Impedir reviews para marcações inexistentes, não concluídas ou de outro tenant.
-- [ ] Rate limiting / anti-spam do fluxo de reviews.
+- [x] Rate limiting distribuído no fluxo público de reviews (5 pedidos/hora por IP e barbearia); prova de marcação concluída continua pendente.
 
 ## P1 — Billing
 
