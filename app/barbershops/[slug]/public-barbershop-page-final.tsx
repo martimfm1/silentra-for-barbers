@@ -188,6 +188,7 @@ export default function BarbershopPublicPageFinal({
     setReviewName('');
     setReviewText('');
     setReviewRating(0);
+    setReviewToken('');
     setReviewSent(true);
   }
 
@@ -446,7 +447,11 @@ export default function BarbershopPublicPageFinal({
           >
             Avaliações
           </h2>
-          {reviewToken ? (
+          {reviewSent ? (
+            <p className="mt-5 text-sm text-emerald-300" role="status">
+              Avaliação enviada. Obrigado por partilhares a tua experiência.
+            </p>
+          ) : reviewToken ? (
             <form
               onSubmit={submitReview}
               className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.018] p-4 sm:grid-cols-2"
@@ -495,14 +500,6 @@ export default function BarbershopPublicPageFinal({
             {reviewError && (
               <p className="text-xs text-red-300 sm:col-span-2" role="alert">
                 {reviewError}
-              </p>
-            )}
-            {reviewSent && (
-              <p
-                className="text-xs text-emerald-300 sm:col-span-2"
-                role="status"
-              >
-                Avaliação enviada.
               </p>
             )}
             <Button
