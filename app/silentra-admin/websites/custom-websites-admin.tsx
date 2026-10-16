@@ -81,7 +81,7 @@ export default function CustomWebsitesAdmin() {
 
   useEffect(() => { void load(); }, [load]);
 
-  function change(id: string, key: keyof EditableRequest, value: string) {
+  function change<K extends keyof EditableRequest>(id: string, key: K, value: EditableRequest[K]) {
     setEdits((current) => ({
       ...current,
       [id]: { ...current[id], [key]: value },
@@ -163,7 +163,7 @@ export default function CustomWebsitesAdmin() {
                     <section className="min-w-0 space-y-4">
                       <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Estado e publicação</h3>
                       <label className="grid gap-1.5 text-xs text-zinc-400">Estado do projeto
-                        <select value={edit.status} onChange={(event) => change(item.id, 'status', event.target.value)} className={inputClass}>{STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select>
+                        <select value={edit.status} onChange={(event) => change(item.id, 'status', event.target.value as WebsiteStatus)} className={inputClass}>{STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select>
                       </label>
                       <label className="grid gap-1.5 text-xs text-zinc-400">Caminho público (sem /)
                         <input value={edit.publicSlug} onChange={(event) => change(item.id, 'publicSlug', event.target.value)} placeholder={item.desired_slug} className={inputClass} />
