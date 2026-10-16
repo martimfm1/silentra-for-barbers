@@ -478,12 +478,16 @@ export default function StatsPage() {
                             dataKey="name"
                             tickLine={false}
                             axisLine={false}
-                            tick={{ fill: '#a1a1aa', fontSize: 11 }}
+                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
                             dy={6}
-                            interval={0}
+                            angle={-20}
+                            textAnchor="end"
+                            height={48}
+                            interval="preserveStartEnd"
+                            minTickGap={4}
                             tickFormatter={(value: string) =>
-                              value.length > 12
-                                ? `${value.slice(0, 12)}…`
+                              value.length > 10
+                                ? `${value.slice(0, 10)}…`
                                 : value
                             }
                           />
