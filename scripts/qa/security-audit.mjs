@@ -89,6 +89,9 @@ const requestValidationChecks = [
     markers: [
       "contentType !== 'application/json'",
       'DEFAULT_MAX_BODY_BYTES',
+      'request.body?.getReader()',
+      'totalBytes > maxBytes',
+      "TextDecoder('utf-8', { fatal: true })",
       'body_too_large',
       'JSON.parse(raw)',
       'Array.isArray(parsed)',
