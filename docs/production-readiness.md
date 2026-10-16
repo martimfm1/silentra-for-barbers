@@ -104,14 +104,20 @@
 
 ## P2 — Legal / GDPR
 
-- [ ] Privacy Policy final.
-- [ ] Terms of Service final.
+- [ ] Revisão jurídica final da Política de Privacidade e dos Termos PT/EN (as páginas de rascunho já existem).
 - [ ] Cookie/consentimento quando aplicável.
-- [ ] Data retention.
-- [ ] Account/data deletion.
-- [ ] Data export.
-- [ ] DPA/subprocessors.
+- [ ] Aprovar prazos de retenção e eliminação por categoria.
+- [ ] Implementar e testar eliminação de conta/dados.
+- [ ] Implementar e testar exportação de dados.
+- [ ] Finalizar DPA e lista real de subprocessadores.
+- [ ] Validar consentimento de cookies/analytics por rota.
+- [ ] Executar e documentar processo de pedidos de titulares.
 - [ ] Revisão jurídica antes do lançamento comercial.
+
+## Documentação operacional
+
+- [Runbook de operações e recuperação](./PRODUCTION_OPERATIONS.md)
+- [Operações de privacidade e RGPD](./GDPR_OPERATIONS.md)
 
 ## Release gate
 
