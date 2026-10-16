@@ -199,10 +199,10 @@ export default function PublicProfileSettingsPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug,
-          seoTitle,
-          seoDescription,
-          ogImageUrl,
+          ...(profile.canCustomizeSlug ? { slug } : {}),
+          ...(profile.canCustomizeEnterprise
+            ? { seoTitle, seoDescription, ogImageUrl }
+            : {}),
           amenities,
         }),
       });
