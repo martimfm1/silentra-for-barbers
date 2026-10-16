@@ -33,7 +33,8 @@
 - [ ] Validar Storage por tenant e conversão de avatar para WebP.
 - [ ] Completar auditoria de rate limiting dos restantes endpoints públicos e de mensagens.
 - [x] Rate limiting do fluxo público de reviews.
-- [ ] Error tracking e logs estruturados sem secrets.
+- [ ] Error tracking externo/alertas.
+- [x] Logs estruturados com redação de campos sensíveis; detalhes de erro do webhook Stripe são persistidos apenas como identificadores.
 - [ ] Auditar CSP/CORS em produção.
 - [x] `allowedDevOrigins` limitado ao modo de desenvolvimento.
 
@@ -50,7 +51,7 @@
 - [ ] Upgrade Pro → Enterprise.
 - [ ] Cancelamento e fim do período.
 - [ ] Falhas de pagamento.
-- [ ] Webhook idempotente.
+- [x] Ledger idempotente de webhook com claim/lease/complete; a execução de eventos duplicados continua a exigir teste em staging.
 - [ ] Price ID → entitlement server-side.
 - [ ] Não confiar no plano enviado pelo cliente.
 - [ ] Testar eventos Stripe duplicados.
@@ -83,9 +84,9 @@
 - [ ] Backups e recuperação testados.
 - [ ] Monitoring e alertas.
 - [ ] Error tracking.
-- [ ] Request/correlation IDs.
+- [x] Request/correlation IDs (`x-request-id`) nos handlers com observabilidade.
 - [ ] Security headers auditados.
-- [ ] `allowedDevOrigins` limitado ao desenvolvimento.
+- [x] `allowedDevOrigins` limitado ao desenvolvimento.
 - [ ] Performance e Core Web Vitals.
 - [ ] Mobile e acessibilidade.
 - [ ] SEO / sitemap / canonical / metadata.
