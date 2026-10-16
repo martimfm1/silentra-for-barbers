@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import {
   buildMarketplaceTrackingUrl,
@@ -158,10 +159,13 @@ async function PATCH__unobserved(
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
     const { orderId } = await params;
-    const body = (await request.json().catch(() => null)) as {
-      status?: unknown;
-    } | null;
-    const status = typeof body?.status === 'string' ? body.status : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 2 * 1024,
+      allowedKeys: ['status'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const status = typeof body.status === 'string' ? body.status : '';
 
     if (!STATUSES.includes(status as Status)) {
       return NextResponse.json({ error: 'Estado inválido.' }, { status: 400 });
