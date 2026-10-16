@@ -813,12 +813,12 @@ export default function DocumentationPage() {
         <footer className="mt-16 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Silentra for Barbers · Documentação API v1</p>
           <div className="flex flex-wrap gap-4">
-            <a href="/privacy" className="transition hover:text-zinc-300">
+            <Link href="/privacy" className="transition hover:text-zinc-300">
               Privacidade
-            </a>
-            <a href="/terms" className="transition hover:text-zinc-300">
+            </Link>
+            <Link href="/terms" className="transition hover:text-zinc-300">
               Termos
-            </a>
+            </Link>
             <a
               href="https://github.com/martimfm1/silentra-for-barbers"
               target="_blank"
