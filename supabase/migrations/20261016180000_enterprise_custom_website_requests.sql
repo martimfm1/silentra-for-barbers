@@ -36,6 +36,11 @@ create index if not exists custom_website_requests_status_created_idx
 create index if not exists custom_website_requests_shop_created_idx
   on public.custom_website_requests (barbershop_id, created_at desc);
 
+-- Enforce one in-flight project per barbershop even under concurrent submissions.
+create unique index if not exists custom_website_requests_one_active_per_shop
+  on public.custom_website_requests (barbershop_id)
+  where status in ('requested', 'contacted', 'in_progress', 'review');
+
 alter table public.custom_website_requests enable row level security;
 revoke all on public.custom_website_requests from anon, authenticated;
 grant all on public.custom_website_requests to service_role;
