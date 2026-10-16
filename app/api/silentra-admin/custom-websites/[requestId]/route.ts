@@ -76,8 +76,9 @@ async function PATCH__unobserved(
     ] as const;
     for (const [inputKey, column, max] of textFields) {
       if (inputKey in input) {
-        if (typeof input[inputKey] !== 'string') return fail(`Campo inválido: ${inputKey}.`, 400);
-        update[column] = input[inputKey].trim().slice(0, max) || null;
+        const value = input[inputKey];
+        if (typeof value !== 'string') return fail(`Campo inválido: ${inputKey}.`, 400);
+        update[column] = value.trim().slice(0, max) || null;
       }
     }
     if ('heroImageUrl' in input) {
