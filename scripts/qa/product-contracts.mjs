@@ -315,6 +315,14 @@ const checks = [
     },
   },
   {
+    name: 'Public review API never inserts directly into the reviews table',
+    file: 'app/api/public/reviews/route.ts',
+    test: (source) =>
+      source.includes("rpc(\n      'submit_public_review_with_token'") &&
+      source.includes("createHash('sha256')") &&
+      !source.includes("from('reviews')"),
+  },
+  {
     name: 'Public reviews require a single-use token tied to a completed appointment',
     file: 'supabase/migrations/20261016120000_verified_review_submission_tokens.sql',
     test: (source) =>
@@ -323,7 +331,8 @@ const checks = [
       source.includes('t.consumed_at is null') &&
       source.includes('t.expires_at > now()') &&
       source.includes('set consumed_at = now()') &&
-      source.includes('submit_public_review_with_token'),
+      source.includes('submit_public_review_with_token') &&
+      source.includes('revoke all on function public.submit_public_review(uuid, text, integer, text)'),
   },
   {
     name: 'Completed booking issues a hashed, expiring review capability',
