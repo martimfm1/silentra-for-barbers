@@ -186,6 +186,21 @@ const requestValidationChecks = [
     markers: ['readJsonObject(request', "'barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'", 'submit_public_review_with_token', 'createHash'],
     label: 'Public review request validation and one-time token RPC',
   },
+  {
+    file: 'app/api/_silentra-admin/subscription-requests/[requestId]/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['action', 'paymentLink', 'reason']", 'assertSameOrigin(request)', 'requirePlatformAdmin()'],
+    label: 'Manual billing admin request validation and authorization',
+  },
+  {
+    file: 'app/api/marketplace/orders/[orderId]/email/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['subject', 'message']", ".eq('barbershop_id', barbershopId)", 'sendBrevoEmail'],
+    label: 'Marketplace order email request validation and tenant binding',
+  },
+  {
+    file: 'app/api/barbershops/avatar/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['avatarUrl']", 'requireTenantAuthorization(request', 'expectedPath', ".eq('id', tenant.barbershopId)"],
+    label: 'Avatar update request validation and tenant-scoped storage path',
+  },
 ];
 
 for (const check of requestValidationChecks) {
