@@ -68,22 +68,57 @@ export async function readJsonObject(
     }
   }
 
-  let raw: string;
+  const reader = request.body?.getReader();
+  if (!reader) {
+    return {
+      ok: false,
+      response: jsonError(400, 'O corpo do pedido está vazio.'),
+      reason: 'invalid_json',
+    };
+  }
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
   try {
-    raw = await request.text();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        return {
+          ok: false,
+          response: jsonError(413, 'O pedido excede o tamanho permitido.'),
+          reason: 'body_too_large',
+        };
+      }
+      chunks.push(value);
+    }
   } catch {
     return {
       ok: false,
       response: jsonError(400, 'Não foi possível ler o pedido.'),
       reason: 'invalid_json',
     };
+  } finally {
+    reader.releaseLock();
   }
 
-  if (new TextEncoder().encode(raw).byteLength > maxBytes) {
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  let raw: string;
+  try {
+    raw = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
     return {
       ok: false,
-      response: jsonError(413, 'O pedido excede o tamanho permitido.'),
-      reason: 'body_too_large',
+      response: jsonError(400, 'A codificação do pedido não é válida.'),
+      reason: 'invalid_json',
     };
   }
 
