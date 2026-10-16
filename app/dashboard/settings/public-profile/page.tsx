@@ -199,10 +199,10 @@ export default function PublicProfileSettingsPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug,
-          seoTitle,
-          seoDescription,
-          ogImageUrl,
+          ...(profile.canCustomizeSlug ? { slug } : {}),
+          ...(profile.canCustomizeEnterprise
+            ? { seoTitle, seoDescription, ogImageUrl }
+            : {}),
           amenities,
         }),
       });
@@ -387,10 +387,10 @@ export default function PublicProfileSettingsPage() {
               />
             </div>
             {profile.canCustomizeSlug ? (
-              <span className="text-xs text-emerald-300">Pro incluído</span>
+              <span className="text-xs text-emerald-300">Incluído no Enterprise</span>
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-zinc-600">
-                <Lock className="size-3" aria-hidden="true" /> Disponível no Pro
+                <Lock className="size-3" aria-hidden="true" /> Exclusivo do Enterprise
               </span>
             )}
           </div>
@@ -491,7 +491,7 @@ export default function PublicProfileSettingsPage() {
           </Link>
           <Button
             onClick={() => void save()}
-            disabled={saving || !profile.canCustomizeSlug}
+            disabled={saving}
             className="min-h-11 rounded-xl bg-zinc-100 px-5 text-zinc-950 hover:bg-white"
           >
             {saving ? (

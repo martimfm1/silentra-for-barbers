@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Accessibility,
   Armchair,
@@ -119,6 +119,7 @@ export default function BarbershopPublicPageFinal({
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
+  const [reviewToken, setReviewToken] = useState('');
   const [reviewName, setReviewName] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(0);
@@ -127,6 +128,27 @@ export default function BarbershopPublicPageFinal({
   const [reviewSent, setReviewSent] = useState(false);
   const [avatarImageError, setAvatarImageError] = useState(false);
   const [bannerImageError, setBannerImageError] = useState(false);
+
+  useEffect(() => {
+    const browserWindow = window as Window & {
+      __SILENTRA_REVIEW_TOKEN__?: string | null;
+    };
+    const url = new URL(window.location.href);
+    const token =
+      browserWindow.__SILENTRA_REVIEW_TOKEN__ ||
+      url.searchParams.get('review_token') ||
+      '';
+    browserWindow.__SILENTRA_REVIEW_TOKEN__ = null;
+    if (/^[A-Za-z0-9_-]{43}$/.test(token)) setReviewToken(token);
+    if (url.searchParams.has('review_token')) {
+      url.searchParams.delete('review_token');
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      );
+    }
+  }, []);
 
   const targetId = shop.barbershop_id || shop.id;
   const avatarUrl = storageUrl('avatar', shop.avatar_url, targetId);
@@ -154,6 +176,7 @@ export default function BarbershopPublicPageFinal({
       client_name: reviewName.trim(),
       rating: reviewRating,
       comment: reviewText.trim(),
+      review_token: reviewToken,
     });
     setReviewLoading(false);
     if (result.error || !result.data) {
@@ -165,6 +188,7 @@ export default function BarbershopPublicPageFinal({
     setReviewName('');
     setReviewText('');
     setReviewRating(0);
+    setReviewToken('');
     setReviewSent(true);
   }
 
@@ -423,10 +447,15 @@ export default function BarbershopPublicPageFinal({
           >
             Avaliações
           </h2>
-          <form
-            onSubmit={submitReview}
-            className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.018] p-4 sm:grid-cols-2"
-          >
+          {reviewSent ? (
+            <p className="mt-5 text-sm text-emerald-300" role="status">
+              Avaliação enviada. Obrigado por partilhares a tua experiência.
+            </p>
+          ) : reviewToken ? (
+            <form
+              onSubmit={submitReview}
+              className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.018] p-4 sm:grid-cols-2"
+            >
             <label className="grid gap-1 text-xs text-zinc-500">
               Nome
               <input
@@ -473,14 +502,6 @@ export default function BarbershopPublicPageFinal({
                 {reviewError}
               </p>
             )}
-            {reviewSent && (
-              <p
-                className="text-xs text-emerald-300 sm:col-span-2"
-                role="status"
-              >
-                Avaliação enviada.
-              </p>
-            )}
             <Button
               type="submit"
               disabled={reviewLoading}
@@ -488,7 +509,12 @@ export default function BarbershopPublicPageFinal({
             >
               {reviewLoading ? 'A enviar…' : 'Enviar avaliação'}
             </Button>
-          </form>
+            </form>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-zinc-500">
+              Só é possível enviar uma avaliação através do link recebido por email após um atendimento concluído.
+            </p>
+          )}
           <div className="mt-5 grid gap-3">
             {shop.reviews.map((review) => (
               <article

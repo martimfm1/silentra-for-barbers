@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/stripe/constants';
 import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
@@ -42,12 +43,21 @@ async function POST__unobserved(request: Request) {
         { status: 401 },
       );
 
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const plan = readPlan(body?.plan);
-    const interval = readInterval(body?.interval);
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['plan', 'interval'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+
+    const body = bodyResult.value;
+    const plan = readPlan(body.plan);
+    if (body.interval !== undefined && body.interval !== 'month' && body.interval !== 'year') {
+      return NextResponse.json(
+        { error: 'O período de faturação não é válido.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    const interval = readInterval(body.interval);
 
     if (!plan)
       return NextResponse.json(

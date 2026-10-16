@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { hashLoyaltyToken } from '@/lib/loyalty/session';
 import {
   requireModuleContext,
@@ -15,11 +16,15 @@ const VALIDATION_RATE_WINDOW_SECONDS = 60;
 async function POST__unobserved(request: Request) {
   try {
     const context = await requireModuleContext('loyalty', 'loyalty');
-    const body = (await request.json().catch(() => ({}))) as {
-      identifier?: unknown;
-    };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 2 * 1024,
+      allowedKeys: ['identifier'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
     const identifier =
-      typeof body.identifier === 'string' ? body.identifier.trim() : '';
+      typeof bodyResult.value.identifier === 'string'
+        ? bodyResult.value.identifier.trim()
+        : '';
     if (!identifier || identifier.length > 256) {
       return NextResponse.json({ error: 'Código inválido.' }, { status: 400 });
     }

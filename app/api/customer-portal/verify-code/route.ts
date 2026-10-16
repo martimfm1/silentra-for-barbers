@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   generateSessionToken,
@@ -35,12 +36,13 @@ function rateLimitKey(request: Request, email: string): string {
 
 async function POST__unobserved(request: Request) {
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      email?: unknown;
-      code?: unknown;
-    };
-    const email = normalizePortalEmail(body.email);
-    const code = typeof body.code === 'string' ? body.code.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['email', 'code'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const email = normalizePortalEmail(bodyResult.value.email);
+    const code = typeof bodyResult.value.code === 'string' ? bodyResult.value.code.trim() : '';
     if (!email || !/^\d{6}$/.test(code))
       return NextResponse.json(
         { success: false, error: 'Email ou código inválido.' },

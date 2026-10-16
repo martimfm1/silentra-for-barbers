@@ -23,7 +23,11 @@ const noFrameHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['192.168.56.1', 'localhost:3000', '192.168.1.6'],
+  // Development origins are intentionally disabled in production builds.
+  allowedDevOrigins:
+    process.env.NODE_ENV === 'development'
+      ? ['192.168.56.1', 'localhost:3000', '192.168.1.6']
+      : [],
   poweredByHeader: false,
   experimental: {
     optimizePackageImports: ['lucide-react', '@tabler/icons-react', 'date-fns'],

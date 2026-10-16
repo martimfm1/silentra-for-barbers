@@ -22,7 +22,7 @@ const WHOP_PIXEL_SCRIPT = `!function(w,d,s,u,n,a,b){if(w[n])return;a=w[n]={q:[],
 // Read the tracking capability and scrub the fragment before analytics/pixels
 // execute. The fragment is not sent to the server, and after this bootstrap the
 // canonical page URL contains no bearer token for GTM/Whop page-view events.
-const TRACKING_TOKEN_BOOTSTRAP_SCRIPT = `(()=>{try{if(window.location.pathname!=="/marketplace/track")return;const params=new URLSearchParams(window.location.hash.slice(1));const token=params.get("token");if(token){let pendingToken=token;window.__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__=()=>{const value=pendingToken;pendingToken=null;return value}}window.history.replaceState(null,"",window.location.pathname+window.location.search)}catch{window.history.replaceState(null,"",window.location.pathname+window.location.search)}})();`;
+const TRACKING_TOKEN_BOOTSTRAP_SCRIPT = `(()=>{try{if(window.location.pathname==="/marketplace/track"){const params=new URLSearchParams(window.location.hash.slice(1));const token=params.get("token");if(token){let pendingToken=token;window.__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__=()=>{const value=pendingToken;pendingToken=null;return value}}window.history.replaceState(null,"",window.location.pathname+window.location.search);return}const url=new URL(window.location.href);const reviewToken=url.searchParams.get("review_token");if(reviewToken&&/^[A-Za-z0-9_-]{43}$/.test(reviewToken)){window.__SILENTRA_REVIEW_TOKEN__=reviewToken;url.searchParams.delete("review_token");window.history.replaceState(null,"",url.pathname+url.search+url.hash)}}catch{}})();`;
 
 const jetbrainsMonoHeading = JetBrains_Mono({
   subsets: ['latin'],

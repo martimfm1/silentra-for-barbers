@@ -1,13 +1,16 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 async function POST__unobserved(request: Request) {
   try {
-    const body: unknown = await request.json();
-    if (typeof body !== 'object' || body === null) {
-      return NextResponse.json({ error: 'Pedido inválido.' }, { status: 400 });
-    }
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['email', 'password'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
     const email =
       'email' in body && typeof body.email === 'string'

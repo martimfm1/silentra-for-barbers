@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -37,13 +38,24 @@ async function POST__unobserved(request: Request) {
       'multi_location',
       'team',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['name', 'slug', 'phone', 'address'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     const slug =
-      typeof body?.slug === 'string' ? body.slug.trim().toLowerCase() : '';
+      typeof body.slug === 'string' ? body.slug.trim().toLowerCase() : '';
+    if (
+      (body.phone !== undefined &&
+        body.phone !== null &&
+        (typeof body.phone !== 'string' || body.phone.length > 40)) ||
+      (body.address !== undefined &&
+        body.address !== null &&
+        (typeof body.address !== 'string' || body.address.length > 500))
+    )
+      return NextResponse.json({ error: 'Invalid location fields' }, { status: 400 });
     if (name.length < 1 || name.length > 120 || !/^[a-z0-9-]+$/.test(slug))
       return NextResponse.json({ error: 'Invalid location' }, { status: 400 });
     const { count, error: countError } = await admin

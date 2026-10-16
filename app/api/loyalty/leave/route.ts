@@ -4,12 +4,18 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { clearLoyaltyCookie, getLoyaltySession } from '@/lib/loyalty/session';
 import { requireTenantAuthorization } from '@/lib/security/tenant-guard';
 import { getLoyaltyTenantBySlug } from '@/lib/loyalty/public-tenant';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 export const runtime = 'nodejs';
 
 async function POST__unobserved(request: Request) {
   try {
-    const body = (await request.json().catch(() => ({}))) as { slug?: unknown };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 2 * 1024,
+      allowedKeys: ['slug'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const slug =
       typeof body.slug === 'string' ? body.slug.trim().toLowerCase() : '';
     if (!slug)

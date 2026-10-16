@@ -61,6 +61,10 @@ Depois do deploy:
 8. Verificar logs.
 9. Executar smoke QA quando aplicável.
 
+## Operações e recuperação
+
+Segue o [runbook de operações de produção](./PRODUCTION_OPERATIONS.md) para backups/restore, monitorização, resposta a incidentes, providers e rollback.
+
 ## Rollback
 
 Um rollback de aplicação não desfaz automaticamente uma migration de database. Em caso de regressão, reverte para a última versão estável, verifica o estado de DB/providers e corrige a causa antes de nova promoção.

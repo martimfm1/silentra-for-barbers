@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -43,13 +44,15 @@ async function POST__unobserved(request: Request) {
       'automated_followups',
       'marketing',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 16 * 1024,
+      allowedKeys: ['name', 'triggerType', 'conditions', 'actions', 'active'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     const triggerType =
-      typeof body?.triggerType === 'string' ? body.triggerType : '';
+      typeof body.triggerType === 'string' ? body.triggerType : '';
     if (
       name.length < 1 ||
       name.length > 120 ||
@@ -60,15 +63,44 @@ async function POST__unobserved(request: Request) {
         { status: 400 },
       );
     }
+
+    if (body.active !== undefined && typeof body.active !== 'boolean') {
+      return NextResponse.json(
+        { error: 'Invalid automation rule' },
+        { status: 400 },
+      );
+    }
     const conditions =
-      body?.conditions &&
-      typeof body.conditions === 'object' &&
-      !Array.isArray(body.conditions)
-        ? body.conditions
-        : {};
-    const actions = Array.isArray(body?.actions)
-      ? body.actions.slice(0, 10)
-      : [];
+      body.conditions === undefined
+        ? {}
+        : body.conditions &&
+            typeof body.conditions === 'object' &&
+            !Array.isArray(body.conditions)
+          ? body.conditions
+          : null;
+    if (!conditions) {
+      return NextResponse.json(
+        { error: 'Invalid automation conditions' },
+        { status: 400 },
+      );
+    }
+    const actions = body.actions === undefined ? [] : body.actions;
+    if (
+      !Array.isArray(actions) ||
+      actions.length > 10 ||
+      actions.some(
+        (action) =>
+          !action ||
+          typeof action !== 'object' ||
+          Array.isArray(action),
+      )
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid automation actions' },
+        { status: 400 },
+      );
+    }
+
     const { data, error } = await admin
       .from('automation_rules')
       .insert({
@@ -78,7 +110,7 @@ async function POST__unobserved(request: Request) {
         trigger_type: triggerType,
         conditions,
         actions,
-        active: body?.active !== false,
+        active: body.active !== false,
       })
       .select('*')
       .single();

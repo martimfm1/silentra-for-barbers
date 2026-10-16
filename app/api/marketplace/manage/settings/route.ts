@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -38,10 +39,12 @@ async function GET__unobserved() {
 async function PATCH__unobserved(request: Request) {
   try {
     const { admin, barbershopId } = await requireModuleContext('pos', 'pos');
-    const body = (await request.json().catch(() => null)) as {
-      marketplaceSalesMode?: unknown;
-    } | null;
-    const mode = body?.marketplaceSalesMode;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 2 * 1024,
+      allowedKeys: ['marketplaceSalesMode'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const mode = bodyResult.value.marketplaceSalesMode;
     if (
       typeof mode !== 'string' ||
       !MODES.includes(mode as MarketplaceSalesMode)

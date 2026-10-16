@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { isRecord, UUID_PATTERN } from '@/lib/validation';
+import { UUID_PATTERN } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
 const APPOINTMENT_WRITE_ROLES = [
@@ -30,9 +31,21 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const body: unknown = await request.json();
-    if (!isRecord(body))
-      return NextResponse.json({ error: 'Pedido inválido.' }, { status: 400 });
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 16 * 1024,
+      allowedKeys: [
+        'shopId',
+        'serviceId',
+        'date',
+        'date_hour',
+        'clientName',
+        'clientPhone',
+        'clientEmail',
+        'professionalId',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
     const shopId = typeof body.shopId === 'string' ? body.shopId : '';
     const serviceId = typeof body.serviceId === 'string' ? body.serviceId : '';

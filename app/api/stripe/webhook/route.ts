@@ -12,7 +12,23 @@ export const dynamic = 'force-dynamic';
 
 async function markWebhookFailed(eventId: string, error: unknown) {
   const database = createAdminClient();
-  const message = error instanceof Error ? error.message : 'UNKNOWN';
+  // Persist only a bounded error identifier; provider exception messages can
+  // contain customer details or request data and must not enter the ledger.
+  const candidate: { name?: unknown; code?: unknown } =
+    error && typeof error === 'object'
+      ? (error as { name?: unknown; code?: unknown })
+      : {};
+  const safeName =
+    typeof candidate.name === 'string' &&
+    /^[A-Za-z0-9_.:-]{1,60}$/.test(candidate.name)
+      ? candidate.name
+      : 'UNKNOWN';
+  const safeCode =
+    typeof candidate.code === 'string' &&
+    /^[A-Za-z0-9_.:-]{1,60}$/.test(candidate.code)
+      ? candidate.code
+      : null;
+  const message = safeCode ? `${safeName}:${safeCode}` : safeName;
   const { error: markError } = await database.rpc('fail_stripe_webhook_event', {
     p_event_id: eventId,
     p_error: message,

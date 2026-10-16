@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getLoyaltySession,
@@ -40,10 +41,12 @@ async function POST__unobserved(request: Request) {
   let tenantId: string | null = null;
   let rewardIdForLog: string | null = null;
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      slug?: unknown;
-      rewardId?: unknown;
-    };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['slug', 'rewardId'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const slug =
       typeof body.slug === 'string' ? body.slug.trim().toLowerCase() : '';
     const rewardId = typeof body.rewardId === 'string' ? body.rewardId : '';

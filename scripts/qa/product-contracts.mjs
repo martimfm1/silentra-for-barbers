@@ -328,6 +328,8 @@ const checks = [
       const whopPixel = source.indexOf('id="whop-pixel"');
       return (
         source.includes('TRACKING_TOKEN_BOOTSTRAP_SCRIPT') &&
+        source.includes('__SILENTRA_REVIEW_TOKEN__') &&
+        source.includes('review_token') &&
         source.includes('__SILENTRA_CONSUME_MARKETPLACE_TRACKING_TOKEN__') &&
         source.includes('window.history.replaceState') &&
         bootstrap >= 0 &&
@@ -419,6 +421,79 @@ const checks = [
       source.includes('overscroll-contain') &&
       source.includes('safe-area-inset-bottom') &&
       source.includes('h-[min(90dvh,48rem)]'),
+  },
+  {
+    name: 'Stripe webhook ledger stores sanitized failure identifiers only',
+    file: 'app/api/stripe/webhook/route.ts',
+    test: (source) => {
+      const start = source.indexOf('async function markWebhookFailed');
+      const end = source.indexOf('async function hydrateBillingMappingFromMetadata');
+      const block = source.slice(start, end);
+      return (
+        start >= 0 &&
+        end > start &&
+        block.includes('safeName') &&
+        block.includes('safeCode') &&
+        block.includes('candidate.code') &&
+        !block.includes('error.message')
+      );
+    },
+  },
+  {
+    name: 'Public review API never inserts directly into the reviews table',
+    file: 'app/api/public/reviews/route.ts',
+    test: (source) =>
+      source.includes("rpc(\n      'submit_public_review_with_token'") &&
+      source.includes("createHash('sha256')") &&
+      !source.includes("from('reviews')"),
+  },
+  {
+    name: 'Public reviews require a single-use token tied to a completed appointment',
+    file: 'supabase/migrations/20261016120000_verified_review_submission_tokens.sql',
+    test: (source) =>
+      source.includes('review_submission_tokens') &&
+      source.includes('a.status = \'completed\'::public.appointment_status') &&
+      source.includes('t.consumed_at is null') &&
+      source.includes('t.expires_at > now()') &&
+      source.includes('length(p_token_hash) <> 64') &&
+      source.includes("translate(p_token_hash, '0123456789abcdef', '') <> ''") &&
+      source.includes('set consumed_at = now()') &&
+      source.includes('submit_public_review_with_token') &&
+      source.includes('revoke all on function public.submit_public_review(uuid, text, integer, text)'),
+  },
+  {
+    name: 'Completed booking issues a hashed, expiring review capability',
+    file: 'app/api/appointments/[appointmentId]/complete/route.ts',
+    test: (source) =>
+      source.includes('randomBytes(32).toString(\'base64url\')') &&
+      source.includes("createHash('sha256')") &&
+      source.includes("from('review_submission_tokens')") &&
+      source.includes("searchParams.set('review_token', reviewToken)") &&
+      source.includes('expires_at'),
+  },
+  {
+    name: 'Public review UI is only available from a review email capability',
+    file: 'app/barbershops/[slug]/public-barbershop-page-final.tsx',
+    test: (source) =>
+      source.includes("searchParams.get('review_token')") &&
+      source.includes("searchParams.delete('review_token')") &&
+      source.includes('reviewToken ? (') &&
+      source.includes('review_token: reviewToken'),
+  },
+  {
+    name: 'Public review inserts are restricted to the validated RPC',
+    file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
+    test: (source) =>
+      source.includes('drop policy if exists "reviews_public_insert" on public.reviews') &&
+      source.includes('revoke insert, update, delete on public.reviews from anon, authenticated') &&
+      source.includes('submit_public_review'),
+  },
+  {
+    name: 'Development origins are not enabled in production',
+    file: 'next.config.ts',
+    test: (source) =>
+      source.includes("process.env.NODE_ENV === 'development'") &&
+      source.includes("      : [],"),
   },
 ];
 

@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -36,11 +37,13 @@ async function POST__unobserved(request: Request) {
       'advanced_crm',
       'clients',
     );
-    const body = (await request.json().catch(() => null)) as {
-      name?: unknown;
-      color?: unknown;
-    } | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['name', 'color'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     if (name.length < 1 || name.length > 80) {
       return NextResponse.json({ error: 'Invalid tag name' }, { status: 400 });
     }

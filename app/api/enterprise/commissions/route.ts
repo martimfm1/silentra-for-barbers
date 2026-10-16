@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -37,48 +38,128 @@ async function POST__unobserved(request: Request) {
       'commissions',
       'commissions',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: [
+        'professionalId',
+        'grossAmount',
+        'commissionPercentage',
+        'appointmentId',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const professionalId =
-      typeof body?.professionalId === 'string' ? body.professionalId : '';
-    const grossAmount =
-      typeof body?.grossAmount === 'number' ? body.grossAmount : NaN;
-    const percentage =
-      typeof body?.commissionPercentage === 'number'
-        ? body.commissionPercentage
-        : NaN;
+      typeof body.professionalId === 'string' ? body.professionalId.trim() : '';
+    let grossAmount =
+      typeof body.grossAmount === 'number' ? body.grossAmount : NaN;
+    let percentage = NaN;
+    const appointmentId =
+      body.appointmentId === undefined || body.appointmentId === null
+        ? null
+        : typeof body.appointmentId === 'string' &&
+            body.appointmentId.length <= 80
+          ? body.appointmentId
+          : '';
     if (
       !professionalId ||
-      !Number.isFinite(grossAmount) ||
-      grossAmount < 0 ||
-      !Number.isFinite(percentage) ||
-      percentage < 0 ||
-      percentage > 100
+      professionalId.length > 80 ||
+      appointmentId === '' ||
+      (appointmentId === null &&
+        (!Number.isFinite(grossAmount) ||
+          grossAmount < 0 ||
+          grossAmount > 1_000_000_000))
     )
       return NextResponse.json(
         { error: 'Invalid commission' },
         { status: 400 },
       );
-    const { data: professional } = await admin
+    const { data: professional, error: professionalError } = await admin
       .from('professionals')
-      .select('id')
+      .select('id, commission_percentage')
       .eq('id', professionalId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
+    if (professionalError) throw professionalError;
     if (!professional)
       return NextResponse.json(
         { error: 'Professional not found' },
         { status: 404 },
       );
+    percentage = Number(professional.commission_percentage ?? 50);
+    if (appointmentId) {
+      const { data: appointment, error: appointmentError } = await admin
+        .from('appointments')
+        .select('id, service_id, value_products, status')
+        .eq('id', appointmentId)
+        .eq('barbershop_id', barbershopId)
+        .eq('professional_id', professionalId)
+        .maybeSingle();
+      if (appointmentError) throw appointmentError;
+      if (!appointment)
+        return NextResponse.json(
+          { error: 'Appointment not found for this professional and shop' },
+          { status: 404 },
+        );
+      if (appointment.status !== 'completed')
+        return NextResponse.json(
+          { error: 'Only completed appointments can generate commissions' },
+          { status: 409 },
+        );
+      const { data: existingCommission, error: existingCommissionError } =
+        await admin
+          .from('commissions')
+          .select('id')
+          .eq('barbershop_id', barbershopId)
+          .eq('appointment_id', appointmentId)
+          .maybeSingle();
+      if (existingCommissionError) throw existingCommissionError;
+      if (existingCommission)
+        return NextResponse.json(
+          { error: 'A commission already exists for this appointment' },
+          { status: 409 },
+        );
+      if (!appointment.service_id)
+        return NextResponse.json(
+          { error: 'Appointment has no service to calculate commission' },
+          { status: 400 },
+        );
+      const { data: service, error: serviceError } = await admin
+        .from('services')
+        .select('price')
+        .eq('id', appointment.service_id)
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle();
+      if (serviceError) throw serviceError;
+      if (!service)
+        return NextResponse.json(
+          { error: 'Appointment service not found for this shop' },
+          { status: 404 },
+        );
+      // When tied to an appointment, authoritative service/product totals and
+      // the professional's stored commission rate override all client values.
+      grossAmount =
+        Number(service.price) + Number(appointment.value_products ?? 0);
+    }
+    if (
+      !Number.isFinite(grossAmount) ||
+      grossAmount < 0 ||
+      grossAmount > 1_000_000_000 ||
+      !Number.isFinite(percentage) ||
+      percentage < 0 ||
+      percentage > 100
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid commission values' },
+        { status: 400 },
+      );
+    }
     const { data, error } = await admin
       .from('commissions')
       .insert({
         barbershop_id: barbershopId,
         professional_id: professionalId,
-        appointment_id:
-          typeof body?.appointmentId === 'string' ? body.appointmentId : null,
+        appointment_id: appointmentId,
         gross_amount: grossAmount,
         commission_percentage: percentage,
       })

@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -36,31 +37,84 @@ async function POST__unobserved(request: Request) {
       'inventory',
       'inventory',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: [
+        'locationId',
+        'name',
+        'sku',
+        'unitPrice',
+        'stockQuantity',
+        'lowStockThreshold',
+      ],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     if (name.length < 1 || name.length > 160)
       return NextResponse.json(
         { error: 'Invalid product name' },
         { status: 400 },
       );
+    if (
+      (body.locationId !== undefined &&
+        body.locationId !== null &&
+        (typeof body.locationId !== 'string' || body.locationId.length > 80)) ||
+      (body.sku !== undefined &&
+        body.sku !== null &&
+        (typeof body.sku !== 'string' || body.sku.length > 80))
+    )
+      return NextResponse.json(
+        { error: 'Invalid inventory product fields' },
+        { status: 400 },
+      );
     const numeric = (value: unknown, fallback = 0) =>
-      typeof value === 'number' && Number.isFinite(value) && value >= 0
-        ? value
-        : fallback;
+      value === undefined
+        ? fallback
+        : typeof value === 'number' &&
+            Number.isFinite(value) &&
+            value >= 0 &&
+            value <= 1_000_000_000
+          ? value
+          : NaN;
+    const unitPrice = numeric(body.unitPrice);
+    const stockQuantity = numeric(body.stockQuantity);
+    const lowStockThreshold = numeric(body.lowStockThreshold);
+    if (
+      !Number.isFinite(unitPrice) ||
+      !Number.isFinite(stockQuantity) ||
+      !Number.isFinite(lowStockThreshold)
+    )
+      return NextResponse.json(
+        { error: 'Invalid inventory quantities or price' },
+        { status: 400 },
+      );
+    const locationId =
+      typeof body.locationId === 'string' ? body.locationId : null;
+    if (locationId) {
+      const { data: location, error: locationError } = await admin
+        .from('locations')
+        .select('id')
+        .eq('id', locationId)
+        .eq('parent_barbershop_id', barbershopId)
+        .maybeSingle();
+      if (locationError) throw locationError;
+      if (!location)
+        return NextResponse.json(
+          { error: 'Location not found' },
+          { status: 404 },
+        );
+    }
     const { data, error } = await admin
       .from('inventory_products')
       .insert({
         barbershop_id: barbershopId,
-        location_id:
-          typeof body?.locationId === 'string' ? body.locationId : null,
+        location_id: locationId,
         name,
-        sku: typeof body?.sku === 'string' ? body.sku.slice(0, 80) : null,
-        unit_price: numeric(body?.unitPrice),
-        stock_quantity: numeric(body?.stockQuantity),
-        low_stock_threshold: numeric(body?.lowStockThreshold),
+        sku: typeof body.sku === 'string' ? body.sku.trim() || null : null,
+        unit_price: unitPrice,
+        stock_quantity: stockQuantity,
+        low_stock_threshold: lowStockThreshold,
       })
       .select('*')
       .single();

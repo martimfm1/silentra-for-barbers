@@ -2,14 +2,16 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 async function POST__unobserved(request: Request) {
   try {
-    const body: unknown = await request.json();
-    const password =
-      typeof body === 'object' && body !== null && 'password' in body
-        ? (body as { password?: unknown }).password
-        : undefined;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['password'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const password = bodyResult.value.password;
 
     if (
       typeof password !== 'string' ||

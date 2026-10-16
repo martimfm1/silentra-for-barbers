@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
@@ -31,15 +32,17 @@ async function POST__unobserved(
     const supabase = await createClient();
     const { data: auth } = await supabase.auth.getUser();
     const { orderId } = await params;
-    const body = (await request.json().catch(() => null)) as {
-      subject?: unknown;
-      message?: unknown;
-    } | null;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['subject', 'message'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
     const subject =
-      typeof body?.subject === 'string' ? body.subject.trim() : '';
+      typeof body.subject === 'string' ? body.subject.trim() : '';
     const message =
-      typeof body?.message === 'string' ? body.message.trim() : '';
+      typeof body.message === 'string' ? body.message.trim() : '';
 
     if (
       subject.length < 3 ||

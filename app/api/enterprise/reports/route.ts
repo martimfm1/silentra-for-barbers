@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   moduleErrorResponse,
   requireModuleContext,
@@ -45,11 +46,13 @@ async function POST__unobserved(request: Request) {
       'advanced_reports',
       'analytics',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 16 * 1024,
+      allowedKeys: ['name', 'reportType', 'filters'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     const reportType =
       typeof body?.reportType === 'string' ? body.reportType : '';
     if (
