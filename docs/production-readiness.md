@@ -44,6 +44,8 @@
 - [x] Regras de automação, definições do código QR e saída do programa Loyalty: allowlists específicas, limites de corpo e validação server-side de campos/contexto.
 - [x] Definições do programa Loyalty: allowlist estrita, rejeição de tipos inesperados e limites numéricos server-side.
 - [x] Inventário Enterprise, localizações e comissões: allowlists específicas, limites de corpo, valores numéricos limitados e validação de localização/profissional contra o tenant autenticado.
+- [x] Comissões ligadas a marcações: só são criadas após conclusão, rejeitam duplicados existentes e derivam montante/percentagem de registos do servidor; concorrência entre pedidos ainda requer garantia transacional/índice único.
+- [x] Webhooks Brevo: Content-Type JSON obrigatório, limite de 64 KiB durante leitura, máximo de 100 eventos por lote, rejeição de payloads inválidos e logs sem mensagem de erro arbitrária.
 - [x] Pedidos/verificação de códigos do portal de clientes e OTP da fidelização, e resgate Loyalty: allowlists estritas, limites de corpo e rate limiting/verificação de sessão ou tenant server-side.
 - [ ] Aplicar o parser comum ou validação equivalente a todos os endpoints mutáveis; inventário completo e testes negativos por rota ainda pendentes.
 - [ ] Revalidar permissões e propriedade dos recursos dentro da mesma transação/RPC para todas as operações sensíveis; validação client-side nunca conta como controlo de segurança.
