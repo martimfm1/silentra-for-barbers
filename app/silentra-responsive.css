@@ -48,34 +48,49 @@ canvas {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  [data-slot='drawer-content']:has([data-terms-scroll-area]) {
+    height: min(90dvh, 48rem);
+    max-height: 90dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  [data-terms-scroll-area] {
+    min-height: 0;
+    flex: 1 1 auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* The fixed mobile dashboard navigation must never hide the final actions/content. */
   body:has(nav[aria-label='Navegação rápida']) {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 
-  /* Keep scrollable content clear of the fixed mobile navigation. */
   main,
   [role='main'] {
     scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 }
 
-/* Dashboard mobile is a vertical-only surface: prevent viewport-level horizontal panning. */
+/* Dashboard is a vertical-only surface: prevent viewport-level horizontal panning. */
 body:has(.silentra-dashboard-shell),
 .silentra-dashboard-shell {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
 
-.silentra-dashboard-shell * {
+.silentra-dashboard-shell *,
+.silentra-dashboard-main,
+.dashboard-page,
+.dashboard-content {
   min-width: 0;
+  max-width: 100%;
 }
 
-/* The public booking drawer should be a focused sheet, not a full-screen takeover. */
+/* Keep the public booking drawer a focused sheet, not a full-screen takeover. */
 [data-slot='drawer-content'].max-w-lg.rounded-none {
   box-shadow: 0 -18px 60px rgb(0 0 0 / 0.42);
 }
