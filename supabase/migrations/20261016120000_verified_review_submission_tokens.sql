@@ -42,7 +42,7 @@ declare
   v_name text := left(trim(coalesce(p_client_name, '')), 120);
   v_comment text := nullif(left(trim(coalesce(p_comment, '')), 2000), '');
 begin
-  if p_shop_id is null or p_token_hash is null or p_token_hash !~ '^[0-9a-f]{64}
+  if p_shop_id is null or p_token_hash is null or length(p_token_hash) <> 64 or p_token_hash !~ '^[0-9a-f]+' then
     raise exception using errcode = '22023', message = 'REVIEW_TOKEN_REQUIRED';
   end if;
 
