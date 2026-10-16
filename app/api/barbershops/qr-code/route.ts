@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 const QR_MANAGE_ROLES = ['owner', 'admin'] as const;
 const DEFAULT_QR_TEXT =
@@ -48,11 +49,15 @@ async function PATCH__unobserved(request: Request) {
       { error: tenant.status === 401 ? 'Nao autenticado.' : 'Sem permissao.' },
       { status: tenant.status },
     );
-  const body: unknown = await request.json().catch(() => null);
-  const text =
-    typeof (body as { text?: unknown } | null)?.text === 'string'
-      ? (body as { text: string }).text.trim()
-      : '';
+  const bodyResult = await readJsonObject(request, {
+    maxBytes: 2 * 1024,
+    allowedKeys: ['text'],
+  });
+  if (!bodyResult.ok) return bodyResult.response;
+  const body = bodyResult.value;
+  if (body.text !== undefined && typeof body.text !== 'string')
+    return NextResponse.json({ error: 'Texto inválido.' }, { status: 400 });
+  const text = typeof body.text === 'string' ? body.text.trim() : '';
   if (text.length > 160)
     return NextResponse.json(
       { error: 'O texto pode ter no maximo 160 caracteres.' },
