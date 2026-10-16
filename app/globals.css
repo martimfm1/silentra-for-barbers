@@ -641,3 +641,72 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Mobile-first dashboard overflow contract: wrap content instead of creating an x-axis. */
+.dashboard-page,
+.dashboard-content,
+.silentra-dashboard-main,
+.silentra-dashboard-shell {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-page [data-slot='table-container'],
+.dashboard-page .silentra-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.dashboard-page table,
+.dashboard-page table thead,
+.dashboard-page table tbody {
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard-page table {
+  table-layout: fixed;
+}
+
+.dashboard-page th,
+.dashboard-page td {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+@media (max-width: 639px) {
+  .dashboard-page {
+    padding-inline: 0.75rem;
+  }
+
+  .dashboard-page table {
+    display: table;
+    overflow: visible;
+    font-size: 0.75rem;
+  }
+
+  .dashboard-page th,
+  .dashboard-page td {
+    padding-inline: 0.4rem;
+    white-space: normal;
+  }
+
+  .dashboard-page [data-slot='card-header'],
+  .dashboard-page [data-slot='card-content'],
+  .dashboard-page [data-slot='card-footer'] {
+    min-width: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .dashboard-page [data-slot='dialog-content'],
+  .dashboard-page [data-slot='sheet-content'] {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
