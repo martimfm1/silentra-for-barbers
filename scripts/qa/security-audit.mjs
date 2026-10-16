@@ -156,6 +156,36 @@ const requestValidationChecks = [
     ],
     label: 'Private order tracking request envelope and token validation',
   },
+  {
+    file: 'app/api/auth/login/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['email', 'password']", 'signInWithPassword'],
+    label: 'Login request validation',
+  },
+  {
+    file: 'app/api/auth/reset-password/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['password']", 'supabase.auth.getUser()', 'supabase.auth.updateUser({ password })'],
+    label: 'Password reset request validation and authenticated session',
+  },
+  {
+    file: 'app/api/crm/tags/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['name', 'color']", ".eq('barbershop_id', barbershopId)"],
+    label: 'CRM tag request validation and tenant binding',
+  },
+  {
+    file: 'app/api/enterprise/reports/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['name', 'reportType', 'filters']", ".eq('barbershop_id', barbershopId)", 'REPORT_TYPES.includes'],
+    label: 'Enterprise report request validation and tenant binding',
+  },
+  {
+    file: 'app/api/marketplace/orders/[orderId]/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['status']", "STATUSES.includes", "requireModuleContext('pos', 'pos')"],
+    label: 'Marketplace order status request validation and tenant binding',
+  },
+  {
+    file: 'app/api/public/reviews/route.ts',
+    markers: ['readJsonObject(request', "'barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'", 'submit_public_review_with_token', 'createHash'],
+    label: 'Public review request validation and one-time token RPC',
+  },
 ];
 
 for (const check of requestValidationChecks) {
