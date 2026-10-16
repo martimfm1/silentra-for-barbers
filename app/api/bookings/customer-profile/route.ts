@@ -1,19 +1,19 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
-import { isRecord, normalizeText, UUID_PATTERN } from '@/lib/validation';
+import { normalizeText, UUID_PATTERN } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function POST__unobserved(request: Request) {
   try {
-    const payload: unknown = await request.json().catch(() => null);
-    if (!isRecord(payload)) {
-      return NextResponse.json(
-        { success: false, error: 'Pedido inválido.' },
-        { status: 400 },
-      );
-    }
+    const payloadResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['shopId', 'email', 'phone'],
+    });
+    if (!payloadResult.ok) return payloadResult.response;
+    const payload = payloadResult.value;
 
     const shopId = typeof payload.shopId === 'string' ? payload.shopId : '';
     const email = normalizeText(payload.email, 254)?.toLowerCase() ?? '';
