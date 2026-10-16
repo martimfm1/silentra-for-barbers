@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { CustomCheckout } from '@/components/billing/custom-checkout';
@@ -55,12 +56,12 @@ export default async function CheckoutPage({
             A Stripe terminou o processo de checkout. O estado da subscrição
             será sincronizado automaticamente.
           </p>
-          <a
+          <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Ir para faturação
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -80,12 +81,12 @@ export default async function CheckoutPage({
             Este checkout expirou ou não pertence à tua conta. Inicia um novo
             checkout a partir dos planos.
           </p>
-          <a
+          <Link
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Voltar aos planos
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -106,12 +107,12 @@ export default async function CheckoutPage({
             O checkout não corresponde à barbearia atualmente associada à tua
             conta.
           </p>
-          <a
+          <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
             Ir para faturação
-          </a>
+          </Link>
         </div>
       </main>
     );
