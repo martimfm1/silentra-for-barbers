@@ -239,6 +239,31 @@ const requestValidationChecks = [
     ],
     label: 'Loyalty reward create/update request validation and tenant binding',
   },
+  {
+    file: 'app/api/loyalty/redeem/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'rewardId']", 'getLoyaltyTenantBySlug', 'getLoyaltySession'],
+    label: 'Loyalty redemption request validation and session checks',
+  },
+  {
+    file: 'app/api/customer-portal/request-code/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['email']", 'consume_public_rate_limit', 'normalizePortalEmail'],
+    label: 'Customer portal verification request validation and rate limiting',
+  },
+  {
+    file: 'app/api/customer-portal/verify-code/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['email', 'code']", 'verify_booking_portal_code', 'normalizePortalEmail'],
+    label: 'Customer portal verification code request validation',
+  },
+  {
+    file: 'app/api/loyalty/request-code/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'email']", 'consumePublicRateLimit', 'getLoyaltyTenantBySlug'],
+    label: 'Loyalty OTP request validation and rate limiting',
+  },
+  {
+    file: 'app/api/loyalty/verify-code/route.ts',
+    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'email', 'code', 'name']", 'consumePublicRateLimit', 'getLoyaltyTenantBySlug'],
+    label: 'Loyalty OTP verification request validation and rate limiting',
+  },
 ];
 
 for (const check of requestValidationChecks) {
