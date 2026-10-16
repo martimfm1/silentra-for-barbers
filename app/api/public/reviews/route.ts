@@ -2,6 +2,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { UUID_PATTERN } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ async function POST__unobserved(request: Request) {
     const rating =
       typeof body.rating === 'number' ? body.rating : Number(body.rating);
 
-    if (!shopId || !clientName)
+    if (!shopId || !UUID_PATTERN.test(shopId) || !clientName)
       return jsonError('Dados da avaliação inválidos.', 400);
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return jsonError('A classificação deve estar entre 1 e 5.', 400);
