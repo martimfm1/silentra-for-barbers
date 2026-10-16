@@ -59,6 +59,7 @@ const routeSecurityChecks = [
     pattern: /\/public\/reviews\/route\.ts$/,
     markers: [
       'consumePublicRateLimit',
+      'UUID_PATTERN.test(shopId)',
       "'public-review-submit'",
       'REVIEW_RATE_LIMIT = 5',
       "rpc('submit_public_review'",
