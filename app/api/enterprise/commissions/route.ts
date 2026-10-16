@@ -74,12 +74,13 @@ async function POST__unobserved(request: Request) {
         { error: 'Invalid commission' },
         { status: 400 },
       );
-    const { data: professional } = await admin
+    const { data: professional, error: professionalError } = await admin
       .from('professionals')
       .select('id, commission_percentage')
       .eq('id', professionalId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
+    if (professionalError) throw professionalError;
     if (!professional)
       return NextResponse.json(
         { error: 'Professional not found' },
@@ -89,7 +90,7 @@ async function POST__unobserved(request: Request) {
     if (appointmentId) {
       const { data: appointment, error: appointmentError } = await admin
         .from('appointments')
-        .select('id, service_id, value_products')
+        .select('id, service_id, value_products, status')
         .eq('id', appointmentId)
         .eq('barbershop_id', barbershopId)
         .eq('professional_id', professionalId)
@@ -99,6 +100,24 @@ async function POST__unobserved(request: Request) {
         return NextResponse.json(
           { error: 'Appointment not found for this professional and shop' },
           { status: 404 },
+        );
+      if (appointment.status !== 'completed')
+        return NextResponse.json(
+          { error: 'Only completed appointments can generate commissions' },
+          { status: 409 },
+        );
+      const { data: existingCommission, error: existingCommissionError } =
+        await admin
+          .from('commissions')
+          .select('id')
+          .eq('barbershop_id', barbershopId)
+          .eq('appointment_id', appointmentId)
+          .maybeSingle();
+      if (existingCommissionError) throw existingCommissionError;
+      if (existingCommission)
+        return NextResponse.json(
+          { error: 'A commission already exists for this appointment' },
+          { status: 409 },
         );
       if (!appointment.service_id)
         return NextResponse.json(
