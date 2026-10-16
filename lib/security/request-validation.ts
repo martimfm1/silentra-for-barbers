@@ -85,7 +85,7 @@ export async function readJsonObject(
       if (done) break;
       totalBytes += value.byteLength;
       if (totalBytes > maxBytes) {
-        await reader.cancel();
+        await reader.cancel().catch(() => undefined);
         return {
           ok: false,
           response: jsonError(413, 'O pedido excede o tamanho permitido.'),
