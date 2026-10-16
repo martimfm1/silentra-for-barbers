@@ -35,7 +35,8 @@ export type EnterpriseFeatureKey =
   | 'inventory'
   | 'pos'
   | 'enterprise_reports'
-  | 'landing_page';
+  | 'landing_page'
+  | 'custom_website';
 
 export type LegacyFeatureKey = 'professionals' | 'analytics';
 export type FeatureKey =
@@ -87,6 +88,7 @@ const ENTERPRISE_FEATURES: readonly (
   'pos',
   'enterprise_reports',
   'landing_page',
+  'custom_website',
 ];
 
 export const PLAN_FEATURES: Record<
@@ -144,7 +146,7 @@ export const PLAN_DESCRIPTIONS: Record<BillingPlan, string> = {
   free: 'Para uma barbearia pequena começar a gerir tudo gratuitamente.',
   pro: 'Para equipas em crescimento que querem automatizar e fazer crescer o negócio.',
   enterprise:
-    'Para operações com várias localizações, gestão avançada e uma landing page profissional incluída.',
+    'Para operações com várias localizações, gestão avançada, landing page incluída e opção de site próprio personalizado por orçamento.',
 };
 
 export const PLAN_NAMES: Record<BillingPlan, string> = {
@@ -188,4 +190,5 @@ export const FEATURE_LABELS: Record<
   pos: 'Ponto de venda (POS)',
   enterprise_reports: 'Relatórios empresariais',
   landing_page: 'Landing page profissional incluída',
+  custom_website: 'Site próprio personalizado (por orçamento)',
 };
