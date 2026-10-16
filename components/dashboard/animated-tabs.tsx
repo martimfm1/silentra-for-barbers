@@ -84,10 +84,10 @@ function TabContent({
 }
 
 const containerClasses =
-  'no-visible-scrollbar flex w-full gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.025] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] backdrop-blur-xl';
+  'flex w-full min-w-0 flex-wrap gap-1 rounded-2xl border border-white/10 bg-white/[0.025] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] backdrop-blur-xl';
 
 const tabClasses =
-  'group relative min-h-11 shrink-0 overflow-hidden rounded-xl px-4 py-2 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 motion-reduce:transition-none';
+  'group relative min-h-11 min-w-0 flex-1 basis-[calc(50%-0.25rem)] overflow-hidden rounded-xl px-3 py-2 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 motion-reduce:transition-none sm:basis-auto sm:px-4';
 
 export function AnimatedTabs({
   tabs,
