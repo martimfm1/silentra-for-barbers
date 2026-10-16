@@ -337,6 +337,24 @@ const requestValidationChecks = [
   },
 
   {
+    file: 'lib/barbershops/public-profile.ts',
+    markers: [
+      "return plan === 'enterprise';",
+    ],
+    label: 'Custom public URL is restricted to Enterprise plans',
+  },
+  {
+    file: 'app/api/barbershops/public-profile/route.ts',
+    markers: [
+      'readJsonObject(request',
+      'maxBytes: 8 * 1024',
+      'allowedKeys: [',
+      "const canCustomizeSlug = plan === 'enterprise';",
+      'exclusivamente no plano Enterprise',
+    ],
+    label: 'Public URL changes require server-verified Enterprise entitlement',
+  },
+  {
     file: 'app/api/loyalty/route.ts',
     markers: [
       'readJsonObject(request',
