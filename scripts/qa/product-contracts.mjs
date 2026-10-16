@@ -313,6 +313,36 @@ const checks = [
     },
   },
   {
+    name: 'Public reviews require a single-use token tied to a completed appointment',
+    file: 'supabase/migrations/20261016120000_verified_review_submission_tokens.sql',
+    test: (source) =>
+      source.includes('review_submission_tokens') &&
+      source.includes('a.status = \'completed\'::public.appointment_status') &&
+      source.includes('t.consumed_at is null') &&
+      source.includes('t.expires_at > now()') &&
+      source.includes('set consumed_at = now()') &&
+      source.includes('submit_public_review_with_token'),
+  },
+  {
+    name: 'Completed booking issues a hashed, expiring review capability',
+    file: 'app/api/appointments/[appointmentId]/complete/route.ts',
+    test: (source) =>
+      source.includes('randomBytes(32).toString(\'base64url\')') &&
+      source.includes("createHash('sha256')") &&
+      source.includes("from('review_submission_tokens')") &&
+      source.includes("searchParams.set('review_token', reviewToken)") &&
+      source.includes('expires_at'),
+  },
+  {
+    name: 'Public review UI is only available from a review email capability',
+    file: 'app/barbershops/[slug]/public-barbershop-page-final.tsx',
+    test: (source) =>
+      source.includes("searchParams.get('review_token')") &&
+      source.includes("searchParams.delete('review_token')") &&
+      source.includes('reviewToken ? (') &&
+      source.includes('review_token: reviewToken'),
+  },
+  {
     name: 'Public review inserts are restricted to the validated RPC',
     file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
     test: (source) =>
