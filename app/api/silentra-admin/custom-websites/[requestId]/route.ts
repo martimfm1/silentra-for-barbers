@@ -9,7 +9,10 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const RESERVED_SLUGS = new Set([
   'api', 'admin', 'login', 'registo', 'logout', 'plans', 'checkout',
   'dashboard', 'barbershops', 'marketplace', 'silentra-admin', 'legal',
-  'privacy', 'terms', 'favicon.ico', 'robots.txt', 'sitemap.xml',
+  'privacy', 'terms', 'contact', 'contacto', 'about', 'sobre', 'pricing',
+  'faq', 'auth', 'callback', 'reset-password', 'forgot-password',
+  'unsubscribe', 'invite', 'join', 'billing', 'loyalty', 'robots.txt',
+  'sitemap.xml', 'favicon.ico', 'manifest.webmanifest',
 ]);
 const STATUSES = new Set(['requested', 'contacted', 'in_progress', 'review', 'published', 'rejected']);
 
