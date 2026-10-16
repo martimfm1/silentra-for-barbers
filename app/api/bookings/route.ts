@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -117,12 +118,22 @@ async function enforcePublicBookingRateLimit(
 
 async function POST__unobserved(request: Request) {
   try {
-    const payload: unknown = await request.json();
-    if (!isRecord(payload))
-      return NextResponse.json(
-        { success: false, error: 'Pedido inválido.' },
-        { status: 400 },
-      );
+    const payloadResult = await readJsonObject(request, {
+      maxBytes: 16 * 1024,
+      allowedKeys: [
+        'shopId',
+        'service',
+        'date',
+        'slot',
+        'professionalId',
+        'customerName',
+        'customerPhone',
+        'customerEmail',
+        'customerBirthDate',
+      ],
+    });
+    if (!payloadResult.ok) return payloadResult.response;
+    const payload = payloadResult.value;
     const {
       shopId,
       service,
