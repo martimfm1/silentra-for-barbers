@@ -8,7 +8,6 @@ import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import {
-  isRecord,
   isSafePublicBookingDate,
   isValidTime,
   normalizeText,
