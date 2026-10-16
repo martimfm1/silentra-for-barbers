@@ -83,6 +83,58 @@ for (const file of sourceFiles) {
   }
 }
 
+const requestValidationChecks = [
+  {
+    file: 'lib/security/request-validation.ts',
+    markers: [
+      "contentType !== 'application/json'",
+      'DEFAULT_MAX_BODY_BYTES',
+      'body_too_large',
+      'JSON.parse(raw)',
+      'Array.isArray(parsed)',
+      'unexpected_fields',
+      'options.allowedKeys',
+    ],
+    label: 'Strict server-side JSON envelope validation',
+  },
+  {
+    file: 'app/api/bookings/route.ts',
+    markers: [
+      'readJsonObject(request',
+      'maxBytes: 16 * 1024',
+      "'shopId'",
+      "'professionalId'",
+      'payloadResult.value',
+      "create_booking_atomic",
+      ".eq('barbershop_id', barbershopId)",
+    ],
+    label: 'Booking request validation and server-side source-of-truth checks',
+  },
+  {
+    file: 'app/api/billing/subscribe/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['plan', 'interval']",
+      "body.interval !== 'month' && body.interval !== 'year'",
+      'StripePriceService.resolveVerifiedPrice(plan, interval)',
+      'BillingService.assertBillingOwner(user.id)',
+      "from('subscriptions')",
+    ],
+    label: 'Subscription request validation and server-side plan/price checks',
+  },
+];
+
+for (const check of requestValidationChecks) {
+  const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
+    encoding: 'utf8',
+  });
+  for (const marker of check.markers) {
+    if (!source.includes(marker)) {
+      findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
+    }
+  }
+}
+
 const routeSecurityChecks = [
   {
     file: 'app/api/stripe/subscription/route.ts',
