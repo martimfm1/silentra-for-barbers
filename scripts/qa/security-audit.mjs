@@ -345,6 +345,18 @@ for (const check of requestValidationChecks) {
     label: 'Enterprise commission request validation and tenant binding',
   },
 
+  {
+    file: 'app/api/loyalty/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "'points_per_euro',",
+      "'referralPoints',",
+      "typeof body.enabled !== 'boolean'",
+      ".eq('barbershop_id', barbershopId)",
+    ],
+    label: 'Loyalty settings request validation and tenant binding',
+  },
+
 const routeSecurityChecks = [
   {
     file: 'app/api/stripe/subscription/route.ts',
