@@ -109,10 +109,12 @@ async function PATCH__unobserved(request: Request) {
       'loyalty',
       'loyalty',
     );
-    const body = (await request.json().catch(() => ({}))) as Record<
-      string,
-      unknown
-    >;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['id', 'name', 'points', 'active', 'serviceId'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const id = uuid(body.id);
     if (!id)
       return NextResponse.json({ error: 'Regra inválida.' }, { status: 400 });
