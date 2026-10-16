@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requireModuleContext } from '@/services/modules/authorization';
 
 type RewardType = 'discount' | 'free_service' | 'custom';
@@ -24,11 +25,13 @@ async function POST__unobserved(request: Request) {
       'loyalty',
       'loyalty',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
     const description =
       typeof body?.description === 'string'
         ? body.description.trim().slice(0, 1000)
@@ -114,11 +117,13 @@ async function PATCH__unobserved(request: Request) {
       'loyalty',
       'loyalty',
     );
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
-    const id = parseId(body?.id);
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['id', 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+    const id = parseId(body.id);
     if (!id)
       return NextResponse.json({ error: 'Invalid reward id' }, { status: 400 });
     const patch: Record<string, unknown> = {
