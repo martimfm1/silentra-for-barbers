@@ -13,8 +13,10 @@ const RESERVED_SLUGS = new Set([
   'dashboard', 'barbershops', 'marketplace', 'silentra-admin', 'legal',
   'privacy', 'terms', 'contact', 'contacto', 'about', 'sobre', 'pricing',
   'faq', 'auth', 'callback', 'reset-password', 'forgot-password',
-  'unsubscribe', 'invite', 'join', 'billing', 'loyalty', 'robots.txt',
-  'sitemap.xml', 'favicon.ico', 'manifest.webmanifest',
+  'unsubscribe', 'invite', 'join', 'billing', 'loyalty', 'documentation',
+  'docs', 'status', 'support', 'register', 'signup', 'signin', 'sign-in',
+  'sign-up', 'success', 'error', 'cancel', 'stripe', 'embed', 'health',
+  'api-docs', 'robots.txt', 'sitemap.xml', 'favicon.ico', 'manifest.webmanifest',
 ]);
 
 function fail(message: string, status: number) {
