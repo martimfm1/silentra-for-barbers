@@ -38,7 +38,11 @@ export async function readJsonObject(
     maxBytes?: number;
   } = {},
 ): Promise<JsonObjectReadResult> {
-  const contentType = request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase();
+  const contentType = request.headers
+    .get('content-type')
+    ?.split(';', 1)[0]
+    ?.trim()
+    .toLowerCase();
   if (contentType !== 'application/json') {
     return {
       ok: false,
@@ -51,7 +55,11 @@ export async function readJsonObject(
   const contentLength = request.headers.get('content-length');
   if (contentLength !== null) {
     const parsedLength = Number(contentLength);
-    if (!Number.isSafeInteger(parsedLength) || parsedLength < 0 || parsedLength > maxBytes) {
+    if (
+      !Number.isSafeInteger(parsedLength) ||
+      parsedLength < 0 ||
+      parsedLength > maxBytes
+    ) {
       return {
         ok: false,
         response: jsonError(413, 'O pedido excede o tamanho permitido.'),
@@ -115,11 +123,12 @@ export async function readJsonObject(
 
 export function isBoundedString(
   value: unknown,
-  options: { min?: number; max: number; trim?: boolean } ,
+  options: { min?: number; max: number; trim?: boolean },
 ): value is string {
   if (typeof value !== 'string') return false;
+  if (value.length > options.max) return false;
   const candidate = options.trim === false ? value : value.trim();
-  return candidate.length >= (options.min ?? 1) && candidate.length <= options.max;
+  return candidate.length >= (options.min ?? 1);
 }
 
 export function isSafeIntegerInRange(
