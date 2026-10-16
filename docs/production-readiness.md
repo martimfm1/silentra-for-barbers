@@ -36,6 +36,9 @@
 - [x] Subscrições: allowlist estrita, intervalo rejeitado se inválido, proprietário verificado, subscrição atual reconsultada e preço resolvido no servidor.
 - [x] Registo de conta: allowlist estrita e validação server-side de email, palavra-passe, nome e telefone.
 - [x] Tracking privado de encomendas: Content-Type obrigatório, limite de corpo, apenas campo token, token validado e hash consultado no servidor.
+- [x] Login e redefinição de palavra-passe: allowlist estrita e sessão validada pelo Supabase antes de alterar credenciais.
+- [x] CRM tags e relatórios Enterprise: allowlist estrita e associação ao tenant obtida no servidor.
+- [x] Alteração do estado de encomendas, emails manuais de encomendas, avatar e ações de faturação manual no admin: allowlists específicas e verificação de contexto/autorização no servidor.
 - [ ] Aplicar o parser comum ou validação equivalente a todos os endpoints mutáveis; inventário completo e testes negativos por rota ainda pendentes.
 - [ ] Revalidar permissões e propriedade dos recursos dentro da mesma transação/RPC para todas as operações sensíveis; validação client-side nunca conta como controlo de segurança.
 - [ ] Completar auditoria de rate limiting dos restantes endpoints públicos e de mensagens.
