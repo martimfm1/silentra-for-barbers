@@ -52,7 +52,11 @@ export default function CustomWebsiteDashboardPage() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (planLoading) return;
+    if (plan === 'enterprise') void load();
+    else setLoading(false);
+  }, [load, plan, planLoading]);
 
   const activeRequest = requests.find((item) =>
     ['requested', 'contacted', 'in_progress', 'review'].includes(item.status),
