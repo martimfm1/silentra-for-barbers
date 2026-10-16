@@ -104,6 +104,42 @@ const checks = [
       source.includes('Acompanhar encomenda'),
   },
   {
+    name: 'Terms drawer keeps its heading fixed and scrolls the legal content on mobile',
+    file: 'components/legal/terms-drawer.tsx',
+    test: (source) =>
+      source.includes('data-terms-scroll-area') &&
+      source.includes('min-h-0 flex-1') &&
+      source.includes('touch-pan-y') &&
+      source.includes('overscroll-contain') &&
+      source.includes('max-h-[90dvh]'),
+  },
+  {
+    name: 'Dashboard tabs wrap instead of requiring horizontal scrolling',
+    file: 'components/dashboard/animated-tabs.tsx',
+    test: (source) =>
+      source.includes('flex-wrap') &&
+      source.includes('basis-[calc(50%-0.25rem)]') &&
+      !source.includes('overflow-x-auto'),
+  },
+  {
+    name: 'Mobile dashboard blocks viewport horizontal overflow and wraps dense content',
+    file: 'app/silentra-responsive.css',
+    test: (source) =>
+      source.includes('overflow-x: clip') &&
+      source.includes('overscroll-behavior-x: none') &&
+      source.includes('.silentra-dashboard-main') &&
+      source.includes('min-width: 0'),
+  },
+  {
+    name: 'Public barbershop page provides a mobile-safe persistent booking action',
+    file: 'app/barbershops/[slug]/public-barbershop-page-final.tsx',
+    test: (source) =>
+      source.includes('fixed inset-x-0 bottom-0') &&
+      source.includes('pb-[max(0.75rem,env(safe-area-inset-bottom))]') &&
+      source.includes('sm:hidden') &&
+      source.includes('setBookingOpen(true)'),
+  },
+  {
     name: 'Public booking has mobile-safe horizontal overflow rules',
     file: 'app/silentra-responsive.css',
     test: (source) =>
