@@ -68,6 +68,18 @@ function notFound() {
 
 async function POST__unobserved(request: Request) {
   try {
+    const contentType = request.headers
+      .get('content-type')
+      ?.split(';', 1)[0]
+      ?.trim()
+      .toLowerCase();
+    if (contentType !== 'application/json') {
+      return NextResponse.json(
+        { error: 'O pedido tem de usar JSON.' },
+        { status: 415, headers: PRIVATE_HEADERS },
+      );
+    }
+
     const contentLength = Number(request.headers.get('content-length') ?? 0);
     if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
       return NextResponse.json(
@@ -113,8 +125,19 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const body = parsedBody.value as { token?: unknown } | null;
-    const token = typeof body?.token === 'string' ? body.token : '';
+    const body = parsedBody.value;
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      Array.isArray(body) ||
+      Object.keys(body).length !== 1 ||
+      !Object.hasOwn(body, 'token')
+    ) {
+      return notFound();
+    }
+    const token = typeof (body as Record<string, unknown>).token === 'string'
+      ? (body as Record<string, unknown>).token as string
+      : '';
     if (!isMarketplaceTrackingToken(token)) {
       return notFound();
     }
