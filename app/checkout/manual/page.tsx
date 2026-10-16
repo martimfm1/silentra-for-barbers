@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
@@ -38,12 +39,12 @@ export default async function ManualCheckoutPage({
             Este checkout expirou ou não pertence à tua conta. Volta aos planos
             e inicia um novo pedido.
           </p>
-          <a
+          <Link
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950"
           >
             Voltar aos planos
-          </a>
+          </Link>
         </div>
       </main>
     );
