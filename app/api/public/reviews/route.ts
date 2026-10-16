@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { UUID_PATTERN } from '@/lib/validation';
 
@@ -29,13 +30,12 @@ function cleanString(value: unknown, maxLength: number): string | null {
 
 async function POST__unobserved(request: Request) {
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      barbershopId?: unknown;
-      clientName?: unknown;
-      rating?: unknown;
-      comment?: unknown;
-      reviewToken?: unknown;
-    };
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
     const shopId = cleanString(body.barbershopId, 100);
     const clientName = cleanString(body.clientName, MAX_NAME_LENGTH);
