@@ -31,6 +31,11 @@
 - [ ] Testar Free/Pro/Enterprise na API e database.
 - [ ] Testar quota Free de 1 profissional sob concorrência.
 - [ ] Validar Storage por tenant e conversão de avatar para WebP.
+- [x] Parser comum server-side para JSON: Content-Type, limite de bytes, JSON válido, objeto e allowlist de campos.
+- [x] Booking público: allowlist estrita e validação cruzada de barbearia/serviço/profissional contra registos server-side; criação atómica na base de dados.
+- [x] Subscrições: allowlist estrita, intervalo rejeitado se inválido, proprietário verificado, subscrição atual reconsultada e preço resolvido no servidor.
+- [ ] Aplicar o parser comum ou validação equivalente a todos os endpoints mutáveis; inventário completo e testes negativos por rota ainda pendentes.
+- [ ] Revalidar permissões e propriedade dos recursos dentro da mesma transação/RPC para todas as operações sensíveis; validação client-side nunca conta como controlo de segurança.
 - [ ] Completar auditoria de rate limiting dos restantes endpoints públicos e de mensagens.
 - [x] Rate limiting do fluxo público de reviews.
 - [ ] Error tracking externo/alertas.
