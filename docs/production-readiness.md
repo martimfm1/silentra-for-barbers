@@ -24,7 +24,7 @@
 - [x] Helpers `SECURITY DEFINER` críticos têm `search_path` explícito.
 - [x] `role` e `barbershop_id` do utilizador estão protegidos server-side/database.
 - [x] Índice parcial único protege active double-booking na database.
-- [ ] Corrigir a pré-verificação da API de booking para considerar `professional_id`.
+- [ ] Confirmar em staging que a disponibilidade é calculada por profissional e que dois profissionais podem atender em paralelo.
 - [x] Converter conflito de concorrência `23505` em HTTP 409.
 - [ ] Teste real de isolamento multi-tenant A → A permitido / A → B recusado.
 - [ ] Auditar todas as funções `SECURITY DEFINER` da migration history.
@@ -43,7 +43,7 @@
 - [x] Remover a policy pública de reviews com `WITH CHECK (true)` através de migration corretiva; validar a migration em staging antes de produção.
 - [x] Token de avaliação aleatório, guardado como hash, associado a marcação concluída, expira em 30 dias e só pode ser usado uma vez; validar o fluxo em staging.
 - [x] RPC valida marcação concluída, tenant/barbearia e token não expirado/não consumido; confirmar testes negativos em staging.
-- [x] Rate limiting distribuído no fluxo público de reviews (5 pedidos/hora por IP e barbearia); prova de marcação concluída continua pendente.
+- [x] Rate limiting distribuído no fluxo público de reviews (5 pedidos/hora por IP e barbearia); token de marcação concluída implementado, aguarda validação em staging.
 
 ## P1 — Billing
 
