@@ -50,7 +50,8 @@ export function TermsDrawer({ trigger }: TermsDrawerProps) {
           aria-label={t('legal.termsTitle', {
             defaultValue: 'Terms & Conditions',
           })}
-          className="scrollbar-thin min-h-0 flex-1 touch-pan-y overscroll-contain overflow-y-auto px-5 pb-8 text-xs leading-relaxed text-zinc-400 sm:px-6"
+          data-vaul-no-drag="true"
+          className="scrollbar-thin min-h-0 flex-1 touch-pan-y overscroll-y-contain overflow-y-scroll [-webkit-overflow-scrolling:touch] px-5 pb-8 text-xs leading-relaxed text-zinc-400 sm:px-6"
         >
           <div className="space-y-5 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <p>{updatedTerms.intro}</p>
