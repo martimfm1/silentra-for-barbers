@@ -1,6 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { isRecord } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
 async function PATCH__unobserved(request: Request) {
@@ -16,10 +16,14 @@ async function PATCH__unobserved(request: Request) {
       { status: tenant.status },
     );
 
-  const body: unknown = await request.json().catch(() => null);
+  const bodyResult = await readJsonObject(request, {
+    maxBytes: 4 * 1024,
+    allowedKeys: ['avatarUrl'],
+  });
+  if (!bodyResult.ok) return bodyResult.response;
   const avatarUrl =
-    isRecord(body) && typeof body.avatarUrl === 'string'
-      ? body.avatarUrl.trim()
+    typeof bodyResult.value.avatarUrl === 'string'
+      ? bodyResult.value.avatarUrl.trim()
       : '';
   const expectedPath = `/storage/v1/object/public/avatar/${tenant.barbershopId}/avatar.webp`;
   let parsedUrl: URL;
