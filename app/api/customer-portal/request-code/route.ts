@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   generateVerificationCode,
@@ -40,10 +41,12 @@ async function POST__unobserved(request: Request) {
   });
 
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      email?: unknown;
-    };
-    const email = normalizePortalEmail(body.email);
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['email'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const email = normalizePortalEmail(bodyResult.value.email);
     if (!email) {
       return NextResponse.json(
         { success: false, error: 'Indica um email válido.' },
