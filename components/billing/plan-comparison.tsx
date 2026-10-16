@@ -73,7 +73,7 @@ const FEATURE_GROUPS: ReadonlyArray<{
   },
   {
     title: 'Presença online',
-    features: ['landing_page'],
+    features: ['landing_page', 'custom_website'],
   },
 ];
 
