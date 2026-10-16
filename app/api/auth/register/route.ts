@@ -2,14 +2,17 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthCallbackUrl } from '@/lib/auth/email-confirmation';
-import { isRecord, normalizeText } from '@/lib/validation';
+import { normalizeText } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
 
 async function POST__unobserved(request: Request) {
   try {
-    const body: unknown = await request.json();
-    if (!isRecord(body)) {
-      return NextResponse.json({ error: 'Pedido inválido.' }, { status: 400 });
-    }
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['email', 'name_complete', 'num_phone', 'password'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
     const email = normalizeText(body.email, 254)?.toLowerCase();
     const name = normalizeText(body.name_complete, 120);
