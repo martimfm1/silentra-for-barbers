@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requireModuleContext } from '@/services/modules/authorization';
 
 function uuid(value: unknown): string | null {
@@ -52,10 +53,12 @@ async function POST__unobserved(request: Request) {
       'loyalty',
       'loyalty',
     );
-    const body = (await request.json().catch(() => ({}))) as Record<
-      string,
-      unknown
-    >;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['name', 'serviceId', 'points', 'active'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const name =
       typeof body.name === 'string' ? body.name.trim().slice(0, 120) : '';
     const serviceId = uuid(body.serviceId);
