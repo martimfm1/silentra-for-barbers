@@ -117,6 +117,19 @@ const checks = [
       source.includes('max-h-[90dvh]'),
   },
   {
+    name: 'Professional revenue chart hides X axis on mobile',
+    file: 'app/silentra-responsive.css',
+    test: (source) =>
+      source.includes('.stats-professional-chart .recharts-xAxis') &&
+      source.includes('display: none'),
+  },
+  {
+    name: 'Professional revenue chart scopes mobile X axis to the intended chart',
+    file: 'app/dashboard/stats/page.tsx',
+    test: (source) =>
+      source.includes('className="stats-professional-chart border'),
+  },
+  {
     name: 'Dashboard tabs wrap instead of requiring horizontal scrolling',
     file: 'components/dashboard/animated-tabs.tsx',
     test: (source) =>
