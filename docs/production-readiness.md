@@ -39,6 +39,7 @@
 - [x] Login e redefinição de palavra-passe: allowlist estrita e sessão validada pelo Supabase antes de alterar credenciais.
 - [x] CRM tags e relatórios Enterprise: allowlist estrita e associação ao tenant obtida no servidor.
 - [x] Alteração do estado de encomendas, emails manuais de encomendas, avatar e ações de faturação manual no admin: allowlists específicas e verificação de contexto/autorização no servidor.
+- [x] Definições do marketplace, consulta pública do perfil de cliente de marcação, validação de resgates Loyalty e criação/edição de regras de pontos: allowlists específicas, limites de corpo e validação do tenant/identificadores no servidor.
 - [ ] Aplicar o parser comum ou validação equivalente a todos os endpoints mutáveis; inventário completo e testes negativos por rota ainda pendentes.
 - [ ] Revalidar permissões e propriedade dos recursos dentro da mesma transação/RPC para todas as operações sensíveis; validação client-side nunca conta como controlo de segurança.
 - [ ] Completar auditoria de rate limiting dos restantes endpoints públicos e de mensagens.
