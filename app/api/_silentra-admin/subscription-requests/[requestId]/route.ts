@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import { assertSameOrigin } from '@/services/billing/http';
@@ -20,13 +21,14 @@ export async function PATCH(request: Request, { params }: Params) {
     assertSameOrigin(request);
     const { user } = await requirePlatformAdmin();
     const { requestId } = await params;
-    const body = (await request.json().catch(() => null)) as {
-      action?: unknown;
-      paymentLink?: unknown;
-      reason?: unknown;
-    } | null;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['action', 'paymentLink', 'reason'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
 
-    const action = body?.action;
+    const action = body.action;
 
     if (action === 'send_payment' || action === 'resend_payment') {
       const existing = await ManualPaymentService.getRequest(requestId);
