@@ -14,7 +14,7 @@ async function markWebhookFailed(eventId: string, error: unknown) {
   const database = createAdminClient();
   // Persist only a bounded error identifier; provider exception messages can
   // contain customer details or request data and must not enter the ledger.
-  const candidate =
+  const candidate: { name?: unknown; code?: unknown } =
     error && typeof error === 'object'
       ? (error as { name?: unknown; code?: unknown })
       : {};
