@@ -277,6 +277,40 @@ for (const check of requestValidationChecks) {
   }
 }
 
+  {
+    file: 'app/api/automations/rules/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['name', 'triggerType', 'conditions', 'actions', 'active']",
+      'TRIGGERS.includes',
+      'actions.length > 10',
+      'requireModuleContext',
+      ".eq('barbershop_id', barbershopId)",
+    ],
+    label: 'Automation rule request validation and tenant binding',
+  },
+  {
+    file: 'app/api/barbershops/qr-code/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['text']",
+      'requireTenantAuthorization(request, QR_MANAGE_ROLES)',
+      ".eq('id', tenant.barbershopId)",
+    ],
+    label: 'QR code settings request validation and tenant binding',
+  },
+  {
+    file: 'app/api/loyalty/leave/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['slug']",
+      'getLoyaltyTenantBySlug(slug)',
+      'getLoyaltySession(tenant.barbershopId)',
+      "admin.rpc('leave_loyalty_program'",
+    ],
+    label: 'Loyalty exit request validation and server-side session binding',
+  },
+
 const routeSecurityChecks = [
   {
     file: 'app/api/stripe/subscription/route.ts',
