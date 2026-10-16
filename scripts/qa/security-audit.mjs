@@ -122,6 +122,40 @@ const requestValidationChecks = [
     ],
     label: 'Subscription request validation and server-side plan/price checks',
   },
+  {
+    file: 'app/api/appointments/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "'shopId'",
+      "'professionalId'",
+      ".eq('barbershop_id', barbershopId)",
+      'create_booking_atomic',
+    ],
+    label: 'Authenticated appointment request validation and tenant binding',
+  },
+  {
+    file: 'app/api/auth/register/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['email', 'name_complete', 'num_phone', 'password']",
+      'password.length < 12',
+      'password.length > 128',
+      'supabase.auth.signUp',
+    ],
+    label: 'Registration request validation',
+  },
+  {
+    file: 'app/api/marketplace/orders/track/route.ts',
+    markers: [
+      "contentType !== 'application/json'",
+      'MAX_BODY_BYTES = 512',
+      'Object.keys(body).length !== 1',
+      "Object.hasOwn(body, 'token')",
+      'isMarketplaceTrackingToken(token)',
+      'hashMarketplaceTrackingToken(token)',
+    ],
+    label: 'Private order tracking request envelope and token validation',
+  },
 ];
 
 for (const check of requestValidationChecks) {
