@@ -45,7 +45,7 @@ async function GET__unobserved() {
 
     const { data, error } = await context.database
       .from('custom_website_requests')
-      .select('id, shop_name, desired_slug, brief, contact_email, status, public_slug, site_title, site_description, hero_image_url, primary_cta_label, admin_notes, created_at, updated_at, published_at')
+      .select('id, shop_name, desired_slug, brief, contact_email, status, public_slug, site_title, site_description, hero_image_url, primary_cta_label, created_at, updated_at, published_at')
       .eq('barbershop_id', context.tenant.barbershopId)
       .order('created_at', { ascending: false })
       .limit(10);
@@ -68,6 +68,15 @@ async function GET__unobserved() {
 
 async function POST__unobserved(request: Request) {
   try {
+    try {
+      const { assertSameOrigin } = await import('@/services/billing/http');
+      assertSameOrigin(request);
+    } catch {
+      return fail('A origem do pedido não pôde ser validada.', 403);
+    }
+    if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
+      return fail('O pedido tem de usar application/json.', 415);
+    }
     const context = await getOwnerContext();
     if ('response' in context) return context.response;
 
