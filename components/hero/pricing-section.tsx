@@ -42,6 +42,7 @@ const HERO_FEATURES = {
     'Permissões e gestão global',
     'Relatórios empresariais avançados',
     'Landing page profissional incluída',
+    'Site próprio personalizado disponível por orçamento',
   ],
 } as const;
 
@@ -296,6 +297,23 @@ export function PricingSection({
           />
         </div>
       )}
+
+      <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.045] p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+            <ShieldCheck className="size-5" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-semibold text-zinc-100">Queres um site feito à medida da tua barbearia?</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
+              Disponível para clientes Enterprise. A criação é combinada diretamente com a Silentra, com orçamento próprio — não é cobrada automaticamente no checkout da subscrição.
+            </p>
+          </div>
+        </div>
+        <Link href="/dashboard/website" className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto">
+          Pedir um site <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="glassmorphism rounded-2xl border border-white/10 bg-white/[0.025] p-5">
