@@ -101,7 +101,7 @@ export function BillingHub() {
     : '—';
 
   useEffect(() => {
-    if ((!isStripeSubscription && !isManualSubscription) || isAdministrativePlan) return;
+    // Billing history can outlive the current subscription, so always query the owner-scoped history endpoint.
     let cancelled = false;
     setLoadingInvoices(true);
     fetch('/api/billing/history', { cache: 'no-store' })
@@ -130,7 +130,7 @@ export function BillingHub() {
     return () => {
       cancelled = true;
     };
-  }, [isStripeSubscription, isManualSubscription, isAdministrativePlan, t]);
+  }, [t]);
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
@@ -495,10 +495,6 @@ export function BillingHub() {
           {loadingInvoices ? (
             <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 py-10 text-zinc-500">
               <Loader2 className="size-5 animate-spin" />
-            </div>
-          ) : !hasSubscription || isAdministrativePlan ? (
-            <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
-              {t('billingHub.noStripeReceipts')}
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
