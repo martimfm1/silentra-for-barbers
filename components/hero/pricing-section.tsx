@@ -310,8 +310,8 @@ export function PricingSection({
             </p>
           </div>
         </div>
-        <Link href="/dashboard/website" className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto">
-          Pedir um site <ArrowRight className="size-4" aria-hidden="true" />
+        <Link href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto">
+          Contactar para um site <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
 
