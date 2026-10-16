@@ -328,6 +328,8 @@ const requestValidationChecks = [
       'grossAmount > 1_000_000_000',
       'professional.commission_percentage',
       'Number(service.price)',
+      "appointment.status !== 'completed'",
+      'existingCommission',
       ".eq('professional_id', professionalId)",
       ".eq('barbershop_id', barbershopId)",
     ],
