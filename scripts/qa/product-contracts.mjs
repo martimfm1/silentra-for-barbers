@@ -331,6 +331,18 @@ const checks = [
       );
     },
   },
+  {
+    name: 'Customer booking drawer resets each step to the top and supports safe-area mobile scrolling',
+    file: 'app/barbershops/components/booking-drawer-canonical.tsx',
+    test: (source) =>
+      source.includes('scrollAreaRef') &&
+      source.includes('scrollTo({ top: 0, behavior: \'auto\' })') &&
+      source.includes('data-booking-scroll-area') &&
+      source.includes('touch-pan-y') &&
+      source.includes('overscroll-contain') &&
+      source.includes('safe-area-inset-bottom') &&
+      source.includes('h-[min(90dvh,48rem)]'),
+  },
 ];
 
 let failed = 0;
