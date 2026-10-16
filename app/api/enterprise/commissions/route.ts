@@ -65,12 +65,10 @@ async function POST__unobserved(request: Request) {
       !professionalId ||
       professionalId.length > 80 ||
       appointmentId === '' ||
-      !Number.isFinite(grossAmount) ||
-      grossAmount < 0 ||
-      grossAmount > 1_000_000_000 ||
-      !Number.isFinite(percentage) ||
-      percentage < 0 ||
-      percentage > 100
+      (appointmentId === null &&
+        (!Number.isFinite(grossAmount) ||
+          grossAmount < 0 ||
+          grossAmount > 1_000_000_000))
     )
       return NextResponse.json(
         { error: 'Invalid commission' },
