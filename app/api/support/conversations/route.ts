@@ -77,14 +77,13 @@ export async function GET() {
       .maybeSingle();
 
     if (error) throw new Error('SUPPORT_CONVERSATION_LOOKUP_FAILED');
+    const effectivePlan = await getEffectiveSupportPlan(admin, shop.id);
     if (!conversation) {
       return NextResponse.json(
-        { ok: true, conversation: null, messages: [], unreadCount: 0 },
+        { ok: true, plan: effectivePlan, conversation: null, messages: [], unreadCount: 0 },
         { headers: { 'Cache-Control': 'no-store' } },
       );
     }
-
-    const effectivePlan = await getEffectiveSupportPlan(admin, shop.id);
     if (
       conversation.customer_user_id !== user.id ||
       conversation.plan !== effectivePlan ||
