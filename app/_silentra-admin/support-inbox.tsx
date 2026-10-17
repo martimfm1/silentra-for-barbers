@@ -37,6 +37,7 @@ type Conversation = {
   priority: number;
   last_message_at: string | null;
   last_message_preview: string | null;
+  created_at: string;
   unreadCount: number;
   customer: { id: string; name: string; email: string | null };
   barbershop: { id: string; name: string; slug: string | null };
