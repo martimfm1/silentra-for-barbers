@@ -1,4 +1,6 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -52,7 +54,7 @@ async function getCustomerContext() {
   return { admin, user, profile, shop };
 }
 
-export async function GET() {
+async function GET__unobserved() {
   try {
     const context = await getCustomerContext();
     if ('error' in context) {
@@ -147,7 +149,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   if (!isTrustedSupportOrigin(request)) {
     return jsonError('Pedido de origem não autorizado.', 403);
   }
@@ -167,10 +169,14 @@ export async function POST(request: Request) {
     }
 
     const { admin, user, profile, shop } = context;
-    const payload = (await request.json().catch(() => null)) as
-      | { message?: unknown }
-      | null;
-    const message = typeof payload?.message === 'string' ? payload.message.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['message'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const message = typeof bodyResult.value.message === 'string'
+      ? bodyResult.value.message.trim()
+      : '';
     if (!message || message.length > MAX_MESSAGE_LENGTH) {
       return jsonError('A mensagem tem de ter entre 1 e 4000 caracteres.', 400);
     }
@@ -280,3 +286,6 @@ export async function POST(request: Request) {
     return jsonError('Não foi possível enviar a mensagem de suporte.', 500);
   }
 }
+
+export const GET = withApiObservability('/api/support/conversations', GET__unobserved);
+export const POST = withApiObservability('/api/support/conversations', POST__unobserved);
