@@ -179,13 +179,13 @@ export function PlanComparison() {
                   </span>
                   {active ? (
                     <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-wider text-emerald-600">
-                      Atual
+                      {english ? 'Current' : 'Atual'}
                     </span>
                   ) : item === PLANS.PRO ? (
                     <span
                       className={`mt-0.5 block text-[9px] font-medium uppercase tracking-wider ${selected ? 'text-emerald-700' : 'text-emerald-400/70'}`}
                     >
-                      Popular
+                      {english ? 'Popular' : 'Popular'}
                     </span>
                   ) : null}
                 </button>
@@ -383,7 +383,7 @@ export function PlanComparison() {
                           {included ? (
                             <span
                               className="inline-flex size-6 items-center justify-center rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} incluído`}
+                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} ${english ? "included" : "incluído"}`}
                             >
                               <Check className="size-3.5" aria-hidden="true" />
                             </span>
