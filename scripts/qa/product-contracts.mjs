@@ -356,10 +356,12 @@ const checks = [
     },
   },
   {
-    name: 'Custom website requests are Enterprise-only and validate user input server-side',
+    name: 'Custom website requests enforce Enterprise entitlement or an explicit Free/Pro grant',
     file: 'app/api/dashboard/custom-website/route.ts',
     test: (source) =>
-      source.includes("plan !== 'enterprise'") &&
+      source.includes("plan === 'enterprise'") &&
+      source.includes("from('custom_website_access_grants')") &&
+      source.includes("eq('active', true)") &&
       source.includes('RESERVED_SLUGS') &&
       source.includes('12_000') &&
       source.includes("from('custom_website_requests')") &&
