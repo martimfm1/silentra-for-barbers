@@ -390,7 +390,7 @@ export function PlanComparison() {
                           ) : (
                             <span
                               className="inline-flex size-6 items-center justify-center text-zinc-700"
-                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} não incluído`}
+                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} ${english ? "not included" : "não incluído"}`}
                             >
                               <Minus className="size-4" aria-hidden="true" />
                             </span>
@@ -405,8 +405,7 @@ export function PlanComparison() {
           </table>
         </div>
         <p className="border-t border-white/10 px-5 py-4 text-xs leading-5 text-zinc-500 sm:px-7">
-          Todas as funcionalidades de um plano inferior ficam incluídas nos
-          planos superiores. Os limites são aplicados no servidor.
+          {english ? 'All features in lower plans are included in higher plans. Limits are enforced on the server.' : 'Todas as funcionalidades de um plano inferior ficam incluídas nos planos superiores. Os limites são aplicados no servidor.'}
         </p>
       </div>
     </section>
