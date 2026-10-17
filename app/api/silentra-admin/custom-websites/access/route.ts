@@ -76,8 +76,8 @@ async function POST__unobserved(request: Request) {
     if (input.plan !== 'free' && input.plan !== 'pro') return fail('Só podes atribuir esta permissão aos planos Free ou Pro.', 400);
     const monthlyFee = typeof input.monthlyFee === 'number' ? input.monthlyFee : Number(input.monthlyFee);
     const expectedFee = input.plan === 'pro' ? 4.99 : 6.99;
-    if (!Number.isFinite(monthlyFee) || monthlyFee < 0 || monthlyFee > 99.99 || Math.round(monthlyFee * 100) !== monthlyFee * 100) {
-      return fail('Mensalidade inválida.', 400);
+    if (!Number.isFinite(monthlyFee) || monthlyFee !== expectedFee) {
+      return fail(`A mensalidade definida para o plano ${input.plan === 'pro' ? 'Pro' : 'Free'} é ${expectedFee.toFixed(2)} €.`, 400);
     }
     const reason = typeof input.reason === 'string' ? input.reason.trim().slice(0, 1000) : '';
     if (reason.length < 3) return fail('Regista o motivo da concessão (mínimo 3 caracteres).', 400);
@@ -86,6 +86,23 @@ async function POST__unobserved(request: Request) {
       .select('id').eq('id', barbershopId).maybeSingle();
     if (shopError) throw shopError;
     if (!shop) return fail('Barbearia não encontrada.', 404);
+
+    const { data: owners, error: ownersError } = await admin
+      .from('users')
+      .select('id')
+      .eq('barbershop_id', barbershopId)
+      .eq('role', 'owner')
+      .limit(5);
+    if (ownersError) throw ownersError;
+    if (!owners?.length) return fail('Não foi possível identificar o proprietário da barbearia.', 409);
+    const { BarbershopStripeService } = await import('@/services/billing/barbershop-stripe.service');
+    const ownerPlans = await Promise.all(owners.map(async (owner) => ({
+      id: owner.id,
+      plan: await BarbershopStripeService.getEffectivePlan(owner.id),
+    })));
+    if (!ownerPlans.some((owner) => owner.plan === input.plan)) {
+      return fail('O plano selecionado não corresponde ao plano atual da barbearia. Atualiza a página e tenta novamente.', 409);
+    }
 
     const { error } = await admin.from('custom_website_access_grants').upsert({
       barbershop_id: barbershopId,
