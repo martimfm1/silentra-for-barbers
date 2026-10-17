@@ -67,6 +67,9 @@ jobs:
       - name: Support chat contracts
         run: pnpm qa:support
 
+      - name: UI/UX and accessibility contracts
+        run: pnpm qa:ux
+
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
 
