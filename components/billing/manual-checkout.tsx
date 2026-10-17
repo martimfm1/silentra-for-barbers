@@ -172,7 +172,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not validate the promo code.' : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
+            : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
         );
       }
 
@@ -233,7 +233,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not submit the request.' : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
+            : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
         );
 
       router.replace(body.redirectUrl || '/dashboard/billing?manual=pending');
