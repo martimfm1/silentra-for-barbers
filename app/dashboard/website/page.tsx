@@ -53,18 +53,25 @@ export default function CustomWebsiteDashboardPage() {
   const [desiredSlug, setDesiredSlug] = useState('');
   const [brief, setBrief] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const response = await fetch('/api/dashboard/custom-website', { cache: 'no-store' });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || (pt ? 'Não foi possível carregar os pedidos.' : 'Could not load website requests.'));
+      if (!body || typeof body !== 'object' || !('access' in body)) {
+        throw new Error(pt ? 'A resposta do serviço de sites é inválida.' : 'The website service returned an invalid response.');
+      }
       setRequests(Array.isArray(body.data) ? body.data : []);
       setAccess(body.access && typeof body.access === 'object' ? body.access as WebsiteAccess : null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : (pt ? 'Não foi possível carregar os pedidos.' : 'Could not load website requests.'));
+      const message = error instanceof Error ? error.message : (pt ? 'Não foi possível carregar os pedidos.' : 'Could not load website requests.');
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -104,6 +111,28 @@ export default function CustomWebsiteDashboardPage() {
 
   if (planLoading || loading) {
     return <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8"><div className="flex min-h-64 items-center justify-center text-zinc-500"><Loader2 className="mr-2 size-5 animate-spin" />{pt ? 'A carregar os teus sites…' : 'Loading your websites…'}</div></main>;
+  }
+
+  if (loadError && access === null) {
+    return (
+      <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8">
+        <Link href="/dashboard" className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-zinc-400 hover:text-white">
+          <ArrowLeft className="size-4" />
+          {pt ? 'Painel' : 'Dashboard'}
+        </Link>
+        <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-10">
+          <div className="flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-300">
+            <Globe2 className="size-6" aria-hidden="true" />
+          </div>
+          <h1 className="mt-5 text-2xl font-semibold text-white">{pt ? 'Site próprio' : 'Custom website'}</h1>
+          <p role="alert" className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{loadError}</p>
+          <Button type="button" onClick={() => void load()} disabled={loading} className="mt-6 min-h-11">
+            {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+            {pt ? 'Tentar novamente' : 'Try again'}
+          </Button>
+        </section>
+      </main>
+    );
   }
 
   if (!access?.allowed) {
