@@ -227,6 +227,14 @@ async function POST__unobserved(request: Request) {
 
   try {
     const { admin, user } = await requirePlatformAdmin();
+    const { data: senderProfile, error: senderProfileError } = await admin
+      .from('users')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (senderProfileError) throw new Error('SUPPORT_ADMIN_SENDER_LOOKUP_FAILED');
+    const senderUserId = senderProfile?.id ?? null;
+
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
       allowedKeys: ['conversationId', 'message'],
@@ -315,7 +323,7 @@ async function POST__unobserved(request: Request) {
     const rpc = await admin.rpc('support_send_message', {
       p_conversation_id: conversation.id,
       p_sender_type: 'admin',
-      p_sender_user_id: user.id,
+      p_sender_user_id: senderUserId,
       p_body: message,
       p_recipient_email: customerEmail,
       p_recipient_name: customerResult.data?.name_complete || customerEmail,
