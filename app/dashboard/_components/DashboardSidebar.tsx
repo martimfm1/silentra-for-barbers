@@ -16,6 +16,7 @@ import {
   Scissors,
   Briefcase,
   MessageCircle,
+  Headset,
   Menu,
   X,
   Lock,
@@ -120,6 +121,7 @@ const secondaryItems: SidebarItem[] = [
     feature: 'loyalty',
   },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
+  { href: '/dashboard/suporte', label: 'Suporte Silentra', icon: Headset },
   { href: '/dashboard/billing', label: 'Plano e pagamentos', icon: CreditCard },
   // Keep the entry available on every plan; the page/API explain purchase and grant access.
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
@@ -131,7 +133,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { hasFeature } = useFeatureAccess();
   const { barbershopAvatarUrl } = useBarbershop();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [communicationOpen, setCommunicationOpen] = useState(
     () =>
@@ -163,6 +165,10 @@ export function DashboardSidebar() {
       pathname === item.href ||
       (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
     const Icon = item.icon;
+    const itemLabel =
+      item.href === '/dashboard/suporte' && locale === 'en'
+        ? 'Silentra Support'
+        : item.label;
 
     if (locked) {
       return (
@@ -174,10 +180,10 @@ export function DashboardSidebar() {
             'group relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-[background-color,color,transform] duration-200 motion-reduce:transition-none text-zinc-500 hover:bg-white/5 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
             mobile && 'min-h-12',
           )}
-          aria-label={`${item.label}, disponível num plano superior`}
+          aria-label={locale === 'en' ? `${itemLabel}, available on a higher plan` : `${itemLabel}, disponível num plano superior`}
         >
           <Icon className="size-4 shrink-0 text-zinc-600" aria-hidden="true" />
-          <span className="truncate">{item.label}</span>
+          <span className="truncate">{itemLabel}</span>
           <Lock
             className="ml-auto size-3.5 shrink-0 text-zinc-600"
             aria-hidden="true"
@@ -217,7 +223,7 @@ export function DashboardSidebar() {
           )}
           aria-hidden="true"
         />
-        <span className="truncate">{item.label}</span>
+        <span className="truncate">{itemLabel}</span>
       </Link>
     );
   };

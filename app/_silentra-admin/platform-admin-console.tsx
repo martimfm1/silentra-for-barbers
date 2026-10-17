@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import SupportInbox from './support-inbox';
+
 import {
   Activity,
   AlertTriangle,
@@ -15,6 +17,7 @@ import {
   Gauge,
   KeyRound,
   MailWarning,
+  MessageCircle,
   RefreshCw,
   Search,
   ServerCog,
@@ -144,6 +147,7 @@ const tabs = [
   { id: 'plans', label: 'Planos', icon: KeyRound },
   { id: 'payments', label: 'Pagamentos', icon: CreditCard },
   { id: 'payment_requests', label: 'Pedidos de pagamento', icon: MailCheck },
+  { id: 'support', label: 'Suporte', icon: MessageCircle },
   { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
   { id: 'api_health', label: 'Saúde da API', icon: Activity },
@@ -262,6 +266,11 @@ function StatCard({
 
 export default function PlatformAdminConsole() {
   const [tab, setTab] = useState<Tab>('overview');
+
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab === 'support') setTab('support');
+  }, []);
   const [data, setData] = useState<Overview | null>(null);
   const [query, setQuery] = useState('');
   const [selectedShop, setSelectedShop] = useState<
@@ -703,6 +712,8 @@ export default function PlatformAdminConsole() {
             {error}
           </div>
         ) : null}
+
+        {tab === 'support' ? <SupportInbox /> : null}
 
         {tab === 'overview' && data ? (
           <section className="space-y-5">
