@@ -65,6 +65,7 @@ Regras de negócio, autorização, isolamento de tenants e entitlements são dec
 ### Comunicação
 
 - Email transacional via Brevo.
+- Chat privado entre membros e equipa Silentra, com prioridade Free/Pro/Enterprise e emails quando existem mensagens por ler.
 - Templates com variáveis.
 - Sender por barbearia.
 - Marketing e automações.
@@ -345,6 +346,7 @@ Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 | [Architecture](docs/ARCHITECTURE.md) | Arquitetura, camadas e isolamento multi-tenant |
 | [Development](docs/DEVELOPMENT.md)   | Setup local, env e workflow                    |
 | [Billing](docs/BILLING.md)           | Stripe e pagamentos manuais                    |
+| [Support Chat](docs/SUPPORT_CHAT.md) | Inbox privada, prioridade e notificações email  |
 | [Security](docs/SECURITY.md)         | Segurança, auth, RLS, APIs e embeds            |
 | [API pública](docs/API_PUBLICA.md)   | Endpoints públicos, payloads e limites         |
 | [Deployment](docs/DEPLOYMENT.md)     | Release, Vercel, Supabase e produção           |
