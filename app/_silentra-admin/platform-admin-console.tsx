@@ -266,6 +266,11 @@ function StatCard({
 
 export default function PlatformAdminConsole() {
   const [tab, setTab] = useState<Tab>('overview');
+
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab === 'support') setTab('support');
+  }, []);
   const [data, setData] = useState<Overview | null>(null);
   const [query, setQuery] = useState('');
   const [selectedShop, setSelectedShop] = useState<
