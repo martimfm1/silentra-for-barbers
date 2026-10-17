@@ -64,6 +64,9 @@ jobs:
       - name: Product contracts
         run: pnpm qa:product
 
+      - name: Support chat contracts
+        run: pnpm qa:support
+
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
 
