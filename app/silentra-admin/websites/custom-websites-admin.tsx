@@ -247,7 +247,7 @@ export default function CustomWebsitesAdmin() {
                     <div className="min-w-0">
                       <h2 className="text-lg font-semibold text-white">{item.shop_name}</h2>
                       <p className="mt-1 break-all text-xs text-zinc-500">Pedido {item.id} · {new Date(item.created_at).toLocaleString('pt-PT')}</p>
-                      <p className="mt-2 text-sm text-zinc-400">URL pretendido: <span className="text-zinc-200">/{item.desired_slug}</span></p>
+                      <p className="mt-2 text-sm text-zinc-400">URL pretendido: <span className="text-zinc-200">/site/{item.desired_slug}</span></p>
                     </div>
                     <a href={`mailto:${encodeURIComponent(item.contact_email)}?subject=${encodeURIComponent(`Site personalizado — ${item.shop_name}`)}`} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-sm hover:bg-white/[0.05]"><Mail className="size-4" />{item.contact_email}</a>
                   </div>
@@ -281,7 +281,7 @@ export default function CustomWebsitesAdmin() {
                         <textarea value={edit.adminNotes} onChange={(event) => change(item.id, 'adminNotes', event.target.value)} rows={2} maxLength={2000} className={inputClass} />
                       </label>
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        {item.status === 'published' && item.public_slug ? <Link href={`/${encodeURIComponent(item.public_slug)}`} target="_blank" className="inline-flex min-h-10 items-center gap-2 text-sm text-emerald-300 hover:text-emerald-200">Ver site <ExternalLink className="size-4" /></Link> : <span className="text-xs leading-5 text-zinc-600">Para publicar, define o caminho, título e descrição.</span>}
+                        {item.status === 'published' && item.public_slug ? <Link href={`/site/${encodeURIComponent(item.public_slug)}`} target="_blank" className="inline-flex min-h-10 items-center gap-2 text-sm text-emerald-300 hover:text-emerald-200">Ver site <ExternalLink className="size-4" /></Link> : <span className="text-xs leading-5 text-zinc-600">Para publicar, define o caminho, título e descrição.</span>}
                         <button type="button" onClick={() => void save(item)} disabled={savingId !== null} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 disabled:opacity-50">{savingId === item.id ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}Guardar alterações</button>
                       </div>
                     </section>
