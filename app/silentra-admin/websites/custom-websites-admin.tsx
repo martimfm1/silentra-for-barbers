@@ -192,7 +192,7 @@ export default function CustomWebsitesAdmin() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Acesso e condições comerciais</p>
             <h2 className="mt-2 text-xl font-semibold text-white">Autorizar sites para Free e Pro</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">Depois de confirmares a aquisição do serviço, concede aqui a permissão sem alterar o plano da subscrição. O preço de criação é 150 €; a mensalidade predefinida é 4,99 € para Pro e 6,99 € para Free. Enterprise tem a condição de 2,99 €/mês.</p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">Depois de confirmares a aquisição do serviço, concede aqui a permissão sem alterar o plano da subscrição. Free: criação 150 € + 6,99 €/mês. Pro: criação 150 € + 4,99 €/mês. Enterprise: desconto de 100 € na criação (50 € finais) + 2,99 €/mês.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.7fr)]">
             <label className="grid gap-1.5 text-xs text-zinc-400">ID da barbearia
