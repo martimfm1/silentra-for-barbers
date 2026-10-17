@@ -445,7 +445,8 @@ const checks = [
     name: 'Public review API never inserts directly into the reviews table',
     file: 'app/api/public/reviews/route.ts',
     test: (source) =>
-      source.includes("rpc(\n      'submit_public_review_with_token'") &&
+      source.includes('database.rpc(') &&
+      source.includes("'submit_public_review_with_token'") &&
       source.includes("createHash('sha256')") &&
       !source.includes("from('reviews')"),
   },
