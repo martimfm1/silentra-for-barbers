@@ -220,7 +220,6 @@ export default function BarbershopPublicPageFinal({
           fill
           priority
           sizes="100vw"
-          unoptimized
           onError={() => setBannerImageError(true)}
           className="object-cover opacity-45"
         />
@@ -247,7 +246,6 @@ export default function BarbershopPublicPageFinal({
                     alt={`Logótipo de ${shop.name}`}
                     fill
                     sizes="128px"
-                    unoptimized
                     onError={() => setAvatarImageError(true)}
                     className="object-cover"
                   />
