@@ -402,6 +402,11 @@ export function SiteNavbar() {
               <span className="font-heading text-[1.02rem] font-semibold tracking-tight sm:text-lg">
                 Silentra
               </span>
+              {pathname === '/documentation' ? (
+                <span className="hidden shrink-0 items-center rounded-lg border border-emerald-300/20 bg-emerald-300/[0.07] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-emerald-200 sm:inline-flex sm:text-[10px]">
+                  {locale === 'pt' ? 'API pública' : 'Public API'}
+                </span>
+              ) : null}
             </Link>
             <nav
               aria-label={t('dashboard.mainNavigation', {
