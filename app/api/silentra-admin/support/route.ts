@@ -249,10 +249,11 @@ async function POST__unobserved(request: Request) {
     }
 
     const since = new Date(Date.now() - 60_000).toISOString();
+    // Apply a platform-wide admin send limit so it also works for a
+    // platform admin who does not have a row in public.users.
     const { count: recentMessages, error: rateError } = await admin
       .from('support_messages')
       .select('id', { count: 'exact', head: true })
-      .eq('sender_user_id', user.id)
       .eq('sender_type', 'admin')
       .gte('created_at', since);
     if (rateError) throw new Error('SUPPORT_ADMIN_RATE_LIMIT_LOOKUP_FAILED');
