@@ -59,7 +59,6 @@ async function GET__unobserved(request: Request) {
     const customerIds = [...new Set(rows.map((row) => row.customer_user_id))];
     const shopIds = [...new Set(rows.map((row) => row.barbershop_id))];
 
-    const now = new Date().toISOString();
     const [usersResult, shopsResult, unreadResult, assignmentsResult, subscriptionsResult] =
       conversationIds.length
         ? await Promise.all([
