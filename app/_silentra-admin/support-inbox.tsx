@@ -122,6 +122,11 @@ export default function SupportInbox() {
   }, [selectedId]);
 
   useEffect(() => {
+    const requestedConversation = new URLSearchParams(window.location.search).get('conversationId');
+    if (requestedConversation) setSelectedId(requestedConversation);
+  }, []);
+
+  useEffect(() => {
     void load();
     const interval = window.setInterval(() => {
       if (document.visibilityState === 'visible') void load(selectedId, true);
@@ -164,8 +169,8 @@ export default function SupportInbox() {
           : conversation.status === statusFilter);
       return matchesQuery && matchesStatus;
     }).sort((a, b) =>
-      b.unreadCount - a.unreadCount ||
       planRank[b.plan] - planRank[a.plan] ||
+      b.unreadCount - a.unreadCount ||
       (Date.parse(b.last_message_at ?? b.created_at) - Date.parse(a.last_message_at ?? a.created_at)),
     );
   }, [conversations, query, statusFilter]);
