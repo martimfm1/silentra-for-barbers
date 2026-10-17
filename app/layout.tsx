@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { GoogleTagManager } from '@next/third-parties/google';
+import Script from 'next/script';
 import { cookies } from 'next/headers';
 import {
-  Geist,
   Geist_Mono,
   Source_Sans_3,
   JetBrains_Mono,
@@ -32,7 +32,6 @@ const sourceSans3 = Source_Sans_3({
   subsets: ['latin'],
   variable: '--font-sans',
 });
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
@@ -55,7 +54,6 @@ export default async function RootLayout({
       dir="ltr"
       className={cn(
         'dark h-full scroll-smooth antialiased',
-        geistSans.variable,
         geistMono.variable,
         'font-sans',
         sourceSans3.variable,
@@ -67,10 +65,6 @@ export default async function RootLayout({
           id="marketplace-tracking-token-bootstrap"
           dangerouslySetInnerHTML={{ __html: TRACKING_TOKEN_BOOTSTRAP_SCRIPT }}
         />
-        <script
-          id="whop-pixel"
-          dangerouslySetInnerHTML={{ __html: WHOP_PIXEL_SCRIPT }}
-        />
       </head>
       <body className="min-h-full bg-black text-foreground">
         <noscript>
@@ -81,6 +75,9 @@ export default async function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
+        <Script id="whop-pixel" strategy="afterInteractive">
+          {WHOP_PIXEL_SCRIPT}
+        </Script>
         <GoogleTagManager gtmId="GTM-PBCWTRT5" />
         <LanguageProvider initialLocale={initialLocale}>
           <ProductionLogGuard />
