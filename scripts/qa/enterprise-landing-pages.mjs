@@ -48,7 +48,7 @@ assert.match(
 assert.match(features, /'landing_page'/);
 assert.match(features, /landing_page: 'Landing page profissional incluída'/);
 assert.match(pricing, /Landing page profissional incluída/);
-assert.match(comparison, /features: \['landing_page'\]/);
+assert.match(comparison, /title: 'Presença online',\s*features: \['landing_page', 'custom_website'\]/);
 assert.match(landingPage, /profile\.plan !== 'enterprise'/);
 assert.match(landingPage, /entitlement\.status !== 'active'/);
 assert.match(landingPage, /from\('barbershop_landing_pages'\)/);

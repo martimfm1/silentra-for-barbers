@@ -5,8 +5,11 @@ import { useEffect } from 'react';
 import { ArrowLeft, CreditCard, ReceiptText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BillingHub } from '@/components/billing/BillingHub';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function BillingPage() {
+  const { t } = useLanguage();
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get('checkout');
@@ -42,15 +45,13 @@ export default function BillingPage() {
         <header className="dashboard-page-header border-b border-white/10 pb-6">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              <CreditCard className="size-4" aria-hidden="true" /> Subscrição
+              <CreditCard className="size-4" aria-hidden="true" /> {t('billingPage.section')}
             </div>
             <h1 className="mt-2 text-2xl font-heading font-bold tracking-tight sm:text-4xl">
-              Plano e faturação
+              {t('billingPage.title')}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              Resumo do teu plano, estado da subscrição e histórico dos
-              documentos de faturação emitidos. As decisões de compra e mudança
-              de plano acontecem em /plans.
+              {t('billingPage.description')}
             </p>
           </div>
           <Button
@@ -60,22 +61,21 @@ export default function BillingPage() {
           >
             <Link href="/dashboard/settings">
               <ArrowLeft className="mr-2 size-4" />
-              Definições
+              {t('billingPage.settings')}
             </Link>
           </Button>
         </header>
-        <section className="grid gap-3 sm:grid-cols-2" aria-label="Faturação">
+        <section className="grid gap-3 sm:grid-cols-2" aria-label={t('billingPage.billingLabel')}>
           <div className="border border-white/10 bg-white/[0.025] px-4 py-4">
             <p className="flex items-center gap-2 text-sm font-medium text-zinc-100">
               <ReceiptText
                 className="size-4 text-emerald-400"
                 aria-hidden="true"
               />{' '}
-              Recibos
+              {t('billingPage.receipts')}
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Os pagamentos manuais geram automaticamente um comprovativo em PDF
-              enviado por email.
+              {t('billingPage.receiptsDescription')}
             </p>
           </div>
           <div className="border border-white/10 bg-white/[0.025] px-4 py-4">
@@ -84,11 +84,10 @@ export default function BillingPage() {
                 className="size-4 text-emerald-400"
                 aria-hidden="true"
               />{' '}
-              Gestão simples
+              {t('billingPage.simpleManagement')}
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Cancela no fim do período atual ou compara planos quando quiseres
-              mudar.
+              {t('billingPage.managementDescription')}
             </p>
           </div>
         </section>

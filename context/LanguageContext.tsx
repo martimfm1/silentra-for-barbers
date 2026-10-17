@@ -11,6 +11,7 @@ import { pt } from '@/app/locales/pt';
 import { en } from '@/app/locales/en';
 import { ptCopy } from '@/app/locales/pt-copy';
 import { enCopy } from '@/app/locales/en-copy';
+import { createClient } from '@/lib/supabase/client';
 
 type Locale = 'pt' | 'en';
 type TranslationTree = Record<string, unknown>;
@@ -91,8 +92,43 @@ export function LanguageProvider({
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
+    let active = true;
     const saved = window.localStorage.getItem('locale');
     if (saved === 'pt' || saved === 'en') setLocaleState(saved);
+
+    const syncBarbershopLanguage = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !active) return;
+        const { data: profile } = await supabase
+          .from('users')
+          .select('barbershop_id,role')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (
+          !profile?.barbershop_id ||
+          !['owner', 'admin', 'manager', 'receptionist', 'staff', 'barber', 'professional'].includes(profile.role) ||
+          !active
+        ) return;
+        const { data: shop } = await supabase
+          .from('barbershops')
+          .select('default_language')
+          .eq('id', profile.barbershop_id)
+          .maybeSingle();
+        if (!active) return;
+        const preferred = shop?.default_language === 'en' ? 'en' : shop?.default_language === 'pt' ? 'pt' : null;
+        if (preferred) {
+          setLocaleState(preferred);
+          window.localStorage.setItem('locale', preferred);
+          document.cookie = `locale=${preferred}; Path=/; Max-Age=31536000; SameSite=Lax`;
+        }
+      } catch {
+        // Keep the saved browser preference if the profile cannot be loaded.
+      }
+    };
+    void syncBarbershopLanguage();
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {

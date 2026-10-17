@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 type ClientRow = {
   id: string;
@@ -35,11 +36,12 @@ async function authHeaders(): Promise<Record<string, string>> {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token)
-    throw new Error('A sessão expirou. Volta a iniciar sessão.');
+    throw new Error('Your session expired. Please sign in again.');
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
 export default function CRMPage() {
+  const { t } = useLanguage();
   const { hasFeature, loading: billingLoading } = useFeatureAccess();
   const allowed = hasFeature('advanced_crm');
   const [search, setSearch] = useState('');
@@ -63,7 +65,7 @@ export default function CRMPage() {
           fetch('/api/crm/tags', { headers, cache: 'no-store' }),
         ]);
         if (!clientsRes.ok || !tagsRes.ok)
-          throw new Error('Não foi possível carregar o CRM.');
+          throw new Error(t('crm.loadFailed'));
         const clientsJson = await clientsRes.json();
         const tagsJson = await tagsRes.json();
         if (!cancelled) {
@@ -75,7 +77,7 @@ export default function CRMPage() {
           toast.error(
             error instanceof Error
               ? error.message
-              : 'Não foi possível carregar os clientes.',
+              : t('crm.loadClientsFailed'),
           );
       } finally {
         if (!cancelled) setLoading(false);
@@ -86,7 +88,7 @@ export default function CRMPage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [allowed, billingLoading, search]);
+  }, [allowed, billingLoading, search, t]);
 
   async function handleCreateTag(event: React.FormEvent) {
     event.preventDefault();
@@ -104,17 +106,17 @@ export default function CRMPage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error ?? 'Não foi possível criar a etiqueta.');
+        throw new Error(json.error ?? t('crm.tagCreateFailed'));
       setTags((current) =>
         [...current, json.tag].sort((a, b) => a.name.localeCompare(b.name)),
       );
       setNewTag('');
-      toast.success('Etiqueta criada.');
+      toast.success(t('crm.tagCreated'));
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível criar a etiqueta.',
+          : t('crm.tagCreateFailed'),
       );
     } finally {
       setCreatingTag(false);
@@ -122,15 +124,14 @@ export default function CRMPage() {
   }
 
   const hasSearch = search.trim().length > 0;
-  const firstName = clients[0]?.name_complete?.split(' ')[0];
   const emptyTitle = hasSearch
-    ? 'Não encontrámos esse cliente.'
-    : 'A tua base de clientes começa aqui.';
+    ? t('crm.noCustomerFound')
+    : t('crm.baseStartsHere');
   const emptyDescription = hasSearch
-    ? 'Experimenta pesquisar pelo nome, email ou telefone.'
-    : 'Assim que os clientes fizerem marcações, aparecem aqui automaticamente. Também podes começar a organizar a base com etiquetas.';
+    ? t('crm.trySearch')
+    : t('crm.autoPopulate');
   const clientCountLabel = useMemo(
-    () => `${clients.length} ${clients.length === 1 ? 'cliente' : 'clientes'}`,
+    () => `${clients.length} ${t(clients.length === 1 ? 'crm.customerSingular' : 'crm.customerPlural')}`,
     [clients.length],
   );
 
@@ -145,13 +146,13 @@ export default function CRMPage() {
                 <Lock className="h-7 w-7" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold">CRM Avançado</h1>
+                <h1 className="text-2xl font-semibold">{t('crm.title')}</h1>
                 <p className="mt-2 text-muted-foreground">
-                  Clientes, histórico, notas e segmentação num só lugar.
+                  {t('crm.lockedDescription')}
                 </p>
               </div>
               <Button asChild>
-                <Link href="/plans">Comparar planos</Link>
+                <Link href="/plans">{t('crm.comparePlans')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -165,24 +166,23 @@ export default function CRMPage() {
         <header className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Relacionamento
+              {t('crm.relationship')}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Clientes
+              {t('crm.customers')}
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Percebe quem volta, quem está a desaparecer e onde podes criar uma
-              relação melhor.
+              {t('crm.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/dashboard">Voltar ao dashboard</Link>
+              <Link href="/dashboard">{t('crm.backDashboard')}</Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/agenda">
                 <UserPlus className="mr-2 h-4 w-4" />
-                Nova marcação
+                {t('crm.newAppointment')}
               </Link>
             </Button>
           </div>
@@ -197,21 +197,19 @@ export default function CRMPage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Começa sem trabalho extra
+                    {t('crm.noExtraWork')}
                   </p>
                   <h2 className="mt-2 text-xl font-semibold">
-                    Não precisas de importar clientes manualmente.
+                    {t('crm.noManualImport')}
                   </h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                    Quando receberes a primeira marcação, a Silentra cria o
-                    cliente por ti. Depois podes adicionar etiquetas e notas
-                    conforme fores conhecendo a pessoa.
+                    {t('crm.autoCreateDescription')}
                   </p>
                 </div>
               </div>
               <Button asChild className="shrink-0">
                 <Link href="/dashboard/agenda">
-                  Criar primeira marcação{' '}
+                  {t('crm.firstAppointment')}{' '}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -225,7 +223,7 @@ export default function CRMPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  Base de clientes{' '}
+                  {t('crm.customerBase')}{' '}
                   <span className="text-sm font-normal text-muted-foreground">
                     {clientCountLabel}
                   </span>
@@ -236,15 +234,15 @@ export default function CRMPage() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar por nome, email ou telefone..."
-                  aria-label="Pesquisar clientes"
+                  placeholder={t('crm.searchPlaceholder')}
+                  aria-label={t('crm.searchCustomers')}
                   className="min-h-[44px] pl-9 pr-9"
                 />
                 {hasSearch && (
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    aria-label="Limpar pesquisa"
+                    aria-label={t('crm.clearSearch')}
                     className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-white/10 hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
@@ -272,7 +270,7 @@ export default function CRMPage() {
                       onClick={() => setSearch('')}
                       className="mt-4"
                     >
-                      Limpar pesquisa
+                      {t('crm.clearSearch')}
                     </Button>
                   )}
                 </div>
@@ -295,7 +293,7 @@ export default function CRMPage() {
                           <p className="truncate text-sm text-muted-foreground">
                             {client.email ||
                               client.num_phone ||
-                              'Sem contacto registado'}
+                              t('crm.noContact')}
                           </p>
                         </div>
                       </div>
@@ -311,10 +309,10 @@ export default function CRMPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Tag className="h-5 w-5" />
-                Etiquetas
+                {t('crm.tags')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Cria grupos úteis sem preencher formulários extra.
+                {t('crm.tagsDescription')}
               </p>
             </CardHeader>
             <CardContent>
@@ -323,8 +321,8 @@ export default function CRMPage() {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   maxLength={50}
-                  placeholder="Ex.: Cliente frequente"
-                  aria-label="Nome da nova etiqueta"
+                  placeholder={t('crm.tagPlaceholder')}
+                  aria-label={t('crm.newTagName')}
                   className="min-h-[44px]"
                 />
                 <Button
@@ -332,7 +330,7 @@ export default function CRMPage() {
                   disabled={creatingTag || !newTag.trim()}
                   className="min-h-[44px] shrink-0"
                 >
-                  {creatingTag ? 'A criar...' : 'Adicionar'}
+                  {creatingTag ? t('crm.creating') : t('crm.add')}
                 </Button>
               </form>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -347,8 +345,7 @@ export default function CRMPage() {
                   ))
                 ) : (
                   <p className="text-xs leading-5 text-muted-foreground">
-                    Ainda não tens etiquetas. Começa com algo simples, como
-                    “Cliente frequente” ou “Novo cliente”.
+                    {t('crm.noTags')}
                   </p>
                 )}
               </div>

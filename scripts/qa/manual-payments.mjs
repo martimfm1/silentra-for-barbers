@@ -175,7 +175,8 @@ const checks = [
     billingHistory.includes("from('billing_documents')") &&
       billingHistory.includes('stripe.invoices.list') &&
       billingHub.includes("fetch('/api/billing/history'") &&
-      billingHub.includes('Comprovativo manual'),
+      billingHub.includes("t('billingHub.manualReceipt')") &&
+      billingHub.includes("fetch('/api/billing/history'"),
   ],
   [
     'Billing history scopes manual documents to the owner and barbershop',

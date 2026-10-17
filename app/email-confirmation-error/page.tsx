@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, Mail } from 'lucide-react';
 import { StarfieldBackground } from '@/components/ui/starfield';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function EmailConfirmationErrorPage() {
+  const { t } = useLanguage();
   return (
     <main className="min-h-screen bg-background px-4 py-10 sm:px-6 lg:px-8">
       <StarfieldBackground>
@@ -18,16 +23,17 @@ export default function EmailConfirmationErrorPage() {
               <AlertCircle className="h-6 w-6" />
             </div>
 
+            <div className="mb-4 flex justify-end">
+              <LanguageSwitcher />
+            </div>
             <h1
               id="confirmation-error-title"
               className="text-2xl font-semibold tracking-tight"
             >
-              Não foi possível confirmar o teu e-mail
+              {t('auth.emailConfirmationErrorTitle')}
             </h1>
             <p className="mt-3 text-sm leading-6 text-zinc-400">
-              O link de confirmação pode ter expirado, já ter sido utilizado ou
-              não ser válido. Pede um novo e-mail de confirmação e tenta
-              novamente.
+              {t('auth.emailConfirmationErrorBody')}
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

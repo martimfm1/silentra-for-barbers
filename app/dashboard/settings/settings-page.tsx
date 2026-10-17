@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { cn } from '@/lib/utils';
 import {
@@ -77,6 +78,7 @@ type Config = {
   time_limit_cancellation_hours: number;
   auto_confirm_bookings: boolean;
   auto_complete_bookings: boolean;
+  default_language: 'pt' | 'en';
 };
 const sections: [Section, string, string, typeof Settings][] = [
   ['overview', 'Visão geral', 'Estado da configuração', Settings],
@@ -112,22 +114,6 @@ const amenitiesKeys = [
   'pet_friendly',
   'appointment_required',
 ] as const;
-const amenityLabels: Record<(typeof amenitiesKeys)[number], string> = {
-  wifi: 'Wi-Fi',
-  wheelchair_accessible: 'Acesso para cadeira de rodas',
-  accessible_entrance: 'Entrada acessível',
-  accessible_toilet: 'WC acessível',
-  kids_friendly: 'Adequado para crianças',
-  waiting_area: 'Área de espera',
-  restroom: 'Casa de banho',
-  air_conditioning: 'Ar condicionado',
-  card_payments: 'Pagamento por cartão',
-  walk_ins: 'Atendimento sem marcação',
-  coffee: 'Café',
-  water: 'Água',
-  pet_friendly: 'Animais de companhia',
-  appointment_required: 'Agendamento obrigatório',
-};
 const normalize = (v: Partial<Config>): Config => ({
   name: v.name ?? '',
   phone: v.phone ?? '',
@@ -145,6 +131,7 @@ const normalize = (v: Partial<Config>): Config => ({
   ),
   auto_confirm_bookings: v.auto_confirm_bookings === true,
   auto_complete_bookings: v.auto_complete_bookings === true,
+  default_language: v.default_language === 'en' ? 'en' : 'pt',
 });
 const closedList = (v: string) =>
   !v || v === 'None'
@@ -156,6 +143,7 @@ const closedList = (v: string) =>
 
 export default function SettingsPageOrganized() {
   const router = useRouter();
+  const { t, setLocale } = useLanguage();
   const { barbershopId } = useBarbershop();
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
@@ -193,7 +181,7 @@ export default function SettingsPageOrganized() {
     ]);
     if (c.error)
       toast.error(
-        c.error.message || 'Não foi possível carregar as definições.',
+        t('settingsPage.loadFailed'),
       );
     if (c.data) {
       const n = normalize(c.data);
@@ -208,10 +196,10 @@ export default function SettingsPageOrganized() {
         setInitialAmenities(n);
       }
     } catch {
-      toast.error('Não foi possível carregar as informações públicas.');
+      toast.error(t('settingsPage.publicLoadFailed'));
     }
     setLoading(false);
-  }, [barbershopId]);
+  }, [barbershopId, t]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -244,9 +232,13 @@ export default function SettingsPageOrganized() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q
-      ? sections.filter(([, , d]) => `${d}`.toLowerCase().includes(q))
+      ? sections.filter(([id]) => {
+          const label = t(`settingsPage.${id}`).toLowerCase();
+          const description = t(`settingsPage.${id}Description`).toLowerCase();
+          return `${label} ${description}`.includes(q);
+        })
       : sections;
-  }, [search]);
+  }, [search, t]);
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
   function go(s: Section) {
@@ -261,7 +253,7 @@ export default function SettingsPageOrganized() {
     if (!barbershopId || !dirty || saving) return;
     if (config.opening_time >= config.closing_time)
       return toast.error(
-        'O horário de fecho tem de ser posterior ao horário de abertura.',
+        t('settingsPage.openingAfterClosing'),
       );
     if (
       (config.lunch_start && !config.lunch_end) ||
@@ -270,7 +262,7 @@ export default function SettingsPageOrganized() {
         config.lunch_end &&
         config.lunch_start >= config.lunch_end)
     )
-      return toast.error('Verifica o início e o fim da pausa.');
+      return toast.error(t('settingsPage.lunchInvalid'));
     setSaving(true);
     try {
       const payload = { ...config };
@@ -296,7 +288,7 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || 'Não foi possível atualizar a localização.',
+            t('settingsPage.locationUpdateFailed'),
           );
       }
       if (JSON.stringify(amenities) !== JSON.stringify(initialAmenities)) {
@@ -311,20 +303,19 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok)
           throw new Error(
-            b.error || 'Não foi possível guardar as informações do espaço.',
+            t('settingsPage.amenitiesSaveFailed'),
           );
       }
       const n = normalize(c.data ?? config);
       setConfig(n);
       setInitial(n);
       setInitialAmenities(amenities);
+      setLocale(n.default_language);
       setSuggestion(null);
-      toast.success('Todas as alterações foram guardadas.');
+      toast.success(t('settingsPage.saved'));
     } catch (e) {
       toast.error(
-        e instanceof Error
-          ? e.message
-          : 'Não foi possível guardar as alterações.',
+        t('settingsPage.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -348,7 +339,7 @@ export default function SettingsPageOrganized() {
     setUploading(null);
     if (r.error)
       return toast.error(
-        r.error.message || 'Não foi possível atualizar a imagem.',
+        t('settingsPage.imageUpdateFailed'),
       );
     if (type === 'avatar') {
       setAvatarPreviewError(false);
@@ -358,7 +349,7 @@ export default function SettingsPageOrganized() {
       setBannerTick(Date.now());
     }
     toast.success(
-      type === 'avatar' ? 'Logótipo atualizado.' : 'Capa atualizada.',
+      type === 'avatar' ? t('settingsPage.logoUpdated') : t('settingsPage.coverUpdated'),
     );
   }
   async function logout() {
@@ -368,7 +359,7 @@ export default function SettingsPageOrganized() {
       router.replace('/login');
       router.refresh();
     } catch {
-      toast.error('Não foi possível terminar a sessão.');
+      toast.error(t('settingsPage.logoutFailed'));
       setLogoutLoading(false);
     }
   }
@@ -395,14 +386,14 @@ export default function SettingsPageOrganized() {
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href="/dashboard"
-                aria-label="Voltar ao painel"
+                aria-label={t('settingsPage.backToDashboard')}
                 className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[.03]"
               >
                 <ArrowLeft className="size-4" />
               </Link>
               <div className="min-w-0">
                 <h1 className="truncate text-xl font-semibold sm:text-2xl">
-                  Definições
+                  {t('settingsPage.title')}
                 </h1>
               </div>
             </div>
@@ -413,7 +404,7 @@ export default function SettingsPageOrganized() {
                   onClick={reset}
                   className="hidden sm:inline-flex"
                 >
-                  Descartar
+                  {t('settingsPage.discard')}
                 </Button>
               )}
               <Button
@@ -427,16 +418,16 @@ export default function SettingsPageOrganized() {
                   <Save className="mr-2 size-4" />
                 )}
                 {saving
-                  ? 'A guardar…'
+                  ? t('settingsPage.saving')
                   : dirty
-                    ? 'Guardar alterações'
-                    : 'Tudo guardado'}
+                    ? t('settingsPage.saveChanges')
+                    : t('settingsPage.allSaved')}
               </Button>
             </div>
           </div>
           {dirty && (
             <p className="mt-2 text-right text-[11px] text-amber-300">
-              Tens alterações por guardar.
+              {t('settingsPage.unsavedChanges')}
             </p>
           )}
         </header>
@@ -459,9 +450,9 @@ export default function SettingsPageOrganized() {
                       <Icon className="size-4" />
                     </span>
                     <span>
-                      <span className="block text-sm font-medium">{label}</span>
+                      <span className="block text-sm font-medium">{t(`settingsPage.${id}`)}</span>
                       <span className="block truncate text-[11px] text-zinc-600">
-                        {desc}
+                        {t(id === 'overview' ? 'settingsPage.overviewStatus' : `settingsPage.${id}Description`)}
                       </span>
                     </span>
                   </button>
@@ -469,7 +460,7 @@ export default function SettingsPageOrganized() {
               </nav>
               <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[.04] p-4">
                 <p className="text-xs font-semibold text-emerald-300">
-                  Configuração
+                  {t('settingsPage.configuration')}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{completion}%</p>
                 <div className="mt-2 h-1.5 rounded-full bg-white/10">
@@ -488,19 +479,19 @@ export default function SettingsPageOrganized() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar definições"
+                  placeholder={t('settingsPage.search')}
                   className={`${INPUT_CLASS} pl-9`}
                 />
               </div>
               <select
-                aria-label="Secção"
+                aria-label={t('settingsPage.section')}
                 value={section}
                 onChange={(e) => go(e.target.value as Section)}
                 className="min-h-11 max-w-[48%] rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
               >
                 {sections.map(([id, label]) => (
                   <option key={id} value={id}>
-                    {label}
+                    {t(`settingsPage.${id}`)}
                   </option>
                 ))}
               </select>
@@ -509,14 +500,13 @@ export default function SettingsPageOrganized() {
               <Card className={CARD_CLASS}>
                 <CardContent className="p-6 sm:p-8">
                   <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-400">
-                    Centro de definições
+                    {t('settingsPage.overviewEyebrow')}
                   </p>
                   <h2 className="mt-2 text-3xl font-semibold">
-                    Tudo o que importa, num só lugar.
+                    {t('settingsPage.overviewTitle')}
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">
-                    Altera várias definições e guarda tudo de uma vez. As
-                    alterações só ficam publicadas quando confirmares.
+                    {t('settingsPage.overviewDescription')}
                   </p>
                 </CardContent>
               </Card>
@@ -526,15 +516,15 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Store className="size-4 text-emerald-400" />
-                    Negócio
+                    {t('settingsPage.business')}
                   </CardTitle>
                   <CardDescription>
-                    Informações públicas da tua barbearia.
+                    {t('settingsPage.publicInfo')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-5 sm:grid-cols-2">
                   <div className="grid gap-2">
-                    <label>Nome da barbearia</label>
+                    <label>{t('settingsPage.shopName')}</label>
                     <Input
                       value={config.name}
                       onChange={(e) => set({ name: e.target.value })}
@@ -542,7 +532,7 @@ export default function SettingsPageOrganized() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <label>Telefone</label>
+                    <label>{t('settingsPage.phone')}</label>
                     <Input
                       type="tel"
                       value={config.phone}
@@ -550,13 +540,26 @@ export default function SettingsPageOrganized() {
                       className={INPUT_CLASS}
                     />
                   </div>
+                  <div className="sm:col-span-2 grid gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.03] p-4">
+                    <label htmlFor="settings-default-language" className="text-sm font-medium">{t('settingsLanguage.title')}</label>
+                    <p className="text-xs text-zinc-500">{t('settingsLanguage.description')}</p>
+                    <select
+                      id="settings-default-language"
+                      value={config.default_language}
+                      onChange={(event) => set({ default_language: event.target.value === 'en' ? 'en' : 'pt' })}
+                      className={INPUT_CLASS}
+                    >
+                      <option value="pt">Português (Portugal)</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
                   <div className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div>
                       <p className="text-sm font-medium">
-                        Visibilidade no diretório
+                        {t('settingsPage.directoryVisibility')}
                       </p>
                       <p className="mt-1 text-xs text-zinc-600">
-                        Mostra ou esconde a barbearia na descoberta pública.
+                        {t('settingsPage.directoryDescription')}
                       </p>
                     </div>
                     <Switch
@@ -575,10 +578,10 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="size-4 text-emerald-400" />
-                    Localização e informações
+                    {t('settingsPage.locationInfo')}
                   </CardTitle>
                   <CardDescription>
-                    Morada, mapa e características do espaço.
+                    {t('settingsPage.locationDescriptionLong')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -593,12 +596,12 @@ export default function SettingsPageOrganized() {
                       set({ address: s.fullAddress || s.streetWithNumber });
                     }}
                     inputId="settings-address"
-                    placeholder="Pesquise a rua, número ou código postal…"
+                    placeholder={t('settingsPage.searchAddress')}
                     className="border-white/10 bg-white/5"
                   />
                   {suggestion && (
                     <p className="text-xs text-emerald-300">
-                      Morada selecionada: {suggestion.fullAddress}
+                      {t('settingsPage.selectedAddress', { address: suggestion.fullAddress })}
                     </p>
                   )}
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -617,19 +620,19 @@ export default function SettingsPageOrganized() {
                             : 'border-white/10 bg-white/[.02] text-zinc-400',
                         )}
                       >
-                        {amenityLabels[k]}
+                        {t(`settingsPage.amenities.${k}`)}
                         {amenities[k] && <Check className="size-4" />}
                       </button>
                     ))}
                   </div>
                   <div className="grid gap-2 sm:max-w-md">
-                    <p className="text-sm font-medium">Estacionamento</p>
+                    <p className="text-sm font-medium">{t('settingsPage.parking')}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {(
                         [
-                          ['none', 'Não tem'],
-                          ['free', 'Gratuito'],
-                          ['paid', 'Pago'],
+                          ['none', t('settingsPage.noParking')],
+                          ['free', t('settingsPage.freeParking')],
+                          ['paid', t('settingsPage.paidParking')],
                         ] as const
                       ).map(([v, l]) => (
                         <button
@@ -660,22 +663,24 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock3 className="size-4 text-blue-400" />
-                    Horários e regras
+                    {t('settingsPage.hoursRules')}
                   </CardTitle>
                   <CardDescription>
-                    Funcionamento, pausas e regras de marcação.
+                    {t('settingsPage.hoursRulesDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.openingTime')}
                       value={config.opening_time}
                       onChange={(e) => set({ opening_time: e.target.value })}
                       className={INPUT_CLASS}
                     />
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.closingTime')}
                       value={config.closing_time}
                       onChange={(e) => set({ closing_time: e.target.value })}
                       className={INPUT_CLASS}
@@ -684,12 +689,14 @@ export default function SettingsPageOrganized() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.lunchStart')}
                       value={config.lunch_start}
                       onChange={(e) => set({ lunch_start: e.target.value })}
                       className={INPUT_CLASS}
                     />
                     <Input
                       type="time"
+                      aria-label={t('settingsPage.lunchEnd')}
                       value={config.lunch_end}
                       onChange={(e) => set({ lunch_end: e.target.value })}
                       className={INPUT_CLASS}
@@ -727,10 +734,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Permitir marcações online
+                          {t('settingsPage.allowOnline')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          Aceita novas reservas através da página pública.
+                          {t('settingsPage.allowOnlineDescription')}
                         </p>
                       </div>
                       <Switch
@@ -743,11 +750,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Confirmar automaticamente
+                          {t('settingsPage.autoConfirm')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          As novas reservas ficam confirmadas sem intervenção
-                          manual.
+                          {t('settingsPage.autoConfirmDescription')}
                         </p>
                       </div>
                       <Switch
@@ -763,10 +769,10 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
                         <p className="text-sm font-medium">
-                          Concluir automaticamente
+                          {t('settingsPage.autoComplete')}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          Conclui a reserva depois da hora prevista.
+                          {t('settingsPage.autoCompleteDescription')}
                         </p>
                       </div>
                       <Switch
@@ -785,7 +791,7 @@ export default function SettingsPageOrganized() {
                     <div className="flex items-center gap-2">
                       <CalendarCheck2 className="size-4 text-amber-300" />
                       <p className="text-sm font-medium">
-                        Prazo de cancelamento
+                        {t('settingsPage.cancellationWindow')}
                       </p>
                     </div>
                     <Input
@@ -808,9 +814,9 @@ export default function SettingsPageOrganized() {
             <section id="settings-appearance">
               <Card className={CARD_CLASS}>
                 <CardHeader>
-                  <CardTitle>Aparência</CardTitle>
+                  <CardTitle>{t('settingsPage.appearance')}</CardTitle>
                   <CardDescription>
-                    Imagens usadas na página pública.
+                    {t('settingsPage.appearanceDescriptionLong')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -822,7 +828,7 @@ export default function SettingsPageOrganized() {
                             ? DEFAULT_BARBERSHOP_BANNER
                             : banner
                         }
-                        alt="Capa predefinida ou personalizada da barbearia"
+                        alt={t('settingsPage.bannerAlt')}
                         fill
                         className="object-cover"
                         unoptimized
@@ -836,7 +842,7 @@ export default function SettingsPageOrganized() {
                                 ? DEFAULT_BARBERSHOP_AVATAR
                                 : avatar
                             }
-                            alt="Logótipo predefinido ou personalizado"
+                            alt={t('settingsPage.avatarAlt')}
                             width={128}
                             height={128}
                             className="h-full w-full object-cover"
@@ -852,7 +858,7 @@ export default function SettingsPageOrganized() {
                             disabled={uploading === 'banner'}
                           >
                             <ImageIcon className="mr-2 size-4" />
-                            Capa
+                            {t('settingsPage.cover')}
                           </Button>
                           <Button
                             type="button"
@@ -861,7 +867,7 @@ export default function SettingsPageOrganized() {
                             disabled={uploading === 'avatar'}
                           >
                             <Camera className="mr-2 size-4" />
-                            Logótipo
+                            {t('settingsPage.logo')}
                           </Button>
                         </div>
                       </div>
@@ -897,14 +903,14 @@ export default function SettingsPageOrganized() {
                 <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[.16em] text-emerald-400">
-                      Plano e faturação
+                      {t('settingsPage.billing')}
                     </p>
                     <h2 className="mt-1 text-lg font-semibold">
-                      Subscrição, faturas e limites.
+                      {t('settingsPage.billingTitle')}
                     </h2>
                   </div>
                   <Button asChild>
-                    <Link href="/dashboard/billing">Abrir faturação</Link>
+                    <Link href="/dashboard/billing">{t('settingsPage.openBilling')}</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -914,7 +920,7 @@ export default function SettingsPageOrganized() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShieldCheck className="size-4 text-emerald-400" />
-                    Conta e segurança
+                    {t('settingsPage.accountSecurity')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -925,7 +931,7 @@ export default function SettingsPageOrganized() {
                     disabled={logoutLoading}
                   >
                     <LogOut className="mr-2 size-4" />
-                    {logoutLoading ? 'A terminar sessão…' : 'Terminar sessão'}
+                    {logoutLoading ? t('settingsPage.logoutLoading') : t('settingsPage.logout')}
                   </Button>
                 </CardContent>
               </Card>
@@ -937,14 +943,14 @@ export default function SettingsPageOrganized() {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/95 p-3 backdrop-blur-xl sm:hidden">
           <div className="mx-auto flex max-w-xl gap-2">
             <Button variant="ghost" onClick={reset} className="min-h-11 flex-1">
-              Descartar
+              {t('settingsPage.discard')}
             </Button>
             <Button
               onClick={() => void saveAll()}
               disabled={saving}
               className="min-h-11 flex-1 bg-white text-zinc-950"
             >
-              {saving ? 'A guardar…' : 'Guardar alterações'}
+              {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
             </Button>
           </div>
         </div>
