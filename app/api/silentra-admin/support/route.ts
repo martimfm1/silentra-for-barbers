@@ -1,4 +1,6 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import {
   deliverSupportEmailNotification,
@@ -22,7 +24,7 @@ function jsonError(error: string, status: number) {
   );
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const { admin } = await requirePlatformAdmin();
     const url = new URL(request.url);
@@ -183,18 +185,21 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function POST__unobserved(request: Request) {
   if (!isTrustedSupportOrigin(request)) {
     return jsonError('Pedido de origem não autorizado.', 403);
   }
 
   try {
     const { admin, user } = await requirePlatformAdmin();
-    const payload = (await request.json().catch(() => null)) as
-      | { conversationId?: unknown; message?: unknown }
-      | null;
-    const conversationId = typeof payload?.conversationId === 'string' ? payload.conversationId.trim() : '';
-    const message = typeof payload?.message === 'string' ? payload.message.trim() : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['conversationId', 'message'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const payload = bodyResult.value;
+    const conversationId = typeof payload.conversationId === 'string' ? payload.conversationId.trim() : '';
+    const message = typeof payload.message === 'string' ? payload.message.trim() : '';
 
     if (!UUID_RE.test(conversationId) || !message || message.length > 4000) {
       return jsonError('Conversa e mensagem válida são obrigatórias (máximo 4000 caracteres).', 400);
@@ -311,18 +316,21 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   if (!isTrustedSupportOrigin(request)) {
     return jsonError('Pedido de origem não autorizado.', 403);
   }
 
   try {
     const { admin } = await requirePlatformAdmin();
-    const payload = (await request.json().catch(() => null)) as
-      | { conversationId?: unknown; action?: unknown; status?: unknown }
-      | null;
-    const conversationId = typeof payload?.conversationId === 'string' ? payload.conversationId.trim() : '';
-    const action = typeof payload?.action === 'string' ? payload.action : '';
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 2 * 1024,
+      allowedKeys: ['conversationId', 'action', 'status'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const payload = bodyResult.value;
+    const conversationId = typeof payload.conversationId === 'string' ? payload.conversationId.trim() : '';
+    const action = typeof payload.action === 'string' ? payload.action : '';
 
     if (!UUID_RE.test(conversationId)) return jsonError('ID da conversa inválido.', 400);
 
@@ -365,3 +373,7 @@ export async function PATCH(request: Request) {
     return jsonError('Não foi possível atualizar a conversa.', 500);
   }
 }
+
+export const GET = withApiObservability('/api/silentra-admin/support', GET__unobserved);
+export const POST = withApiObservability('/api/silentra-admin/support', POST__unobserved);
+export const PATCH = withApiObservability('/api/silentra-admin/support', PATCH__unobserved);
