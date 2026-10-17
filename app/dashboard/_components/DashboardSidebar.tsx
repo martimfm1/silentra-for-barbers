@@ -177,6 +177,19 @@ export function DashboardSidebar() {
       pathname.startsWith('/dashboard/marketing'),
   );
 
+  useEffect(() => {
+    const matchesCurrentPath = (items: SidebarItem[]) =>
+      items.some(
+        (item) =>
+          pathname === item.href || pathname.startsWith(`${item.href}/`),
+      );
+
+    // Keep a parent section expanded when navigation reaches one of its routes
+    // from another part of the application. Users can still collapse it again.
+    if (matchesCurrentPath(communicationItems)) setCommunicationOpen(true);
+    if (matchesCurrentPath(toolsItems)) setToolsOpen(true);
+  }, [pathname]);
+
   const mobilePrimary = primaryItems.slice(0, 4);
   const isLocked = (item: SidebarItem) =>
     Boolean(item.feature && !hasFeature(item.feature));
