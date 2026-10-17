@@ -140,7 +140,7 @@ export default function CustomWebsiteDashboardPage() {
             <div>
               <p className="text-xs uppercase tracking-wider text-zinc-500">{pt ? 'Estado do pedido mais recente' : 'Latest request status'}</p>
               <h2 className="mt-2 text-lg font-semibold text-white">{statusCopy[latest.status].label}</h2>
-              <p className="mt-1 text-sm text-zinc-400">{STATUS[latest.status].description}</p>
+              <p className="mt-1 text-sm text-zinc-400">{statusCopy[latest.status].description}</p>
             </div>
             <span className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">{new Date(latest.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT')}</span>
           </div>
