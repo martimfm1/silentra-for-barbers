@@ -8,6 +8,7 @@ const [
   sidebar,
   globalCss,
   dashboardShell,
+  topBar,
   button,
   supportService,
   emailMigration,
@@ -16,6 +17,7 @@ const [
   read('app/dashboard/_components/DashboardSidebar.tsx'),
   read('app/globals.css'),
   read('app/dashboard/dashboard-content.tsx'),
+  read('app/dashboard/_components/DashboardTopBar.tsx'),
   read('components/ui/button.tsx'),
   read('services/support/support-chat.service.ts'),
   read('supabase/migrations/20261017130000_support_notify_every_message.sql'),
@@ -47,12 +49,17 @@ assert.match(sidebar, /aria-controls=\{mobile \? 'dashboard-communication-mobile
 assert.match(sidebar, /aria-expanded=\{toolsOpen\}/);
 assert.match(sidebar, /aria-controls=\{panelId\}/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
+assert.match(sidebar, /handleDialogKeys/);
+assert.match(sidebar, /mobileTriggerRef\.current\?\.focus\(\)/);
 
 // Core accessibility regressions: keyboard focus, landmarks, target sizes and motion.
 assert.match(navbar, /keepFocusInside/);
 assert.match(navbar, /aria-controls="site-navigation-overlay"/);
 assert.match(dashboardShell, /href="#dashboard-main-content"/);
 assert.match(dashboardShell, /id="dashboard-main-content"/);
+assert.match(dashboardShell, /isSettingsPage \? 'pt-0' : 'pt-16'/);
+assert.match(topBar, /aria-current="page"/);
+assert.doesNotMatch(topBar, /setInterval/);
 assert.match(globalCss, /:focus-visible/);
 assert.match(globalCss, /\.skip-link/);
 assert.match(globalCss, /@media \(prefers-reduced-motion: reduce\)/);
