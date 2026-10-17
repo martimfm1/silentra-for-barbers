@@ -427,7 +427,7 @@ export function DashboardSidebar() {
                   )}
                   aria-hidden="true"
                 />
-                <span className="max-w-full truncate">{item.label}</span>
+                <span className="max-w-full truncate">{localizeNavLabel(item.label, locale)}</span>
               </Link>
             );
           })}
