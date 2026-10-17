@@ -260,7 +260,7 @@ export default async function DocumentationPage() {
     ...section,
     label: sectionLabels[section.id]?.[english ? 'en' : 'pt'] ?? section.label,
   }));
-  const localizedResponseStatuses = localizedResponseStatuses.map((item) => ({
+  const localizedResponseStatuses = responseStatuses.map((item) => ({
     ...item,
     meaning: statusMeanings[item.status]?.[english ? 'en' : 'pt'] ?? item.meaning,
   }));
@@ -312,7 +312,7 @@ export default async function DocumentationPage() {
               { label: tr('Autenticação', 'Authentication'), value: tr('Não necessária', 'Not required'), icon: Globe2 },
               {
                 label: tr('Limite inicial', 'Initial rate limit'),
-                value: '120 pedidos/min',
+                value: tr('120 pedidos/min', '120 requests/min'),
                 icon: Timer,
               },
               { label: tr('Contrato', 'Contract'), value: 'API v1 · JSON', icon: Layers3 },
