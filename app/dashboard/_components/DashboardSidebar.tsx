@@ -121,7 +121,8 @@ const secondaryItems: SidebarItem[] = [
   },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/billing', label: 'Plano e pagamentos', icon: CreditCard },
-  { href: '/dashboard/website', label: 'Site próprio', icon: Globe2, feature: 'custom_website' },
+  // Keep the entry available on every plan; the page/API explain purchase and grant access.
+  { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
   { href: '/dashboard/settings', label: 'Definições', icon: Settings },
 ];
 
