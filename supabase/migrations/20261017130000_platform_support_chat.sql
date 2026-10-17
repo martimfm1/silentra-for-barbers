@@ -47,7 +47,7 @@ create table if not exists public.support_email_notifications (
   recipient_email text not null,
   recipient_name text,
   status text not null default 'pending'
-    check (status in ('pending', 'sent', 'failed')),
+    check (status in ('pending', 'processing', 'sent', 'failed')),
   attempts integer not null default 0 check (attempts >= 0),
   next_attempt_at timestamptz not null default now(),
   last_error text,
@@ -58,7 +58,7 @@ create table if not exists public.support_email_notifications (
 
 create index if not exists support_email_notifications_due_idx
   on public.support_email_notifications (next_attempt_at, created_at)
-  where status in ('pending', 'failed') and attempts < 5;
+  where status in ('pending', 'processing', 'failed') and attempts < 5;
 
 comment on table public.support_conversations is
   'Private platform-level support inbox. One conversation per barbershop; priority is derived server-side from effective plan.';
