@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/support-email-notifications",
-      "schedule": "*/15 * * * *"
+      "schedule": "45 0 * * *"
     }
   ],
   "git": {
