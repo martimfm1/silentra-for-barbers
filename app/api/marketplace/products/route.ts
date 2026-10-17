@@ -8,6 +8,8 @@ export const runtime = 'nodejs';
 const MAX_QUERY_LENGTH = 80;
 const CATALOG_RATE_LIMIT = 120;
 const CATALOG_RATE_WINDOW_SECONDS = 60;
+// All response fields are public catalogue data; only cache successful responses.
+const PUBLIC_CATALOG_CACHE = 'public, max-age=0, s-maxage=15, stale-while-revalidate=45';
 const MAX_CATEGORY_LENGTH = 80;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -140,6 +142,39 @@ async function GET__unobserved(request: Request) {
     query = query.order('updated_at', { ascending: false });
   else query = query.order('updated_at', { ascending: false });
 
+  // Start the featured-products lookup before awaiting the base catalogue query.
+  // These reads are independent, so featured sorting costs one database round trip
+  // instead of two sequential round trips.
+  const featuredProductsPromise =
+    sort === 'featured' && !productId
+      ? (async () => {
+          let featuredQuery = db
+            .from('inventory_products')
+            .select(
+              'id,barbershop_id,name,description,category,image_url,unit_price,compare_at_price,stock_quantity,marketplace_featured,marketplace_published_at,marketplace_featured_until,created_at,updated_at,barbershops!inner(name,slug,is_public_in_directory,marketplace_sales_mode)',
+            )
+            .eq('active', true)
+            .eq('marketplace_visible', true)
+            .eq('marketplace_featured', true)
+            .gt('marketplace_featured_until', new Date().toISOString())
+            .gt('stock_quantity', 0)
+            .eq('barbershops.is_public_in_directory', true)
+            .eq('barbershops.marketplace_sales_mode', 'physical_and_online');
+
+          if (q)
+            featuredQuery = featuredQuery.or(
+              `name.ilike.%${q}%,description.ilike.%${q}%`,
+            );
+          if (category) featuredQuery = featuredQuery.eq('category', category);
+          if (shopId) featuredQuery = featuredQuery.eq('barbershop_id', shopId);
+
+          return await featuredQuery
+            .order('marketplace_featured_until', { ascending: false })
+            .order('updated_at', { ascending: false })
+            .limit(100);
+        })()
+      : null;
+
   const { data, error } = await query;
   if (error) {
     console.error('[MARKETPLACE_PRODUCTS_API]', error.name ?? 'database_error');
@@ -180,41 +215,16 @@ async function GET__unobserved(request: Request) {
     }
     return NextResponse.json(
       { product },
-      { headers: { 'Cache-Control': 'no-store' } },
+      { headers: { 'Cache-Control': PUBLIC_CATALOG_CACHE } },
     );
   }
 
   let catalog = visible;
 
   if (sort === 'featured') {
-    // Query active boosts separately so a popular product can be promoted even
-    // when its updated_at would otherwise put it outside the first 100 results.
-    // Expired boosts are excluded in SQL; legacy boolean flags cannot keep an
-    // expired listing permanently above unfeatured products.
-    let featuredQuery = db
-      .from('inventory_products')
-      .select(
-        'id,barbershop_id,name,description,category,image_url,unit_price,compare_at_price,stock_quantity,marketplace_featured,marketplace_published_at,marketplace_featured_until,created_at,updated_at,barbershops!inner(name,slug,is_public_in_directory,marketplace_sales_mode)',
-      )
-      .eq('active', true)
-      .eq('marketplace_visible', true)
-      .eq('marketplace_featured', true)
-      .gt('marketplace_featured_until', new Date().toISOString())
-      .gt('stock_quantity', 0)
-      .eq('barbershops.is_public_in_directory', true)
-      .eq('barbershops.marketplace_sales_mode', 'physical_and_online');
-
-    if (q)
-      featuredQuery = featuredQuery.or(
-        `name.ilike.%${q}%,description.ilike.%${q}%`,
-      );
-    if (category) featuredQuery = featuredQuery.eq('category', category);
-    if (shopId) featuredQuery = featuredQuery.eq('barbershop_id', shopId);
-
-    const { data: featuredData, error: featuredError } = await featuredQuery
-      .order('marketplace_featured_until', { ascending: false })
-      .order('updated_at', { ascending: false })
-      .limit(100);
+    // The promise started alongside the base query above to avoid serial latency.
+    const { data: featuredData, error: featuredError } =
+      await featuredProductsPromise!;
 
     if (featuredError) {
       console.error(
@@ -279,7 +289,7 @@ async function GET__unobserved(request: Request) {
 
   return NextResponse.json(
     { products: catalog, categories, shops },
-    { headers: { 'Cache-Control': 'no-store' } },
+    { headers: { 'Cache-Control': PUBLIC_CATALOG_CACHE } },
   );
 }
 

@@ -33,6 +33,8 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', '@tabler/icons-react', 'date-fns'],
   },
   images: {
+    // AVIF reduces bytes on the wire; WebP remains the broadly supported fallback.
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
