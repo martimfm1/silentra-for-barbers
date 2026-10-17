@@ -185,6 +185,8 @@ const localeAwareSources = {
   'components/hero/pricing-section.tsx': ["useLanguage()", 'HERO_FEATURES_EN', 'const descriptions ='],
   'components/billing/PricingCard.tsx': ["useLanguage()", "english ? 'Current plan'"],
   'components/billing/plan-comparison.tsx': ["useLanguage()", 'FEATURE_LABELS_EN', 'GROUP_LABELS_EN'],
+  'components/billing/manual-checkout.tsx': ["useLanguage()", 'COPY_EN', 'english ? \'Annual billing\''],
+  'components/billing/custom-checkout.tsx': ["useLanguage()", 'PLAN_COPY_EN', 'englishRef.current'],
 };
 
 for (const [path, expectedFragments] of Object.entries(localeAwareSources)) {
