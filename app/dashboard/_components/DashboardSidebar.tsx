@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BarChart3,
   Megaphone,
@@ -163,6 +163,8 @@ export function DashboardSidebar() {
   const { barbershopAvatarUrl } = useBarbershop();
   const { t, locale } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileDialogRef = useRef<HTMLElement>(null);
   const [toolsOpen, setToolsOpen] = useState(() =>
     ['/dashboard/qr-code', '/dashboard/analytics', '/dashboard/loyalty', '/dashboard/pos', '/dashboard/website'].some(
       (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -199,6 +201,51 @@ export function DashboardSidebar() {
   };
 
   const closeMobile = () => setMobileOpen(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const dialog = mobileDialogRef.current;
+    if (!dialog) return;
+
+    const selector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () =>
+      Array.from(dialog.querySelectorAll<HTMLElement>(selector)).filter(
+        (element) => element.getAttribute('aria-hidden') !== 'true',
+      );
+
+    getFocusable()[0]?.focus();
+
+    const handleDialogKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const elements = getFocusable();
+      if (!elements.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDialogKeys);
+    return () => {
+      document.removeEventListener('keydown', handleDialogKeys);
+      mobileTriggerRef.current?.focus();
+    };
+  }, [mobileOpen]);
 
   const renderItem = (item: SidebarItem, mobile = false) => {
     const locked = isLocked(item);
@@ -440,6 +487,7 @@ export function DashboardSidebar() {
             );
           })}
           <button
+            ref={mobileTriggerRef}
             type="button"
             onClick={() => setMobileOpen(true)}
             className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
@@ -465,7 +513,7 @@ export function DashboardSidebar() {
             onClick={closeMobile}
             aria-label={locale === 'en' ? 'Close menu' : 'Fechar menu'}
           />
-          <aside className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-white/10 bg-zinc-950 p-4 shadow-2xl">
+          <aside ref={mobileDialogRef} className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-white/10 bg-zinc-950 p-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <Link
                 href="/dashboard"
