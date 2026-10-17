@@ -33,17 +33,48 @@ async function getOwnerContext() {
 
   const tenant = await BarbershopStripeService.getTenantContext(user.id);
   const plan = await BarbershopStripeService.getEffectivePlan(user.id);
-  if (plan !== 'enterprise') {
-    return { response: fail('Os sites próprios são exclusivos do plano Enterprise.', 403) } as const;
+  const database = createAdminClient();
+  if (plan === 'enterprise') {
+    return {
+      user, tenant, plan, database,
+      access: { allowed: true, setupFee: 150, monthlyFee: 2.99, source: 'enterprise' as const },
+    } as const;
   }
 
-  return { user, tenant, database: createAdminClient() } as const;
+  const { data: grant, error: grantError } = await database
+    .from('custom_website_access_grants')
+    .select('plan_at_grant, setup_fee_eur, monthly_fee_eur')
+    .eq('barbershop_id', tenant.barbershopId)
+    .eq('active', true)
+    .maybeSingle();
+  if (grantError) {
+    console.error('[CUSTOM_WEBSITE_ACCESS_CHECK_FAILED]', { code: grantError.code });
+    return { response: fail('Não foi possível validar o acesso ao serviço de sites.', 503) } as const;
+  }
+
+  return {
+    user, tenant, plan, database,
+    access: grant ? {
+      allowed: true,
+      setupFee: Number(grant.setup_fee_eur),
+      monthlyFee: Number(grant.monthly_fee_eur),
+      source: 'admin_grant' as const,
+    } : { allowed: false, setupFee: plan === 'pro' ? 150 : 150, monthlyFee: plan === 'pro' ? 4.99 : 6.99, source: 'not_granted' as const },
+  } as const;
 }
 
 async function GET__unobserved() {
   try {
     const context = await getOwnerContext();
     if ('response' in context) return context.response;
+
+    if (!context.access.allowed) {
+      return NextResponse.json({
+        data: [],
+        access: context.access,
+        plan: context.plan,
+      }, { headers: { 'Cache-Control': 'no-store' } });
+    }
 
     const { data, error } = await context.database
       .from('custom_website_requests')
@@ -57,7 +88,7 @@ async function GET__unobserved() {
       return fail('Não foi possível carregar os pedidos de site.', 503);
     }
 
-    return NextResponse.json({ data: data ?? [], plan: 'enterprise' }, {
+    return NextResponse.json({ data: data ?? [], plan: context.plan, access: context.access }, {
       headers: { 'Cache-Control': 'no-store' },
     });
   } catch (error) {
@@ -81,6 +112,9 @@ async function POST__unobserved(request: Request) {
     }
     const context = await getOwnerContext();
     if ('response' in context) return context.response;
+    if (!context.access.allowed) {
+      return fail('O acesso a sites personalizados ainda não foi autorizado para esta barbearia. Contacta a Silentra para adquirir o serviço.', 403);
+    }
 
     const contentLength = Number(request.headers.get('content-length') ?? '0');
     if (Number.isFinite(contentLength) && contentLength > 12_000) {
