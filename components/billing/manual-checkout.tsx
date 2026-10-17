@@ -233,7 +233,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
+            : english ? 'Could not submit the request.' : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
         );
 
       router.replace(body.redirectUrl || '/dashboard/billing?manual=pending');
@@ -241,7 +241,7 @@ export function ManualCheckout({
       setError(
         err instanceof Error
           ? err.message
-          : 'Não foi possível enviar o pedido.',
+          : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.',
       );
       setSubmitting(false);
     }
