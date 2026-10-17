@@ -6,6 +6,7 @@ import {
   deliverSupportEmailNotification,
   getPlatformSupportEmail,
   isTrustedSupportOrigin,
+  normalizeSupportPlan,
   type SupportStatus,
   type SupportPlan,
   supportPriority,
@@ -30,6 +31,10 @@ async function GET__unobserved(request: Request) {
     const url = new URL(request.url);
     const conversationId = url.searchParams.get('conversationId')?.trim() ?? '';
 
+    if (conversationId && !UUID_RE.test(conversationId)) {
+      return jsonError('ID da conversa inválido.', 400);
+    }
+
     const { data: conversations, error: conversationsError } = await admin
       .from('support_conversations')
       .select('id,barbershop_id,customer_user_id,subject,status,plan,priority,last_message_at,last_message_preview,created_at,updated_at')
@@ -39,33 +44,61 @@ async function GET__unobserved(request: Request) {
 
     if (conversationsError) throw new Error('SUPPORT_ADMIN_CONVERSATIONS_LOOKUP_FAILED');
 
-    const rows = conversations ?? [];
+    const rows = [...(conversations ?? [])];
+    if (conversationId && !rows.some((row) => row.id === conversationId)) {
+      const extra = await admin
+        .from('support_conversations')
+        .select('id,barbershop_id,customer_user_id,subject,status,plan,priority,last_message_at,last_message_preview,created_at,updated_at')
+        .eq('id', conversationId)
+        .maybeSingle();
+      if (extra.error) throw new Error('SUPPORT_ADMIN_SELECTED_CONVERSATION_LOOKUP_FAILED');
+      if (extra.data) rows.push(extra.data);
+      else return jsonError('Conversa não encontrada.', 404);
+    }
     const conversationIds = rows.map((row) => row.id);
     const customerIds = [...new Set(rows.map((row) => row.customer_user_id))];
     const shopIds = [...new Set(rows.map((row) => row.barbershop_id))];
 
-    const [usersResult, shopsResult, unreadResult] = conversationIds.length
-      ? await Promise.all([
-          customerIds.length
-            ? admin.from('users').select('id,name_complete,email').in('id', customerIds)
-            : Promise.resolve({ data: [], error: null }),
-          shopIds.length
-            ? admin.from('barbershops').select('id,name,slug').in('id', shopIds)
-            : Promise.resolve({ data: [], error: null }),
-          admin
-            .from('support_messages')
-            .select('conversation_id,id', { count: 'exact' })
-            .in('conversation_id', conversationIds)
-            .eq('sender_type', 'customer')
-            .is('read_at', null),
-        ])
-      : [
-          { data: [], error: null },
-          { data: [], error: null },
-          { data: [], error: null },
-        ];
+    const now = new Date().toISOString();
+    const [usersResult, shopsResult, unreadResult, assignmentsResult, subscriptionsResult] =
+      conversationIds.length
+        ? await Promise.all([
+            customerIds.length
+              ? admin.from('users').select('id,name_complete,email').in('id', customerIds)
+              : Promise.resolve({ data: [], error: null }),
+            shopIds.length
+              ? admin.from('barbershops').select('id,name,slug').in('id', shopIds)
+              : Promise.resolve({ data: [], error: null }),
+            admin
+              .from('support_messages')
+              .select('conversation_id,id', { count: 'exact' })
+              .in('conversation_id', conversationIds)
+              .eq('sender_type', 'customer')
+              .is('read_at', null),
+            admin
+              .from('barbershop_plan_assignments')
+              .select('barbershop_id,plan,expires_at')
+              .in('barbershop_id', shopIds),
+            admin
+              .from('subscriptions')
+              .select('barbershop_id,plan,plan_override,status')
+              .in('barbershop_id', shopIds),
+          ])
+        : [
+            { data: [], error: null },
+            { data: [], error: null },
+            { data: [], error: null },
+            { data: [], error: null },
+            { data: [], error: null },
+          ];
 
-    if (usersResult.error || shopsResult.error || unreadResult.error) {
+    if (
+      usersResult.error ||
+      shopsResult.error ||
+      unreadResult.error ||
+      assignmentsResult.error ||
+      subscriptionsResult.error
+    ) {
       throw new Error('SUPPORT_ADMIN_CONTEXT_LOOKUP_FAILED');
     }
 
@@ -78,6 +111,31 @@ async function GET__unobserved(request: Request) {
         (unreadByConversation.get(message.conversation_id) ?? 0) + 1,
       );
     }
+    const assignmentByShop = new Map(
+      (assignmentsResult.data ?? []).map((assignment) => [assignment.barbershop_id, assignment]),
+    );
+    const subscriptionByShop = new Map(
+      (subscriptionsResult.data ?? []).map((subscription) => [subscription.barbershop_id, subscription]),
+    );
+    const resolveEffectivePlan = (barbershopId: string): SupportPlan => {
+      const assignment = assignmentByShop.get(barbershopId);
+      if (
+        assignment &&
+        (!assignment.expires_at || Date.parse(assignment.expires_at) > Date.now())
+      ) {
+        return normalizeSupportPlan(assignment.plan);
+      }
+
+      const subscription = subscriptionByShop.get(barbershopId);
+      if (subscription?.plan_override) return normalizeSupportPlan(subscription.plan_override);
+      if (
+        (subscription?.status === 'active' || subscription?.status === 'trialing') &&
+        (subscription?.plan === 'pro' || subscription?.plan === 'enterprise')
+      ) {
+        return subscription.plan;
+      }
+      return 'free';
+    };
 
     const normalizedConversations = await Promise.all(
       rows.map(async (row) => {
@@ -88,8 +146,11 @@ async function GET__unobserved(request: Request) {
           customerEmail = result.data.user?.email ?? null;
         }
         const shop = shopById.get(row.barbershop_id);
+        const effectivePlan = resolveEffectivePlan(row.barbershop_id);
         return {
           ...row,
+          plan: effectivePlan,
+          priority: supportPriority(effectivePlan),
           unreadCount: unreadByConversation.get(row.id) ?? 0,
           customer: {
             id: row.customer_user_id,
@@ -113,44 +174,19 @@ async function GET__unobserved(request: Request) {
       const selected = rows.find((row) => row.id === conversationId);
       if (!selected) return jsonError('Conversa não encontrada.', 404);
 
-      const [messageResult, planResult] = await Promise.all([
-        admin
-          .from('support_messages')
-          .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
-          .eq('conversation_id', conversationId)
-          .order('created_at', { ascending: true })
-          .limit(100),
-        admin
-          .from('barbershop_plan_assignments')
-          .select('plan,expires_at')
-          .eq('barbershop_id', selected.barbershop_id)
-          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-          .maybeSingle(),
-      ]);
-      if (messageResult.error || planResult.error) {
+      const messageResult = await admin
+        .from('support_messages')
+        .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+        .limit(100);
+      if (messageResult.error) {
         throw new Error('SUPPORT_ADMIN_MESSAGES_LOOKUP_FAILED');
       }
       messages = messageResult.data ?? [];
-      // Refresh the cached plan/priority from the authoritative assignment and
-      // subscription data, not from any browser-supplied plan value.
-      const { data: subscription, error: subscriptionError } = await admin
-        .from('subscriptions')
-        .select('plan,plan_override,status')
-        .eq('barbershop_id', selected.barbershop_id)
-        .maybeSingle();
-      if (subscriptionError) throw new Error('SUPPORT_ADMIN_PLAN_LOOKUP_FAILED');
-
-      let effectivePlan: SupportPlan = 'free';
-      if (planResult.data?.plan === 'pro' || planResult.data?.plan === 'enterprise') {
-        effectivePlan = planResult.data.plan;
-      } else if (subscription?.plan_override === 'pro' || subscription?.plan_override === 'enterprise') {
-        effectivePlan = subscription.plan_override;
-      } else if (
-        (subscription?.status === 'active' || subscription?.status === 'trialing') &&
-        (subscription?.plan === 'pro' || subscription?.plan === 'enterprise')
-      ) {
-        effectivePlan = subscription.plan;
-      }
+      // Priority is resolved from current assignment/subscription rows, not
+      // the browser or potentially stale conversation metadata.
+      const effectivePlan = resolveEffectivePlan(selected.barbershop_id);
 
       const { error: syncError } = await admin
         .from('support_conversations')
