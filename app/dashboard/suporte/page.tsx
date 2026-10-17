@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ArrowUpRight,
@@ -304,9 +305,9 @@ export default function SupportPage() {
                   <span className="text-xs text-muted-foreground">{pt ? 'Prioridade máxima' : 'Highest priority'}</span>
                 </div>
               </div>
-              <a href="/dashboard/billing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+              <Link href="/dashboard/billing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                 {pt ? 'Ver planos' : 'View plans'} <ArrowUpRight className="size-4" />
-              </a>
+              </Link>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-5">
