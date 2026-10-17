@@ -180,14 +180,22 @@ export function DashboardSidebar() {
     Boolean(item.feature && !hasFeature(item.feature));
 
   const handleLocked = (item: SidebarItem) => {
-    toast.info(`${item.label}: disponível num plano superior.`, {
-      description:
-        'A tua conta continua a funcionar normalmente. Podes mudar de plano quando precisares desta funcionalidade.',
-      action: {
-        label: 'Ver planos',
-        onClick: () => router.push('/dashboard/billing'),
+    const label = localizeNavLabel(item.label, locale);
+    toast.info(
+      locale === 'en'
+        ? `${label}: available on a higher plan.`
+        : `${label}: disponível num plano superior.`,
+      {
+        description:
+          locale === 'en'
+            ? 'Your account will keep working normally. Upgrade your plan whenever you need this feature.'
+            : 'A tua conta continua a funcionar normalmente. Podes mudar de plano quando precisares desta funcionalidade.',
+        action: {
+          label: locale === 'en' ? 'View plans' : 'Ver planos',
+          onClick: () => router.push('/dashboard/billing'),
+        },
       },
-    });
+    );
   };
 
   const closeMobile = () => setMobileOpen(false);
@@ -291,7 +299,7 @@ export function DashboardSidebar() {
             )}
             aria-hidden="true"
           />
-          <span className="truncate">Comunicação</span>
+          <span className="truncate">{locale === 'en' ? 'Communication' : 'Comunicação'}</span>
           <ChevronDown
             className={cn(
               'ml-auto size-4 transition-transform duration-200 motion-reduce:transition-none',
