@@ -115,7 +115,7 @@ async function GET__unobserved() {
       .from('support_messages')
       .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
       .eq('conversation_id', conversation.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(100);
     if (messagesError) throw new Error('SUPPORT_MESSAGES_LOOKUP_FAILED');
 
@@ -138,7 +138,7 @@ async function GET__unobserved() {
           shop_name: shop.name,
           customer_name: profile.name_complete || user.email,
         },
-        messages: messages ?? [],
+        messages: (messages ?? []).reverse(),
         unreadCount: unreadCount ?? 0,
       },
       { headers: { 'Cache-Control': 'no-store' } },
