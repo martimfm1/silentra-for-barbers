@@ -71,6 +71,7 @@ export default function SupportPage() {
   const { locale } = useLanguage();
   const pt = locale === 'pt';
   const [conversation, setConversation] = useState<SupportConversation | null>(null);
+  const [accountPlan, setAccountPlan] = useState<SupportPlan>('free');
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
@@ -87,12 +88,14 @@ export default function SupportPage() {
         ok?: boolean;
         error?: string;
         conversation?: SupportConversation | null;
+        plan?: SupportPlan;
         messages?: SupportMessage[];
       };
       if (!response.ok || !payload.ok) {
         throw new Error(payload.error || 'Não foi possível carregar o suporte.');
       }
       setConversation(payload.conversation ?? null);
+      setAccountPlan(payload.plan ?? payload.conversation?.plan ?? 'free');
       setMessages(payload.messages ?? []);
       setError(null);
     } catch (err) {
@@ -155,7 +158,7 @@ export default function SupportPage() {
     }
   };
 
-  const plan = conversation?.plan ?? 'free';
+  const plan = conversation?.plan ?? accountPlan;
   const planInfo = planDescriptions[locale][plan];
 
   return (
@@ -197,7 +200,7 @@ export default function SupportPage() {
                 </p>
               </div>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-300">
-                <LockKeyhole className="size-3" /> Privado
+                <LockKeyhole className="size-3" /> {pt ? 'Privado' : 'Private'}
               </span>
             </div>
 
@@ -235,7 +238,7 @@ export default function SupportPage() {
                             <span>{ownMessage ? (pt ? 'Tu' : 'You') : (pt ? 'Equipa Silentra' : 'Silentra team')}</span>
                             <span>·</span>
                             <time dateTime={message.created_at}>{formatDate(message.created_at, locale)}</time>
-                            {ownMessage ? <Check className="size-3" aria-label={message.read_at ? 'Lida' : 'Enviada'} /> : null}
+                            {ownMessage ? <Check className="size-3" aria-label={message.read_at ? (pt ? 'Lida' : 'Read') : (pt ? 'Enviada' : 'Sent')} /> : null}
                           </div>
                         </div>
                       </div>
