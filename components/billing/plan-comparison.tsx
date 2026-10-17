@@ -185,7 +185,7 @@ export function PlanComparison() {
                     <span
                       className={`mt-0.5 block text-[9px] font-medium uppercase tracking-wider ${selected ? 'text-emerald-700' : 'text-emerald-400/70'}`}
                     >
-                      {english ? 'Popular' : 'Popular'}
+                      {english ? 'Most popular' : 'Mais popular'}
                     </span>
                   ) : null}
                 </button>
