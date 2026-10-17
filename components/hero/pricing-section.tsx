@@ -14,7 +14,7 @@ import {
   PricingCard,
   type PricingDestination,
 } from '@/components/billing/PricingCard';
-import { PLAN_DESCRIPTIONS } from '@/lib/billing/plan-features';
+import { useLanguage } from '@/context/LanguageContext';
 
 type BillingPrice = {
   plan: 'pro' | 'enterprise' | null;
@@ -46,6 +46,12 @@ const HERO_FEATURES = {
   ],
 } as const;
 
+const HERO_FEATURES_EN = {
+  free: ['Unlimited bookings', 'Unlimited customers and services', 'Online bookings + QR code', '1 barber and 1 location'],
+  pro: ['Up to 5 barbers', 'Advanced CRM and analytics', 'Marketing campaigns and automation', 'Loyalty and automated follow-ups'],
+  enterprise: ['Unlimited barbers and locations', 'POS, inventory and commissions', 'Global permissions and management', 'Advanced business reports', 'Professional landing page included', 'Custom website available at a separate quote'],
+} as const;
+
 export function PricingSection({
   destination = 'plans',
   showDecisionHeader = true,
@@ -53,6 +59,12 @@ export function PricingSection({
   destination?: PricingDestination;
   showDecisionHeader?: boolean;
 }) {
+  const { locale } = useLanguage();
+  const english = locale === 'en';
+  const featureCopy = english ? HERO_FEATURES_EN : HERO_FEATURES;
+  const descriptions = english
+    ? { free: 'The essentials to start taking bookings and keep your barbershop organised.', pro: 'For barbershops ready to grow, retain customers and automate daily operations.', enterprise: 'For larger teams, multiple locations and advanced operational control.' }
+    : { free: 'O essencial para começar a receber marcações e organizar a barbearia.', pro: 'Para barbearias que querem crescer, fidelizar clientes e automatizar o dia a dia.', enterprise: 'Para equipas maiores, várias localizações e controlo operacional avançado.' };
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>(
@@ -108,10 +120,10 @@ export function PricingSection({
     )?.unitAmount;
 
     if (typeof amount !== 'number') {
-      return plan === 'pro' ? '9,90 €' : '29,90 €';
+      return english ? (plan === 'pro' ? '€9.90' : '€29.90') : (plan === 'pro' ? '9,90 €' : '29,90 €');
     }
 
-    return new Intl.NumberFormat('pt-PT', {
+    return new Intl.NumberFormat(english ? 'en-GB' : 'pt-PT', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
@@ -132,7 +144,7 @@ export function PricingSection({
           <div
             className="inline-flex rounded-xl border border-white/10 bg-white/[0.025] p-1"
             role="group"
-            aria-label="Período de faturação"
+            aria-label={english ? 'Billing interval' : 'Período de faturação'}
           >
             <button
               type="button"
@@ -144,7 +156,7 @@ export function PricingSection({
                   : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
               }`}
             >
-              Mensal
+              {english ? 'Monthly' : 'Mensal'}
             </button>
             <button
               type="button"
@@ -157,7 +169,7 @@ export function PricingSection({
                   : 'text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
               } disabled:cursor-not-allowed disabled:opacity-40`}
             >
-              Anual
+              {english ? 'Yearly' : 'Anual'}
             </button>
           </div>
         </div>
@@ -168,47 +180,46 @@ export function PricingSection({
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
-                <ShieldCheck className="size-3.5" aria-hidden="true" /> Decisão
-                e checkout
+                <ShieldCheck className="size-3.5" aria-hidden="true" /> {english ? 'Plan selection and checkout' : 'Decisão e checkout'}
               </div>
               <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-zinc-50 sm:text-4xl lg:text-5xl">
-                Escolhe o plano. O próximo passo é{' '}
+                {english ? 'Choose your plan. Next: ' : 'Escolhe o plano. O próximo passo é '}
                 {paymentMode === 'MANUAL'
-                  ? 'o pedido de subscrição.'
-                  : 'o checkout.'}
+                  ? english ? 'a subscription request.' : 'o pedido de subscrição.'
+                  : english ? 'checkout.' : 'o checkout.'}
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-                Compara o essencial e escolhe a fase certa da tua barbearia.{' '}
+                {english ? 'Compare the essentials and choose the right plan for your barbershop. ' : 'Compara o essencial e escolhe a fase certa da tua barbearia. '}
                 {paymentMode === 'MANUAL'
-                  ? 'O pedido é registado e a equipa envia-te as instruções de pagamento.'
-                  : 'O pagamento acontece na experiência de checkout da Silentra.'}
+                  ? english ? 'Your request is recorded and the team will send payment instructions.' : 'O pedido é registado e a equipa envia-te as instruções de pagamento.'
+                  : english ? 'Payment takes place in Silentra checkout.' : 'O pagamento acontece na experiência de checkout da Silentra.'}
               </p>
             </div>
             <Link
               href="#comparacao"
               className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 transition hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              Ver comparação <ArrowRight className="size-4" />
+              {english ? 'Compare plans' : 'Ver comparação'} <ArrowRight className="size-4" />
             </Link>
           </div>
 
           <div
             className="grid gap-2 sm:grid-cols-3"
-            aria-label="Passos para aderir à Silentra"
+            aria-label={english ? 'Steps to subscribe to Silentra' : 'Passos para aderir à Silentra'}
           >
             {[
-              ['01', 'Escolhe', 'Compara os planos e encontra o nível certo.'],
+              ['01', english ? 'Choose' : 'Escolhe', english ? 'Compare plans and find the right fit.' : 'Compara os planos e encontra o nível certo.'], 
               [
                 '02',
-                paymentMode === 'MANUAL' ? 'Pedido' : 'Checkout',
+                paymentMode === 'MANUAL' ? (english ? 'Request' : 'Pedido') : 'Checkout',
                 paymentMode === 'MANUAL'
-                  ? 'Regista o pedido e aguarda as instruções de pagamento.'
-                  : 'Revê os dados e conclui o pagamento dentro da Silentra.',
+                  ? (english ? 'Submit your request and wait for payment instructions.' : 'Regista o pedido e aguarda as instruções de pagamento.')
+                  : (english ? 'Review your details and complete payment with Silentra.' : 'Revê os dados e conclui o pagamento dentro da Silentra.'),
               ],
               [
                 '03',
-                'Ativa',
-                'A subscrição fica ligada à tua barbearia e respetiva equipa.',
+                english ? 'Activate' : 'Ativa',
+                english ? 'Your subscription is linked to your barbershop and its team.' : 'A subscrição fica ligada à tua barbearia e respetiva equipa.', 
               ],
             ].map(([step, title, text]) => (
               <div
@@ -234,7 +245,7 @@ export function PricingSection({
             <div
               key={item}
               className="glassmorphism flex min-h-[480px] items-center justify-center rounded-2xl border border-white/10 bg-zinc-900/70 text-zinc-500"
-              aria-label="A carregar preços"
+              aria-label={english ? 'Loading prices' : 'A carregar preços'}
             >
               <Loader2 className="size-5 animate-spin" aria-hidden="true" />
             </div>
@@ -246,11 +257,10 @@ export function PricingSection({
           className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-6 text-center sm:p-8"
         >
           <p className="text-base font-semibold text-zinc-100">
-            Não foi possível carregar os preços.
+            {english ? 'We could not load prices.' : 'Não foi possível carregar os preços.'}
           </p>
           <p className="mt-2 text-sm leading-6 text-zinc-500">
-            O checkout está temporariamente indisponível. Tenta novamente sem
-            perder o contexto desta página.
+            {english ? 'Checkout is temporarily unavailable. Try again without losing your place on this page.' : 'O checkout está temporariamente indisponível. Tenta novamente sem perder o contexto desta página.'}
           </p>
           <button
             type="button"
@@ -258,7 +268,7 @@ export function PricingSection({
             className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:border-white/20 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <RefreshCw className="size-4" aria-hidden="true" />
-            Tentar novamente
+            {english ? 'Try again' : 'Tentar novamente'}
           </button>
         </div>
       ) : (
@@ -268,8 +278,8 @@ export function PricingSection({
             tier="free"
             title="Barbers Free"
             price="0 €"
-            description={PLAN_DESCRIPTIONS.free}
-            features={HERO_FEATURES.free}
+            description={descriptions.free}
+            features={featureCopy.free}
           />
           <PricingCard
             destination={destination}
@@ -277,8 +287,8 @@ export function PricingSection({
             tier="pro"
             title="Barbers Pro"
             price={formatPrice('pro')}
-            description={PLAN_DESCRIPTIONS.pro}
-            features={HERO_FEATURES.pro}
+            description={descriptions.pro}
+            features={featureCopy.pro}
             popular
             trialDays={
               paymentMode === 'STRIPE' && billingInterval === 'month'
@@ -292,8 +302,8 @@ export function PricingSection({
             tier="enterprise"
             title="Barbers Enterprise"
             price={formatPrice('enterprise')}
-            description={PLAN_DESCRIPTIONS.enterprise}
-            features={HERO_FEATURES.enterprise}
+            description={descriptions.enterprise}
+            features={featureCopy.enterprise}
           />
         </div>
       )}
@@ -304,48 +314,47 @@ export function PricingSection({
             <ShieldCheck className="size-5" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-semibold text-zinc-100">Queres um site feito à medida da tua barbearia?</p>
+            <p className="font-semibold text-zinc-100">{english ? "Need a website built for your barbershop?" : "Queres um site feito à medida da tua barbearia?"}</p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
-              Disponível para clientes Enterprise. A criação é combinada diretamente com a Silentra, com orçamento próprio — não é cobrada automaticamente no checkout da subscrição.
+              {english ? 'Available to Enterprise customers. This is arranged directly with Silentra and quoted separately — it is not automatically charged with your subscription.' : 'Disponível para clientes Enterprise. A criação é combinada diretamente com a Silentra, com orçamento próprio — não é cobrada automaticamente no checkout da subscrição.'}
             </p>
           </div>
         </div>
-        <Link href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto">
-          Contactar para um site <ArrowRight className="size-4" aria-hidden="true" />
+        <Link href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Enterprise custom website' : 'Site próprio Enterprise')}`} className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto">
+          {english ? 'Request a custom website' : 'Contactar para um site'} <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="glassmorphism rounded-2xl border border-white/10 bg-white/[0.025] p-5">
           <p className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
-            <CircleCheck className="size-4 text-emerald-400" /> Free sem cartão
+            <CircleCheck className="size-4 text-emerald-400" /> {english ? "Free, no card required" : "Free sem cartão"}
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            Começa a operar sem pagamento obrigatório.
+            {english ? 'Start using the platform without a mandatory payment.' : 'Começa a operar sem pagamento obrigatório.'}
           </p>
         </div>
         <div className="glassmorphism rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.045] p-5">
           <p className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
             <Check className="size-4 text-emerald-300" />{' '}
             {paymentMode === 'MANUAL'
-              ? 'Pagamento manual'
-              : 'Oferta Pro para elegíveis'}
+              ? (english ? 'Manual payment' : 'Pagamento manual')
+              : (english ? 'Eligible Pro offer' : 'Oferta Pro para elegíveis')}
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
             {paymentMode === 'MANUAL'
-              ? 'Recebe as instruções de pagamento depois de o pedido ser processado.'
-              : 'A oferta aplicável é validada no fluxo de checkout.'}
+              ? (english ? 'You will receive payment instructions after your request is processed.' : 'Recebe as instruções de pagamento depois de o pedido ser processado.')
+              : (english ? 'Any applicable offer is validated during checkout.' : 'A oferta aplicável é validada no fluxo de checkout.')}
           </p>
         </div>
         <div className="glassmorphism rounded-2xl border border-white/10 bg-white/[0.025] p-5">
           <p className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
-            <ShieldCheck className="size-4 text-emerald-400" /> Faturação
-            transparente
+            <ShieldCheck className="size-4 text-emerald-400" /> {english ? 'Transparent billing' : 'Faturação transparente'}
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
             {paymentMode === 'MANUAL'
-              ? 'O pedido fica associado à tua barbearia e o método é registado como manual.'
-              : 'A subscrição pertence à barbearia e é processada pela Stripe.'}
+              ? (english ? 'The request is linked to your barbershop and recorded as a manual payment.' : 'O pedido fica associado à tua barbearia e o método é registado como manual.')
+              : (english ? 'The subscription belongs to the barbershop and is processed by Stripe.' : 'A subscrição pertence à barbearia e é processada pela Stripe.')}
           </p>
         </div>
       </div>
