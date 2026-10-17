@@ -177,12 +177,12 @@ async function GET__unobserved(request: Request) {
         .from('support_messages')
         .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(100);
       if (messageResult.error) {
         throw new Error('SUPPORT_ADMIN_MESSAGES_LOOKUP_FAILED');
       }
-      messages = messageResult.data ?? [];
+      messages = (messageResult.data ?? []).reverse();
       // Priority is resolved from current assignment/subscription rows, not
       // the browser or potentially stale conversation metadata.
       const effectivePlan = resolveEffectivePlan(selected.barbershop_id);
