@@ -90,13 +90,13 @@ const sections: [Section, string, string, typeof Settings][] = [
   ['account', 'Conta e segurança', 'Sessão e acesso', ShieldCheck],
 ];
 const days = [
-  ['Monday', 'Segunda-feira'],
-  ['Tuesday', 'Terça-feira'],
-  ['Wednesday', 'Quarta-feira'],
-  ['Thursday', 'Quinta-feira'],
-  ['Friday', 'Sexta-feira'],
-  ['Saturday', 'Sábado'],
-  ['Sunday', 'Domingo'],
+  ['Monday', 'Monday', 'Segunda-feira'],
+  ['Tuesday', 'Tuesday', 'Terça-feira'],
+  ['Wednesday', 'Wednesday', 'Quarta-feira'],
+  ['Thursday', 'Thursday', 'Quinta-feira'],
+  ['Friday', 'Friday', 'Sexta-feira'],
+  ['Saturday', 'Saturday', 'Sábado'],
+  ['Sunday', 'Sunday', 'Domingo'],
 ] as const;
 const amenitiesKeys = [
   'wifi',
@@ -143,7 +143,7 @@ const closedList = (v: string) =>
 
 export default function SettingsPageOrganized() {
   const router = useRouter();
-  const { t, setLocale } = useLanguage();
+  const { t, setLocale, locale } = useLanguage();
   const { barbershopId } = useBarbershop();
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
@@ -650,7 +650,7 @@ export default function SettingsPageOrganized() {
                               : 'border-white/10 bg-white/[.02] text-zinc-400',
                           )}
                         >
-                          {l}
+                          {locale === 'pt' ? ptLabel : enLabel}
                         </button>
                       ))}
                     </div>
@@ -703,7 +703,7 @@ export default function SettingsPageOrganized() {
                     />
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {days.map(([v, l]) => {
+                    {days.map(([v, enLabel, ptLabel]) => {
                       const active = closed.includes(v);
                       return (
                         <button
