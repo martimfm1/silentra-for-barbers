@@ -199,7 +199,7 @@ export function PricingCard({
       };
     if (tier === 'free')
       return {
-        label: 'Mudar para este plano',
+        label: english ? 'Switch to this plan' : 'Mudar para este plano',
         disabled: false,
         variant: 'outline' as const,
       };
@@ -286,7 +286,7 @@ export function PricingCard({
           </div>
           {tier === 'pro' && trialDays ? (
             <p className="mt-2 text-xs font-semibold text-emerald-300/90">
-              {english ? '1 month of Pro free for eligible new users with code TRIALPRO.' : '1 mês de Pro grátis para novos membros com o código TRIALPRO.'}
+              {english ? '1 month of Pro free for eligible new users with code TRIALPRO.' : '1 mês de Pro grátis para novos utilizadores elegíveis com o código TRIALPRO.'}
             </p>
           ) : null}
           {tier === 'pro' && !trialDays ? (
