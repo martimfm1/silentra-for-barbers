@@ -8,6 +8,7 @@ const localeFiles = {
   en: ['app/locales/en.ts', 'app/locales/en-copy.ts'],
 };
 const localizedSources = [
+  'components/site-navbar.tsx',
   'app/marketplace/page.tsx',
   'app/dashboard/page.tsx',
   'app/dashboard/agenda/page.tsx',
