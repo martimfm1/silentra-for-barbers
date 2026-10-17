@@ -436,7 +436,7 @@ export function CustomCheckout({
           setInitializationError(
             error instanceof Error
               ? error.message
-              : english ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
+              : englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
           );
         }
       }
