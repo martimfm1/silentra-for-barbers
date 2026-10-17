@@ -277,7 +277,7 @@ export function PricingSection({
             destination={destination}
             tier="free"
             title="Barbers Free"
-            price="0 €"
+            price={english ? '€0' : '0 €'}
             description={descriptions.free}
             features={featureCopy.free}
           />
