@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
@@ -192,6 +193,8 @@ async function resolveNewMemberPromotionCodeId(): Promise<string> {
 async function POST__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
+    const cookieStore = await cookies();
+    const checkoutLocale = cookieStore.get('locale')?.value === 'en' ? 'en' : 'pt';
 
     const supabase = await createClient();
     const {
@@ -369,7 +372,7 @@ async function POST__unobserved(request: Request) {
         billing_address_collection: 'required',
         customer_update: { name: 'auto', address: 'auto' },
         tax_id_collection: { enabled: true },
-        locale: 'pt',
+        locale: checkoutLocale,
       },
       {
         idempotencyKey: `checkout-elements:${tenant.barbershopId}:${intent.jti}:${bucket}`,
