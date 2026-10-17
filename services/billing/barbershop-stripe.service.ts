@@ -454,6 +454,7 @@ export class BarbershopStripeService {
     userId: string,
     plan: CheckoutPlan,
     interval: CheckoutInterval = 'month',
+    locale: 'pt' | 'en' = 'pt',
   ): Promise<{ clientSecret: string; sessionId: string }> {
     const tenant = await this.getTenantContext(userId);
     const verifiedPrice = await StripePriceService.resolveVerifiedPrice(
@@ -521,7 +522,7 @@ export class BarbershopStripeService {
         customer_update: { name: 'auto', address: 'auto' },
         phone_number_collection: { enabled: true },
         tax_id_collection: { enabled: true },
-        locale: 'pt',
+        locale,
       },
       {
         idempotencyKey:

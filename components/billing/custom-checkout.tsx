@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   CheckoutElementsProvider,
   BillingAddressElement,
@@ -84,10 +85,27 @@ const PLAN_COPY = {
   },
 } as const;
 
+const PLAN_COPY_EN = {
+  pro: {
+    name: 'Barbers Pro', shortName: 'Pro', price: '€9.90 / month',
+    description: 'For barbershops ready to grow with CRM, automation, campaigns and loyalty.',
+    trial: '14 days free for eligible new users.',
+    highlights: ['CRM and customers', 'Campaigns and automation', 'Loyalty and analytics'],
+  },
+  enterprise: {
+    name: 'Barbers Enterprise', shortName: 'Enterprise', price: 'From €29.90 / month',
+    description: 'For larger teams, multiple locations, POS, inventory and advanced management.',
+    trial: null,
+    highlights: ['Teams and locations', 'Advanced operations', 'More control and scale'],
+  },
+} as const;
+
 type CheckoutFormProps = { plan: keyof typeof PLAN_COPY };
 
 function CheckoutForm({ plan }: CheckoutFormProps) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const english = locale === 'en';
   const checkoutState = useCheckout();
   const [promotionCode, setPromotionCode] = useState('');
   const [promotionError, setPromotionError] = useState<string | null>(null);
@@ -139,7 +157,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
       setPromotionError(
         error instanceof Error
           ? error.message
-          : 'Não foi possível confirmar a subscrição.',
+          : english ? 'Could not confirm the subscription.' : 'Não foi possível confirmar a subscrição.',
       );
       setSubmitting(false);
     }
@@ -153,10 +171,10 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
             <Sparkles className="size-5 animate-pulse" />
           </div>
           <p className="mt-4 text-sm font-semibold text-white">
-            A preparar o teu checkout
+            {english ? 'Preparing your checkout' : 'A preparar o teu checkout'}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            A carregar os dados de pagamento em segurança.
+            {english ? 'Loading your payment details securely.' : 'A carregar os dados de pagamento em segurança.'}
           </p>
         </div>
       </div>
@@ -165,7 +183,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
     return (
       <div className="rounded-2xl border border-red-400/20 bg-red-400/[0.05] p-5 sm:p-6">
         <p className="text-sm font-semibold text-red-100">
-          Não foi possível carregar o checkout
+          {english ? 'Could not load checkout' : 'Não foi possível carregar o checkout'}
         </p>
         <p className="mt-1 text-sm leading-6 text-red-200/70">
           {checkoutState.error.message}
@@ -175,7 +193,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
           onClick={() => window.location.reload()}
           className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
         >
-          Tentar novamente
+          {english ? 'Try again' : 'Tentar novamente'}
         </button>
       </div>
     );
@@ -183,7 +201,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
   const totalAmount = checkoutState.checkout.total.total.minorUnitsAmount;
   const currency = checkoutState.checkout.currency.toUpperCase();
   const isZeroTotal = totalAmount === 0;
-  const formattedTotal = new Intl.NumberFormat('pt-PT', {
+  const formattedTotal = new Intl.NumberFormat(english ? 'en-GB' : 'pt-PT', {
     style: 'currency',
     currency,
   }).format(totalAmount / 100);
@@ -194,25 +212,25 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         <span className="flex size-6 items-center justify-center rounded-full bg-emerald-400 text-[10px] font-bold text-zinc-950">
           1
         </span>
-        <span className="text-zinc-300">Faturação</span>
+        <span className="text-zinc-300">{english ? 'Billing' : 'Faturação'}</span>
         <ChevronRight className="size-3.5" />
-        <span>Pagamento</span>
+        <span>{english ? 'Payment' : 'Pagamento'}</span>
         <ChevronRight className="size-3.5" />
-        <span>Confirmação</span>
+        <span>{english ? 'Confirmation' : 'Confirmação'}</span>
       </div>
       <div className="rounded-2xl border border-emerald-300/15 bg-[linear-gradient(145deg,rgba(52,211,153,0.08),rgba(255,255,255,0.02))] p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300/80">
-              Hoje
+              {english ? 'Today' : 'Hoje'}
             </p>
             <p className="mt-1 text-sm font-semibold text-white">
-              Total da subscrição
+              {english ? 'Subscription total' : 'Total da subscrição'}
             </p>
             <p className="mt-1 max-w-xl text-xs leading-5 text-zinc-500">
               {isZeroTotal
-                ? 'Não tens nenhum valor a pagar hoje. O preço normal começa no fim do trial, quando aplicável.'
-                : 'Total atualizado automaticamente com descontos e impostos.'}
+                ? (english ? 'Nothing is due today. The regular price starts at the end of the trial, when applicable.' : 'Não tens nenhum valor a pagar hoje. O preço normal começa no fim do trial, quando aplicável.')
+                : (english ? 'Total automatically updated to include discounts and taxes.' : 'Total atualizado automaticamente com descontos e impostos.')}
             </p>
           </div>
           <p className="shrink-0 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
@@ -222,7 +240,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         {isZeroTotal ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-emerald-300/15 bg-emerald-300/5 px-3 py-2 text-xs font-medium text-emerald-200">
             <Check className="size-3.5" />
-            14 dias sem cobrança inicial
+            {english ? '14 days with no initial charge' : '14 dias sem cobrança inicial'}
           </div>
         ) : null}
       </div>
@@ -234,10 +252,10 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-white">
-                Dados de faturação
+                {english ? 'Billing details' : 'Dados de faturação'}
               </h2>
               <p className="mt-0.5 text-xs text-zinc-500">
-                Necessários para a faturação da subscrição.
+                {english ? 'Required for subscription billing.' : 'Necessários para a faturação da subscrição.'}
               </p>
             </div>
           </div>
@@ -254,14 +272,14 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 <CreditCard className="size-4" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-white">Pagamento</h2>
+                <h2 className="text-sm font-semibold text-white">{english ? 'Payment' : 'Pagamento'}</h2>
                 <p className="mt-0.5 text-xs text-zinc-500">
-                  Processado diretamente pela Stripe.
+                  {english ? 'Processed directly by Stripe.' : 'Processado diretamente pela Stripe.'}
                 </p>
               </div>
             </div>
             <span className="hidden items-center gap-1.5 text-[11px] text-zinc-500 sm:inline-flex">
-              <LockKeyhole className="size-3.5 text-emerald-300" /> Seguro
+              <LockKeyhole className="size-3.5 text-emerald-300" /> {english ? 'Secure' : 'Seguro'}
             </span>
           </div>
         </div>
@@ -274,28 +292,28 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-sm font-semibold text-white">
-                Código promocional
+                {english ? 'Promo code' : 'Código promocional'}
               </h2>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Tens um código? Aplica-o antes de confirmar a subscrição.
+                {english ? 'Have a code? Apply it before confirming your subscription.' : 'Tens um código? Aplica-o antes de confirmar a subscrição.'}
               </p>
             </div>
             {promotionApplied ? (
               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/5 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">
                 <Check className="size-3" />
-                Aplicado
+                {english ? 'Applied' : 'Aplicado'}
               </span>
             ) : null}
           </div>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <label className="sr-only" htmlFor="promotion-code">
-              Código promocional
+              {english ? 'Promo code' : 'Código promocional'}
             </label>
             <input
               id="promotion-code"
               value={promotionCode}
               onChange={(event) => setPromotionCode(event.target.value)}
-              placeholder="Ex.: SILENTRA20"
+              placeholder={english ? 'e.g. SILENTRA20' : 'Ex.: SILENTRA20'}
               autoComplete="off"
               className="min-h-11 flex-1 rounded-xl border border-white/10 bg-zinc-950/80 px-3.5 text-sm text-white outline-none placeholder:text-zinc-600 transition focus:border-emerald-300/30 focus:ring-2 focus:ring-emerald-300/10 disabled:opacity-60"
               disabled={promotionApplied || submitting}
@@ -307,7 +325,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 disabled={submitting}
                 className="min-h-11 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.06] disabled:opacity-50"
               >
-                Remover
+                {english ? 'Remove' : 'Remover'}
               </button>
             ) : (
               <button
@@ -316,7 +334,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 disabled={submitting || !promotionCode.trim()}
                 className="min-h-11 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-45"
               >
-                Aplicar
+                {english ? 'Apply' : 'Aplicar'}
               </button>
             )}
           </div>
@@ -331,8 +349,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         <div className="flex gap-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300" />
           <p>
-            Os dados de pagamento são processados diretamente pela Stripe. A
-            Silentra não guarda o número completo do teu cartão.
+            {english ? 'Payment details are processed directly by Stripe. Silentra does not store your full card number.' : 'Os dados de pagamento são processados diretamente pela Stripe. A Silentra não guarda o número completo do teu cartão.'}
           </p>
         </div>
       </div>
@@ -344,16 +361,15 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         >
           <LockKeyhole className="size-4" />
           {submitting
-            ? 'A confirmar subscrição…'
+            ? (english ? 'Confirming subscription…' : 'A confirmar subscrição…')
             : isZeroTotal
-              ? 'Começar os 14 dias grátis'
+              ? (english ? 'Start the 14-day free trial' : 'Começar os 14 dias grátis')
               : plan === 'pro'
-                ? 'Confirmar e subscrever Pro'
-                : 'Confirmar e subscrever Enterprise'}
+                ? (english ? 'Confirm and subscribe to Pro' : 'Confirmar e subscrever Pro')
+                : (english ? 'Confirm and subscribe to Enterprise' : 'Confirmar e subscrever Enterprise')}
         </button>
         <p className="mt-2 text-center text-[11px] leading-5 text-zinc-600">
-          Ao confirmar, aceitas a cobrança recorrente aplicável ao plano
-          selecionado.
+          {english ? 'By confirming, you agree to the recurring charges applicable to the selected plan.' : 'Ao confirmar, aceitas a cobrança recorrente aplicável ao plano selecionado.'}
         </p>
       </div>
     </form>
@@ -367,12 +383,19 @@ export function CustomCheckout({
   checkoutToken: string;
   plan: keyof typeof PLAN_COPY;
 }) {
+  const { locale } = useLanguage();
+  const english = locale === 'en';
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [initializationError, setInitializationError] = useState<string | null>(
     null,
   );
   const initializedKey = useRef<string | null>(null);
   const checkoutAttemptIdRef = useRef<string | null>(null);
+  const englishRef = useRef(english);
+
+  useEffect(() => {
+    englishRef.current = english;
+  }, [english]);
 
   useEffect(() => {
     if (!checkoutToken || initializedKey.current === checkoutToken) return;
@@ -393,7 +416,7 @@ export function CustomCheckout({
         if (!response.ok) {
           const backendError = readBackendError(
             body,
-            'Não foi possível iniciar o checkout.',
+            englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
           );
           const error = new Error(backendError.message) as Error & {
             code?: string | null;
@@ -403,7 +426,7 @@ export function CustomCheckout({
         }
         if (!body.clientSecret)
           throw new Error(
-            'O Stripe não devolveu uma sessão de checkout válida.',
+            englishRef.current ? 'Stripe did not return a valid checkout session.' : 'O Stripe não devolveu uma sessão de checkout válida.',
           );
         if (!cancelled) setClientSecret(body.clientSecret as string);
       } catch (error) {
@@ -413,7 +436,7 @@ export function CustomCheckout({
           setInitializationError(
             error instanceof Error
               ? error.message
-              : 'Não foi possível iniciar o checkout.',
+              : englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
           );
         }
       }
@@ -424,12 +447,12 @@ export function CustomCheckout({
     };
   }, [checkoutToken]);
 
-  const copy = PLAN_COPY[plan];
+  const copy = english ? PLAN_COPY_EN[plan] : PLAN_COPY[plan];
   if (initializationError)
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-red-400/20 bg-red-400/[0.04] p-6">
         <p className="text-sm font-semibold text-red-100">
-          Não foi possível iniciar o checkout
+          {english ? 'Could not start checkout' : 'Não foi possível iniciar o checkout'}
         </p>
         <p className="mt-1 text-sm leading-6 text-red-200/70">
           {initializationError}
@@ -439,7 +462,7 @@ export function CustomCheckout({
           onClick={() => window.location.reload()}
           className="mt-5 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
         >
-          Tentar novamente
+          {english ? 'Try again' : 'Tentar novamente'}
         </button>
       </div>
     );
@@ -451,10 +474,10 @@ export function CustomCheckout({
             <Sparkles className="size-5 animate-pulse" />
           </div>
           <p className="mt-4 text-sm font-semibold text-white">
-            A preparar o checkout seguro…
+            {english ? 'Preparing secure checkout…' : 'A preparar o checkout seguro…'}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            Estamos a criar uma sessão segura para o teu plano.
+            {english ? 'We are creating a secure session for your plan.' : 'Estamos a criar uma sessão segura para o teu plano.'}
           </p>
         </div>
       </div>
@@ -488,7 +511,7 @@ export function CustomCheckout({
             <Sparkles className="size-4" />
           </div>
           <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-300/80">
-            Checkout Silentra
+            {english ? 'Silentra checkout' : 'Checkout Silentra'}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-white">
             {copy.name}
@@ -519,7 +542,7 @@ export function CustomCheckout({
             className="mt-7 inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white"
           >
             <ArrowLeft className="size-3.5" />
-            Voltar aos planos
+            {english ? 'Back to plans' : 'Voltar aos planos'}
           </Link>
         </aside>
         <div className="min-w-0">

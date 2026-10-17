@@ -8,6 +8,7 @@ const localeFiles = {
   en: ['app/locales/en.ts', 'app/locales/en-copy.ts'],
 };
 const localizedSources = [
+  'components/site-navbar.tsx',
   'app/marketplace/page.tsx',
   'app/dashboard/page.tsx',
   'app/dashboard/agenda/page.tsx',
@@ -172,6 +173,30 @@ for (const status of [
     const key = 'orderManagement.status.' + status;
     if (!hasPath(localeTrees[locale], key)) {
       failures.push(locale + ': missing translation for dynamic status "' + key + '"');
+    }
+  }
+}
+
+const localeAwareSources = {
+  'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
+  'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
+  'app/checkout/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
+  'app/checkout/manual/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
+  'app/checkout/success/page.tsx': ["useLanguage()", "locale === 'en'", 'Confirming your subscription…', 'formatMoney(payload.promotion.discountAmount, payload.promotion.currency, locale)'],
+  'app/checkout/error/page.tsx': ["useLanguage()", "Checkout not completed"],
+  'app/api/stripe/embedded-checkout/route.ts': ["cookies()", 'locale: checkoutLocale'],
+  'components/hero/pricing-section.tsx': ["useLanguage()", 'HERO_FEATURES_EN', 'const descriptions ='],
+  'components/billing/PricingCard.tsx': ["useLanguage()", "english ? 'Current plan'"],
+  'components/billing/plan-comparison.tsx': ["useLanguage()", 'FEATURE_LABELS_EN', 'GROUP_LABELS_EN'],
+  'components/billing/manual-checkout.tsx': ["useLanguage()", 'COPY_EN', 'english ? \'Annual billing\''],
+  'components/billing/custom-checkout.tsx': ["useLanguage()", 'PLAN_COPY_EN', 'englishRef.current'],
+};
+
+for (const [path, expectedFragments] of Object.entries(localeAwareSources)) {
+  const source = read(path);
+  for (const fragment of expectedFragments) {
+    if (!source.includes(fragment)) {
+      failures.push(path + ': missing locale-aware UI marker "' + fragment + '"');
     }
   }
 }

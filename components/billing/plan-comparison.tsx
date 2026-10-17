@@ -2,6 +2,7 @@
 
 import { Check, Minus, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import {
   FEATURE_LABELS,
@@ -77,20 +78,35 @@ const FEATURE_GROUPS: ReadonlyArray<{
   },
 ];
 
-function formatLimit(value: number, singular: string, plural: string) {
+function formatLimit(value: number, singular: string, plural: string, english: boolean) {
   return Number.isFinite(value)
     ? `${value} ${value === 1 ? singular : plural}`
-    : 'Ilimitado';
+    : english ? 'Unlimited' : 'Ilimitado';
 }
+
+const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
+  agenda: 'Full schedule', appointments: 'Unlimited bookings', clients: 'Unlimited customers', services: 'Unlimited services', online_booking: 'Online bookings', booking_page: 'Booking page', qr_booking: 'QR code bookings', basic_dashboard: 'Basic dashboard', basic_revenue: 'Basic revenue', basic_client_history: 'Customer history', basic_notifications: 'Essential notifications', team_management: 'Team management', messaging: 'Email messaging', directory_visibility: 'Directory visibility', advanced_crm: 'Advanced CRM', advanced_analytics: 'Advanced analytics', automated_reminders: 'Automated reminders', automated_followups: 'Automated follow-ups', marketing_campaigns: 'Marketing campaigns', customer_segments: 'Customer segments', loyalty: 'Loyalty programme', advanced_reports: 'Advanced reports', advanced_notifications: 'Advanced notifications', multi_location: 'Multiple locations', global_dashboard: 'Global dashboard', advanced_permissions: 'Advanced permissions', commissions: 'Commissions', inventory: 'Inventory management', pos: 'Point of sale (POS)', enterprise_reports: 'Business reports', landing_page: 'Professional landing page included', custom_website: 'Custom website (quoted separately)',
+};
+
+const GROUP_LABELS_EN: Record<string, string> = {
+  'Gestão da barbearia': 'Barbershop management',
+  'Comunicação e automação': 'Communication and automation',
+  'Crescimento e clientes': 'Growth and customers',
+  'Analytics e relatórios': 'Analytics and reporting',
+  'Equipa e operação': 'Team and operations',
+  'Presença online': 'Online presence',
+};
 
 function PlanBadge({
   plan,
   active,
   popular,
+  english,
 }: {
   plan: BillingPlan;
   active: boolean;
   popular: boolean;
+  english: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
@@ -102,18 +118,18 @@ function PlanBadge({
         </p>
         {active ? (
           <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-            Plano atual
+            {english ? 'Current plan' : 'Plano atual'}
           </p>
         ) : popular ? (
           <p className="mt-0.5 text-[10px] font-medium uppercase tracking-widest text-emerald-400/70">
-            Mais popular
+            {english ? 'Most popular' : 'Mais popular'}
           </p>
         ) : null}
       </div>
       {active ? (
         <ShieldCheck
           className="size-4 shrink-0 text-emerald-400"
-          aria-label="Plano atual"
+          aria-label={english ? "Current plan" : "Plano atual"}
         />
       ) : null}
     </div>
@@ -122,24 +138,24 @@ function PlanBadge({
 
 export function PlanComparison() {
   const { plan: currentPlan, isAuthenticated, loading } = useSubscription();
+  const { locale } = useLanguage();
+  const english = locale === 'en';
   const [mobilePlan, setMobilePlan] = useState<BillingPlan>(PLANS.PRO);
 
   return (
     <section className="mt-16" aria-labelledby="comparison-title">
       <div className="mb-7 max-w-3xl">
         <p className="text-xs uppercase tracking-[0.34em] text-zinc-500">
-          Comparação completa
+          {english ? 'Full comparison' : 'Comparação completa'}
         </p>
         <h2
           id="comparison-title"
           className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-zinc-50 sm:text-4xl"
         >
-          Compara todas as funcionalidades.
+          {english ? 'Compare every feature.' : 'Compara todas as funcionalidades.'}
         </h2>
         <p className="mt-3 text-sm leading-6 text-zinc-400 sm:text-base">
-          O Free já inclui tudo o que precisas para começar. Os planos pagos
-          acrescentam ferramentas para crescer, automatizar e gerir operações
-          maiores.
+          {english ? 'Free includes everything you need to get started. Paid plans add tools to grow, automate and manage larger operations.' : 'O Free já inclui tudo o que precisas para começar. Os planos pagos acrescentam ferramentas para crescer, automatizar e gerir operações maiores.'}
         </p>
       </div>
 
@@ -163,13 +179,13 @@ export function PlanComparison() {
                   </span>
                   {active ? (
                     <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-wider text-emerald-600">
-                      Atual
+                      {english ? 'Current' : 'Atual'}
                     </span>
                   ) : item === PLANS.PRO ? (
                     <span
                       className={`mt-0.5 block text-[9px] font-medium uppercase tracking-wider ${selected ? 'text-emerald-700' : 'text-emerald-400/70'}`}
                     >
-                      Popular
+                      {english ? 'Most popular' : 'Mais popular'}
                     </span>
                   ) : null}
                 </button>
@@ -184,25 +200,28 @@ export function PlanComparison() {
               plan={mobilePlan}
               active={isAuthenticated && !loading && currentPlan === mobilePlan}
               popular={mobilePlan === PLANS.PRO}
+              english={english}
             />
             <div className="glassmorphism mt-4 grid grid-cols-2 gap-2 text-sm">
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <p className="text-[11px] text-zinc-500">Profissionais</p>
+                <p className="text-[11px] text-zinc-500">{english ? 'Barbers' : 'Profissionais'}</p>
                 <p className="mt-1 font-semibold text-zinc-100">
                   {formatLimit(
                     PLAN_LIMITS[mobilePlan].barbers,
-                    'barbeiro',
-                    'barbeiros',
+                    english ? 'barber' : 'barbeiro',
+                    english ? 'barbers' : 'barbeiros',
+                    english,
                   )}
                 </p>
               </div>
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <p className="text-[11px] text-zinc-500">Localizações</p>
+                <p className="text-[11px] text-zinc-500">{english ? 'Locations' : 'Localizações'}</p>
                 <p className="mt-1 font-semibold text-zinc-100">
                   {formatLimit(
                     PLAN_LIMITS[mobilePlan].locations,
-                    'localização',
-                    'localizações',
+                    english ? 'location' : 'localização',
+                    english ? 'locations' : 'localizações',
+                    english,
                   )}
                 </p>
               </div>
@@ -211,12 +230,12 @@ export function PlanComparison() {
 
           {FEATURE_GROUPS.map((group) => (
             <section
-              key={group.title}
+              key={english ? GROUP_LABELS_EN[group.title] : group.title}
               className="glassmorphism rounded-2xl border border-white/10 bg-zinc-900/45"
             >
               <div className="border-b border-white/10 bg-white/[0.02] px-4 py-3">
                 <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                  {group.title}
+                  {english ? GROUP_LABELS_EN[group.title] : group.title}
                 </h3>
               </div>
               <div className="divide-y divide-white/5">
@@ -228,7 +247,7 @@ export function PlanComparison() {
                       className="flex items-center justify-between gap-4 px-4 py-3.5"
                     >
                       <span className="min-w-0 text-sm leading-5 text-zinc-300">
-                        {FEATURE_LABELS[feature]}
+                        {english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]}
                       </span>
                       <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/5 bg-white/[0.02]">
                         {included ? (
@@ -251,8 +270,7 @@ export function PlanComparison() {
           ))}
 
           <p className="px-1 pt-1 text-xs leading-5 text-zinc-600">
-            Todas as funcionalidades de um plano inferior ficam incluídas nos
-            planos superiores. Os limites são aplicados no servidor.
+            {english ? 'All features in lower plans are included in higher plans. Limits are enforced on the server.' : 'Todas as funcionalidades de um plano inferior ficam incluídas nos planos superiores. Os limites são aplicados no servidor.'}
           </p>
         </div>
       </div>
@@ -266,7 +284,7 @@ export function PlanComparison() {
                   scope="col"
                   className="w-[44%] px-5 py-5 text-sm font-medium text-zinc-400 sm:px-7"
                 >
-                  Funcionalidade
+                  {english ? 'Feature' : 'Funcionalidade'}
                 </th>
                 {PLAN_ORDER.map((item) => {
                   const active =
@@ -281,6 +299,7 @@ export function PlanComparison() {
                         plan={item}
                         active={active}
                         popular={item === PLANS.PRO && !active}
+                        english={english}
                       />
                     </th>
                   );
@@ -293,7 +312,7 @@ export function PlanComparison() {
                   scope="row"
                   className="px-5 py-4 text-sm font-semibold text-zinc-200 sm:px-7"
                 >
-                  Limite de profissionais
+                  {english ? 'Barber limit' : 'Limite de profissionais'}
                 </th>
                 {PLAN_ORDER.map((item) => (
                   <td
@@ -302,8 +321,9 @@ export function PlanComparison() {
                   >
                     {formatLimit(
                       PLAN_LIMITS[item].barbers,
-                      'barbeiro',
-                      'barbeiros',
+                      english ? 'barber' : 'barbeiro',
+                      english ? 'barbers' : 'barbeiros',
+                      english,
                     )}
                   </td>
                 ))}
@@ -313,7 +333,7 @@ export function PlanComparison() {
                   scope="row"
                   className="px-5 py-4 text-sm font-semibold text-zinc-200 sm:px-7"
                 >
-                  Localizações
+                  {english ? 'Locations' : 'Localizações'}
                 </th>
                 {PLAN_ORDER.map((item) => (
                   <td
@@ -322,22 +342,23 @@ export function PlanComparison() {
                   >
                     {formatLimit(
                       PLAN_LIMITS[item].locations,
-                      'localização',
-                      'localizações',
+                      english ? 'location' : 'localização',
+                      english ? 'locations' : 'localizações',
+                      english,
                     )}
                   </td>
                 ))}
               </tr>
             </tbody>
             {FEATURE_GROUPS.map((group) => (
-              <tbody key={group.title}>
+              <tbody key={english ? GROUP_LABELS_EN[group.title] : group.title}>
                 <tr>
                   <th
                     scope="colgroup"
                     colSpan={4}
                     className="border-y border-white/10 bg-zinc-950/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500 sm:px-7"
                   >
-                    {group.title}
+                    {english ? GROUP_LABELS_EN[group.title] : group.title}
                   </th>
                 </tr>
                 {group.features.map((feature) => (
@@ -349,7 +370,7 @@ export function PlanComparison() {
                       scope="row"
                       className="px-5 py-4 text-sm font-normal text-zinc-300 sm:px-7"
                     >
-                      {FEATURE_LABELS[feature]}
+                      {english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]}
                     </th>
                     {PLAN_ORDER.map((item) => {
                       const included = hasPlanFeature(item, feature);
@@ -362,14 +383,14 @@ export function PlanComparison() {
                           {included ? (
                             <span
                               className="inline-flex size-6 items-center justify-center rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                              aria-label={`${FEATURE_LABELS[feature]} incluído`}
+                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} ${english ? "included" : "incluído"}`}
                             >
                               <Check className="size-3.5" aria-hidden="true" />
                             </span>
                           ) : (
                             <span
                               className="inline-flex size-6 items-center justify-center text-zinc-700"
-                              aria-label={`${FEATURE_LABELS[feature]} não incluído`}
+                              aria-label={`${english ? FEATURE_LABELS_EN[feature] : FEATURE_LABELS[feature]} ${english ? "not included" : "não incluído"}`}
                             >
                               <Minus className="size-4" aria-hidden="true" />
                             </span>
@@ -384,8 +405,7 @@ export function PlanComparison() {
           </table>
         </div>
         <p className="border-t border-white/10 px-5 py-4 text-xs leading-5 text-zinc-500 sm:px-7">
-          Todas as funcionalidades de um plano inferior ficam incluídas nos
-          planos superiores. Os limites são aplicados no servidor.
+          {english ? 'All features in lower plans are included in higher plans. Limits are enforced on the server.' : 'Todas as funcionalidades de um plano inferior ficam incluídas nos planos superiores. Os limites são aplicados no servidor.'}
         </p>
       </div>
     </section>

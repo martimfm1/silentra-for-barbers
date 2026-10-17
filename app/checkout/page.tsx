@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { CustomCheckout } from '@/components/billing/custom-checkout';
 import { verifyCheckoutIntent } from '@/lib/stripe/checkout-intent';
@@ -17,6 +18,8 @@ export default async function CheckoutPage({
     session_id?: string;
   }>;
 }) {
+  const cookieStore = await cookies();
+  const english = cookieStore.get('locale')?.value === 'en';
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,17 +53,18 @@ export default async function CheckoutPage({
             ✓
           </div>
           <h1 className="mt-5 text-2xl font-semibold text-white">
-            Pedido de subscrição recebido
+            {english ? 'Subscription request received' : 'Pedido de subscrição recebido'}
           </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
-            A Stripe terminou o processo de checkout. O estado da subscrição
-            será sincronizado automaticamente.
+            {english
+              ? 'Stripe has completed checkout. Your subscription status will sync automatically.'
+              : 'A Stripe terminou o processo de checkout. O estado da subscrição será sincronizado automaticamente.'}
           </p>
           <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
-            Ir para faturação
+            {english ? 'Go to billing' : 'Ir para faturação'}
           </Link>
         </div>
       </main>
@@ -75,17 +79,18 @@ export default async function CheckoutPage({
       <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 py-10 text-zinc-50">
         <div className="glassmorphism w-full max-w-xl rounded-2xl border border-red-400/20 bg-zinc-900/70 p-7 text-center shadow-[0_24px_90px_rgba(0,0,0,0.28)] sm:p-9">
           <h1 className="text-2xl font-semibold text-white">
-            Checkout indisponível
+            {english ? 'Checkout unavailable' : 'Checkout indisponível'}
           </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
-            Este checkout expirou ou não pertence à tua conta. Inicia um novo
-            checkout a partir dos planos.
+            {english
+              ? 'This checkout has expired or does not belong to your account. Start a new checkout from the plans page.'
+              : 'Este checkout expirou ou não pertence à tua conta. Inicia um novo checkout a partir dos planos.'}
           </p>
           <Link
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
-            Voltar aos planos
+            {english ? 'Back to plans' : 'Voltar aos planos'}
           </Link>
         </div>
       </main>
@@ -101,17 +106,18 @@ export default async function CheckoutPage({
       <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 py-10 text-zinc-50">
         <div className="glassmorphism w-full max-w-xl rounded-2xl border border-red-400/20 bg-zinc-900/70 p-7 text-center shadow-[0_24px_90px_rgba(0,0,0,0.28)] sm:p-9">
           <h1 className="text-2xl font-semibold text-white">
-            Checkout indisponível
+            {english ? 'Checkout unavailable' : 'Checkout indisponível'}
           </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
-            O checkout não corresponde à barbearia atualmente associada à tua
-            conta.
+            {english
+              ? 'This checkout does not match the barbershop currently linked to your account.'
+              : 'O checkout não corresponde à barbearia atualmente associada à tua conta.'}
           </p>
           <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
-            Ir para faturação
+            {english ? 'Go to billing' : 'Ir para faturação'}
           </Link>
         </div>
       </main>
@@ -123,10 +129,10 @@ export default async function CheckoutPage({
       {intent.plan === 'enterprise' && (
         <section className="mx-auto mb-5 flex max-w-6xl flex-col gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
-            <p className="text-sm font-semibold text-zinc-100">Queres também um site próprio?</p>
-            <p className="mt-1 text-xs leading-5 text-zinc-400">A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento.</p>
+            <p className="text-sm font-semibold text-zinc-100">{english ? "Would you also like a custom website?" : "Queres também um site próprio?"}</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">{english ? "A custom website is a separate service arranged directly with Silentra and priced separately." : "A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento."}</p>
           </div>
-          <a href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Contactar a Silentra</a>
+          <a href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Custom website Enterprise' : 'Site próprio Enterprise')}`} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">{english ? 'Contact Silentra' : 'Contactar a Silentra'}</a>
         </section>
       )}
       <CustomCheckout checkoutToken={token} plan={intent.plan} />

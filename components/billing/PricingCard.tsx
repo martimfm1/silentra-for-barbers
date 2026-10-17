@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import {
   Check,
@@ -57,6 +58,8 @@ export function PricingCard({
   billingInterval = 'month',
 }: PricingCardProps) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const english = locale === 'en';
   const isMounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -99,7 +102,7 @@ export function PricingCard({
       if (isCurrentPlan) return;
       if (!isBillingOwner) {
         toast.error(
-          'Apenas o proprietário da barbearia pode alterar a subscrição.',
+          english ? 'Only the barbershop owner can change the subscription.' : 'Apenas o proprietário da barbearia pode alterar a subscrição.',
         );
         return;
       }
@@ -125,7 +128,7 @@ export function PricingCard({
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível concluir a alteração do plano.',
+          : english ? 'Could not complete the plan change.' : 'Não foi possível concluir a alteração do plano.',
       );
     }
   };
@@ -133,7 +136,7 @@ export function PricingCard({
   const confirmPlanChange = async () => {
     if (isDowngradeToFree) {
       toast.error(
-        'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
+        english ? 'Switching to Free does not use checkout because there is no paid subscription to change.' : 'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
       );
       return;
     }
@@ -149,7 +152,7 @@ export function PricingCard({
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível iniciar a alteração da subscrição.',
+          : english ? 'Could not start the subscription change.' : 'Não foi possível iniciar a alteração da subscrição.',
       );
     }
   };
@@ -157,13 +160,13 @@ export function PricingCard({
   const buttonConfig = useMemo(() => {
     if (!isMounted)
       return {
-        label: 'A carregar…',
+        label: english ? 'Loading…' : 'A carregar…',
         disabled: true,
         variant: popular ? ('primary' as const) : ('outline' as const),
       };
     if (!isAuthenticated) {
       const label =
-        tier === 'free' ? 'Começar gratuitamente' : 'Criar conta para começar';
+        tier === 'free' ? (english ? 'Start for free' : 'Começar gratuitamente') : (english ? 'Create an account to get started' : 'Criar conta para começar');
       return {
         label,
         disabled: false,
@@ -172,36 +175,36 @@ export function PricingCard({
     }
     if (isCurrentPlan)
       return {
-        label: 'Plano atual',
+        label: english ? 'Current plan' : 'Plano atual',
         disabled: true,
         variant: 'secondary' as const,
       };
     if (!isBillingOwner)
       return {
-        label: 'Apenas o proprietário',
+        label: english ? 'Owner only' : 'Apenas o proprietário',
         disabled: true,
         variant: 'outline' as const,
       };
     if (destination === 'plans')
       return {
-        label: 'Mudar para este plano',
+        label: english ? 'Switch to this plan' : 'Mudar para este plano',
         disabled: false,
         variant: popular ? ('primary' as const) : ('outline' as const),
       };
     if (tier === 'free' && hasCurrentPaidPlan)
       return {
-        label: 'Mudar para Free',
+        label: english ? 'Switch to Free' : 'Mudar para Free',
         disabled: false,
         variant: 'outline' as const,
       };
     if (tier === 'free')
       return {
-        label: 'Mudar para este plano',
+        label: english ? 'Switch to this plan' : 'Mudar para este plano',
         disabled: false,
         variant: 'outline' as const,
       };
     return {
-      label: isUpgrade ? 'Fazer upgrade' : 'Mudar para este plano',
+      label: isUpgrade ? (english ? 'Upgrade plan' : 'Fazer upgrade') : (english ? 'Switch to this plan' : 'Mudar para este plano'),
       disabled: false,
       variant: popular ? ('primary' as const) : ('outline' as const),
     };
@@ -217,18 +220,19 @@ export function PricingCard({
     tier,
     checkoutLoading,
     billingInterval,
+    locale,
   ]);
 
   const isActivePaidPlan =
     isCurrentPlan && (tier === 'pro' || tier === 'enterprise');
   const currentPlanLabel = currentPlan
     ? PLAN_NAMES[currentPlan as PlanTier]
-    : 'Plano atual';
+    : (english ? 'Current plan' : 'Plano atual');
   const confirmationTitle = isDowngrade
-    ? 'Confirmar mudança para um plano inferior'
-    : 'Confirmar upgrade';
+    ? (english ? 'Confirm switching to a lower plan' : 'Confirmar mudança para um plano inferior')
+    : (english ? 'Confirm upgrade' : 'Confirmar upgrade');
   const confirmationDescription =
-    'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
+    english ? 'After confirmation, you will continue to the applicable payment flow. Your current subscription will only change after the new payment is complete.' : 'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
 
   return (
     <>
@@ -250,12 +254,12 @@ export function PricingCard({
                 </h3>
                 {popular && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
-                    <Sparkles className="size-3" /> Recomendado
+                    <Sparkles className="size-3" /> {english ? 'Recommended' : 'Recomendado'}
                   </span>
                 )}
                 {tier === 'pro' && trialDays ? (
                   <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
-                    <Gift className="size-3" /> 1 mês grátis
+                    <Gift className="size-3" /> {english ? '1 month free' : '1 mês grátis'}
                   </span>
                 ) : null}
               </div>
@@ -265,7 +269,7 @@ export function PricingCard({
             </div>
             {isCurrentPlan && (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300">
-                <Shield className="size-3" /> Ativo
+                <Shield className="size-3" /> {english ? 'Active' : 'Ativo'}
               </span>
             )}
           </div>
@@ -276,34 +280,34 @@ export function PricingCard({
             </span>
             {tier !== 'free' && (
               <span className="text-xs text-zinc-500">
-                {billingInterval === 'year' ? '/ano' : '/mês'}
+                {billingInterval === 'year' ? (english ? '/year' : '/ano') : (english ? '/month' : '/mês')}
               </span>
             )}
           </div>
           {tier === 'pro' && trialDays ? (
             <p className="mt-2 text-xs font-semibold text-emerald-300/90">
-              1 mês de Pro grátis para novos membros com o código TRIALPRO.
+              {english ? '1 month of Pro free for eligible new users with code TRIALPRO.' : '1 mês de Pro grátis para novos utilizadores elegíveis com o código TRIALPRO.'}
             </p>
           ) : null}
           {tier === 'pro' && !trialDays ? (
             <p className="mt-2 text-xs font-medium text-emerald-300/90">
-              Para crescer sem aumentar a complexidade.
+              {english ? 'Grow without adding complexity.' : 'Para crescer sem aumentar a complexidade.'}
             </p>
           ) : null}
           {tier === 'free' && (
             <p className="mt-2 text-xs text-zinc-500">
-              Sem cartão. Começa hoje e atualiza quando precisares.
+              {english ? 'No card required. Start today and upgrade when you need to.' : 'Sem cartão. Começa hoje e atualiza quando precisares.'}
             </p>
           )}
           {tier === 'enterprise' && (
             <p className="mt-2 text-xs text-zinc-500">
-              Para equipas e operações com várias localizações.
+              {english ? 'For teams and multi-location operations.' : 'Para equipas e operações com várias localizações.'}
             </p>
           )}
 
           <div className="mt-7 space-y-3 border-t border-white/8 pt-6">
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
-              Inclui
+              {english ? 'Includes' : 'Inclui'}
             </p>
             <ul className="space-y-3">
               {features.map((feature) => (
@@ -344,8 +348,8 @@ export function PricingCard({
           {tier === 'pro' && !isCurrentPlan ? (
             <p className="mt-2 text-center text-[11px] text-zinc-600">
               {trialDays
-                ? '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.'
-                : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.'}
+                ? (english ? '1 month free for eligible new users. The regular price applies after that.' : '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.')
+                : (english ? 'Payment instructions and terms are shown during subscription.' : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.')}
             </p>
           ) : null}
         </div>
@@ -368,7 +372,7 @@ export function PricingCard({
           <div className="mt-4 grid gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm sm:grid-cols-2">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                Atual
+                {english ? 'Current' : 'Atual'}
               </p>
               <p className="mt-1 font-semibold text-zinc-100">
                 {currentPlanLabel}
@@ -376,7 +380,7 @@ export function PricingCard({
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                Novo plano
+                {english ? 'New plan' : 'Novo plano'}
               </p>
               <p className="mt-1 font-semibold text-zinc-100">{title}</p>
             </div>
@@ -388,7 +392,7 @@ export function PricingCard({
               disabled={isChangingPlan}
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-zinc-200 hover:bg-white/[0.06] disabled:opacity-50"
             >
-              Cancelar
+              {english ? 'Cancel' : 'Cancelar'}
             </button>
             <button
               type="button"
@@ -399,7 +403,7 @@ export function PricingCard({
               {isChangingPlan ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : null}
-              {isDowngrade ? 'Ir para checkout' : 'Ir para checkout'}
+              {english ? 'Continue to checkout' : 'Ir para checkout'}
             </button>
           </DialogFooter>
         </DialogContent>
