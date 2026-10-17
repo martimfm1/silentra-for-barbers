@@ -37,7 +37,7 @@ async function getOwnerContext() {
   if (plan === 'enterprise') {
     return {
       user, tenant, plan, database,
-      access: { allowed: true, setupFee: 150, monthlyFee: 2.99, source: 'enterprise' as const },
+      access: { allowed: true, setupFee: 50, monthlyFee: 2.99, source: 'enterprise' as const },
     } as const;
   }
 
