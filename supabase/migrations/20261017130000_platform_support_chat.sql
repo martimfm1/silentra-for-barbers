@@ -87,8 +87,7 @@ create or replace function public.support_send_message(
 )
 returns jsonb
 language plpgsql
-security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   v_conversation public.support_conversations%rowtype;
@@ -96,19 +95,16 @@ declare
   v_notification_id uuid;
   v_recipient_type text;
   v_unread_count integer;
-  v_now timestamptz := now();
+  v_now timestamptz := pg_catalog.now();
   v_preview text;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
-    raise exception 'SUPPORT_SERVICE_ROLE_REQUIRED' using errcode = '42501';
-  end if;
   if p_sender_type not in ('customer', 'admin') then
     raise exception 'SUPPORT_INVALID_SENDER' using errcode = '22023';
   end if;
-  if p_body is null or char_length(btrim(p_body)) < 1 or char_length(p_body) > 4000 then
+  if p_body is null or pg_catalog.char_length(pg_catalog.btrim(p_body)) < 1 or pg_catalog.char_length(p_body) > 4000 then
     raise exception 'SUPPORT_INVALID_MESSAGE' using errcode = '22023';
   end if;
-  if p_recipient_email is null or btrim(p_recipient_email) = '' then
+  if p_recipient_email is null or pg_catalog.btrim(p_recipient_email) = '' then
     raise exception 'SUPPORT_RECIPIENT_REQUIRED' using errcode = '22023';
   end if;
 
@@ -134,10 +130,10 @@ begin
   insert into public.support_messages (
     conversation_id, sender_type, sender_user_id, body, created_at
   ) values (
-    p_conversation_id, p_sender_type, p_sender_user_id, btrim(p_body), v_now
+    p_conversation_id, p_sender_type, p_sender_user_id, pg_catalog.btrim(p_body), v_now
   ) returning id into v_message_id;
 
-  v_preview := left(regexp_replace(btrim(p_body), '[[:space:]]+', ' ', 'g'), 200);
+  v_preview := pg_catalog.left(pg_catalog.regexp_replace(pg_catalog.btrim(p_body), '[[:space:]]+', ' ', 'g'), 200);
 
   update public.support_conversations
   set status = case when p_sender_type = 'customer' then 'open' else 'waiting_customer' end,
@@ -151,14 +147,14 @@ begin
       conversation_id, message_id, recipient_type, recipient_email,
       recipient_name, status, next_attempt_at
     ) values (
-      p_conversation_id, v_message_id, v_recipient_type, lower(btrim(p_recipient_email)),
-      nullif(btrim(coalesce(p_recipient_name, '')), ''), 'pending', v_now
+      p_conversation_id, v_message_id, v_recipient_type, pg_catalog.lower(pg_catalog.btrim(p_recipient_email)),
+      nullif(pg_catalog.btrim(coalesce(p_recipient_name, '')), ''), 'pending', v_now
     )
     on conflict (message_id, recipient_type) do nothing
     returning id into v_notification_id;
   end if;
 
-  return jsonb_build_object(
+  return pg_catalog.jsonb_build_object(
     'message_id', v_message_id,
     'notification_id', v_notification_id,
     'notification_queued', v_notification_id is not null
