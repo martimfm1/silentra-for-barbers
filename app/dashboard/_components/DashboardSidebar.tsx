@@ -16,6 +16,7 @@ import {
   Scissors,
   Briefcase,
   MessageCircle,
+  Headset,
   Menu,
   X,
   Lock,
@@ -120,6 +121,7 @@ const secondaryItems: SidebarItem[] = [
     feature: 'loyalty',
   },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
+  { href: '/dashboard/suporte', label: 'Suporte Silentra', icon: Headset },
   { href: '/dashboard/billing', label: 'Plano e pagamentos', icon: CreditCard },
   // Keep the entry available on every plan; the page/API explain purchase and grant access.
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
