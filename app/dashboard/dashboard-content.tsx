@@ -79,7 +79,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <DashboardSidebar />
       <div
         className={`dashboard-content silentra-dashboard-main min-w-0 lg:pl-64 ${
-          isSettingsPage ? 'pt-0' : 'pt-2'
+          isSettingsPage ? 'pt-0' : 'pt-16'
         }`}
       >
         <DashboardPageTransition>
