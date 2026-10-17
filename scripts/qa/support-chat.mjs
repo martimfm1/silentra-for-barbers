@@ -50,12 +50,12 @@ assert.match(worker, /CRON_SECRET/);
 assert.match(worker, /retryDueSupportEmailNotifications/);
 
 const customerUi = await readFile(requiredFiles[5], 'utf8');
-assert.match(customerUi, //api\/support\/conversations/);
+assert.ok(customerUi.includes("fetch('/api/support/conversations'"));
 assert.match(customerUi, /Enviar mensagem/);
 
 const adminUi = await readFile(requiredFiles[6], 'utf8');
 assert.match(adminUi, /planRank\[b\.plan\] - planRank\[a\.plan\]/);
-assert.match(adminUi, //api\/silentra-admin\/support/);
+assert.ok(adminUi.includes("/api/silentra-admin/support"));
 assert.match(adminUi, /statusFilter === 'unread'/);
 
 const adminConsole = await readFile(requiredFiles[7], 'utf8');
