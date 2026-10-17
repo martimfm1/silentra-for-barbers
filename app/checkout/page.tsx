@@ -90,7 +90,7 @@ export default async function CheckoutPage({
             href="/plans"
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-950"
           >
-            Voltar aos planos
+            {english ? 'Back to plans' : 'Voltar aos planos'}
           </Link>
         </div>
       </main>
