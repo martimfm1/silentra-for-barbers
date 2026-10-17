@@ -391,6 +391,11 @@ export function CustomCheckout({
   );
   const initializedKey = useRef<string | null>(null);
   const checkoutAttemptIdRef = useRef<string | null>(null);
+  const englishRef = useRef(english);
+
+  useEffect(() => {
+    englishRef.current = english;
+  }, [english]);
 
   useEffect(() => {
     if (!checkoutToken || initializedKey.current === checkoutToken) return;
@@ -411,7 +416,7 @@ export function CustomCheckout({
         if (!response.ok) {
           const backendError = readBackendError(
             body,
-            english ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
+            englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
           );
           const error = new Error(backendError.message) as Error & {
             code?: string | null;
@@ -421,7 +426,7 @@ export function CustomCheckout({
         }
         if (!body.clientSecret)
           throw new Error(
-            english ? 'Stripe did not return a valid checkout session.' : 'O Stripe não devolveu uma sessão de checkout válida.',
+            englishRef.current ? 'Stripe did not return a valid checkout session.' : 'O Stripe não devolveu uma sessão de checkout válida.',
           );
         if (!cancelled) setClientSecret(body.clientSecret as string);
       } catch (error) {
@@ -457,7 +462,7 @@ export function CustomCheckout({
           onClick={() => window.location.reload()}
           className="mt-5 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
         >
-          Tentar novamente
+          {english ? 'Try again' : 'Tentar novamente'}
         </button>
       </div>
     );
