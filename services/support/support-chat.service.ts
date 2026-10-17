@@ -128,7 +128,7 @@ type SupportNotification = {
   recipient_type: SupportSenderType;
   recipient_email: string;
   recipient_name: string | null;
-  status: 'pending' | 'sent' | 'failed';
+  status: 'pending' | 'processing' | 'sent' | 'failed';
   attempts: number;
   next_attempt_at: string;
 };
@@ -153,9 +153,33 @@ export async function deliverSupportEmailNotification(
   const row = notification as SupportNotification;
   if (row.status === 'sent') return { sent: true } as const;
   if (row.attempts >= 5) return { sent: false, error: 'RETRY_LIMIT_REACHED' } as const;
-  if (Date.parse(row.next_attempt_at) > Date.now()) {
+  const now = new Date();
+  if (Date.parse(row.next_attempt_at) > now.getTime()) {
     return { sent: false, error: 'RETRY_NOT_DUE' } as const;
   }
+
+  // Claim the outbox row before calling the provider so an immediate send and
+  // the scheduled worker cannot deliver the same email concurrently. The
+  // 10-minute lease lets the cron recover from a worker that crashed mid-send.
+  const { data: claim, error: claimError } = await admin
+    .from('support_email_notifications')
+    .update({
+      status: 'processing',
+      attempts: row.attempts + 1,
+      next_attempt_at: new Date(now.getTime() + 10 * 60_000).toISOString(),
+    })
+    .eq('id', row.id)
+    .eq('status', row.status)
+    .eq('attempts', row.attempts)
+    .lte('next_attempt_at', now.toISOString())
+    .select('id')
+    .maybeSingle();
+
+  if (claimError) {
+    console.error('[SUPPORT_EMAIL_OUTBOX_CLAIM_FAILED]', claimError.code ?? 'UNKNOWN');
+    return { sent: false, error: 'OUTBOX_CLAIM_FAILED' } as const;
+  }
+  if (!claim) return { sent: false, error: 'OUTBOX_ALREADY_CLAIMED' } as const;
 
   const [conversationResult, messageResult] = await Promise.all([
     admin
@@ -284,7 +308,7 @@ export async function retryDueSupportEmailNotifications(admin: SupabaseClient) {
   const { data, error } = await admin
     .from('support_email_notifications')
     .select('id')
-    .in('status', ['pending', 'failed'])
+    .in('status', ['pending', 'processing', 'failed'])
     .lt('attempts', 5)
     .lte('next_attempt_at', new Date().toISOString())
     .order('created_at', { ascending: true })
