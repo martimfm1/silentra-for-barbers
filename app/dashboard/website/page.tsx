@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
+type WebsiteAccess = { allowed: boolean; setupFee: number; monthlyFee: number; source: 'enterprise' | 'admin_grant' | 'not_granted' };
+
 type WebsiteRequest = {
   id: string;
   shop_name: string;
@@ -33,6 +35,7 @@ const STATUS: Record<WebsiteRequest['status'], { label: string; description: str
 export default function CustomWebsiteDashboardPage() {
   const { plan, loading: planLoading } = useFeatureAccess();
   const [requests, setRequests] = useState<WebsiteRequest[]>([]);
+  const [access, setAccess] = useState<WebsiteAccess | null>(null);
   const [desiredSlug, setDesiredSlug] = useState('');
   const [brief, setBrief] = useState('');
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,7 @@ export default function CustomWebsiteDashboardPage() {
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || 'Não foi possível carregar os pedidos.');
       setRequests(Array.isArray(body.data) ? body.data : []);
+      setAccess(body.access && typeof body.access === 'object' ? body.access as WebsiteAccess : null);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Não foi possível carregar os pedidos.');
     } finally {
@@ -53,9 +57,8 @@ export default function CustomWebsiteDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (planLoading) return;
-    if (plan === 'enterprise') void load();
-  }, [load, plan, planLoading]);
+    if (!planLoading) void load();
+  }, [load, planLoading]);
 
   const activeRequest = requests.find((item) =>
     ['requested', 'contacted', 'in_progress', 'review'].includes(item.status),
@@ -85,19 +88,21 @@ export default function CustomWebsiteDashboardPage() {
     }
   }
 
-  if (planLoading || (plan === 'enterprise' && loading)) {
+  if (planLoading || loading) {
     return <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8"><div className="flex min-h-64 items-center justify-center text-zinc-500"><Loader2 className="mr-2 size-5 animate-spin" />A carregar os teus sites…</div></main>;
   }
 
-  if (plan !== 'enterprise') {
+  if (!access?.allowed) {
+    const monthlyPrice = plan === 'pro' ? '4,99 €' : '6,99 €';
     return (
       <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8">
         <Link href="/dashboard/billing" className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-zinc-400 hover:text-white"><ArrowLeft className="size-4" />Plano e pagamentos</Link>
         <section className="rounded-3xl border border-emerald-400/15 bg-emerald-400/[0.035] p-6 sm:p-10">
           <div className="flex size-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300"><ShieldCheck className="size-6" /></div>
-          <h1 className="mt-5 text-2xl font-semibold text-white">Sites próprios para a tua barbearia</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">O serviço de criação de sites personalizados está disponível exclusivamente para clientes Enterprise. A equipa Silentra desenha o site contigo e atribui-lhe um endereço público próprio.</p>
-          <Link href="/plans" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Conhecer o Enterprise</Link>
+          <h1 className="mt-5 text-2xl font-semibold text-white">Site próprio para a tua barbearia</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">O serviço pode ser adquirido por clientes de qualquer plano. A criação custa <strong className="text-zinc-100">150 €</strong> e a manutenção mensal para o teu plano {plan === 'pro' ? 'Pro' : 'Free'} é de <strong className="text-zinc-100">{monthlyPrice}/mês</strong>. O acesso ao pedido e à gestão do site é ativado pela equipa depois de confirmar a aquisição.</p>
+          <a href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent('Adquirir site próprio — ' + (plan === 'pro' ? 'Pro' : 'Free'))}`} className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200"><Mail className="size-4" />Adquirir site próprio</a>
+          <p className="mt-4 text-xs leading-5 text-zinc-500">Após a confirmação do pagamento, a administração pode conceder acesso a esta área sem alterar o teu plano de subscrição.</p>
         </section>
       </main>
     );
@@ -108,9 +113,9 @@ export default function CustomWebsiteDashboardPage() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link href="/dashboard" className="mb-4 inline-flex min-h-10 items-center gap-2 text-sm text-zinc-500 hover:text-zinc-200"><ArrowLeft className="size-4" />Dashboard</Link>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">Enterprise · Serviço à medida</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">{plan === 'enterprise' ? 'Enterprise' : 'Acesso autorizado'} · Serviço à medida</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Site próprio</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">A Silentra cria um site personalizado para a tua barbearia e associa-o a um endereço como <span className="font-medium text-zinc-200">barbers.silentra.me/nome-da-barbearia</span>. O projeto é combinado diretamente connosco; não é cobrado automaticamente no checkout do plano.</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">A Silentra cria um site personalizado para a tua barbearia. O serviço custa <span className="font-medium text-zinc-200">150 € de criação</span> e <span className="font-medium text-zinc-200">{plan === 'enterprise' ? '2,99 €' : plan === 'pro' ? '4,99 €' : '6,99 €'}/mês</span>. O site é publicado após aprovação do projeto e confirmação das condições comerciais.</p>
         </div>
         <a href="mailto:silentra.contact@gmail.com?subject=Site%20pr%C3%B3prio%20Enterprise" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.08]"><Mail className="size-4" />Contactar a Silentra</a>
       </header>
@@ -126,7 +131,7 @@ export default function CustomWebsiteDashboardPage() {
             <span className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">{new Date(latest.created_at).toLocaleDateString('pt-PT')}</span>
           </div>
           {latest.status === 'published' && latest.public_slug && (
-            <a href={`/${encodeURIComponent(latest.public_slug)}`} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Abrir site publicado <ExternalLink className="size-4" /></a>
+            <a href={`/site/${encodeURIComponent(latest.public_slug)}`} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">Abrir site publicado <ExternalLink className="size-4" /></a>
           )}
         </section>
       )}
