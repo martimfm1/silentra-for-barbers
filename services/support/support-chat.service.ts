@@ -200,7 +200,7 @@ export async function deliverSupportEmailNotification(
 
   const { data: shop, error: shopError } = await admin
     .from('barbershops')
-    .select('name')
+    .select('name,default_language')
     .eq('id', conversationResult.data.barbershop_id)
     .maybeSingle();
   if (shopError) {
@@ -208,27 +208,32 @@ export async function deliverSupportEmailNotification(
   }
 
   const plan = normalizeSupportPlan(conversationResult.data.plan);
-  const shopName = shop?.name || 'a tua barbearia';
+  const english = shop?.default_language === 'en';
+  const shopName = shop?.name || (english ? 'your barbershop' : 'a tua barbearia');
   const isAdminRecipient = row.recipient_type === 'admin';
   const target = isAdminRecipient
     ? `/silentra-admin?tab=support&conversationId=${encodeURIComponent(row.conversation_id)}`
     : '/dashboard/suporte';
   const title = isAdminRecipient
-    ? 'Nova mensagem de suporte'
-    : 'Tens uma nova mensagem da equipa Silentra';
+    ? english ? 'New support message' : 'Nova mensagem de suporte'
+    : english ? 'Silentra has replied to your support conversation' : 'Tens uma nova mensagem da equipa Silentra';
   const description = isAdminRecipient
-    ? `A barbearia ${shopName} (${plan.toUpperCase()}) enviou uma mensagem no chat de suporte.`
-    : 'A equipa Silentra respondeu à tua conversa de suporte.';
+    ? english
+      ? `${shopName} (${plan.toUpperCase()}) sent a message in the support chat.`
+      : `A barbearia ${shopName} (${plan.toUpperCase()}) enviou uma mensagem no chat de suporte.`
+    : english
+      ? 'The Silentra team has replied to your support conversation.'
+      : 'A equipa Silentra respondeu à tua conversa de suporte.';
   const excerpt = String(messageResult.data.body).slice(0, 600);
   const htmlContent = `
     <div style="background:#f4f4f5;padding:32px 12px;font-family:Arial,Helvetica,sans-serif;color:#18181b">
       <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:28px">
-        <p style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#71717a;font-weight:700">Silentra · Suporte</p>
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#71717a;font-weight:700">Silentra · ${english ? 'Support' : 'Suporte'}</p>
         <h1 style="font-size:22px;line-height:1.3;margin:14px 0;color:#18181b">${escapeHtml(title)}</h1>
         <p style="font-size:14px;line-height:1.7;color:#52525b">${escapeHtml(description)}</p>
         <div style="margin:22px 0;padding:16px;border-radius:10px;background:#f4f4f5;font-size:14px;line-height:1.7;color:#3f3f46;white-space:pre-wrap">${escapeHtml(excerpt)}${String(messageResult.data.body).length > 600 ? '…' : ''}</div>
-        <a href="${getBaseUrl()}${target}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-size:14px;font-weight:700">${isAdminRecipient ? 'Abrir Silentra Admin' : 'Abrir conversa'}</a>
-        <p style="margin-top:24px;font-size:11px;line-height:1.6;color:#a1a1aa">Recebeste este email porque tens uma mensagem por ler na plataforma Silentra. Este é um aviso transacional; responde diretamente na plataforma.</p>
+        <a href="${getBaseUrl()}${target}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-size:14px;font-weight:700">${isAdminRecipient ? (english ? 'Open Silentra Admin' : 'Abrir Silentra Admin') : (english ? 'Open conversation' : 'Abrir conversa')}</a>
+        <p style="margin-top:24px;font-size:11px;line-height:1.6;color:#a1a1aa">${english ? 'You received this email because you have an unread message on Silentra. This is a transactional notice; reply directly in the platform.' : 'Recebeste este email porque tens uma mensagem por ler na plataforma Silentra. Este é um aviso transacional; responde diretamente na plataforma.'}</p>
       </div>
     </div>`;
 
