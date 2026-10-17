@@ -650,7 +650,7 @@ export default function SettingsPageOrganized() {
                               : 'border-white/10 bg-white/[.02] text-zinc-400',
                           )}
                         >
-                          {locale === 'pt' ? ptLabel : enLabel}
+                          {l}
                         </button>
                       ))}
                     </div>
@@ -725,7 +725,7 @@ export default function SettingsPageOrganized() {
                               : 'border-white/10 bg-white/[.02] text-zinc-400',
                           )}
                         >
-                          {l}
+                          {locale === 'pt' ? ptLabel : enLabel}
                         </button>
                       );
                     })}
