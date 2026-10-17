@@ -45,7 +45,7 @@ O plano é resolvido no backend a partir de atribuições de plano válidas e su
 1. Aplicar a migration `supabase/migrations/20261017130000_platform_support_chat.sql` no projeto Supabase usado pela aplicação.
 2. Confirmar que `SUPABASE_SERVICE_ROLE_KEY`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL` (ou `SENDER_EMAIL`), e a identidade admin `SILENTRA_PLATFORM_ADMIN_EMAIL` ou `SILENTRA_PLATFORM_ADMIN_USER_ID` estão configuradas no ambiente de produção.
 3. Confirmar que o email admin pode ser resolvido. Se só estiver configurado o ID, esse utilizador tem de existir no Supabase Auth com email.
-4. O cron `/api/cron/support-email-notifications` está configurado em `vercel.json` a cada 15 minutos para retentativas; o envio inicial é tentado imediatamente após a gravação da mensagem.
+4. O cron `/api/cron/support-email-notifications` está configurado diariamente às 00:45 UTC para retentativas, para manter a configuração compatível com a Vercel Hobby. O envio inicial é tentado imediatamente após a gravação da mensagem. Uma frequência de retentativas inferior a um dia exige um plano Vercel que suporte cron subdiário ou um scheduler externo autenticado.
 5. Executar `pnpm qa:support`, `pnpm typecheck`, `pnpm lint` e `pnpm build`. Depois, testar com uma conta Free e outra Pro/Enterprise: criar conversa, responder em ambos os sentidos, marcar como lida, mudar o estado e confirmar emails.
 
 ## Observações operacionais
