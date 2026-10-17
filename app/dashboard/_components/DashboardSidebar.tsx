@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BarChart3,
   Megaphone,
@@ -23,6 +23,7 @@ import {
   QrCode,
   Globe2,
   ChevronDown,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -75,7 +76,6 @@ const primaryItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Início', icon: LayoutDashboard },
   { href: '/dashboard/agenda', label: 'Agenda', icon: CalendarDays },
   { href: '/dashboard/clientes', label: 'Clientes', icon: Users },
-  { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
   { href: '/dashboard/servicos', label: 'Serviços', icon: Scissors },
   {
     href: '/dashboard/equipa',
@@ -107,7 +107,8 @@ const communicationItems: SidebarItem[] = [
   },
 ];
 
-const secondaryItems: SidebarItem[] = [
+const toolsItems: SidebarItem[] = [
+  { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
   {
     href: '/dashboard/analytics',
     label: 'Relatórios',
@@ -121,12 +122,39 @@ const secondaryItems: SidebarItem[] = [
     feature: 'loyalty',
   },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
+  // Keep the entry available on every plan; the page explains purchase and access.
+  { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
+];
+
+const secondaryItems: SidebarItem[] = [
   { href: '/dashboard/suporte', label: 'Suporte Silentra', icon: Headset },
   { href: '/dashboard/billing', label: 'Plano e pagamentos', icon: CreditCard },
-  // Keep the entry available on every plan; the page/API explain purchase and grant access.
-  { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
   { href: '/dashboard/settings', label: 'Definições', icon: Settings },
 ];
+
+const englishLabels: Record<string, string> = {
+  'Início': 'Overview',
+  'Agenda': 'Appointments',
+  'Clientes': 'Clients',
+  'Serviços': 'Services',
+  'Equipa': 'Team',
+  'Comunicação': 'Communication',
+  'Mensagens': 'Messages',
+  'Campanhas': 'Campaigns',
+  'Aniversários': 'Birthdays',
+  'QR Code': 'QR code',
+  'Relatórios': 'Reports',
+  'Fidelização': 'Loyalty',
+  'Vendas': 'Sales',
+  'Site próprio': 'Website',
+  'Suporte Silentra': 'Silentra Support',
+  'Plano e pagamentos': 'Plan and billing',
+  'Definições': 'Settings',
+};
+
+function localizeNavLabel(label: string, locale: string) {
+  return locale === 'en' ? (englishLabels[label] ?? label) : label;
+}
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -135,6 +163,13 @@ export function DashboardSidebar() {
   const { barbershopAvatarUrl } = useBarbershop();
   const { t, locale } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileDialogRef = useRef<HTMLElement>(null);
+  const [toolsOpen, setToolsOpen] = useState(() =>
+    ['/dashboard/qr-code', '/dashboard/analytics', '/dashboard/loyalty', '/dashboard/pos', '/dashboard/website'].some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    ),
+  );
   const [communicationOpen, setCommunicationOpen] = useState(
     () =>
       pathname.startsWith('/dashboard/comunicacao') ||
@@ -142,22 +177,88 @@ export function DashboardSidebar() {
       pathname.startsWith('/dashboard/marketing'),
   );
 
+  useEffect(() => {
+    const matchesCurrentPath = (items: SidebarItem[]) =>
+      items.some(
+        (item) =>
+          pathname === item.href || pathname.startsWith(`${item.href}/`),
+      );
+
+    // Keep a parent section expanded when navigation reaches one of its routes
+    // from another part of the application. Users can still collapse it again.
+    if (matchesCurrentPath(communicationItems)) setCommunicationOpen(true);
+    if (matchesCurrentPath(toolsItems)) setToolsOpen(true);
+  }, [pathname]);
+
   const mobilePrimary = primaryItems.slice(0, 4);
   const isLocked = (item: SidebarItem) =>
     Boolean(item.feature && !hasFeature(item.feature));
 
   const handleLocked = (item: SidebarItem) => {
-    toast.info(`${item.label}: disponível num plano superior.`, {
-      description:
-        'A tua conta continua a funcionar normalmente. Podes mudar de plano quando precisares desta funcionalidade.',
-      action: {
-        label: 'Ver planos',
-        onClick: () => router.push('/dashboard/billing'),
+    const label = localizeNavLabel(item.label, locale);
+    toast.info(
+      locale === 'en'
+        ? `${label}: available on a higher plan.`
+        : `${label}: disponível num plano superior.`,
+      {
+        description:
+          locale === 'en'
+            ? 'Your account will keep working normally. Upgrade your plan whenever you need this feature.'
+            : 'A tua conta continua a funcionar normalmente. Podes mudar de plano quando precisares desta funcionalidade.',
+        action: {
+          label: locale === 'en' ? 'View plans' : 'Ver planos',
+          onClick: () => router.push('/dashboard/billing'),
+        },
       },
-    });
+    );
   };
 
   const closeMobile = () => setMobileOpen(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const dialog = mobileDialogRef.current;
+    if (!dialog) return;
+
+    const selector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () =>
+      Array.from(dialog.querySelectorAll<HTMLElement>(selector)).filter(
+        (element) => element.getAttribute('aria-hidden') !== 'true',
+      );
+
+    getFocusable()[0]?.focus();
+
+    const handleDialogKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const elements = getFocusable();
+      if (!elements.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDialogKeys);
+    return () => {
+      document.removeEventListener('keydown', handleDialogKeys);
+      mobileTriggerRef.current?.focus();
+    };
+  }, [mobileOpen]);
 
   const renderItem = (item: SidebarItem, mobile = false) => {
     const locked = isLocked(item);
@@ -165,10 +266,7 @@ export function DashboardSidebar() {
       pathname === item.href ||
       (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
     const Icon = item.icon;
-    const itemLabel =
-      item.href === '/dashboard/suporte' && locale === 'en'
-        ? 'Silentra Support'
-        : item.label;
+    const itemLabel = localizeNavLabel(item.label, locale);
 
     if (locked) {
       return (
@@ -245,6 +343,7 @@ export function DashboardSidebar() {
             mobile && 'min-h-12',
           )}
           aria-expanded={communicationOpen}
+          aria-controls={mobile ? 'dashboard-communication-mobile' : 'dashboard-communication-desktop'}
         >
           <span
             aria-hidden="true"
@@ -260,7 +359,7 @@ export function DashboardSidebar() {
             )}
             aria-hidden="true"
           />
-          <span className="truncate">Comunicação</span>
+          <span className="truncate">{locale === 'en' ? 'Communication' : 'Comunicação'}</span>
           <ChevronDown
             className={cn(
               'ml-auto size-4 transition-transform duration-200 motion-reduce:transition-none',
@@ -270,17 +369,56 @@ export function DashboardSidebar() {
           />
         </button>
         <div
+          id={mobile ? 'dashboard-communication-mobile' : 'dashboard-communication-desktop'}
           className={cn(
             'grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none',
             communicationOpen
               ? 'grid-rows-[1fr] opacity-100'
               : 'grid-rows-[0fr] opacity-0 pointer-events-none',
           )}
+          hidden={!communicationOpen}
         >
           <div className="min-h-0 ml-3 space-y-1 border-l border-white/10 pl-3">
-            {communicationItems
-              .slice(1)
-              .map((item) => renderItem(item, mobile))}
+            {communicationItems.map((item) => renderItem(item, mobile))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTools = (mobile = false) => {
+    const active = toolsItems.some(
+      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+    );
+    const panelId = mobile ? 'dashboard-tools-mobile' : 'dashboard-tools-desktop';
+
+    return (
+      <div key="tools" className="space-y-1">
+        <button
+          type="button"
+          onClick={() => setToolsOpen((value) => !value)}
+          className={cn(
+            'group relative flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-left text-sm transition-[background-color,color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+            active ? 'bg-white/[0.06] text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100',
+            mobile && 'min-h-12',
+          )}
+          aria-expanded={toolsOpen}
+          aria-controls={panelId}
+        >
+          <Wrench className={cn('size-4 shrink-0', active ? 'text-emerald-400' : 'text-zinc-500')} aria-hidden="true" />
+          <span className="truncate">{locale === 'en' ? 'Tools & insights' : 'Ferramentas e análise'}</span>
+          <ChevronDown className={cn('ml-auto size-4 transition-transform duration-200 motion-reduce:transition-none', toolsOpen && 'rotate-180')} aria-hidden="true" />
+        </button>
+        <div
+          id={panelId}
+          className={cn(
+            'grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none',
+            toolsOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none',
+          )}
+          hidden={!toolsOpen}
+        >
+          <div className="min-h-0 ml-3 space-y-1 border-l border-white/10 pl-3">
+            {toolsItems.map((item) => renderItem(item, mobile))}
           </div>
         </div>
       </div>
@@ -304,7 +442,7 @@ export function DashboardSidebar() {
             </Link>
           </div>
           <nav
-            aria-label="Navegação principal"
+            aria-label={locale === 'en' ? 'Main navigation' : 'Navegação principal'}
             className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-5"
           >
             <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
@@ -313,6 +451,7 @@ export function DashboardSidebar() {
             {primaryItems.map((item) => renderItem(item))}
             <div className="my-2 border-t border-white/[0.06]" />
             {renderCommunication()}
+            {renderTools()}
             <div className="my-2 border-t border-white/[0.06]" />
             {secondaryItems.map((item) => renderItem(item))}
           </nav>
@@ -320,7 +459,7 @@ export function DashboardSidebar() {
       </aside>
 
       <nav
-        aria-label="Navegação rápida"
+        aria-label={locale === 'en' ? 'Quick navigation' : 'Navegação rápida'}
         className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
       >
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
@@ -356,11 +495,12 @@ export function DashboardSidebar() {
                   )}
                   aria-hidden="true"
                 />
-                <span className="max-w-full truncate">{item.label}</span>
+                <span className="max-w-full truncate">{localizeNavLabel(item.label, locale)}</span>
               </Link>
             );
           })}
           <button
+            ref={mobileTriggerRef}
             type="button"
             onClick={() => setMobileOpen(true)}
             className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
@@ -368,7 +508,7 @@ export function DashboardSidebar() {
             aria-expanded={mobileOpen}
           >
             <Menu className="size-4" aria-hidden="true" />
-            <span>Mais</span>
+            <span>{locale === 'en' ? 'More' : 'Mais'}</span>
           </button>
         </div>
       </nav>
@@ -378,15 +518,15 @@ export function DashboardSidebar() {
           className="fixed inset-0 z-[60] lg:hidden"
           role="dialog"
           aria-modal="true"
-          aria-label="Menu"
+          aria-label={locale === 'en' ? 'Dashboard menu' : 'Menu do painel'}
         >
           <button
             type="button"
             className="absolute inset-0 bg-black/70"
             onClick={closeMobile}
-            aria-label="Fechar menu"
+            aria-label={locale === 'en' ? 'Close menu' : 'Fechar menu'}
           />
-          <aside className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-white/10 bg-zinc-950 p-4 shadow-2xl">
+          <aside ref={mobileDialogRef} className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-white/10 bg-zinc-950 p-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <Link
                 href="/dashboard"
@@ -406,12 +546,13 @@ export function DashboardSidebar() {
               </button>
             </div>
             <nav
-              aria-label="Todas as áreas"
+              aria-label={locale === 'en' ? 'All areas' : 'Todas as áreas'}
               className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto py-4"
             >
               {primaryItems.map((item) => renderItem(item, true))}
               <div className="my-2 border-t border-white/[0.06]" />
               {renderCommunication(true)}
+              {renderTools(true)}
               <div className="my-2 border-t border-white/[0.06]" />
               {secondaryItems.map((item) => renderItem(item, true))}
             </nav>

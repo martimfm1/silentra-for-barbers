@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const requiredFiles = [
-  'supabase/migrations/20261017130000_platform_support_chat.sql',
+  'supabase/migrations/20261017115827_platform_support_chat.sql',
   'services/support/support-chat.service.ts',
   'app/api/support/conversations/route.ts',
   'app/api/silentra-admin/support/route.ts',
@@ -26,10 +26,20 @@ assert.match(migration, /grant execute on function public\.support_send_message[
 assert.match(migration, /support_email_notifications/i);
 assert.match(migration, /unique \(barbershop_id\)/i);
 
+const everyMessageMigration = await readFile(
+  'supabase/migrations/20261017130000_support_notify_every_message.sql',
+  'utf8',
+);
+assert.match(everyMessageMigration, /Every message has a unique outbox entry/i);
+assert.match(everyMessageMigration, /insert into public\.support_email_notifications/i);
+assert.doesNotMatch(everyMessageMigration, /v_unread_count|if\s+v_unread_count\s*=\s*0/i);
+
 const service = await readFile(requiredFiles[1], 'utf8');
 assert.match(service, /getEffectiveSupportPlan/i);
 assert.match(service, /supportPriority/i);
 assert.match(service, /sendBrevoEmail/i);
+assert.match(service, /new message was sent in your Silentra support conversation/i);
+assert.doesNotMatch(service, /if \(messageResult\.data\.read_at\)/);
 assert.match(service, /retryDueSupportEmailNotifications/i);
 
 const customerApi = await readFile(requiredFiles[2], 'utf8');

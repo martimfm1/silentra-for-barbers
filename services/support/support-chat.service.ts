@@ -208,19 +208,8 @@ export async function deliverSupportEmailNotification(
     return { sent: false, error: errorCode } as const;
   }
 
-  // The message may have been read before the notification worker ran. Do not
-  // send a stale email in that case.
-  if (messageResult.data.read_at) {
-    await admin
-      .from('support_email_notifications')
-      .update({
-        status: 'sent',
-        sent_at: new Date().toISOString(),
-        last_error: null,
-      })
-      .eq('id', row.id);
-    return { sent: true, skipped: true } as const;
-  }
+  // Deliver one transactional email for every accepted message, even if the
+  // recipient opened the chat before the outbox worker started.
 
   const { data: shop, error: shopError } = await admin
     .from('barbershops')
@@ -257,7 +246,7 @@ export async function deliverSupportEmailNotification(
         <p style="font-size:14px;line-height:1.7;color:#52525b">${escapeHtml(description)}</p>
         <div style="margin:22px 0;padding:16px;border-radius:10px;background:#f4f4f5;font-size:14px;line-height:1.7;color:#3f3f46;white-space:pre-wrap">${escapeHtml(excerpt)}${String(messageResult.data.body).length > 600 ? '…' : ''}</div>
         <a href="${getBaseUrl()}${target}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-size:14px;font-weight:700">${isAdminRecipient ? (english ? 'Open Silentra Admin' : 'Abrir Silentra Admin') : (english ? 'Open conversation' : 'Abrir conversa')}</a>
-        <p style="margin-top:24px;font-size:11px;line-height:1.6;color:#a1a1aa">${english ? 'You received this email because you have an unread message on Silentra. This is a transactional notice; reply directly in the platform.' : 'Recebeste este email porque tens uma mensagem por ler na plataforma Silentra. Este é um aviso transacional; responde diretamente na plataforma.'}</p>
+        <p style="margin-top:24px;font-size:11px;line-height:1.6;color:#a1a1aa">${english ? 'You received this email because a new message was sent in your Silentra support conversation. Reply directly in the platform.' : 'Recebeste este email porque foi enviada uma nova mensagem na tua conversa de suporte Silentra. Responde diretamente na plataforma.'}</p>
       </div>
     </div>`;
 

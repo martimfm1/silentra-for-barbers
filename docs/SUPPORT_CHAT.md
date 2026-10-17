@@ -6,9 +6,9 @@ O chat de suporte da plataforma é um canal privado entre o proprietário da bar
 
 1. Um proprietário autenticado abre **Dashboard → Suporte Silentra** e envia a primeira mensagem.
 2. A API confirma a sessão no Supabase Auth, o papel `owner`, a barbearia associada e a origem da requisição. O servidor calcula o plano efetivo e cria uma conversa por barbearia.
-3. A mensagem é guardada como texto simples. O RPC `support_send_message` serializa envios por conversa e cria uma notificação no outbox quando o destinatário passa de sem mensagens por ler para ter mensagens por ler.
+3. A mensagem é guardada como texto simples. O RPC `support_send_message` serializa envios por conversa e cria, na mesma transação, uma notificação independente no outbox para cada mensagem e destinatário.
 4. A equipa responde em **Silentra Admin → Suporte**. As conversas são ordenadas por plano (Enterprise, Pro, Free), depois por mensagens por ler e atividade recente.
-5. O destinatário recebe email transacional via Brevo com uma ligação direta à área de chat. Enquanto houver mensagens por ler, novos envios não geram um email por cada mensagem; a notificação representa o lote de mensagens ainda por ler.
+5. Cada mensagem aceite gera um email transacional via Brevo com um excerto escapado e uma ligação direta à conversa. O envio inicial é tentado imediatamente depois do RPC, mesmo que o destinatário abra o chat antes de o worker terminar.
 6. As falhas de entrega ficam na tabela `support_email_notifications`, com limite de cinco tentativas e backoff. O worker programado processa notificações pendentes/falhadas.
 
 ## Prioridade por plano
@@ -42,12 +42,12 @@ O plano é resolvido no backend a partir de atribuições de plano válidas e su
 
 ## Deploy
 
-1. Aplicar a migration `supabase/migrations/20261017130000_platform_support_chat.sql` no projeto Supabase usado pela aplicação.
-2. Confirmar que `SUPABASE_SERVICE_ROLE_KEY`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL` (ou `SENDER_EMAIL`), e a identidade admin `SILENTRA_PLATFORM_ADMIN_EMAIL` ou `SILENTRA_PLATFORM_ADMIN_USER_ID` estão configuradas no ambiente de produção.
+1. Aplicar primeiro `supabase/migrations/20261017115827_platform_support_chat.sql` e depois `supabase/migrations/20261017130000_support_notify_every_message.sql` no projeto Supabase usado pela aplicação.
+2. Confirmar que `SUPABASE_SERVICE_ROLE_KEY`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL` (ou `SENDER_EMAIL`), e a identidade admin `SILENTRA_PLATFORM_ADMIN_EMAIL` ou `SILENTRA_PLATFORM_ADMIN_USER_ID` estão configuradas no ambiente de produção. Sem estes valores válidos, o envio não pode ser garantido.
 3. Confirmar que o email admin pode ser resolvido. Se só estiver configurado o ID, esse utilizador tem de existir no Supabase Auth com email.
 4. O cron `/api/cron/support-email-notifications` está configurado diariamente às 00:45 UTC para retentativas, para manter a configuração compatível com a Vercel Hobby. O envio inicial é tentado imediatamente após a gravação da mensagem. Uma frequência de retentativas inferior a um dia exige um plano Vercel que suporte cron subdiário ou um scheduler externo autenticado.
 5. Executar `pnpm qa:support`, `pnpm typecheck`, `pnpm lint` e `pnpm build`. Depois, testar com uma conta Free e outra Pro/Enterprise: criar conversa, responder em ambos os sentidos, marcar como lida, mudar o estado e confirmar emails.
 
 ## Observações operacionais
 
-A criação de mensagens e a inserção da notificação inicial são transacionais dentro do RPC. A chamada a Brevo ocorre após o commit para evitar manter uma transação da base de dados aberta enquanto um fornecedor externo responde. Os emails falhados permanecem registados e a mensagem continua disponível no chat.
+A criação de mensagens e a inserção de uma notificação por mensagem são transacionais dentro do RPC. A chamada a Brevo ocorre após o commit para evitar manter uma transação da base de dados aberta enquanto um fornecedor externo responde. Os emails falhados permanecem registados e a mensagem continua disponível no chat.

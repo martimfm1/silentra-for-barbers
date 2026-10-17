@@ -180,6 +180,50 @@ export function SiteNavbar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  // Treat the mobile navigation as a real modal: move focus inside it, keep
+  // keyboard users within the overlay and return focus to the trigger on close.
+  useEffect(() => {
+    if (!open) return;
+
+    const overlay = document.getElementById('site-navigation-overlay');
+    if (!overlay) return;
+
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () =>
+      Array.from(overlay.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (element) => element.getAttribute('aria-hidden') !== 'true',
+      );
+
+    getFocusable()[0]?.focus();
+
+    const keepFocusInside = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const elements = getFocusable();
+      if (!elements.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', keepFocusInside);
+    return () => {
+      document.removeEventListener('keydown', keepFocusInside);
+      document
+        .querySelector<HTMLButtonElement>('[aria-controls="site-navigation-overlay"]')
+        ?.focus();
+    };
+  }, [open]);
+
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       if (
@@ -223,7 +267,7 @@ export function SiteNavbar() {
       },
       {
         label: t('dashboard.clients', { defaultValue: 'Clientes' }),
-        href: '/dashboard/clients',
+        href: '/dashboard/clientes',
         permission: 'clients',
       },
       {
@@ -238,7 +282,7 @@ export function SiteNavbar() {
       },
       {
         label: t('dashboard.team', { defaultValue: 'Equipa' }),
-        href: '/dashboard/team',
+        href: '/dashboard/equipa',
         permission: 'team',
       },
       {
@@ -475,7 +519,6 @@ export function SiteNavbar() {
                       ? `Conta de ${firstName}`
                       : `Account of ${firstName}`
                   }
-                  aria-haspopup="menu"
                   aria-expanded={dropdownOpen}
                   whileHover={isMotionEnabled ? { scale: 1.03 } : undefined}
                   whileTap={isMotionEnabled ? { scale: 0.96 } : undefined}
@@ -504,7 +547,6 @@ export function SiteNavbar() {
                           : undefined
                       }
                       transition={NAVBAR_POPUP_TRANSITION}
-                      role="menu"
                       className="absolute right-0 top-[calc(100%+0.65rem)] w-[min(19rem,calc(100vw-1.5rem))] bg-zinc-950/93 border-white/10 backdrop-blur-2xl mt-4 rounded-2xl p-1.5 text-zinc-200 shadow-2xl shadow-black/50"
                     >
                       <div className="border-b border-white/8 px-3 py-3">
@@ -536,7 +578,6 @@ export function SiteNavbar() {
                           >
                             <Link
                               href={link.href}
-                              role="menuitem"
                               onClick={() => setDropdownOpen(false)}
                               className={cn(
                                 'flex min-h-11 items-center rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25',
@@ -551,7 +592,6 @@ export function SiteNavbar() {
                         ))}
                         <button
                           type="button"
-                          role="menuitem"
                           onClick={() => void handleLogout()}
                           className="mt-1 flex min-h-11 w-full items-center rounded-xl px-3 text-left text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/25"
                         >
