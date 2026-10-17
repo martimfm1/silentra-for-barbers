@@ -168,7 +168,7 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const { admin, user, profile, shop } = context;
+    const { admin, user, shop } = context;
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
       allowedKeys: ['message'],
