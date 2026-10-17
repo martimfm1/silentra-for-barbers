@@ -291,7 +291,7 @@ export function SiteNavbar() {
         permission: 'settings',
       },
       {
-        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        label: t('nav.documentation'),
         href: '/documentation',
       },
     ],
