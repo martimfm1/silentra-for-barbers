@@ -778,3 +778,60 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
     overflow-wrap: anywhere;
   }
 }
+
+
+/* Accessibility and navigation polish shared by every route. */
+:where(h1, h2, h3, h4, [id]) {
+  scroll-margin-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .aceternity-beam {
+    animation: none !important;
+  }
+}
+
+/* Help dense data screens adapt instead of forcing horizontal page overflow. */
+.dashboard-page,
+.dashboard-content,
+.silentra-dashboard-main {
+  min-width: 0;
+}
+
+.dashboard-page :where(table) {
+  max-width: 100%;
+}
+
+.dashboard-page :where(th, td) {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 639px) {
+  .silentra-page-content {
+    width: min(100% - 1.25rem, 90rem);
+    padding-top: 5.25rem;
+  }
+
+  .silentra-page-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .silentra-page-actions {
+    justify-content: flex-start;
+  }
+}
