@@ -64,6 +64,9 @@ jobs:
       - name: Internationalization contracts
         run: pnpm qa:i18n
 
+      - name: Performance contracts
+        run: pnpm qa:performance
+
       - name: Product contracts
         run: pnpm qa:product
 
