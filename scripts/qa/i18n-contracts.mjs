@@ -177,6 +177,25 @@ for (const status of [
   }
 }
 
+const localeAwareSources = {
+  'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
+  'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
+  'app/checkout/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
+  'app/checkout/manual/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
+  'components/hero/pricing-section.tsx': ["useLanguage()", 'HERO_FEATURES_EN', 'const descriptions ='],
+  'components/billing/PricingCard.tsx': ["useLanguage()", "english ? 'Current plan'"],
+  'components/billing/plan-comparison.tsx': ["useLanguage()", 'FEATURE_LABELS_EN', 'GROUP_LABELS_EN'],
+};
+
+for (const [path, expectedFragments] of Object.entries(localeAwareSources)) {
+  const source = read(path);
+  for (const fragment of expectedFragments) {
+    if (!source.includes(fragment)) {
+      failures.push(path + ': missing locale-aware UI marker "' + fragment + '"');
+    }
+  }
+}
+
 if (failures.length) {
   console.error('Internationalization contract failed:');
   for (const failure of [...new Set(failures)]) console.error('- ' + failure);
