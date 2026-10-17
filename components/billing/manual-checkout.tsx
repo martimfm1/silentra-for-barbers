@@ -172,7 +172,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : 'Não foi possível validar o código promocional.',
+            : english ? 'Could not validate the promo code.' : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
         );
       }
 
@@ -182,8 +182,8 @@ export function ManualCheckout({
       setPromotionCode(quote.promotionCode ?? '');
       setPromotionMessage(
         quote.discountAmount > 0
-          ? `Código ${quote.promotionCode} aplicado: ${quote.discountDescription}.`
-          : 'Este código não altera o preço do plano.',
+          ? (english ? `Code ${quote.promotionCode} applied: ${quote.discountDescription}.` : `Código ${quote.promotionCode} aplicado: ${quote.discountDescription}.`)
+          : (english ? 'This code does not change the plan price.' : 'Este código não altera o preço do plano.'),
       );
     } catch (err) {
       setPricing(initialPricing);
@@ -206,7 +206,7 @@ export function ManualCheckout({
       promotionCode.trim().toUpperCase() !== appliedPromotionCode
     ) {
       setError(
-        'Aplica o código promocional ou limpa o campo antes de continuar.',
+        english ? 'Apply the promo code or clear the field before continuing.' : 'Aplica o código promocional ou limpa o campo antes de continuar.', 
       );
       return;
     }
@@ -233,7 +233,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : 'Não foi possível enviar o pedido.',
+            : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
         );
 
       router.replace(body.redirectUrl || '/dashboard/billing?manual=pending');
@@ -289,7 +289,7 @@ export function ManualCheckout({
                   ) : null}
                   <p className="text-xl font-semibold text-white">
                     {formatMoney(pricing.finalPrice, 'EUR', english ? 'en-GB' : 'pt-PT')} /{' '}
-                    {interval === 'year' ? 'ano' : 'mês'}
+                    {interval === 'year' ? (english ? 'year' : 'ano') : (english ? 'month' : 'mês')}
                   </p>
                 </div>
               </div>
@@ -386,7 +386,7 @@ export function ManualCheckout({
                     onChange={(e) => set('businessType', e.target.value)}
                   >
                     <option value="">{english ? 'Select' : 'Selecionar'}</option>
-                    <option value="barbershop">Barbearia</option>
+                    <option value="barbershop">{english ? 'Barbershop' : 'Barbearia'}</option>
                     <option value="salon">{english ? 'Salon' : 'Salão'}</option>
                     <option value="barbershop_salon">{english ? 'Barbershop + salon' : 'Barbearia + salão'}</option>
                     <option value="other">{english ? 'Other' : 'Outro'}</option>
