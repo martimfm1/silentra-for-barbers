@@ -172,7 +172,7 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
+            : english ? 'Could not validate the promo code.' : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
         );
       }
 
