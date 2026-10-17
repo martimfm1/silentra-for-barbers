@@ -29,6 +29,14 @@ function safeErrorCode(error: unknown) {
   return 'UNHANDLED_EXCEPTION';
 }
 
+function isSharedCacheableResponse(response: Response) {
+  const cacheControl = response.headers.get('cache-control') ?? '';
+  return (
+    /\bpublic\b/i.test(cacheControl) &&
+    /\bs-maxage\s*=\s*\d+/i.test(cacheControl)
+  );
+}
+
 type ApiLogRow = {
   request_id: string;
   route: string;
@@ -95,7 +103,9 @@ export function withApiObservability<T extends ApiHandler>(
     try {
       const response = await handler(...args);
       statusCode = response instanceof Response ? response.status : 500;
-      if (response instanceof Response) {
+      if (response instanceof Response && !isSharedCacheableResponse(response)) {
+        // A CDN-cached response cannot carry a unique ID per visitor. Keep
+        // per-request IDs on private/no-store responses, never on shared cache entries.
         try {
           response.headers.set('x-request-id', requestId);
         } catch {
