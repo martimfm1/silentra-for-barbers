@@ -22,7 +22,7 @@ export function FooterSection() {
             {pt ? 'Um SaaS feito para transformar marcações em fluxo, e fluxo em receita.' : 'A SaaS that turns bookings into momentum, and momentum into revenue.'}
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
-            {pt ? 'Agenda, confirmações, lembretes e gestão da barbearia num produto que simplifica o trabalho e deixa o cliente avançar sem fricção.' : 'Scheduling, confirmations, reminders and shop management in one product that simplifies operations and keeps the customer journey frictionless.'}
+            {pt ? 'Agenda, confirmações, lembretes e gestão da barbearia num produto que simplifica o trabalho e deixa o cliente avançar sem fricção.' : 'Appointments, confirmations, reminders and barbershop management in one place, making every visit easier from start to finish.'}
           </p>
         </div>
 
