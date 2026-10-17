@@ -48,6 +48,8 @@ assert.match(sidebar, /aria-expanded=\{communicationOpen\}/);
 assert.match(sidebar, /aria-controls=\{mobile \? 'dashboard-communication-mobile'/);
 assert.match(sidebar, /aria-expanded=\{toolsOpen\}/);
 assert.match(sidebar, /aria-controls=\{panelId\}/);
+assert.match(sidebar, /matchesCurrentPath\(communicationItems\)/);
+assert.match(sidebar, /matchesCurrentPath\(toolsItems\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
 assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /mobileTriggerRef\.current\?\.focus\(\)/);
