@@ -45,7 +45,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `https://barbers.silentra.me/${encodeURIComponent(slug)}` },
+    alternates: { canonical: `https://barbers.silentra.me/site/${encodeURIComponent(slug)}` },
     openGraph: {
       title,
       description,
@@ -72,7 +72,7 @@ export default async function CustomBarbershopWebsitePage({
   return (
     <main className="min-h-screen overflow-x-clip bg-[#090b0e] text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8 lg:px-12">
-        <Link href={`/${encodeURIComponent(slug)}`} className="flex min-w-0 items-center gap-3" aria-label={website.shop_name}>
+        <Link href={`/site/${encodeURIComponent(slug)}`} className="flex min-w-0 items-center gap-3" aria-label={website.shop_name}>
           <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]"><Scissors className="size-5 text-emerald-300" aria-hidden="true" /></span>
           <span className="truncate text-sm font-semibold tracking-wide">{website.shop_name}</span>
         </Link>
