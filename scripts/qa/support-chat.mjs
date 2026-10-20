@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 
 const requiredFiles = [
   'supabase/migrations/20261017115827_platform_support_chat.sql',
-  'supabase/migrations/20261020170000_support_ticket_workflow.sql',
-  'supabase/migrations/20261020182400_support_ticket_quotas_and_history.sql',
+  'supabase/migrations/20261020173130_support_ticket_workflow.sql',
+  'supabase/migrations/20261020173141_support_ticket_quotas_and_history.sql',
   'services/support/support-chat.service.ts',
   'app/api/support/conversations/route.ts',
   'app/api/silentra-admin/support/route.ts',
