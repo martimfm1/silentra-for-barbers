@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 type SupportPlan = 'free' | 'pro' | 'enterprise';
-type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed';
+type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 type SupportMessage = {
   id: string;
   conversation_id: string;
@@ -53,6 +53,8 @@ type SupportPayload = {
   ticket?: SupportTicket | null;
   selectedTicketId?: string | null;
   messages?: SupportMessage[];
+  activeTicketCount?: number;
+  maxOpenTickets?: number;
 };
 
 const planDescriptions: Record<'pt' | 'en', Record<SupportPlan, { title: string; detail: string }>> = {
@@ -84,12 +86,13 @@ function statusLabel(status: SupportStatus, pt: boolean) {
   if (status === 'pending') return pt ? 'À espera de aceitação' : 'Awaiting acceptance';
   if (status === 'waiting_customer') return pt ? 'À espera da tua resposta' : 'Waiting for your reply';
   if (status === 'closed') return pt ? 'Resolvido' : 'Resolved';
+  if (status === 'closed_unresolved') return pt ? 'Fechado sem resolução' : 'Closed without resolution';
   return pt ? 'Chat ativo' : 'Chat active';
 }
 
 function statusTone(status: SupportStatus) {
   if (status === 'pending') return 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-300';
-  if (status === 'closed') return 'border-border bg-muted text-muted-foreground';
+  if (status === 'closed' || status === 'closed_unresolved') return 'border-border bg-muted text-muted-foreground';
   if (status === 'waiting_customer') return 'border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-300';
   return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300';
 }
@@ -192,7 +195,7 @@ export default function SupportPage() {
   const sendMessage = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const message = draft.trim();
-    if (!selectedTicket || selectedTicket.status === 'pending' || selectedTicket.status === 'closed' || !message || sending) return;
+    if (!selectedTicket || selectedTicket.status === 'pending' || selectedTicket.status === 'closed' || selectedTicket.status === 'closed_unresolved' || !message || sending) return;
     setSending(true);
     setError(null);
     try {
@@ -220,6 +223,30 @@ export default function SupportPage() {
 
   const plan = selectedTicket?.plan ?? accountPlan;
   const planInfo = planDescriptions[locale][plan];
+  const maxOpenTickets = accountPlan === 'enterprise' ? 10 : accountPlan === 'pro' ? 2 : 1;
+  const activeTickets = tickets.filter((ticket) => ['pending', 'open', 'waiting_customer'].includes(ticket.status));
+  const ticketHistory = tickets.filter((ticket) => ['closed', 'closed_unresolved'].includes(ticket.status));
+  const canCreateTicket = activeTickets.length < maxOpenTickets;
+  const renderTicketButton = (ticket: SupportTicket) => (
+    <button
+      key={ticket.id}
+      type="button"
+      onClick={() => {
+        setSelectedTicketId(ticket.id);
+        setError(null);
+      }}
+      className={`block w-full border-b border-border/70 p-4 text-left transition hover:bg-accent/50 ${selectedTicketId === ticket.id ? 'bg-accent/60' : ''}`}
+    >
+      <p className="break-words text-sm font-semibold">{ticket.subject}</p>
+      <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted-foreground">{ticket.last_message_preview || ticket.description}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusTone(ticket.status)}`}>{statusLabel(ticket.status, pt)}</span>
+        <time className="ml-auto text-[10px] text-muted-foreground" dateTime={ticket.last_message_at || ticket.created_at}>
+          {formatDate(ticket.last_message_at || ticket.created_at, locale)}
+        </time>
+      </div>
+    </button>
+  );
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
