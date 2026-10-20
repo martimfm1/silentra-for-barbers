@@ -247,7 +247,7 @@ async function GET__unobserved() {
             customer: stripeCustomerId,
             limit: 50,
           },
-          { timeout: 6000 },
+          { timeout: 6000, maxNetworkRetries: 0 },
         );
         const now = Date.now();
         stripeHistory = invoices
