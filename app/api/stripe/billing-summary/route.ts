@@ -236,9 +236,14 @@ async function GET__unobserved() {
         // contact Stripe when the local record lacks this information.
         const needsRemoteCancellation =
           !subscription.canceled_at || !subscription.canceled_by_user_id;
-        const remote = needsRemoteCancellation && subscription.stripe_subscription_id
-          ? await getStripeClient().subscriptions.retrieve(subscription.stripe_subscription_id)
-          : null;
+        const remote =
+          needsRemoteCancellation && subscription.stripe_subscription_id
+            ? await getStripeClient().subscriptions.retrieve(
+                subscription.stripe_subscription_id,
+                {},
+                { timeout: 6000, maxNetworkRetries: 0 },
+              )
+            : null;
 
         const canceledAt = subscription.canceled_at ??
           (remote?.canceled_at
