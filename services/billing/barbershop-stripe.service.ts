@@ -324,6 +324,7 @@ export class BarbershopStripeService {
       const remote = options?.timeoutMs
         ? await stripe.subscriptions.retrieve(
             subscription.stripe_subscription_id,
+            {},
             { timeout: options.timeoutMs, maxNetworkRetries: 0 },
           )
         : await stripe.subscriptions.retrieve(
