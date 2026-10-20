@@ -38,8 +38,7 @@ async function reconcileSubscriptionWithThrottle(
   const inFlight = inFlightStripeReconciliations.get(cacheKey);
   if (inFlight) return inFlight;
 
-  let work: Promise<SubscriptionRecord | null>;
-  work = BarbershopStripeService.reconcileSubscription(barbershopId, subscription)
+  const work = BarbershopStripeService.reconcileSubscription(barbershopId, subscription)
     .then((result) => {
       recentStripeReconciliations.set(cacheKey, Date.now());
       // Bound module-level memory in long-lived instances.
