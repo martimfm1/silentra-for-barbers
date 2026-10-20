@@ -69,6 +69,7 @@ assert.match(adminApi, /isTrustedSupportOrigin/);
 assert.match(adminApi, /support_send_message/i);
 assert.match(adminApi, /action === 'read'/);
 assert.match(adminApi, /action === 'accept'/);
+assert.match(adminApi, /SUPPORT_TICKET_LIMIT_REACHED/);
 assert.match(adminApi, /SUPPORT_TICKET_NOT_ACCEPTED|Aceita o ticket antes de responder/);
 
 const worker = await readFile(requiredFiles[6], 'utf8');
