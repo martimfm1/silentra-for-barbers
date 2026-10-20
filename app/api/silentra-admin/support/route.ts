@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const STATUSES = new Set<SupportStatus>(['open', 'waiting_customer', 'closed']);
+const STATUSES = new Set<SupportStatus>(['open', 'waiting_customer', 'closed', 'closed_unresolved']);
 
 function jsonError(error: string, status: number) {
   return NextResponse.json(
@@ -287,8 +287,8 @@ async function POST__unobserved(request: Request) {
     if (conversation.status === 'pending') {
       return jsonError('Aceita o ticket antes de responder. O chat ainda não está ativo.', 409);
     }
-    if (conversation.status === 'closed') {
-      return jsonError('Este ticket está resolvido. Reabre-o antes de enviar uma resposta.', 409);
+    if (conversation.status === 'closed' || conversation.status === 'closed_unresolved') {
+      return jsonError('Este ticket está fechado. Reabre-o antes de enviar uma resposta.', 409);
     }
 
     const [customerResult, authCustomerResult, shopResult] = await Promise.all([
