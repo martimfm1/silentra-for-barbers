@@ -40,6 +40,14 @@ assert.match(ticketQuotaMigration, /when 'enterprise' then 10/i);
 assert.match(ticketQuotaMigration, /pg_advisory_xact_lock/i);
 assert.match(ticketQuotaMigration, /closed_unresolved/i);
 
+const supportUnreadCountsMigration = await readFile(
+  'supabase/migrations/20261020230000_support_unread_counts_rpc.sql',
+  'utf8',
+);
+assert.match(supportUnreadCountsMigration, /function public\.support_unread_counts/i);
+assert.match(supportUnreadCountsMigration, /group by message\.conversation_id/i);
+assert.match(supportUnreadCountsMigration, /grant execute on function public\.support_unread_counts[\s\S]*to service_role/i);
+
 const everyMessageMigration = await readFile(
   'supabase/migrations/20261017130000_support_notify_every_message.sql',
   'utf8',
@@ -71,6 +79,8 @@ assert.match(adminApi, /action === 'read'/);
 assert.match(adminApi, /action === 'accept'/);
 assert.match(adminApi, /SUPPORT_TICKET_LIMIT_REACHED/);
 assert.match(adminApi, /SUPPORT_TICKET_NOT_ACCEPTED|Aceita o ticket antes de responder/);
+assert.match(adminApi, /support_unread_counts/i);
+assert.doesNotMatch(adminApi, /normalizedConversations = await Promise\.all/);
 
 const worker = await readFile(requiredFiles[6], 'utf8');
 assert.match(worker, /CRON_SECRET/);
@@ -85,6 +95,7 @@ assert.match(customerUi, /Tickets ativos/);
 assert.match(customerUi, /Histórico/);
 assert.match(customerUi, /maxOpenTickets/);
 assert.match(customerUi, /Fechado sem resolução/);
+assert.doesNotMatch(customerUi, /setInterval\(/);
 
 const adminUi = await readFile(requiredFiles[8], 'utf8');
 assert.match(adminUi, /planRank\[b\.plan\] - planRank\[a\.plan\]/);
@@ -94,6 +105,7 @@ assert.match(adminUi, /acceptTicket/);
 assert.match(adminUi, /selected.status === 'pending'/);
 assert.match(adminUi, /Aceitar ticket/);
 assert.match(adminUi, /Fechado sem resolução/);
+assert.doesNotMatch(adminUi, /setInterval\(/);
 
 const adminConsole = await readFile(requiredFiles[9], 'utf8');
 assert.match(adminConsole, /id: 'support', label: 'Suporte'/);
