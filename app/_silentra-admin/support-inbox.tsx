@@ -416,14 +416,7 @@ export default function SupportInbox() {
                     <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">{selected.description}</p>
                   </div>
                   <p className="mt-4 text-sm text-zinc-400">O chat só fica disponível para o membro depois de aceitares este ticket.</p>
-                  <button
-                    type="button"
-                    onClick={() => void acceptTicket()}
-                    disabled={updatingStatus}
-                    className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-200 disabled:opacity-50"
-                  >
-                    <CheckCheck className="size-4" /> {updatingStatus ? 'A aceitar…' : 'Aceitar ticket e abrir chat'}
-                  </button>
+
                 </div>
               ) : (
               <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
