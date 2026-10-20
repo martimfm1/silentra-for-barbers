@@ -163,6 +163,10 @@ export default function SupportPage() {
     event.preventDefault();
     const subject = subjectDraft.trim();
     const description = descriptionDraft.trim();
+    if (!canCreateTicket) {
+      toast.error(pt ? 'Atingiste o limite de tickets abertos do teu plano.' : 'You have reached your plan limit for open tickets.');
+      return;
+    }
     if (subject.length < 3 || subject.length > 120 || description.length < 10 || description.length > 4000 || creating) return;
 
     setCreating(true);
@@ -286,6 +290,25 @@ export default function SupportPage() {
           </div>
         </header>
 
+        <section className="rounded-2xl border border-border bg-card px-4 py-3 sm:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold">{pt ? 'Tickets ativos do teu plano' : 'Active tickets on your plan'}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {activeTickets.length}/{maxOpenTickets} · {pt ? 'Free: 1, Pro: 2, Enterprise: 10 tickets abertos' : 'Free: 1, Pro: 2, Enterprise: 10 open tickets'}
+              </p>
+            </div>
+            <span className={`rounded-full border px-3 py-1 text-xs font-medium ${canCreateTicket ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300' : 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300'}`}>
+              {canCreateTicket ? (pt ? 'Vaga disponível' : 'Slot available') : (pt ? 'Limite atingido' : 'Limit reached')}
+            </span>
+          </div>
+          {!canCreateTicket ? (
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              {pt ? 'Resolve um ticket ou fecha-o sem resolução para libertar uma vaga.' : 'Resolve a ticket or close it without resolution to free a slot.'}
+            </p>
+          ) : null}
+        </section>
+
         {createTicketOpen ? (
           <section className="rounded-2xl border border-border bg-card p-4 sm:p-6">
             <div className="flex items-start gap-3">
@@ -341,7 +364,7 @@ export default function SupportPage() {
                 </p>
                 <button
                   type="submit"
-                  disabled={creating || subjectDraft.trim().length < 3 || descriptionDraft.trim().length < 10}
+                  disabled={creating || !canCreateTicket || subjectDraft.trim().length < 3 || descriptionDraft.trim().length < 10}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Ticket className="size-4" /> {creating ? (pt ? 'A criar…' : 'Creating…') : (pt ? 'Submeter ticket' : 'Submit ticket')}
