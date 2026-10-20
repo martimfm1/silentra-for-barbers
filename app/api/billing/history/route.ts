@@ -245,7 +245,7 @@ async function GET__unobserved() {
         const { data: invoices } = await stripe.invoices.list(
           {
             customer: stripeCustomerId,
-            limit: 20,
+            limit: 50,
           },
           { timeout: 6000 },
         );
