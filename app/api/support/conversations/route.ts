@@ -85,13 +85,31 @@ async function GET__unobserved(request: Request) {
       return jsonError('ID do ticket inválido.', 400);
     }
 
-    const { data: ticketRows, error: ticketsError } = await admin
-      .from('support_conversations')
-      .select('id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at')
-      .eq('barbershop_id', shop.id)
-      .order('created_at', { ascending: false })
-      .limit(100);
-    if (ticketsError) throw new Error('SUPPORT_TICKETS_LOOKUP_FAILED');
+    const ticketSelection = 'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
+    const [activeResult, historyResult] = await Promise.all([
+      admin
+        .from('support_conversations')
+        .select(ticketSelection)
+        .eq('barbershop_id', shop.id)
+        .in('status', ['pending', 'open', 'waiting_customer'])
+        .order('created_at', { ascending: false })
+        .limit(100),
+      admin
+        .from('support_conversations')
+        .select(ticketSelection)
+        .eq('barbershop_id', shop.id)
+        .in('status', ['closed', 'closed_unresolved'])
+        .order('created_at', { ascending: false })
+        .limit(100),
+    ]);
+    if (activeResult.error || historyResult.error) {
+      throw new Error('SUPPORT_TICKETS_LOOKUP_FAILED');
+    }
+    // Always retain active tickets even when the member has a long history.
+    const ticketRows = [
+      ...(activeResult.data ?? []),
+      ...(historyResult.data ?? []),
+    ].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 
     const effectivePlan = await getEffectiveSupportPlan(admin, shop.id);
     const tickets = (ticketRows ?? []).map((ticket) => ({
