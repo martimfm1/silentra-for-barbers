@@ -17,6 +17,52 @@ import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const STRIPE_RECONCILIATION_CACHE_TTL_MS = 120_000;
+const recentStripeReconciliations = new Map<string, number>();
+const inFlightStripeReconciliations = new Map<
+  string,
+  Promise<SubscriptionRecord | null>
+>();
+
+async function reconcileSubscriptionWithThrottle(
+  barbershopId: string,
+  subscription: SubscriptionRecord,
+): Promise<SubscriptionRecord | null> {
+  const cacheKey = `${subscription.id}:${subscription.updated_at || 'unknown'}`;
+  const now = Date.now();
+  const checkedAt = recentStripeReconciliations.get(cacheKey);
+  if (checkedAt !== undefined && now - checkedAt < STRIPE_RECONCILIATION_CACHE_TTL_MS) {
+    return subscription;
+  }
+
+  const inFlight = inFlightStripeReconciliations.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  let work: Promise<SubscriptionRecord | null>;
+  work = BarbershopStripeService.reconcileSubscription(barbershopId, subscription)
+    .then((result) => {
+      recentStripeReconciliations.set(cacheKey, Date.now());
+      // Bound module-level memory in long-lived instances.
+      const cutoff = Date.now() - STRIPE_RECONCILIATION_CACHE_TTL_MS;
+      for (const [key, timestamp] of recentStripeReconciliations) {
+        if (timestamp < cutoff) recentStripeReconciliations.delete(key);
+      }
+      while (recentStripeReconciliations.size > 500) {
+        const oldestKey = recentStripeReconciliations.keys().next().value;
+        if (oldestKey === undefined) break;
+        recentStripeReconciliations.delete(oldestKey);
+      }
+      return result;
+    })
+    .finally(() => {
+      if (inFlightStripeReconciliations.get(cacheKey) === work) {
+        inFlightStripeReconciliations.delete(cacheKey);
+      }
+    });
+  inFlightStripeReconciliations.set(cacheKey, work);
+  return work;
+}
+
 async function GET__unobserved() {
   try {
     const supabase = await createClient();
@@ -146,7 +192,7 @@ async function GET__unobserved() {
       subscription.status !== 'canceled' &&
       !subscriptionIsFresh
     ) {
-      subscription = await BarbershopStripeService.reconcileSubscription(
+      subscription = await reconcileSubscriptionWithThrottle(
         barbershopId,
         subscription,
       );
