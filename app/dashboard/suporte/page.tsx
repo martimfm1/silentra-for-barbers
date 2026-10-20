@@ -365,35 +365,33 @@ export default function SupportPage() {
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <div>
                 <h2 className="font-semibold">{pt ? 'Os teus tickets' : 'Your tickets'}</h2>
-                <p className="mt-1 text-xs text-muted-foreground">{tickets.length} {pt ? 'ticket(s)' : 'ticket(s)'}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{activeTickets.length} {pt ? 'ativo(s)' : 'active'} · {ticketHistory.length} {pt ? 'no histórico' : 'in history'}</p>
               </div>
               <Ticket className="size-5 text-muted-foreground" />
             </div>
             <div className="max-h-[560px] overflow-y-auto">
               {loading && !tickets.length ? (
                 <div className="p-6 text-center text-sm text-muted-foreground">{pt ? 'A carregar tickets…' : 'Loading tickets…'}</div>
-              ) : tickets.length ? tickets.map((ticket) => (
-                <button
-                  key={ticket.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedTicketId(ticket.id);
-                    setError(null);
-                  }}
-                  className={`block w-full border-b border-border/70 p-4 text-left transition hover:bg-accent/50 ${selectedTicketId === ticket.id ? 'bg-accent/60' : ''}`}
-                >
-                  <p className="break-words text-sm font-semibold">{ticket.subject}</p>
-                  <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted-foreground">
-                    {ticket.last_message_preview || ticket.description}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusTone(ticket.status)}`}>{statusLabel(ticket.status, pt)}</span>
-                    <time className="ml-auto text-[10px] text-muted-foreground" dateTime={ticket.last_message_at || ticket.created_at}>
-                      {formatDate(ticket.last_message_at || ticket.created_at, locale)}
-                    </time>
-                  </div>
-                </button>
-              )) : (
+              ) : tickets.length ? (
+                <div>
+                  {activeTickets.length ? (
+                    <section>
+                      <div className="sticky top-0 z-10 border-b border-border bg-card/95 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                        {pt ? 'Tickets ativos' : 'Active tickets'} · {activeTickets.length}/{maxOpenTickets}
+                      </div>
+                      {activeTickets.map(renderTicketButton)}
+                    </section>
+                  ) : null}
+                  {ticketHistory.length ? (
+                    <section>
+                      <div className="sticky top-0 z-10 border-b border-border bg-card/95 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                        {pt ? 'Histórico' : 'History'} · {ticketHistory.length}
+                      </div>
+                      {ticketHistory.map(renderTicketButton)}
+                    </section>
+                  ) : null}
+                </div>
+              ) : (
                 <div className="flex flex-col items-center px-5 py-12 text-center">
                   <FilePlus2 className="size-8 text-muted-foreground" />
                   <p className="mt-3 text-sm font-medium">{pt ? 'Ainda não tens tickets' : 'No tickets yet'}</p>
@@ -468,9 +466,9 @@ export default function SupportPage() {
                         </div>
                       )}
                     </div>
-                    {selectedTicket.status === 'closed' ? (
+                    {selectedTicket.status === 'closed' || selectedTicket.status === 'closed_unresolved' ? (
                       <div className="border-t border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-                        {pt ? 'Este ticket foi resolvido. Cria um novo ticket caso precises de ajuda com outro problema.' : 'This ticket is resolved. Create a new ticket if you need help with a different issue.'}
+                        {selectedTicket.status === 'closed' ? (pt ? 'Este ticket foi resolvido. Cria um novo ticket caso precises de ajuda com outro problema.' : 'This ticket is resolved. Create a new ticket if you need help with a different issue.') : (pt ? 'Este ticket foi fechado sem resolução. Cria um novo ticket para continuares a pedir ajuda.' : 'This ticket was closed without resolution. Create a new ticket to continue getting help.')}
                       </div>
                     ) : (
                       <form onSubmit={sendMessage} className="border-t border-border bg-muted/20 p-3 sm:p-4">
