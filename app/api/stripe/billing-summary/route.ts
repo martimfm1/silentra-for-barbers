@@ -38,8 +38,11 @@ async function reconcileSubscriptionWithThrottle(
   const inFlight = inFlightStripeReconciliations.get(cacheKey);
   if (inFlight) return inFlight;
 
-  const work = BarbershopStripeService.reconcileSubscription(barbershopId, subscription)
-    .then((result) => {
+  const work = BarbershopStripeService.reconcileSubscription(
+    barbershopId,
+    subscription,
+    { timeoutMs: 6000 },
+  ).then((result) => {
       recentStripeReconciliations.set(cacheKey, Date.now());
       // Bound module-level memory in long-lived instances.
       const cutoff = Date.now() - STRIPE_RECONCILIATION_CACHE_TTL_MS;
@@ -52,6 +55,12 @@ async function reconcileSubscriptionWithThrottle(
         recentStripeReconciliations.delete(oldestKey);
       }
       return result;
+    })
+    .catch((error: unknown) => {
+      // Back off failed reads too, so provider incidents do not turn every
+      // dashboard refresh into another slow Stripe request.
+      recentStripeReconciliations.set(cacheKey, Date.now());
+      throw error;
     })
     .finally(() => {
       if (inFlightStripeReconciliations.get(cacheKey) === work) {
@@ -191,10 +200,19 @@ async function GET__unobserved() {
       subscription.status !== 'canceled' &&
       !subscriptionIsFresh
     ) {
-      subscription = await reconcileSubscriptionWithThrottle(
-        barbershopId,
-        subscription,
-      );
+      try {
+        subscription = await reconcileSubscriptionWithThrottle(
+          barbershopId,
+          subscription,
+        );
+      } catch (error) {
+        // Billing summary is read-only: serve the persisted snapshot during a
+        // temporary provider outage; checkout routes still require live checks.
+        console.warn(
+          '[BILLING_SUMMARY_RECONCILIATION_SKIPPED]',
+          error instanceof Error ? error.name : 'UNKNOWN',
+        );
+      }
     }
 
     const assignment = assignmentResult.data;
