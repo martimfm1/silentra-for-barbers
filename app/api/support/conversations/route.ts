@@ -16,7 +16,9 @@ export const dynamic = 'force-dynamic';
 
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_TICKET_SUBJECT_LENGTH = 120;
-const MAX_TICKETS_PER_HOUR = 5;
+const MAX_TICKETS_PER_HOUR = 20;
+const OPEN_TICKET_LIMITS = { free: 1, pro: 2, enterprise: 10 } as const;
+const ACTIVE_TICKET_STATUSES = new Set(['pending', 'open', 'waiting_customer']);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function jsonError(error: string, status: number) {
@@ -172,6 +174,8 @@ async function GET__unobserved(request: Request) {
         selectedTicketId: selectedTicket?.id ?? null,
         messages,
         unreadCount,
+        activeTicketCount: (ticketRows ?? []).filter((ticket) => ACTIVE_TICKET_STATUSES.has(ticket.status)).length,
+        maxOpenTickets: OPEN_TICKET_LIMITS[effectivePlan],
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
@@ -229,7 +233,7 @@ async function POST__unobserved(request: Request) {
         .gte('created_at', since);
       if (rateError) throw new Error('SUPPORT_TICKET_RATE_LIMIT_LOOKUP_FAILED');
       if ((count ?? 0) >= MAX_TICKETS_PER_HOUR) {
-        return jsonError('Atingiste o limite de 5 tickets por hora. Tenta novamente mais tarde.', 429);
+        return jsonError('Atingiste o limite de 20 tickets por hora. Tenta novamente mais tarde.', 429);
       }
 
       const plan = await getEffectiveSupportPlan(admin, shop.id);
@@ -248,6 +252,13 @@ async function POST__unobserved(request: Request) {
         .single();
 
       if (createError || !ticket) {
+        if (createError?.message?.includes('SUPPORT_TICKET_LIMIT_REACHED')) {
+          const maxOpenTickets = OPEN_TICKET_LIMITS[plan];
+          return jsonError(
+            `O teu plano permite ${maxOpenTickets} ticket(s) aberto(s) ao mesmo tempo. Resolve ou fecha um ticket antes de criares outro.`,
+            409,
+          );
+        }
         console.error('[SUPPORT_TICKET_CREATE_FAILED]', createError?.code ?? 'UNKNOWN');
         return jsonError('Não foi possível criar o ticket. Tenta novamente.', 500);
       }
@@ -298,8 +309,8 @@ async function POST__unobserved(request: Request) {
     if (ticket.status === 'pending') {
       return jsonError('O ticket ainda aguarda aceitação. O chat ficará disponível depois de ser aceite.', 409);
     }
-    if (ticket.status === 'closed') {
-      return jsonError('Este ticket está resolvido. Cria um novo ticket para outro problema.', 409);
+    if (ticket.status === 'closed' || ticket.status === 'closed_unresolved') {
+      return jsonError('Este ticket está fechado. Cria um novo ticket para outro problema.', 409);
     }
 
     const plan = await getEffectiveSupportPlan(admin, shop.id);
