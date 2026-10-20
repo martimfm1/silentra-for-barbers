@@ -12,6 +12,13 @@ const [
   marketplaceApi,
   pricesApi,
   observability,
+  customerSupportApi,
+  adminSupportApi,
+  customerSupportUi,
+  adminSupportUi,
+  billingSummaryApi,
+  billingHistoryApi,
+  adminObservabilityApi,
 ] = await Promise.all([
   read('next.config.ts'),
   read('app/layout.tsx'),
@@ -20,6 +27,13 @@ const [
   read('app/api/marketplace/products/route.ts'),
   read('app/api/stripe/prices/route.ts'),
   read('lib/observability/api.ts'),
+  read('app/api/support/conversations/route.ts'),
+  read('app/api/silentra-admin/support/route.ts'),
+  read('app/dashboard/suporte/page.tsx'),
+  read('app/_silentra-admin/support-inbox.tsx'),
+  read('app/api/stripe/billing-summary/route.ts'),
+  read('app/api/billing/history/route.ts'),
+  read('app/api/silentra-admin/observability/route.ts'),
 ]);
 
 assert.match(
@@ -72,6 +86,52 @@ assert.match(
   observability,
   /!isSharedCacheableResponse\(response\)/,
   'Shared cache entries must not retain a per-request correlation ID.',
+);
+
+assert.doesNotMatch(
+  customerSupportUi + adminSupportUi,
+  /setInterval\(/,
+  'Support polling must not overlap while a slow request is still in flight.',
+);
+assert.match(
+  customerSupportUi + adminSupportUi,
+  /scheduleNextPoll/,
+  'Support polling should schedule the next request only after completion.',
+);
+assert.match(
+  customerSupportApi,
+  /getEffectiveSupportPlan\(admin, shop\.id\)/,
+  'Customer ticket reads should request plan context as part of parallel reads.',
+);
+assert.doesNotMatch(
+  customerSupportApi,
+  /const staleTickets =/,
+  'Customer ticket GETs must not perform per-ticket synchronization writes.',
+);
+assert.match(
+  adminSupportApi,
+  /support_unread_counts/,
+  'Admin unread counts should be aggregated by Postgres instead of downloading every message ID.',
+);
+assert.doesNotMatch(
+  adminSupportApi,
+  /normalizedConversations = await Promise\.all/,
+  'Admin inbox normalization must not issue one asynchronous Auth call per ticket.',
+);
+assert.match(
+  billingSummaryApi,
+  /subscriptionIsFresh/,
+  'Billing summary should avoid repeated Stripe reconciliation for fresh subscription rows.',
+);
+assert.match(
+  billingHistoryApi,
+  /timeout: 6000/,
+  'Billing history should bound its dependency on the Stripe invoice API.',
+);
+assert.match(
+  adminObservabilityApi,
+  /await Promise\.all\(\[\s*admin[\s\S]*platform_api_logs/,
+  'API health telemetry reads should run concurrently.',
 );
 
 console.log(
