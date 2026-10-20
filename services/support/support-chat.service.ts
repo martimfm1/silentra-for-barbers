@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type SupportPlan = 'free' | 'pro' | 'enterprise';
 export type SupportSenderType = 'customer' | 'admin';
-export type SupportStatus = 'open' | 'waiting_customer' | 'closed';
+export type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed';
 
 export function supportPriority(plan: SupportPlan) {
   return plan === 'enterprise' ? 3 : plan === 'pro' ? 2 : 1;
