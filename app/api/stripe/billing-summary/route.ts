@@ -24,6 +24,20 @@ const inFlightStripeReconciliations = new Map<
   Promise<SubscriptionRecord | null>
 >();
 
+function markStripeReconciliation(cacheKey: string) {
+  const now = Date.now();
+  const cutoff = now - STRIPE_RECONCILIATION_CACHE_TTL_MS;
+  recentStripeReconciliations.set(cacheKey, now);
+  for (const [key, timestamp] of recentStripeReconciliations) {
+    if (timestamp < cutoff) recentStripeReconciliations.delete(key);
+  }
+  while (recentStripeReconciliations.size > 500) {
+    const oldestKey = recentStripeReconciliations.keys().next().value;
+    if (oldestKey === undefined) break;
+    recentStripeReconciliations.delete(oldestKey);
+  }
+}
+
 async function reconcileSubscriptionWithThrottle(
   barbershopId: string,
   subscription: SubscriptionRecord,
@@ -43,23 +57,13 @@ async function reconcileSubscriptionWithThrottle(
     subscription,
     { timeoutMs: 6000 },
   ).then((result) => {
-      recentStripeReconciliations.set(cacheKey, Date.now());
-      // Bound module-level memory in long-lived instances.
-      const cutoff = Date.now() - STRIPE_RECONCILIATION_CACHE_TTL_MS;
-      for (const [key, timestamp] of recentStripeReconciliations) {
-        if (timestamp < cutoff) recentStripeReconciliations.delete(key);
-      }
-      while (recentStripeReconciliations.size > 500) {
-        const oldestKey = recentStripeReconciliations.keys().next().value;
-        if (oldestKey === undefined) break;
-        recentStripeReconciliations.delete(oldestKey);
-      }
+      markStripeReconciliation(cacheKey);
       return result;
     })
     .catch((error: unknown) => {
       // Back off failed reads too, so provider incidents do not turn every
       // dashboard refresh into another slow Stripe request.
-      recentStripeReconciliations.set(cacheKey, Date.now());
+      markStripeReconciliation(cacheKey);
       throw error;
     })
     .finally(() => {
