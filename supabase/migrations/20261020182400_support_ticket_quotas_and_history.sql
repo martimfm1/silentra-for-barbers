@@ -75,6 +75,7 @@ begin
   v_limit := case v_effective_plan
     when 'enterprise' then 10
     when 'pro' then 2
+    when 'free' then 1
     else 1
   end;
 
