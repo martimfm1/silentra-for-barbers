@@ -41,7 +41,7 @@ assert.match(ticketQuotaMigration, /pg_advisory_xact_lock/i);
 assert.match(ticketQuotaMigration, /closed_unresolved/i);
 
 const supportUnreadCountsMigration = await readFile(
-  'supabase/migrations/20261020230000_support_unread_counts_rpc.sql',
+  'supabase/migrations/20261020221127_support_unread_counts_rpc.sql',
   'utf8',
 );
 assert.match(supportUnreadCountsMigration, /function public\.support_unread_counts/i);
