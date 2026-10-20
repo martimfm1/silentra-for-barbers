@@ -28,7 +28,7 @@ assert.match(migration, /grant execute on function public\.support_send_message[
 assert.match(migration, /support_email_notifications/i);
 assert.match(migration, /unique \(barbershop_id\)/i);
 assert.match(ticketMigration, /drop constraint if exists support_conversations_barbershop_id_key/i);
-assert.match(ticketMigration, /status in \\(\'pending\', \'open\', \'waiting_customer\', \'closed\'\\)/i);
+assert.match(ticketMigration, /status in \('pending', 'open', 'waiting_customer', 'closed'\)/i);
 assert.match(ticketMigration, /accepted_at timestamptz/i);
 assert.match(ticketMigration, /SUPPORT_TICKET_NOT_ACCEPTED/i);
 assert.match(ticketMigration, /SUPPORT_TICKET_CLOSED/i);
