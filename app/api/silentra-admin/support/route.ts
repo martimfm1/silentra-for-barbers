@@ -35,16 +35,30 @@ async function GET__unobserved(request: Request) {
       return jsonError('ID da conversa inválido.', 400);
     }
 
-    const { data: conversations, error: conversationsError } = await admin
-      .from('support_conversations')
-      .select('id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at')
-      .order('priority', { ascending: false })
-      .order('last_message_at', { ascending: false, nullsFirst: false })
-      .limit(250);
+    const ticketSelection = 'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
+    const [pendingResult, activeResult] = await Promise.all([
+      admin
+        .from('support_conversations')
+        .select(ticketSelection)
+        .eq('status', 'pending')
+        .order('priority', { ascending: false })
+        .order('created_at', { ascending: true })
+        .limit(250),
+      admin
+        .from('support_conversations')
+        .select(ticketSelection)
+        .neq('status', 'pending')
+        .order('priority', { ascending: false })
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(250),
+    ]);
 
-    if (conversationsError) throw new Error('SUPPORT_ADMIN_CONVERSATIONS_LOOKUP_FAILED');
+    if (pendingResult.error || activeResult.error) {
+      throw new Error('SUPPORT_ADMIN_CONVERSATIONS_LOOKUP_FAILED');
+    }
 
-    const rows = [...(conversations ?? [])];
+    // Keep pending tickets visible even when the active chat backlog is large.
+    const rows = [...(pendingResult.data ?? []), ...(activeResult.data ?? [])];
     if (conversationId && !rows.some((row) => row.id === conversationId)) {
       const extra = await admin
         .from('support_conversations')
