@@ -6,18 +6,22 @@ import {
   ArrowUpRight,
   Check,
   Clock3,
+  FilePlus2,
   Headset,
   LockKeyhole,
   MessageCircle,
+  Plus,
   RefreshCw,
   Send,
   ShieldCheck,
+  Ticket,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 type SupportPlan = 'free' | 'pro' | 'enterprise';
-type SupportStatus = 'open' | 'waiting_customer' | 'closed';
+type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed';
 type SupportMessage = {
   id: string;
   conversation_id: string;
@@ -27,33 +31,47 @@ type SupportMessage = {
   created_at: string;
   read_at: string | null;
 };
-type SupportConversation = {
+type SupportTicket = {
   id: string;
   subject: string;
+  description: string;
   status: SupportStatus;
   plan: SupportPlan;
   priority: number;
   last_message_at: string | null;
   last_message_preview: string | null;
+  accepted_at: string | null;
+  created_at: string;
   shop_name?: string;
+};
+
+type SupportPayload = {
+  ok?: boolean;
+  error?: string;
+  plan?: SupportPlan;
+  tickets?: SupportTicket[];
+  ticket?: SupportTicket | null;
+  selectedTicketId?: string | null;
+  messages?: SupportMessage[];
 };
 
 const planDescriptions: Record<'pt' | 'en', Record<SupportPlan, { title: string; detail: string }>> = {
   pt: {
     free: { title: 'Suporte standard', detail: 'A equipa responde assim que possível.' },
-    pro: { title: 'Suporte prioritário', detail: 'A tua conversa tem prioridade sobre o plano Free.' },
+    pro: { title: 'Suporte prioritário', detail: 'Os teus tickets têm prioridade sobre o plano Free.' },
     enterprise: { title: 'Suporte Enterprise', detail: 'Prioridade máxima na fila de suporte.' },
   },
   en: {
     free: { title: 'Standard support', detail: 'The team will reply as soon as possible.' },
-    pro: { title: 'Priority support', detail: 'Your conversation takes priority over the Free plan.' },
+    pro: { title: 'Priority support', detail: 'Your tickets take priority over the Free plan.' },
     enterprise: { title: 'Enterprise support', detail: 'Highest priority in the support queue.' },
   },
 };
 
-function formatDate(value: string, locale: 'pt' | 'en') {
+function formatDate(value: string | null, locale: 'pt' | 'en') {
+  if (!value) return locale === 'pt' ? 'Sem mensagens' : 'No messages';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
+  if (Number.isNaN(date.getTime())) return '—';
   return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     day: '2-digit',
     month: 'short',
@@ -63,103 +81,144 @@ function formatDate(value: string, locale: 'pt' | 'en') {
 }
 
 function statusLabel(status: SupportStatus, pt: boolean) {
+  if (status === 'pending') return pt ? 'À espera de aceitação' : 'Awaiting acceptance';
   if (status === 'waiting_customer') return pt ? 'À espera da tua resposta' : 'Waiting for your reply';
-  if (status === 'closed') return pt ? 'Resolvida' : 'Resolved';
-  return pt ? 'Em acompanhamento' : 'In progress';
+  if (status === 'closed') return pt ? 'Resolvido' : 'Resolved';
+  return pt ? 'Chat ativo' : 'Chat active';
+}
+
+function statusTone(status: SupportStatus) {
+  if (status === 'pending') return 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-300';
+  if (status === 'closed') return 'border-border bg-muted text-muted-foreground';
+  if (status === 'waiting_customer') return 'border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-300';
+  return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300';
 }
 
 export default function SupportPage() {
   const { locale } = useLanguage();
   const pt = locale === 'pt';
-  const [conversation, setConversation] = useState<SupportConversation | null>(null);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [accountPlan, setAccountPlan] = useState<SupportPlan>('free');
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [draft, setDraft] = useState('');
+  const [subjectDraft, setSubjectDraft] = useState('');
+  const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async (quiet = false) => {
+  const refresh = useCallback(async (ticketId = selectedTicketId, quiet = false) => {
     if (!quiet) setLoading(true);
     try {
-      const response = await fetch('/api/support/conversations', {
-        cache: 'no-store',
-      });
-      const payload = (await response.json()) as {
-        ok?: boolean;
-        error?: string;
-        conversation?: SupportConversation | null;
-        plan?: SupportPlan;
-        messages?: SupportMessage[];
-      };
-      if (!response.ok || !payload.ok) {
-        throw new Error(payload.error || 'Não foi possível carregar o suporte.');
+      const query = ticketId ? `?ticketId=${encodeURIComponent(ticketId)}` : '';
+      const response = await fetch(`/api/support/conversations${query}`, { cache: 'no-store' });
+      const payload = (await response.json()) as SupportPayload;
+      if (!response.ok || !payload.ok || !Array.isArray(payload.tickets)) {
+        throw new Error(payload.error || (pt ? 'Não foi possível carregar os tickets.' : 'Could not load support tickets.'));
       }
-      setConversation(payload.conversation ?? null);
-      setAccountPlan(payload.plan ?? payload.conversation?.plan ?? 'free');
+
+      const nextTickets = payload.tickets;
+      setTickets(nextTickets);
+      setAccountPlan(payload.plan ?? 'free');
+      setSelectedTicket(payload.ticket ?? nextTickets.find((ticket) => ticket.id === ticketId) ?? null);
       setMessages(payload.messages ?? []);
       setError(null);
+
+      if (!ticketId && nextTickets.length) {
+        setSelectedTicketId((current) =>
+          current && nextTickets.some((ticket) => ticket.id === current) ? current : nextTickets[0].id,
+        );
+      } else if (ticketId && !nextTickets.some((ticket) => ticket.id === ticketId)) {
+        setSelectedTicketId(nextTickets[0]?.id ?? null);
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro inesperado.';
-      setError(message);
+      setError(err instanceof Error ? err.message : (pt ? 'Erro inesperado.' : 'Unexpected error.'));
     } finally {
       if (!quiet) setLoading(false);
     }
+  }, [selectedTicketId, pt]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get('ticketId') ?? params.get('conversationId');
+    if (ticketId) setSelectedTicketId(ticketId);
   }, []);
 
   useEffect(() => {
     void refresh();
     const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void refresh(true);
+      if (document.visibilityState === 'visible') void refresh(selectedTicketId, true);
     }, 15000);
     return () => window.clearInterval(interval);
-  }, [refresh]);
+  }, [refresh, selectedTicketId]);
 
-  const sendMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+  const createTicket = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const message = draft.trim();
-    if (!message || sending) return;
-    setSending(true);
+    const subject = subjectDraft.trim();
+    const description = descriptionDraft.trim();
+    if (subject.length < 3 || subject.length > 120 || description.length < 10 || description.length > 4000 || creating) return;
+
+    setCreating(true);
+    setError(null);
     try {
       const response = await fetch('/api/support/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ action: 'create_ticket', subject, description }),
       });
-      const payload = (await response.json()) as {
-        ok?: boolean;
-        error?: string;
-        conversationId?: string;
-        message?: SupportMessage;
-      };
+      const payload = (await response.json()) as SupportPayload;
+      if (!response.ok || !payload.ok || !payload.ticket) {
+        throw new Error(payload.error || (pt ? 'Não foi possível criar o ticket.' : 'Could not create the ticket.'));
+      }
+      setSubjectDraft('');
+      setDescriptionDraft('');
+      setCreateTicketOpen(false);
+      setSelectedTicketId(payload.ticket.id);
+      toast.success(pt ? 'Ticket enviado. O chat ficará disponível após a aceitação.' : 'Ticket submitted. The chat will be available after acceptance.');
+      await refresh(payload.ticket.id, true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : (pt ? 'Não foi possível criar o ticket.' : 'Could not create the ticket.');
+      setError(message);
+      toast.error(message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const sendMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const message = draft.trim();
+    if (!selectedTicket || selectedTicket.status === 'pending' || selectedTicket.status === 'closed' || !message || sending) return;
+    setSending(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/support/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'message', ticketId: selectedTicket.id, message }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string; message?: SupportMessage };
       if (!response.ok || !payload.ok || !payload.message) {
-        throw new Error(payload.error || 'Não foi possível enviar a mensagem.');
+        throw new Error(payload.error || (pt ? 'Não foi possível enviar a mensagem.' : 'Could not send the message.'));
       }
       setDraft('');
-      setConversation((current) =>
-        current
-          ? { ...current, id: payload.conversationId ?? current.id, status: 'open' }
-          : {
-              id: payload.conversationId ?? payload.message!.conversation_id,
-              subject: 'Suporte Silentra',
-              status: 'open',
-              plan: 'free',
-              priority: 1,
-              last_message_at: payload.message!.created_at,
-              last_message_preview: payload.message!.body.slice(0, 200),
-            },
-      );
       setMessages((current) => [...current, payload.message!]);
-      toast.success('Mensagem enviada à equipa Silentra.');
-      await refresh(true);
+      toast.success(pt ? 'Mensagem enviada à equipa Silentra.' : 'Message sent to the Silentra team.');
+      await refresh(selectedTicket.id, true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Não foi possível enviar a mensagem.');
+      const message = err instanceof Error ? err.message : (pt ? 'Não foi possível enviar a mensagem.' : 'Could not send the message.');
+      setError(message);
+      toast.error(message);
     } finally {
       setSending(false);
     }
   };
 
-  const plan = conversation?.plan ?? accountPlan;
+  const plan = selectedTicket?.plan ?? accountPlan;
   const planInfo = planDescriptions[locale][plan];
 
   return (
@@ -171,116 +230,261 @@ export default function SupportPage() {
               {pt ? 'Apoio ao membro' : 'Member support'}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              {pt ? 'Fala diretamente com a Silentra.' : 'Talk directly to Silentra.'}
+              {pt ? 'Tickets de suporte' : 'Support tickets'}
             </h1>
             <p className="mt-3 text-muted-foreground">
-              {pt ? 'Coloca aqui as tuas dúvidas ou problemas. A conversa fica guardada na plataforma e recebes um email quando a equipa responder.' : 'Send us your questions or report a problem here. Your conversation stays in the platform, and you will receive an email when the team replies.'}
+              {pt
+                ? 'Cria um ticket para cada assunto ou problema. A equipa Silentra irá analisá-lo e aceitar o pedido antes de abrir o chat.'
+                : 'Create a ticket for each issue. The Silentra team will review it and accept the request before opening the chat.'}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void refresh()}
-            disabled={loading}
-            className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-border bg-card px-4 text-sm font-medium transition hover:bg-accent disabled:opacity-50 sm:self-auto"
-          >
-            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-            {pt ? 'Atualizar' : 'Refresh'}
-          </button>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              disabled={loading}
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium transition hover:bg-accent disabled:opacity-50"
+            >
+              <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+              {pt ? 'Atualizar' : 'Refresh'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreateTicketOpen((value) => !value)}
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              {createTicketOpen ? <X className="size-4" /> : <Plus className="size-4" />}
+              {createTicketOpen ? (pt ? 'Cancelar' : 'Cancel') : (pt ? 'Novo ticket' : 'New ticket')}
+            </button>
+          </div>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
-            <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Headset className="size-5" />
+        {createTicketOpen ? (
+          <section className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FilePlus2 className="size-5" />
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold">{pt ? 'Chat de suporte' : 'Support chat'}</h2>
-                <p className="text-xs text-muted-foreground">
-                  {conversation ? statusLabel(conversation.status, pt) : pt ? 'Canal privado de contacto' : 'Private contact channel'}
+              <div>
+                <h2 className="font-semibold">{pt ? 'Criar um ticket' : 'Create a ticket'}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {pt ? 'Usa um assunto por problema para manter cada pedido separado.' : 'Use one ticket per issue to keep every request separate.'}
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-300">
-                <LockKeyhole className="size-3" /> {pt ? 'Privado' : 'Private'}
-              </span>
             </div>
-
-            <div className="flex min-h-[360px] flex-col">
-              {loading && !conversation ? (
-                <div className="flex flex-1 items-center justify-center p-10 text-sm text-muted-foreground">
-                  {pt ? 'A carregar o suporte…' : 'Loading support…'}
-                </div>
-              ) : error && !conversation ? (
-                <div className="m-5 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                  {error}
-                  <button className="ml-2 underline" type="button" onClick={() => void refresh()}>
-                    {pt ? 'Tentar novamente' : 'Try again'}
-                  </button>
-                </div>
-              ) : !conversation && messages.length === 0 ? (
-                <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                    <MessageCircle className="size-6" />
-                  </div>
-                  <h3 className="mt-4 text-base font-semibold">{pt ? 'Como podemos ajudar?' : 'How can we help?'}</h3>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                    {pt ? 'Envia a tua primeira mensagem para abrir uma conversa com a equipa Silentra. Não precisas de sair da dashboard nem de enviar um email manualmente.' : 'Send your first message to start a conversation with the Silentra team. You can stay in your dashboard instead of sending an email manually.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
-                  {messages.map((message) => {
-                    const ownMessage = message.sender_type === 'customer';
-                    return (
-                      <div key={message.id} className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[90%] rounded-2xl px-4 py-3 sm:max-w-[78%] ${ownMessage ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md bg-muted text-foreground'}`}>
-                          <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
-                          <div className={`mt-2 flex items-center justify-end gap-1.5 text-[10px] ${ownMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                            <span>{ownMessage ? (pt ? 'Tu' : 'You') : (pt ? 'Equipa Silentra' : 'Silentra team')}</span>
-                            <span>·</span>
-                            <time dateTime={message.created_at}>{formatDate(message.created_at, locale)}</time>
-                            {ownMessage ? <Check className="size-3" aria-label={message.read_at ? (pt ? 'Lida' : 'Read') : (pt ? 'Enviada' : 'Sent')} /> : null}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {error && conversation ? (
-              <div className="mx-4 mb-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive sm:mx-6">
-                {pt ? 'Não foi possível atualizar a conversa. As mensagens já carregadas continuam disponíveis.' : 'Could not refresh the conversation. Previously loaded messages are still available.'}
+            <form onSubmit={createTicket} className="mt-5 space-y-4">
+              <div>
+                <label htmlFor="support-ticket-subject" className="mb-1.5 block text-sm font-medium">
+                  {pt ? 'Assunto' : 'Subject'}
+                </label>
+                <input
+                  id="support-ticket-subject"
+                  value={subjectDraft}
+                  onChange={(event) => setSubjectDraft(event.target.value)}
+                  placeholder={pt ? 'Ex.: Problema com a faturação' : 'e.g. Billing issue'}
+                  maxLength={120}
+                  required
+                  minLength={3}
+                  disabled={creating}
+                  className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                />
+                <p className="mt-1 text-right text-[11px] text-muted-foreground">{subjectDraft.trim().length}/120</p>
               </div>
-            ) : null}
-
-            <form onSubmit={sendMessage} className="border-t border-border bg-muted/20 p-3 sm:p-4">
-              <label htmlFor="support-message" className="sr-only">{pt ? 'A tua mensagem' : 'Your message'}</label>
-              <textarea
-                id="support-message"
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                placeholder={pt ? 'Escreve a tua mensagem…' : 'Write your message…'}
-                maxLength={4000}
-                rows={3}
-                disabled={sending}
-                className="w-full resize-y rounded-xl border border-border bg-background px-3 py-3 text-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-              />
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[11px] leading-5 text-muted-foreground">
-                  {pt ? 'Recebes uma notificação por email quando houver uma resposta por ler.' : 'You will receive an email notification when a reply is unread.'}
+              <div>
+                <label htmlFor="support-ticket-description" className="mb-1.5 block text-sm font-medium">
+                  {pt ? 'Descreve o problema' : 'Describe the issue'}
+                </label>
+                <textarea
+                  id="support-ticket-description"
+                  value={descriptionDraft}
+                  onChange={(event) => setDescriptionDraft(event.target.value)}
+                  placeholder={pt ? 'Explica o que aconteceu, o que estavas a tentar fazer e qual foi o resultado esperado…' : 'Explain what happened, what you were trying to do, and what you expected…'}
+                  maxLength={4000}
+                  minLength={10}
+                  rows={4}
+                  required
+                  disabled={creating}
+                  className="w-full resize-y rounded-xl border border-border bg-background px-3 py-3 text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                />
+                <p className="mt-1 text-right text-[11px] text-muted-foreground">{descriptionDraft.trim().length}/4000</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {pt ? 'O ticket fica pendente até ser aceite. Ainda não será possível enviar mensagens no chat.' : 'The ticket remains pending until accepted. Chat messages will not be available yet.'}
                 </p>
                 <button
                   type="submit"
-                  disabled={sending || !draft.trim() || draft.trim().length > 4000}
+                  disabled={creating || subjectDraft.trim().length < 3 || descriptionDraft.trim().length < 10}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {sending ? (pt ? 'A enviar…' : 'Sending…') : (pt ? 'Enviar mensagem' : 'Send message')}
-                  <Send className="size-4" />
+                  <Ticket className="size-4" /> {creating ? (pt ? 'A criar…' : 'Creating…') : (pt ? 'Submeter ticket' : 'Submit ticket')}
                 </button>
               </div>
             </form>
+          </section>
+        ) : null}
+
+        {error ? (
+          <div className="flex items-start justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <p>{error}</p>
+            <button type="button" onClick={() => void refresh()} className="shrink-0 underline">
+              {pt ? 'Tentar novamente' : 'Try again'}
+            </button>
+          </div>
+        ) : null}
+
+        <section className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)_280px]">
+          <aside className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
+              <div>
+                <h2 className="font-semibold">{pt ? 'Os teus tickets' : 'Your tickets'}</h2>
+                <p className="mt-1 text-xs text-muted-foreground">{tickets.length} {pt ? 'ticket(s)' : 'ticket(s)'}</p>
+              </div>
+              <Ticket className="size-5 text-muted-foreground" />
+            </div>
+            <div className="max-h-[560px] overflow-y-auto">
+              {loading && !tickets.length ? (
+                <div className="p-6 text-center text-sm text-muted-foreground">{pt ? 'A carregar tickets…' : 'Loading tickets…'}</div>
+              ) : tickets.length ? tickets.map((ticket) => (
+                <button
+                  key={ticket.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTicketId(ticket.id);
+                    setError(null);
+                  }}
+                  className={`block w-full border-b border-border/70 p-4 text-left transition hover:bg-accent/50 ${selectedTicketId === ticket.id ? 'bg-accent/60' : ''}`}
+                >
+                  <p className="break-words text-sm font-semibold">{ticket.subject}</p>
+                  <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted-foreground">
+                    {ticket.last_message_preview || ticket.description}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusTone(ticket.status)}`}>{statusLabel(ticket.status, pt)}</span>
+                    <time className="ml-auto text-[10px] text-muted-foreground" dateTime={ticket.last_message_at || ticket.created_at}>
+                      {formatDate(ticket.last_message_at || ticket.created_at, locale)}
+                    </time>
+                  </div>
+                </button>
+              )) : (
+                <div className="flex flex-col items-center px-5 py-12 text-center">
+                  <FilePlus2 className="size-8 text-muted-foreground" />
+                  <p className="mt-3 text-sm font-medium">{pt ? 'Ainda não tens tickets' : 'No tickets yet'}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{pt ? 'Cria um ticket para cada questão que precises de resolver.' : 'Create a separate ticket for every issue you need help with.'}</p>
+                  <button type="button" onClick={() => setCreateTicketOpen(true)} className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-medium hover:bg-accent">
+                    <Plus className="size-4" /> {pt ? 'Criar ticket' : 'Create ticket'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card">
+            {selectedTicket ? (
+              <>
+                <div className="border-b border-border px-4 py-4 sm:px-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Headset className="size-4" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">{pt ? 'Ticket de suporte' : 'Support ticket'}</span>
+                      </div>
+                      <h2 className="mt-2 break-words text-lg font-semibold">{selectedTicket.subject}</h2>
+                      <p className="mt-1 text-xs text-muted-foreground">{pt ? 'Criado a' : 'Created'} {formatDate(selectedTicket.created_at, locale)}</p>
+                    </div>
+                    <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${statusTone(selectedTicket.status)}`}>
+                      {statusLabel(selectedTicket.status, pt)}
+                    </span>
+                  </div>
+                  <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 sm:p-4">
+                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{pt ? 'Descrição do problema' : 'Issue description'}</p>
+                    <p className="whitespace-pre-wrap break-words text-sm leading-6">{selectedTicket.description}</p>
+                  </div>
+                </div>
+
+                {selectedTicket.status === 'pending' ? (
+                  <div className="flex min-h-[260px] flex-col items-center justify-center px-6 py-10 text-center">
+                    <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-300">
+                      <Clock3 className="size-6" />
+                    </div>
+                    <h3 className="mt-4 font-semibold">{pt ? 'À espera de aceitação' : 'Awaiting acceptance'}</h3>
+                    <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                      {pt ? 'A equipa Silentra vai analisar o pedido. O chat e o envio de mensagens serão disponibilizados assim que o ticket for aceite.' : 'The Silentra team will review your request. Chat and messages will become available as soon as the ticket is accepted.'}
+                    </p>
+                    <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground">
+                      <LockKeyhole className="size-3.5" /> {pt ? 'Chat ainda não disponível' : 'Chat not available yet'}
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex min-h-[280px] flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-5">
+                      {messages.length ? messages.map((message) => {
+                        const ownMessage = message.sender_type === 'customer';
+                        return (
+                          <div key={message.id} className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[94%] rounded-2xl px-4 py-3 sm:max-w-[82%] ${ownMessage ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md bg-muted text-foreground'}`}>
+                              <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
+                              <div className={`mt-2 flex items-center justify-end gap-1.5 text-[10px] ${ownMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                                <span>{ownMessage ? (pt ? 'Tu' : 'You') : (pt ? 'Equipa Silentra' : 'Silentra team')}</span>
+                                <span>·</span>
+                                <time dateTime={message.created_at}>{formatDate(message.created_at, locale)}</time>
+                                {ownMessage ? <Check className="size-3" aria-label={message.read_at ? (pt ? 'Lida' : 'Read') : (pt ? 'Enviada' : 'Sent')} /> : null}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }) : (
+                        <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
+                          <MessageCircle className="size-7 text-muted-foreground" />
+                          <p className="mt-3 text-sm font-medium">{pt ? 'Chat iniciado' : 'Chat started'}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{pt ? 'Podes agora trocar mensagens com a equipa Silentra.' : 'You can now exchange messages with the Silentra team.'}</p>
+                        </div>
+                      )}
+                    </div>
+                    {selectedTicket.status === 'closed' ? (
+                      <div className="border-t border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+                        {pt ? 'Este ticket foi resolvido. Cria um novo ticket caso precises de ajuda com outro problema.' : 'This ticket is resolved. Create a new ticket if you need help with a different issue.'}
+                      </div>
+                    ) : (
+                      <form onSubmit={sendMessage} className="border-t border-border bg-muted/20 p-3 sm:p-4">
+                        <label htmlFor="support-message" className="sr-only">{pt ? 'A tua mensagem' : 'Your message'}</label>
+                        <textarea
+                          id="support-message"
+                          value={draft}
+                          onChange={(event) => setDraft(event.target.value)}
+                          placeholder={pt ? 'Escreve uma mensagem sobre este ticket…' : 'Write a message about this ticket…'}
+                          maxLength={4000}
+                          rows={3}
+                          disabled={sending}
+                          className="w-full resize-y rounded-xl border border-border bg-background px-3 py-3 text-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                        />
+                        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <p className="text-[11px] leading-5 text-muted-foreground">
+                            {pt ? 'Recebes um email quando a equipa enviar uma nova mensagem.' : 'You will receive an email when the team sends a new message.'}
+                          </p>
+                          <button
+                            type="submit"
+                            disabled={sending || !draft.trim() || draft.trim().length > 4000}
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {sending ? (pt ? 'A enviar…' : 'Sending…') : (pt ? 'Enviar mensagem' : 'Send message')}
+                            <Send className="size-4" />
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                  <MessageCircle className="size-6" />
+                </div>
+                <h2 className="mt-4 font-semibold">{pt ? 'Seleciona um ticket' : 'Select a ticket'}</h2>
+                <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{pt ? 'Escolhe um pedido à esquerda ou cria um novo ticket para começar.' : 'Choose a ticket on the left or create one to get started.'}</p>
+              </div>
+            )}
           </div>
 
           <aside className="space-y-4">
@@ -315,9 +519,11 @@ export default function SupportPage() {
                 <Clock3 className="size-5 text-muted-foreground" />
                 <h2 className="font-semibold">{pt ? 'Como funciona' : 'How it works'}</h2>
               </div>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {pt ? 'As mensagens ficam nesta conversa. Quando uma nova resposta estiver por ler, a plataforma envia um aviso por email. Abre a dashboard para continuares o contacto.' : 'Messages stay in this conversation. When a new reply is unread, the platform sends an email notification. Return to your dashboard to continue the conversation.'}
-              </p>
+              <ol className="mt-3 list-inside list-decimal space-y-2 text-sm leading-6 text-muted-foreground">
+                <li>{pt ? 'Cria um ticket por cada assunto ou problema.' : 'Create one ticket for each issue.'}</li>
+                <li>{pt ? 'A equipa Silentra analisa e aceita o pedido.' : 'The Silentra team reviews and accepts it.'}</li>
+                <li>{pt ? 'Após a aceitação, o chat fica disponível nesse ticket.' : 'Once accepted, chat becomes available on that ticket.'}</li>
+              </ol>
             </div>
           </aside>
         </section>
