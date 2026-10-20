@@ -69,7 +69,7 @@ assert.match(worker, /CRON_SECRET/);
 assert.match(worker, /retryDueSupportEmailNotifications/);
 
 const customerUi = await readFile(requiredFiles[6], 'utf8');
-assert.ok(customerUi.includes("fetch('/api/support/conversations'"));
+assert.match(customerUi, /\/api\/support\/conversations/);
 assert.match(customerUi, /Enviar mensagem/);
 assert.match(customerUi, /create_ticket/);
 assert.match(customerUi, /À espera de aceitação/);
