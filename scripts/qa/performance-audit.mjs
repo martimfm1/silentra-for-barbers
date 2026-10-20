@@ -133,6 +133,11 @@ assert.match(
   /await Promise\.all\(\[\s*admin[\s\S]*platform_api_logs/,
   'API health telemetry reads should run concurrently.',
 );
+assert.doesNotMatch(
+  adminObservabilityApi,
+  /select\('id', \{ head: true, count: 'exact' \}\)/,
+  'Availability probes should not run expensive exact row counts.',
+);
 
 console.log(
   '[PERFORMANCE_QA] image optimization, deferred third-party pixel, public cache headers and parallel catalogue reads passed',
