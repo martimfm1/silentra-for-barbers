@@ -226,7 +226,7 @@ export async function deliverSupportEmailNotification(
   const isAdminRecipient = row.recipient_type === 'admin';
   const target = isAdminRecipient
     ? `/silentra-admin?tab=support&conversationId=${encodeURIComponent(row.conversation_id)}`
-    : '/dashboard/suporte';
+    : `/dashboard/suporte?ticketId=${encodeURIComponent(row.conversation_id)}`;
   const title = isAdminRecipient
     ? english ? 'New support message' : 'Nova mensagem de suporte'
     : english ? 'Silentra has replied to your support conversation' : 'Tens uma nova mensagem da equipa Silentra';
