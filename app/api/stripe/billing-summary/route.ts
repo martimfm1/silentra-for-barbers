@@ -30,13 +30,16 @@ async function GET__unobserved() {
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
 
-    const paymentMode = await PaymentModeService.getPaymentMode();
     const database = createAdminClient();
-    const { data: userRow, error: userError } = await database
-      .from('users')
-      .select('barbershop_id, role, email')
-      .eq('id', user.id)
-      .maybeSingle();
+    const [paymentMode, userResult] = await Promise.all([
+      PaymentModeService.getPaymentMode(),
+      database
+        .from('users')
+        .select('barbershop_id, role, email')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ]);
+    const { data: userRow, error: userError } = userResult;
     if (userError) {
       console.error(
         '[BILLING_SUMMARY_USER_ERROR]',
@@ -76,7 +79,7 @@ async function GET__unobserved() {
         database
           .from('subscriptions')
           .select(
-            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, payment_method, updated_at',
+            'id, user_id, stripe_customer_id, stripe_subscription_id, stripe_price_id, status, cancel_at_period_end, current_period_end, trial_end, plan, plan_override, payment_method, canceled_at, canceled_by_user_id, cancellation_requested_at, updated_at',
           )
           .eq('barbershop_id', barbershopId)
           .order('updated_at', { ascending: false })
@@ -127,10 +130,22 @@ async function GET__unobserved() {
 
     let subscription = subscriptionResult.data as SubscriptionRecord | null;
 
-    // Stripe is the billing source of truth. Reconcile on every billing-page
-    // read so a missed/delayed webhook cannot leave the dashboard showing
-    // "cancelamento agendado" after Stripe has already canceled the subscription.
-    if (subscription?.stripe_subscription_id && !subscription.plan_override) {
+    // Webhooks keep the local subscription row current. Avoid an external Stripe
+    // round-trip on every dashboard read; use reconciliation as a bounded fallback
+    // for records that have not been updated recently. The checkout/action routes
+    // still reconcile synchronously when fresh provider state is required.
+    const subscriptionUpdatedAt = subscription?.updated_at
+      ? Date.parse(subscription.updated_at)
+      : Number.NaN;
+    const subscriptionIsFresh =
+      Number.isFinite(subscriptionUpdatedAt) &&
+      Date.now() - subscriptionUpdatedAt < 120_000;
+    if (
+      subscription?.stripe_subscription_id &&
+      !subscription.plan_override &&
+      subscription.status !== 'canceled' &&
+      !subscriptionIsFresh
+    ) {
       subscription = await BarbershopStripeService.reconcileSubscription(
         barbershopId,
         subscription,
@@ -154,21 +169,24 @@ async function GET__unobserved() {
 
     if (subscription?.status === 'canceled') {
       try {
-        const stripe = getStripeClient();
-        const remote = subscription.stripe_subscription_id
-          ? await stripe.subscriptions.retrieve(
-              subscription.stripe_subscription_id,
-            )
+        // Cancellation metadata is persisted by billing/webhook flows. Only
+        // contact Stripe when the local record lacks this information.
+        const needsRemoteCancellation = !subscription.canceled_at ||
+          (!subscription.canceled_by_user_id && !subscription.cancellation_requested_at);
+        const remote = needsRemoteCancellation && subscription.stripe_subscription_id
+          ? await getStripeClient().subscriptions.retrieve(subscription.stripe_subscription_id)
           : null;
 
-        const canceledAt = remote?.canceled_at
-          ? new Date(remote.canceled_at * 1000).toISOString()
-          : null;
+        const canceledAt = subscription.canceled_at ??
+          (remote?.canceled_at
+            ? new Date(remote.canceled_at * 1000).toISOString()
+            : null);
         const previousPlan =
           planForPrice(remote?.items.data[0]?.price.id ?? '') ??
           planForPrice(subscription.stripe_price_id ?? '') ??
           (subscription.plan === PLANS.FREE ? null : subscription.plan);
         const canceledByUserId =
+          subscription.canceled_by_user_id ||
           remote?.metadata?.cancellation_requested_by_user_id?.trim() ||
           remote?.metadata?.user_id?.trim() ||
           subscription.user_id;
@@ -195,7 +213,9 @@ async function GET__unobserved() {
           canceledByName,
           canceledByEmail,
           previousPlan,
-          requestedAt: remote?.metadata?.cancellation_requested_at ?? null,
+          requestedAt: subscription.cancellation_requested_at ??
+            remote?.metadata?.cancellation_requested_at ??
+            null,
         };
       } catch (error) {
         console.error(
