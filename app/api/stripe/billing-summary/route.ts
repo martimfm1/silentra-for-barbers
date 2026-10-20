@@ -216,8 +216,8 @@ async function GET__unobserved() {
       try {
         // Cancellation metadata is persisted by billing/webhook flows. Only
         // contact Stripe when the local record lacks this information.
-        const needsRemoteCancellation = !subscription.canceled_at ||
-          (!subscription.canceled_by_user_id && !subscription.cancellation_requested_at);
+        const needsRemoteCancellation =
+          !subscription.canceled_at || !subscription.canceled_by_user_id;
         const remote = needsRemoteCancellation && subscription.stripe_subscription_id
           ? await getStripeClient().subscriptions.retrieve(subscription.stripe_subscription_id)
           : null;
