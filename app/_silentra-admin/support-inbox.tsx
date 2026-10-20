@@ -308,6 +308,7 @@ export default function SupportInbox() {
                 ['open', 'Chat ativo'],
                 ['waiting_customer', 'À espera'],
                 ['closed', 'Resolvidas'],
+                ['closed_unresolved', 'Fechadas sem resolução'],
               ] as const).map(([value, label]) => (
                 <button
                   key={value}
