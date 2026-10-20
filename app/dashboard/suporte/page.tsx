@@ -152,11 +152,29 @@ export default function SupportPage() {
   }, []);
 
   useEffect(() => {
-    void refresh();
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void refresh(selectedTicketId, true);
-    }, 15000);
-    return () => window.clearInterval(interval);
+    let cancelled = false;
+    let timer: number | undefined;
+
+    // Schedule the next poll only after the previous request has settled.
+    // Fixed setInterval caused overlapping requests whenever the API took >15s.
+    const scheduleNextPoll = () => {
+      timer = window.setTimeout(async () => {
+        if (cancelled) return;
+        if (document.visibilityState === 'visible') {
+          await refresh(selectedTicketId, true);
+        }
+        if (!cancelled) scheduleNextPoll();
+      }, 30000);
+    };
+
+    void refresh(selectedTicketId, false).finally(() => {
+      if (!cancelled) scheduleNextPoll();
+    });
+
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
   }, [refresh, selectedTicketId]);
 
   const createTicket = async (event: React.FormEvent<HTMLFormElement>) => {
