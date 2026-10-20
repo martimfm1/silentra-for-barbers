@@ -448,6 +448,9 @@ async function PATCH__unobserved(request: Request) {
         .from('support_conversations')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', conversationId);
+      if (error?.message?.includes('SUPPORT_TICKET_LIMIT_REACHED')) {
+        return jsonError('O limite de tickets abertos deste plano foi atingido. Fecha outro ticket antes de o reabrir.', 409);
+      }
       if (error) throw new Error('SUPPORT_ADMIN_STATUS_UPDATE_FAILED');
       return NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } });
     }
