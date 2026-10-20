@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 type Plan = 'free' | 'pro' | 'enterprise';
-type Status = 'pending' | 'open' | 'waiting_customer' | 'closed';
+type Status = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 type Message = {
   id: string;
   conversation_id: string;
@@ -67,6 +67,7 @@ const statusNames: Record<Status, string> = {
   open: 'Chat ativo',
   waiting_customer: 'À espera do membro',
   closed: 'Resolvida',
+  closed_unresolved: 'Fechado sem resolução',
 };
 
 function formatDate(value: string | null) {
@@ -404,6 +405,7 @@ export default function SupportInbox() {
                       <option value="open">Chat ativo</option>
                       <option value="waiting_customer">À espera do membro</option>
                       <option value="closed">Resolvida</option>
+                      <option value="closed_unresolved">Fechado sem resolução</option>
                     </select>
                   </label>
                 )}
@@ -445,7 +447,7 @@ export default function SupportInbox() {
               </div>
               )}
 
-{selected.status !== 'pending' && selected.status !== 'closed' ? (
+{selected.status !== 'pending' && selected.status !== 'closed' && selected.status !== 'closed_unresolved' ? (
               <form onSubmit={sendReply} className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
                 <label htmlFor="admin-support-reply" className="sr-only">Resposta ao membro</label>
                 <textarea
@@ -467,9 +469,9 @@ export default function SupportInbox() {
                   </button>
                 </div>
               </form>
-              ) : selected.status === 'closed' ? (
+              ) : selected.status === 'closed' || selected.status === 'closed_unresolved' ? (
                 <div className="border-t border-white/10 bg-black/10 p-4 text-sm text-zinc-500">
-                  Este ticket está resolvido. Se o membro tiver outro problema, deverá criar um novo ticket.
+                  {selected.status === 'closed' ? 'Este ticket foi resolvido.' : 'Este ticket foi fechado sem resolução.'} Se o membro tiver outro problema, deverá criar um novo ticket.
                 </div>
               ) : null}
             </>
