@@ -133,11 +133,28 @@ export default function SupportInbox() {
   }, []);
 
   useEffect(() => {
-    void load();
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void load(selectedId, true);
-    }, 15000);
-    return () => window.clearInterval(interval);
+    let cancelled = false;
+    let timer: number | undefined;
+
+    // Avoid piling up inbox requests if Supabase/Auth has a slow response.
+    const scheduleNextPoll = () => {
+      timer = window.setTimeout(async () => {
+        if (cancelled) return;
+        if (document.visibilityState === 'visible') {
+          await load(selectedId, true);
+        }
+        if (!cancelled) scheduleNextPoll();
+      }, 30000);
+    };
+
+    void load(selectedId, false).finally(() => {
+      if (!cancelled) scheduleNextPoll();
+    });
+
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
   }, [load, selectedId]);
 
   useEffect(() => {
