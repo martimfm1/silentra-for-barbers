@@ -250,29 +250,32 @@ async function GET_unobserved(_request: Request) {
       }),
     ]);
 
-    const logsResult = await admin
-      .from('platform_api_logs')
-      .select(
-        'id,request_id,route,method,status_code,duration_ms,level,error_code,environment,region,created_at',
-      )
-      .gte('created_at', windowStart)
-      .order('created_at', { ascending: false })
-      .limit(2000);
-    const totalResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart);
-    const errorsResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart)
-      .gte('status_code', 500);
-    const clientErrorsResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart)
-      .gte('status_code', 400)
-      .lt('status_code', 500);
+    const [logsResult, totalResult, errorsResult, clientErrorsResult] =
+      await Promise.all([
+        admin
+          .from('platform_api_logs')
+          .select(
+            'id,request_id,route,method,status_code,duration_ms,level,error_code,environment,region,created_at',
+          )
+          .gte('created_at', windowStart)
+          .order('created_at', { ascending: false })
+          .limit(2000),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart)
+          .gte('status_code', 500),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart)
+          .gte('status_code', 400)
+          .lt('status_code', 500),
+      ]);
     const telemetryAvailable =
       !logsResult.error &&
       !totalResult.error &&
