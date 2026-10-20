@@ -37,7 +37,7 @@ async function GET__unobserved(request: Request) {
 
     const { data: conversations, error: conversationsError } = await admin
       .from('support_conversations')
-      .select('id,barbershop_id,customer_user_id,subject,status,plan,priority,last_message_at,last_message_preview,created_at,updated_at')
+      .select('id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at')
       .order('priority', { ascending: false })
       .order('last_message_at', { ascending: false, nullsFirst: false })
       .limit(250);
@@ -48,7 +48,7 @@ async function GET__unobserved(request: Request) {
     if (conversationId && !rows.some((row) => row.id === conversationId)) {
       const extra = await admin
         .from('support_conversations')
-        .select('id,barbershop_id,customer_user_id,subject,status,plan,priority,last_message_at,last_message_preview,created_at,updated_at')
+        .select('id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at')
         .eq('id', conversationId)
         .maybeSingle();
       if (extra.error) throw new Error('SUPPORT_ADMIN_SELECTED_CONVERSATION_LOOKUP_FAILED');
@@ -173,16 +173,18 @@ async function GET__unobserved(request: Request) {
       const selected = rows.find((row) => row.id === conversationId);
       if (!selected) return jsonError('Conversa não encontrada.', 404);
 
-      const messageResult = await admin
-        .from('support_messages')
-        .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (messageResult.error) {
-        throw new Error('SUPPORT_ADMIN_MESSAGES_LOOKUP_FAILED');
+      if (selected.status !== 'pending') {
+        const messageResult = await admin
+          .from('support_messages')
+          .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (messageResult.error) {
+          throw new Error('SUPPORT_ADMIN_MESSAGES_LOOKUP_FAILED');
+        }
+        messages = (messageResult.data ?? []).reverse();
       }
-      messages = (messageResult.data ?? []).reverse();
       // Priority is resolved from current assignment/subscription rows, not
       // the browser or potentially stale conversation metadata.
       const effectivePlan = resolveEffectivePlan(selected.barbershop_id);
@@ -263,11 +265,17 @@ async function POST__unobserved(request: Request) {
 
     const { data: conversation, error: conversationError } = await admin
       .from('support_conversations')
-      .select('id,customer_user_id,barbershop_id')
+      .select('id,customer_user_id,barbershop_id,status')
       .eq('id', conversationId)
       .maybeSingle();
     if (conversationError) throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
-    if (!conversation) return jsonError('Conversa não encontrada.', 404);
+    if (!conversation) return jsonError('Ticket não encontrado.', 404);
+    if (conversation.status === 'pending') {
+      return jsonError('Aceita o ticket antes de responder. O chat ainda não está ativo.', 409);
+    }
+    if (conversation.status === 'closed') {
+      return jsonError('Este ticket está resolvido. Reabre-o antes de enviar uma resposta.', 409);
+    }
 
     const [customerResult, authCustomerResult, shopResult] = await Promise.all([
       admin
@@ -366,7 +374,7 @@ async function PATCH__unobserved(request: Request) {
   }
 
   try {
-    const { admin } = await requirePlatformAdmin();
+    const { admin, user } = await requirePlatformAdmin();
     const bodyResult = await readJsonObject(request, {
       maxBytes: 2 * 1024,
       allowedKeys: ['conversationId', 'action', 'status'],
@@ -380,11 +388,33 @@ async function PATCH__unobserved(request: Request) {
 
     const { data: conversation, error: lookupError } = await admin
       .from('support_conversations')
-      .select('id')
+      .select('id,status,accepted_at')
       .eq('id', conversationId)
       .maybeSingle();
     if (lookupError) throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
-    if (!conversation) return jsonError('Conversa não encontrada.', 404);
+    if (!conversation) return jsonError('Ticket não encontrado.', 404);
+
+    if (action === 'accept') {
+      if (conversation.status !== 'pending') {
+        return jsonError('Este ticket já foi aceite ou deixou de estar pendente.', 409);
+      }
+      const acceptedAt = new Date().toISOString();
+      const { data: accepted, error } = await admin
+        .from('support_conversations')
+        .update({
+          status: 'open',
+          accepted_at: acceptedAt,
+          accepted_by: user.id,
+          updated_at: acceptedAt,
+        })
+        .eq('id', conversationId)
+        .eq('status', 'pending')
+        .select('id,status,accepted_at,accepted_by')
+        .maybeSingle();
+      if (error) throw new Error('SUPPORT_ADMIN_TICKET_ACCEPT_FAILED');
+      if (!accepted) return jsonError('Outro pedido já alterou este ticket. Atualiza a caixa de entrada.', 409);
+      return NextResponse.json({ ok: true, ticket: accepted }, { headers: { 'Cache-Control': 'no-store' } });
+    }
 
     if (action === 'read') {
       const { error } = await admin
