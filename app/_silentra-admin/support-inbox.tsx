@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 type Plan = 'free' | 'pro' | 'enterprise';
-type Status = 'open' | 'waiting_customer' | 'closed';
+type Status = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 type Message = {
   id: string;
   conversation_id: string;
@@ -32,6 +32,9 @@ type Conversation = {
   barbershop_id: string;
   customer_user_id: string;
   subject: string;
+  description: string;
+  accepted_at: string | null;
+  accepted_by?: string | null;
   status: Status;
   plan: Plan;
   priority: number;
@@ -60,9 +63,11 @@ const planNames: Record<Plan, string> = {
 };
 
 const statusNames: Record<Status, string> = {
-  open: 'Aberta',
+  pending: 'Pendente · aguarda aceitação',
+  open: 'Chat ativo',
   waiting_customer: 'À espera do membro',
   closed: 'Resolvida',
+  closed_unresolved: 'Fechado sem resolução',
 };
 
 function formatDate(value: string | null) {
@@ -170,6 +175,7 @@ export default function SupportInbox() {
           : conversation.status === statusFilter);
       return matchesQuery && matchesStatus;
     }).sort((a, b) =>
+      Number(b.status === 'pending') - Number(a.status === 'pending') ||
       planRank[b.plan] - planRank[a.plan] ||
       b.unreadCount - a.unreadCount ||
       (Date.parse(b.last_message_at ?? b.created_at) - Date.parse(a.last_message_at ?? a.created_at)),
@@ -227,17 +233,39 @@ export default function SupportInbox() {
     }
   };
 
+  const acceptTicket = async () => {
+    if (!selectedId || updatingStatus || selected?.status !== 'pending') return;
+    setUpdatingStatus(true);
+    setNotice(null);
+    setError(null);
+    try {
+      const response = await fetch('/api/silentra-admin/support', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept', conversationId: selectedId }),
+      });
+      const payload = (await response.json()) as Payload;
+      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Não foi possível aceitar o ticket.');
+      setNotice('Ticket aceite. O chat ficou ativo para o membro.');
+      await load(selectedId, true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível aceitar o ticket.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   return (
     <section className="space-y-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-emerald-300">
             <MessageCircle className="size-5" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em]">Membros · Suporte</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em]">Tickets · Suporte</p>
           </div>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">Caixa de entrada</h2>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">Tickets de suporte</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Conversas privadas ordenadas por mensagens por ler e prioridade do plano.
+            Revê cada pedido, aceita-o para ativar o chat e mantém assuntos diferentes em tickets separados.
           </p>
         </div>
         <button
@@ -276,9 +304,11 @@ export default function SupportInbox() {
               {([
                 ['all', 'Todas'],
                 ['unread', 'Por ler'],
-                ['open', 'Abertas'],
+                ['pending', 'Pendentes'],
+                ['open', 'Chat ativo'],
                 ['waiting_customer', 'À espera'],
                 ['closed', 'Resolvidas'],
+                ['closed_unresolved', 'Fechadas sem resolução'],
               ] as const).map(([value, label]) => (
                 <button
                   key={value}
@@ -318,7 +348,7 @@ export default function SupportInbox() {
                       ) : null}
                     </div>
                     <p className="mt-0.5 truncate text-xs text-zinc-500">{conversation.barbershop.name}</p>
-                    <p className="mt-2 line-clamp-2 break-words text-xs leading-5 text-zinc-400">{conversation.last_message_preview || 'Conversa criada, sem mensagens.'}</p>
+                    <p className="mt-2 line-clamp-2 break-words text-xs leading-5 text-zinc-400">{conversation.last_message_preview || conversation.description || 'Ticket sem descrição.'}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -330,13 +360,13 @@ export default function SupportInbox() {
             )) : (
               <div className="flex flex-col items-center px-5 py-12 text-center">
                 <Inbox className="size-7 text-zinc-700" />
-                <p className="mt-3 text-sm font-medium text-zinc-400">Sem conversas a mostrar</p>
-                <p className="mt-1 text-xs leading-5 text-zinc-600">As conversas novas surgem automaticamente quando um membro envia a primeira mensagem.</p>
+                <p className="mt-3 text-sm font-medium text-zinc-400">Sem tickets a mostrar</p>
+                <p className="mt-1 text-xs leading-5 text-zinc-600">Os novos tickets aparecem aqui para serem analisados e aceites.</p>
               </div>
             )}
           </div>
           <div className="border-t border-white/8 px-4 py-3 text-[10px] text-zinc-600">
-            {conversations.length} conversa(s) · {conversations.reduce((sum, item) => sum + item.unreadCount, 0)} mensagem(ns) por ler
+            {conversations.length} ticket(s) · {conversations.reduce((sum, item) => sum + item.unreadCount, 0)} mensagem(ns) por ler
           </div>
         </aside>
 
@@ -349,26 +379,49 @@ export default function SupportInbox() {
                     <UserRound className="size-4" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-zinc-100">{selected.customer.name}</h3>
-                    <p className="truncate text-xs text-zinc-500">{selected.customer.email || 'Sem email disponível'} · {selected.barbershop.name}</p>
+                    <h3 className="truncate text-sm font-semibold text-zinc-100">{selected.subject}</h3>
+                    <p className="mt-0.5 truncate text-xs text-zinc-300">{selected.customer.name} · {selected.barbershop.name}</p>
+                    <p className="truncate text-xs text-zinc-500">{selected.customer.email || 'Sem email disponível'}</p>
                     <span className={`mt-1 inline-flex rounded-md border px-1.5 py-0.5 text-[9px] font-semibold ${planTone(selected.plan)}`}>{planNames[selected.plan]}</span>
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-xs text-zinc-500">
-                  Estado
-                  <select
-                    value={selected.status}
+                {selected.status === 'pending' ? (
+                  <button
+                    type="button"
+                    onClick={() => void acceptTicket()}
                     disabled={updatingStatus}
-                    onChange={(event) => void updateStatus(event.target.value as Status)}
-                    className="min-h-9 rounded-lg border border-white/10 bg-[#121216] px-2.5 text-xs text-zinc-200 outline-none focus:border-emerald-400/30 disabled:opacity-50"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-200 disabled:opacity-50"
                   >
-                    <option value="open">Aberta</option>
-                    <option value="waiting_customer">À espera do membro</option>
-                    <option value="closed">Resolvida</option>
-                  </select>
-                </label>
+                    <CheckCheck className="size-4" /> {updatingStatus ? 'A aceitar…' : 'Aceitar ticket'}
+                  </button>
+                ) : (
+                  <label className="flex items-center gap-2 text-xs text-zinc-500">
+                    Estado
+                    <select
+                      value={selected.status}
+                      disabled={updatingStatus}
+                      onChange={(event) => void updateStatus(event.target.value as Status)}
+                      className="min-h-9 rounded-lg border border-white/10 bg-[#121216] px-2.5 text-xs text-zinc-200 outline-none focus:border-emerald-400/30 disabled:opacity-50"
+                    >
+                      <option value="open">Chat ativo</option>
+                      <option value="waiting_customer">À espera do membro</option>
+                      <option value="closed">Resolvida</option>
+                      <option value="closed_unresolved">Fechado sem resolução</option>
+                    </select>
+                  </label>
+                )}
               </div>
 
+{selected.status === 'pending' ? (
+                <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 text-center">
+                  <div className="w-full max-w-xl rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200">Descrição do problema</p>
+                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">{selected.description}</p>
+                  </div>
+                  <p className="mt-4 text-sm text-zinc-400">O chat só fica disponível para o membro depois de aceitares este ticket.</p>
+
+                </div>
+              ) : (
               <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
                 {messages.length ? messages.map((message) => {
                   const adminMessage = message.sender_type === 'admin';
@@ -393,7 +446,9 @@ export default function SupportInbox() {
                   </div>
                 )}
               </div>
+              )}
 
+{selected.status !== 'pending' && selected.status !== 'closed' && selected.status !== 'closed_unresolved' ? (
               <form onSubmit={sendReply} className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
                 <label htmlFor="admin-support-reply" className="sr-only">Resposta ao membro</label>
                 <textarea
@@ -415,6 +470,11 @@ export default function SupportInbox() {
                   </button>
                 </div>
               </form>
+              ) : selected.status === 'closed' || selected.status === 'closed_unresolved' ? (
+                <div className="border-t border-white/10 bg-black/10 p-4 text-sm text-zinc-500">
+                  {selected.status === 'closed' ? 'Este ticket foi resolvido.' : 'Este ticket foi fechado sem resolução.'} Se o membro tiver outro problema, deverá criar um novo ticket.
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center px-5 py-16 text-center">

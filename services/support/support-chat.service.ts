@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type SupportPlan = 'free' | 'pro' | 'enterprise';
 export type SupportSenderType = 'customer' | 'admin';
-export type SupportStatus = 'open' | 'waiting_customer' | 'closed';
+export type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 
 export function supportPriority(plan: SupportPlan) {
   return plan === 'enterprise' ? 3 : plan === 'pro' ? 2 : 1;
@@ -226,7 +226,7 @@ export async function deliverSupportEmailNotification(
   const isAdminRecipient = row.recipient_type === 'admin';
   const target = isAdminRecipient
     ? `/silentra-admin?tab=support&conversationId=${encodeURIComponent(row.conversation_id)}`
-    : '/dashboard/suporte';
+    : `/dashboard/suporte?ticketId=${encodeURIComponent(row.conversation_id)}`;
   const title = isAdminRecipient
     ? english ? 'New support message' : 'Nova mensagem de suporte'
     : english ? 'Silentra has replied to your support conversation' : 'Tens uma nova mensagem da equipa Silentra';
