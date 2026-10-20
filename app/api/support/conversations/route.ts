@@ -86,7 +86,7 @@ async function GET__unobserved(request: Request) {
     }
 
     const ticketSelection = 'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
-    const [activeResult, historyResult] = await Promise.all([
+    const [activeResult, historyResult, effectivePlan] = await Promise.all([
       admin
         .from('support_conversations')
         .select(ticketSelection)
@@ -101,6 +101,7 @@ async function GET__unobserved(request: Request) {
         .in('status', ['closed', 'closed_unresolved'])
         .order('created_at', { ascending: false })
         .limit(100),
+      getEffectiveSupportPlan(admin, shop.id),
     ]);
     if (activeResult.error || historyResult.error) {
       throw new Error('SUPPORT_TICKETS_LOOKUP_FAILED');
@@ -111,7 +112,6 @@ async function GET__unobserved(request: Request) {
       ...(historyResult.data ?? []),
     ].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 
-    const effectivePlan = await getEffectiveSupportPlan(admin, shop.id);
     const tickets = (ticketRows ?? []).map((ticket) => ({
       ...ticket,
       customer_user_id: user.id,
@@ -121,30 +121,8 @@ async function GET__unobserved(request: Request) {
       customer_name: profile.name_complete || user.email,
     }));
 
-    const staleTickets = (ticketRows ?? []).filter(
-      (ticket) =>
-        ticket.customer_user_id !== user.id ||
-        ticket.plan !== effectivePlan ||
-        ticket.priority !== supportPriority(effectivePlan),
-    );
-    if (staleTickets.length) {
-      const syncResults = await Promise.all(
-        staleTickets.map((ticket) =>
-          admin
-            .from('support_conversations')
-            .update({
-              customer_user_id: user.id,
-              plan: effectivePlan,
-              priority: supportPriority(effectivePlan),
-            })
-            .eq('id', ticket.id)
-            .eq('barbershop_id', shop.id),
-        ),
-      );
-      if (syncResults.some((result) => result.error)) {
-        throw new Error('SUPPORT_TICKET_SYNC_FAILED');
-      }
-    }
+    // GET is intentionally read-only. Plan/priority are normalized in the response;
+    // persistent synchronisation belongs to ticket mutations, not frequent polling.
 
     const selectedTicket = requestedTicketId
       ? tickets.find((ticket) => ticket.id === requestedTicketId) ?? null
@@ -156,31 +134,27 @@ async function GET__unobserved(request: Request) {
     let messages: Array<Record<string, unknown>> = [];
     let unreadCount = 0;
     if (selectedTicket && selectedTicket.status !== 'pending') {
-      const { error: readError } = await admin
-        .from('support_messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('conversation_id', selectedTicket.id)
-        .eq('sender_type', 'admin')
-        .is('read_at', null);
-      if (readError) throw new Error('SUPPORT_MARK_READ_FAILED');
+      const [readResult, messageResult] = await Promise.all([
+        admin
+          .from('support_messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('conversation_id', selectedTicket.id)
+          .eq('sender_type', 'admin')
+          .is('read_at', null),
+        admin
+          .from('support_messages')
+          .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
+          .eq('conversation_id', selectedTicket.id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+      ]);
+      if (readResult.error) throw new Error('SUPPORT_MARK_READ_FAILED');
+      if (messageResult.error) throw new Error('SUPPORT_MESSAGES_LOOKUP_FAILED');
+      messages = (messageResult.data ?? []).reverse();
 
-      const { data: messageRows, error: messagesError } = await admin
-        .from('support_messages')
-        .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
-        .eq('conversation_id', selectedTicket.id)
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (messagesError) throw new Error('SUPPORT_MESSAGES_LOOKUP_FAILED');
-      messages = (messageRows ?? []).reverse();
-
-      const { count, error: unreadError } = await admin
-        .from('support_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('conversation_id', selectedTicket.id)
-        .eq('sender_type', 'admin')
-        .is('read_at', null);
-      if (unreadError) throw new Error('SUPPORT_UNREAD_COUNT_FAILED');
-      unreadCount = count ?? 0;
+      // This endpoint does not expose a customer-side unread badge; admin
+      // unread counts are derived from customer messages in the admin inbox.
+      unreadCount = 0;
     }
 
     return NextResponse.json(
