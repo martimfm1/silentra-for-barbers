@@ -130,6 +130,22 @@ async function PATCH__unobserved(
         return fail('Não foi possível validar o caminho público.', 503);
       }
       if (collision) return fail('Esse caminho público já está atribuído a outro site.', 409);
+
+      const { data: profileCollision, error: profileCollisionError } = await admin
+        .from('shops')
+        .select('id')
+        .eq('slug', nextSlug)
+        .limit(1)
+        .maybeSingle();
+      if (profileCollisionError) {
+        console.error('[ADMIN_CUSTOM_WEBSITE_PROFILE_SLUG_CHECK_FAILED]', {
+          code: profileCollisionError.code,
+        });
+        return fail('Não foi possível validar o caminho público.', 503);
+      }
+      if (profileCollision) {
+        return fail('Esse caminho já é utilizado pelo perfil público de uma barbearia.', 409);
+      }
     }
 
     const { data, error } = await admin
