@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -135,6 +137,7 @@ const canCancel = (status: Status) =>
   ['pending', 'confirmed', 'preparing', 'ready'].includes(status);
 
 export default function MarketplaceOrdersPage() {
+  const confirm = useDashboardConfirm();
   const { locale, t } = useLanguage();
   const formatLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const [orders, setOrders] = useState<Order[]>([]);
@@ -213,12 +216,15 @@ export default function MarketplaceOrdersPage() {
 
   async function changeStatus(order: Order, next: Status) {
     if (next === 'cancelled') {
-      const confirmed = window.confirm(
-        t('orderManagement.cancelOrderConfirm', {
+      const confirmed = await confirm({
+        title: 'Cancelar encomenda?',
+        description: t('orderManagement.cancelOrderConfirm', {
           reference: order.id.slice(0, 8),
           customer: order.customer_name,
         }),
-      );
+        confirmLabel: 'Cancelar encomenda',
+        destructive: true,
+      });
       if (!confirmed) return;
     }
 

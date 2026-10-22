@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -39,6 +41,7 @@ function formatAmount(amount: number, currency: string, locale: string) {
 }
 
 export function BillingHub() {
+  const confirm = useDashboardConfirm();
   const { t, locale } = useLanguage();
   const {
     subscription,
@@ -134,9 +137,12 @@ export function BillingHub() {
 
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
-    const confirmed = window.confirm(
-      t('billingHub.cancelConfirm'),
-    );
+    const confirmed = await confirm({
+      title: locale === 'en' ? 'Cancel subscription renewal?' : 'Cancelar renovação da subscrição?',
+      description: t('billingHub.cancelConfirm'),
+      confirmLabel: locale === 'en' ? 'Cancel renewal' : 'Cancelar renovação',
+      destructive: true,
+    });
     if (!confirmed) return;
     try {
       setCancelling(true);

@@ -70,7 +70,7 @@ export interface ClientsListCardProps {
   setNewClientData: Dispatch<
     SetStateAction<{ name_complete: string; num_phone: string; email: string }>
   >;
-  handleCreateClient: (event: FormEvent) => Promise<void> | void;
+  handleCreateClient: (event: FormEvent) => Promise<boolean> | boolean;
   setEditingClient: (client: Client | null) => void;
   handleDeleteClient: (clientId: string) => Promise<void> | void;
   loading: boolean;
@@ -92,7 +92,7 @@ export interface ServicesListCardProps {
       duration: string | number;
     }>
   >;
-  handleCreateService: (event: FormEvent) => Promise<void> | void;
+  handleCreateService: (event: FormEvent) => Promise<boolean> | boolean;
   setEditingService: (service: Service | null) => void;
   handleDeleteService: (serviceId: string) => Promise<void> | void;
   loading: boolean;

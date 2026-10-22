@@ -6,6 +6,7 @@ import { DashboardTopBar } from '@/app/dashboard/_components/DashboardTopBar';
 import { DashboardSidebar } from '@/app/dashboard/_components/DashboardSidebar';
 import { Spotlight } from '@/components/aceternity/spotlight';
 import { DashboardTabMotionEnhancer } from '@/components/dashboard/dashboard-tab-motion-enhancer';
+import { DashboardConfirmProvider } from '@/components/dashboard/dashboard-confirm-provider';
 import { DashboardPageTransition } from '@/components/dashboard/dashboard-page-transition';
 
 const dashboardSurfaceStyles = `
@@ -103,8 +104,10 @@ export default function DashboardContentLayout({
 }) {
   return (
     <BarbershopProvider>
-      <Spotlight className="opacity-80" />
-      <DashboardContent>{children}</DashboardContent>
+      <DashboardConfirmProvider>
+        <Spotlight className="opacity-80" />
+        <DashboardContent>{children}</DashboardContent>
+      </DashboardConfirmProvider>
     </BarbershopProvider>
   );
 }

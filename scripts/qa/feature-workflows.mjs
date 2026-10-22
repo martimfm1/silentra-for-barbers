@@ -5,6 +5,9 @@ import path from 'node:path';
 const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
 
 const dashboardPage = read('app/dashboard/page.tsx');
+const automationPage = read('app/dashboard/automations/page.tsx');
+const automationSidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
+const marketingWorkspace = read('app/dashboard/marketing/marketing-workspace.tsx');
 const stripePricesRoute = read('app/api/stripe/prices/route.ts');
 const billingSummaryRoute = read('app/api/stripe/billing-summary/route.ts');
 const subscriptionDriftMigration = read('supabase/migrations/20261022181644_restore_subscription_cancellation_requested_at.sql');
@@ -137,9 +140,25 @@ assert.ok(
 );
 assert.ok(
   dashboardPage.includes('Atividade por dia da semana') &&
-    dashboardPage.includes('!aspect-auto h-full min-h-[240px] min-w-0 w-full') &&
-    dashboardPage.includes('hasChartActivity'),
-  'Dashboard chart must have a responsive layout, weekday aggregation and an explicit empty state.',
+    dashboardPage.includes('role="img"') &&
+    dashboardPage.includes('grid h-full min-w-0 grid-cols-7') &&
+    dashboardPage.includes('hasChartActivity') &&
+    dashboardPage.includes('maxRevenue'),
+  'Dashboard overview must render visible responsive weekday bars with an empty state.',
+);
+assert.ok(
+  automationPage.includes('MarketingWorkspace initialView="automation"') &&
+    automationSidebar.includes("href: '/dashboard/automations'") &&
+    !automationSidebar.includes("label: 'Aniversários'") &&
+    !automationSidebar.includes("href: '/dashboard/mensagens/birthdays'"),
+  'Birthday automation must live inside the dedicated Automations navigation, not a separate birthday tab.',
+);
+assert.ok(
+  marketingWorkspace.includes('async function createBirthdayAutomation()') &&
+    marketingWorkspace.includes("triggerType: 'birthday'") &&
+    marketingWorkspace.includes('Adicionar automaticamente') &&
+    marketingWorkspace.includes('birthdayCampaign'),
+  'Automations must provide an idempotent one-click birthday automation setup.',
 );
 
-console.log('Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, chart and billing regression contracts passed.');
+console.log('Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.');

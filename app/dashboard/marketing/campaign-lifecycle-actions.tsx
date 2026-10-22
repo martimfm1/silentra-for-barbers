@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import { useEffect, useState } from 'react';
 import { Ban, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,6 +25,7 @@ function statusLabel(status: string) {
 }
 
 export function CampaignLifecycleActions() {
+  const confirm = useDashboardConfirm();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [busyId, setBusyId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,12 +60,13 @@ export function CampaignLifecycleActions() {
   }, []);
 
   async function cancel(campaign: Campaign) {
-    if (
-      !window.confirm(
-        `Cancelar o envio de “${campaign.name}”? Os destinatários ainda não enviados deixam de estar na fila.`,
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: 'Cancelar envio?',
+      description: `Cancelar o envio de “${campaign.name}”? Os destinatários ainda não enviados deixam de estar na fila.`,
+      confirmLabel: 'Cancelar envio',
+      destructive: true,
+    });
+    if (!confirmed) return;
     setBusyId(campaign.id);
     try {
       const response = await fetch(
@@ -84,7 +88,13 @@ export function CampaignLifecycleActions() {
   }
 
   async function remove(campaign: Campaign) {
-    if (!window.confirm(`Apagar “${campaign.name}” permanentemente?`)) return;
+    const confirmed = await confirm({
+      title: 'Apagar campanha?',
+      description: `“${campaign.name}” será apagada permanentemente. Esta ação não pode ser desfeita.`,
+      confirmLabel: 'Apagar campanha',
+      destructive: true,
+    });
+    if (!confirmed) return;
     setBusyId(campaign.id);
     try {
       const response = await fetch(

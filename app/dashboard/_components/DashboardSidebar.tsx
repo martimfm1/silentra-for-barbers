@@ -24,6 +24,7 @@ import {
   Globe2,
   ChevronDown,
   Wrench,
+  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -100,10 +101,10 @@ const communicationItems: SidebarItem[] = [
     feature: 'marketing_campaigns',
   },
   {
-    href: '/dashboard/mensagens/birthdays',
-    label: 'Aniversários',
-    icon: MessageCircle,
-    feature: 'messaging',
+    href: '/dashboard/automations',
+    label: 'Automações',
+    icon: Zap,
+    feature: 'marketing_campaigns',
   },
 ];
 
@@ -141,7 +142,7 @@ const englishLabels: Record<string, string> = {
   'Comunicação': 'Communication',
   'Mensagens': 'Messages',
   'Campanhas': 'Campaigns',
-  'Aniversários': 'Birthdays',
+  'Automações': 'Automations',
   'QR Code': 'QR code',
   'Relatórios': 'Reports',
   'Fidelização': 'Loyalty',

@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -82,6 +84,7 @@ const money = (value: number) =>
   );
 
 export default function POSPage() {
+  const confirm = useDashboardConfirm();
   const { hasFeature, loading: billingLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
   const searchParams = useSearchParams();
@@ -351,12 +354,13 @@ export default function POSPage() {
     mode: 'refund' | 'void',
   ) {
     const label = mode === 'refund' ? 'reembolsar' : 'anular';
-    if (
-      !window.confirm(
-        `Confirma ${label} a transação de ${money(transaction.total)}? O stock dos produtos será reposto automaticamente.`,
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: mode === 'refund' ? 'Confirmar reembolso?' : 'Confirmar anulação?',
+      description: `Confirma ${label} a transação de ${money(transaction.total)}? O stock dos produtos será reposto automaticamente.`,
+      confirmLabel: mode === 'refund' ? 'Reembolsar' : 'Anular transação',
+      destructive: true,
+    });
+    if (!confirmed) return;
     setReversing(transaction.id);
     try {
       const response = await fetch(

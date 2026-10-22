@@ -20,12 +20,12 @@ export function useClients(
     email: '',
   });
 
-  const handleCreateClient = async (e?: React.SyntheticEvent) => {
+  const handleCreateClient = async (e?: React.SyntheticEvent): Promise<boolean> => {
     e?.preventDefault();
     const formattedPhone = newClientData.num_phone.trim();
     if (!newClientData.name_complete.trim() || !formattedPhone) {
       toast.error('Por favor, introduz um nome e um telemóvel.');
-      return;
+      return false;
     }
     setLoading(true);
     try {
@@ -43,9 +43,11 @@ export function useClients(
       toast.success('Cliente adicionado com sucesso!');
       setNewClientData({ name_complete: '', num_phone: '', email: '' });
       await onRefreshData();
+      return true;
     } catch (error) {
       console.error('[Create Client Hook Error]:', error);
       toast.error(getErrorMessage(error));
+      return false;
     } finally {
       setLoading(false);
     }

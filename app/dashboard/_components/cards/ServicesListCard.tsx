@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import {
   AlertDialog,
@@ -60,24 +61,38 @@ export function ServicesListCard({
             </div>
           </div>
           <Button
-            onClick={() => setShowAddServiceForm(!showAddServiceForm)}
+            onClick={() => setShowAddServiceForm(true)}
             className="min-h-11 w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200 sm:w-auto"
           >
             <Plus className="mr-2 size-4" />
-            {showAddServiceForm ? 'Fechar' : 'Adicionar serviço'}
+            Adicionar serviço
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="p-5 sm:p-6">
-        {showAddServiceForm && (
-          <AddServiceForm
-            newServiceData={newServiceData}
-            setNewServiceData={setNewServiceData}
-            handleCreateService={handleCreateService}
-            loading={loading}
-          />
-        )}
+        <Dialog open={showAddServiceForm} onOpenChange={setShowAddServiceForm}>
+          <DialogContent className="border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Adicionar serviço</DialogTitle>
+              <DialogDescription>
+                Define o nome, o preço e a duração. Podes acrescentar mais serviços depois.
+              </DialogDescription>
+            </DialogHeader>
+            <AddServiceForm
+              newServiceData={newServiceData}
+              setNewServiceData={setNewServiceData}
+              handleCreateService={handleCreateService}
+              setShowAddServiceForm={setShowAddServiceForm}
+              loading={loading}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddServiceForm(false)} className="border-white/10 bg-transparent">
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {services.length === 0 ? (
           <EmptyState
@@ -111,6 +126,7 @@ interface AddServiceFormProps {
   newServiceData: ServicesListCardProps['newServiceData'];
   setNewServiceData: ServicesListCardProps['setNewServiceData'];
   handleCreateService: ServicesListCardProps['handleCreateService'];
+  setShowAddServiceForm: ServicesListCardProps['setShowAddServiceForm'];
   loading: boolean;
 }
 
@@ -118,12 +134,18 @@ function AddServiceForm({
   newServiceData,
   setNewServiceData,
   handleCreateService,
+  setShowAddServiceForm,
   loading,
 }: AddServiceFormProps) {
+  async function submit(event: React.FormEvent) {
+    const created = await handleCreateService(event);
+    if (created) setShowAddServiceForm(false);
+  }
+
   return (
     <form
-      onSubmit={handleCreateService}
-      className="mb-6 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-4 sm:p-5"
+      onSubmit={(event) => void submit(event)}
+      className="grid gap-4 py-2"
     >
       <div className="mb-4 flex items-start gap-3">
         <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" />
@@ -134,7 +156,7 @@ function AddServiceForm({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.5fr_1fr_1fr_auto] md:items-end">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <label
             htmlFor="new-service-name"
