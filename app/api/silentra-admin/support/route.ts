@@ -36,29 +36,39 @@ async function GET__unobserved(request: Request) {
     }
 
     const ticketSelection = 'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
-    const [pendingResult, activeResult] = await Promise.all([
+    const [pendingResult, activeResult, historyResult] = await Promise.all([
       admin
         .from('support_conversations')
         .select(ticketSelection)
         .eq('status', 'pending')
         .order('priority', { ascending: false })
         .order('created_at', { ascending: true })
-        .limit(250),
+        .limit(150),
       admin
         .from('support_conversations')
         .select(ticketSelection)
-        .neq('status', 'pending')
+        .in('status', ['open', 'waiting_customer'])
         .order('priority', { ascending: false })
         .order('last_message_at', { ascending: false, nullsFirst: false })
-        .limit(250),
+        .limit(150),
+      admin
+        .from('support_conversations')
+        .select(ticketSelection)
+        .in('status', ['closed', 'closed_unresolved'])
+        .order('updated_at', { ascending: false })
+        .limit(75),
     ]);
 
-    if (pendingResult.error || activeResult.error) {
+    if (pendingResult.error || activeResult.error || historyResult.error) {
       throw new Error('SUPPORT_ADMIN_CONVERSATIONS_LOOKUP_FAILED');
     }
 
-    // Keep pending tickets visible even when the active chat backlog is large.
-    const rows = [...(pendingResult.data ?? []), ...(activeResult.data ?? [])];
+    // Keep pending/active tickets visible while bounding closed history payloads.
+    const rows = [
+      ...(pendingResult.data ?? []),
+      ...(activeResult.data ?? []),
+      ...(historyResult.data ?? []),
+    ];
     if (conversationId && !rows.some((row) => row.id === conversationId)) {
       const extra = await admin
         .from('support_conversations')
@@ -82,12 +92,9 @@ async function GET__unobserved(request: Request) {
             shopIds.length
               ? admin.from('barbershops').select('id,name,slug').in('id', shopIds)
               : Promise.resolve({ data: [], error: null }),
-            admin
-              .from('support_messages')
-              .select('conversation_id,id', { count: 'exact' })
-              .in('conversation_id', conversationIds)
-              .eq('sender_type', 'customer')
-              .is('read_at', null),
+            admin.rpc('support_unread_counts', {
+              p_conversation_ids: conversationIds,
+            }),
             admin
               .from('barbershop_plan_assignments')
               .select('barbershop_id,plan,expires_at')
@@ -117,13 +124,15 @@ async function GET__unobserved(request: Request) {
 
     const userById = new Map((usersResult.data ?? []).map((item) => [item.id, item]));
     const shopById = new Map((shopsResult.data ?? []).map((item) => [item.id, item]));
-    const unreadByConversation = new Map<string, number>();
-    for (const message of unreadResult.data ?? []) {
-      unreadByConversation.set(
+    const unreadByConversation = new Map<string, number>(
+      ((unreadResult.data ?? []) as Array<{
+        conversation_id: string;
+        unread_count: number | string;
+      }>).map((message) => [
         message.conversation_id,
-        (unreadByConversation.get(message.conversation_id) ?? 0) + 1,
-      );
-    }
+        Number(message.unread_count) || 0,
+      ]),
+    );
     const assignmentByShop = new Map(
       (assignmentsResult.data ?? []).map((assignment) => [assignment.barbershop_id, assignment]),
     );
@@ -150,34 +159,30 @@ async function GET__unobserved(request: Request) {
       return 'free';
     };
 
-    const normalizedConversations = await Promise.all(
-      rows.map(async (row) => {
-        const customer = userById.get(row.customer_user_id);
-        let customerEmail = customer?.email ?? null;
-        if (!customerEmail) {
-          const result = await admin.auth.admin.getUserById(row.customer_user_id);
-          customerEmail = result.data.user?.email ?? null;
-        }
-        const shop = shopById.get(row.barbershop_id);
-        const effectivePlan = resolveEffectivePlan(row.barbershop_id);
-        return {
-          ...row,
-          plan: effectivePlan,
-          priority: supportPriority(effectivePlan),
-          unreadCount: unreadByConversation.get(row.id) ?? 0,
-          customer: {
-            id: row.customer_user_id,
-            name: customer?.name_complete || customerEmail || 'Membro Silentra',
-            email: customerEmail,
-          },
-          barbershop: {
-            id: row.barbershop_id,
-            name: shop?.name || 'Barbearia',
-            slug: shop?.slug ?? null,
-          },
-        };
-      }),
-    );
+    const normalizedConversations = rows.map((row) => {
+      const customer = userById.get(row.customer_user_id);
+      // Avoid one Supabase Auth network call per ticket during inbox polling.
+      // Auth lookup is performed only when actually sending a response.
+      const customerEmail = customer?.email ?? null;
+      const shop = shopById.get(row.barbershop_id);
+      const effectivePlan = resolveEffectivePlan(row.barbershop_id);
+      return {
+        ...row,
+        plan: effectivePlan,
+        priority: supportPriority(effectivePlan),
+        unreadCount: unreadByConversation.get(row.id) ?? 0,
+        customer: {
+          id: row.customer_user_id,
+          name: customer?.name_complete || customerEmail || 'Membro Silentra',
+          email: customerEmail,
+        },
+        barbershop: {
+          id: row.barbershop_id,
+          name: shop?.name || 'Barbearia',
+          slug: shop?.slug ?? null,
+        },
+      };
+    });
 
     let messages: Array<Record<string, unknown>> = [];
     if (conversationId) {
@@ -199,16 +204,9 @@ async function GET__unobserved(request: Request) {
         }
         messages = (messageResult.data ?? []).reverse();
       }
-      // Priority is resolved from current assignment/subscription rows, not
-      // the browser or potentially stale conversation metadata.
+      // GET remains read-only: plan/priority are recalculated for the response,
+      // while persistent sync happens only when a ticket changes.
       const effectivePlan = resolveEffectivePlan(selected.barbershop_id);
-
-      const { error: syncError } = await admin
-        .from('support_conversations')
-        .update({ plan: effectivePlan, priority: supportPriority(effectivePlan) })
-        .eq('id', conversationId);
-      if (syncError) throw new Error('SUPPORT_ADMIN_PLAN_SYNC_FAILED');
-
       const updated = normalizedConversations.find((row) => row.id === conversationId);
       if (updated) {
         updated.plan = effectivePlan;

@@ -133,11 +133,28 @@ export default function SupportInbox() {
   }, []);
 
   useEffect(() => {
-    void load();
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void load(selectedId, true);
-    }, 15000);
-    return () => window.clearInterval(interval);
+    let cancelled = false;
+    let timer: number | undefined;
+
+    // Avoid piling up inbox requests if Supabase/Auth has a slow response.
+    const scheduleNextPoll = () => {
+      timer = window.setTimeout(async () => {
+        if (cancelled) return;
+        if (document.visibilityState === 'visible') {
+          await load(selectedId, true);
+        }
+        if (!cancelled) scheduleNextPoll();
+      }, 30000);
+    };
+
+    void load(selectedId, false).finally(() => {
+      if (!cancelled) scheduleNextPoll();
+    });
+
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
   }, [load, selectedId]);
 
   useEffect(() => {
@@ -483,7 +500,7 @@ export default function SupportInbox() {
               </div>
               <h3 className="mt-4 text-base font-semibold text-zinc-200">Escolhe uma conversa</h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-500">Os membros Free, Pro e Enterprise contactam a equipa nesta caixa de entrada. A prioridade do plano é aplicada automaticamente.</p>
-              <div className="mt-4 flex items-center gap-2 text-xs text-zinc-600"><Clock3 className="size-3.5" /> Atualização automática a cada 15 segundos</div>
+              <div className="mt-4 flex items-center gap-2 text-xs text-zinc-600"><Clock3 className="size-3.5" /> Atualização automática a cada 30 segundos</div>
             </div>
           )}
         </div>

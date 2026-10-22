@@ -137,25 +137,33 @@ async function GET__unobserved() {
       );
     }
 
-    const { data: documents, error: documentsError } = await admin
-      .from('billing_documents')
-      .select(
-        [
-          'id',
-          'document_number',
-          'issued_at',
-          'plan',
-          'billing_interval',
-          'currency',
-          'total',
-          'user_id',
-          'barbershop_id',
-        ].join(', '),
-      )
-      .eq('barbershop_id', barbershopId)
-      .eq('user_id', user.id)
-      .order('issued_at', { ascending: false })
-      .limit(50);
+    const [documentsResult, billingAccountResult] = await Promise.all([
+      admin
+        .from('billing_documents')
+        .select(
+          [
+            'id',
+            'document_number',
+            'issued_at',
+            'plan',
+            'billing_interval',
+            'currency',
+            'total',
+            'user_id',
+            'barbershop_id',
+          ].join(', '),
+        )
+        .eq('barbershop_id', barbershopId)
+        .eq('user_id', user.id)
+        .order('issued_at', { ascending: false })
+        .limit(50),
+      admin
+        .from('barbershop_billing_accounts')
+        .select('stripe_customer_id')
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle(),
+    ]);
+    const { data: documents, error: documentsError } = documentsResult;
 
     if (documentsError) {
       console.error('[BILLING_HISTORY_MANUAL_DOCUMENTS_ERROR]', {
@@ -194,41 +202,36 @@ async function GET__unobserved() {
 
     // Resolve an already-stored Stripe customer only. Reading the history must
     // never create a new customer as a side effect.
-    let stripeCustomerId: string | null = null;
+    let stripeCustomerId: string | null =
+      billingAccountResult.error ? null : billingAccountResult.data?.stripe_customer_id ?? null;
     try {
-      const { data: billingAccount, error: billingAccountError } = await admin
-        .from('barbershop_billing_accounts')
-        .select('stripe_customer_id')
-        .eq('barbershop_id', barbershopId)
-        .maybeSingle();
-
-      if (billingAccountError) throw billingAccountError;
-      stripeCustomerId = billingAccount?.stripe_customer_id ?? null;
-
       if (!stripeCustomerId) {
-        const { data: subscription, error: subscriptionError } = await admin
-          .from('subscriptions')
-          .select('stripe_customer_id')
-          .eq('barbershop_id', barbershopId)
-          .not('stripe_customer_id', 'is', null)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // Legacy mappings are independent; resolve them in parallel rather than
+        // paying multiple database round-trips in series.
+        const [subscriptionResult, legacyCustomerResult] = await Promise.all([
+          admin
+            .from('subscriptions')
+            .select('stripe_customer_id')
+            .eq('barbershop_id', barbershopId)
+            .not('stripe_customer_id', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          admin
+            .from('customers')
+            .select('stripe_customer_id')
+            .eq('user_id', user.id)
+            .maybeSingle(),
+        ]);
 
-        if (subscriptionError) throw subscriptionError;
-        stripeCustomerId = subscription?.stripe_customer_id ?? null;
+        if (subscriptionResult.error) throw subscriptionResult.error;
+        if (legacyCustomerResult.error) throw legacyCustomerResult.error;
+        stripeCustomerId =
+          subscriptionResult.data?.stripe_customer_id ??
+          legacyCustomerResult.data?.stripe_customer_id ??
+          null;
       }
-
-      if (!stripeCustomerId) {
-        const { data: legacyCustomer, error: legacyCustomerError } = await admin
-          .from('customers')
-          .select('stripe_customer_id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (legacyCustomerError) throw legacyCustomerError;
-        stripeCustomerId = legacyCustomer?.stripe_customer_id ?? null;
-      }
+      if (billingAccountResult.error) throw billingAccountResult.error;
     } catch (error) {
       console.error('[BILLING_HISTORY_STRIPE_CUSTOMER_LOOKUP_ERROR]', {
         errorName: error instanceof Error ? error.name : 'UNKNOWN',
@@ -239,10 +242,13 @@ async function GET__unobserved() {
     if (stripeCustomerId) {
       try {
         const stripe = getStripeClient();
-        const { data: invoices } = await stripe.invoices.list({
-          customer: stripeCustomerId,
-          limit: 50,
-        });
+        const { data: invoices } = await stripe.invoices.list(
+          {
+            customer: stripeCustomerId,
+            limit: 50,
+          },
+          { timeout: 6000, maxNetworkRetries: 0 },
+        );
         const now = Date.now();
         stripeHistory = invoices
           .filter((invoice) => {

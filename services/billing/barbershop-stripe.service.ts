@@ -249,6 +249,7 @@ export class BarbershopStripeService {
   static async reconcileSubscription(
     barbershopId: string,
     subscription: SubscriptionRecord | null,
+    options?: { timeoutMs?: number },
   ): Promise<SubscriptionRecord | null> {
     if (subscription?.payment_method === 'MANUAL') {
       const expired =
@@ -319,9 +320,16 @@ export class BarbershopStripeService {
       return subscription;
 
     try {
-      const remote = await getStripeClient().subscriptions.retrieve(
-        subscription.stripe_subscription_id,
-      );
+      const stripe = getStripeClient();
+      const remote = options?.timeoutMs
+        ? await stripe.subscriptions.retrieve(
+            subscription.stripe_subscription_id,
+            {},
+            { timeout: options.timeoutMs, maxNetworkRetries: 0 },
+          )
+        : await stripe.subscriptions.retrieve(
+            subscription.stripe_subscription_id,
+          );
       const priceId =
         remote.items.data[0]?.price.id ?? subscription.stripe_price_id;
       const stripePlan = subscriptionPlan(remote);

@@ -146,7 +146,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('database', 'Base de dados Supabase', true, async () => {
         const { error } = await admin
           .from('barbershops')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -157,7 +157,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('telemetry', 'Registo de pedidos API', false, async () => {
         const { error } = await admin
           .from('platform_api_logs')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -168,7 +168,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('barbershops', 'Dados de barbearias', true, async () => {
         const { error } = await admin
           .from('barbershops')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -179,7 +179,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('users', 'Utilizadores e permissões', true, async () => {
         const { error } = await admin
           .from('users')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -190,7 +190,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('appointments', 'Marcações', true, async () => {
         const { error } = await admin
           .from('appointments')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -201,7 +201,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('subscriptions', 'Subscrições e planos', true, async () => {
         const { error } = await admin
           .from('subscriptions')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -212,7 +212,7 @@ async function GET_unobserved(_request: Request) {
       timedCheck('audit_logs', 'Auditoria administrativa', true, async () => {
         const { error } = await admin
           .from('audit_logs')
-          .select('id', { head: true, count: 'exact' });
+          .select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -250,29 +250,32 @@ async function GET_unobserved(_request: Request) {
       }),
     ]);
 
-    const logsResult = await admin
-      .from('platform_api_logs')
-      .select(
-        'id,request_id,route,method,status_code,duration_ms,level,error_code,environment,region,created_at',
-      )
-      .gte('created_at', windowStart)
-      .order('created_at', { ascending: false })
-      .limit(2000);
-    const totalResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart);
-    const errorsResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart)
-      .gte('status_code', 500);
-    const clientErrorsResult = await admin
-      .from('platform_api_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', windowStart)
-      .gte('status_code', 400)
-      .lt('status_code', 500);
+    const [logsResult, totalResult, errorsResult, clientErrorsResult] =
+      await Promise.all([
+        admin
+          .from('platform_api_logs')
+          .select(
+            'id,request_id,route,method,status_code,duration_ms,level,error_code,environment,region,created_at',
+          )
+          .gte('created_at', windowStart)
+          .order('created_at', { ascending: false })
+          .limit(2000),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart)
+          .gte('status_code', 500),
+        admin
+          .from('platform_api_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', windowStart)
+          .gte('status_code', 400)
+          .lt('status_code', 500),
+      ]);
     const telemetryAvailable =
       !logsResult.error &&
       !totalResult.error &&

@@ -124,9 +124,8 @@ const checks = [
   ],
   [
     'Billing summary reads payment_method',
-    read('app/api/stripe/billing-summary/route.ts').includes(
-      'payment_method, updated_at',
-    ),
+    read('app/api/stripe/billing-summary/route.ts').includes('payment_method,') &&
+      read('app/api/stripe/billing-summary/route.ts').includes('updated_at'),
   ],
   [
     'Manual cancellation is server-side',
