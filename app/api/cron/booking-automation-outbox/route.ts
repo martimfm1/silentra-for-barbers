@@ -162,3 +162,7 @@ export const GET = withApiObservability(
   '/api/cron/booking-automation-outbox',
   GET__unobserved,
 );
+export const POST = withApiObservability(
+  '/api/cron/booking-automation-outbox',
+  GET__unobserved,
+);
