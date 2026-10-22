@@ -139,7 +139,7 @@ assert.ok(
   dashboardPage.includes('Atividade por dia da semana') &&
     dashboardPage.includes('!aspect-auto h-full min-h-[240px] min-w-0 w-full') &&
     dashboardPage.includes('hasChartActivity'),
-  'Dashboard chart must have a responsive layout, a real 7-day range and an explicit empty state.',
+  'Dashboard chart must have a responsive layout, weekday aggregation and an explicit empty state.',
 );
 
 console.log('Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, chart and billing regression contracts passed.');
