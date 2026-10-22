@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -75,6 +77,7 @@ const money = (n: number) =>
   );
 
 export default function MarketplaceProductsPage() {
+  const confirm = useDashboardConfirm();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
   const [products, setProducts] = useState<Product[]>([]);
@@ -284,7 +287,13 @@ export default function MarketplaceProductsPage() {
   }
 
   async function archive(product: Product) {
-    if (!window.confirm(`Arquivar “${product.name}”?`)) return;
+    const confirmed = await confirm({
+      title: 'Arquivar produto?',
+      description: `“${product.name}” deixará de estar disponível para venda. Os registos anteriores serão mantidos.`,
+      confirmLabel: 'Arquivar produto',
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       const response = await fetch(
         `/api/marketplace/manage/products/${product.id}`,
