@@ -394,7 +394,8 @@ async function POST__unobserved(request: Request) {
         p_manual_phone: phone,
         p_manual_email: email,
         p_manual_birth_date: birthDate,
-        p_status: 'scheduled',
+        // Start as pending; the database promotes it to scheduled only when auto-confirm is enabled.
+        p_status: 'pending',
       },
     );
     if (createError || !appointment) {
@@ -449,23 +450,25 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
-    sendBookingConfirmationEmail({
-      to: email,
-      clientName: name,
-      serviceName: selectedService.name || 'Serviço',
-      date: bookingDate,
-      time: bookingTime,
-      durationMinutes,
-      appointmentId: appointment.id,
-      barbershopId,
-      barbershopName,
-      barbershopAddress,
-    }).catch((err) =>
-      console.error(
-        '[BACKGROUND_EMAIL_ERROR]',
-        err instanceof Error ? err.name : 'UNKNOWN',
-      ),
-    );
+    if (appointment.status === 'scheduled') {
+      void sendBookingConfirmationEmail({
+        to: email,
+        clientName: name,
+        serviceName: selectedService.name || 'Serviço',
+        date: bookingDate,
+        time: bookingTime,
+        durationMinutes,
+        appointmentId: appointment.id,
+        barbershopId,
+        barbershopName,
+        barbershopAddress,
+      }).catch((err) =>
+        console.error(
+          '[BACKGROUND_EMAIL_ERROR]',
+          err instanceof Error ? err.name : 'UNKNOWN',
+        ),
+      );
+    }
     void dispatchAppointmentAutomations('booking_created', {
       appointmentId: appointment.id,
       barbershopId,
@@ -477,7 +480,7 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Marcação confirmada com sucesso!',
+        message: appointment.status === 'scheduled'\n          ? 'Marcação confirmada com sucesso!'\n          : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
         booking: {
           id: appointment.id,
           barbershopId: appointment.barbershop_id,
