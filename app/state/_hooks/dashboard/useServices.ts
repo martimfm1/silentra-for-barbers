@@ -21,13 +21,13 @@ export function useServices(
   });
 
   const handleCreateService = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent): Promise<boolean> => {
       e.preventDefault();
       if (!barbershopId) return;
 
       if (!newServiceData.name.trim() || !newServiceData.price) {
         toast.error('Introduz o nome e o preço do serviço.');
-        return;
+        return false;
       }
 
       setLoading(true);
@@ -44,9 +44,11 @@ export function useServices(
         toast.success('Serviço criado com sucesso!');
         setNewServiceData({ name: '', price: '', duration: '30' });
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('❌ [Create Service Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
