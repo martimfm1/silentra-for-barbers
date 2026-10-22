@@ -13,7 +13,7 @@ O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às
 
 A execução regista contagens de campanhas, destinatários enviados/falhados e duração nos logs `[MARKETING_CRON]`. O endpoint deve permanecer protegido por `CRON_SECRET`.
 
-A configuração da mensagem é gerida em `/api/messages/birthdays`; este é um endpoint de configuração, não um cron. Não existe uma rota de execução `/api/cron/birthdays`: o envio é feito pelo worker de marketing. A migration `20261022161000_reconcile_legacy_birthday_campaigns.sql` recupera configurações antigas ativas que ainda não tenham uma campanha no sistema de Marketing, sem substituir campanhas existentes.
+A configuração da mensagem é gerida em `/api/messages/birthdays`; este é um endpoint de configuração, não um cron. Não existe uma rota de execução `/api/cron/birthdays`: o envio é feito pelo worker de marketing. A migration `20261022161843_reconcile_legacy_birthday_campaigns.sql` recupera configurações antigas ativas que ainda não tenham uma campanha no sistema de Marketing, sem substituir campanhas existentes.
 
 ## Conclusão automática de marcações
 
