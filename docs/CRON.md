@@ -41,7 +41,7 @@ supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql
 
 O trigger `appointments_enqueue_booking_completed_automation` cria um evento idempotente em `booking_automation_outbox` sempre que uma marcação muda para `completed`. O worker `/api/cron/booking-automation-outbox` reclama lotes com `FOR UPDATE SKIP LOCKED`, tenta novamente com atraso exponencial e recupera leases abandonadas. O endpoint aceita `BOOKING_OUTBOX_CRON_SECRET` (preferencial) ou `CRON_SECRET`.
 
-O agendamento de alta frequência deve ser feito pelo Supabase Cron através de `pg_net`, com URL e token guardados no Vault; não adicionar um cron horário ao Vercel Hobby.
+O agendamento de alta frequência deve ser feito pelo Supabase Cron através de `pg_net`, com URL e segredo HMAC guardados no Vault; não adicionar um cron horário ao Vercel Hobby. O pedido HTTP tem timeout de 15 segundos para tolerar arranques a frio do Vercel.
 
 ## Vercel
 
