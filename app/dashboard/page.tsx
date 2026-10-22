@@ -24,14 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
   Users,
   Scissors,
@@ -131,10 +124,8 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const chartConfig = {
-    revenue: { label: t('dashboard.revenueLabel'), color: '#34d399' },
-    bookings: { label: t('dashboard.appointmentsLabel'), color: '#60a5fa' },
-  } satisfies ChartConfig;
+  const maxRevenue = Math.max(1, ...dynamicChartData.map((point) => point.revenue));
+  const maxBookings = Math.max(1, ...dynamicChartData.map((point) => point.bookings));
 
   const dynamicChartData = useMemo(() => {
     const days = [
@@ -539,7 +530,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent className="h-[280px] min-w-0 w-full pt-4">
+              <CardContent className="h-[310px] min-w-0 w-full pt-4">
                 {!loadingInitial && !hasChartActivity ? (
                   <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
                     <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
@@ -551,52 +542,52 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 ) : (
-                <ChartContainer config={chartConfig} className="!aspect-auto h-full min-h-[240px] min-w-0 w-full">
-                  <BarChart
-                    data={dynamicChartData}
-                    margin={{ top: 10, right: 10, left: -12, bottom: 0 }}
-                    barGap={8}
-                    barCategoryGap="24%"
+                  <div
+                    className="flex h-full min-h-[250px] min-w-0 flex-col"
+                    role="img"
+                    aria-label={locale === 'en' ? 'Bar chart comparing completed revenue and bookings by weekday' : 'Gráfico de barras que compara a receita concluída e as marcações por dia da semana'}
                   >
-                    <CartesianGrid
-                      vertical={false}
-                      strokeDasharray="4 4"
-                      stroke="rgba(255,255,255,0.07)"
-                    />
-                    <XAxis
-                      dataKey="day"
-                      tickLine={false}
-                      axisLine={false}
-                      tick={{ fill: '#a1a1aa', fontSize: 12 }}
-                      dy={8}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      width={36}
-                      tick={{ fill: '#a1a1aa', fontSize: 12 }}
-                      allowDecimals={false}
-                    />
-                    <ChartTooltip
-                      cursor={{ fill: 'rgba(255,255,255,0.06)' }}
-                      content={<ChartTooltipContent />}
-                    />
-                    <Bar
-                      dataKey="revenue"
-                      name="Receita"
-                      fill="#34d399"
-                      radius={[6, 6, 2, 2]}
-                      maxBarSize={22}
-                    />
-                    <Bar
-                      dataKey="bookings"
-                      name="Marcações"
-                      fill="#60a5fa"
-                      radius={[6, 6, 2, 2]}
-                      maxBarSize={22}
-                    />
-                  </BarChart>
-                </ChartContainer>
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+                      <span>{locale === 'en' ? 'Relative scale for each metric' : 'Escala relativa para cada indicador'}</span>
+                      <span>{locale === 'en' ? 'Hover or tap a bar for details' : 'Passa o cursor ou toca numa barra para ver detalhes'}</span>
+                    </div>
+                    <div className="relative min-h-0 flex-1">
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex flex-col justify-between">
+                        {[0, 1, 2, 3].map((line) => (
+                          <div key={line} className="border-t border-dashed border-white/[0.08]" />
+                        ))}
+                      </div>
+                      <div className="relative grid h-full min-w-0 grid-cols-7 gap-1 sm:gap-3">
+                        {dynamicChartData.map((point) => {
+                          const revenueHeight = point.revenue > 0 ? Math.max(8, (point.revenue / maxRevenue) * 100) : 2;
+                          const bookingsHeight = point.bookings > 0 ? Math.max(8, (point.bookings / maxBookings) * 100) : 2;
+                          return (
+                            <div key={point.day} className="flex min-w-0 flex-col items-center justify-end gap-2">
+                              <div className="flex h-full w-full items-end justify-center gap-1.5">
+                                <div
+                                  title={locale === 'en' ? `${point.day}: ${point.revenue.toFixed(2)} EUR in completed service revenue` : `${point.day}: ${point.revenue.toFixed(2).replace('.', ',')} € de receita de serviços concluídos`}
+                                  aria-label={locale === 'en' ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros` : `${point.day}, receita ${point.revenue.toFixed(2)} euros`}
+                                  className="w-1/2 max-w-7 rounded-t-md bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
+                                  style={{ height: `${revenueHeight}%`, minHeight: point.revenue > 0 ? '8px' : '2px' }}
+                                />
+                                <div
+                                  title={locale === 'en' ? `${point.day}: ${point.bookings} bookings` : `${point.day}: ${point.bookings} marcações`}
+                                  aria-label={locale === 'en' ? `${point.day}, ${point.bookings} bookings` : `${point.day}, ${point.bookings} marcações`}
+                                  className="w-1/2 max-w-7 rounded-t-md bg-sky-400 shadow-[0_0_18px_rgba(96,165,250,0.15)] transition-[height,filter] hover:brightness-125"
+                                  style={{ height: `${bookingsHeight}%`, minHeight: point.bookings > 0 ? '8px' : '2px' }}
+                                />
+                              </div>
+                              <span className="w-full truncate text-center text-[10px] text-zinc-400 sm:text-xs">{point.day}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-zinc-500 sm:text-xs">
+                      <span>{locale === 'en' ? `Peak revenue: ${maxRevenue.toFixed(2)} €` : `Receita máxima: ${maxRevenue.toFixed(2).replace('.', ',')} €`}</span>
+                      <span className="text-right">{locale === 'en' ? `Peak bookings: ${maxBookings}` : `Marcações máximas: ${maxBookings}`}</span>
+                    </div>
+                  </div>
                 )}
               </CardContent>
               <div
