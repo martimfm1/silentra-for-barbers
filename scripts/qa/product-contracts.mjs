@@ -517,6 +517,23 @@ const checks = [
       source.includes('"schedule": "10 0 * * *"'),
   },
   {
+    name: 'Published custom websites are included in the sitemap',
+    file: 'app/sitemap.ts',
+    test: (source) =>
+      source.includes("from('custom_website_requests')") &&
+      source.includes(".eq('status', 'published')") &&
+      source.includes("customWebsiteRoutes.push") &&
+      source.includes("/site/"),
+  },
+  {
+    name: 'Custom website publication prevents collisions with existing public profile slugs',
+    file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+    test: (source) =>
+      source.includes("from('shops')") &&
+      source.includes(".eq('slug', nextSlug)") &&
+      source.includes('Esse caminho já é utilizado pelo perfil público'),
+  },
+  {
     name: 'Custom website publishing sets and clears publication timestamp',
     file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
     test: (source) =>
