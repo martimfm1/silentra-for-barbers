@@ -4,6 +4,15 @@
 
 Tarefas frequentes que alteram dados da aplicação devem correr no Supabase/Postgres sempre que a operação puder ser executada por uma função SQL. Isto evita dependência das limitações de frequência do Vercel Cron e reduz latência de rede.
 
+## Campanhas de marketing e aniversários
+
+O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às 00:10 UTC. Requer `CRON_SECRET` configurado no ambiente de produção e processa:
+- campanhas de aniversário e respetivos vouchers;
+- campanhas de marketing agendadas;
+- destinatários em fila e novas tentativas de entrega.
+
+A execução regista contagens de campanhas, destinatários enviados/falhados e duração nos logs `[MARKETING_CRON]`. O endpoint deve permanecer protegido por `CRON_SECRET`.
+
 ## Conclusão automática de marcações
 
 A função canónica é:

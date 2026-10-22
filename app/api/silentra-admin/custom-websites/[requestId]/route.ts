@@ -96,7 +96,7 @@ async function PATCH__unobserved(
 
     const { data: current, error: currentError } = await admin
       .from('custom_website_requests')
-      .select('id, public_slug, site_title, site_description, status')
+      .select('id, public_slug, site_title, site_description, status, published_at')
       .eq('id', requestId)
       .maybeSingle();
     if (currentError) {
@@ -106,6 +106,11 @@ async function PATCH__unobserved(
     if (!current) return fail('Pedido de site não encontrado.', 404);
 
     const nextStatus = (update.status ?? current.status) as string;
+    if (nextStatus === 'published' && current.status !== 'published') {
+      update.published_at = new Date().toISOString();
+    } else if (nextStatus !== 'published' && current.status === 'published') {
+      update.published_at = null;
+    }
     const nextSlug = ('public_slug' in update ? update.public_slug : current.public_slug) as string | null;
     const nextTitle = ('site_title' in update ? update.site_title : current.site_title) as string | null;
     const nextDescription = ('site_description' in update ? update.site_description : current.site_description) as string | null;
@@ -125,6 +130,22 @@ async function PATCH__unobserved(
         return fail('Não foi possível validar o caminho público.', 503);
       }
       if (collision) return fail('Esse caminho público já está atribuído a outro site.', 409);
+
+      const { data: profileCollision, error: profileCollisionError } = await admin
+        .from('shops')
+        .select('id')
+        .eq('slug', nextSlug)
+        .limit(1)
+        .maybeSingle();
+      if (profileCollisionError) {
+        console.error('[ADMIN_CUSTOM_WEBSITE_PROFILE_SLUG_CHECK_FAILED]', {
+          code: profileCollisionError.code,
+        });
+        return fail('Não foi possível validar o caminho público.', 503);
+      }
+      if (profileCollision) {
+        return fail('Esse caminho já é utilizado pelo perfil público de uma barbearia.', 409);
+      }
     }
 
     const { data, error } = await admin

@@ -492,6 +492,72 @@ const checks = [
       source.includes('submit_public_review'),
   },
   {
+    name: 'Public booking creation respects automatic confirmation instead of confirming every booking',
+    file: 'app/api/bookings/route.ts',
+    test: (source) =>
+      source.includes("p_status: 'pending'") &&
+      source.includes("if (appointment.status === 'scheduled')") &&
+      source.includes('sendBrevoEmail({') &&
+      source.includes('A marcação ainda não está confirmada.') &&
+      source.includes("Aguarda a confirmação da barbearia."),
+  },
+  {
+    name: 'Marketing cron schedules birthday campaigns and queued delivery',
+    file: 'app/api/cron/marketing/route.ts',
+    test: (source) =>
+      source.includes('processBirthdayCampaignDelivery') &&
+      source.includes('processQueuedCampaignRecipients') &&
+      source.includes('processScheduledCampaigns'),
+  },
+  {
+    name: 'Marketing worker is scheduled in Vercel Cron',
+    file: 'vercel.json',
+    test: (source) =>
+      source.includes('"/api/cron/marketing"') &&
+      source.includes('"schedule": "10 0 * * *"'),
+  },
+  {
+    name: 'Published custom websites are included in the sitemap',
+    file: 'app/sitemap.ts',
+    test: (source) =>
+      source.includes("from('custom_website_requests')") &&
+      source.includes(".eq('status', 'published')") &&
+      source.includes("customWebsiteRoutes.push") &&
+      source.includes("/site/"),
+  },
+  {
+    name: 'Custom website publication prevents collisions with existing public profile slugs',
+    file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+    test: (source) =>
+      source.includes("from('shops')") &&
+      source.includes(".eq('slug', nextSlug)") &&
+      source.includes('Esse caminho já é utilizado pelo perfil público'),
+  },
+  {
+    name: 'Custom website publishing sets and clears publication timestamp',
+    file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+    test: (source) =>
+      source.includes("update.published_at = new Date().toISOString()") &&
+      source.includes('update.published_at = null') &&
+      source.includes("nextStatus === 'published'"),
+  },
+  {
+    name: 'Automatic booking completion does not update a non-existent appointments.updated_at column',
+    file: 'supabase/migrations/20261022144928_fix_automatic_booking_completion_updated_at.sql',
+    test: (source) =>
+      source.includes("set status = 'completed'") &&
+      source.includes('public.process_automatic_booking_completion()') &&
+      !source.includes('updated_at = now()'),
+  },
+  {
+    name: 'Automatic booking completion has a ten-minute Supabase Cron job',
+    file: 'supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql',
+    test: (source) =>
+      source.includes("'silentra-booking-completion'") &&
+      source.includes("'*/10 * * * *'") &&
+      source.includes('public.process_automatic_booking_completion()'),
+  },
+  {
     name: 'Development origins are not enabled in production',
     file: 'next.config.ts',
     test: (source) =>

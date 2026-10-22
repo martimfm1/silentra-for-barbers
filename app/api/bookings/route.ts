@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
+import { sendBrevoEmail } from '@/lib/email/brevo';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import {
@@ -394,7 +395,8 @@ async function POST__unobserved(request: Request) {
         p_manual_phone: phone,
         p_manual_email: email,
         p_manual_birth_date: birthDate,
-        p_status: 'scheduled',
+        // Start as pending; the database promotes it to scheduled only when auto-confirm is enabled.
+        p_status: 'pending',
       },
     );
     if (createError || !appointment) {
@@ -449,23 +451,46 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
-    sendBookingConfirmationEmail({
-      to: email,
-      clientName: name,
-      serviceName: selectedService.name || 'Serviço',
-      date: bookingDate,
-      time: bookingTime,
-      durationMinutes,
-      appointmentId: appointment.id,
-      barbershopId,
-      barbershopName,
-      barbershopAddress,
-    }).catch((err) =>
-      console.error(
-        '[BACKGROUND_EMAIL_ERROR]',
-        err instanceof Error ? err.name : 'UNKNOWN',
-      ),
-    );
+    if (appointment.status === 'scheduled') {
+      void sendBookingConfirmationEmail({
+        to: email,
+        clientName: name,
+        serviceName: selectedService.name || 'Serviço',
+        date: bookingDate,
+        time: bookingTime,
+        durationMinutes,
+        appointmentId: appointment.id,
+        barbershopId,
+        barbershopName,
+        barbershopAddress,
+      }).catch((err) =>
+        console.error(
+          '[BACKGROUND_EMAIL_ERROR]',
+          err instanceof Error ? err.name : 'UNKNOWN',
+        ),
+      );
+    } else {
+      const escapeEmailHtml = (value: string) =>
+        value.replace(/[&<>"']/g, (character) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[character] ?? character);
+      void sendBrevoEmail({
+        to: email,
+        toName: name,
+        senderName: barbershopName,
+        subject: `Pedido de marcação recebido — ${barbershopName}`,
+        htmlContent: `<!doctype html><html lang="pt"><body style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b"><h1>Recebemos o teu pedido de marcação</h1><p>Olá ${escapeEmailHtml(name)},</p><p>Recebemos o teu pedido para <strong>${escapeEmailHtml(selectedService.name || 'Serviço')}</strong> no dia <strong>${escapeEmailHtml(bookingDate)}</strong> às <strong>${escapeEmailHtml(bookingTime)}</strong>.</p><p>A marcação ainda não está confirmada. A barbearia irá analisar o pedido e receberás a confirmação quando for aceite.</p><p>Obrigado,<br>${escapeEmailHtml(barbershopName)}</p></body></html>`,
+      }).catch((err) =>
+        console.error(
+          '[BACKGROUND_BOOKING_REQUEST_EMAIL_ERROR]',
+          err instanceof Error ? err.name : 'UNKNOWN',
+        ),
+      );
+    }
     void dispatchAppointmentAutomations('booking_created', {
       appointmentId: appointment.id,
       barbershopId,
@@ -477,7 +502,9 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Marcação confirmada com sucesso!',
+        message: appointment.status === 'scheduled'
+          ? 'Marcação confirmada com sucesso!'
+          : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
         booking: {
           id: appointment.id,
           barbershopId: appointment.barbershop_id,

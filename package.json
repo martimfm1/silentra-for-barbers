@@ -18,7 +18,7 @@
     "qa:i18n": "node scripts/qa/i18n-contracts.mjs",
     "qa:performance": "node scripts/qa/performance-audit.mjs",
     "qa:product": "node scripts/qa/product-contracts.mjs",
-    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:i18n && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo",
+    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:i18n && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo && pnpm qa:feature-workflows",
     "translate": "tsx scripts/translate.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -27,7 +27,8 @@
     "qa:enterprise-landing-pages": "node scripts/qa/enterprise-landing-pages.mjs",
     "qa:seo": "node scripts/qa/seo-foundation.mjs",
     "qa:support": "node scripts/qa/support-chat.mjs",
-    "qa:ux": "node scripts/qa/ui-ux-audit.mjs"
+    "qa:ux": "node scripts/qa/ui-ux-audit.mjs",
+    "qa:feature-workflows": "node scripts/qa/feature-workflows.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",
