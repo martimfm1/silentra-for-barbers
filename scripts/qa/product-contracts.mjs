@@ -492,6 +492,45 @@ const checks = [
       source.includes('submit_public_review'),
   },
   {
+    name: 'Public booking creation respects automatic confirmation instead of confirming every booking',
+    file: 'app/api/bookings/route.ts',
+    test: (source) =>
+      source.includes("p_status: 'pending'") &&
+      source.includes("if (appointment.status === 'scheduled')") &&
+      source.includes("Aguarda a confirmação da barbearia."),
+  },
+  {
+    name: 'Marketing cron schedules birthday campaigns and queued delivery',
+    file: 'app/api/cron/marketing/route.ts',
+    test: (source) =>
+      source.includes('processBirthdayCampaignDelivery') &&
+      source.includes('processQueuedCampaignRecipients') &&
+      source.includes('processScheduledCampaigns'),
+  },
+  {
+    name: 'Marketing worker is scheduled in Vercel Cron',
+    file: 'vercel.json',
+    test: (source) =>
+      source.includes('"/api/cron/marketing"') &&
+      source.includes('"schedule": "10 0 * * *"'),
+  },
+  {
+    name: 'Custom website publishing sets and clears publication timestamp',
+    file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+    test: (source) =>
+      source.includes("update.published_at = new Date().toISOString()") &&
+      source.includes('update.published_at = null') &&
+      source.includes("nextStatus === 'published'"),
+  },
+  {
+    name: 'Automatic booking completion has a ten-minute Supabase Cron job',
+    file: 'supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql',
+    test: (source) =>
+      source.includes("'silentra-booking-completion'") &&
+      source.includes("'*/10 * * * *'") &&
+      source.includes('public.process_automatic_booking_completion()'),
+  },
+  {
     name: 'Development origins are not enabled in production',
     file: 'next.config.ts',
     test: (source) =>
