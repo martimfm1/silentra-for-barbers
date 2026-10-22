@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type LoyaltySettings = {
   enabled: boolean;
@@ -483,8 +484,16 @@ export default function LoyaltyPage() {
               Nova recompensa
             </Button>
           </div>
-          {creating && (
-            <Card className="mb-4">
+          <Dialog
+            open={creating}
+            onOpenChange={(open) => {
+              setCreating(open);
+              if (!open) setEditing(null);
+            }}
+          >
+            <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
+              {creating && (
+            <Card className="mb-0 border-white/10 bg-white/[0.02]">
               <CardHeader>
                 <CardTitle>
                   {editing ? 'Editar recompensa' : 'Nova recompensa'}
@@ -593,7 +602,9 @@ export default function LoyaltyPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
+              )}
+            </DialogContent>
+          </Dialog>
           {loading && rewards.length === 0 ? (
             <div
               className="flex h-40 items-center justify-center text-muted-foreground"
