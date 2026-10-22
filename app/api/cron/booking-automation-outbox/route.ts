@@ -1,0 +1,168 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { withApiObservability } from '@/lib/observability/api';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
+import { NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+const BATCH_SIZE = 100;
+const MAX_ATTEMPTS = 10;
+
+function authorized(request: Request) {
+  const secret = (process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET)?.trim();
+  if (!secret) return false;
+
+  // Bearer auth remains available for controlled manual invocation. Supabase
+  // Cron uses HMAC so the shared secret is never placed in pg_net's HTTP queue.
+  if (
+    request.headers.get('authorization') === `Bearer ${secret}` ||
+    request.headers.get('x-cron-secret') === secret
+  ) return true;
+
+  const timestamp = request.headers.get('x-booking-timestamp') ?? '';
+  const signature = request.headers.get('x-booking-signature') ?? '';
+  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) return false;
+  const seconds = Number(timestamp);
+  if (!Number.isSafeInteger(seconds) || Math.abs(Date.now() / 1000 - seconds) > 300) return false;
+
+  const expected = createHmac('sha256', secret)
+    .update(`${timestamp}:booking-outbox`)
+    .digest();
+  const supplied = Buffer.from(signature, 'hex');
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+}
+
+async function GET__unobserved(request: Request) {
+  if (!authorized(request)) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const startedAt = Date.now();
+  const admin = createAdminClient();
+  const requestId = crypto.randomUUID();
+
+  try {
+    const recovery = await admin.rpc('recover_stale_booking_automation_events');
+    if (recovery.error) throw recovery.error;
+
+    const { data: events, error } = await admin.rpc(
+      'claim_booking_automation_events',
+      { p_batch_size: BATCH_SIZE },
+    );
+    if (error) throw error;
+
+    let completed = 0;
+    let failed = 0;
+    for (const event of events ?? []) {
+      try {
+        const { data: appointment, error: appointmentError } = await admin
+          .from('appointments')
+          .select('id,barbershop_id,client_id,status')
+          .eq('id', event.appointment_id)
+          .eq('barbershop_id', event.barbershop_id)
+          .maybeSingle();
+
+        if (appointmentError) throw appointmentError;
+        // A booking could have been changed after the event was queued. Only
+        // dispatch a completion event while its current state is still completed.
+        if (!appointment || appointment.status !== 'completed') {
+          const { error: skipError } = await admin
+            .from('booking_automation_outbox')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              last_error: null,
+              locked_at: null,
+            })
+            .eq('id', event.id)
+            .eq('status', 'processing');
+          if (skipError) throw skipError;
+          completed += 1;
+          continue;
+        }
+
+        const dispatched = await dispatchAppointmentAutomations('booking_completed', {
+          appointmentId: appointment.id,
+          barbershopId: appointment.barbershop_id,
+          clientId: appointment.client_id,
+        });
+        if (!dispatched) throw new Error('One or more booking automations failed');
+
+        const { error: completeError } = await admin
+          .from('booking_automation_outbox')
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_error: null,
+            locked_at: null,
+          })
+          .eq('id', event.id)
+          .eq('status', 'processing');
+        if (completeError) throw completeError;
+        completed += 1;
+      } catch (error) {
+        failed += 1;
+        const attempts = Number(event.attempts ?? 1);
+        const exhausted = attempts >= MAX_ATTEMPTS;
+        const delayMinutes = Math.min(6 * 60, 2 ** Math.min(attempts, 8));
+        const message =
+          error instanceof Error ? error.message.slice(0, 500) : 'Unknown worker error';
+        const { error: updateError } = await admin
+          .from('booking_automation_outbox')
+          .update({
+            status: exhausted ? 'failed' : 'pending',
+            available_at: new Date(Date.now() + delayMinutes * 60_000).toISOString(),
+            last_error: message,
+            locked_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', event.id)
+          .eq('status', 'processing');
+        if (updateError) {
+          console.error('[BOOKING_AUTOMATION_OUTBOX_UPDATE_FAILED]', {
+            requestId,
+            eventId: event.id,
+            code: updateError.code,
+          });
+        }
+      }
+    }
+
+    const result = {
+      ok: failed === 0,
+      requestId,
+      claimed: events?.length ?? 0,
+      completed,
+      failed,
+      recoveredLeases: Number(recovery.data ?? 0),
+      durationMs: Date.now() - startedAt,
+    };
+    console.info('[BOOKING_AUTOMATION_OUTBOX]', result);
+    return NextResponse.json(result, {
+      status: failed === 0 ? 200 : 207,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  } catch (error) {
+    console.error('[BOOKING_AUTOMATION_OUTBOX_FAILED]', {
+      requestId,
+      error: error instanceof Error ? error.message : 'UNKNOWN',
+    });
+    return NextResponse.json(
+      { ok: false, requestId, error: 'Booking automation worker failed' },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+}
+
+export const GET = withApiObservability(
+  '/api/cron/booking-automation-outbox',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/cron/booking-automation-outbox',
+  GET__unobserved,
+);

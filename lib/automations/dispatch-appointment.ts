@@ -42,7 +42,7 @@ function html(value: string) {
 export async function dispatchAppointmentAutomations(
   trigger: Trigger,
   event: AppointmentEvent,
-): Promise<void> {
+): Promise<boolean> {
   try {
     const admin = createAdminClient();
     const [{ data: rules, error: rulesError }, { data: shop }] =
@@ -62,7 +62,7 @@ export async function dispatchAppointmentAutomations(
     if (rulesError) throw rulesError;
 
     let email = event.manualEmail?.trim().toLowerCase() ?? '';
-    let name = event.manualName?.trim() ?? 'Cliente';
+    let name = event.manualName?.trim() ?? '';
     let clientId = event.clientId ?? null;
 
     if (clientId) {
@@ -77,12 +77,18 @@ export async function dispatchAppointmentAutomations(
     } else {
       const { data: appointment } = await admin
         .from('appointments')
-        .select('client_id')
+        .select('client_id,manual_email,manual_name')
         .eq('id', event.appointmentId)
         .eq('barbershop_id', event.barbershopId)
         .maybeSingle();
       clientId = appointment?.client_id ?? null;
+      email = email || appointment?.manual_email?.trim().toLowerCase() || '';
+      name = name || appointment?.manual_name?.trim() || 'Cliente';
     }
+
+    let hadFailure = false;
+
+    name = name || 'Cliente';
 
     for (const rule of rules ?? []) {
       const action = Array.isArray(rule.actions)
@@ -92,27 +98,50 @@ export async function dispatchAppointmentAutomations(
         : null;
       if (!action || typeof action.body !== 'string' || !email) continue;
 
-      const { data: existing } = await admin
+      const { data: existing, error: existingError } = await admin
         .from('automation_runs')
         .select('id,status')
         .eq('rule_id', rule.id)
         .eq('entity_id', event.appointmentId)
         .limit(1)
         .maybeSingle();
-      if (existing) continue;
+      if (existingError) {
+        hadFailure = true;
+        continue;
+      }
+      if (existing?.status === 'completed' || existing?.status === 'running') {
+        continue;
+      }
 
-      const { data: run, error: runError } = await admin
-        .from('automation_runs')
-        .insert({
-          rule_id: rule.id,
-          barbershop_id: event.barbershopId,
-          entity_id: event.appointmentId,
-          status: 'running',
-          started_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single();
-      if (runError || !run) continue;
+      const startedAt = new Date().toISOString();
+      const runResult = existing
+        ? await admin
+            .from('automation_runs')
+            .update({
+              status: 'running',
+              started_at: startedAt,
+              completed_at: null,
+              error_message: null,
+            })
+            .eq('id', existing.id)
+            .select('id')
+            .single()
+        : await admin
+            .from('automation_runs')
+            .insert({
+              rule_id: rule.id,
+              barbershop_id: event.barbershopId,
+              entity_id: event.appointmentId,
+              status: 'running',
+              started_at: startedAt,
+            })
+            .select('id')
+            .single();
+      const run = runResult.data;
+      if (runResult.error || !run) {
+        hadFailure = true;
+        continue;
+      }
 
       const variables = {
         nome: name || 'Cliente',
@@ -129,7 +158,7 @@ export async function dispatchAppointmentAutomations(
         subject,
         htmlContent: `<div style="font-family:Arial,sans-serif;line-height:1.6">${html(body)}</div>`,
       });
-      await admin
+      const { error: runUpdateError } = await admin
         .from('automation_runs')
         .update({
           status: result.success ? 'completed' : 'failed',
@@ -137,6 +166,7 @@ export async function dispatchAppointmentAutomations(
           completed_at: new Date().toISOString(),
         })
         .eq('id', run.id);
+      if (!result.success || runUpdateError) hadFailure = true;
     }
 
     await dispatchMarketingEvent({
@@ -144,11 +174,13 @@ export async function dispatchAppointmentAutomations(
       eventName: trigger,
       clientId,
     });
+    return !hadFailure;
   } catch (error) {
     console.error('[AUTOMATION_APPOINTMENT_DISPATCH]', {
       trigger,
       appointmentId: event.appointmentId,
       error,
     });
+    return false;
   }
 }
