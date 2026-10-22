@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -124,6 +126,7 @@ const emptyProduct = {
 };
 
 export default function POSStorePage() {
+  const confirm = useDashboardConfirm();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
   const [tab, setTab] = useState<'products' | 'orders'>('products');
@@ -264,12 +267,13 @@ export default function POSStorePage() {
   }
 
   async function archiveProduct(item: Product) {
-    if (
-      !window.confirm(
-        `Arquivar “${item.name}”? O produto deixa de aparecer na loja.`,
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: 'Arquivar produto?',
+      description: `“${item.name}” deixará de aparecer na loja. O histórico da encomenda será preservado.`,
+      confirmLabel: 'Arquivar produto',
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       const response = await fetch(
         `/api/marketplace/manage/products/${item.id}`,
@@ -323,8 +327,13 @@ export default function POSStorePage() {
       ['completed', 'delivered', 'shipped'].includes(order.status)
     )
       return;
-    if (!window.confirm(`Cancelar a encomenda de ${order.customer_name}?`))
-      return;
+    const confirmed = await confirm({
+      title: 'Cancelar encomenda?',
+      description: `A encomenda de ${order.customer_name} será marcada como cancelada. Esta ação deve ser usada apenas quando a encomenda não vai avançar.`,
+      confirmLabel: 'Cancelar encomenda',
+      destructive: true,
+    });
+    if (!confirmed) return;
     setOrderBusy(order.id);
     try {
       const response = await fetch(`/api/marketplace/orders/${order.id}`, {
