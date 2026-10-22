@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
-const getDayIndex = (value: string) => (new Date(value).getDay() + 6) % 7;
+const toDateKey = (date: Date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
@@ -108,26 +108,45 @@ export default function DashboardPage() {
   } satisfies ChartConfig;
 
   const dynamicChartData = useMemo(() => {
-    const days = [
-      t('dashboard.dayMon'),
-      t('dashboard.dayTue'),
-      t('dashboard.dayWed'),
-      t('dashboard.dayThu'),
-      t('dashboard.dayFri'),
-      t('dashboard.daySat'),
-      t('dashboard.daySun'),
-    ];
-    return days.map((day, index) => ({
-      day,
-      revenue: appointments
-        .filter(
-          (a) => a.status === 'completed' && getDayIndex(a.date_hour) === index,
-        )
-        .reduce((acc, a) => acc + Number(a.services?.price || 0), 0),
-      bookings: appointments.filter((a) => getDayIndex(a.date_hour) === index)
-        .length,
-    }));
-  }, [appointments, locale, t]);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const firstDay = new Date(today);
+    firstDay.setDate(today.getDate() - 6);
+
+    const appointmentsByDate = new Map<string, Appointment[]>();
+    for (const appointment of appointments) {
+      const date = new Date(appointment.date_hour);
+      if (!Number.isFinite(date.getTime())) continue;
+
+      const key = toDateKey(date);
+      const dailyAppointments = appointmentsByDate.get(key) ?? [];
+      dailyAppointments.push(appointment);
+      appointmentsByDate.set(key, dailyAppointments);
+    }
+
+    const dateLocale = locale === 'en' ? 'en-GB' : 'pt-PT';
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(firstDay);
+      date.setDate(firstDay.getDate() + index);
+      const dailyAppointments = appointmentsByDate.get(toDateKey(date)) ?? [];
+      const revenue = dailyAppointments
+        .filter((appointment) => appointment.status === 'completed')
+        .reduce((total, appointment) => {
+          const price = Number(appointment.services?.price ?? 0);
+          return total + (Number.isFinite(price) ? price : 0);
+        }, 0);
+
+      return {
+        day: date.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' }),
+        revenue,
+        bookings: dailyAppointments.length,
+      };
+    });
+  }, [appointments, locale]);
+
+  const hasChartActivity = dynamicChartData.some(
+    (point) => point.bookings > 0 || point.revenue > 0,
+  );
 
   const metrics = useMemo(() => {
     const totalRevenue = appointments
@@ -485,7 +504,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg font-medium text-zinc-100">
-                      Atividade semanal
+                      {locale === 'en' ? 'Activity in the last 7 days' : 'Atividade dos últimos 7 dias'}
                     </CardTitle>
                     <CardDescription className="mt-1 text-zinc-500">
                       {t('dashboard.compareDaily')}
@@ -499,8 +518,19 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent className="h-[280px] w-full pt-4">
-                <ChartContainer config={chartConfig} className="h-full w-full">
+              <CardContent className="h-[280px] min-w-0 w-full pt-4">
+                {!loadingInitial && !hasChartActivity ? (
+                  <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
+                    <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
+                    <p className="mt-3 text-sm font-medium text-zinc-200">
+                      {locale === 'en' ? 'No activity in the last 7 days' : 'Sem atividade nos últimos 7 dias'}
+                    </p>
+                    <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
+                      {locale === 'en' ? 'New bookings and completed service revenue will appear here.' : 'As novas marcações e a receita dos serviços concluídos aparecerão aqui.'}
+                    </p>
+                  </div>
+                ) : (
+                <ChartContainer config={chartConfig} className="!aspect-auto h-full min-h-[240px] min-w-0 w-full">
                   <BarChart
                     data={dynamicChartData}
                     margin={{ top: 10, right: 10, left: -12, bottom: 0 }}
@@ -546,6 +576,7 @@ export default function DashboardPage() {
                     />
                   </BarChart>
                 </ChartContainer>
+                )}
               </CardContent>
               <div
                 className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
@@ -556,7 +587,7 @@ export default function DashboardPage() {
                     className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
                     aria-hidden="true"
                   />
-                  <span className="text-zinc-300">Receita</span>
+                  <span className="text-zinc-300">{locale === 'en' ? 'Revenue' : 'Receita'}</span>
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <span
