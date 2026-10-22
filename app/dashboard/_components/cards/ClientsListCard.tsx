@@ -1,6 +1,7 @@
 'use client';
 
 import { Client, ClientsListCardProps } from '@/types';
+import type { FormEvent } from 'react';
 import {
   Users,
   UserPlus,
@@ -115,6 +116,7 @@ export function ClientsListCard({
               newClientData={newClientData}
               setNewClientData={setNewClientData}
               handleCreateClient={handleCreateClient}
+              setShowAddClientForm={setShowAddClientForm}
               loading={loading}
             />
             <DialogFooter>
@@ -155,6 +157,7 @@ interface AddClientFormProps {
   newClientData: ClientsListCardProps['newClientData'];
   setNewClientData: ClientsListCardProps['setNewClientData'];
   handleCreateClient: ClientsListCardProps['handleCreateClient'];
+  setShowAddClientForm: ClientsListCardProps['setShowAddClientForm'];
   loading: boolean;
 }
 
@@ -162,11 +165,17 @@ function AddClientForm({
   newClientData,
   setNewClientData,
   handleCreateClient,
+  setShowAddClientForm,
   loading,
 }: AddClientFormProps) {
+  async function submit(event: FormEvent) {
+    const created = await handleCreateClient(event);
+    if (created) setShowAddClientForm(false);
+  }
+
   return (
     <form
-      onSubmit={handleCreateClient}
+      onSubmit={(event) => void submit(event)}
       className="grid gap-4 py-2"
     >
       <div className="mb-4 flex items-start gap-3">
