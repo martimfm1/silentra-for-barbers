@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -120,7 +121,7 @@ function MetricCard({ title, value, note, icon: Icon, accent = 'neutral' }: {
   );
 }
 
-function Panel({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <section className="min-w-0 rounded-2xl border border-white/10 bg-zinc-950/70 p-4 sm:p-5">
       <div className="mb-5">
