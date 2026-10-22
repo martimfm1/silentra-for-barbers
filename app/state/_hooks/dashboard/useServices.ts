@@ -23,7 +23,7 @@ export function useServices(
   const handleCreateService = useCallback(
     async (e: React.FormEvent): Promise<boolean> => {
       e.preventDefault();
-      if (!barbershopId) return;
+      if (!barbershopId) return false;
 
       if (!newServiceData.name.trim() || !newServiceData.price) {
         toast.error('Introduz o nome e o preço do serviço.');
