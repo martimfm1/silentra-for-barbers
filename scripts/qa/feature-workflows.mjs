@@ -97,6 +97,7 @@ assert.match(bookingOutboxMigration, /booking_automation_outbox/);
 assert.match(bookingOutboxMigration, /for update skip locked/i);
 assert.match(bookingOutboxMigration, /unique \(appointment_id, event_type\)/);
 assert.match(bookingOutboxWorker, /claim_booking_automation_events/);
+assert.match(bookingOutboxWorker, /export const POST/);
 assert.match(bookingLifecycleCron, /process_automatic_booking_completion/);
 assert.doesNotMatch(bookingLifecycleCron, /dispatchAppointmentAutomations/);
 assert.doesNotMatch(appointmentCompleteApi, /dispatchAppointmentAutomations/);
