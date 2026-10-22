@@ -136,7 +136,7 @@ assert.ok(
   'The public prices endpoint must return the payment mode for the pricing UI.',
 );
 assert.ok(
-  dashboardPage.includes('Atividade dos últimos 7 dias') &&
+  dashboardPage.includes('Atividade por dia da semana') &&
     dashboardPage.includes('!aspect-auto h-full min-h-[240px] min-w-0 w-full') &&
     dashboardPage.includes('hasChartActivity'),
   'Dashboard chart must have a responsive layout, a real 7-day range and an explicit empty state.',
