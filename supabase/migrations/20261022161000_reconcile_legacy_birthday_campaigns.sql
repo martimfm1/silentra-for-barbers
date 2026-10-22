@@ -38,7 +38,7 @@ join public.barbershops as shop
 where legacy.enabled = true
   and exists (
     select 1
-    from public.users as owner
+    from auth.users as owner
     where owner.id = shop.created_by
   )
   and not exists (
