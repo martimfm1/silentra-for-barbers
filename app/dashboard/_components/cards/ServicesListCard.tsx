@@ -83,6 +83,7 @@ export function ServicesListCard({
               newServiceData={newServiceData}
               setNewServiceData={setNewServiceData}
               handleCreateService={handleCreateService}
+              setShowAddServiceForm={setShowAddServiceForm}
               loading={loading}
             />
             <DialogFooter>
@@ -125,6 +126,7 @@ interface AddServiceFormProps {
   newServiceData: ServicesListCardProps['newServiceData'];
   setNewServiceData: ServicesListCardProps['setNewServiceData'];
   handleCreateService: ServicesListCardProps['handleCreateService'];
+  setShowAddServiceForm: ServicesListCardProps['setShowAddServiceForm'];
   loading: boolean;
 }
 
@@ -132,11 +134,17 @@ function AddServiceForm({
   newServiceData,
   setNewServiceData,
   handleCreateService,
+  setShowAddServiceForm,
   loading,
 }: AddServiceFormProps) {
+  async function submit(event: React.FormEvent) {
+    const created = await handleCreateService(event);
+    if (created) setShowAddServiceForm(false);
+  }
+
   return (
     <form
-      onSubmit={handleCreateService}
+      onSubmit={(event) => void submit(event)}
       className="grid gap-4 py-2"
     >
       <div className="mb-4 flex items-start gap-3">
