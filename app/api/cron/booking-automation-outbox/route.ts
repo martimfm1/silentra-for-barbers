@@ -23,7 +23,7 @@ function authorized(request: Request) {
 
   const timestamp = request.headers.get('x-booking-timestamp') ?? '';
   const signature = request.headers.get('x-booking-signature') ?? '';
-  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) return false;
+  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) return false;
   const seconds = Number(timestamp);
   if (!Number.isSafeInteger(seconds) || Math.abs(Date.now() / 1000 - seconds) > 300) return false;
 
