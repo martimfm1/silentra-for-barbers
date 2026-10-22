@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type LoyaltySettings = {
   enabled: boolean;
@@ -492,6 +492,12 @@ export default function LoyaltyPage() {
             }}
           >
             <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
+              <DialogHeader className="sr-only">
+                <DialogTitle>{editing ? 'Editar recompensa' : 'Nova recompensa'}</DialogTitle>
+                <DialogDescription>
+                  Configura o nome, os pontos necessários e o tipo de recompensa.
+                </DialogDescription>
+              </DialogHeader>
               {creating && (
             <Card className="mb-0 border-white/10 bg-white/[0.02]">
               <CardHeader>
@@ -499,7 +505,14 @@ export default function LoyaltyPage() {
                   {editing ? 'Editar recompensa' : 'Nova recompensa'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
+              <CardContent>
+                <form
+                  className="grid gap-4 sm:grid-cols-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void saveReward();
+                  }}
+                >
                 <div className="silentra-form-field">
                   <Label htmlFor="reward-name">Nome</Label>
                   <Input
@@ -583,7 +596,7 @@ export default function LoyaltyPage() {
                 </div>
                 <div className="flex gap-2 sm:col-span-2">
                   <Button
-                    onClick={() => void saveReward()}
+                    type="submit"
                     disabled={saving || !rewardForm.name.trim()}
                     aria-busy={saving}
                   >
@@ -591,6 +604,7 @@ export default function LoyaltyPage() {
                     Guardar
                   </Button>
                   <Button
+                    type="button"
                     variant="outline"
                     onClick={() => {
                       setCreating(false);
@@ -600,6 +614,7 @@ export default function LoyaltyPage() {
                     Cancelar
                   </Button>
                 </div>
+                </form>
               </CardContent>
             </Card>
               )}
