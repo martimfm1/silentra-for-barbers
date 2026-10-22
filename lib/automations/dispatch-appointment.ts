@@ -62,7 +62,7 @@ export async function dispatchAppointmentAutomations(
     if (rulesError) throw rulesError;
 
     let email = event.manualEmail?.trim().toLowerCase() ?? '';
-    let name = event.manualName?.trim() ?? 'Cliente';
+    let name = event.manualName?.trim() ?? '';
     let clientId = event.clientId ?? null;
 
     if (clientId) {
@@ -87,6 +87,8 @@ export async function dispatchAppointmentAutomations(
     }
 
     let hadFailure = false;
+
+    name = name || 'Cliente';
 
     for (const rule of rules ?? []) {
       const action = Array.isArray(rule.actions)
