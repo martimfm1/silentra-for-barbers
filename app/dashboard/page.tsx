@@ -124,9 +124,6 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const maxRevenue = Math.max(1, ...dynamicChartData.map((point) => point.revenue));
-  const maxBookings = Math.max(1, ...dynamicChartData.map((point) => point.bookings));
-
   const dynamicChartData = useMemo(() => {
     const days = [
       t('dashboard.dayMon'),
@@ -159,6 +156,9 @@ export default function DashboardPage() {
   const hasChartActivity = dynamicChartData.some(
     (point) => point.bookings > 0 || point.revenue > 0,
   );
+
+  const maxRevenue = Math.max(1, ...dynamicChartData.map((point) => point.revenue));
+  const maxBookings = Math.max(1, ...dynamicChartData.map((point) => point.bookings));
 
   const metrics = useMemo(() => {
     const totalRevenue = appointments
