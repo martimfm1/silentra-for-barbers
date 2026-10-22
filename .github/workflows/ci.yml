@@ -85,6 +85,9 @@ jobs:
       - name: Enterprise landing-page and public API contracts
         run: pnpm qa:enterprise-landing-pages
 
+      - name: Requested feature workflow contracts
+        run: pnpm qa:feature-workflows
+
       - name: Dependency audit
         run: pnpm qa:deps
 
