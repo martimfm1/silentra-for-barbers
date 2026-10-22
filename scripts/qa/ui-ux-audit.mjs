@@ -3,6 +3,26 @@ import { access, readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
 
+const [dashboardConfirmProvider, overviewPage, clientsListCard, servicesListCard, automationPage, marketingWorkspace] = await Promise.all([
+  read('components/dashboard/dashboard-confirm-provider.tsx'),
+  read('app/dashboard/page.tsx'),
+  read('app/dashboard/_components/cards/ClientsListCard.tsx'),
+  read('app/dashboard/_components/cards/ServicesListCard.tsx'),
+  read('app/dashboard/automations/page.tsx'),
+  read('app/dashboard/marketing/marketing-workspace.tsx'),
+]);
+const confirmationTargets = await Promise.all([
+  'app/dashboard/pos/page.tsx',
+  'app/dashboard/pos/loja/page.tsx',
+  'app/dashboard/loyalty/page.tsx',
+  'app/dashboard/pos/pedidos/page.tsx',
+  'app/dashboard/pos/produtos/page.tsx',
+  'app/dashboard/_components/team/TeamMembersManager.tsx',
+  'app/dashboard/marketing/campaign-lifecycle-actions.tsx',
+  'components/dashboard/loyalty/earning-rules-card.tsx',
+  'components/billing/BillingHub.tsx',
+].map((file) => read(file)));
+
 const [
   navbar,
   sidebar,
@@ -53,6 +73,28 @@ assert.match(sidebar, /matchesCurrentPath\(toolsItems\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
 assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /mobileTriggerRef\.current\?\.focus\(\)/);
+
+assert.match(sidebar, /href: '\/dashboard\/automations'/);
+assert.doesNotMatch(sidebar, /href: '\/dashboard\/mensagens\/birthdays'/);
+assert.doesNotMatch(sidebar, /label: 'Aniversários'/);
+assert.match(automationPage, /MarketingWorkspace initialView="automation"/);
+assert.match(marketingWorkspace, /createBirthdayAutomation/);
+assert.match(marketingWorkspace, /Adicionar automaticamente/);
+assert.match(marketingWorkspace, /triggerType: 'birthday'/);
+
+// Dialogs for mutations and forms are shared, accessible and not browser-native.
+assert.match(dashboardShell, /DashboardConfirmProvider/);
+assert.match(dashboardConfirmProvider, /AlertDialog/);
+assert.match(dashboardConfirmProvider, /aria|AlertDialogTitle/);
+assert.match(clientsListCard, /<Dialog open=\{showAddClientForm\}/);
+assert.match(servicesListCard, /<Dialog open=\{showAddServiceForm\}/);
+assert.match(overviewPage, /role="img"/);
+assert.match(overviewPage, /grid h-full min-w-0 grid-cols-7/);
+assert.match(overviewPage, /maxRevenue/);
+for (const source of confirmationTargets) {
+  assert.match(source, /useDashboardConfirm/);
+  assert.doesNotMatch(source, /window\.confirm/);
+}
 
 // Core accessibility regressions: keyboard focus, landmarks, target sizes and motion.
 assert.match(navbar, /keepFocusInside/);
