@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
@@ -12,10 +13,25 @@ const MAX_ATTEMPTS = 10;
 function authorized(request: Request) {
   const secret = (process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET)?.trim();
   if (!secret) return false;
-  return (
+
+  // Bearer auth remains available for controlled manual invocation. Supabase
+  // Cron uses HMAC so the shared secret is never placed in pg_net's HTTP queue.
+  if (
     request.headers.get('authorization') === `Bearer ${secret}` ||
     request.headers.get('x-cron-secret') === secret
-  );
+  ) return true;
+
+  const timestamp = request.headers.get('x-booking-timestamp') ?? '';
+  const signature = request.headers.get('x-booking-signature') ?? '';
+  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) return false;
+  const seconds = Number(timestamp);
+  if (!Number.isSafeInteger(seconds) || Math.abs(Date.now() / 1000 - seconds) > 300) return false;
+
+  const expected = createHmac('sha256', secret)
+    .update(`${timestamp}:booking-outbox`)
+    .digest();
+  const supplied = Buffer.from(signature, 'hex');
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
 }
 
 async function GET__unobserved(request: Request) {
