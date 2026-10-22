@@ -37,7 +37,7 @@ supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql
 
 ## Vercel
 
-`vercel.json` mantém apenas cron jobs compatíveis com Vercel Hobby. O worker de conclusão automática não deve voltar a ser configurado como `*/10 * * * *` em Vercel.
+`vercel.json` mantém apenas cron jobs diários compatíveis com Vercel Hobby. Não agendar `/api/cron/booking-lifecycle` de hora a hora em Vercel Hobby: o deploy de produção é rejeitado por essa frequência. O estado da conclusão automática é tratado pelo job `silentra-booking-completion` do Supabase a cada 10 minutos. A emissão das automações `booking_completed` pela rota HTTP ainda requer uma estratégia de execução compatível com o plano antes de ser considerada ativa em produção.
 
 O endpoint `/api/cron/booking-completion` continua disponível para execução controlada/manual, mas não é o scheduler principal.
 
