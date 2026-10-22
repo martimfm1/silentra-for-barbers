@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
-const toDateKey = (date: Date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+const isValidDate = (value: string) => Number.isFinite(new Date(value).getTime());
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
@@ -108,41 +108,33 @@ export default function DashboardPage() {
   } satisfies ChartConfig;
 
   const dynamicChartData = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const firstDay = new Date(today);
-    firstDay.setDate(today.getDate() - 6);
+    const days = [
+      t('dashboard.dayMon'),
+      t('dashboard.dayTue'),
+      t('dashboard.dayWed'),
+      t('dashboard.dayThu'),
+      t('dashboard.dayFri'),
+      t('dashboard.daySat'),
+      t('dashboard.daySun'),
+    ];
+    const values = days.map((day) => ({ day, revenue: 0, bookings: 0 }));
 
-    const appointmentsByDate = new Map<string, Appointment[]>();
     for (const appointment of appointments) {
       const date = new Date(appointment.date_hour);
       if (!Number.isFinite(date.getTime())) continue;
 
-      const key = toDateKey(date);
-      const dailyAppointments = appointmentsByDate.get(key) ?? [];
-      dailyAppointments.push(appointment);
-      appointmentsByDate.set(key, dailyAppointments);
+      const dayIndex = (date.getDay() + 6) % 7;
+      const point = values[dayIndex];
+      point.bookings += 1;
+
+      if (appointment.status === 'completed') {
+        const price = Number(appointment.services?.price ?? 0);
+        if (Number.isFinite(price)) point.revenue += price;
+      }
     }
 
-    const dateLocale = locale === 'en' ? 'en-GB' : 'pt-PT';
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(firstDay);
-      date.setDate(firstDay.getDate() + index);
-      const dailyAppointments = appointmentsByDate.get(toDateKey(date)) ?? [];
-      const revenue = dailyAppointments
-        .filter((appointment) => appointment.status === 'completed')
-        .reduce((total, appointment) => {
-          const price = Number(appointment.services?.price ?? 0);
-          return total + (Number.isFinite(price) ? price : 0);
-        }, 0);
-
-      return {
-        day: date.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' }),
-        revenue,
-        bookings: dailyAppointments.length,
-      };
-    });
-  }, [appointments, locale]);
+    return values;
+  }, [appointments, t]);
 
   const hasChartActivity = dynamicChartData.some(
     (point) => point.bookings > 0 || point.revenue > 0,
@@ -504,7 +496,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg font-medium text-zinc-100">
-                      {locale === 'en' ? 'Activity in the last 7 days' : 'Atividade dos últimos 7 dias'}
+                      {locale === 'en' ? 'Weekly activity by weekday' : 'Atividade por dia da semana'}
                     </CardTitle>
                     <CardDescription className="mt-1 text-zinc-500">
                       {t('dashboard.compareDaily')}
@@ -523,10 +515,10 @@ export default function DashboardPage() {
                   <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
                     <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
                     <p className="mt-3 text-sm font-medium text-zinc-200">
-                      {locale === 'en' ? 'No activity in the last 7 days' : 'Sem atividade nos últimos 7 dias'}
+                      {locale === 'en' ? 'No bookings to chart yet' : 'Ainda não existem marcações para apresentar'}
                     </p>
                     <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
-                      {locale === 'en' ? 'New bookings and completed service revenue will appear here.' : 'As novas marcações e a receita dos serviços concluídos aparecerão aqui.'}
+                      {locale === 'en' ? 'Bookings and completed service revenue will appear here when the barbershop has appointments.' : 'As marcações e a receita dos serviços concluídos aparecerão aqui quando existirem marcações.'}
                     </p>
                   </div>
                 ) : (
