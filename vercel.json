@@ -11,6 +11,14 @@
     {
       "path": "/api/cron/support-email-notifications",
       "schedule": "45 0 * * *"
+    },
+    {
+      "path": "/api/cron/booking-lifecycle",
+      "schedule": "10 * * * *"
+    },
+    {
+      "path": "/api/cron/marketing",
+      "schedule": "0 8 * * *"
     }
   ],
   "git": {
