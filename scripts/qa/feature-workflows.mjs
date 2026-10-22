@@ -24,6 +24,12 @@ const bookingRpcMigration = read('supabase/migrations/20260905150000_finalize_at
 const completionMigration = read('supabase/migrations/20260827134500_enable_booking_completion_worker.sql');
 const completionSchedule = read('supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql');
 const completionCronApi = read('app/api/cron/booking-completion/route.ts');
+const bookingOutboxMigration = read('supabase/migrations/20261022173500_booking_automation_outbox.sql');
+const bookingOutboxWorker = read('app/api/cron/booking-automation-outbox/route.ts');
+const adminReportsPage = read('app/silentra-admin/reports/page.tsx');
+const adminReportsUi = read('app/_silentra-admin/reports-page.tsx');
+const adminReportsApi = read('app/api/silentra-admin/reports/route.ts');
+const adminReportsMigration = read('supabase/migrations/20261022174500_platform_admin_reports.sql');
 const vercel = JSON.parse(read('vercel.json'));
 
 assert.match(websiteRequestApi, /require\(['"]@\/services\/billing\/barbershop-stripe\.service|BarbershopStripeService/);
@@ -84,4 +90,17 @@ assert.match(completionSchedule, /\*\/10 \* \* \* \*/);
 assert.match(completionCronApi, /CRON_SECRET/);
 assert.match(completionCronApi, /process_automatic_booking_completion/);
 
-console.log('Custom websites, public API, birthday automation, auto-confirmation and auto-completion contracts passed.');
+assert.match(bookingOutboxMigration, /booking_automation_outbox/);
+assert.match(bookingOutboxMigration, /for update skip locked/i);
+assert.match(bookingOutboxMigration, /unique \(appointment_id, event_type\)/);
+assert.match(bookingOutboxWorker, /claim_booking_automation_events/);
+assert.match(bookingOutboxWorker, /BOOKING_OUTBOX_CRON_SECRET/);
+assert.match(adminReportsPage, /getPlatformAdminContext/);
+assert.match(adminReportsUi, /Relatórios da plataforma/);
+assert.match(adminReportsUi, /Exportar CSV/);
+assert.match(adminReportsApi, /requirePlatformAdmin/);
+assert.match(adminReportsApi, /get_platform_admin_reports/);
+assert.match(adminReportsMigration, /get_platform_admin_reports/);
+assert.match(adminReportsMigration, /revoke all on function public\.get_platform_admin_reports/);
+
+console.log('Custom websites, public API, birthday automation, booking outbox, admin reports and booking lifecycle contracts passed.');
