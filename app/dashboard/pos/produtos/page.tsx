@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type Product = {
   id: string;
@@ -232,7 +233,6 @@ export default function MarketplaceProductsPage() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setFormOpen(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   function startEdit(product: Product) {
     setEditing(product);
@@ -254,7 +254,6 @@ export default function MarketplaceProductsPage() {
       marketplaceFeatured: product.marketplace_featured,
     });
     setFormOpen(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async function save(event: React.FormEvent) {
@@ -516,8 +515,19 @@ export default function MarketplaceProductsPage() {
           </CardContent>
         </Card>
 
-        {formOpen && (
-          <Card className="border-emerald-400/15 bg-emerald-400/[0.025]">
+        <Dialog
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) {
+              setEditing(null);
+              setForm(EMPTY_FORM);
+            }
+          }}
+        >
+          <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 p-3 text-zinc-100 sm:max-w-4xl sm:p-5">
+            {formOpen && (
+              <Card className="border-emerald-400/15 bg-emerald-400/[0.025]">
             <CardHeader>
               <CardTitle>
                 {editing ? `Editar ${editing.name}` : 'Novo produto'}
@@ -734,8 +744,10 @@ export default function MarketplaceProductsPage() {
                 </div>
               </form>
             </CardContent>
-          </Card>
-        )}
+              </Card>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <section aria-live="polite">
           <div className="mb-3 flex items-end justify-between">
