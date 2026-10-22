@@ -179,7 +179,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           ? new Date(String(lastModifiedValue))
           : now;
         customWebsiteRoutes.push({
-          url: `${SITE_URL}/site/${encodeURIComponent(slug)}`,
+          url: `${SITE_URL}/${encodeURIComponent(slug)}`,
           lastModified: Number.isNaN(parsedLastModified.getTime())
             ? now
             : parsedLastModified,
