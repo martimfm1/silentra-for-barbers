@@ -3,7 +3,7 @@ import { sendMarketingEmail, sendBrevoSms } from '@/lib/marketing/brevo';
 
 const TIME_ZONE = 'Europe/Lisbon';
 const MAX_CAMPAIGNS = 25;
-const MAX_CLIENTS = 5000;
+const CLIENT_PAGE_SIZE = 1000;
 const MAX_ATTEMPTS = 3;
 const VOUCHER_VALIDITY_DAYS = 30;
 
@@ -91,6 +91,10 @@ async function getBirthdayCampaigns() {
     .eq('active', true)
     .eq('trigger_type', 'birthday')
     .in('status', ['draft', 'scheduled', 'completed'])
+    // Rotate older/unprocessed campaigns to the front so a 25-campaign batch
+    // does not permanently starve shops when the tenant count grows.
+    .order('birthday_last_run_date', { ascending: true, nullsFirst: true })
+    .order('created_at', { ascending: true })
     .limit(MAX_CAMPAIGNS);
   if (error) throw error;
   return (data ?? []) as BirthdayCampaign[];
@@ -243,17 +247,29 @@ export async function processBirthdayCampaignDelivery(limit = MAX_CAMPAIGNS) {
     let campaignSent = 0;
     let campaignFailed = 0;
 
-    const { data: clients, error: clientsError } = await admin
-      .from('users')
-      .select('id,name_complete,birth_date,email,num_phone')
-      .eq('barbershop_id', campaign.barbershop_id)
-      .eq('role', 'client')
-      .not('birth_date', 'is', null)
-      .not(destinationField, 'is', null)
-      .limit(MAX_CLIENTS);
-    if (clientsError) throw clientsError;
+    const clients: Array<{
+      id: string;
+      name_complete: string | null;
+      birth_date: string | null;
+      email: string | null;
+      num_phone: string | null;
+    }> = [];
+    for (let offset = 0; ; offset += CLIENT_PAGE_SIZE) {
+      const { data: page, error: clientsError } = await admin
+        .from('users')
+        .select('id,name_complete,birth_date,email,num_phone')
+        .eq('barbershop_id', campaign.barbershop_id)
+        .eq('role', 'client')
+        .not('birth_date', 'is', null)
+        .not(destinationField, 'is', null)
+        .order('id', { ascending: true })
+        .range(offset, offset + CLIENT_PAGE_SIZE - 1);
+      if (clientsError) throw clientsError;
+      clients.push(...(page ?? []));
+      if (!page || page.length < CLIENT_PAGE_SIZE) break;
+    }
 
-    const matching = (clients ?? []).filter(
+    const matching = clients.filter(
       (client) => String(client.birth_date ?? '').slice(5) === monthDay,
     );
 
