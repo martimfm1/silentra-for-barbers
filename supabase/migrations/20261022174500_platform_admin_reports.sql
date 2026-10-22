@@ -35,7 +35,7 @@ begin
       'posRevenue', coalesce((select sum(total) from public.pos_transactions where created_at >= v_start and status::text in ('completed', 'paid')), 0),
       'posTransactions', (select count(*) from public.pos_transactions where created_at >= v_start and status::text in ('completed', 'paid')),
       'marketplaceOrders', (select count(*) from public.marketplace_orders where created_at >= v_start),
-      'marketplaceRevenue', coalesce((select sum(total) from public.marketplace_orders where created_at >= v_start and status::text not in ('cancelled', 'canceled', 'rejected', 'refunded')), 0),
+      'marketplaceRevenue', coalesce((select sum(total) from public.marketplace_orders where created_at >= v_start and status::text = 'completed'), 0),
       'apiRequests', (select count(*) from public.platform_api_logs where created_at >= v_start),
       'apiErrors', (select count(*) from public.platform_api_logs where created_at >= v_start and status_code >= 500),
       'marketingSent', (select count(*) from public.marketing_campaign_recipients where sent_at >= v_start),
