@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import {
@@ -91,26 +92,38 @@ export function ClientsListCard({
               )}
             </div>
             <Button
-              onClick={() => setShowAddClientForm(!showAddClientForm)}
+              onClick={() => setShowAddClientForm(true)}
               className="min-h-11 rounded-lg bg-zinc-50 text-zinc-950 hover:bg-white"
             >
               <UserPlus className="mr-2 size-4" />
-              {showAddClientForm ? 'Fechar' : 'Adicionar cliente'}
+              Adicionar cliente
             </Button>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-5 sm:p-6">
-        {/* Formulário de Adição de Cliente */}
-        {showAddClientForm && (
-          <AddClientForm
-            newClientData={newClientData}
-            setNewClientData={setNewClientData}
-            handleCreateClient={handleCreateClient}
-            loading={loading}
-          />
-        )}
+        <Dialog open={showAddClientForm} onOpenChange={setShowAddClientForm}>
+          <DialogContent className="border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Adicionar cliente</DialogTitle>
+              <DialogDescription>
+                Guarda os contactos essenciais. A data de nascimento pode ser adicionada ao editar o cliente.
+              </DialogDescription>
+            </DialogHeader>
+            <AddClientForm
+              newClientData={newClientData}
+              setNewClientData={setNewClientData}
+              handleCreateClient={handleCreateClient}
+              loading={loading}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddClientForm(false)} className="border-white/10 bg-transparent">
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Lista de Clientes / Empty States */}
         {filteredClients.length === 0 ? (
@@ -154,7 +167,7 @@ function AddClientForm({
   return (
     <form
       onSubmit={handleCreateClient}
-      className="mb-6 rounded-xl border border-blue-500/20 bg-blue-500/[0.05] p-4 sm:p-5"
+      className="grid gap-4 py-2"
     >
       <div className="mb-4 flex items-start gap-3">
         <Sparkles className="mt-0.5 size-4 shrink-0 text-blue-400" />
@@ -165,7 +178,7 @@ function AddClientForm({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.2fr_1fr_1.2fr_auto] md:items-end">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <label
             htmlFor="new-client-name"
