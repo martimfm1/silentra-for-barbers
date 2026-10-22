@@ -39,6 +39,14 @@ type Report = {
     subscriptions: number;
     activeSubscriptions: number;
     marketplaceOrders: number;
+    reviews: number;
+    loyaltyRedemptions: number;
+    inventoryProducts: number;
+    locations: number;
+    services: number;
+    professionals: number;
+    posTransactions: number;
+    billingDocuments: number;
   };
   period: {
     newBarbershops: number;
@@ -59,6 +67,15 @@ type Report = {
     automationRuns: number;
     automationFailed: number;
     openSupportConversations: number;
+    reviews: number;
+    loyaltyRedemptions: number;
+    inventoryMovements: number;
+    lowStockProducts: number;
+    billingDocuments: number;
+    emailFailures: number;
+    notificationFailures: number;
+    commissions: number;
+    commissionValue: number;
   };
   appointmentStatuses: StatusCount[];
   subscriptionStatuses: StatusCount[];
@@ -282,6 +299,19 @@ export default function PlatformReportsPage() {
             <MetricCard title="Automações" value={number(p!.automationRuns)} note={`${number(p!.automationFailed)} execuções falhadas`} icon={Activity} accent={p!.automationFailed ? 'warn' : 'good'} />
             <MetricCard title="Suporte em aberto" value={number(p!.openSupportConversations)} note="Conversas que ainda não estão fechadas ou resolvidas" icon={Users} />
             <MetricCard title="Encomendas" value={number(totals!.marketplaceOrders)} note={`${number(p!.marketplaceOrders)} criadas no período selecionado`} icon={ShoppingBag} />
+          </section>
+
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard title="Avaliações" value={number(totals!.reviews)} note={`+${number(p!.reviews)} no período`} icon={CheckCircle2} />
+            <MetricCard title="Fidelização" value={number(totals!.loyaltyRedemptions)} note={`+${number(p!.loyaltyRedemptions)} resgates no período`} icon={Users} />
+            <MetricCard title="Produtos de inventário" value={number(totals!.inventoryProducts)} note={`${number(p!.lowStockProducts)} produtos com stock baixo agora`} icon={ShoppingBag} accent={p!.lowStockProducts ? 'warn' : 'good'} />
+            <MetricCard title="Faturas/documentos" value={number(totals!.billingDocuments)} note={`+${number(p!.billingDocuments)} emitidos no período`} icon={CreditCard} />
+          </section>
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard title="Movimentos de inventário" value={number(p!.inventoryMovements)} note="Movimentos registados no período" icon={ShoppingBag} />
+            <MetricCard title="Comissões registadas" value={number(p!.commissions)} note={money(p!.commissionValue) + ' em valor de comissão'} icon={CreditCard} />
+            <MetricCard title="Falhas de email" value={number(p!.emailFailures + p!.marketingFailed)} note={`${number(p!.emailFailures)} na fila transacional · ${number(p!.marketingFailed)} no marketing`} icon={Mail} accent={p!.emailFailures + p!.marketingFailed ? 'warn' : 'good'} />
+            <MetricCard title="Falhas de notificações" value={number(p!.notificationFailures)} note="Notificações com estado de falha no período" icon={AlertTriangle} accent={p!.notificationFailures ? 'warn' : 'good'} />
           </section>
 
           <Panel title="Atividade administrativa recente" description="Registos de auditoria sem expor mensagens, emails ou outros dados pessoais.">
