@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type Product = {
   id: string;
@@ -526,6 +526,12 @@ export default function MarketplaceProductsPage() {
           }}
         >
           <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 p-3 text-zinc-100 sm:max-w-4xl sm:p-5">
+            <DialogHeader className="sr-only">
+              <DialogTitle>{editing ? `Editar ${editing.name}` : 'Novo produto'}</DialogTitle>
+              <DialogDescription>
+                Define o nome, preço, stock e as opções de publicação do produto.
+              </DialogDescription>
+            </DialogHeader>
             {formOpen && (
               <Card className="border-emerald-400/15 bg-emerald-400/[0.025]">
             <CardHeader>
