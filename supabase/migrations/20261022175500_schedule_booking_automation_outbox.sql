@@ -1,7 +1,6 @@
 begin;
 
-create schema if not exists net;
-create extension if not exists pg_net with schema net;
+create extension if not exists pg_net;
 
 -- Secrets are provisioned separately in Supabase Vault; never embed credentials
 -- or production URLs in the migration source.
