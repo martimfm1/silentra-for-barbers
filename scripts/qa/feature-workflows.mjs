@@ -24,15 +24,15 @@ const bookingRpcMigration = read('supabase/migrations/20260905150000_finalize_at
 const completionMigration = read('supabase/migrations/20260827134500_enable_booking_completion_worker.sql');
 const completionSchedule = read('supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql');
 const completionCronApi = read('app/api/cron/booking-completion/route.ts');
-const bookingOutboxSchedule = read('supabase/migrations/20261022175500_schedule_booking_automation_outbox.sql');
-const bookingOutboxMigration = read('supabase/migrations/20261022173500_booking_automation_outbox.sql');
+const bookingOutboxSchedule = read('supabase/migrations/20261022165654_schedule_booking_automation_outbox.sql');
+const bookingOutboxMigration = read('supabase/migrations/20261022165242_booking_automation_outbox.sql');
 const bookingOutboxWorker = read('app/api/cron/booking-automation-outbox/route.ts');
 const bookingLifecycleCron = read('app/api/cron/booking-lifecycle/route.ts');
 const appointmentCompleteApi = read('app/api/appointments/[appointmentId]/complete/route.ts');
 const adminReportsPage = read('app/silentra-admin/reports/page.tsx');
 const adminReportsUi = read('app/_silentra-admin/reports-page.tsx');
 const adminReportsApi = read('app/api/silentra-admin/reports/route.ts');
-const adminReportsMigration = read('supabase/migrations/20261022174500_platform_admin_reports.sql');
+const adminReportsMigration = read('supabase/migrations/20261022165246_platform_admin_reports.sql');
 const vercel = JSON.parse(read('vercel.json'));
 
 assert.match(websiteRequestApi, /require\(['"]@\/services\/billing\/barbershop-stripe\.service|BarbershopStripeService/);
