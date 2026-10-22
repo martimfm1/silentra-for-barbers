@@ -77,11 +77,13 @@ export async function dispatchAppointmentAutomations(
     } else {
       const { data: appointment } = await admin
         .from('appointments')
-        .select('client_id')
+        .select('client_id,manual_email,manual_name')
         .eq('id', event.appointmentId)
         .eq('barbershop_id', event.barbershopId)
         .maybeSingle();
       clientId = appointment?.client_id ?? null;
+      email = email || appointment?.manual_email?.trim().toLowerCase() || '';
+      name = name || appointment?.manual_name?.trim() || 'Cliente';
     }
 
     let hadFailure = false;
