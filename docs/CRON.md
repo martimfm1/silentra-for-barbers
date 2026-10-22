@@ -6,12 +6,14 @@ Tarefas frequentes que alteram dados da aplicação devem correr no Supabase/Pos
 
 ## Campanhas de marketing e aniversários
 
-O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às 00:10 UTC. Requer `CRON_SECRET` configurado no ambiente de produção e processa:
+O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às 00:10 UTC (a hora local em Portugal muda com o horário de verão). Requer `CRON_SECRET` configurado no ambiente de produção e processa:
 - campanhas de aniversário e respetivos vouchers;
 - campanhas de marketing agendadas;
 - destinatários em fila e novas tentativas de entrega.
 
 A execução regista contagens de campanhas, destinatários enviados/falhados e duração nos logs `[MARKETING_CRON]`. O endpoint deve permanecer protegido por `CRON_SECRET`.
+
+A configuração da mensagem é gerida em `/api/messages/birthdays`; este é um endpoint de configuração, não um cron. Não existe uma rota de execução `/api/cron/birthdays`: o envio é feito pelo worker de marketing. A migration `20261022161000_reconcile_legacy_birthday_campaigns.sql` recupera configurações antigas ativas que ainda não tenham uma campanha no sistema de Marketing, sem substituir campanhas existentes.
 
 ## Conclusão automática de marcações
 
