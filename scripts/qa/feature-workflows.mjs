@@ -9,6 +9,7 @@ const enterpriseWebsitePage = read('app/site/[slug]/page.tsx');
 const websiteRequestApi = read('app/api/dashboard/custom-website/route.ts');
 const websiteAdminApi = read('app/api/silentra-admin/custom-websites/[requestId]/route.ts');
 const websiteMigration = read('supabase/migrations/20261016180000_enterprise_custom_website_requests.sql');
+const sitemap = read('app/sitemap.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
 const publicApiDocs = read('docs/API_PUBLICA.md');
 const openApi = read('public/openapi-v1.yaml');
@@ -36,6 +37,7 @@ assert.match(websitePage, /notFound\(\)/);
 assert.match(enterpriseWebsitePage, /barbershop_landing_pages/);
 assert.match(websiteMigration, /custom_website_requests_one_active_per_shop/);
 assert.match(websiteMigration, /enable row level security/i);
+assert.match(sitemap, /customWebsiteRoutes\.push\([\s\S]*url: `\$\{SITE_URL\}\/\$\{encodeURIComponent\(slug\)\}`/);
 
 assert.match(publicApi, /consumePublicRateLimit/);
 assert.match(publicApi, /Access-Control-Allow-Origin/);
