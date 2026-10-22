@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import { useCallback, useEffect, useState } from 'react';
 import { ShieldCheck, Trash2, UserRoundCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,6 +67,7 @@ const PERMISSION_LABELS: Record<string, string> = {
 export function TeamMembersManager({
   onMembershipChanged,
 }: TeamMembersManagerProps) {
+  const confirm = useDashboardConfirm();
   const [members, setMembers] = useState<Member[]>([]);
   const [seats, setSeats] = useState<{
     used: number;
@@ -132,12 +135,13 @@ export function TeamMembersManager({
 
   async function remove(member: Member) {
     if (member.role === 'owner') return;
-    if (
-      !window.confirm(
-        `Remover ${member.name_complete || 'este membro'} da barbearia?`,
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: 'Remover membro da equipa?',
+      description: `${member.name_complete || 'Este membro'} perderá acesso à barbearia. Esta ação não apaga o histórico de atividade.`,
+      confirmLabel: 'Remover membro',
+      destructive: true,
+    });
+    if (!confirmed) return;
     setSavingId(member.user_id);
     try {
       const response = await fetch('/api/team/members', {
