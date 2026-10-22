@@ -497,6 +497,8 @@ const checks = [
     test: (source) =>
       source.includes("p_status: 'pending'") &&
       source.includes("if (appointment.status === 'scheduled')") &&
+      source.includes('sendBrevoEmail({') &&
+      source.includes('A marcação ainda não está confirmada.') &&
       source.includes("Aguarda a confirmação da barbearia."),
   },
   {
