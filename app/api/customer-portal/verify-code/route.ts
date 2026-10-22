@@ -3,6 +3,7 @@ import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getClientIp } from '@/lib/security/public-rate-limit';
 import {
   generateSessionToken,
   getSessionExpiry,
@@ -14,14 +15,6 @@ import {
 
 const VERIFY_LIMIT = 10;
 const VERIFY_WINDOW_SECONDS = 10 * 60;
-
-function getClientIp(request: Request): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip')?.trim() ||
-    'unknown'
-  );
-}
 
 function rateLimitKey(request: Request, email: string): string {
   const secret = process.env.RATE_LIMIT_SECRET;

@@ -26,6 +26,10 @@ const patterns = [
   },
 ];
 
+// Do not let callers choose rate-limit buckets by forging the leftmost
+// X-Forwarded-For value. Route handlers must use the shared, validated IP helper.
+const spoofableForwardedForPattern = /headers\.get\(['"]x-forwarded-for['"]\)\?\.split\(['"],['"]\)\[0\]/;
+
 const sensitiveIdentifierPattern =
   /(?:userId|barbershopId|customerId|stripeCustomerId|subscriptionId|stripeSubscriptionId|sessionId|email|phone|address)\s*[:=]/i;
 const secretIdentifierPattern =
@@ -66,6 +70,10 @@ for (const file of sourceFiles) {
   const source = execFileSync('git', ['show', `HEAD:${file}`], {
     encoding: 'utf8',
   });
+
+  if (spoofableForwardedForPattern.test(source)) {
+    findings.push(`spoofable X-Forwarded-For rate-limit key: ${file}`);
+  }
 
   for (const item of patterns) {
     if (item.pattern.test(source)) findings.push(`${item.label}: ${file}`);

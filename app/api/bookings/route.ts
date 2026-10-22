@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { readJsonObject } from '@/lib/security/request-validation';
+import { getClientIp } from '@/lib/security/public-rate-limit';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -76,14 +77,6 @@ function parseClosedDays(value: unknown): Set<number> {
   for (const item of values)
     if (names[item] !== undefined) result.add(names[item]);
   return result;
-}
-function getClientIp(request: Request): string {
-  const forwarded = request.headers
-    .get('x-forwarded-for')
-    ?.split(',')[0]
-    ?.trim();
-  const real = request.headers.get('x-real-ip')?.trim();
-  return forwarded || real || 'unknown';
 }
 function getRateLimitKey(request: Request, shopId: string): string {
   const secret = process.env.RATE_LIMIT_SECRET;
