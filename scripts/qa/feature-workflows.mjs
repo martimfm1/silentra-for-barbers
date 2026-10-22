@@ -24,6 +24,7 @@ const bookingRpcMigration = read('supabase/migrations/20260905150000_finalize_at
 const completionMigration = read('supabase/migrations/20260827134500_enable_booking_completion_worker.sql');
 const completionSchedule = read('supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql');
 const completionCronApi = read('app/api/cron/booking-completion/route.ts');
+const bookingOutboxSchedule = read('supabase/migrations/20261022175500_schedule_booking_automation_outbox.sql');
 const bookingOutboxMigration = read('supabase/migrations/20261022173500_booking_automation_outbox.sql');
 const bookingOutboxWorker = read('app/api/cron/booking-automation-outbox/route.ts');
 const adminReportsPage = read('app/silentra-admin/reports/page.tsx');
@@ -95,6 +96,9 @@ assert.match(bookingOutboxMigration, /for update skip locked/i);
 assert.match(bookingOutboxMigration, /unique \(appointment_id, event_type\)/);
 assert.match(bookingOutboxWorker, /claim_booking_automation_events/);
 assert.match(bookingOutboxWorker, /BOOKING_OUTBOX_CRON_SECRET/);
+assert.match(bookingOutboxSchedule, /silentra-booking-automation-outbox/);
+assert.match(bookingOutboxSchedule, /\*\/10 \* \* \* \*/);
+assert.match(bookingOutboxSchedule, /vault\.decrypted_secrets/);
 assert.match(adminReportsPage, /getPlatformAdminContext/);
 assert.match(adminReportsUi, /Relatórios da plataforma/);
 assert.match(adminReportsUi, /Exportar CSV/);
