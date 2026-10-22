@@ -6,8 +6,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-import { redirect } from 'next/navigation';
+import { CampaignLifecycleActions } from '@/app/dashboard/marketing/campaign-lifecycle-actions';
+import { MarketingWorkspace } from '@/app/dashboard/marketing/marketing-workspace';
 
 export default function AutomationsPage() {
-  redirect('/dashboard/marketing');
+  return (
+    <>
+      <CampaignLifecycleActions />
+      <MarketingWorkspace initialView="automation" />
+    </>
+  );
 }
