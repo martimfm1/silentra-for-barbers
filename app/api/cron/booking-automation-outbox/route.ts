@@ -10,7 +10,7 @@ const BATCH_SIZE = 100;
 const MAX_ATTEMPTS = 10;
 
 function authorized(request: Request) {
-  const secret = process.env.CRON_SECRET?.trim();
+  const secret = (process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET)?.trim();
   if (!secret) return false;
   return (
     request.headers.get('authorization') === `Bearer ${secret}` ||
