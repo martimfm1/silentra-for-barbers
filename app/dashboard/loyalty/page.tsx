@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -48,6 +50,7 @@ const emptyReward = {
 };
 
 export default function LoyaltyPage() {
+  const confirm = useDashboardConfirm();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('loyalty');
   const [settings, setSettings] = useState<LoyaltySettings>({
@@ -189,12 +192,13 @@ export default function LoyaltyPage() {
     });
   };
   const deleteReward = async (id: string) => {
-    if (
-      !window.confirm(
-        'Desativar esta recompensa? Os resgates anteriores continuam no histórico.',
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: 'Desativar recompensa?',
+      description: 'Os clientes deixam de poder resgatar esta recompensa. Os resgates anteriores continuam no histórico.',
+      confirmLabel: 'Desativar recompensa',
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       const response = await fetch(
         `/api/loyalty/rewards?id=${encodeURIComponent(id)}`,
