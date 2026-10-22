@@ -57,7 +57,7 @@ assert.match(birthdayWorker, /birthday:\$\{birthdayDate\}/);
 assert.match(birthdayWorker, /status === 'sent'/);
 assert.match(birthdayReconciliation, /birthday_email_automations/);
 assert.match(birthdayReconciliation, /legacy.enabled = true/);
-assert.match(birthdayReconciliation, /not exists \([\\s\\S]*campaign.trigger_type = 'birthday'/);
+assert.match(birthdayReconciliation, /not exists \([\s\S]*campaign.trigger_type = 'birthday'/);
 assert.match(marketingCron, /processBirthdayCampaignDelivery/);
 assert.match(marketingCron, /CRON_SECRET/);
 assert.ok(vercel.crons.some((job) => job.path === '/api/cron/marketing'));
