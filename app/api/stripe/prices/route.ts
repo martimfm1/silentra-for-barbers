@@ -30,7 +30,7 @@ async function GET__unobserved() {
 
     const prices = await StripePriceService.getAvailablePrices();
     return NextResponse.json(
-      { data: prices },
+      { mode: paymentMode, data: prices },
       { status: 200, headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' } },
     );
   } catch (error) {

@@ -46,8 +46,6 @@ import {
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
-const getDayIndex = (value: string) => (new Date(value).getDay() + 6) % 7;
-
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
@@ -60,26 +58,53 @@ export default function DashboardPage() {
   const [loadingInitial, setLoadingInitial] = useState(true);
 
   const fetchInitialData = useCallback(async () => {
-    if (!barbershopId) return;
+    if (!barbershopId) {
+      setLoadingInitial(false);
+      return;
+    }
     setLoadingInitial(true);
     try {
-      const [appointmentsRes, servicesRes, professionalsRes, clientsRes] =
-        await Promise.all([
+      const [appointmentsResult, servicesResult, professionalsResult, clientsResult] =
+        await Promise.allSettled([
           appointmentService.getAll(barbershopId),
           servicesService.getAll(barbershopId),
           professionalService.getAll(barbershopId),
           appointmentService.getClients(barbershopId),
         ]);
-      if (appointmentsRes.error) throw appointmentsRes.error;
-      if (servicesRes.error) throw servicesRes.error;
-      if (professionalsRes.error) throw professionalsRes.error;
-      if (clientsRes.error) throw clientsRes.error;
-      setAppointments(appointmentsRes.data ?? []);
-      setServices(servicesRes.data ?? []);
-      setProfessionals(professionalsRes.data ?? []);
-      setClients(clientsRes.data ?? []);
+
+      if (appointmentsResult.status === 'rejected') {
+        throw appointmentsResult.reason;
+      }
+      if (appointmentsResult.value.error) {
+        throw appointmentsResult.value.error;
+      }
+      setAppointments(appointmentsResult.value.data ?? []);
+
+      let secondaryDataFailed = false;
+      if (servicesResult.status === 'fulfilled' && !servicesResult.value.error) {
+        setServices(servicesResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Services Sync Error]');
+      }
+
+      if (professionalsResult.status === 'fulfilled' && !professionalsResult.value.error) {
+        setProfessionals(professionalsResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Professionals Sync Error]');
+      }
+
+      if (clientsResult.status === 'fulfilled' && !clientsResult.value.error) {
+        setClients(clientsResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Clients Sync Error]');
+      }
+
+      if (secondaryDataFailed) toast.error(t('dashboard.updateError'));
     } catch (error) {
-      console.error('[Dashboard Sync Error]:', error);
+      console.error('[Dashboard Appointments Sync Error]:', error);
       toast.error(t('dashboard.updateError'));
     } finally {
       setLoadingInitial(false);
@@ -88,7 +113,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
-    if (barbershopId) queueMicrotask(() => void fetchInitialData());
+    if (!barbershopId) {
+      setLoadingInitial(false);
+      return;
+    }
+    queueMicrotask(() => void fetchInitialData());
   }, [barbershopId, fetchInitialData, isLoadingBarbershop]);
 
   useEffect(() => {
@@ -117,17 +146,28 @@ export default function DashboardPage() {
       t('dashboard.daySat'),
       t('dashboard.daySun'),
     ];
-    return days.map((day, index) => ({
-      day,
-      revenue: appointments
-        .filter(
-          (a) => a.status === 'completed' && getDayIndex(a.date_hour) === index,
-        )
-        .reduce((acc, a) => acc + Number(a.services?.price || 0), 0),
-      bookings: appointments.filter((a) => getDayIndex(a.date_hour) === index)
-        .length,
-    }));
-  }, [appointments, locale, t]);
+    const values = days.map((day) => ({ day, revenue: 0, bookings: 0 }));
+
+    for (const appointment of appointments) {
+      const date = new Date(appointment.date_hour);
+      if (!Number.isFinite(date.getTime())) continue;
+
+      const dayIndex = (date.getDay() + 6) % 7;
+      const point = values[dayIndex];
+      point.bookings += 1;
+
+      if (appointment.status === 'completed') {
+        const price = Number(appointment.services?.price ?? 0);
+        if (Number.isFinite(price)) point.revenue += price;
+      }
+    }
+
+    return values;
+  }, [appointments, t]);
+
+  const hasChartActivity = dynamicChartData.some(
+    (point) => point.bookings > 0 || point.revenue > 0,
+  );
 
   const metrics = useMemo(() => {
     const totalRevenue = appointments
@@ -485,7 +525,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg font-medium text-zinc-100">
-                      Atividade semanal
+                      {locale === 'en' ? 'Weekly activity by weekday' : 'Atividade por dia da semana'}
                     </CardTitle>
                     <CardDescription className="mt-1 text-zinc-500">
                       {t('dashboard.compareDaily')}
@@ -499,8 +539,19 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent className="h-[280px] w-full pt-4">
-                <ChartContainer config={chartConfig} className="h-full w-full">
+              <CardContent className="h-[280px] min-w-0 w-full pt-4">
+                {!loadingInitial && !hasChartActivity ? (
+                  <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
+                    <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
+                    <p className="mt-3 text-sm font-medium text-zinc-200">
+                      {locale === 'en' ? 'No bookings to chart yet' : 'Ainda não existem marcações para apresentar'}
+                    </p>
+                    <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
+                      {locale === 'en' ? 'Bookings and completed service revenue will appear here when the barbershop has appointments.' : 'As marcações e a receita dos serviços concluídos aparecerão aqui quando existirem marcações.'}
+                    </p>
+                  </div>
+                ) : (
+                <ChartContainer config={chartConfig} className="!aspect-auto h-full min-h-[240px] min-w-0 w-full">
                   <BarChart
                     data={dynamicChartData}
                     margin={{ top: 10, right: 10, left: -12, bottom: 0 }}
@@ -546,6 +597,7 @@ export default function DashboardPage() {
                     />
                   </BarChart>
                 </ChartContainer>
+                )}
               </CardContent>
               <div
                 className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
@@ -556,7 +608,7 @@ export default function DashboardPage() {
                     className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
                     aria-hidden="true"
                   />
-                  <span className="text-zinc-300">Receita</span>
+                  <span className="text-zinc-300">{locale === 'en' ? 'Revenue' : 'Receita'}</span>
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <span

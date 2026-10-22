@@ -4,6 +4,11 @@ import path from 'node:path';
 
 const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
 
+const dashboardPage = read('app/dashboard/page.tsx');
+const stripePricesRoute = read('app/api/stripe/prices/route.ts');
+const billingSummaryRoute = read('app/api/stripe/billing-summary/route.ts');
+const subscriptionDriftMigration = read('supabase/migrations/20261022181644_restore_subscription_cancellation_requested_at.sql');
+
 const websitePage = read('app/[slug]/page.tsx');
 const enterpriseWebsitePage = read('app/site/[slug]/page.tsx');
 const websiteRequestApi = read('app/api/dashboard/custom-website/route.ts');
@@ -118,4 +123,23 @@ assert.match(adminReportsApi, /get_platform_admin_reports/);
 assert.match(adminReportsMigration, /get_platform_admin_reports/);
 assert.match(adminReportsMigration, /revoke all on function public\.get_platform_admin_reports/);
 
-console.log('Custom websites, public API, birthday automation, booking outbox, admin reports and booking lifecycle contracts passed.');
+assert.ok(
+  subscriptionDriftMigration.includes('add column if not exists cancellation_requested_at timestamptz'),
+  'Billing schema repair must add the cancellation timestamp queried by billing-summary.',
+);
+assert.ok(
+  billingSummaryRoute.includes('canceled_by_user_id, cancellation_requested_at, updated_at'),
+  'Billing summary must keep the cancellation data contract covered by a migration.',
+);
+assert.ok(
+  stripePricesRoute.includes('{ mode: paymentMode, data: prices }'),
+  'The public prices endpoint must return the payment mode for the pricing UI.',
+);
+assert.ok(
+  dashboardPage.includes('Atividade por dia da semana') &&
+    dashboardPage.includes('!aspect-auto h-full min-h-[240px] min-w-0 w-full') &&
+    dashboardPage.includes('hasChartActivity'),
+  'Dashboard chart must have a responsive layout, weekday aggregation and an explicit empty state.',
+);
+
+console.log('Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, chart and billing regression contracts passed.');
