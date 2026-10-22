@@ -46,8 +46,6 @@ import {
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 
-const isValidDate = (value: string) => Number.isFinite(new Date(value).getTime());
-
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
@@ -60,26 +58,53 @@ export default function DashboardPage() {
   const [loadingInitial, setLoadingInitial] = useState(true);
 
   const fetchInitialData = useCallback(async () => {
-    if (!barbershopId) return;
+    if (!barbershopId) {
+      setLoadingInitial(false);
+      return;
+    }
     setLoadingInitial(true);
     try {
-      const [appointmentsRes, servicesRes, professionalsRes, clientsRes] =
-        await Promise.all([
+      const [appointmentsResult, servicesResult, professionalsResult, clientsResult] =
+        await Promise.allSettled([
           appointmentService.getAll(barbershopId),
           servicesService.getAll(barbershopId),
           professionalService.getAll(barbershopId),
           appointmentService.getClients(barbershopId),
         ]);
-      if (appointmentsRes.error) throw appointmentsRes.error;
-      if (servicesRes.error) throw servicesRes.error;
-      if (professionalsRes.error) throw professionalsRes.error;
-      if (clientsRes.error) throw clientsRes.error;
-      setAppointments(appointmentsRes.data ?? []);
-      setServices(servicesRes.data ?? []);
-      setProfessionals(professionalsRes.data ?? []);
-      setClients(clientsRes.data ?? []);
+
+      if (appointmentsResult.status === 'rejected') {
+        throw appointmentsResult.reason;
+      }
+      if (appointmentsResult.value.error) {
+        throw appointmentsResult.value.error;
+      }
+      setAppointments(appointmentsResult.value.data ?? []);
+
+      let secondaryDataFailed = false;
+      if (servicesResult.status === 'fulfilled' && !servicesResult.value.error) {
+        setServices(servicesResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Services Sync Error]');
+      }
+
+      if (professionalsResult.status === 'fulfilled' && !professionalsResult.value.error) {
+        setProfessionals(professionalsResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Professionals Sync Error]');
+      }
+
+      if (clientsResult.status === 'fulfilled' && !clientsResult.value.error) {
+        setClients(clientsResult.value.data ?? []);
+      } else {
+        secondaryDataFailed = true;
+        console.error('[Dashboard Clients Sync Error]');
+      }
+
+      if (secondaryDataFailed) toast.error(t('dashboard.updateError'));
     } catch (error) {
-      console.error('[Dashboard Sync Error]:', error);
+      console.error('[Dashboard Appointments Sync Error]:', error);
       toast.error(t('dashboard.updateError'));
     } finally {
       setLoadingInitial(false);
@@ -88,7 +113,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
-    if (barbershopId) queueMicrotask(() => void fetchInitialData());
+    if (!barbershopId) {
+      setLoadingInitial(false);
+      return;
+    }
+    queueMicrotask(() => void fetchInitialData());
   }, [barbershopId, fetchInitialData, isLoadingBarbershop]);
 
   useEffect(() => {
