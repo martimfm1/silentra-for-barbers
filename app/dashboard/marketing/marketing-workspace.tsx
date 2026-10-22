@@ -165,10 +165,10 @@ function automationLabel(campaign: Campaign) {
   return 'Manual';
 }
 
-export function MarketingWorkspace() {
+export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?: View }) {
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('marketing_campaigns');
-  const [view, setView] = useState<View>('campaigns');
+  const [view, setView] = useState<View>(initialView);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [events, setEvents] = useState<EventKey[]>(
@@ -183,6 +183,7 @@ export function MarketingWorkspace() {
   const [deletingId, setDeletingId] = useState('');
   const [sendingId, setSendingId] = useState('');
   const [automationSaving, setAutomationSaving] = useState(false);
+  const [creatingBirthday, setCreatingBirthday] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
   const [details, setDetails] = useState<Campaign | null>(null);
@@ -194,6 +195,12 @@ export function MarketingWorkspace() {
 
   const selected =
     campaigns.find((campaign) => campaign.id === selectedId) ?? null;
+  const birthdayCampaign = campaigns.find(
+    (campaign) =>
+      campaign.trigger_type === 'birthday' &&
+      campaign.active !== false &&
+      campaign.status !== 'cancelled',
+  ) ?? null;
   const canManage = (campaign: Campaign) =>
     EDITABLE_STATUSES.includes(
       campaign.status as (typeof EDITABLE_STATUSES)[number],
@@ -434,6 +441,80 @@ export function MarketingWorkspace() {
       );
     } finally {
       setSendingId('');
+    }
+  }
+
+  async function createBirthdayAutomation() {
+    if (birthdayCampaign) {
+      setSelectedId(birthdayCampaign.id);
+      setView('automation');
+      toast.info('A automação de aniversário já existe. Abri a configuração atual.');
+      return;
+    }
+
+    setCreatingBirthday(true);
+    let createdCampaignId = '';
+    try {
+      const createResponse = await fetch('/api/marketing/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Aniversários',
+          channel: 'email',
+          subject: 'Feliz aniversário, {{nome}}! 🎂',
+          body: 'Olá {{nome}},\n\nA equipa da {{barbearia}} deseja-te um feliz aniversário, cheio de coisas boas! 🎉\n\nObrigado por fazeres parte da nossa comunidade. Esperamos ver-te em breve!\n\nCom os melhores votos,\n{{barbearia}}',
+        }),
+      });
+      const createData = await createResponse.json().catch(() => ({}));
+      if (!createResponse.ok || !createData.campaign?.id) {
+        throw new Error(createData.error ?? 'Não foi possível criar a campanha de aniversário.');
+      }
+
+      const campaign = createData.campaign as Campaign;
+      createdCampaignId = campaign.id;
+
+      const automationResponse = await fetch('/api/marketing/campaigns/automation', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: campaign.id,
+          triggerType: 'birthday',
+          birthdayOffsetDays: 0,
+          birthdayRewardType: 'none',
+          birthdayRewardServiceId: null,
+        }),
+      });
+      const automationData = await automationResponse.json().catch(() => ({}));
+      if (!automationResponse.ok || !automationData.campaign) {
+        throw new Error(automationData.error ?? 'A campanha foi criada, mas não foi possível ativar o gatilho de aniversário.');
+      }
+
+      setCampaigns((current) => [
+        { ...campaign, ...automationData.campaign },
+        ...current.filter((item) => item.id !== campaign.id),
+      ]);
+      setSelectedId(campaign.id);
+      setAutomation({
+        ...EMPTY_AUTOMATION,
+        mode: 'birthday',
+      });
+      setView('automation');
+      setLiveMessage('Automação de aniversário criada e ativada.');
+      toast.success('Automação de aniversário criada e ativada.');
+    } catch (error) {
+      if (createdCampaignId) {
+        await fetch(
+          `/api/marketing/campaigns?id=${encodeURIComponent(createdCampaignId)}`,
+          { method: 'DELETE' },
+        ).catch(() => undefined);
+      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível criar a automação de aniversário.',
+      );
+    } finally {
+      setCreatingBirthday(false);
     }
   }
 
@@ -801,7 +882,44 @@ export function MarketingWorkspace() {
         )}
 
         {view === 'automation' && (
-          <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+          <>
+            <Card className="overflow-hidden border-amber-400/20 bg-gradient-to-br from-amber-400/[0.09] via-white/[0.025] to-white/[0.015]">
+              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
+                    <Cake className="size-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-zinc-100">Automação de aniversário</h2>
+                    <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
+                      Cria automaticamente uma mensagem de aniversário por email, configurada para ser enviada no próprio dia. Podes editar o texto e escolher uma recompensa depois.
+                    </p>
+                    {birthdayCampaign && (
+                      <p className="mt-2 text-xs font-medium text-emerald-300">
+                        Já existe uma automação de aniversário ativa.
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => void createBirthdayAutomation()}
+                  disabled={creatingBirthday || loading}
+                  className="min-h-11 shrink-0"
+                >
+                  {creatingBirthday ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Plus className="mr-2 size-4" aria-hidden="true" />
+                  )}
+                  {creatingBirthday
+                    ? 'A configurar…'
+                    : birthdayCampaign
+                      ? 'Abrir automação'
+                      : 'Adicionar automaticamente'}
+                </Button>
+              </CardContent>
+            </Card>
+            <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
             {!selected ? (
               <Card className="border-white/10 bg-white/[0.02]">
                 <CardContent className="py-16 text-center">
@@ -1088,7 +1206,8 @@ export function MarketingWorkspace() {
                 </Card>
               </>
             )}
-          </section>
+            </section>
+          </>
         )}
 
         {view === 'performance' && (
