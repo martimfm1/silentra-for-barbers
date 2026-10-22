@@ -542,6 +542,14 @@ const checks = [
       source.includes("nextStatus === 'published'"),
   },
   {
+    name: 'Automatic booking completion does not update a non-existent appointments.updated_at column',
+    file: 'supabase/migrations/20261022144928_fix_automatic_booking_completion_updated_at.sql',
+    test: (source) =>
+      source.includes("set status = 'completed'") &&
+      source.includes('public.process_automatic_booking_completion()') &&
+      !source.includes('updated_at = now()'),
+  },
+  {
     name: 'Automatic booking completion has a ten-minute Supabase Cron job',
     file: 'supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql',
     test: (source) =>
