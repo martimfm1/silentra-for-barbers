@@ -46,6 +46,25 @@ O worker muda o estado antes de despachar automações. Se o envio falhar depois
 
 Antes de aumentar o tráfego, recolher latência p50/p95/p99, taxa de erros por endpoint, pool/conexões da base de dados, timeouts, consumo de rate limit, falhas de webhooks e backlog de automações. Confirmar limites de conexões Supabase, timeouts das funções Vercel e índices das queries frequentes. Não aumentar limites só para ocultar saturação.
 
+## Snapshot dos Supabase Advisors (base ligada ao projeto de produção)
+
+Consulta read-only executada em 22/10/2026. Os advisors reportam o seguinte:
+
+### Segurança
+
+- **13 funções `SECURITY DEFINER` executáveis por `authenticated`**. Foram inspecionadas as definições devolvidas para estas funções; a maioria inclui verificações explícitas de `auth.uid()`, papel e/ou tenant, mas o advisor não consegue provar que cada contrato é correto. Não revogar permissões em lote: primeiro identificar quais são chamadas diretamente pela aplicação e criar testes negativos por função. Referência: [Supabase advisor 0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+- **32 tabelas com RLS ativo e sem policies**. Isto pode ser intencional para tabelas exclusivamente acedidas via service role; tem de ser confirmado que os papéis `anon` e `authenticated` não têm grants que exponham esses dados. Não criar policies genéricas para eliminar o aviso.
+- **1 extensão no schema `public` (`btree_gist`)** e **proteção contra palavras-passe comprometidas desativada**. A primeira requer plano de migração/compatibilidade; a segunda deve ser ativada nas definições de Auth após avaliação do impacto para utilizadores.
+
+### Performance e capacidade
+
+- **53 chaves estrangeiras sem índice de cobertura**, incluindo referências de `appointments` a profissional, serviço e utilizador. Rever contra queries reais e adicionar índices apenas onde a seletividade e os planos justificarem.
+- **15 policies com avaliação repetida de funções de auth por linha**, que podem beneficiar de `(select auth.uid())`/equivalente conforme o predicado.
+- **14 conjuntos de policies permissivas duplicadas/sobrepostas**, incluindo leitura pública em `barbershops`, `reviews` e `services`. Consolidar apenas depois de provar que a semântica de acesso não muda.
+- **4 pares de índices duplicados** e **74 índices assinalados como não utilizados**. Não remover índices em massa: a janela de observação pode não incluir todos os fluxos; comparar planos, tráfego e migrations antes de qualquer remoção.
+
+Estas contagens são uma fotografia do advisor, não uma confirmação automática de vulnerabilidade. Os avisos de performance não justificam alterações destrutivas diretamente na base de produção sem staging, medição e rollback.
+
 ## Gate de produção recomendado
 
 - [ ] Executar `pnpm qa` e os testes de integração contra uma base de staging.
