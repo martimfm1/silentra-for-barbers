@@ -80,40 +80,54 @@ begin
     ),
     'daily', (
       select coalesce(jsonb_agg(jsonb_build_object(
-        'date', to_char(day, 'YYYY-MM-DD'),
+        'date', to_char(days.day, 'YYYY-MM-DD'),
         'barbershops', coalesce(shop_counts.total, 0),
         'users', coalesce(user_counts.total, 0),
         'appointments', coalesce(appointment_counts.total, 0),
         'revenue', coalesce(revenue_counts.total, 0),
         'apiRequests', coalesce(api_counts.total, 0),
         'apiErrors', coalesce(api_counts.errors, 0)
-      ) order by day), '[]'::jsonb)
+      ) order by days.day), '[]'::jsonb)
       from generate_series(v_start::date, current_date, interval '1 day') as days(day)
-      left join lateral (
-        select count(*) as total from public.barbershops s
-        where s.created_at >= day and s.created_at < day + interval '1 day'
-      ) shop_counts on true
-      left join lateral (
-        select count(*) as total from public.users u
-        where u.created_at >= day and u.created_at < day + interval '1 day'
-      ) user_counts on true
-      left join lateral (
-        select count(*) as total from public.appointments a
-        where a.created_at >= day and a.created_at < day + interval '1 day'
-      ) appointment_counts on true
-      left join lateral (
-        select
-          coalesce((select sum(sr.price) from public.subscription_requests sr
-            where sr.status = 'PAID' and sr.paid_at >= day and sr.paid_at < day + interval '1 day'), 0)
-          + coalesce((select sum(pt.total) from public.pos_transactions pt
-            where pt.status::text in ('completed', 'paid') and pt.created_at >= day and pt.created_at < day + interval '1 day'), 0)
-          as total
-      ) revenue_counts on true
-      left join lateral (
-        select count(*) as total, count(*) filter (where l.status_code >= 500) as errors
-        from public.platform_api_logs l
-        where l.created_at >= day and l.created_at < day + interval '1 day'
-      ) api_counts on true
+      left join (
+        select created_at::date as day, count(*) as total
+        from public.barbershops
+        where created_at >= v_start
+        group by created_at::date
+      ) shop_counts on shop_counts.day = days.day::date
+      left join (
+        select created_at::date as day, count(*) as total
+        from public.users
+        where created_at >= v_start
+        group by created_at::date
+      ) user_counts on user_counts.day = days.day::date
+      left join (
+        select created_at::date as day, count(*) as total
+        from public.appointments
+        where created_at >= v_start
+        group by created_at::date
+      ) appointment_counts on appointment_counts.day = days.day::date
+      left join (
+        select revenue_day as day, sum(amount) as total
+        from (
+          select paid_at::date as revenue_day, price as amount
+          from public.subscription_requests
+          where status = 'PAID' and paid_at >= v_start
+          union all
+          select created_at::date as revenue_day, total as amount
+          from public.pos_transactions
+          where status::text in ('completed', 'paid') and created_at >= v_start
+        ) revenue_sources
+        group by revenue_day
+      ) revenue_counts on revenue_counts.day = days.day::date
+      left join (
+        select created_at::date as day,
+          count(*) as total,
+          count(*) filter (where status_code >= 500) as errors
+        from public.platform_api_logs
+        where created_at >= v_start
+        group by created_at::date
+      ) api_counts on api_counts.day = days.day::date
     ),
     'recentActivity', (
       select coalesce(jsonb_agg(jsonb_build_object(
