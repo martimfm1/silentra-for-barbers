@@ -502,7 +502,9 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: appointment.status === 'scheduled'\n          ? 'Marcação confirmada com sucesso!'\n          : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
+        message: appointment.status === 'scheduled'
+          ? 'Marcação confirmada com sucesso!'
+          : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
         booking: {
           id: appointment.id,
           barbershopId: appointment.barbershop_id,
