@@ -260,7 +260,7 @@ export default function PlatformReportsPage() {
 
           <section className="grid gap-4 xl:grid-cols-2">
             <MiniBars title="Crescimento da plataforma" rows={report.daily} keys={[{ key: 'barbershops', label: 'Barbearias' }, { key: 'users', label: 'Utilizadores' }, { key: 'appointments', label: 'Marcações' }]} />
-            <Panel title="Receita diária registada" description="Subscrições manuais marcadas como pagas + vendas POS concluídas/pagas. Não representa receita Stripe reconciliada.">
+            <Panel title="Receita diária registada" description="Pedidos de subscrição pagos registados + vendas POS concluídas/pagas. Não representa receita Stripe reconciliada.">
               <div className="flex h-40 items-end gap-1 border-b border-white/10 pb-1 sm:h-52">
                 {report.daily.map((row) => {
                   const max = Math.max(1, ...report.daily.map((item) => item.revenue));
