@@ -25,6 +25,7 @@ const completionMigration = read('supabase/migrations/20260827134500_enable_book
 const completionSchedule = read('supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql');
 const completionCronApi = read('app/api/cron/booking-completion/route.ts');
 const bookingOutboxSchedule = read('supabase/migrations/20261022165654_schedule_booking_automation_outbox.sql');
+const bookingOutboxTimeout = read('supabase/migrations/20261022170213_increase_booking_outbox_http_timeout.sql');
 const bookingOutboxMigration = read('supabase/migrations/20261022165242_booking_automation_outbox.sql');
 const bookingOutboxWorker = read('app/api/cron/booking-automation-outbox/route.ts');
 const bookingLifecycleCron = read('app/api/cron/booking-lifecycle/route.ts');
@@ -108,6 +109,7 @@ assert.match(bookingOutboxWorker, /x-booking-timestamp/);
 assert.match(bookingOutboxSchedule, /silentra-booking-automation-outbox/);
 assert.match(bookingOutboxSchedule, /\*\/10 \* \* \* \*/);
 assert.match(bookingOutboxSchedule, /vault\.decrypted_secrets/);
+assert.match(bookingOutboxTimeout, /timeout_milliseconds := 15000/);
 assert.match(adminReportsPage, /getPlatformAdminContext/);
 assert.match(adminReportsUi, /Relatórios da plataforma/);
 assert.match(adminReportsUi, /Exportar CSV/);
