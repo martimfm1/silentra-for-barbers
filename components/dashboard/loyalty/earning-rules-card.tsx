@@ -1,5 +1,7 @@
 'use client';
 
+import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,6 +25,7 @@ interface Rule {
 }
 
 export function EarningRulesCard() {
+  const confirm = useDashboardConfirm();
   const [services, setServices] = useState<Service[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
   const [serviceId, setServiceId] = useState('');
@@ -110,7 +113,13 @@ export function EarningRulesCard() {
   }
 
   async function deleteRule(id: string) {
-    if (!window.confirm('Remover esta regra de pontos?')) return;
+    const confirmed = await confirm({
+      title: 'Remover regra de pontos?',
+      description: 'A regra deixa de atribuir pontos aos serviços associados. Os pontos já atribuídos não serão alterados.',
+      confirmLabel: 'Remover regra',
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       const response = await fetch(
         `/api/loyalty/earning-rules?id=${encodeURIComponent(id)}`,
