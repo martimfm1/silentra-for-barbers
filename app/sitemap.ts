@@ -156,5 +156,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Enterprise URLs are best-effort if the entitlement migration is not deployed yet.
   }
 
-  return [...staticRoutes, ...dynamicShopRoutes, ...enterpriseLandingRoutes];
+  const customWebsiteRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const database = createAdminClient();
+    const { data: websites, error: websitesError } = await database
+      .from('custom_website_requests')
+      .select('public_slug, published_at, updated_at')
+      .eq('status', 'published')
+      .not('public_slug', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(5000);
+
+    if (!websitesError && websites?.length) {
+      const seen = new Set<string>();
+      for (const website of websites) {
+        const slug = String(website.public_slug ?? '').trim().toLowerCase();
+        if (!slug || seen.has(slug)) continue;
+        seen.add(slug);
+        const lastModifiedValue = website.published_at ?? website.updated_at;
+        const parsedLastModified = lastModifiedValue
+          ? new Date(String(lastModifiedValue))
+          : now;
+        customWebsiteRoutes.push({
+          url: `${SITE_URL}/site/${encodeURIComponent(slug)}`,
+          lastModified: Number.isNaN(parsedLastModified.getTime())
+            ? now
+            : parsedLastModified,
+          changeFrequency: 'weekly',
+          priority: 0.85,
+        });
+      }
+    }
+  } catch {
+    // Custom website URLs are best-effort when the feature table is unavailable.
+  }
+
+  return [
+    ...staticRoutes,
+    ...dynamicShopRoutes,
+    ...enterpriseLandingRoutes,
+    ...customWebsiteRoutes,
+  ];
 }
