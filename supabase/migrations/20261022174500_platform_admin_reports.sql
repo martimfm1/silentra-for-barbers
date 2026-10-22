@@ -22,7 +22,15 @@ begin
       'appointments', (select count(*) from public.appointments),
       'subscriptions', (select count(*) from public.subscriptions),
       'activeSubscriptions', (select count(*) from public.subscriptions where status::text in ('active', 'trialing')),
-      'marketplaceOrders', (select count(*) from public.marketplace_orders)
+      'marketplaceOrders', (select count(*) from public.marketplace_orders),
+      'reviews', (select count(*) from public.reviews),
+      'loyaltyRedemptions', (select count(*) from public.loyalty_redemptions),
+      'inventoryProducts', (select count(*) from public.inventory_products),
+      'locations', (select count(*) from public.locations),
+      'services', (select count(*) from public.services),
+      'professionals', (select count(*) from public.professionals),
+      'posTransactions', (select count(*) from public.pos_transactions),
+      'billingDocuments', (select count(*) from public.billing_documents)
     ),
     'period', jsonb_build_object(
       'newBarbershops', (select count(*) from public.barbershops where created_at >= v_start),
@@ -42,7 +50,16 @@ begin
       'marketingFailed', (select count(*) from public.marketing_campaign_recipients where created_at >= v_start and status = 'failed'),
       'automationRuns', (select count(*) from public.automation_runs where created_at >= v_start),
       'automationFailed', (select count(*) from public.automation_runs where created_at >= v_start and status = 'failed'),
-      'openSupportConversations', (select count(*) from public.support_conversations where status::text not in ('closed', 'resolved'))
+      'openSupportConversations', (select count(*) from public.support_conversations where status::text not in ('closed', 'resolved')),
+      'reviews', (select count(*) from public.reviews where created_at >= v_start),
+      'loyaltyRedemptions', (select count(*) from public.loyalty_redemptions where created_at >= v_start),
+      'inventoryMovements', (select count(*) from public.inventory_movements where created_at >= v_start),
+      'lowStockProducts', (select count(*) from public.inventory_products where active = true and low_stock_threshold is not null and stock_quantity <= low_stock_threshold),
+      'billingDocuments', (select count(*) from public.billing_documents where created_at >= v_start),
+      'emailFailures', (select count(*) from public.email_queue where status = 'failed' and created_at >= v_start),
+      'notificationFailures', (select count(*) from public.notification_queue where status = 'failed' and created_at >= v_start),
+      'commissions', (select count(*) from public.commissions where created_at >= v_start),
+      'commissionValue', coalesce((select sum(commission_amount) from public.commissions where created_at >= v_start), 0)
     ),
     'appointmentStatuses', (
       select coalesce(jsonb_agg(jsonb_build_object('status', status, 'count', count) order by count desc), '[]'::jsonb)
