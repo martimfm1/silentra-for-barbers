@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
-import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { isRecord } from '@/lib/validation';
 
 async function POST__unobserved(
@@ -205,14 +204,6 @@ async function POST__unobserved(
       }
     }
 
-    void dispatchAppointmentAutomations('booking_completed', {
-      appointmentId: appointment.id,
-      barbershopId: profile.barbershop_id,
-      clientId: appointment.client_id,
-      manualEmail: appointment.manual_email,
-      manualName: appointment.manual_name,
-      serviceName: serviceRelation?.name,
-    });
     return NextResponse.json({
       success: true,
       booking: updated,
