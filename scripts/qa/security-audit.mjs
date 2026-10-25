@@ -151,6 +151,20 @@ const requestValidationChecks = [
     label: 'Authenticated appointment request validation, tenant binding, and mobile agenda read',
   },
   {
+    file: 'app/api/appointments/[appointmentId]/complete/route.ts',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['paymentMethod', 'descriptionProducts', 'valueProducts']",
+      "new Set(['cash', 'mbway', 'card'])",
+      'requireTenantAuthorization(request, COMPLETION_ROLES)',
+      ".eq('barbershop_id', barbershopId)",
+      ".eq('status', 'scheduled')",
+      "'review_submission_tokens'",
+      'sendBookingReviewRequestEmail',
+    ],
+    label: 'Appointment completion supports Bearer/cookie auth, strict payment inputs and tenant scoping',
+  },
+  {
     file: 'app/api/appointments/[appointmentId]/confirm/route.ts',
     markers: [
       'requireTenantAuthorization(request, CONFIRM_ROLES)',
