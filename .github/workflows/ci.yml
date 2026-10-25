@@ -95,6 +95,9 @@ jobs:
       - name: SEO foundation contracts
         run: pnpm qa:seo
 
+      - name: Cookie consent and legal-document contracts
+        run: pnpm qa:cookies
+
       - name: Build
         run: pnpm build
 
