@@ -104,8 +104,9 @@ async function hasMemberPermission(
 export async function requireModuleContext(
   feature: FeatureKey,
   permission?: string,
+  request?: Request,
 ) {
-  const access = await getAccessPlanForRequest();
+  const access = await getAccessPlanForRequest(request);
   if (!access.ok) throw new ModuleAuthorizationError('UNAUTHORIZED');
 
   try {

@@ -1,33 +1,19 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { UUID_PATTERN } from '@/lib/validation';
+import { requireModuleContext, moduleErrorResponse } from '@/services/modules/authorization';
 
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ clientId: string }> };
 
-async function tenant(req: Request) {
-  const authUser = await getCurrentUser(req);
-  if (!authUser) return null;
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from('users')
-    .select('barbershop_id, role')
-    .eq('id', authUser.id)
-    .maybeSingle();
-  if (
-    !data?.barbershop_id ||
-    !['admin', 'owner', 'staff'].includes(data.role ?? 'staff')
-  )
-    return null;
-  return { admin, userId: authUser.id, barbershopId: data.barbershop_id };
-}
-
 async function GET__unobserved(req: Request, { params }: Params) {
-  const t = await tenant(req);
-  if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { clientId } = await params;
+  try {
+    const t = await requireModuleContext('clients', 'clients', req);
+    const { clientId } = await params;
+    if (!UUID_PATTERN.test(clientId)) {
+      return NextResponse.json({ error: 'Identificador de cliente inválido.' }, { status: 400 });
+    }
 
   const [
     { data: client, error: clientError },
@@ -47,7 +33,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
     t.admin
       .from('appointments')
       .select(
-        'id, date_hour, status, value_products, payment_method, service_id, professional_id, description_products, created_at',
+        'id, date_hour, status, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name,price), professionals(name)',
       )
       .eq('barbershop_id', t.barbershopId)
       .eq('client_id', clientId)
@@ -78,12 +64,24 @@ async function GET__unobserved(req: Request, { params }: Params) {
       { error: 'Failed to load client history' },
       { status: 500 },
     );
-  return NextResponse.json({
-    client,
-    appointments: appointments ?? [],
-    notes: notes ?? [],
-    tags: tags ?? [],
-  });
+  return NextResponse.json(
+    {
+      client,
+      appointments: appointments ?? [],
+      notes: notes ?? [],
+      tags: tags ?? [],
+    },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
+  } catch (error) {
+    const authorization = moduleErrorResponse(error);
+    if (authorization) return authorization;
+    console.error('[CRM_CLIENT_DETAIL_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
+    return NextResponse.json(
+      { error: 'Não foi possível carregar os dados deste cliente.' },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
 }
 
 export const GET = withApiObservability(
