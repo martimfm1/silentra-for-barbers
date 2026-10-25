@@ -39,7 +39,7 @@ assert.match(layout, /allowAnalytics && allowMarketing \? \(/);
 assert.match(layout, /enableVercelTelemetry && allowAnalytics/);
 assert.match(
   layout,
-  /allowAnalytics && allowMarketing \?\s*<GoogleTagManager gtmId="GTM-PBCWTRT5"/,
+  /allowAnalytics && allowMarketing \?\s*\(\s*<GoogleTagManager gtmId="GTM-PBCWTRT5"/,
   'Google Tag Manager must be gated by both analytics and marketing consent.',
 );
 assert.match(
