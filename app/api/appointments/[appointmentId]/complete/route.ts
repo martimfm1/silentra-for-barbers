@@ -1,10 +1,29 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
-import { isRecord } from '@/lib/validation';
+import { UUID_PATTERN } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
+import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { hasPlanFeature } from '@/lib/billing/plan-features';
+import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
+
+const COMPLETION_ROLES = [
+  'owner',
+  'admin',
+  'manager',
+  'barber',
+  'receptionist',
+  'staff',
+] as const;
+const PAYMENT_METHODS = new Set(['cash', 'mbway', 'card']);
+
+function hasAgendaGrant(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const permissions = value as Record<string, unknown>;
+  return permissions.agenda === true || permissions.appointments === true;
+}
+
 
 async function POST__unobserved(
   request: Request,
@@ -12,67 +31,130 @@ async function POST__unobserved(
 ) {
   try {
     const { appointmentId } = await params;
-    const body: unknown = await request.json().catch(() => ({}));
-    if (!appointmentId || !isRecord(body))
+    if (!UUID_PATTERN.test(appointmentId)) {
       return NextResponse.json(
-        { success: false, error: 'Pedido inválido.' },
+        { success: false, error: 'Identificador de marcação inválido.' },
         { status: 400 },
       );
+    }
+
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['paymentMethod', 'descriptionProducts', 'valueProducts'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
+
     const paymentMethod =
-      typeof body.paymentMethod === 'string' ? body.paymentMethod : '';
-    const descriptionProducts =
-      typeof body.descriptionProducts === 'string'
-        ? body.descriptionProducts.slice(0, 500)
+      typeof body.paymentMethod === 'string'
+        ? body.paymentMethod.trim().toLowerCase()
         : '';
-    const rawValue =
-      typeof body.valueProducts === 'string' ||
-      typeof body.valueProducts === 'number'
-        ? Number(body.valueProducts)
-        : 0;
-    const valueProducts =
-      Number.isFinite(rawValue) && rawValue >= 0 ? rawValue : 0;
-    if (!paymentMethod)
+    if (!PAYMENT_METHODS.has(paymentMethod)) {
       return NextResponse.json(
-        { success: false, error: 'Seleciona o método de pagamento.' },
+        { success: false, error: 'Seleciona um método de pagamento válido.' },
         { status: 400 },
       );
+    }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user)
+    const rawDescription = body.descriptionProducts ?? '';
+    if (typeof rawDescription !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Não autorizado.' },
-        { status: 401 },
+        { success: false, error: 'A descrição do produto não é válida.' },
+        { status: 400 },
       );
+    }
+    const descriptionProducts = rawDescription.trim().slice(0, 500);
 
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('barbershop_id, role')
-      .eq('id', user.id)
-      .maybeSingle();
-    if (
-      profileError ||
-      !profile?.barbershop_id ||
-      !['owner', 'admin', 'manager', 'receptionist', 'staff'].includes(
-        profile.role,
-      )
-    ) {
+    const rawValue = body.valueProducts === undefined || body.valueProducts === ''
+      ? 0
+      : typeof body.valueProducts === 'number' || typeof body.valueProducts === 'string'
+        ? Number(body.valueProducts)
+        : Number.NaN;
+    if (!Number.isFinite(rawValue) || rawValue < 0 || !Number.isSafeInteger(Math.round(rawValue * 100))) {
       return NextResponse.json(
-        { success: false, error: 'Sem permissão para concluir esta marcação.' },
+        { success: false, error: 'O valor adicional tem de ser um número válido e não negativo.' },
+        { status: 400 },
+      );
+    }
+    const valueProducts = Math.round(rawValue * 100) / 100;
+
+    const tenant = await requireTenantAuthorization(request, COMPLETION_ROLES);
+    if (!tenant.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: tenant.status === 401
+            ? 'Não autorizado.'
+            : 'Sem permissão para concluir esta marcação.',
+        },
+        { status: tenant.status },
+      );
+    }
+    const { admin, barbershopId } = tenant;
+
+    if (tenant.role !== 'owner') {
+      const { data: grant, error: grantError } = await admin
+        .from('barbershop_member_permissions')
+        .select('permissions')
+        .eq('barbershop_id', barbershopId)
+        .eq('user_id', tenant.userId)
+        .maybeSingle();
+
+      if (grantError) {
+        console.error('[APPOINTMENT_COMPLETE_PERMISSION_ERROR]', grantError.code ?? 'UNKNOWN');
+        return NextResponse.json(
+          { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+          { status: 503 },
+        );
+      }
+
+      let allowed = false;
+      if (grant) {
+        allowed = hasAgendaGrant(grant.permissions);
+      } else {
+        const { data: legacyGrant, error: legacyError } = await admin
+          .from('staff_permissions')
+          .select('allowed')
+          .eq('barbershop_id', barbershopId)
+          .eq('user_id', tenant.userId)
+          .in('permission', ['agenda', 'appointments'])
+          .eq('allowed', true)
+          .limit(1)
+          .maybeSingle();
+
+        if (legacyError) {
+          console.error('[APPOINTMENT_COMPLETE_LEGACY_PERMISSION_ERROR]', legacyError.code ?? 'UNKNOWN');
+          return NextResponse.json(
+            { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+            { status: 503 },
+          );
+        }
+        allowed = legacyGrant?.allowed === true;
+      }
+
+      if (!allowed) {
+        return NextResponse.json(
+          { success: false, error: 'Sem permissão para concluir atendimentos.' },
+          { status: 403 },
+        );
+      }
+    }
+
+    const plan = await resolveAccessPlanForUser(tenant.userId);
+    if (!hasPlanFeature(plan, 'appointments')) {
+      return NextResponse.json(
+        { success: false, error: 'A agenda não está incluída no plano desta barbearia.' },
         { status: 403 },
       );
     }
 
-    const { data: appointment, error: appointmentError } = await supabase
+    const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
         'id,status,barbershop_id,client_id,manual_name,manual_email,date_hour,services(name)',
       )
       .eq('id', appointmentId)
-      .eq('barbershop_id', profile.barbershop_id)
+      .eq('barbershop_id', barbershopId)
       .maybeSingle();
     if (appointmentError || !appointment)
       return NextResponse.json(
@@ -90,7 +172,7 @@ async function POST__unobserved(
         { status: 409 },
       );
 
-    const { data: updated, error: updateError } = await supabase
+    const { data: updated, error: updateError } = await admin
       .from('appointments')
       .update({
         status: 'completed',
@@ -99,38 +181,44 @@ async function POST__unobserved(
         description_products: descriptionProducts,
       })
       .eq('id', appointmentId)
-      .eq('barbershop_id', profile.barbershop_id)
+      .eq('barbershop_id', barbershopId)
       .eq('status', 'scheduled')
       .select(
         'id,status,date_hour,barbershop_id,client_id,manual_name,manual_email,services(name)',
       )
       .maybeSingle();
-    if (updateError || !updated) {
+    if (updateError) {
       console.error(
         '[APPOINTMENT_COMPLETE_UPDATE_ERROR]',
-        updateError?.code ?? 'UNKNOWN',
+        updateError.code ?? 'UNKNOWN',
       );
       return NextResponse.json(
         { success: false, error: 'Não foi possível concluir o atendimento.' },
         { status: 500 },
       );
     }
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'A marcação já foi alterada. Atualiza a agenda e tenta novamente.' },
+        { status: 409 },
+      );
+    }
 
-    const { data: shop } = await supabase
+    const { data: shop } = await admin
       .from('shops')
       .select('id,slug,name')
-      .eq('barbershop_id', profile.barbershop_id)
+      .eq('barbershop_id', barbershopId)
       .eq('is_active', true)
       .limit(1)
       .maybeSingle();
     let customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
     let customerName = appointment.manual_name?.trim() || 'Cliente';
     if (!customerEmail && appointment.client_id) {
-      const { data: client } = await supabase
+      const { data: client } = await admin
         .from('users')
         .select('email,name_complete')
         .eq('id', appointment.client_id)
-        .eq('barbershop_id', profile.barbershop_id)
+        .eq('barbershop_id', barbershopId)
         .maybeSingle();
       customerEmail = client?.email?.trim().toLowerCase() || '';
       customerName = client?.name_complete?.trim() || customerName;
@@ -145,7 +233,6 @@ async function POST__unobserved(
       try {
         const rawToken = randomBytes(32).toString('base64url');
         const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-        const admin = createAdminClient();
         const { error: tokenError } = await admin
           .from('review_submission_tokens')
           .insert({
