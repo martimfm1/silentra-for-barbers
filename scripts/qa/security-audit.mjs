@@ -390,7 +390,7 @@ const requestValidationChecks = [
     file: 'app/api/barbershops/public-profile/route.ts',
     markers: [
       'readJsonObject(request',
-      'maxBytes: 24 * 1024',
+      'maxBytes: 8 * 1024',
       'allowedKeys: [',
       "const canCustomizeSlug = plan === 'enterprise';",
       'exclusivamente no plano Enterprise',
@@ -469,7 +469,7 @@ const routeSecurityChecks = [
     markers: [
       "requireModuleContext('clients', 'clients', req)",
       "allowedKeys: ['content']",
-      'maxBytes: 8 * 1024',
+      'maxBytes: 24 * 1024',
       'UUID_PATTERN.test(clientId)',
       ".eq('barbershop_id', tenant.barbershopId)",
       ".eq('role', 'client')",
