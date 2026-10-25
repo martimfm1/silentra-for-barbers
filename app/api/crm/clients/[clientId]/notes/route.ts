@@ -1,64 +1,103 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { UUID_PATTERN } from '@/lib/validation';
+import { readJsonObject } from '@/lib/security/request-validation';
+import {
+  requireModuleContext,
+  moduleErrorResponse,
+} from '@/services/modules/authorization';
+
+export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ clientId: string }> };
 
-async function tenant(req: Request) {
-  const authUser = await getCurrentUser(req);
-  if (!authUser) return null;
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from('users')
-    .select('barbershop_id, role')
-    .eq('id', authUser.id)
-    .maybeSingle();
-  if (
-    !data?.barbershop_id ||
-    !['admin', 'owner', 'staff'].includes(data.role ?? 'staff')
-  )
-    return null;
-  return { admin, userId: authUser.id, barbershopId: data.barbershop_id };
-}
-
 async function POST__unobserved(req: Request, { params }: Params) {
-  const t = await tenant(req);
-  if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { clientId } = await params;
-  const body = (await req.json().catch(() => null)) as {
-    content?: unknown;
-  } | null;
-  const content = typeof body?.content === 'string' ? body.content.trim() : '';
-  if (content.length < 1 || content.length > 5000)
-    return NextResponse.json({ error: 'Invalid note' }, { status: 400 });
+  try {
+    const tenant = await requireModuleContext('clients', 'clients', req);
+    const { clientId } = await params;
+    if (!UUID_PATTERN.test(clientId)) {
+      return NextResponse.json(
+        { error: 'Identificador de cliente inválido.' },
+        { status: 400 },
+      );
+    }
 
-  const { data: client } = await t.admin
-    .from('users')
-    .select('id')
-    .eq('id', clientId)
-    .eq('barbershop_id', t.barbershopId)
-    .eq('role', 'client')
-    .maybeSingle();
-  if (!client)
-    return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+    const payload = await readJsonObject(req, {
+      maxBytes: 8 * 1024,
+      allowedKeys: ['content'],
+    });
+    if (!payload.ok) return payload.response;
+    const content =
+      typeof payload.value.content === 'string'
+        ? payload.value.content.trim()
+        : '';
+    if (content.length < 1 || content.length > 5000) {
+      return NextResponse.json(
+        { error: 'A nota tem de conter entre 1 e 5000 caracteres.' },
+        { status: 400 },
+      );
+    }
 
-  const { data, error } = await t.admin
-    .from('client_notes')
-    .insert({
-      client_id: clientId,
-      barbershop_id: t.barbershopId,
-      author_id: t.userId,
-      content,
-    })
-    .select('id, content, author_id, created_at, updated_at')
-    .single();
-  if (error)
+    const { data: client, error: clientError } = await tenant.admin
+      .from('users')
+      .select('id')
+      .eq('id', clientId)
+      .eq('barbershop_id', tenant.barbershopId)
+      .eq('role', 'client')
+      .maybeSingle();
+
+    if (clientError) {
+      console.error('[CRM_CLIENT_NOTE_CLIENT_LOOKUP_ERROR]', clientError.code ?? 'UNKNOWN');
+      return NextResponse.json(
+        { error: 'Não foi possível validar o cliente.' },
+        { status: 503 },
+      );
+    }
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Cliente não encontrado.' },
+        { status: 404 },
+      );
+    }
+
+    const { data: note, error } = await tenant.admin
+      .from('client_notes')
+      .insert({
+        client_id: clientId,
+        barbershop_id: tenant.barbershopId,
+        author_id: tenant.userId,
+        content,
+      })
+      .select('id, content, author_id, created_at, updated_at')
+      .single();
+
+    if (error || !note) {
+      console.error('[CRM_CLIENT_NOTE_CREATE_ERROR]', error?.code ?? 'UNKNOWN');
+      return NextResponse.json(
+        { error: 'Não foi possível guardar a nota.' },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create note' },
-      { status: 500 },
+      { note },
+      {
+        status: 201,
+        headers: { 'Cache-Control': 'no-store' },
+      },
     );
-  return NextResponse.json({ note: data }, { status: 201 });
+  } catch (error) {
+    const authorization = moduleErrorResponse(error);
+    if (authorization) return authorization;
+    console.error(
+      '[CRM_CLIENT_NOTE_INTERNAL_ERROR]',
+      error instanceof Error ? error.name : 'UNKNOWN',
+    );
+    return NextResponse.json(
+      { error: 'Não foi possível guardar a nota.' },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
 }
 
 export const POST = withApiObservability(
