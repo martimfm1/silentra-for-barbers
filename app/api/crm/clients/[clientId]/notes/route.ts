@@ -23,7 +23,7 @@ async function POST__unobserved(req: Request, { params }: Params) {
     }
 
     const payload = await readJsonObject(req, {
-      maxBytes: 8 * 1024,
+      maxBytes: 24 * 1024,
       allowedKeys: ['content'],
     });
     if (!payload.ok) return payload.response;

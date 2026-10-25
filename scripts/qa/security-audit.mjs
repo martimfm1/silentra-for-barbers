@@ -390,7 +390,7 @@ const requestValidationChecks = [
     file: 'app/api/barbershops/public-profile/route.ts',
     markers: [
       'readJsonObject(request',
-      'maxBytes: 8 * 1024',
+      'maxBytes: 24 * 1024',
       'allowedKeys: [',
       "const canCustomizeSlug = plan === 'enterprise';",
       'exclusivamente no plano Enterprise',
