@@ -5,6 +5,7 @@ import { privacyPolicy } from '@/lib/legal/privacy-policy';
 import {
   CURRENT_LEGAL_UPDATE,
   currentPrivacyAddendum,
+  currentPrivacyFeatureSections,
 } from '@/lib/legal/current-legal-addendum';
 
 const CANONICAL_URL = 'https://barbers.silentra.me/privacy';
@@ -35,12 +36,20 @@ const currentPrivacyPolicy = {
   pt: {
     ...privacyPolicy.pt,
     lastUpdated: CURRENT_LEGAL_UPDATE,
-    sections: [...privacyPolicy.pt.sections, currentPrivacyAddendum.pt],
+    sections: [
+      ...privacyPolicy.pt.sections,
+      currentPrivacyAddendum.pt,
+      ...currentPrivacyFeatureSections.pt,
+    ],
   },
   en: {
     ...privacyPolicy.en,
-    lastUpdated: 'August 21, 2026',
-    sections: [...privacyPolicy.en.sections, currentPrivacyAddendum.en],
+    lastUpdated: 'October 25, 2026',
+    sections: [
+      ...privacyPolicy.en.sections,
+      currentPrivacyAddendum.en,
+      ...currentPrivacyFeatureSections.en,
+    ],
   },
 };
 
