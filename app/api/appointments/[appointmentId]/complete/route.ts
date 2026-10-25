@@ -5,6 +5,25 @@ import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
 import { UUID_PATTERN } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { hasPlanFeature } from '@/lib/billing/plan-features';
+import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
+
+const COMPLETION_ROLES = [
+  'owner',
+  'admin',
+  'manager',
+  'barber',
+  'receptionist',
+  'staff',
+] as const;
+const PAYMENT_METHODS = new Set(['cash', 'mbway', 'card']);
+
+function hasAgendaGrant(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const permissions = value as Record<string, unknown>;
+  return permissions.agenda === true || permissions.appointments === true;
+}
+
 
 async function POST__unobserved(
   request: Request,
@@ -30,8 +49,7 @@ async function POST__unobserved(
       typeof body.paymentMethod === 'string'
         ? body.paymentMethod.trim().toLowerCase()
         : '';
-    const paymentMethods = new Set(['cash', 'mbway', 'card']);
-    if (!paymentMethods.has(paymentMethod)) {
+    if (!PAYMENT_METHODS.has(paymentMethod)) {
       return NextResponse.json(
         { success: false, error: 'Seleciona um método de pagamento válido.' },
         { status: 400 },
@@ -60,13 +78,6 @@ async function POST__unobserved(
     }
     const valueProducts = Math.round(rawValue * 100) / 100;
 
-    const COMPLETION_ROLES = [
-      'owner',
-      'admin',
-      'manager',
-      'receptionist',
-      'staff',
-    ] as const;
     const tenant = await requireTenantAuthorization(request, COMPLETION_ROLES);
     if (!tenant.ok) {
       return NextResponse.json(
@@ -80,6 +91,62 @@ async function POST__unobserved(
       );
     }
     const { admin, barbershopId } = tenant;
+
+    if (tenant.role !== 'owner') {
+      const { data: grant, error: grantError } = await admin
+        .from('barbershop_member_permissions')
+        .select('permissions')
+        .eq('barbershop_id', barbershopId)
+        .eq('user_id', tenant.userId)
+        .maybeSingle();
+
+      if (grantError) {
+        console.error('[APPOINTMENT_COMPLETE_PERMISSION_ERROR]', grantError.code ?? 'UNKNOWN');
+        return NextResponse.json(
+          { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+          { status: 503 },
+        );
+      }
+
+      let allowed = false;
+      if (grant) {
+        allowed = hasAgendaGrant(grant.permissions);
+      } else {
+        const { data: legacyGrant, error: legacyError } = await admin
+          .from('staff_permissions')
+          .select('allowed')
+          .eq('barbershop_id', barbershopId)
+          .eq('user_id', tenant.userId)
+          .in('permission', ['agenda', 'appointments'])
+          .eq('allowed', true)
+          .limit(1)
+          .maybeSingle();
+
+        if (legacyError) {
+          console.error('[APPOINTMENT_COMPLETE_LEGACY_PERMISSION_ERROR]', legacyError.code ?? 'UNKNOWN');
+          return NextResponse.json(
+            { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+            { status: 503 },
+          );
+        }
+        allowed = legacyGrant?.allowed === true;
+      }
+
+      if (!allowed) {
+        return NextResponse.json(
+          { success: false, error: 'Sem permissão para concluir atendimentos.' },
+          { status: 403 },
+        );
+      }
+    }
+
+    const plan = await resolveAccessPlanForUser(tenant.userId);
+    if (!hasPlanFeature(plan, 'appointments')) {
+      return NextResponse.json(
+        { success: false, error: 'A agenda não está incluída no plano desta barbearia.' },
+        { status: 403 },
+      );
+    }
 
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
@@ -120,14 +187,20 @@ async function POST__unobserved(
         'id,status,date_hour,barbershop_id,client_id,manual_name,manual_email,services(name)',
       )
       .maybeSingle();
-    if (updateError || !updated) {
+    if (updateError) {
       console.error(
         '[APPOINTMENT_COMPLETE_UPDATE_ERROR]',
-        updateError?.code ?? 'UNKNOWN',
+        updateError.code ?? 'UNKNOWN',
       );
       return NextResponse.json(
         { success: false, error: 'Não foi possível concluir o atendimento.' },
         { status: 500 },
+      );
+    }
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'A marcação já foi alterada. Atualiza a agenda e tenta novamente.' },
+        { status: 409 },
       );
     }
 
