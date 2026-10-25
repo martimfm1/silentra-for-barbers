@@ -16,6 +16,10 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { guestMetadata } from '@/lib/site-metadata';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import {
+  COOKIE_CONSENT_COOKIE,
+  parseCookieConsent,
+} from '@/lib/privacy/cookie-consent';
 
 const WHOP_PIXEL_SCRIPT = `!function(w,d,s,u,n,a,b){if(w[n])return;a=w[n]={q:[],t:+new Date,s:[],o:u,track:function(){a.q.push([+new Date].concat([].slice.call(arguments)))},setScope:function(){a.s=[].slice.call(arguments).filter(function(x){return typeof x==="string"});a.q.push([+new Date,"setScope"].concat(a.s))},scope:function(){var c=[].slice.call(arguments);return{track:function(){a.q.push([+new Date].concat([].slice.call(arguments)).concat([{__scope:c}]))}}}};b=d.createElement(s);b.async=1;b.src=u+"/s.js";d.getElementsByTagName(s)[0].parentNode.insertBefore(b,d.getElementsByTagName(s)[0])}(window,document,"script","https://t.whop.tw","whop");whop.setScope("biz_edgYPA5mT3GkKH");whop.track("page");`;
 
@@ -47,6 +51,13 @@ export default async function RootLayout({
   const storedLocale = cookieStore.get('locale')?.value;
   const initialLocale = storedLocale === 'en' ? 'en' : 'pt';
   const enableVercelTelemetry = process.env.NODE_ENV === 'production';
+  const cookieConsent = parseCookieConsent(
+    cookieStore.get(COOKIE_CONSENT_COOKIE)?.value,
+  );
+  const allowAnalytics = cookieConsent?.analytics === true;
+  const allowMarketing = cookieConsent?.marketing === true;
+  // GTM can execute tags from multiple categories, so it loads only when the
+  // visitor has explicitly enabled both analytics and marketing.
 
   return (
     <html
@@ -67,22 +78,28 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-full bg-black text-foreground">
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-PBCWTRT5"
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          />
-        </noscript>
-        <Script id="whop-pixel" strategy="afterInteractive">
-          {WHOP_PIXEL_SCRIPT}
-        </Script>
-        <GoogleTagManager gtmId="GTM-PBCWTRT5" />
+        {allowAnalytics && allowMarketing ? (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-PBCWTRT5"
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        ) : null}
+        {allowMarketing ? (
+          <Script id="whop-pixel" strategy="afterInteractive">
+            {WHOP_PIXEL_SCRIPT}
+          </Script>
+        ) : null}
+        {allowAnalytics && allowMarketing ? (
+          <GoogleTagManager gtmId="GTM-PBCWTRT5" />
+        ) : null}
         <LanguageProvider initialLocale={initialLocale}>
           <ProductionLogGuard />
-          {enableVercelTelemetry ? <SpeedInsights /> : null}
-          {enableVercelTelemetry ? <Analytics /> : null}
+          {enableVercelTelemetry && allowAnalytics ? <SpeedInsights /> : null}
+          {enableVercelTelemetry && allowAnalytics ? <Analytics /> : null}
           <ClientShell>{children}</ClientShell>
         </LanguageProvider>
       </body>

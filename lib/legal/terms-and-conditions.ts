@@ -9,7 +9,7 @@ export type TermsDocument = {
   sections: LegalSection[];
 };
 
-export const TERMS_LAST_UPDATED = '10 de agosto de 2026';
+export const TERMS_LAST_UPDATED = '25 de outubro de 2026';
 
 export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
   pt: {

@@ -9,7 +9,7 @@ export type PrivacyDocument = {
   sections: PrivacySection[];
 };
 
-export const PRIVACY_LAST_UPDATED = '10 de agosto de 2026';
+export const PRIVACY_LAST_UPDATED = '25 de outubro de 2026';
 
 export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
   pt: {
