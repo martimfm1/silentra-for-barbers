@@ -11,7 +11,7 @@ async function GET__unobserved(request: Request) {
         success: false,
         error: 'Sessão expirada. Confirma novamente o teu email.',
       },
-      { status: 401 },
+      { status: 401, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 
