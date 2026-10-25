@@ -423,6 +423,48 @@ for (const check of requestValidationChecks) {
 
 const routeSecurityChecks = [
   {
+    file: 'services/billing/plan-access.guard.ts',
+    markers: [
+      'getAccessPlanForRequest(',
+      'getCurrentUser(request)',
+      'SubscriptionService.getAccessPlan(userId)',
+    ],
+    label: 'Request-aware plan guard supports mobile Bearer tokens without changing cookie callers',
+  },
+  {
+    file: 'services/modules/authorization.ts',
+    markers: [
+      'request?: Request',
+      'getAccessPlanForRequest(request)',
+      "PERMISSION_ALIASES:",
+      "clients: ['clients']",
+    ],
+    label: 'Module authorization supports request-bound client access and preserved member permissions',
+  },
+  {
+    file: 'app/api/crm/clients/route.ts',
+    markers: [
+      "requireModuleContext('clients', 'clients', req)",
+      ".eq('barbershop_id', tenant.barbershopId)",
+      ".eq('role', 'client')",
+      'const search = url.searchParams.get(\'search\')?.trim().slice(0, 80)',
+      'Cache-Control',
+    ],
+    label: 'Mobile client directory requires authenticated tenant, module permission and bounded search',
+  },
+  {
+    file: 'app/api/crm/clients/[clientId]/route.ts',
+    markers: [
+      "requireModuleContext('clients', 'clients', req)",
+      'UUID_PATTERN.test(clientId)',
+      ".eq('barbershop_id', t.barbershopId)",
+      ".eq('role', 'client')",
+      'services(name,price), professionals(name)',
+      'Cache-Control',
+    ],
+    label: 'Client details and history are tenant-scoped and protected by plan/module permission',
+  },
+  {
     file: 'lib/marketing/brevo-webhook.ts',
     markers: [
       "contentType !== 'application/json'",

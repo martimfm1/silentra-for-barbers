@@ -9,16 +9,16 @@ export const dynamic = 'force-dynamic';
 
 async function GET__unobserved(req: Request) {
   try {
-    const tenant = await requireModuleContext('clients', 'clients');
+    const tenant = await requireModuleContext('clients', 'clients', req);
     const url = new URL(req.url);
-    const search = url.searchParams.get('search')?.trim() ?? '';
+    const search = url.searchParams.get('search')?.trim().slice(0, 80) ?? '';
     const parsedLimit = Number(url.searchParams.get('limit') ?? 50);
     const parsedOffset = Number(url.searchParams.get('offset') ?? 0);
     const limit = Number.isFinite(parsedLimit)
       ? Math.min(Math.max(parsedLimit, 1), 100)
       : 50;
     const offset = Number.isFinite(parsedOffset)
-      ? Math.max(parsedOffset, 0)
+      ? Math.min(Math.max(Math.trunc(parsedOffset), 0), 100_000)
       : 0;
 
     let query = tenant.admin
