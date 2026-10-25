@@ -73,9 +73,18 @@ export async function clearPortalCookie(): Promise<void> {
   });
 }
 
-export async function getPortalSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
+export async function getPortalSession(request?: Request) {
+  const authorization = request?.headers.get('authorization');
+  let token: string | undefined;
+
+  if (authorization !== null && authorization !== undefined) {
+    const match = /^Bearer\s+([a-f0-9]{64})$/.exec(authorization.trim());
+    if (!match) return null;
+    token = match[1];
+  } else {
+    const cookieStore = await cookies();
+    token = cookieStore.get(COOKIE_NAME)?.value;
+  }
   if (!token) return null;
 
   const tokenHash = hashPortalToken(token);

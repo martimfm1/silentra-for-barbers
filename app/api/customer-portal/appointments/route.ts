@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-async function GET__unobserved() {
-  const session = await getPortalSession();
+async function GET__unobserved(request: Request) {
+  const session = await getPortalSession(request);
   if (!session) {
     return NextResponse.json(
       {
