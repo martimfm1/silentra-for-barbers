@@ -507,6 +507,21 @@ const routeSecurityChecks = [
     label: 'Client details and history are tenant-scoped and protected by plan/module permission',
   },
   {
+    file: 'app/api/crm/clients/[clientId]/notes/route.ts',
+    markers: [
+      "requireModuleContext('clients', 'clients', req)",
+      "allowedKeys: ['content']",
+      'maxBytes: 24 * 1024',
+      'UUID_PATTERN.test(clientId)',
+      ".eq('barbershop_id', tenant.barbershopId)",
+      ".eq('role', 'client')",
+      'content.length > 5000',
+      'author_id: tenant.userId',
+      'Cache-Control',
+    ],
+    label: 'CRM note creation validates request, plan/module permissions and tenant before writing',
+  },
+  {
     file: 'lib/marketing/brevo-webhook.ts',
     markers: [
       "contentType !== 'application/json'",
