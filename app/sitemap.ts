@@ -58,6 +58,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.2,
     },
+    {
+      url: `${SITE_URL}/cookies`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.2,
+    },
   ];
 
   let dynamicShopRoutes: MetadataRoute.Sitemap = [];
