@@ -141,7 +141,7 @@ const requestValidationChecks = [
       "'professionalId'",
       ".eq('barbershop_id', barbershopId)",
       'create_booking_atomic',
-      'requireTenantAuthorization(request',
+      'requireTenantAuthorization(',
       'hasAgendaGrant',
       'resolveAccessPlanForUser',
       "hasPlanFeature(plan, 'appointments')",
