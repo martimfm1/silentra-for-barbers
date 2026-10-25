@@ -1,50 +1,37 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient } from '@/lib/supabase/server';
+import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 
-const CONFIRM_ROLES = new Set([
+const CONFIRM_ROLES = [
   'owner',
   'admin',
   'manager',
   'receptionist',
   'staff',
   'barber',
-]);
+] as const;
 
 async function POST__unobserved(
   request: Request,
   context: { params: Promise<{ appointmentId: string }> },
 ) {
-  void request;
   try {
     const { appointmentId } = await context.params;
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
+    const tenant = await requireTenantAuthorization(request, CONFIRM_ROLES);
+    if (!tenant.ok) {
       return NextResponse.json(
-        { success: false, error: 'Sessão inválida.' },
-        { status: 401 },
+        {
+          success: false,
+          error: tenant.status === 401
+            ? 'Sessão inválida.'
+            : 'Sem permissão para confirmar marcações.',
+        },
+        { status: tenant.status },
       );
-
-    const admin = createAdminClient();
-    const { data: profile, error: profileError } = await admin
-      .from('users')
-      .select('barbershop_id, role')
-      .eq('id', user.id)
-      .maybeSingle();
-    const role = String(profile?.role ?? '')
-      .trim()
-      .toLowerCase();
-    if (profileError || !profile?.barbershop_id || !CONFIRM_ROLES.has(role))
-      return NextResponse.json(
-        { success: false, error: 'Sem permissão para confirmar marcações.' },
-        { status: 403 },
-      );
+    }
+    const { admin, barbershopId } = tenant;
 
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
@@ -52,7 +39,7 @@ async function POST__unobserved(
         'id,status,barbershop_id,date_hour,duration_minutes,manual_name,manual_email,client_id,service_id',
       )
       .eq('id', appointmentId)
-      .eq('barbershop_id', profile.barbershop_id)
+      .eq('barbershop_id', barbershopId)
       .maybeSingle();
     if (appointmentError)
       return NextResponse.json(
@@ -92,7 +79,7 @@ async function POST__unobserved(
       admin
         .from('barbershops')
         .select('name,address')
-        .eq('id', profile.barbershop_id)
+        .eq('id', barbershopId)
         .maybeSingle(),
       appointment.service_id
         ? admin
@@ -138,7 +125,7 @@ async function POST__unobserved(
       .from('appointments')
       .update({ status: 'scheduled' })
       .eq('id', appointmentId)
-      .eq('barbershop_id', profile.barbershop_id)
+      .eq('barbershop_id', barbershopId)
       .eq('status', 'pending')
       .select('id,status,date_hour')
       .maybeSingle();
@@ -191,7 +178,7 @@ async function POST__unobserved(
           time: localTime,
           durationMinutes: Number(appointment.duration_minutes ?? 45),
           appointmentId: appointment.id,
-          barbershopId: profile.barbershop_id,
+          barbershopId: barbershopId,
           barbershopName: barbershop.name,
           barbershopAddress: barbershop.address || 'Endereço sob consulta',
         });
@@ -211,7 +198,7 @@ async function POST__unobserved(
 
     void dispatchAppointmentAutomations('booking_created', {
       appointmentId: appointment.id,
-      barbershopId: profile.barbershop_id,
+      barbershopId: barbershopId,
       clientId: appointment.client_id,
       manualEmail: appointment.manual_email,
       manualName: appointment.manual_name,
