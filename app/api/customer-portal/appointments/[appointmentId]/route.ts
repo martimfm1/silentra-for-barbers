@@ -62,8 +62,8 @@ function jsonError(error: string, status = 400) {
     { status, headers: { 'Cache-Control': 'no-store' } },
   );
 }
-async function getAuthorizedAppointment(appointmentId: string) {
-  const session = await getPortalSession();
+async function getAuthorizedAppointment(request: Request, appointmentId: string) {
+  const session = await getPortalSession(request);
   if (!session || !UUID_PATTERN.test(appointmentId))
     return { session, appointment: null, admin: null };
   const admin = createAdminClient();
@@ -223,7 +223,7 @@ async function GET__unobserved(
   try {
     const { appointmentId } = await params;
     const { session, appointment, admin } =
-      await getAuthorizedAppointment(appointmentId);
+      await getAuthorizedAppointment(request, appointmentId);
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)
@@ -246,13 +246,13 @@ async function GET__unobserved(
 }
 
 async function DELETE__unobserved(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
 ) {
   try {
     const { appointmentId } = await params;
     const { session, appointment, admin } =
-      await getAuthorizedAppointment(appointmentId);
+      await getAuthorizedAppointment(request, appointmentId);
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)
@@ -327,7 +327,7 @@ async function PATCH__unobserved(
     if (!isSafePublicBookingDate(date) || !isValidTime(slot))
       return jsonError('Indica uma data e hora válidas.');
     const { session, appointment, admin } =
-      await getAuthorizedAppointment(appointmentId);
+      await getAuthorizedAppointment(request, appointmentId);
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)

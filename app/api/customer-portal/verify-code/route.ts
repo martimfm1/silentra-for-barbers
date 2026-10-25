@@ -31,11 +31,18 @@ async function POST__unobserved(request: Request) {
   try {
     const bodyResult = await readJsonObject(request, {
       maxBytes: 4 * 1024,
-      allowedKeys: ['email', 'code'],
+      allowedKeys: ['email', 'code', 'clientPlatform'],
     });
     if (!bodyResult.ok) return bodyResult.response;
     const email = normalizePortalEmail(bodyResult.value.email);
     const code = typeof bodyResult.value.code === 'string' ? bodyResult.value.code.trim() : '';
+    const clientPlatform = bodyResult.value.clientPlatform ?? 'web';
+    if (clientPlatform !== 'web' && clientPlatform !== 'mobile') {
+      return NextResponse.json(
+        { success: false, error: 'Plataforma de cliente inválida.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     if (!email || !/^\d{6}$/.test(code))
       return NextResponse.json(
         { success: false, error: 'Email ou código inválido.' },
@@ -124,7 +131,14 @@ async function POST__unobserved(request: Request) {
     }
 
     await setPortalCookie(token, expiresAt);
-    return NextResponse.json({ success: true, email });
+    return NextResponse.json(
+      {
+        success: true,
+        email,
+        ...(clientPlatform === 'mobile' ? { sessionToken: token, expiresAt } : {}),
+      },
+      { headers: { 'Cache-Control': 'no-store', Pragma: 'no-cache' } },
+    );
   } catch (error) {
     console.error('[CUSTOMER_PORTAL_VERIFY_ERROR]', error);
     return NextResponse.json(
