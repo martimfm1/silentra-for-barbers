@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
+import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import {
@@ -318,12 +319,16 @@ async function PATCH__unobserved(
 ) {
   try {
     const { appointmentId } = await params;
-    const body = (await request.json().catch(() => ({}))) as {
-      date?: unknown;
-      slot?: unknown;
-    };
-    const date = typeof body.date === 'string' ? body.date : '';
-    const slot = typeof body.slot === 'string' ? body.slot.slice(0, 5) : '';
+    if (!UUID_PATTERN.test(appointmentId))
+      return jsonError('Identificador de marcação inválido.');
+
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['date', 'slot'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const date = typeof bodyResult.value.date === 'string' ? bodyResult.value.date : '';
+    const slot = typeof bodyResult.value.slot === 'string' ? bodyResult.value.slot.slice(0, 5) : '';
     if (!isSafePublicBookingDate(date) || !isValidTime(slot))
       return jsonError('Indica uma data e hora válidas.');
     const { session, appointment, admin } =
