@@ -436,7 +436,7 @@ const routeSecurityChecks = [
     markers: [
       'request?: Request',
       'getAccessPlanForRequest(request)',
-      "PERMISSION_ALIASES =",
+      "PERMISSION_ALIASES:",
       "clients: ['clients']",
     ],
     label: 'Module authorization supports request-bound client access and preserved member permissions',
