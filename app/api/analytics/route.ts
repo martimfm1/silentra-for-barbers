@@ -70,7 +70,7 @@ function ageGroup(age: number) {
 async function GET__unobserved(request: Request) {
   try {
     const { admin, barbershopId, plan } =
-      await requireModuleContext('advanced_analytics');
+      await requireModuleContext('advanced_analytics', undefined, request);
     const url = new URL(request.url);
     const now = new Date();
     const from = startOfDay(
@@ -304,7 +304,7 @@ async function GET__unobserved(request: Request) {
     }
     return NextResponse.json(response, {
       headers: {
-        'Cache-Control': 'private, max-age=60, stale-while-revalidate=120',
+        'Cache-Control': 'no-store',
       },
     });
   } catch (error) {
