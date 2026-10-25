@@ -45,7 +45,7 @@ function getLisbonOffsetMinutes(utcInstant: Date): number {
     minute: '2-digit',
     hourCycle: 'h23',
   }).formatToParts(utcInstant).find((part) => part.type === 'timeZoneName')?.value;
-  const match = /^GMT(?:([+-])(\\d{1,2})(?::(\\d{2}))?)?$/.exec(value ?? 'GMT');
+  const match = /^GMT(?:([+-])(\d{1,2})(?::(\d{2}))?)?$/.exec(value ?? 'GMT');
   if (!match) return 0;
   const sign = match[1] === '-' ? -1 : 1;
   return sign * (Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0));
