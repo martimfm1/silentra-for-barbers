@@ -294,8 +294,50 @@ const requestValidationChecks = [
   },
   {
     file: 'app/api/customer-portal/verify-code/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['email', 'code']", 'verify_booking_portal_code', 'normalizePortalEmail'],
-    label: 'Customer portal verification code request validation',
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['email', 'code', 'clientPlatform']",
+      'verify_booking_portal_code',
+      'normalizePortalEmail',
+      "bodyResult.value.clientPlatform ?? 'web'",
+      "clientPlatform === 'mobile' ? { sessionToken: token, expiresAt }",
+      "'Cache-Control': 'no-store'",
+    ],
+    label: 'Customer portal OTP verification supports secure mobile session tokens without changing web cookie login',
+  },
+  {
+    file: 'app/api/customer-portal/appointments/route.ts',
+    markers: [
+      'async function GET__unobserved(request: Request)',
+      'getPortalSession(request)',
+      ".eq('manual_email', session.email)",
+      '.in(\'client_id\', clientIds)',
+      "headers: { 'Cache-Control': 'no-store' }",
+    ],
+    label: 'Customer booking history validates cookie or Bearer session and remains email-scoped',
+  },
+  {
+    file: 'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+    markers: [
+      'async function getAuthorizedAppointment(request: Request, appointmentId: string)',
+      'getPortalSession(request)',
+      'ownsAppointment',
+      'getAuthorizedAppointment(request, appointmentId)',
+      ".eq('id', appointment.id)",
+      'CUSTOMER_PORTAL_CANCEL_ERROR',
+    ],
+    label: 'Customer booking actions accept the session token and verify appointment ownership',
+  },
+  {
+    file: 'app/api/customer-portal/logout/route.ts',
+    markers: [
+      'POST__unobserved(request: Request)',
+      'getPortalSession(request)',
+      ".eq('id', session.id)",
+      'clearPortalCookie()',
+      "'Cache-Control': 'no-store'",
+    ],
+    label: 'Customer portal logout revokes server-side session by validated session ID',
   },
   {
     file: 'app/api/loyalty/request-code/route.ts',
