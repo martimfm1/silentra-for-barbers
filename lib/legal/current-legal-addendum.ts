@@ -4,7 +4,7 @@ export const CURRENT_LEGAL_UPDATE = '25 de outubro de 2026';
 
 export const currentTermsAddendum = {
   pt: {
-    title: '15. Oferta promocional, dados e faturação — 21 de agosto de 2026',
+    title: '15. Oferta promocional, dados e faturação — 25 de outubro de 2026',
     paragraphs: [
       'A Silentra disponibiliza, para novos membros elegíveis que subscrevam o plano Barbers Pro através do checkout aplicável, uma oferta promocional de um mês associada ao código promocional TRIALPRO. A oferta está sujeita à elegibilidade verificada pela Plataforma e às condições configuradas na Stripe.',
       'A oferta TRIALPRO não constitui um período experimental universal nem é garantida para contas que já tenham tido uma subscrição, uma oferta promocional ou outro histórico de faturação que as torne inelegíveis. A Silentra pode impedir a aplicação da oferta quando a conta ou a utilização anterior indicar que as condições de novos membros não são cumpridas.',
@@ -12,10 +12,12 @@ export const currentTermsAddendum = {
       'A aplicação do código promocional é controlada server-side e pela Stripe. A apresentação do código numa página, anúncio ou mensagem promocional não garante, por si só, a aplicação do desconto se a promoção tiver expirado, sido desativada, atingido os respetivos limites ou se a conta não cumprir os critérios de elegibilidade.',
       'O utilizador deve rever o total, o desconto, a periodicidade e as condições apresentadas no checkout antes de confirmar a subscrição. Em caso de conflito entre uma mensagem promocional e o valor final confirmado no checkout, prevalecem as condições e valores efetivamente apresentados no checkout e registados pelo processador de pagamentos, sem prejuízo dos direitos legais aplicáveis.',
       'As funcionalidades podem incluir reservas públicas, gestão de clientes, agenda, profissionais, fidelização, emails, analytics, automações e outras ferramentas disponibilizadas no plano. Os limites e a disponibilidade podem variar por plano, configuração e estado da conta.',
+      'A utilização de cookies não essenciais, identificadores de publicidade ou tecnologias de análise depende da escolha prévia do utilizador sempre que exigido por lei. A recusa não deve impedir o acesso às funcionalidades essenciais.',
+      'As preferências são guardadas durante um período limitado e podem ser alteradas ou retiradas através do atalho de preferências de cookies. A retirada do consentimento não afeta a licitude do tratamento efetuado antes da retirada.',
     ],
   },
   en: {
-    title: '15. Promotional offer, data, and billing — August 21, 2026',
+    title: '15. Promotional offer, data, and billing — October 25, 2026',
     paragraphs: [
       'Silentra provides eligible new members who subscribe to the Barbers Pro plan through the applicable checkout with a one-month promotional offer associated with the TRIALPRO promotion code. The offer is subject to eligibility verified by the Platform and the conditions configured in Stripe.',
       'The TRIALPRO offer is not a universal trial and is not guaranteed for accounts that have previously had a subscription, promotional offer, or other billing history that makes them ineligible. Silentra may prevent the offer from being applied when account or prior-use information indicates that the new-member conditions are not met.',
@@ -23,13 +25,15 @@ export const currentTermsAddendum = {
       'Promotion-code application is controlled server-side and by Stripe. Displaying the code on a promotional page, advertisement, or message does not by itself guarantee the discount if the promotion has expired, been disabled, reached its limits, or the account does not meet the eligibility criteria.',
       'Users should review the total, discount, billing interval, and terms shown at checkout before confirming a subscription. If a promotional message conflicts with the final checkout amount, the conditions and values actually presented at checkout and recorded by the payment processor prevail, subject to mandatory legal rights.',
       'Features may include public bookings, customer management, scheduling, professionals, loyalty, email, analytics, automations, and other tools made available under the applicable plan. Limits and availability may vary by plan, configuration, and account state.',
+      'Use of non-essential cookies, advertising identifiers, or analytics technologies depends on the user’s prior choice wherever required by law. Refusing them must not prevent access to essential features.',
+      'Preferences are stored for a limited period and can be changed or withdrawn through the cookie-preferences shortcut. Withdrawal does not affect the lawfulness of processing carried out before withdrawal.',
     ],
   },
 } as const;
 
 export const currentPrivacyAddendum = {
   pt: {
-    title: '15. Atualização do tratamento — 21 de agosto de 2026',
+    title: '15. Atualização do tratamento — 25 de outubro de 2026',
     paragraphs: [
       'Data de nascimento: o campo pode ser recolhido no processo de reserva e armazenado na marcação até existir uma necessidade operacional de o associar ao perfil de cliente da barbearia. A barbearia deve limitar a utilização deste dado ao necessário e assegurar uma base legal adequada.',
       'Localização: quando o cliente autoriza a localização do dispositivo, a Silentra pode utilizar latitude, longitude e informação de precisão para apresentar o mapa, ordenar resultados por distância e melhorar a pesquisa. A localização do cliente não é necessária para navegar no marketplace e, por defeito, é utilizada apenas no contexto da experiência em que foi autorizada.',
@@ -39,10 +43,12 @@ export const currentPrivacyAddendum = {
       'Email e notificações: a plataforma pode tratar endereços de email e dados técnicos necessários para enviar confirmações de reserva, mensagens operacionais, códigos de acesso e outras comunicações configuradas. O envio de comunicações comerciais deve respeitar a base legal e as preferências aplicáveis.',
       'Cookies e analytics: podem ser utilizados identificadores estritamente necessários para sessão, segurança e funcionamento. Quando sejam usados mecanismos opcionais de medição ou tecnologias que exijam consentimento, esse tratamento deve respeitar as preferências de consentimento configuradas pelo utilizador e a legislação aplicável.',
       'Segurança e minimização: as políticas de acesso procuram aplicar segregação por barbearia, menor privilégio e validação no servidor. Estes controlos destinam-se a apoiar os princípios de minimização, limitação das finalidades, integridade e confidencialidade previstos no RGPD.',
+      'O banner de consentimento permite aceitar todas as categorias opcionais, rejeitar as opcionais ou configurar separadamente estatísticas e marketing. As tecnologias não essenciais permanecem desativadas até existir uma escolha válida. A preferência é guardada num cookie próprio, com duração limitada, e pode ser alterada através do atalho de preferências ou da página Política de Cookies.',
+      'O Google Tag Manager pode executar etiquetas de terceiros e, por isso, só é carregado quando as categorias de consentimento necessárias estão autorizadas. O pixel Whop depende da autorização de marketing; Vercel Analytics e Speed Insights dependem da autorização de estatísticas. A configuração de etiquetas no Google Tag Manager deve respeitar estas categorias e não pode contornar as preferências registadas.',
     ],
   },
   en: {
-    title: '15. Processing update — August 21, 2026',
+    title: '15. Processing update — October 25, 2026',
     paragraphs: [
       "Date of birth: the field may be collected during booking and stored on the appointment until there is an operational need to associate it with the barbershop's customer profile. The barbershop should limit use of this data to what is necessary and maintain an appropriate lawful basis.",
       'Location: when a customer authorizes device location, Silentra may use latitude, longitude, and accuracy information to display maps, sort results by distance, and improve search. Customer location is not required to browse the marketplace and, by default, is used only in the experience for which it was authorized.',
@@ -52,6 +58,8 @@ export const currentPrivacyAddendum = {
       'Email and notifications: the platform may process email addresses and technical data needed to send booking confirmations, operational messages, access codes, and other configured communications. Commercial communications must be supported by an appropriate lawful basis and respect applicable preferences.',
       "Cookies and analytics: strictly necessary identifiers may be used for sessions, security, and essential operation. Where optional measurement tools or technologies requiring consent are used, processing should respect the user's configured consent preferences and applicable law.",
       'Security and minimization: access policies aim to apply barbershop-level segregation, least privilege, and server-side validation. These controls are intended to support GDPR principles of data minimization, purpose limitation, integrity, and confidentiality.',
+      'The consent banner lets visitors accept all optional categories, reject optional categories, or configure analytics and marketing separately. Non-essential technologies remain disabled until a valid choice is recorded. The preference is stored in a first-party cookie for a limited period and can be changed through the cookie-preferences shortcut or the Cookie Policy page.',
+      'Google Tag Manager can execute third-party tags and is therefore loaded only when the required consent categories are enabled. The Whop pixel depends on marketing consent; Vercel Analytics and Speed Insights depend on analytics consent. Tags configured in Google Tag Manager must respect these categories and must not bypass recorded preferences.',
     ],
   },
 } as const;
