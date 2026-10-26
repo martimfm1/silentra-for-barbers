@@ -12,6 +12,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import { PwaInstallButton } from '@/components/pwa-install-button';
 import { NAVBAR_POPUP_TRANSITION, NAVBAR_TRANSITION } from './navbar-motion';
 
 type NavigationRole =
@@ -724,6 +725,9 @@ export function SiteNavbar() {
                   );
                 })}
               </nav>
+              <div className="my-4 flex justify-start">
+                <PwaInstallButton locale={locale === 'en' ? 'en' : 'pt'} />
+              </div>
               {!loading && !user ? (
                 <div className="mt-auto grid gap-2 border-t border-white/8 pt-6 sm:flex sm:items-center sm:justify-end">
                   <Button
