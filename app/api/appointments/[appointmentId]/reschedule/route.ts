@@ -68,8 +68,11 @@ async function PATCH__unobserved(
     if (!['pending', 'scheduled'].includes(appointment.status)) return NextResponse.json({ success: false, error: 'Só podes remarcar marcações pendentes ou confirmadas.' }, { status: 409 });
 
     const newDateHour = `${date}T${time}:00`;
-    const start = new Date(newDateHour).getTime();
-    if (!Number.isFinite(start) || start <= Date.now()) return NextResponse.json({ success: false, error: 'A nova data tem de estar no futuro.' }, { status: 400 });
+    const todayLisbon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const currentLisbonTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+    if (date < todayLisbon || (date === todayLisbon && time <= currentLisbonTime)) {
+      return NextResponse.json({ success: false, error: 'A nova data tem de estar no futuro.' }, { status: 400 });
+    }
     const duration = Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440);
     const startMinutes = minutes(time);
     const endMinutes = startMinutes + duration;
