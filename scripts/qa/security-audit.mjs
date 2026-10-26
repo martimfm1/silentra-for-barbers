@@ -180,6 +180,20 @@ const requestValidationChecks = [
     label: 'Appointment confirmation supports Bearer/cookie auth and remains tenant-scoped',
   },
   {
+    file: 'app/api/appointments/[appointmentId]/reschedule/route.ts',
+    markers: [
+      'requireTenantAuthorization(request, ROLES)',
+      "allowedKeys: ['date', 'time']",
+      "hasPlanFeature(plan, 'appointments')",
+      ".eq('barbershop_id', barbershopId)",
+      "['pending', 'scheduled']",
+      "from('schedule_blocks')",
+      'professional_appointment_reschedule',
+      "withApiObservability('/api/appointments/[appointmentId]/reschedule'",
+    ],
+    label: 'Professional appointment rescheduling validates request, permissions, plan, tenant, availability and audit trail',
+  },
+  {
     file: 'app/api/auth/register/route.ts',
     markers: [
       'readJsonObject(request',
