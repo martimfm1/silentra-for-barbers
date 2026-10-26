@@ -264,6 +264,45 @@ async function POST__unobserved(request: Request) {
       );
     }
 
+    if (tenant.role !== 'owner') {
+      const { data: grant, error: grantError } = await tenant.admin
+        .from('barbershop_member_permissions')
+        .select('permissions')
+        .eq('barbershop_id', tenant.barbershopId)
+        .eq('user_id', tenant.userId)
+        .maybeSingle();
+
+      if (grantError) {
+        return NextResponse.json({ error: 'Não foi possível validar as permissões da agenda.' }, { status: 503 });
+      }
+
+      let allowed = grant ? hasAgendaGrant(grant.permissions) : false;
+      if (!grant) {
+        const { data: legacyGrant, error: legacyError } = await tenant.admin
+          .from('staff_permissions')
+          .select('allowed')
+          .eq('barbershop_id', tenant.barbershopId)
+          .eq('user_id', tenant.userId)
+          .in('permission', ['agenda', 'appointments'])
+          .eq('allowed', true)
+          .limit(1)
+          .maybeSingle();
+        if (legacyError) {
+          return NextResponse.json({ error: 'Não foi possível validar as permissões da agenda.' }, { status: 503 });
+        }
+        allowed = legacyGrant?.allowed === true;
+      }
+
+      if (!allowed) {
+        return NextResponse.json({ error: 'Sem permissão para criar marcações.' }, { status: 403 });
+      }
+    }
+
+    const plan = await resolveAccessPlanForUser(tenant.userId);
+    if (!hasPlanFeature(plan, 'appointments')) {
+      return NextResponse.json({ error: 'A agenda não está incluída no plano desta barbearia.' }, { status: 403 });
+    }
+
     const bodyResult = await readJsonObject(request, {
       maxBytes: 16 * 1024,
       allowedKeys: [
