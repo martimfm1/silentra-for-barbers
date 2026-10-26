@@ -18,7 +18,7 @@ const [rootLayout, responsiveCss, globalsCss, packageJson, workflow] = await Pro
   read('app/layout.tsx'),
   read('app/silentra-responsive.css'),
   read('app/globals.css'),
-  read('package.json'),
+  read('package.json').then((contents) => JSON.parse(contents)),
   read('.github/workflows/ci.yml'),
 ]);
 
