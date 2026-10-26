@@ -32,6 +32,20 @@ assert.match(consentManager, /href="\/cookies"/);
 assert.match(consentManager, /window\.location\.reload\(\)/);
 assert.match(consentManager, /Preferências de cookies/);
 assert.match(clientShell, /CookieConsentManager/);
+assert.match(clientShell, /usePathname/);
+assert.match(clientShell, /const dashboardRoutePrefixes = \[/);
+for (const prefix of ['/dashboard', '/silentra-admin', '/_silentra-admin', '/silentra_admin']) {
+  assert.ok(
+    clientShell.includes(`'${prefix}'`),
+    `Cookie consent must stay hidden throughout dashboard route ${prefix}.`,
+  );
+}
+assert.match(clientShell, /showCookieConsent \? <CookieConsentManager \/> : null/);
+assert.match(
+  clientShell,
+  /pathname === prefix \|\| pathname\.startsWith\(\`\$\{prefix\}\/\`\)/,
+  'Dashboard route matching must cover nested dashboard pages.',
+);
 
 assert.match(layout, /parseCookieConsent/);
 assert.match(layout, /allowMarketing \? \(/);
