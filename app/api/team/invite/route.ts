@@ -1,10 +1,27 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-async function POST__unobserved() {
+async function createRequestClient(request: Request) {
+  const authorization = request.headers.get('Authorization');
+  if (authorization?.startsWith('Bearer ')) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase server configuration is incomplete.');
+    }
+    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authorization } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  return createClient();
+}
+
+async function POST__unobserved(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = await createRequestClient(request);
     const {
       data: { user },
       error: authError,

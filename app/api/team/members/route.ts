@@ -1,5 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 
@@ -27,6 +28,22 @@ const DEFAULT_PERMISSIONS: Record<string, boolean> = {
   settings: false,
   billing: false,
 };
+
+async function createRequestClient(request: Request) {
+  const authorization = request.headers.get('Authorization');
+  if (authorization?.startsWith('Bearer ')) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase server configuration is incomplete.');
+    }
+    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authorization } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  return createClient();
+}
 
 function defaultPermissionsForRole(role: string) {
   if (role === 'barber') {
@@ -202,7 +219,7 @@ async function GET__unobserved(request: Request) {
 }
 
 async function PATCH__unobserved(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createRequestClient(request);
   const {
     data: { user },
     error: authError,
@@ -266,7 +283,7 @@ async function PATCH__unobserved(request: Request) {
 }
 
 async function DELETE__unobserved(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createRequestClient(request);
   const {
     data: { user },
     error: authError,
