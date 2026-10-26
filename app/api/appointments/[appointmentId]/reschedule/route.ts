@@ -47,7 +47,7 @@ function getLisbonParts(value: string | Date): { date: string; time: string } {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(new Date(value));
+  }).formatToParts(new Date(value instanceof Date ? value.getTime() : value));
   const field = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
   return {
     date: field('year') + '-' + field('month') + '-' + field('day'),
@@ -78,7 +78,7 @@ function formatLisbonDate(value: string | Date): string {
   return new Intl.DateTimeFormat('pt-PT', {
     dateStyle: 'full',
     timeZone: 'Europe/Lisbon',
-  }).format(new Date(value));
+  }).format(new Date(value instanceof Date ? value.getTime() : value));
 }
 
 function formatLisbonTime(value: string | Date): string {
@@ -87,7 +87,7 @@ function formatLisbonTime(value: string | Date): string {
     minute: '2-digit',
     hourCycle: 'h23',
     timeZone: 'Europe/Lisbon',
-  }).format(new Date(value));
+  }).format(new Date(value instanceof Date ? value.getTime() : value));
 }
 
 async function PATCH__unobserved(
