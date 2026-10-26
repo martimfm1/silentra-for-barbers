@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const root = process.cwd();
 const read = (path) => readFile(join(root, path), 'utf8');
 
-const [manifestSource, metadata, layout, registration, worker, topBar, siteNavbar, packageJson] =
+const [manifestSource, metadata, layout, registration, worker, topBar, siteNavbar, installPage, packageJson] =
   await Promise.all([
     read('public/site.webmanifest'),
     read('lib/site-metadata.ts'),
@@ -14,6 +14,7 @@ const [manifestSource, metadata, layout, registration, worker, topBar, siteNavba
     read('public/sw.js'),
     read('app/dashboard/_components/DashboardTopBar.tsx'),
     read('components/site-navbar.tsx'),
+    read('app/instalar/page.tsx'),
     read('package.json'),
   ]);
 
@@ -36,6 +37,10 @@ assert.match(registration, /serviceWorker\.register\('\/sw\.js'/);
 assert.match(topBar, /PwaInstallButton/);
 assert.match(topBar, /PwaInstallButton locale=/);
 assert.match(siteNavbar, /PwaInstallButton locale=/);
+assert.match(siteNavbar, /href: '\/instalar'/);
+assert.match(installPage, /<PwaInstallButton locale=\{locale\} \/>/);
+assert.match(installPage, /Adicionar ao ecrã principal/);
+assert.match(installPage, /href="\/dashboard"/);
 assert.match(worker, /url\.pathname\.startsWith\('\/_next\/static\/'\)/);
 assert.match(worker, /if \(!isStaticAsset && !isPwaAsset\) return/);
 assert.match(packageJson, /"qa:pwa": "node scripts\/qa\/pwa-installability\.mjs"/);
