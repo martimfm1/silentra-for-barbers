@@ -76,6 +76,9 @@ jobs:
       - name: UI/UX and accessibility contracts
         run: pnpm qa:ux
 
+      - name: Horizontal overflow contracts
+        run: pnpm qa:overflow
+
       - name: Manual payment contracts
         run: pnpm qa:manual-payments
 

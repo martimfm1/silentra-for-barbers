@@ -221,3 +221,175 @@ body:has([data-slot='drawer-content'].max-w-lg.rounded-none)
     max-width: 100%;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Platform-wide horizontal-overflow contract.
+   This is deliberately global so public pages, auth flows, dashboards,
+   dialogs and embedded content share the same sizing rules.
+   ------------------------------------------------------------------------- */
+html,
+body {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+body,
+body > * {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Flex/grid children default to min-width:auto, which is a common source
+   of overflow when labels, inputs, charts or long values are present. */
+:where(.flex, .grid, [class*='flex-'], [class*='grid-']) > * {
+  min-inline-size: 0;
+}
+
+:where(
+  main,
+  section,
+  article,
+  aside,
+  header,
+  footer,
+  nav,
+  form,
+  fieldset,
+  [role='main'],
+  [data-slot='card'],
+  [data-slot='card-header'],
+  [data-slot='card-content'],
+  [data-slot='card-footer'],
+  .container,
+  .silentra-page-shell,
+  .silentra-page-content,
+  .silentra-section-block,
+  .silentra-dashboard-shell,
+  .silentra-dashboard-main,
+  .dashboard-page,
+  .dashboard-content
+) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Long names, URLs, codes and customer-provided values must wrap inside
+   the container instead of increasing the page's intrinsic width. */
+body :where(
+  p,
+  a,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label,
+  strong,
+  em,
+  b,
+  li,
+  td,
+  th,
+  [data-slot='card-title']
+) {
+  overflow-wrap: anywhere;
+}
+
+:where(img, video, canvas, iframe, object, embed, svg) {
+  max-inline-size: 100%;
+}
+
+:where(pre, code, kbd, samp) {
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* Prevent viewport-sized utilities and inline 100vw sizing from extending
+   beyond the actual containing block (notably on mobile with browser UI). */
+[class*='w-screen'],
+[style*='100vw'] {
+  max-inline-size: 100%;
+}
+
+/* Dialog/sheet/popover surfaces fit the viewport on every route, not only
+   when opened from the dashboard. */
+[data-slot='dialog-content'],
+[data-slot='sheet-content'],
+[data-slot='drawer-content'],
+[data-slot='popover-content'],
+[data-slot='dropdown-menu-content'],
+[role='dialog'] {
+  max-inline-size: min(calc(100vw - 1rem), 100%);
+}
+
+[data-slot='table-container'],
+.silentra-table-wrap {
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+@media (max-width: 767px) {
+  /* Tables stay inside their cards and let cell content wrap. */
+  table,
+  .silentra-table-wrap table,
+  [data-slot='table-container'] table {
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    table-layout: fixed;
+  }
+
+  th,
+  td,
+  .silentra-table-wrap th,
+  .silentra-table-wrap td,
+  [data-slot='table-container'] th,
+  [data-slot='table-container'] td {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .silentra-table-wrap,
+  [data-slot='table-container'] {
+    overflow-x: clip;
+  }
+
+  :where(
+    main,
+    section,
+    article,
+    aside,
+    header,
+    footer,
+    nav,
+    form,
+    fieldset,
+    [role='main'],
+    [data-slot='card'],
+    [data-slot='card-header'],
+    [data-slot='card-content'],
+    [data-slot='card-footer']
+  ) {
+    min-inline-size: 0;
+  }
+
+  :where(input, select, textarea) {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content'],
+  [data-slot='drawer-content'],
+  [role='dialog'] {
+    inline-size: min(calc(100vw - 1rem), 100%);
+    max-inline-size: min(calc(100vw - 1rem), 100%);
+  }
+}
+
