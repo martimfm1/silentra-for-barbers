@@ -314,11 +314,15 @@ export function SiteNavbar() {
         href: '/#howitworks',
       },
       {
+        label: locale === 'pt' ? 'Aplicação' : 'Get the app',
+        href: '/instalar',
+      },
+      {
         label: t('nav.documentation', { defaultValue: 'Documentação' }),
         href: '/documentation',
       },
     ],
-    [t],
+    [t, locale],
   );
 
   const guestLinks = useMemo<NavLink[]>(
@@ -343,6 +347,10 @@ export function SiteNavbar() {
       {
         label: t('nav.forBarbers', { defaultValue: 'Para barbeiros' }),
         href: '/registo',
+      },
+      {
+        label: locale === 'pt' ? 'Aplicação' : 'Get the app',
+        href: '/instalar',
       },
       {
         label: t('nav.documentation', { defaultValue: 'Documentação' }),
