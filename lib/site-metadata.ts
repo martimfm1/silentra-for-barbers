@@ -96,6 +96,11 @@ export const guestMetadata: Metadata = {
   },
 
   manifest: '/site.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Silentra',
+  },
 
   category: 'business',
 };
@@ -141,6 +146,11 @@ export const authenticatedMetadata: Metadata = {
 
   icons: guestMetadata.icons,
   manifest: '/site.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Silentra',
+  },
 };
 
 // ── Helper ────────────────────────────────────────────────────────────────────
