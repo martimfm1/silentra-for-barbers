@@ -20,6 +20,54 @@ function minutes(value: string): number {
   return hour * 60 + minute;
 }
 
+function getLisbonOffsetMinutes(instant: Date): number {
+  const value = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon', timeZoneName: 'shortOffset',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(instant).find((part) => part.type === 'timeZoneName')?.value;
+  const match = /^GMT(?:([+-])(\d{1,2})(?::(\d{2}))?)?$/.exec(value ?? 'GMT');
+  if (!match) return 0;
+  const sign = match[1] === '-' ? -1 : 1;
+  return sign * (Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0));
+}
+
+function getLisbonDayBounds(date: string): { start: string; endExclusive: string } {
+  const [year, month, day] = date.split('-').map(Number);
+  const startUtc = Date.UTC(year, month - 1, day);
+  const nextDayUtc = Date.UTC(year, month - 1, day + 1);
+  const startOffset = getLisbonOffsetMinutes(new Date(startUtc));
+  const nextOffset = getLisbonOffsetMinutes(new Date(nextDayUtc));
+  return {
+    start: new Date(startUtc - startOffset * 60_000).toISOString(),
+    endExclusive: new Date(nextDayUtc - nextOffset * 60_000).toISOString(),
+  };
+}
+
+function getLisbonParts(value: string | Date): { date: string; time: string } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(value));
+  const field = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+  return {
+    date: field('year') + '-' + field('month') + '-' + field('day'),
+    time: field('hour') + ':' + field('minute'),
+  };
+}
+
+function toLisbonISOString(date: string, time: string): string | null {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute] = time.split(':').map(Number);
+  const wallClockAsUtc = Date.UTC(year, month - 1, day, hour, minute);
+  const firstOffset = getLisbonOffsetMinutes(new Date(wallClockAsUtc));
+  const firstInstant = new Date(wallClockAsUtc - firstOffset * 60_000);
+  const actualOffset = getLisbonOffsetMinutes(firstInstant);
+  const instant = new Date(wallClockAsUtc - actualOffset * 60_000);
+  const local = getLisbonParts(instant);
+  if (local.date !== date || local.time !== time) return null;
+  return instant.toISOString();
+}
+
 function escapeEmailHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -90,11 +138,13 @@ async function PATCH__unobserved(
     if (!appointment) return NextResponse.json({ success: false, error: 'Marcação não encontrada.' }, { status: 404 });
     if (!['pending', 'scheduled'].includes(appointment.status)) return NextResponse.json({ success: false, error: 'Só podes remarcar marcações pendentes ou confirmadas.' }, { status: 409 });
 
-    const newDateHour = `${date}T${time}:00`;
-    const todayLisbon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-    const currentLisbonTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
-    if (date < todayLisbon || (date === todayLisbon && time <= currentLisbonTime)) {
+    const todayParts = getLisbonParts(new Date());
+    if (date < todayParts.date || (date === todayParts.date && time <= todayParts.time)) {
       return NextResponse.json({ success: false, error: 'A nova data tem de estar no futuro.' }, { status: 400 });
+    }
+    const newDateHour = toLisbonISOString(date, time);
+    if (!newDateHour) {
+      return NextResponse.json({ success: false, error: 'Esta hora local não existe devido à mudança de hora. Escolhe outro horário.' }, { status: 400 });
     }
     const duration = Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440);
     const startMinutes = minutes(time);
@@ -103,7 +153,13 @@ async function PATCH__unobserved(
     const [{ data: shop, error: shopError }, { data: blocks, error: blocksError }, { data: others, error: othersError }] = await Promise.all([
       admin.from('barbershops').select('name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days').eq('id', barbershopId).maybeSingle(),
       admin.from('schedule_blocks').select('professional_id,start_time,end_time,reason').eq('barbershop_id', barbershopId).eq('date', date),
-      admin.from('appointments').select('id,date_hour,duration_minutes,professional_id').eq('barbershop_id', barbershopId).gte('date_hour', `${date}T00:00:00`).lt('date_hour', `${date}T23:59:59`).in('status', ['pending', 'scheduled']).neq('id', appointmentId),
+      (() => {
+        const bounds = getLisbonDayBounds(date);
+        return admin.from('appointments').select('id,date_hour,duration_minutes,professional_id')
+          .eq('barbershop_id', barbershopId).gte('date_hour', bounds.start)
+          .lt('date_hour', bounds.endExclusive).in('status', ['pending', 'scheduled'])
+          .neq('id', appointmentId);
+      })(),
     ]);
     if (shopError || blocksError || othersError) return NextResponse.json({ success: false, error: 'Não foi possível validar a disponibilidade.' }, { status: 503 });
 
@@ -123,9 +179,9 @@ async function PATCH__unobserved(
     if (block) return NextResponse.json({ success: false, error: String(block.reason || 'O horário está bloqueado.') }, { status: 409 });
     const conflict = (others ?? []).some((item) => {
       if (item.professional_id !== appointment.professional_id) return false;
-      const otherDate = String(item.date_hour ?? '').replace(' ', 'T');
-      if (!otherDate.startsWith(`${date}T`)) return false;
-      const otherStart = minutes(otherDate.slice(11, 16));
+      const local = getLisbonParts(String(item.date_hour ?? ''));
+      if (local.date !== date) return false;
+      const otherStart = minutes(local.time);
       const otherEnd = otherStart + Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440);
       return startMinutes < otherEnd && endMinutes > otherStart;
     });
