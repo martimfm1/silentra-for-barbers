@@ -9,7 +9,7 @@ async function collectPages(directory) {
   const nested = await Promise.all(entries.map(async (entry) => {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) return collectPages(fullPath);
-    return entry.isFile() && /^page\\.(tsx|jsx)$/.test(entry.name) ? [fullPath] : [];
+    return entry.isFile() && /^page\.(tsx|jsx)$/.test(entry.name) ? [fullPath] : [];
   }));
   return nested.flat();
 }
