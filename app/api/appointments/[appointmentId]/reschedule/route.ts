@@ -5,6 +5,7 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { sendBrevoEmail } from '@/lib/email/brevo';
 
 const ROLES = ['owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'] as const;
 
@@ -17,6 +18,28 @@ function hasAgendaGrant(value: unknown): boolean {
 function minutes(value: string): number {
   const [hour, minute] = value.slice(0, 5).split(':').map(Number);
   return hour * 60 + minute;
+}
+
+function escapeEmailHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character] ?? character);
+}
+
+function formatLisbonDate(value: string | Date): string {
+  return new Intl.DateTimeFormat('pt-PT', {
+    dateStyle: 'full',
+    timeZone: 'Europe/Lisbon',
+  }).format(new Date(value));
+}
+
+function formatLisbonTime(value: string | Date): string {
+  return new Intl.DateTimeFormat('pt-PT', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Europe/Lisbon',
+  }).format(new Date(value));
 }
 
 async function PATCH__unobserved(
@@ -61,7 +84,7 @@ async function PATCH__unobserved(
 
     const { admin, barbershopId } = tenant;
     const { data: appointment, error: appointmentError } = await admin.from('appointments')
-      .select('id,status,date_hour,duration_minutes,professional_id,service_id')
+      .select('id,status,date_hour,duration_minutes,professional_id,service_id,manual_email,manual_name,client_id')
       .eq('id', appointmentId).eq('barbershop_id', barbershopId).maybeSingle();
     if (appointmentError) return NextResponse.json({ success: false, error: 'Não foi possível consultar a marcação.' }, { status: 503 });
     if (!appointment) return NextResponse.json({ success: false, error: 'Marcação não encontrada.' }, { status: 404 });
@@ -78,7 +101,7 @@ async function PATCH__unobserved(
     const endMinutes = startMinutes + duration;
 
     const [{ data: shop, error: shopError }, { data: blocks, error: blocksError }, { data: others, error: othersError }] = await Promise.all([
-      admin.from('barbershops').select('opening_time,closing_time,lunch_start,lunch_end,closed_days').eq('id', barbershopId).maybeSingle(),
+      admin.from('barbershops').select('name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days').eq('id', barbershopId).maybeSingle(),
       admin.from('schedule_blocks').select('professional_id,start_time,end_time,reason').eq('barbershop_id', barbershopId).eq('date', date),
       admin.from('appointments').select('id,date_hour,duration_minutes,professional_id').eq('barbershop_id', barbershopId).gte('date_hour', `${date}T00:00:00`).lt('date_hour', `${date}T23:59:59`).in('status', ['pending', 'scheduled']).neq('id', appointmentId),
     ]);
@@ -117,8 +140,56 @@ async function PATCH__unobserved(
       return NextResponse.json({ success: false, error: 'Não foi possível remarcar a marcação.' }, { status: 503 });
     }
     if (!updated) return NextResponse.json({ success: false, error: 'A marcação já foi alterada. Atualiza a agenda e tenta novamente.' }, { status: 409 });
-    await admin.from('audit_logs').insert({ action: 'professional_appointment_reschedule', entity_type: 'appointment', entity_id: appointmentId, metadata: { from: appointment.date_hour, to: newDateHour, actorId: tenant.userId } });
-    return NextResponse.json({ success: true, appointment: updated }, { headers: { 'Cache-Control': 'no-store' } });
+    const [{ data: service }, { data: client }] = await Promise.all([
+      appointment.service_id
+        ? admin.from('services').select('name').eq('id', appointment.service_id).eq('barbershop_id', barbershopId).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      appointment.client_id
+        ? admin.from('users').select('email,name_complete').eq('id', appointment.client_id).eq('barbershop_id', barbershopId).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
+
+    const recipientEmail = appointment.manual_email?.trim().toLowerCase() || client?.email?.trim().toLowerCase() || '';
+    const recipientName = appointment.manual_name?.trim() || client?.name_complete?.trim() || 'Cliente';
+    let notificationSent = false;
+    if (recipientEmail) {
+      try {
+        const previousDate = formatLisbonDate(appointment.date_hour);
+        const previousTime = formatLisbonTime(appointment.date_hour);
+        const nextDate = formatLisbonDate(updated.date_hour);
+        const nextTime = formatLisbonTime(updated.date_hour);
+        const barbershopName = String(shop?.name || 'A tua barbearia').trim();
+        const serviceName = String(service?.name || 'Serviço').trim();
+        const htmlContent = `<!doctype html><html lang="pt-PT"><body style="margin:0;padding:24px;background:#f4f4f5;color:#18181b;font-family:Arial,sans-serif;line-height:1.6"><main style="max-width:560px;margin:auto;padding:28px;border:1px solid #e4e4e7;border-radius:16px;background:#fff"><p style="font-size:12px;font-weight:bold;letter-spacing:1px;color:#52525b">${escapeEmailHtml(barbershopName)}</p><h1 style="font-size:24px;margin-bottom:12px">A tua marcação foi alterada</h1><p>Olá ${escapeEmailHtml(recipientName)},</p><p>A barbearia alterou a data ou hora da tua marcação. Consulta os novos detalhes abaixo.</p><p><strong>Serviço:</strong> ${escapeEmailHtml(serviceName)}</p><div style="margin:20px 0;padding:16px;border-radius:12px;background:#f4f4f5"><p style="margin:0 0 8px;color:#71717a;font-size:12px">HORÁRIO ANTERIOR</p><p style="margin:0;text-decoration:line-through">${escapeEmailHtml(previousDate)} às ${escapeEmailHtml(previousTime)}</p><p style="margin:18px 0 8px;color:#047857;font-size:12px;font-weight:bold">NOVO HORÁRIO</p><p style="margin:0;font-size:18px;font-weight:bold">${escapeEmailHtml(nextDate)} às ${escapeEmailHtml(nextTime)}</p></div><p>Se este horário não te for conveniente, contacta a barbearia para combinar uma alternativa.</p><p style="margin-top:28px;color:#71717a;font-size:12px">Mensagem automática enviada pela Silentra for Barbers.</p></main></body></html>`;
+        const result = await sendBrevoEmail({
+          to: recipientEmail,
+          toName: recipientName,
+          senderName: barbershopName,
+          subject: `A tua marcação foi alterada — ${barbershopName}`,
+          htmlContent,
+        });
+        notificationSent = result.success;
+      } catch (emailError) {
+        console.error('[PRO_APPOINTMENT_RESCHEDULE_EMAIL_ERROR]', emailError instanceof Error ? emailError.name : 'UNKNOWN');
+      }
+      if (!notificationSent) console.error('[PRO_APPOINTMENT_RESCHEDULE_EMAIL_FAILED]');
+    }
+
+    await admin.from('audit_logs').insert({
+      action: 'professional_appointment_reschedule',
+      entity_type: 'appointment',
+      entity_id: appointmentId,
+      metadata: {
+        from: appointment.date_hour,
+        to: newDateHour,
+        actorId: tenant.userId,
+        notificationSent,
+      },
+    });
+    return NextResponse.json(
+      { success: true, appointment: updated, notificationSent },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     console.error('[PRO_APPOINTMENT_RESCHEDULE_CRITICAL]', error instanceof Error ? error.name : 'UNKNOWN');
     return NextResponse.json({ success: false, error: 'Erro interno ao remarcar a marcação.' }, { status: 500 });
