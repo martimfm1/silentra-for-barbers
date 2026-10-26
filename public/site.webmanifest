@@ -1,0 +1,27 @@
+{
+  "id": "/dashboard",
+  "name": "Silentra for Barbers",
+  "short_name": "Silentra",
+  "description": "A aplicação de gestão da Silentra for Barbers para agenda, clientes, serviços e equipa.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/icon-2.png",
+      "sizes": "500x500",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowLeft, ChevronRight, Home } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { PwaInstallButton } from '@/components/pwa-install-button';
 
 const routeLabels: Record<string, { pt: string; en: string }> = {
   dashboard: { pt: 'Visão geral', en: 'Overview' },
@@ -69,15 +70,18 @@ export function DashboardTopBar() {
           </span>
         </nav>
 
-        <Link
-          href="/"
-          className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:px-3.5"
-          aria-label={t('dashboard.backToSite')}
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{t('dashboard.backToSite')}</span>
-          <span className="sm:hidden">{locale === 'en' ? 'Site' : 'Site'}</span>
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <PwaInstallButton locale={locale === 'en' ? 'en' : 'pt'} />
+          <Link
+            href="/"
+            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:px-3.5"
+            aria-label={t('dashboard.backToSite')}
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('dashboard.backToSite')}</span>
+            <span className="sm:hidden">Site</span>
+          </Link>
+        </div>
       </div>
     </header>
   );

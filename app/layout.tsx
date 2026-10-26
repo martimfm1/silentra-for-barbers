@@ -12,6 +12,7 @@ import './silentra-responsive.css';
 import { cn } from '@/lib/utils';
 import { ClientShell } from '@/components/client-shell';
 import { ProductionLogGuard } from '@/app/production-log-guard';
+import { PwaRegistration } from '@/components/pwa-registration';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { guestMetadata } from '@/lib/site-metadata';
 import { Analytics } from '@vercel/analytics/next';
@@ -42,7 +43,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = guestMetadata;
-export const viewport = { width: 'device-width', initialScale: 1 };
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#09090b',
+};
 
 export default async function RootLayout({
   children,
@@ -98,6 +103,7 @@ export default async function RootLayout({
         ) : null}
         <LanguageProvider initialLocale={initialLocale}>
           <ProductionLogGuard />
+          <PwaRegistration />
           {enableVercelTelemetry && allowAnalytics ? <SpeedInsights /> : null}
           {enableVercelTelemetry && allowAnalytics ? <Analytics /> : null}
           <ClientShell>{children}</ClientShell>
