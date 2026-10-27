@@ -219,6 +219,7 @@ historyGenericError: 'Error loading transaction history.',
     serviceDuration: 'Service · {minutes} min',
 noActions: 'No actions',
     serverValidationNote: 'Prices, stock and totals are always revalidated by the server before the sale is completed.',
+    repeatSale: 'Repeat sale',
   },
 
   loyaltyPage: {
