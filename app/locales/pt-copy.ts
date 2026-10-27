@@ -222,6 +222,7 @@ historyGenericError: 'Erro ao carregar o histórico.',
     serviceDuration: 'Serviço · {minutes} min',
 noActions: 'Sem ações',
     serverValidationNote: 'Os preços, o stock e o total são sempre revalidados pelo servidor antes de concluir a venda.',
+    repeatSale: 'Repetir venda',
   },
 
   loyaltyPage: {
