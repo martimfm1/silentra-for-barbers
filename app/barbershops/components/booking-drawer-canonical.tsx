@@ -583,7 +583,7 @@ export function BookingDrawerCanonical({
                   aria-label={t('bookingDrawer.chooseServiceAria')}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  <option value="">Seleciona um serviço</option>
+                  <option value="">{t('bookingDrawer.selectService')}</option>
                   {services.map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.name} · {item.durationMinutes} min · €
