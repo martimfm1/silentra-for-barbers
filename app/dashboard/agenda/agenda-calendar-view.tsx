@@ -24,8 +24,7 @@ import {
   startOfWeek,
   subMonths,
 } from 'date-fns';
-import { pt } from 'date-fns/locale/pt';
-import { enGB } from 'date-fns/locale/en-GB';
+import { enGB, pt } from 'date-fns/locale';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
@@ -116,7 +115,7 @@ function weekdayKey(date: Date) {
   return weekdayKeys[mondayIndex];
 }
 
-function appointmentName(appointment: Appointment) {
+function appointmentName(appointment: Appointment, t: (key: string) => string) {
   return (
     appointment.manual_name || appointment.users?.name_complete || t('agendaCalendar.client')
   );
@@ -277,8 +276,7 @@ export function AgendaCalendarView() {
                 {format(month, 'MMMM yyyy', { locale: dateLocale })}
               </CardTitle>
               <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-                Percebe a carga do dia num relance. Eventos, bloqueios e pausas
-                aparecem diretamente no calendário.
+                {t('agendaCalendar.description')}
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -300,7 +298,7 @@ export function AgendaCalendarView() {
                   setSelectedDate(value);
                 }}
               >
-                Hoje
+                {t('agendaCalendar.today')}
               </Button>
               <Button
                 variant="outline"
@@ -436,7 +434,7 @@ export function AgendaCalendarView() {
                         />
                         <span className="hidden truncate text-[9px] text-zinc-500 sm:block">
                           {format(new Date(appointment.date_hour), 'HH:mm')} ·{' '}
-                          {appointmentName(appointment)}
+                          {appointmentName(appointment, t)}
                         </span>
                         <span className="block truncate text-[8px] text-zinc-600 sm:hidden">
                           {format(new Date(appointment.date_hour), 'HH:mm')}
