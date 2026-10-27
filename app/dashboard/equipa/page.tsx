@@ -86,7 +86,7 @@ export default function EquipaPage() {
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   const refreshTeam = useCallback(async () => {
     await Promise.all([fetchProfessionals(), fetchTeamState()]);
