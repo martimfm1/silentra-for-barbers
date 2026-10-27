@@ -17,6 +17,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,7 +60,8 @@ const DAY_INDEX: Record<string, number> = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function buildDays(count = 14): BookingDayOption[] {
+function buildDays(locale: 'pt' | 'en', count = 14): BookingDayOption[] {
+  const dateLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
   const today = new Date();
   today.setHours(12, 0, 0, 0);
   return Array.from({ length: count }, (_, index) => {
@@ -70,7 +72,7 @@ function buildDays(count = 14): BookingDayOption[] {
         partIndex === 0 ? String(part) : String(part).padStart(2, '0'),
       )
       .join('-');
-    const full = date.toLocaleDateString('pt-PT', {
+    const full = date.toLocaleDateString(dateLocale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -78,7 +80,7 @@ function buildDays(count = 14): BookingDayOption[] {
     return {
       dateStr,
       weekdayShort: date
-        .toLocaleDateString('pt-PT', { weekday: 'short' })
+        .toLocaleDateString(dateLocale, { weekday: 'short' })
         .replace('.', '')
         .toUpperCase(),
       dayNumeric: date.getDate(),
@@ -141,7 +143,8 @@ export function BookingDrawerCanonical({
   onSuccess,
   selectedServiceId = null,
 }: BookingDrawerProps) {
-  const days = useMemo(() => buildDays(), []);
+  const { t, locale } = useLanguage();
+  const days = useMemo(() => buildDays(locale), [locale]);
   const [step, setStep] = useState<Step>(1);
   const [dayIndex, setDayIndex] = useState(0);
   const [serviceId, setServiceId] = useState<string | null>(selectedServiceId);
@@ -221,7 +224,7 @@ export function BookingDrawerCanonical({
         const payload = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            payload?.error || 'Não foi possível carregar os barbeiros.',
+            payload?.error || t('bookingDrawer.loadBarbersError'),
           );
         return payload as MarketplaceBookingResponse;
       })
@@ -235,7 +238,7 @@ export function BookingDrawerCanonical({
           setError(
             reason instanceof Error
               ? reason.message
-              : 'Não foi possível carregar os barbeiros.',
+              : t('bookingDrawer.loadBarbersError'),
           );
       });
     return () => controller.abort();
@@ -266,7 +269,7 @@ export function BookingDrawerCanonical({
         const payload = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            payload?.error || 'Não foi possível carregar os horários.',
+            payload?.error || t('bookingDrawer.loadTimesError'),
           );
         return payload as MarketplaceBookingResponse;
       })
@@ -280,7 +283,7 @@ export function BookingDrawerCanonical({
           setError(
             reason instanceof Error
               ? reason.message
-              : 'Não foi possível carregar os horários.',
+              : t('bookingDrawer.loadTimesError'),
           );
       })
       .finally(
@@ -317,7 +320,7 @@ export function BookingDrawerCanonical({
           const payload = await response.json().catch(() => ({}));
           if (!response.ok || !payload.success)
             throw new Error(
-              payload?.error || 'Não foi possível verificar os dados.',
+              payload?.error || t('bookingDrawer.verifyCustomerError'),
             );
           return payload as { matched?: boolean; hasBirthDate?: boolean };
         })
@@ -341,26 +344,26 @@ export function BookingDrawerCanonical({
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
-    if (!professional) return toast.error('Escolhe primeiro o barbeiro.');
+    if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
     if (currentDayClosed)
-      return toast.error('Escolhe um dia em que a barbearia esteja aberta.');
-    if (!service) return toast.error('Escolhe o serviço.');
+      return toast.error(t('bookingDrawer.chooseOpenDay'));
+    if (!service) return toast.error(t('bookingDrawer.chooseService'));
     setStep(2);
   }
 
   function continueTwo() {
-    if (!selectedSlot) return toast.error('Escolhe um horário disponível.');
+    if (!selectedSlot) return toast.error(t('bookingDrawer.chooseAvailableTime'));
     setStep(3);
   }
 
   async function submit() {
     if (!shop || !professional || !service || !selectedSlot) return;
     if (!name.trim() || !phone.trim() || !email.trim())
-      return toast.error('Preenche os campos obrigatórios.');
+      return toast.error(t('bookingDrawer.requiredFields'));
     const birthDateIso = birthDateToIso(birthDate);
     if (!birthDateIso)
       return toast.error(
-        'Indica uma data de nascimento válida no formato DD/MM/AAAA.',
+        t('bookingDrawer.validBirthDate'),
       );
     setSubmitting(true);
     setError('');
@@ -383,11 +386,11 @@ export function BookingDrawerCanonical({
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success)
         throw new Error(
-          payload?.error || 'Não foi possível concluir a marcação.',
+          payload?.error || t('bookingDrawer.bookingError'),
         );
       cacheRef.current.clear();
       setStep(4);
-      toast.success('Agendamento efetuado com sucesso!');
+      toast.success(t('bookingDrawer.bookingSuccess'));
       onSuccess?.({
         shopName: shop.name,
         serviceName: service.name,
@@ -399,7 +402,7 @@ export function BookingDrawerCanonical({
       const message =
         reason instanceof Error
           ? reason.message
-          : 'Não foi possível concluir a marcação.';
+          : t('bookingDrawer.bookingError');
       setError(message);
       toast.error(message);
     } finally {
@@ -419,11 +422,11 @@ export function BookingDrawerCanonical({
                 Agendamento
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
-                {step === 4 ? 'Reserva confirmada' : shop.name}
+                {step === 4 ? t('bookingDrawer.bookingConfirmed') : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
-                  ? 'Escolhe o barbeiro, o dia e o serviço.'
+                  ? t('bookingDrawer.chooseBarberDayService')
                   : step === 2
                     ? 'Agora escolhe um horário disponível.'
                     : step === 3
@@ -473,7 +476,7 @@ export function BookingDrawerCanonical({
                   if (step < 3) setRetryKey((value) => value + 1);
                 }}
               >
-                {step < 3 ? 'Tentar novamente' : 'Voltar aos dados'}
+                {step < 3 ? t('bookingDrawer.retry') : t('bookingDrawer.backToDetails')}
               </Button>
             </div>
           ) : step === 1 ? (
@@ -797,7 +800,7 @@ export function BookingDrawerCanonical({
                       aria-hidden="true"
                     />
                   ) : null}
-                  {submitting ? 'A reservar…' : 'Confirmar agendamento'}
+                  {submitting ? t('bookingDrawer.reserving') : t('bookingDrawer.confirmBooking')}
                 </Button>
               </div>
             </section>
