@@ -66,7 +66,6 @@ export const ptCopy = {
     saveChanges: 'Guardar alterações',
   },
   teamPage: {
-    eyebrow: 'Equipa e permissões',
     seatDescription: 'Cada membro convidado consome 1 lugar. Tu contas como um.',
     activeProfilesHint: 'Aparecem aqui apenas perfis ativos.',
     plan: 'Plano',
@@ -413,7 +412,6 @@ export const ptCopy = {
     noBarbers: "Não existem barbeiros disponíveis.",
     barbershopClosed: "A barbearia está fechada neste dia.",
     chooseServiceAria: "Escolher serviço",
-    continue: "Continuar",
     noSlots: "Sem horários disponíveis",
     tryOtherDayBarber: "Experimenta outro dia ou barbeiro.",
     name: "Nome",
