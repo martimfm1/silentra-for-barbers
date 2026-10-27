@@ -111,7 +111,7 @@ export function ClientsListCard({
             <DialogHeader>
               <DialogTitle>{t('clientsListCard.addDialogTitle')}</DialogTitle>
               <DialogDescription>
-                {t('clientsListCard.addDialogDescription')}
+                {t('clientsListCard.formIntro')}
               </DialogDescription>
             </DialogHeader>
             <AddClientForm
