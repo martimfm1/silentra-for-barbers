@@ -43,12 +43,12 @@ function discoverTsxFiles(directory) {
   });
 }
 
-// Discover routes recursively so newly added dashboard and barbershop UI
-// cannot silently fall outside the translation contract.
+// Discover all application and shared component TSX files so no route or
+// reusable UI can silently fall outside the translation contract.
 const localizedSources = [...new Set([
   ...explicitlyLocalizedSources,
-  ...discoverTsxFiles('app/dashboard'),
-  ...discoverTsxFiles('app/barbershops'),
+  ...discoverTsxFiles('app'),
+  ...discoverTsxFiles('components'),
 ])].sort();
 
 const read = (path) => readFileSync(join(root, path), 'utf8');
