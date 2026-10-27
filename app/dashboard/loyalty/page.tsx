@@ -280,8 +280,7 @@ export default function LoyaltyPage() {
               {t('loyaltyPage.pointsAndRewards')}
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Configura como os clientes acumulam pontos, o que podem resgatar e
-              valida as recompensas no balcão.
+              {t('loyaltyPage.subtitle')}
             </p>
           </div>
           <nav
@@ -345,8 +344,7 @@ export default function LoyaltyPage() {
                       id="loyalty-enabled-help"
                       className="mt-1 block text-xs text-muted-foreground"
                     >
-                      Quando desligado, o card público desaparece e novas
-                      adesões, acessos e resgates ficam bloqueados.
+                      {t('loyaltyPage.disabledDescription')}
                     </span>
                   </span>
                   <input
