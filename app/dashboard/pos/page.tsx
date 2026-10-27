@@ -730,7 +730,7 @@ export default function POSPage() {
                                 }
                               >
                                 <Undo2 className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                Reembolsar
+                                {t('posPage.refundAction')}
                               </Button>
                               <Button
                                 size="sm"
@@ -741,12 +741,12 @@ export default function POSPage() {
                                 }
                               >
                                 <RotateCcw className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                Anular
+                                {t('posPage.voidAction')}
                               </Button>
                             </div>
                           ) : (
                             <span className="block text-right text-xs text-muted-foreground">
-                              Sem ações
+                              {t('posPage.noActions')}
                             </span>
                           )}
                         </td>
@@ -761,8 +761,7 @@ export default function POSPage() {
 
         <Card>
           <CardContent className="flex items-center gap-3 py-4 text-sm text-muted-foreground">
-            Os preços, stock e total são sempre revalidados pelo servidor antes
-            de concluir a venda.
+            {t('posPage.serverValidationNote')}
           </CardContent>
         </Card>
       </div>
