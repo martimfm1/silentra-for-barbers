@@ -363,8 +363,7 @@ export default function MarketingPage() {
                         {t('marketingPage.content')}
                       </div>
                       <p className="mt-1 pl-8 text-xs text-muted-foreground">
-                        Escreve como falarias com um cliente real. O preview
-                        acompanha cada alteração.
+                        {t('marketingPage.contentHint')}
                       </p>
                     </div>
 
