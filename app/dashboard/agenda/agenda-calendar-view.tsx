@@ -416,7 +416,7 @@ export function AgendaCalendarView() {
                     />
                   </div>
                   <p className="mt-1 truncate text-[8px] font-medium text-zinc-600 sm:mt-2 sm:text-[10px]">
-                    {isClosed ? 'Folga' : occupancyLabel(level)}
+                    {isClosed ? t('agendaCalendar.dayOffShort') : occupancyLabel(level, t)}
                   </p>
 
                   <div className="mt-1.5 space-y-1 sm:mt-2">
@@ -494,7 +494,7 @@ export function AgendaCalendarView() {
               >
                 {selectedClosed
                   ? t('agendaCalendar.dayOff')
-                  : occupancyLabel(selectedLevel)}
+                  : occupancyLabel(selectedLevel, t)}
               </p>
             </div>
             <span
@@ -622,10 +622,10 @@ export function AgendaCalendarView() {
                         </span>
                       </div>
                       <p className="mt-1 truncate text-xs text-zinc-300">
-                        {appointmentName(appointment)}
+                        {appointmentName(appointment, t)}
                       </p>
                       <p className="mt-1 truncate text-[10px] text-zinc-600">
-                        {appointment.professionals?.name ?? 'Profissional'}
+                        {appointment.professionals?.name ?? t('agendaCalendar.team')}
                       </p>
                     </div>
                   ))}
