@@ -149,6 +149,22 @@ export const ptCopy = {
     revenue: 'Faturação',
   },
 
+  automaticBookingSettings: {
+    loadError: 'Não foi possível carregar estas opções. Tenta novamente.',
+    planError: 'Estas opções estão disponíveis apenas nos planos Pro e Enterprise.',
+    saveError: 'Não foi possível guardar estas opções.',
+    saved: 'Alterações guardadas.',
+    autoConfirmTitle: 'Confirmar novas marcações automaticamente',
+    autoConfirmDescription: 'Assim que uma nova marcação entrar, fica confirmada sem teres de a abrir manualmente.',
+    autoCompleteTitle: 'Dar como concluídas automaticamente',
+    autoCompleteDescription: 'Depois da hora prevista para terminar o serviço, a marcação passa automaticamente para concluída.',
+    autoConfirmAria: 'Confirmar novas marcações automaticamente',
+    autoCompleteAria: 'Dar como concluídas automaticamente',
+    upgradeHint: 'Muda para Pro ou Enterprise para ativar estas opções.',
+    saving: 'A guardar…',
+    save: 'Guardar alterações',
+  },
+
   booking: {
     confirm: 'Confirmar marcação',
     confirmed: 'Marcação confirmada',
