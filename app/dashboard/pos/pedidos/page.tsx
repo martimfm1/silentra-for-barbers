@@ -327,10 +327,10 @@ export default function MarketplaceOrdersPage() {
               ponto de venda
             </Link>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              Vendas
+              {t('orderPage.sales')}
             </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              Encomendas
+              {t('orderPage.orders')}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
               Acompanha cada encomenda desde a receção até à entrega, com o
@@ -491,7 +491,7 @@ export default function MarketplaceOrdersPage() {
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">
-                          Pedido{' '}
+                          {t('orderPage.order')}{' '}
                           <span className="font-mono text-zinc-400">
                             #{order.id.slice(0, 8)}
                           </span>{' '}
