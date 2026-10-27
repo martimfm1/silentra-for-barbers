@@ -220,6 +220,8 @@ historyGenericError: 'Erro ao carregar o histórico.',
     checkoutGenericError: 'Erro ao concluir a venda.',
     productAndStock: 'Produto · {count} em stock',
     serviceDuration: 'Serviço · {minutes} min',
+noActions: 'Sem ações',
+    serverValidationNote: 'Os preços, o stock e o total são sempre revalidados pelo servidor antes de concluir a venda.',
   },
 
   loyaltyPage: {
