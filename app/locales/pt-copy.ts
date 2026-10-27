@@ -336,6 +336,9 @@ export const ptCopy = {
     deleteDescription: 'As marcações existentes não devem ser alteradas. Confirma apenas se já não precisas deste serviço.',
     keep: 'Manter',
     deleteAction: 'Eliminar',
+title: 'O teu menu',
+    formIntro: 'Adiciona apenas o essencial',
+    namePlaceholder: 'Ex.: Corte + Barba',
   },
   professionalsListCard: {
     title: 'A tua equipa',
