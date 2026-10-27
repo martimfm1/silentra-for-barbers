@@ -65,7 +65,7 @@ export default function EquipaPage() {
     } finally {
       setTeamLoading(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   const fetchProfessionals = useCallback(async () => {
     if (!barbershopId) return;
