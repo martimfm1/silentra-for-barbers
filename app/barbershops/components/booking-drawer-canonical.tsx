@@ -419,7 +419,7 @@ export function BookingDrawerCanonical({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                Agendamento
+                {t('bookingDrawer.bookingTitle')}
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
                 {step === 4 ? t('bookingDrawer.bookingConfirmed') : shop.name}
@@ -428,16 +428,16 @@ export function BookingDrawerCanonical({
                 {step === 1
                   ? t('bookingDrawer.chooseBarberDayService')
                   : step === 2
-                    ? 'Agora escolhe um horário disponível.'
+                    ? t('bookingDrawer.nextChooseTime')
                     : step === 3
-                      ? 'Confirma os teus dados.'
-                      : 'O teu horário ficou reservado.'}
+                      ? t('bookingDrawer.confirmYourDetails')
+                      : t('bookingDrawer.slotReserved')}
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Fechar agendamento"
+              aria-label={t('bookingDrawer.closeBooking')}
               className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               <X className="size-4" aria-hidden="true" />
@@ -488,7 +488,7 @@ export function BookingDrawerCanonical({
                     aria-hidden="true"
                   />
                   <h3 id="booking-step-one" className="text-sm font-semibold">
-                    1. Barbeiro
+                    {t('bookingDrawer.stepOneBarber')}
                   </h3>
                 </div>
                 <div className="grid gap-2">
@@ -505,7 +505,7 @@ export function BookingDrawerCanonical({
                           {item.name}
                         </span>
                         <span className="mt-0.5 block text-xs text-zinc-500">
-                          {item.role || 'Barbeiro profissional'}
+                          {item.role || t('bookingDrawer.professionalDefault')}
                         </span>
                       </span>
                       {professional?.id === item.id && (
@@ -519,7 +519,7 @@ export function BookingDrawerCanonical({
                 </div>
                 {!professionals.length && (
                   <p className="rounded-2xl border border-white/10 p-4 text-sm text-zinc-500">
-                    Não existem barbeiros disponíveis.
+                    {t('bookingDrawer.noBarbers')}
                   </p>
                 )}
               </div>
@@ -530,7 +530,7 @@ export function BookingDrawerCanonical({
                     className="size-4 text-emerald-300"
                     aria-hidden="true"
                   />
-                  <h3 className="text-sm font-semibold">2. Dia</h3>
+                  <h3 className="text-sm font-semibold">{t('bookingDrawer.stepTwoDay')}</h3>
                 </div>
                 <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {days.map((day, index) => {
@@ -550,7 +550,7 @@ export function BookingDrawerCanonical({
                         className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40 ${dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                       >
                         <span className="block text-[10px] font-semibold text-zinc-500">
-                          {day.isToday ? 'HOJE' : day.weekdayShort}
+                          {day.isToday ? t('bookingDrawer.today').toLocaleUpperCase(locale === 'pt' ? 'pt-PT' : 'en-GB') : day.weekdayShort}
                         </span>
                         <span className="mt-1 block text-xl font-black">
                           {day.dayNumeric}
@@ -564,7 +564,7 @@ export function BookingDrawerCanonical({
                 </div>
                 {currentDayClosed && (
                   <p className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.05] p-3 text-xs text-amber-100">
-                    A barbearia está fechada neste dia.
+                    {t('bookingDrawer.barbershopClosed')}
                   </p>
                 )}
               </div>
@@ -575,12 +575,12 @@ export function BookingDrawerCanonical({
                     className="size-4 text-zinc-400"
                     aria-hidden="true"
                   />
-                  <h3 className="text-sm font-semibold">3. Serviço</h3>
+                  <h3 className="text-sm font-semibold">{t('bookingDrawer.stepThreeService')}</h3>
                 </div>
                 <select
                   value={serviceId ?? ''}
                   onChange={(event) => setServiceId(event.target.value || null)}
-                  aria-label="Escolher serviço"
+                  aria-label={t('bookingDrawer.chooseServiceAria')}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
                   <option value="">Seleciona um serviço</option>
@@ -599,7 +599,7 @@ export function BookingDrawerCanonical({
                 onClick={continueOne}
                 className="w-full"
               >
-                Continuar
+                {t('bookingDrawer.continue')}
                 <ArrowRight className="ml-2 size-4" aria-hidden="true" />
               </Button>
             </section>
@@ -627,13 +627,13 @@ export function BookingDrawerCanonical({
                   onClick={() => setStep(1)}
                 >
                   <ArrowLeft className="mr-1 size-4" aria-hidden="true" />
-                  Voltar
+                  {t('bookingDrawer.back')}
                 </Button>
               </div>
               {loadingAvailability ? (
                 <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-zinc-500">
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                  A carregar horários…
+                  {t('bookingDrawer.loadingTimes')}
                 </div>
               ) : slots.length ? (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -652,10 +652,10 @@ export function BookingDrawerCanonical({
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-center">
                   <p className="text-sm font-medium">
-                    Sem horários disponíveis
+                    {t('bookingDrawer.noSlots')}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Experimenta outro dia ou barbeiro.
+                    {t('bookingDrawer.tryOtherDayBarber')}
                   </p>
                 </div>
               )}
@@ -674,7 +674,7 @@ export function BookingDrawerCanonical({
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h3 id="booking-step-three" className="text-sm font-semibold">
-                    3. Os teus dados
+                    {t('bookingDrawer.stepThreeDetails')}
                   </h3>
                   <p className="mt-1 text-xs text-zinc-500">
                     {service?.name} · {currentDay.fullDateFormatted} ·{' '}
@@ -693,16 +693,16 @@ export function BookingDrawerCanonical({
               </div>
               <div className="space-y-4">
                 <label className="grid gap-1.5 text-xs text-zinc-400">
-                  <span>Nome *</span>
+                  <span>{t('bookingDrawer.name')} *</span>
                   <Input
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     autoComplete="name"
-                    placeholder="O teu nome"
+                    placeholder={t('bookingDrawer.yourName')}
                   />
                 </label>
                 <label className="grid gap-1.5 text-xs text-zinc-400">
-                  <span>Telemóvel *</span>
+                  <span>{t('bookingDrawer.phone')} *</span>
                   <div className="relative">
                     <Phone
                       className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600"
@@ -719,7 +719,7 @@ export function BookingDrawerCanonical({
                   </div>
                 </label>
                 <label className="grid gap-1.5 text-xs text-zinc-400">
-                  <span>Email *</span>
+                  <span>{t('bookingDrawer.email')} *</span>
                   <div className="relative">
                     <Mail
                       className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600"
@@ -736,7 +736,7 @@ export function BookingDrawerCanonical({
                   </div>
                 </label>
                 <label className="grid gap-1.5 text-xs text-zinc-400">
-                  <span>Data de nascimento *</span>
+                  <span>{t('bookingDrawer.birthDate')} *</span>
                   <Input
                     value={birthDate}
                     onChange={(event) =>
@@ -759,7 +759,7 @@ export function BookingDrawerCanonical({
                         className="size-3.5 animate-spin"
                         aria-hidden="true"
                       />
-                      A verificar os teus dados…
+                      {t('bookingDrawer.checkingDetails')}
                     </p>
                   )}
                   {customerState === 'matched' && (
