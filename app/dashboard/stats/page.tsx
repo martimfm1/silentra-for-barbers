@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -88,6 +89,7 @@ function CustomChartTooltip({ active, payload, label }: ChartTooltipProps) {
 }
 
 export default function StatsPage() {
+  const { t } = useLanguage();
   const { barbershopId } = useBarbershop();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -102,7 +104,7 @@ export default function StatsPage() {
       setAppointments(res.data || []);
     } catch (error) {
       console.error('❌ [Stats Fetch Error]:', error);
-      toast.error('Erro ao processar métricas de faturação.');
+      toast.error(t('statsPage.loadError'));
     } finally {
       setLoading(false);
     }
@@ -129,7 +131,7 @@ export default function StatsPage() {
       const price = Number(app.services?.price || 0);
       const serviceName = app.services?.name || 'Outros';
       const serviceId = app.service_id || null;
-      const paymentMethod = app.payment_method || 'Não Especificado';
+      const paymentMethod = app.payment_method || t('statsPage.unspecified');
       const barberName = app.professionals?.name || 'Casa / Geral';
 
       totalRevenue += price;
@@ -157,7 +159,7 @@ export default function StatsPage() {
     const avgTicket =
       completedApps.length > 0 ? totalRevenue / completedApps.length : 0;
 
-    let mostPopularService = 'Sem registos';
+    let mostPopularService = t('statsPage.noRecords');
     let mostPopularServiceId: string | null = null;
     let maxCount = 0;
 
@@ -209,11 +211,11 @@ export default function StatsPage() {
               <TrendingUp className="size-5" aria-hidden="true" />
             </div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white">
-              Relatórios de Faturação
+              {t('statsPage.title')}
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-            Métricas operacionais e consolidação financeira da unidade.
+            {t('statsPage.description')}
           </p>
         </div>
 
@@ -222,7 +224,7 @@ export default function StatsPage() {
             variant="ghost"
             onClick={() => void fetchStatsData()}
             disabled={loading}
-            aria-label="Atualizar métricas"
+            aria-label={t('statsPage.refresh')}
             className="min-h-[44px] bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-200 border border-white/10 text-xs sm:text-sm px-3 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
           >
             <RefreshCw
@@ -269,17 +271,17 @@ export default function StatsPage() {
               </Card>
             ))}
           </div>
-          <span className="sr-only">A carregar métricas...</span>
+          <span className="sr-only">{t('statsPage.loading')}</span>
         </div>
       ) : (
         <>
           {/* ⚡ GRID DE KPIS */}
-          <section aria-label="Resumo de Métricas">
+          <section aria-label={t('statsPage.summary')}>
             <dl className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg">
                 <CardHeader className="pb-1 p-4">
                   <dt className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Faturação Total</span>
+                    <span>{t('statsPage.totalRevenue')}</span>
                     <Receipt
                       className="size-4 text-emerald-400"
                       aria-hidden="true"
@@ -296,7 +298,7 @@ export default function StatsPage() {
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg">
                 <CardHeader className="pb-1 p-4">
                   <dt className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Ticket Médio</span>
+                    <span>{t('statsPage.averageTicket')}</span>
                     <DollarSign
                       className="size-4 text-zinc-100"
                       aria-hidden="true"
@@ -333,7 +335,7 @@ export default function StatsPage() {
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg">
                 <CardHeader className="pb-1 p-4">
                   <dt className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Serviços Concluídos</span>
+                    <span>{t('statsPage.completedServices')}</span>
                     <CheckCircle
                       className="size-4 text-sky-400"
                       aria-hidden="true"
@@ -354,18 +356,17 @@ export default function StatsPage() {
 
           {!hasCompleted ? (
             <section
-              aria-label="Sem dados suficientes"
+              aria-label={t('statsPage.noCompletedBookings')}
               className="rounded-2xl border border-dashed border-white/10 bg-zinc-900/40 p-10 text-center"
             >
               <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-400">
                 <Store className="size-6" aria-hidden="true" />
               </div>
               <h2 className="mt-4 text-sm font-semibold text-zinc-200">
-                Sem marcações concluídas
+                {t('statsPage.noCompletedBookings')}
               </h2>
               <p className="mt-1 text-sm text-zinc-500">
-                Conclui marcações para veres gráficos de faturação, métodos de
-                pagamento e desempenho por barbeiro.
+                {t('statsPage.noCompletedBookingsHint')}
               </p>
               <Link
                 href="/dashboard"
@@ -376,7 +377,7 @@ export default function StatsPage() {
             </section>
           ) : (
             <section
-              aria-label="Gráficos de Desempenho"
+              aria-label={t('statsPage.charts')}
               className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             >
               {/* GRÁFICO 1: MÉTODOS DE PAGAMENTO */}
@@ -387,18 +388,18 @@ export default function StatsPage() {
                       className="size-4 text-amber-400"
                       aria-hidden="true"
                     />{' '}
-                    Fluxo por Método (€)
+                    {t('statsPage.paymentFlow')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
                   {analytics.paymentStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
-                      Sem histórico disponível
+                      {t('statsPage.noHistory')}
                     </div>
                   ) : (
                     <>
                       <div className="sr-only">
-                        Tabela de métodos de pagamento:{' '}
+                        {t('statsPage.paymentMethodsTable')}{' '}
                         {analytics.paymentStats
                           .map((s) => `${s.name}: ${s.value.toFixed(2)}€`)
                           .join(', ')}
@@ -448,18 +449,18 @@ export default function StatsPage() {
               <Card className="stats-professional-chart border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
-                    Faturação por Barbeiro (€)
+                    {t('statsPage.revenueByBarber')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
                   {analytics.professionalStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
-                      Sem dados operacionais
+                      {t('statsPage.noOperationalData')}
                     </div>
                   ) : (
                     <>
                       <div className="sr-only">
-                        Faturação por barbeiro:{' '}
+                        {t('statsPage.barberRevenue')}{' '}
                         {analytics.professionalStats
                           .map((s) => `${s.name}: ${s.value.toFixed(2)}€`)
                           .join(', ')}
@@ -500,7 +501,7 @@ export default function StatsPage() {
                           <RechartsTooltip content={<CustomChartTooltip />} />
                           <Bar
                             dataKey="value"
-                            name="Faturação"
+                            name={t('statsPage.revenue')}
                             fill="#38bdf8"
                             radius={[6, 6, 0, 0]}
                             maxBarSize={48}
@@ -516,18 +517,18 @@ export default function StatsPage() {
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between md:col-span-2 lg:col-span-1">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
-                    Top Serviços Ganhos (€)
+                    {t('statsPage.topServices')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
                   {analytics.serviceStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
-                      Sem registos
+                      {t('statsPage.noRecords')}
                     </div>
                   ) : (
                     <>
                       <div className="sr-only">
-                        Serviços mais rentáveis:{' '}
+                        {t('statsPage.mostProfitableServices')}{' '}
                         {analytics.serviceStats
                           .map((s) => `${s.name}: ${s.value.toFixed(2)}€`)
                           .join(', ')}
