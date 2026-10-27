@@ -145,6 +145,7 @@ export const enCopy = {
     revenue: 'Revenue',
   },
 
+undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
