@@ -8,12 +8,14 @@ import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function SettingsAutomaticBookingPanel({
   barbershopId,
 }: {
   barbershopId: string;
 }) {
+  const { t } = useLanguage();
   const { plan, loading: planLoading } = useFeatureAccess();
   const eligible = plan === 'pro' || plan === 'enterprise';
   const [autoConfirm, setAutoConfirm] = useState(false);
@@ -33,7 +35,7 @@ export function SettingsAutomaticBookingPanel({
       if (result.error) {
         toast.error(
           result.error.message ||
-            'Não foi possível carregar estas opções. Tenta novamente.',
+            t('automaticBookingSettings.loadError'),
         );
       } else if (result.data) {
         const next = {
@@ -58,7 +60,7 @@ export function SettingsAutomaticBookingPanel({
   async function save() {
     if (!eligible) {
       toast.error(
-        'Estas opções estão disponíveis apenas nos planos Pro e Enterprise.',
+        t('automaticBookingSettings.planError'),
       );
       return;
     }
@@ -71,12 +73,12 @@ export function SettingsAutomaticBookingPanel({
     setSaving(false);
     if (result.error) {
       toast.error(
-        result.error.message || 'Não foi possível guardar estas opções.',
+        result.error.message || t('automaticBookingSettings.saveError'),
       );
       return;
     }
     setInitial({ autoConfirm, autoComplete });
-    toast.success('Alterações guardadas.');
+    toast.success(t('automaticBookingSettings.saved'));
   }
 
   if (planLoading || loading) {
@@ -93,11 +95,10 @@ export function SettingsAutomaticBookingPanel({
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium">
-              Confirmar novas marcações automaticamente
+              {t('automaticBookingSettings.autoConfirmTitle')}
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Assim que uma nova marcação entrar, fica confirmada sem teres de a
-              abrir manualmente.
+              {t('automaticBookingSettings.autoConfirmDescription')}
             </p>
           </div>
           <Switch
@@ -113,18 +114,17 @@ export function SettingsAutomaticBookingPanel({
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium">
-              Dar como concluídas automaticamente
+              {t('automaticBookingSettings.autoCompleteTitle')}
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Depois da hora prevista para terminar o serviço, a marcação passa
-              automaticamente para concluída.
+              {t('automaticBookingSettings.autoCompleteDescription')}
             </p>
           </div>
           <Switch
             checked={autoComplete}
             disabled={!eligible}
             onCheckedChange={setAutoComplete}
-            aria-label="Dar como concluídas automaticamente"
+            aria-label={t('automaticBookingSettings.autoCompleteAria')}
           />
         </div>
       </div>
@@ -132,7 +132,7 @@ export function SettingsAutomaticBookingPanel({
       {!eligible && (
         <p className="flex items-center gap-2 text-xs text-zinc-500">
           <Check className="size-3.5 text-emerald-300" aria-hidden="true" />
-          Muda para Pro ou Enterprise para ativar estas opções.
+          {t('automaticBookingSettings.upgradeHint')}
         </p>
       )}
 
@@ -144,7 +144,7 @@ export function SettingsAutomaticBookingPanel({
           className="min-h-11 rounded-xl"
         >
           {saving ? <Spinner className="mr-2 size-4" /> : null}
-          {saving ? 'A guardar…' : 'Guardar alterações'}
+          {saving ? t('automaticBookingSettings.saving') : t('automaticBookingSettings.save')}
         </Button>
       </div>
     </div>
