@@ -147,6 +147,14 @@ export const enCopy = {
   },
 
   loyaltyPage: {
+    savingSettings: 'Saving rules…',
+    savingReward: 'Creating reward…',
+    updatingReward: 'Updating reward…',
+    saveGenericError: 'Error saving changes.',
+    saveRewardGenericError: 'Error saving reward.',
+    disableRewardGenericError: 'Error disabling reward.',
+    pointsUnit: 'points',
+
     loadError: 'Unable to load loyalty settings.',
     loadGenericError: 'Error loading loyalty settings.',
     saveError: 'Unable to save changes.',
