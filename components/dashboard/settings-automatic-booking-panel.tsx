@@ -105,7 +105,7 @@ export function SettingsAutomaticBookingPanel({
             checked={autoConfirm}
             disabled={!eligible}
             onCheckedChange={setAutoConfirm}
-            aria-label="Confirmar novas marcações automaticamente"
+            aria-label={t('automaticBookingSettings.autoConfirmAria')}
           />
         </div>
       </div>
