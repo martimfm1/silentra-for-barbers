@@ -202,6 +202,12 @@ export const ptCopy = {
     deleteAction: 'Eliminar',
   },
   professionalsListCard: {
+    title: 'A tua equipa',
+    limitReached: 'Limite atingido',
+    close: 'Fechar',
+    formIntro: 'Adiciona o essencial',
+    fixed: 'fixa',
+
     addFirstHint: 'Adiciona o primeiro barbeiro e começa a organizar a agenda.',
     barberSingular: 'barbeiro',
     barberPlural: 'barbeiros',
