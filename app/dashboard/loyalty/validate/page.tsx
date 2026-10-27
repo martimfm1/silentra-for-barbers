@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoyaltyValidationPage() {
+  const { t } = useLanguage();
   const [slug, setSlug] = useState<string | null>(null);
   const [identifier, setIdentifier] = useState('');
   const [busy, setBusy] = useState(false);
