@@ -375,7 +375,7 @@ export function AgendaCalendarView() {
                   onClick={() => setSelectedDate(date)}
                   aria-current={isToday(date) ? 'date' : undefined}
                   aria-pressed={selected}
-                  aria-label={`${format(date, "EEEE, d 'de' MMMM", { locale: pt })}. ${isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t)}. ${activeCount} marcações. ${dayBlocks.length} bloqueios.`}
+                  aria-label={`${format(date, locale === 'pt' ? "EEEE, d 'de' MMMM" : 'EEEE, MMMM d', { locale: dateLocale })}. ${isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t)}. ${activeCount} marcações. ${dayBlocks.length} bloqueios.`}
                   className={cn(
                     'group relative min-h-24 bg-zinc-950/95 p-1.5 text-left transition-[background,box-shadow,transform] duration-200 hover:bg-white/[0.035] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:scale-[0.995] sm:min-h-36 sm:p-3',
                     !inMonth && 'opacity-35',
@@ -484,7 +484,7 @@ export function AgendaCalendarView() {
                 {t('agendaCalendar.selectedDay')}
               </p>
               <CardTitle className="mt-1 text-lg capitalize sm:text-xl">
-                {format(selectedDate, "EEEE, d 'de' MMMM", { locale: pt })}
+                {format(selectedDate, "EEEE, d 'de' MMMM", { locale: dateLocale })}
               </CardTitle>
               <p
                 className={cn(
