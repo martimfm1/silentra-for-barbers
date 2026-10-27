@@ -199,6 +199,12 @@ export const enCopy = {
     deleteAction: 'Delete',
   },
   professionalsListCard: {
+    title: 'Your team',
+    limitReached: 'Limit reached',
+    close: 'Close',
+    formIntro: 'Add the essentials',
+    fixed: 'fixed',
+
     addFirstHint: 'Add your first barber and start organising the schedule.',
     barberSingular: 'barber',
     barberPlural: 'barbers',
