@@ -34,7 +34,7 @@ const explicitlyLocalizedSources = [
 
 function discoverTsxFiles(directory) {
   return readdirSync(join(root, directory), { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name).replaceAll('\\\\', '/');
+    const path = join(directory, entry.name).replaceAll('\\', '/');
     if (entry.isDirectory()) {
       if (entry.name.startsWith('.') || entry.name === 'node_modules') return [];
       return discoverTsxFiles(path);
