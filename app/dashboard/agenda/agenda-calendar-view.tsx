@@ -174,7 +174,7 @@ export function AgendaCalendarView() {
     } finally {
       setLoading(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     void load();
