@@ -123,6 +123,7 @@ export default function ClientesPage() {
 // --- Sub-componentes para melhor organização visual ---
 
 function ClientsListSkeleton() {
+  const { t } = useLanguage();
   return (
     <div
       role="status"
@@ -154,6 +155,7 @@ function EditClientDialog({
   onChange,
   loading,
 }: EditClientDialogProps) {
+  const { t } = useLanguage();
   return (
     <Dialog open={!!editingClient} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
