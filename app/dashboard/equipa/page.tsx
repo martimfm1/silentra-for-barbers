@@ -202,9 +202,7 @@ export default function EquipaPage() {
                       {t('teamPage.teamLimitReached')}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Para adicionar mais pessoas ou perfis, aumenta o plano.
-                      Uma pessoa convidada conta sempre para o limite, mesmo que
-                      não seja barbeiro.
+                      {t('teamPage.limitReachedDescription')}
                     </p>
                   </div>
                 </div>
@@ -274,7 +272,7 @@ export default function EquipaPage() {
                         htmlFor="edit-professional-name"
                         className="text-xs text-zinc-400"
                       >
-                        Nome
+                        {t('teamPage.name')}
                       </label>
                       <input
                         id="edit-professional-name"
@@ -294,7 +292,7 @@ export default function EquipaPage() {
                         htmlFor="edit-professional-commission"
                         className="text-xs text-zinc-400"
                       >
-                        Comissão (%)
+                        {t('teamPage.commission')}
                       </label>
                       <input
                         id="edit-professional-commission"
