@@ -17,8 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/context/LanguageContext';
 
-const DEFAULT_TEXT =
-  'Faz scan para conhecer a nossa barbearia e marcar o teu proximo servico.';
 function download(href: string, filename: string) {
   const link = document.createElement('a');
   link.href = href;
@@ -29,7 +27,7 @@ function download(href: string, filename: string) {
 export default function QrCodePage() {
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('Barbearia');
-  const [text, setText] = useState(DEFAULT_TEXT);
+  const [text, setText] = useState(defaultText);
   const [savedText, setSavedText] = useState(DEFAULT_TEXT);
   const [png, setPng] = useState('');
   const [svg, setSvg] = useState('');
@@ -202,7 +200,7 @@ export default function QrCodePage() {
                       className="mt-3 aspect-square w-full"
                     />
                     <p className="mt-4 text-center text-base font-semibold text-zinc-900">
-                      {text || DEFAULT_TEXT}
+                      {text || defaultText}
                     </p>
                     <p className="mt-2 break-all text-center text-xs text-zinc-500">
                       {publicUrl}
