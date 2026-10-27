@@ -29,6 +29,7 @@ function expressionHasName(expression) {
   if (!expression) return false;
   if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression) || ts.isNumericLiteral(expression)) return true;
   if (ts.isCallExpression(expression)) return true;
+  if (ts.isJsxElement(expression) || ts.isJsxFragment(expression)) return expression.children.some(jsxHasName);
   if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression) || ts.isIdentifier(expression)) return true;
   if (ts.isConditionalExpression(expression)) {
     return expressionHasName(expression.whenTrue) && expressionHasName(expression.whenFalse);
