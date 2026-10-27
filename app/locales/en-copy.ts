@@ -333,6 +333,9 @@ export const enCopy = {
     deleteDescription: 'Existing bookings should not be changed. Confirm only if you no longer need this service.',
     keep: 'Keep',
     deleteAction: 'Delete',
+title: 'Your menu',
+    formIntro: 'Add only the essentials',
+    namePlaceholder: 'e.g. Haircut + beard',
   },
   professionalsListCard: {
     title: 'Your team',
