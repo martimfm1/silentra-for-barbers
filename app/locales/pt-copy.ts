@@ -150,6 +150,14 @@ export const ptCopy = {
   },
 
   loyaltyPage: {
+    savingSettings: 'A guardar as regras…',
+    savingReward: 'A criar a recompensa…',
+    updatingReward: 'A atualizar a recompensa…',
+    saveGenericError: 'Erro ao guardar.',
+    saveRewardGenericError: 'Erro ao guardar a recompensa.',
+    disableRewardGenericError: 'Erro ao desativar a recompensa.',
+    pointsUnit: 'pontos',
+
     loadError: 'Não foi possível carregar a fidelização.',
     loadGenericError: 'Erro ao carregar a fidelização.',
     saveError: 'Não foi possível guardar as alterações.',
