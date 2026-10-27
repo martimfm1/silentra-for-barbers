@@ -187,11 +187,10 @@ export default function MarketingPage() {
               {t('marketingPage.marketingPro')}
             </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Campanhas
+              {t('marketingPage.campaigns')}
             </h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
-              Cria uma mensagem, escolhe o canal e vê imediatamente como ela
-              será apresentada ao cliente.
+              {t('marketingPage.subtitle')}
             </p>
           </div>
 
@@ -199,7 +198,7 @@ export default function MarketingPage() {
             <Button variant="outline" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('marketingPage.dashboard')}
               </Link>
             </Button>
             <Button onClick={openComposer} className="sm:min-w-40">
@@ -267,8 +266,7 @@ export default function MarketingPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Os dados abaixo servem para preparar a campanha. O nome
-                    interno não é enviado aos clientes.
+                    {t('marketingPage.preparationHint')}
                   </p>
                 </div>
                 <Button
@@ -298,8 +296,7 @@ export default function MarketingPage() {
                         {t('marketingPage.configuration')}
                       </div>
                       <p className="mt-1 pl-8 text-xs text-muted-foreground">
-                        Começa pelo contexto da campanha. Isto ajuda-te a
-                        organizá-la internamente.
+                        {t('marketingPage.configurationDescription')}
                       </p>
                     </div>
 
@@ -446,10 +443,7 @@ export default function MarketingPage() {
                           {t('marketingPage.beforeSaving')}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-sky-100/65">
-                          Esta ação cria a campanha como{' '}
-                          <strong className="text-sky-100">rascunho</strong>.
-                          Usa o preview para confirmar o conteúdo antes de a
-                          utilizares noutro fluxo.
+                          {t('marketingPage.draftWarning')}
                         </p>
                       </div>
                     </div>
@@ -578,8 +572,8 @@ export default function MarketingPage() {
                           </p>
                           <p className="mt-1 text-xs leading-5 text-muted-foreground">
                             {form.channel === 'email'
-                              ? 'Vês o assunto e o corpo da mensagem num layout semelhante ao de um email real. O nome interno continua apenas no teu painel.'
-                              : 'Vês a mensagem num contexto de conversa para perceberes rapidamente o tamanho e a leitura em mobile.'}
+                              ? t('marketingPage.emailPreviewDescription')
+                              : t('marketingPage.smsPreviewDescription')}
                           </p>
                         </div>
                       </div>
@@ -614,8 +608,7 @@ export default function MarketingPage() {
           <CardContent>
             {loading && !campaigns.length ? (
               <div className="flex h-40 items-center justify-center text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />A carregar
-                campanhas…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('marketingPage.loading')}
               </div>
             ) : campaigns.length ? (
               <div className="space-y-2">
@@ -670,8 +663,7 @@ export default function MarketingPage() {
                 </div>
                 <p className="mt-4 font-medium">{t('marketingPage.noCampaigns')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cria a primeira campanha e confirma o conteúdo no preview
-                  antes de a guardares.
+                  {t('marketingPage.noCampaignsDescription')}
                 </p>
                 <Button className="mt-5" onClick={openComposer}>
                   <Plus className="mr-2 h-4 w-4" />
