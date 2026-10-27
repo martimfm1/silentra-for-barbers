@@ -564,7 +564,7 @@ export default function StatsPage() {
                           />
                           <Bar
                             dataKey="value"
-                            name="Faturação"
+                            name={t('statsPage.revenue')}
                             fill="#10b981"
                             radius={[0, 6, 6, 0]}
                             maxBarSize={22}
