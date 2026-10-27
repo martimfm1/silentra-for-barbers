@@ -25,6 +25,8 @@ function download(href: string, filename: string) {
 }
 
 export default function QrCodePage() {
+  const { t } = useLanguage();
+  const defaultText = t('qrCodePage.defaultText');
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('Barbearia');
   const [text, setText] = useState(defaultText);
