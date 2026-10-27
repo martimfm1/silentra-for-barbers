@@ -108,7 +108,7 @@ export default function StatsPage() {
     } finally {
       setLoading(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (barbershopId) {
