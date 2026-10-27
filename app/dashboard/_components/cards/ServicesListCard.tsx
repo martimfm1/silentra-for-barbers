@@ -189,7 +189,7 @@ function AddServiceForm({
             htmlFor="new-service-price"
             className="text-xs font-medium text-zinc-400"
           >
-            Preço
+            {t('servicesListCard.price')}
           </label>
           <div className="relative">
             <Euro className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
@@ -218,7 +218,7 @@ function AddServiceForm({
             htmlFor="new-service-duration"
             className="text-xs font-medium text-zinc-400"
           >
-            Duração
+            {t('servicesListCard.duration')}
           </label>
           <div className="relative">
             <Clock3 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
