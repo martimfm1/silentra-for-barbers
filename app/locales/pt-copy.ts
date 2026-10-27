@@ -147,8 +147,6 @@ export const ptCopy = {
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -809,8 +807,6 @@ loadGenericError: 'Erro ao carregar as regras.',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -1460,8 +1456,6 @@ title: 'O teu menu',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -2122,8 +2116,6 @@ loadGenericError: 'Erro ao carregar as regras.',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -2777,8 +2769,6 @@ backToPos: 'Voltar ao ponto de venda',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -3439,8 +3429,6 @@ loadGenericError: 'Erro ao carregar as regras.',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -4090,8 +4078,6 @@ title: 'O teu menu',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
@@ -4752,8 +4738,6 @@ loadGenericError: 'Erro ao carregar as regras.',
     mostProfitableServices: 'Serviços mais rentáveis:',
     revenue: 'Faturação',
   },
-
-undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
