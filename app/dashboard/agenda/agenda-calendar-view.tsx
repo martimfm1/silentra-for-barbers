@@ -24,8 +24,10 @@ import {
   startOfWeek,
   subMonths,
 } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { pt } from 'date-fns/locale/pt';
+import { enGB } from 'date-fns/locale/en-GB';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { getScheduleBlocksByShop } from '@/app/dashboard/_services/schedule-blocks.service';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
@@ -54,7 +56,6 @@ type CalendarBlock = {
   professionals?: { name?: string | null } | null;
 };
 
-const weekdayLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const weekdayKeys = [
   'Monday',
   'Tuesday',
@@ -97,16 +98,16 @@ function occupancyLevel(appointments: Appointment[]) {
   return 'heavy';
 }
 
-function occupancyLabel(level: string) {
+function occupancyLabel(level: string, t: (key: string) => string) {
   switch (level) {
     case 'light':
-      return 'Pouco ocupada';
+      return t('agendaCalendar.lowOccupancy');
     case 'busy':
-      return 'Ocupada';
+      return t('agendaCalendar.busy');
     case 'heavy':
-      return 'Muito ocupada';
+      return t('agendaCalendar.veryBusy');
     default:
-      return 'Disponível';
+      return t('agendaCalendar.available');
   }
 }
 
@@ -117,11 +118,14 @@ function weekdayKey(date: Date) {
 
 function appointmentName(appointment: Appointment) {
   return (
-    appointment.manual_name || appointment.users?.name_complete || 'Cliente'
+    appointment.manual_name || appointment.users?.name_complete || t('agendaCalendar.client')
   );
 }
 
 export function AgendaCalendarView() {
+  const { t, locale } = useLanguage();
+  const weekdayLabels = locale === 'pt' ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dateLocale = locale === 'pt' ? pt : enGB;
   const { barbershopId } = useBarbershop();
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -166,7 +170,7 @@ export function AgendaCalendarView() {
       setError(
         cause instanceof Error
           ? cause.message
-          : 'Não foi possível carregar o calendário.',
+          : t('agendaCalendar.loadError'),
       );
     } finally {
       setLoading(false);
@@ -267,10 +271,10 @@ export function AgendaCalendarView() {
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
                 <CalendarDays className="size-3.5" aria-hidden="true" />
-                Visão de ocupação
+                {t('agendaCalendar.title')}
               </div>
               <CardTitle className="mt-1 text-xl capitalize text-zinc-50 sm:text-2xl">
-                {format(month, 'MMMM yyyy', { locale: pt })}
+                {format(month, 'MMMM yyyy', { locale: dateLocale })}
               </CardTitle>
               <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
                 Percebe a carga do dia num relance. Eventos, bloqueios e pausas
@@ -283,7 +287,7 @@ export function AgendaCalendarView() {
                 size="icon"
                 className="size-11 rounded-xl"
                 onClick={() => setMonth((value) => subMonths(value, 1))}
-                aria-label="Mês anterior"
+                aria-label={t('agendaCalendar.previousMonth')}
               >
                 <ChevronLeft className="size-4" />
               </Button>
@@ -303,7 +307,7 @@ export function AgendaCalendarView() {
                 size="icon"
                 className="size-11 rounded-xl"
                 onClick={() => setMonth((value) => addMonths(value, 1))}
-                aria-label="Próximo mês"
+                aria-label={t('agendaCalendar.nextMonth')}
               >
                 <ChevronRight className="size-4" />
               </Button>
@@ -312,7 +316,7 @@ export function AgendaCalendarView() {
 
           <div
             className="mt-4 flex flex-wrap gap-2"
-            aria-label="Legenda do calendário"
+            aria-label={t('agendaCalendar.legend')}
           >
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-emerald-300" />
@@ -332,7 +336,7 @@ export function AgendaCalendarView() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-amber-300" />
-              Almoço / folga
+              {t('agendaCalendar.lunchDayOff')}
             </span>
           </div>
         </CardHeader>
@@ -373,7 +377,7 @@ export function AgendaCalendarView() {
                   onClick={() => setSelectedDate(date)}
                   aria-current={isToday(date) ? 'date' : undefined}
                   aria-pressed={selected}
-                  aria-label={`${format(date, "EEEE, d 'de' MMMM", { locale: pt })}. ${isClosed ? 'Dia de folga.' : occupancyLabel(level)}. ${activeCount} marcações. ${dayBlocks.length} bloqueios.`}
+                  aria-label={`${format(date, "EEEE, d 'de' MMMM", { locale: pt })}. ${isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t)}. ${activeCount} marcações. ${dayBlocks.length} bloqueios.`}
                   className={cn(
                     'group relative min-h-24 bg-zinc-950/95 p-1.5 text-left transition-[background,box-shadow,transform] duration-200 hover:bg-white/[0.035] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:scale-[0.995] sm:min-h-36 sm:p-3',
                     !inMonth && 'opacity-35',
@@ -469,7 +473,7 @@ export function AgendaCalendarView() {
             })}
           </div>
           <p className="mt-3 px-1 text-[11px] text-zinc-600 sm:hidden">
-            Toca num dia para veres os detalhes completos.
+            {t('agendaCalendar.tapDayHint')}
           </p>
         </CardContent>
       </Card>
@@ -479,7 +483,7 @@ export function AgendaCalendarView() {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
-                Dia selecionado
+                {t('agendaCalendar.selectedDay')}
               </p>
               <CardTitle className="mt-1 text-lg capitalize sm:text-xl">
                 {format(selectedDate, "EEEE, d 'de' MMMM", { locale: pt })}
@@ -491,7 +495,7 @@ export function AgendaCalendarView() {
                 )}
               >
                 {selectedClosed
-                  ? 'Dia de folga'
+                  ? t('agendaCalendar.dayOff')
                   : occupancyLabel(selectedLevel)}
               </p>
             </div>
@@ -516,7 +520,7 @@ export function AgendaCalendarView() {
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Marcações
+                {t('agendaCalendar.appointments')}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedActive.length}
@@ -561,7 +565,7 @@ export function AgendaCalendarView() {
             ) : null}
             {selectedClosed ? (
               <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs leading-5 text-amber-200/80">
-                A barbearia está marcada como encerrada neste dia da semana.
+                {t('agendaCalendar.closedWeekday')}
               </p>
             ) : null}
           </div>
@@ -587,10 +591,10 @@ export function AgendaCalendarView() {
                     aria-hidden="true"
                   />
                   <p className="mt-2 text-xs text-zinc-500">
-                    Sem eventos registados neste dia.
+                    {t('agendaCalendar.noEvents')}
                   </p>
                   <p className="mt-1 text-[10px] leading-4 text-zinc-700">
-                    O dia está livre para novas marcações.
+                    {t('agendaCalendar.freeDay')}
                   </p>
                 </div>
               ) : (
@@ -616,7 +620,7 @@ export function AgendaCalendarView() {
                           {format(new Date(appointment.date_hour), 'HH:mm')}
                         </span>
                         <span className="min-w-0 truncate text-[10px] text-zinc-600">
-                          {appointment.services?.name ?? 'Serviço'}
+                          {appointment.services?.name ?? t('agendaCalendar.service')}
                         </span>
                       </div>
                       <p className="mt-1 truncate text-xs text-zinc-300">
@@ -643,10 +647,10 @@ export function AgendaCalendarView() {
                         </span>
                       </div>
                       <p className="mt-1 text-xs text-zinc-400">
-                        {block.reason || 'Bloqueio de horário'}
+                        {block.reason || t('agendaCalendar.scheduleBlock')}
                       </p>
                       <p className="mt-1 text-[10px] text-zinc-600">
-                        {block.professionals?.name || 'Equipa'}
+                        {block.professionals?.name || t('agendaCalendar.team')}
                       </p>
                     </div>
                   ))}
@@ -658,12 +662,12 @@ export function AgendaCalendarView() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
             <p className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
               <Users className="size-3.5" aria-hidden="true" />
-              Equipa disponível
+              {t('agendaCalendar.availableTeam')}
             </p>
             <p className="mt-2 text-xs leading-5 text-zinc-600">
               {professionals.length
                 ? `${professionals.length} profissional${professionals.length === 1 ? '' : 'is'} ativo${professionals.length === 1 ? '' : 's'}.`
-                : 'Ainda não tens profissionais ativos.'}
+                : t('agendaCalendar.noActiveProfessionals')}
             </p>
           </div>
         </CardContent>
