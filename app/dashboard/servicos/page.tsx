@@ -41,7 +41,7 @@ export default function ServicosPage() {
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (!isLoadingBarbershop && barbershopId) {
