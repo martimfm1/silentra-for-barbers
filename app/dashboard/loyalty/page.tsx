@@ -99,7 +99,7 @@ export default function LoyaltyPage() {
     } finally {
       setLoading(false);
     }
-  }, [allowed]);
+  }, [allowed, t]);
 
   useEffect(() => {
     void load();
@@ -107,7 +107,7 @@ export default function LoyaltyPage() {
 
   const saveSettings = async () => {
     setSaving(true);
-    setStatus('A guardar as regras…');
+    setStatus(t('loyaltyPage.savingSettings'));
     try {
       const response = await fetch('/api/loyalty', {
         method: 'PATCH',
@@ -130,7 +130,7 @@ export default function LoyaltyPage() {
       toast.success(message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Erro ao guardar.';
+        error instanceof Error ? error.message : t('loyaltyPage.saveGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -140,7 +140,7 @@ export default function LoyaltyPage() {
 
   const saveReward = async () => {
     setSaving(true);
-    setStatus(editing ? 'A atualizar a recompensa…' : 'A criar a recompensa…');
+    setStatus(editing ? t('loyaltyPage.updatingReward') : t('loyaltyPage.savingReward'));
     try {
       const payload = {
         id: editing ?? undefined,
@@ -170,11 +170,11 @@ export default function LoyaltyPage() {
       setEditing(null);
       setCreating(false);
       setRewardForm(emptyReward);
-      setStatus(editing ? 'Recompensa atualizada.' : 'Recompensa criada.');
-      toast.success(editing ? 'Recompensa atualizada.' : 'Recompensa criada.');
+      setStatus(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
+      toast.success(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Erro ao guardar recompensa.';
+        error instanceof Error ? error.message : t('loyaltyPage.saveRewardGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -215,13 +215,13 @@ export default function LoyaltyPage() {
           item.id === id ? { ...item, active: false } : item,
         ),
       );
-      setStatus('Recompensa desativada.');
-      toast.success('Recompensa desativada.');
+      setStatus(t('loyalty.rewardDisabled'));
+      toast.success(t('loyalty.rewardDisabled'));
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Erro ao desativar recompensa.';
+          : t('loyaltyPage.disableRewardGenericError');
       setStatus(message);
       toast.error(message);
     }
@@ -646,7 +646,7 @@ export default function LoyaltyPage() {
                         <Gift className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                        {reward.points_cost} pts
+                        {reward.points_cost} {t('loyaltyPage.pointsUnit')}
                       </span>
                     </div>
                     <h3 className="mt-5 font-semibold">{reward.name}</h3>
@@ -655,7 +655,7 @@ export default function LoyaltyPage() {
                     </p>
                     <p className="mt-4 text-xs text-muted-foreground">
                       {reward.active ? t('loyaltyPage.available') : t('loyaltyPage.deactivated')} ·{' '}
-                      {reward.reward_type}
+                      {reward.reward_type === 'discount' ? t('loyaltyPage.discount') : reward.reward_type === 'free_service' ? t('loyaltyPage.freeService') : t('loyaltyPage.custom')}
                       {reward.reward_value !== null
                         ? ` · ${reward.reward_value}`
                         : ''}
