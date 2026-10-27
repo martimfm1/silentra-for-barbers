@@ -322,7 +322,7 @@ export default function POSPage() {
       const response = await fetch('/api/enterprise/pos', {
         method: 'POST',
         headers: {
-          ...(await authHeaders()),
+          ...(await authHeaders(t)),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -370,7 +370,7 @@ export default function POSPage() {
         {
           method: 'POST',
           headers: {
-            ...(await authHeaders()),
+            ...(await authHeaders(t)),
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ mode }),
