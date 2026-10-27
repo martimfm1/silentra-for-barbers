@@ -245,7 +245,7 @@ export function AgendaCalendarView() {
         <CardContent className="flex min-h-56 flex-col items-center justify-center px-5 text-center">
           <AlertCircle className="size-6 text-rose-300" aria-hidden="true" />
           <p className="mt-3 text-sm font-medium text-zinc-100">
-            Não foi possível carregar o calendário.
+            {t('agendaCalendar.loadError')}
           </p>
           <p className="mt-1 max-w-md text-xs leading-5 text-zinc-500">
             {error}
