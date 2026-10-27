@@ -210,6 +210,13 @@ export const enCopy = {
       refunded: 'Refunded',
       voided: 'Voided',
     },
+historyGenericError: 'Error loading transaction history.',
+    posGenericError: 'Error loading point of sale.',
+    repeatSaleComplete: 'Sale copied to the cart. Review the details before completing it.',
+    stockInsufficient: 'Insufficient stock.',
+    checkoutGenericError: 'Error completing the sale.',
+    productAndStock: 'Product · {count} in stock',
+    serviceDuration: 'Service · {minutes} min',
   },
 
   loyaltyPage: {
