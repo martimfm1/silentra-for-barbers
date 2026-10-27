@@ -146,6 +146,22 @@ export const enCopy = {
     revenue: 'Revenue',
   },
 
+  automaticBookingSettings: {
+    loadError: 'Unable to load these options. Please try again.',
+    planError: 'These options are only available on Pro and Enterprise plans.',
+    saveError: 'Unable to save these options.',
+    saved: 'Changes saved.',
+    autoConfirmTitle: 'Automatically confirm new bookings',
+    autoConfirmDescription: 'New bookings are confirmed as soon as they arrive, without needing to open them manually.',
+    autoCompleteTitle: 'Automatically mark bookings as completed',
+    autoCompleteDescription: 'After the scheduled service end time, the booking is automatically marked as completed.',
+    autoConfirmAria: 'Automatically confirm new bookings',
+    autoCompleteAria: 'Automatically mark bookings as completed',
+    upgradeHint: 'Upgrade to Pro or Enterprise to enable these options.',
+    saving: 'Saving…',
+    save: 'Save changes',
+  },
+
   booking: {
     confirm: 'Confirm booking',
     confirmed: 'Booking confirmed',
