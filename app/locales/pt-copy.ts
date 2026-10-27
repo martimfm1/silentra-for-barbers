@@ -55,6 +55,10 @@ export const ptCopy = {
     noAvailability: 'Não existem horários livres neste dia.',
   },
   bookingDrawer: {
+    profileFound: "Encontrámos o teu perfil. Os dados serão reutilizados.",
+    profileNew: "Não encontrámos um perfil com este email e número. Será criado/atualizado durante a reserva.",
+    profileError: "Não foi possível verificar o perfil agora. Podes continuar normalmente.",
+    profileIdle: "Usamos email + telemóvel para reconhecer clientes existentes nesta barbearia.",
     chooseBarber: 'Escolhe primeiro o barbeiro.',
     chooseOpenDay: 'Escolhe um dia em que a barbearia esteja aberta.',
     chooseService: 'Escolhe o serviço.',
