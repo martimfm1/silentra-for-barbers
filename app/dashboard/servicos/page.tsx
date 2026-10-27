@@ -102,6 +102,7 @@ export default function ServicosPage() {
 // --- SUB-COMPONENTES PARA ORGANIZAÇÃO E MANTENABILIDADE ---
 
 function ServicesSkeletonGrid() {
+  const { t } = useLanguage();
   return (
     <div
       role="status"
@@ -131,6 +132,7 @@ function EditServiceDialog({
   handleUpdateService,
   loadingService,
 }: EditServiceDialogProps) {
+  const { t } = useLanguage();
   if (!editingService) return null;
 
   return (
