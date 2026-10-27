@@ -28,7 +28,7 @@ export default function QrCodePage() {
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('Barbearia');
   const [text, setText] = useState(defaultText);
-  const [savedText, setSavedText] = useState(DEFAULT_TEXT);
+  const [savedText, setSavedText] = useState(defaultText);
   const [png, setPng] = useState('');
   const [svg, setSvg] = useState('');
   const [loading, setLoading] = useState(true);
