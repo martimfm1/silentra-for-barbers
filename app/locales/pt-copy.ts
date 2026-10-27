@@ -67,6 +67,13 @@ export const ptCopy = {
   },
   teamPage: {
     eyebrow: 'Equipa e permissões',
+    seatDescription: 'Cada membro convidado consome 1 lugar. Tu contas como um.',
+    activeProfilesHint: 'Aparecem aqui apenas perfis ativos.',
+    plan: 'Plano',
+    limitReachedDescription: 'Para adicionar mais pessoas ou perfis, aumenta o plano. Uma pessoa convidada conta sempre para o limite, mesmo que não seja barbeiro.',
+    name: 'Nome',
+
+    eyebrow: 'Equipa e permissões',
     title: 'Equipa',
     barbers: 'Barbeiros',
     membersPermissions: 'Membros e permissões',
