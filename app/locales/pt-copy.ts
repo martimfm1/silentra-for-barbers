@@ -150,6 +150,7 @@ export const ptCopy = {
   },
 
   clientsListCard: {
+    formIntro: 'Adiciona apenas o essencial',
     title: 'A tua base de clientes',
     emptyDescription: 'Começa pelo essencial. O histórico cresce com as marcações.',
     countSingular: 'cliente',
