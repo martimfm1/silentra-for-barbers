@@ -182,12 +182,12 @@ export function MobileSearchFilterBar({
 
       <div className=" mt-2 flex min-w-0 items-center justify-between gap-2 rounded-xl border border-white/8 bg-white/[0.025] px-2.5 py-1.5">
         <span className="min-w-0 truncate text-[11px] font-medium text-zinc-400">
-          Filtro: <span className="text-zinc-200">{filterLabel}</span>
+          {t('directory.filterPrefix')} <span className="text-zinc-200">{filterLabel}</span>
         </span>
         {userLocation ? (
           <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-emerald-300">
             <MapPin className="size-3" />
-            Localização ativa
+            {t('directory.activeLocation')}
           </span>
         ) : null}
       </div>
