@@ -148,6 +148,7 @@ export const ptCopy = {
     revenue: 'Faturação',
   },
 
+undefined
   posPage: {
     sessionExpired: 'A sessão expirou. Inicia sessão novamente.',
     loadCatalogError: 'Não foi possível carregar o catálogo do ponto de venda.',
