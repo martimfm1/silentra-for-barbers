@@ -333,8 +333,7 @@ export default function MarketplaceOrdersPage() {
               {t('orderPage.orders')}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-              Acompanha cada encomenda desde a receção até à entrega, com o
-              histórico da atividade num só lugar.
+              {t('orderPage.subtitle')}
             </p>
           </div>
           <Button
