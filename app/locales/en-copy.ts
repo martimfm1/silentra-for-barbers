@@ -64,6 +64,13 @@ export const enCopy = {
   },
   teamPage: {
     eyebrow: 'Team and permissions',
+    seatDescription: 'Each invited member uses one seat. You count as one.',
+    activeProfilesHint: 'Only active profiles appear here.',
+    plan: 'Plan',
+    limitReachedDescription: 'To add more people or profiles, upgrade your plan. Every invited person counts towards the limit, even if they are not a barber.',
+    name: 'Name',
+
+    eyebrow: 'Team and permissions',
     title: 'Team',
     barbers: 'Barbers',
     membersPermissions: 'Members and permissions',
