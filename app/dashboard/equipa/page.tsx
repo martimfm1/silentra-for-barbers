@@ -28,28 +28,6 @@ import Link from 'next/link';
 type TeamSeatState = { used: number; limit: number; unlimited: boolean };
 type TeamTab = 'professionals' | 'members' | 'invite';
 
-const TEAM_TABS = [
-  {
-    value: 'professionals',
-    label: 'Barbeiros',
-    icon: <Briefcase className="size-4" aria-hidden="true" />,
-  },
-  {
-    value: 'members',
-    label: 'Membros e permissões',
-    icon: <UsersRound className="size-4" aria-hidden="true" />,
-  },
-  {
-    value: 'invite',
-    label: 'Convidar',
-    icon: <KeyRound className="size-4" aria-hidden="true" />,
-  },
-] satisfies Array<{
-  value: TeamTab;
-  label: string;
-  icon: React.ReactNode;
-}>;
-
 export default function EquipaPage() {
   const { t } = useLanguage();
   const teamTabs = [
