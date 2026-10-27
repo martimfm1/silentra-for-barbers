@@ -63,7 +63,6 @@ export const enCopy = {
     saveChanges: 'Save changes',
   },
   teamPage: {
-    eyebrow: 'Team and permissions',
     seatDescription: 'Each invited member uses one seat. You count as one.',
     activeProfilesHint: 'Only active profiles appear here.',
     plan: 'Plan',
@@ -410,7 +409,6 @@ export const enCopy = {
     noBarbers: "No barbers are available.",
     barbershopClosed: "The barbershop is closed on this day.",
     chooseServiceAria: "Choose service",
-    continue: "Continue",
     noSlots: "No available times",
     tryOtherDayBarber: "Try another day or barber.",
     name: "Name",
