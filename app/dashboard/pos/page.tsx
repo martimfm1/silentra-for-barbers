@@ -432,8 +432,7 @@ export default function POSPage() {
               {t('posPage.title')}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Cria vendas, associa clientes e gere reversões com stock
-              sincronizado.
+              {t('posPage.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -718,7 +717,7 @@ export default function POSPage() {
                                 <Link
                                   href={`/dashboard/pos?repeat=${encodeURIComponent(transaction.id)}`}
                                 >
-                                  Repetir venda
+                                  {t('posPage.repeatSale')}
                                 </Link>
                               </Button>
                               <Button
