@@ -147,6 +147,7 @@ export const enCopy = {
   },
 
   clientsListCard: {
+    formIntro: 'Add only the essentials',
     title: 'Your client list',
     emptyDescription: 'Start with the essentials. Client history grows with each booking.',
     countSingular: 'client',
