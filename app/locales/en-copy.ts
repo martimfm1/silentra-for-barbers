@@ -52,6 +52,10 @@ export const enCopy = {
     noAvailability: 'There are no available times on this day.',
   },
   bookingDrawer: {
+    profileFound: "We found your profile. Your details will be reused.",
+    profileNew: "We couldn't find a profile with this email and phone number. It will be created or updated during booking.",
+    profileError: "We couldn't verify the profile right now. You can continue.",
+    profileIdle: "We use your email and phone number to recognise existing customers at this barbershop.",
     chooseBarber: 'Choose a barber first.',
     chooseOpenDay: 'Choose a day when the barbershop is open.',
     chooseService: 'Choose a service.',
