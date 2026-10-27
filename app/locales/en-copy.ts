@@ -608,6 +608,8 @@ title: 'Your menu',
   },
   directory: {
     selectShopHint: 'Select a barbershop to open its full page.',
+filterPrefix: 'Filter:',
+    activeLocation: 'Location active',
   },
 
   booking: {
