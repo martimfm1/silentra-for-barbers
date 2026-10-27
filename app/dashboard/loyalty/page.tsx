@@ -266,7 +266,7 @@ export default function LoyaltyPage() {
       className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-8"
     >
       <a className="skip-link" href="#loyalty-content">
-        Saltar para o conteúdo
+        {t('loyaltyPage.skipContent')}
       </a>
       <div
         id="loyalty-content"
@@ -303,7 +303,7 @@ export default function LoyaltyPage() {
             <Button variant="outline" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-                Dashboard
+                {t('dashboard.overview')}
               </Link>
             </Button>
             <Button
