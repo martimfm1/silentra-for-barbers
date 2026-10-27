@@ -4,13 +4,15 @@ import ts from 'typescript';
 
 const root = process.cwd();
 const roots = ['app', 'components'];
-const ignoredDirectories = new Set(['node_modules', '.next', '.git', 'ui']);
+const ignoredDirectories = new Set(['node_modules', '.next', '.git']);
 const files = [];
 
 function collect(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      if (!ignoredDirectories.has(entry.name)) collect(join(directory, entry.name));
+      const childPath = join(directory, entry.name);
+      if (childPath === join(root, 'components', 'ui')) continue;
+      if (!ignoredDirectories.has(entry.name)) collect(childPath);
       continue;
     }
     if (entry.isFile() && entry.name.endsWith('.tsx')) files.push(join(directory, entry.name));
