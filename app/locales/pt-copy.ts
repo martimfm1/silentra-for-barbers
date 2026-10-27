@@ -213,6 +213,13 @@ export const ptCopy = {
       refunded: 'Reembolsada',
       voided: 'Anulada',
     },
+historyGenericError: 'Erro ao carregar o histórico.',
+    posGenericError: 'Erro ao carregar o ponto de venda.',
+    repeatSaleComplete: 'Venda repetida no carrinho. Confirma os dados antes de concluir.',
+    stockInsufficient: 'Stock insuficiente.',
+    checkoutGenericError: 'Erro ao concluir a venda.',
+    productAndStock: 'Produto · {count} em stock',
+    serviceDuration: 'Serviço · {minutes} min',
   },
 
   loyaltyPage: {
