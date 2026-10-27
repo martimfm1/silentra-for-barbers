@@ -177,7 +177,7 @@ export default function LoyaltyValidationPage() {
         </Link>
         <div className="mt-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-            Operações
+              {t('loyaltyValidation.operations')}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">
             {t('loyaltyValidation.title')}
@@ -329,8 +329,7 @@ export default function LoyaltyValidationPage() {
                 id="loyalty-validation-help"
                 className="mt-2 text-xs text-zinc-600"
               >
-                Introduz o código recebido pelo cliente. Podes também usar o QR
-                acima.
+                {t('loyaltyValidation.codeHelp')}
               </p>
             </div>
           </section>
