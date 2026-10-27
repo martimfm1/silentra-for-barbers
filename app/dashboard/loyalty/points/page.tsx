@@ -15,7 +15,7 @@ export default function LoyaltyPointsPage() {
             href="/dashboard/loyalty"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-sm text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" / > {t('loyaltyPointsPage.loyalty')}
+            <ArrowLeft className="size-4" /> {t('loyaltyPointsPage.loyalty')}
           </Link>
           <p className="mt-6 text-sm font-medium text-primary">{t('loyaltyPointsPage.kicker')}</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">
