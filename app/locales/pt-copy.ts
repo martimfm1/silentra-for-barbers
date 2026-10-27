@@ -611,6 +611,8 @@ title: 'O teu menu',
   },
   directory: {
     selectShopHint: 'Seleciona uma barbearia para abrir a página completa.',
+filterPrefix: 'Filtro:',
+    activeLocation: 'Localização ativa',
   },
 
   booking: {
