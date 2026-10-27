@@ -144,8 +144,6 @@ export const enCopy = {
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -807,8 +805,6 @@ loadGenericError: 'Error loading rules.',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -1459,8 +1455,6 @@ title: 'Your menu',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -2122,8 +2116,6 @@ loadGenericError: 'Error loading rules.',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -2778,8 +2770,6 @@ backToPos: 'Back to point of sale',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -3441,8 +3431,6 @@ loadGenericError: 'Error loading rules.',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -4093,8 +4081,6 @@ title: 'Your menu',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
@@ -4756,8 +4742,6 @@ loadGenericError: 'Error loading rules.',
     mostProfitableServices: 'Most profitable services:',
     revenue: 'Revenue',
   },
-
-undefined
   posPage: {
     sessionExpired: 'Your session has expired. Please sign in again.',
     loadCatalogError: 'Unable to load the point-of-sale catalogue.',
