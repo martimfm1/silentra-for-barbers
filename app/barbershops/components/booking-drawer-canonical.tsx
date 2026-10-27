@@ -613,7 +613,7 @@ export function BookingDrawerCanonical({
                       aria-hidden="true"
                     />
                     <h3 id="booking-step-two" className="text-sm font-semibold">
-                      2. Escolhe o horário
+                      {t('bookingDrawer.chooseTimeStep')}
                     </h3>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
@@ -765,25 +765,22 @@ export function BookingDrawerCanonical({
                   {customerState === 'matched' && (
                     <p className="flex items-center gap-2 text-xs text-emerald-300">
                       <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                      Encontrámos o teu perfil. Os dados serão reutilizados.
+                      {t('bookingDrawer.profileFound')}
                     </p>
                   )}
                   {customerState === 'new' && (
                     <p className="text-xs text-zinc-500">
-                      Não encontrámos um perfil com este email e número. Será
-                      criado/atualizado durante a reserva.
+                      {t('bookingDrawer.profileNew')}
                     </p>
                   )}
                   {customerState === 'error' && (
                     <p className="text-xs text-amber-300">
-                      Não foi possível verificar o perfil agora. Podes continuar
-                      normalmente.
+                      {t('bookingDrawer.profileError')}
                     </p>
                   )}
                   {customerState === 'idle' && (
                     <p className="text-xs text-zinc-600">
-                      Usamos email + telemóvel para reconhecer clientes
-                      existentes nesta barbearia.
+                      {t('bookingDrawer.profileIdle')}
                     </p>
                   )}
                 </div>
@@ -819,14 +816,14 @@ export function BookingDrawerCanonical({
                 id="booking-success-title"
                 className="mt-5 text-xl font-semibold"
               >
-                Reserva confirmada
+                {t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
-                {service?.name} com {professional?.name},{' '}
-                {currentDay.fullDateFormatted}, às {selectedSlot}.
+                {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
+                {currentDay.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
               </p>
               <Button type="button" className="mt-6 w-full" onClick={onClose}>
-                Concluir
+                {t('bookingDrawer.finish')}
               </Button>
             </section>
           )}
