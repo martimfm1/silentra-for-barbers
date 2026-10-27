@@ -51,7 +51,7 @@ export function SettingsAutomaticBookingPanel({
     return () => {
       active = false;
     };
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   const dirty =
     autoConfirm !== initial.autoConfirm ||
