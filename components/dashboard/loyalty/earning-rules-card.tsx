@@ -1,6 +1,7 @@
 'use client';
 
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
+import { useLanguage } from '@/context/LanguageContext';
 
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Loader2, Plus, Trash2 } from 'lucide-react';
@@ -25,6 +26,7 @@ interface Rule {
 }
 
 export function EarningRulesCard() {
+  const { t } = useLanguage();
   const confirm = useDashboardConfirm();
   const [services, setServices] = useState<Service[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -41,18 +43,18 @@ export function EarningRulesCard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível carregar as regras.');
+        throw new Error(data.error || t('earningRules.loadError'));
       setServices(data.services ?? []);
       setRules(data.rules ?? []);
       if (!serviceId && data.services?.[0]) setServiceId(data.services[0].id);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar regras.',
+        error instanceof Error ? error.message : t('earningRules.loadGenericError'),
       );
     } finally {
       setLoading(false);
     }
-  }, [serviceId]);
+  }, [serviceId, t]);
 
   useEffect(() => {
     void load();
@@ -63,7 +65,7 @@ export function EarningRulesCard() {
     const value = Number(points);
     if (!selected || !Number.isInteger(value) || value <= 0)
       return toast.error(
-        'Escolhe um serviço e uma quantidade de pontos válida.',
+        t('earningRules.invalidSelection'),
       );
     setSaving(true);
     try {
@@ -79,13 +81,13 @@ export function EarningRulesCard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível criar a regra.');
+        throw new Error(data.error || t('earningRules.createError'));
       setRules((current) => [data.rule, ...current]);
       setPoints('10');
-      toast.success('Regra de pontos criada.');
+      toast.success(t('earningRules.ruleCreated'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar regra.',
+        error instanceof Error ? error.message : t('earningRules.createGenericError'),
       );
     } finally {
       setSaving(false);
@@ -101,22 +103,22 @@ export function EarningRulesCard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível atualizar.');
+        throw new Error(data.error || t('earningRules.updateError'));
       setRules((current) =>
         current.map((item) => (item.id === rule.id ? data.rule : item)),
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao atualizar regra.',
+        error instanceof Error ? error.message : t('earningRules.updateGenericError'),
       );
     }
   }
 
   async function deleteRule(id: string) {
     const confirmed = await confirm({
-      title: 'Remover regra de pontos?',
-      description: 'A regra deixa de atribuir pontos aos serviços associados. Os pontos já atribuídos não serão alterados.',
-      confirmLabel: 'Remover regra',
+      title: t('earningRules.removeConfirm'),
+      description: t('earningRules.removeDescription'),
+      confirmLabel: t('earningRules.removeRule'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -127,12 +129,12 @@ export function EarningRulesCard() {
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível remover.');
+        throw new Error(data.error || t('earningRules.removeError'));
       setRules((current) => current.filter((item) => item.id !== id));
-      toast.success('Regra removida.');
+      toast.success(t('earningRules.ruleRemoved'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao remover regra.',
+        error instanceof Error ? error.message : t('earningRules.removeGenericError'),
       );
     }
   }
@@ -140,23 +142,21 @@ export function EarningRulesCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Como os clientes ganham pontos</CardTitle>
+        <CardTitle>{t('earningRules.title')}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Quando uma marcação desse serviço ficar concluída, os pontos são
-          atribuídos automaticamente. Cada marcação só pode gerar pontos uma
-          vez.
+          {t('earningRules.description')}
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:grid-cols-[1fr_140px_auto] sm:items-end">
           <div>
-            <Label>Serviço</Label>
+            <Label>{t('earningRules.service')}</Label>
             <select
               value={serviceId}
               onChange={(event) => setServiceId(event.target.value)}
               className="mt-1 h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
             >
-              <option value="">Selecionar serviço</option>
+              <option value="">{t('earningRules.selectService')}</option>
               {services.map((service) => (
                 <option key={service.id} value={service.id}>
                   {service.name} · €{Number(service.price).toFixed(2)}
@@ -165,7 +165,7 @@ export function EarningRulesCard() {
             </select>
           </div>
           <div>
-            <Label>Pontos</Label>
+            <Label>{t('earningRules.points')}</Label>
             <Input
               className="mt-1 min-h-11"
               type="number"
@@ -181,19 +181,19 @@ export function EarningRulesCard() {
             className="min-h-11"
           >
             <Plus className="mr-2 size-4" />
-            Adicionar
+            {t('earningRules.addRule')}
           </Button>
         </div>
 
         {loading ? (
           <div className="flex min-h-24 items-center justify-center text-sm text-muted-foreground">
-            <Loader2 className="mr-2 size-4 animate-spin" />A carregar…
+            <Loader2 className="mr-2 size-4 animate-spin" />{t('common.loading')}
           </div>
         ) : rules.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
-            <p className="font-medium">Ainda não existem regras.</p>
+            <p className="font-medium">{t('earningRules.noRules')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Começa por atribuir pontos a um serviço.
+              {t('earningRules.emptyHint')}
             </p>
           </div>
         ) : (
@@ -213,7 +213,7 @@ export function EarningRulesCard() {
                         {service?.name ?? rule.name}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {rule.points} pontos por marcação concluída
+                        {t('earningRules.pointsPerBooking', { points: rule.points })}
                       </p>
                     </div>
                     <span
@@ -223,7 +223,7 @@ export function EarningRulesCard() {
                           : 'rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-500'
                       }
                     >
-                      {rule.active ? 'Ativa' : 'Pausada'}
+                      {rule.active ? t('earningRules.active') : t('earningRules.paused')}
                     </span>
                   </div>
                   <div className="mt-4 flex gap-2">
@@ -233,14 +233,14 @@ export function EarningRulesCard() {
                       onClick={() => void toggleRule(rule)}
                     >
                       <Check className="mr-2 size-4" />
-                      {rule.active ? 'Pausar' : 'Ativar'}
+                      {rule.active ? t('earningRules.pause') : t('earningRules.activate')}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="size-10"
                       onClick={() => void deleteRule(rule.id)}
-                      aria-label="Remover regra"
+                      aria-label={t('earningRules.removeRule')}
                     >
                       <Trash2 className="size-4 text-red-300" />
                     </Button>
