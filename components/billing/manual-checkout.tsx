@@ -645,6 +645,7 @@ export function ManualCheckout({
 
             <div className="sticky bottom-0 z-20 -mx-4 border-t border-white/8 bg-zinc-950/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0">
               <button
+            aria-label="Confirmar pedido de pagamento"
                 type="submit"
                 disabled={submitting}
                 className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 shadow-[0_14px_40px_rgba(52,211,153,0.12)] transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-60"
