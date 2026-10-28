@@ -234,9 +234,10 @@ export default function MensagensPage() {
           body: body.trim(),
         }),
       });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(copy.emailSendFailed);
+      if (!response.ok) {
+        toast.error(copy.emailSendFailed);
+        return;
+      }
       toast.success(copy.emailSent);
     } catch {
       toast.error(copy.sendError);
