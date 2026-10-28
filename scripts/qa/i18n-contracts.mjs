@@ -197,6 +197,7 @@ for (const status of [
 }
 
 const localeAwareSources = {
+  'app/dashboard/settings/public-profile/page.tsx': ["useLanguage()", 'PUBLIC_PROFILE_COPY', 'AMENITIES_EN', 'copy.saveSuccess'],
   'app/dashboard/pos/loja/page.tsx': ["useLanguage()", 'orderStatusLabels', 'Could not load products.', 'Could not load orders.'],
   'app/dashboard/pos/produtos/page.tsx': ["useLanguage()", 'Could not load products.', 'Could not load settings.', 'Publish online'],
   'app/dashboard/mensagens/page.tsx': ["useLanguage()", 'Appointment reminder', 'copy.loadClientsFailed', 'copy.emailSent'],
