@@ -64,6 +64,9 @@ jobs:
       - name: Internationalization contracts
         run: pnpm qa:i18n
 
+      - name: Agenda dialog contracts
+        run: pnpm qa:agenda-dialogs
+
       - name: Closed-day localization contracts
         run: pnpm qa:closed-days
 
