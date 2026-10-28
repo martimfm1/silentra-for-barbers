@@ -197,6 +197,8 @@ for (const status of [
 }
 
 const localeAwareSources = {
+  'app/dashboard/pos/loja/page.tsx': ["useLanguage()", 'orderStatusLabels', 'Could not load products.', 'Could not load orders.'],
+  'app/dashboard/pos/produtos/page.tsx': ["useLanguage()", 'Could not load products.', 'Could not load settings.', 'Publish online'],
   'app/dashboard/mensagens/page.tsx': ["useLanguage()", 'Appointment reminder', 'copy.loadClientsFailed', 'copy.emailSent'],
   'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
   'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
