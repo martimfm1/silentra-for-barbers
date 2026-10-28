@@ -42,26 +42,26 @@ const money = (value: number, locale: 'pt' | 'en') =>
     maximumFractionDigits: 2,
   }).format(Number(value) || 0);
 
-function paymentLabel(value: string, t: (key: string) => string) {
+function paymentLabel(value: string, locale: 'pt' | 'en') {
   return (
     (
       {
-        cash: t('posOverviewPage.cash'),
-        card: t('posOverviewPage.card'),
-        transfer: t('posOverviewPage.transfer'),
-        other: t('posOverviewPage.other'),
+        cash: locale === 'pt' ? 'Dinheiro' : 'Cash',
+        card: locale === 'pt' ? 'Cartão' : 'Card',
+        transfer: locale === 'pt' ? 'Transferência' : 'Bank transfer',
+        other: locale === 'pt' ? 'Outro' : 'Other',
       } as Record<string, string>
     )[value] ?? value
   );
 }
 
-async function authHeaders() {
+async function authHeaders(locale: 'pt' | 'en') {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token)
-    throw new Error('A tua sessão terminou. Volta a iniciar sessão.');
+    throw new Error(locale === 'pt' ? 'A tua sessão terminou. Volta a iniciar sessão.' : 'Your session has expired. Please sign in again.');
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
@@ -77,7 +77,7 @@ export default function SalesOverviewPage() {
     setLoading(true);
     try {
       const response = await fetch('/api/enterprise/pos', {
-        headers: await authHeaders(),
+        headers: await authHeaders(locale),
         cache: 'no-store',
       });
       const body = await response.json();
@@ -249,7 +249,7 @@ export default function SalesOverviewPage() {
               className="min-h-10"
             >
               <RefreshCcw className="mr-2 size-4" />
-              Atualizar
+              {t('posOverviewPage.refresh')}
             </Button>
           </div>
         </header>
@@ -376,7 +376,7 @@ export default function SalesOverviewPage() {
                     className="flex items-center justify-between rounded-xl border border-white/10 p-3"
                   >
                     <div>
-                      <p className="font-medium">{paymentLabel(method, t)}</p>
+                      <p className="font-medium">{paymentLabel(method, locale)}</p>
                       <p className="text-xs text-muted-foreground">
                         {stats.count} {t('posOverviewPage.salesCount')}
                       </p>
@@ -427,7 +427,7 @@ export default function SalesOverviewPage() {
                             .join(', ') || '—'}
                         </td>
                         <td className="px-3 py-4">
-                          {paymentLabel(transaction.payment_method, t)}
+                          {paymentLabel(transaction.payment_method, locale)}
                         </td>
                         <td className="px-3 py-4 text-right font-semibold">
                           {money(transaction.total, locale)}
