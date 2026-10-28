@@ -160,6 +160,7 @@ export function AnimatedTabList<T extends string>({
 
         return (
           <button
+            aria-label="Selecionar separador"
             key={tab.value}
             type="button"
             role="tab"
