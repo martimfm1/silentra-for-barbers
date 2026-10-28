@@ -11,7 +11,6 @@ const cookiePreferencesLink = read('components/privacy/cookie-preferences-link.t
 const legalDocumentPage = read('components/legal/legal-document-page.tsx');
 const cookiePolicyPage = read('app/cookies/page.tsx');
 const consentSchema = read('lib/privacy/cookie-consent.ts');
-const cookiePolicyPage = read('app/cookies/page.tsx');
 const cookiePolicy = read('lib/legal/cookie-policy.ts');
 const termsPage = read('app/terms/page.tsx');
 const privacyPage = read('app/privacy/page.tsx');
