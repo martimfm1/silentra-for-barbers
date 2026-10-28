@@ -125,6 +125,7 @@ export const enCopy = {
     planFeaturesNote: 'Features included in the plan remain available to the barbershop.',
     member: 'Member',
     permission: 'Permission',
+    noEmail: 'No email',
   },
 
   statusBadge: {
