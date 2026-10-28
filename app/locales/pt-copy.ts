@@ -57,6 +57,10 @@ export const ptCopy = {
     save: 'Criar marcação',
     saving: 'A guardar…',
     help: 'Os campos obrigatórios estão reduzidos ao essencial para criares a marcação rapidamente.',
+    barber: 'Barbeiro',
+    dateTime: 'Data e hora',
+    date: 'Data',
+    time: 'Hora',
   },
   inviteCode: {
     generateError: 'Não foi possível gerar o convite.',
@@ -121,6 +125,8 @@ export const ptCopy = {
     remove: 'Remover',
     loading: 'A carregar membros…',
     planFeaturesNote: 'As funcionalidades disponíveis pelo plano continuam disponíveis para a barbearia.',
+    member: 'Membro',
+    permission: 'Permissão',
   },
 
   dashboard: {
