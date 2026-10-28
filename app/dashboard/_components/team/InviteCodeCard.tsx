@@ -136,6 +136,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
         <Button
           onClick={generate}
           disabled={loading || teamFull}
+          aria-label={loading ? t('common.loading') : t('inviteCode.generate')}
           className="min-h-11 bg-emerald-600 text-white hover:bg-emerald-500 sm:w-fit"
         >
           {loading ? (
