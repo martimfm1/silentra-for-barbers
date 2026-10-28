@@ -66,7 +66,7 @@ function normalizeToken(value: string): string {
     .toLocaleLowerCase('pt-PT')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[\\s_]+/g, '-');
+    .replace(/[\s_]+/g, '-');
 }
 
 export function formatClosedDays(
