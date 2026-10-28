@@ -191,8 +191,8 @@ const PUBLIC_PROFILE_COPY = {
     paidParking: 'Estacionamento pago',
     publicUrl: 'URL público',
     publicSlug: 'Slug público',
-    includedEnterprise: '{copy.includedEnterprise}',
-    exclusiveEnterprise: '{copy.exclusiveEnterprise}',
+    includedEnterprise: 'Incluído no Enterprise',
+    exclusiveEnterprise: 'Exclusivo do Enterprise',
     advancedSeo: 'SEO avançado',
     seoTitle: 'Título SEO',
     seoDescription: 'Descrição SEO',
@@ -479,10 +479,10 @@ export default function PublicProfileSettingsPage() {
               />
             </div>
             {profile.canCustomizeSlug ? (
-              <span className="text-xs text-emerald-300">Incluído no Enterprise</span>
+              <span className="text-xs text-emerald-300">{copy.includedEnterprise}</span>
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-zinc-600">
-                <Lock className="size-3" aria-hidden="true" /> Exclusivo do Enterprise
+                <Lock className="size-3" aria-hidden="true" /> {copy.exclusiveEnterprise}
               </span>
             )}
           </div>
