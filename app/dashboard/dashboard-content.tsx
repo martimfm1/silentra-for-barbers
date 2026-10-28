@@ -7,6 +7,7 @@ import { DashboardSidebar } from '@/app/dashboard/_components/DashboardSidebar';
 import { Spotlight } from '@/components/aceternity/spotlight';
 import { DashboardTabMotionEnhancer } from '@/components/dashboard/dashboard-tab-motion-enhancer';
 import { DashboardConfirmProvider } from '@/components/dashboard/dashboard-confirm-provider';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardPageTransition } from '@/components/dashboard/dashboard-page-transition';
 
 const dashboardSurfaceStyles = `
@@ -64,6 +65,7 @@ const dashboardSurfaceStyles = `
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const isSettingsPage = pathname.startsWith('/dashboard/settings');
 
   return (
@@ -73,7 +75,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         href="#dashboard-main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-emerald-400"
       >
-        Saltar para o conteúdo principal
+        {t('common.skipToMain')}
       </a>
       <DashboardTabMotionEnhancer />
       {!isSettingsPage && <DashboardTopBar />}
