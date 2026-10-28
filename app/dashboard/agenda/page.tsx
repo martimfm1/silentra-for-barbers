@@ -23,6 +23,12 @@ import { useAppointments } from '@/app/state/_hooks/dashboard/useAppointments';
 import { BookingForm } from '@/app/dashboard/_components/cards/BookingFormCard';
 import { BlockScheduleForm } from '@/app/dashboard/_components/cards/BlockFormCard';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { AppointmentDetailDialog } from '@/components/dashboard/appointment-detail-dialog';
 import { AppointmentMobileCard } from '@/components/dashboard/appointment-mobile-card';
 import { AppointmentsTable } from '@/components/dashboard/appointments-table';
@@ -55,8 +61,8 @@ export default function AgendaPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showAddBlockForm, setShowAddBlockForm] = useState(false);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [search, setSearch] = useState('');
@@ -255,20 +261,18 @@ export default function AgendaPage() {
           <div className="silentra-page-actions w-full sm:w-auto">
             <Button
               variant="outline"
-              onClick={() => setShowAddForm((value) => !value)}
+              onClick={() => setBookingDialogOpen(true)}
               className="border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200 hover:border-emerald-400/30 hover:bg-emerald-400/[0.1]"
             >
               <Plus className="size-4" aria-hidden="true" />
-              {showAddForm ? t('agenda.closeBooking') : t('agenda.newBooking')}
+              {t('agenda.newBooking')}
             </Button>
             <Button
               variant="outline"
-              onClick={() => setShowAddBlockForm((value) => !value)}
+              onClick={() => setBlockDialogOpen(true)}
             >
               <CalendarOff className="size-4" aria-hidden="true" />
-              {showAddBlockForm
-                ? t('agenda.closeBlock')
-                : t('agenda.blockTime')}
+              {t('agenda.blockTime')}
             </Button>
           </div>
         </header>
@@ -362,37 +366,7 @@ export default function AgendaPage() {
               </button>
             </div>
             <div className="mt-4 space-y-4">
-              {showAddForm && (
-                <section className="silentra-section-block p-4 sm:p-6">
-                  <BookingForm
-                    clients={clients}
-                    services={services}
-                    professionals={professionals}
-                    loading={loadingAppointments}
-                    formData={formData}
-                    setFormData={setFormData}
-                    selectedProfessionalId={selectedProfessionalId}
-                    setSelectedProfessionalId={setSelectedProfessionalId}
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    selectedTime={selectedTime}
-                    setSelectedTime={setSelectedTime}
-                    onSubmit={handleCreateBooking}
-                  />
-                </section>
-              )}
-              {showAddBlockForm && (
-                <section className="silentra-section-block p-4 sm:p-6">
-                  <BlockScheduleForm
-                    professionals={professionals}
-                    loading={loadingAppointments}
-                    blockFormData={blockFormData}
-                    setBlockFormData={setBlockFormData}
-                    onSubmit={handleCreateBlock}
-                  />
-                </section>
-              )}
-              <section
+                            <section
                 className="silentra-section-block overflow-hidden"
                 aria-labelledby="agenda-list-title"
               >
@@ -446,7 +420,7 @@ export default function AgendaPage() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => setShowAddForm(true)}
+                        onClick={() => setBookingDialogOpen(true)}
                         className="mt-5 bg-zinc-50 text-zinc-950 hover:bg-white"
                       >
                         <Plus className="size-4" aria-hidden="true" />
@@ -488,6 +462,61 @@ export default function AgendaPage() {
           </>
         )}
       </div>
+      <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
+        <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-zinc-950/95 p-3 sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,900px)] sm:p-5">
+          <DialogTitle className="sr-only">{t('bookingForm.title')}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t('bookingForm.description')}
+          </DialogDescription>
+          <BookingForm
+            clients={clients}
+            services={services}
+            professionals={professionals}
+            loading={loadingAppointments}
+            formData={formData}
+            setFormData={setFormData}
+            selectedProfessionalId={selectedProfessionalId}
+            setSelectedProfessionalId={setSelectedProfessionalId}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            selectedTime={selectedTime}
+            setSelectedTime={setSelectedTime}
+            onSubmit={async (event) => {
+              const created = await handleCreateBooking(event);
+              if (!created) return;
+              setBookingDialogOpen(false);
+              setFormData({
+                clientId: undefined,
+                name_complete: '',
+                num_phone: '',
+                email: '',
+                service_id: '',
+              });
+              setSelectedProfessionalId('');
+              setSelectedDate('');
+              setSelectedTime('');
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-zinc-950/95 p-3 sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,900px)] sm:p-5">
+          <DialogTitle className="sr-only">{t('agenda.blockTime')}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t('agenda.blockTimeDescription')}
+          </DialogDescription>
+          <BlockScheduleForm
+            professionals={professionals}
+            loading={loadingAppointments}
+            blockFormData={blockFormData}
+            setBlockFormData={setBlockFormData}
+            onSubmit={async (event) => {
+              const created = await handleCreateBlock(event);
+              if (created) setBlockDialogOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
       <AppointmentDetailDialog
         appointment={selectedAppointment}
         open={Boolean(selectedAppointment)}

@@ -2,6 +2,7 @@
 
 //utils
 import { format } from 'date-fns';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { type BlockScheduleFormProps } from '@/types';
 
@@ -32,11 +33,13 @@ export function BlockScheduleForm({
   setBlockFormData,
   onSubmit,
 }: BlockScheduleFormProps) {
+  const { t } = useLanguage();
+
   return (
     <Card className="border border-red-500/20 bg-black/40 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
       <CardHeader>
         <CardTitle className="text-red-400 flex gap-2">
-          <CalendarOff className="size-5" /> Block Schedule
+          <CalendarOff className="size-5" /> {t('agenda.blockTime')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -46,7 +49,7 @@ export function BlockScheduleForm({
         >
           {/* Who is absent */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">Who is absent?</label>
+            <label className="text-xs text-zinc-400">{t('agenda.blockProfessional')}</label>
             <Select
               value={blockFormData.professional_id}
               onValueChange={(val) =>
@@ -54,7 +57,7 @@ export function BlockScheduleForm({
               }
             >
               <SelectTrigger className="bg-zinc-900 border-white/10 text-white cursor-pointer">
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={t('agenda.selectProfessional')} />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-white/10 text-white">
                 <SelectGroup>
@@ -70,7 +73,7 @@ export function BlockScheduleForm({
 
           {/* Block Date */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">Block Date</label>
+            <label className="text-xs text-zinc-400">{t('agenda.blockDate')}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -86,7 +89,7 @@ export function BlockScheduleForm({
                         new Date(blockFormData.start_date + 'T00:00:00'),
                         'PPP',
                       )
-                    : 'Date'}
+                    : t('agenda.chooseDate')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800">
@@ -111,7 +114,7 @@ export function BlockScheduleForm({
 
           {/* Start Time */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">Start Time</label>
+            <label className="text-xs text-zinc-400">{t('agenda.startTime')}</label>
             <input
               type="time"
               required
@@ -128,7 +131,7 @@ export function BlockScheduleForm({
 
           {/* End Time */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">End Time</label>
+            <label className="text-xs text-zinc-400">{t('agenda.endTime')}</label>
             <input
               type="time"
               required
@@ -142,9 +145,9 @@ export function BlockScheduleForm({
 
           {/* Reason */}
           <div className="grid gap-2 md:col-span-2 lg:col-span-2">
-            <label className="text-xs text-zinc-400">Reason</label>
+            <label className="text-xs text-zinc-400">{t('agenda.blockReason')}</label>
             <input
-              placeholder="Reason for the block"
+              placeholder={t('agenda.blockReasonPlaceholder')}
               className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white"
               value={blockFormData.reason || ''}
               onChange={(e) =>
@@ -155,13 +158,13 @@ export function BlockScheduleForm({
 
           {/* Submit */}
           <Button
-            aria-label={loading ? "A guardar bloqueio" : "Guardar bloqueio"}
+            aria-label={loading ? t('agenda.savingBlock') : t('agenda.saveBlock')}
             type="submit"
             disabled={loading}
             variant="ghost"
             className="bg-red-600 hover:bg-red-500 text-white h-10 w-full cursor-pointer"
           >
-            {loading ? <Spinner className="mr-2" /> : 'Block Time'}
+            {loading ? <Spinner className="mr-2" /> : t('agenda.saveBlock')}
           </Button>
         </form>
       </CardContent>
