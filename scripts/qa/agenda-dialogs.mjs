@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const read = (path: string) => fs.readFileSync(path, 'utf8');
+const read = (path) => fs.readFileSync(path, 'utf8');
 const agenda = read('app/dashboard/agenda/page.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 const blockForm = read('app/dashboard/_components/cards/BlockFormCard.tsx');
