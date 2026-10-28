@@ -70,7 +70,7 @@ export function useAppointments(
   const handleCreateBooking = useCallback(
     async (e?: React.SyntheticEvent) => {
       if (e && 'preventDefault' in e) e.preventDefault();
-      if (!barbershopId) return;
+      if (!barbershopId) return false;
       setLoading(true);
       try {
         const {
@@ -85,7 +85,7 @@ export function useAppointments(
         } = bookingFormData;
         if (!serviceId || !professionalId || !date || !time) {
           toast.error('Preenche o serviço, o profissional, a data e a hora.');
-          return;
+          return false;
         }
         const { error } = await appointmentService.create({
           barbershop_id: barbershopId,
@@ -111,9 +111,11 @@ export function useAppointments(
           birthDate: '',
         });
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Create Booking Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
@@ -211,12 +213,12 @@ export function useAppointments(
   const handleCreateBlock = useCallback(
     async (e?: React.SyntheticEvent) => {
       if (e && 'preventDefault' in e) e.preventDefault();
-      if (!barbershopId) return;
+      if (!barbershopId) return false;
       const { professional_id, start_date, start_time, end_time, reason } =
         blockFormData;
       if (!professional_id || !start_date || !start_time || !end_time) {
         toast.error('Por favor, seleciona uma data válida para o bloqueio.');
-        return;
+        return false;
       }
       setLoading(true);
       try {
@@ -238,9 +240,11 @@ export function useAppointments(
           reason: '',
         });
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Create Block Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
