@@ -149,7 +149,7 @@ export default function MarketplaceProductsPage() {
       void load();
       void loadSettings();
     }
-  }, [accessLoading, allowed]);
+  }, [accessLoading, allowed, locale]);
 
   const boostWindowOpen =
     !editing?.marketplace_published_at ||
@@ -185,7 +185,7 @@ export default function MarketplaceProductsPage() {
     [products],
   );
   const filtered = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase('pt-PT');
+    const term = search.trim().toLocaleLowerCase(activeLocale === 'en' ? 'en-GB' : 'pt-PT');
     return products.filter((product) => {
       const text =
         `${product.name} ${product.description ?? ''} ${product.sku ?? ''}`.toLocaleLowerCase(
@@ -333,7 +333,7 @@ export default function MarketplaceProductsPage() {
           <Package className="mx-auto size-8 text-emerald-300" />
           <h1 className="mt-4 text-2xl font-semibold">{localizedText(activeLocale, 'Produtos e vendas', 'Products and sales')}</h1>
           <p className="mt-2 text-sm text-zinc-500">
-            Esta área faz parte do módulo de vendas.
+            {localizedText(activeLocale, 'Esta área faz parte do módulo de vendas.', 'This section is part of the sales module.')}
           </p>
           <Button asChild className="mt-5">
             <Link href="/dashboard/billing">{localizedText(activeLocale, 'Ver plano', 'View plan')}</Link>
@@ -363,7 +363,7 @@ export default function MarketplaceProductsPage() {
               href="/dashboard/pos"
               className="inline-flex min-h-10 items-center gap-2 text-sm text-zinc-500 hover:text-white"
             >
-              ← Voltar ao ponto de venda
+              ← {localizedText(activeLocale, 'Voltar ao ponto de venda', 'Back to point of sale')}
             </Link>
             <div className="mt-5 flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300">
@@ -373,19 +373,17 @@ export default function MarketplaceProductsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
                   Vendas
                 </p>
-                <h1 className="text-3xl font-semibold tracking-tight">
-                  Produtos
-                </h1>
+                <h1 className="text-3xl font-semibold tracking-tight">{localizedText(activeLocale, 'Produtos', 'Products')}</h1>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-zinc-500">
-              Uma única fonte de verdade para o POS, stock e catálogo online.
+              {localizedText(activeLocale, 'Uma única fonte de verdade para o POS, stock e catálogo online.', 'A single source of truth for the POS, stock and online catalogue.')}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button variant="outline" asChild className="min-h-11">
               <Link href="/marketplace" target="_blank">
-                Ver marketplace
+                {localizedText(activeLocale, 'Ver marketplace', 'View marketplace')}
               </Link>
             </Button>
             <Button
@@ -512,7 +510,7 @@ export default function MarketplaceProductsPage() {
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
                 <option value="all">{localizedText(activeLocale, 'Todos os produtos', 'All products')}</option>
-                <option value="published">{localizedText(activeLocale, '{localizedText(activeLocale, 'Publicados online', 'Published online')}', 'Published online')}</option>
+                <option value="published">{localizedText(activeLocale, 'Publicados online', 'Published online')}</option>
                 <option value="hidden">{localizedText(activeLocale, 'Não publicados', 'Not published')}</option>
               </select>
             </div>
@@ -540,7 +538,7 @@ export default function MarketplaceProductsPage() {
               <Card className="border-emerald-400/15 bg-emerald-400/[0.025]">
             <CardHeader>
               <CardTitle>
-                {editing ? `Editar ${editing.name}` : 'Novo produto'}
+                {editing ? `${localizedText(activeLocale, 'Editar', 'Edit')} ${editing.name}` : localizedText(activeLocale, 'Novo produto', 'New product')}
               </CardTitle>
               <p className="text-sm text-zinc-500">
                 {localizedText(activeLocale, 'Preenche a informação pública, preço, imagem e stock. O mesmo stock é usado no POS e no marketplace.', 'Enter public details, price, image and stock. The same stock is used by the POS and marketplace.')}
@@ -549,9 +547,7 @@ export default function MarketplaceProductsPage() {
             <CardContent>
               <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Nome *
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Nome *', 'Name *')}</span>
                   <Input
                     required
                     value={form.name}
@@ -562,9 +558,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Descrição
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Descrição', 'Description')}</span>
                   <textarea
                     value={form.description}
                     onChange={(event) =>
@@ -575,9 +569,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Categoria
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Categoria', 'Category')}</span>
                   <Input
                     value={form.category}
                     onChange={(event) =>
@@ -587,7 +579,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">SKU</span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'SKU', 'SKU')}</span>
                   <Input
                     value={form.sku}
                     onChange={(event) =>
@@ -597,9 +589,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Preço (€) *
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Preço (€) *', 'Price (€) *')}</span>
                   <Input
                     required
                     type="number"
@@ -612,9 +602,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Preço anterior
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Preço anterior', 'Previous price')}</span>
                   <Input
                     type="number"
                     min="0"
@@ -626,9 +614,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Stock *
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Stock *', 'Stock *')}</span>
                   <Input
                     required
                     type="number"
@@ -647,9 +633,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">
-                    Alerta de stock
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Alerta de stock', 'Stock alert')}</span>
                   <Input
                     type="number"
                     min="0"
@@ -664,9 +648,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">
-                    URL da imagem
-                  </span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'URL da imagem', 'Image URL')}</span>
                   <Input
                     type="url"
                     value={form.imageUrl}
@@ -677,9 +659,7 @@ export default function MarketplaceProductsPage() {
                   />
                 </label>
                 <fieldset className="grid gap-2 md:col-span-2">
-                  <legend className="text-xs font-semibold text-zinc-300">
-                    Publicação
-                  </legend>
+                  <legend className="text-xs font-semibold text-zinc-300">{localizedText(activeLocale, 'Publicação', 'Publishing')}</legend>
                   <div className="grid gap-2 sm:grid-cols-3">
                     <CheckBox
                       checked={form.active}
@@ -722,7 +702,7 @@ export default function MarketplaceProductsPage() {
                       <span>
                         <strong className="flex items-center gap-2 text-sm text-white">
                           <Star className="size-4 text-amber-200" />
-                          {localizedText(activeLocale, '{localizedText(activeLocale, 'Destaque', 'Featured')} Enterprise · 3 dias', 'Enterprise featured · 3 days')}
+                          {localizedText(activeLocale, 'Destaque Enterprise · 3 dias', 'Enterprise featured · 3 days')}
                         </strong>
                         <span className="mt-1 block text-xs leading-5 text-zinc-500">
                           {boostHint}
