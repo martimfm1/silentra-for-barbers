@@ -241,11 +241,9 @@ export function TeamMembersManager({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.entries(ROLE_LABELS)
-                            .filter(([value]) => value !== 'owner')
-                            .map(([value, label]) => (
+                          {(['admin', 'manager', 'barber', 'receptionist', 'staff'] as Role[]).map((value) => (
                               <SelectItem key={value} value={value}>
-                                {label}
+                                {t(`teamMembers.roles.${value}`)}
                               </SelectItem>
                             ))}
                         </SelectContent>
@@ -258,18 +256,15 @@ export function TeamMembersManager({
                   <>
                     <div className="mt-5 rounded-2xl border border-white/5 bg-black/10 p-3">
                       <p className="px-1 pb-2 text-xs text-zinc-500">
-                        As funcionalidades disponíveis pelo plano continuam
-                        disponíveis para a barbearia. Estes interruptores
-                        definem apenas o acesso individual deste membro.
+                        {t('teamMembers.planFeaturesNote')}
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                        {Object.entries(PERMISSION_LABELS).map(
-                          ([key, label]) => (
+                        {(['dashboard', 'agenda', 'clients', 'services', 'team', 'messages', 'marketing', 'loyalty', 'automations', 'analytics', 'qr', 'settings', 'billing']).map((key) => (
                             <label
                               key={key}
                               className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-300"
                             >
-                              <span>{label}</span>
+                              <span>{t(`teamMembers.permissions.${key}`)}</span>
                               <Switch
                                 checked={Boolean(member.permissions?.[key])}
                                 onCheckedChange={(checked) =>
