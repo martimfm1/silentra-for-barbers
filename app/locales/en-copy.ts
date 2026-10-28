@@ -126,6 +126,14 @@ export const enCopy = {
     permission: 'Permission',
   },
 
+  statusBadge: {
+    pending: 'Pending',
+    scheduled: 'Confirmed',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    label: 'Status',
+  },
+
   dashboard: {
     overview: 'Overview',
     appointments: 'Bookings',
