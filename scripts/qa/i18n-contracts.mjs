@@ -178,6 +178,15 @@ for (const section of [
 }
 
 
+for (const status of ['all', 'pending', 'confirmed', 'completed', 'cancelled']) {
+  for (const locale of ['pt', 'en']) {
+    const key = 'agenda.' + status;
+    if (!hasPath(localeTrees[locale], key)) {
+      failures.push(locale + ': missing agenda filter translation "' + key + '"');
+    }
+  }
+}
+
 for (const status of [
   'pending',
   'confirmed',
