@@ -48,34 +48,34 @@ const templatesByLocale = {
     reminder: {
       label: 'Lembrete de marcação',
       subject: 'Lembrete da sua marcação',
-      body: 'Olá {{nome}},\\n\\nEstamos a enviar-lhe um lembrete da sua próxima marcação na {{barbearia}}.\\n\\nSe precisar de alterar a marcação, entre em contacto connosco.\\n\\nObrigado,\\n{{barbearia}}',
+      body: 'Olá {{nome}},\n\nEstamos a enviar-lhe um lembrete da sua próxima marcação na {{barbearia}}.\n\nSe precisar de alterar a marcação, entre em contacto connosco.\n\nObrigado,\n{{barbearia}}',
     },
     thanks: {
       label: 'Obrigado pela visita',
       subject: 'Obrigado pela sua visita',
-      body: 'Olá {{nome}},\\n\\nObrigado por visitar a {{barbearia}}. Esperamos voltar a recebê-lo em breve.\\n\\nAté à próxima!\\n{{barbearia}}',
+      body: 'Olá {{nome}},\n\nObrigado por visitar a {{barbearia}}. Esperamos voltar a recebê-lo em breve.\n\nAté à próxima!\n{{barbearia}}',
     },
     custom: {
       label: 'Mensagem personalizada',
       subject: '',
-      body: 'Olá {{nome}},\\n\\n',
+      body: 'Olá {{nome}},\n\n',
     },
   },
   en: {
     reminder: {
       label: 'Appointment reminder',
       subject: 'Your appointment reminder',
-      body: 'Hi {{nome}},\\n\\nThis is a reminder of your upcoming appointment at {{barbearia}}.\\n\\nPlease contact us if you need to change your booking.\\n\\nThank you,\\n{{barbearia}}',
+      body: 'Hi {{nome}},\n\nThis is a reminder of your upcoming appointment at {{barbearia}}.\n\nPlease contact us if you need to change your booking.\n\nThank you,\n{{barbearia}}',
     },
     thanks: {
       label: 'Thank you for visiting',
       subject: 'Thank you for your visit',
-      body: 'Hi {{nome}},\\n\\nThank you for visiting {{barbearia}}. We look forward to seeing you again soon.\\n\\nSee you next time!\\n{{barbearia}}',
+      body: 'Hi {{nome}},\n\nThank you for visiting {{barbearia}}. We look forward to seeing you again soon.\n\nSee you next time!\n{{barbearia}}',
     },
     custom: {
       label: 'Custom message',
       subject: '',
-      body: 'Hi {{nome}},\\n\\n',
+      body: 'Hi {{nome}},\n\n',
     },
   },
 } as const;
@@ -186,16 +186,14 @@ export default function MensagensPage() {
             if (shopData.name) setShopName(shopData.name);
           }
         }
-      } catch (error) {
-        toast.error(
-          copy.loadDataFailed,
-        );
+      } catch {
+        toast.error(copy.loadDataFailed);
       } finally {
         setLoading(false);
       }
     };
     void loadData();
-  }, [barbershopId]);
+  }, [barbershopId, copy]);
 
   const selectedClient = useMemo(
     () => clients.find((client) => client.id === clientId),
@@ -213,7 +211,7 @@ export default function MensagensPage() {
       '{{nome}}',
       selectedClient?.name_complete ||
         selectedClient?.name ||
-        'Nome do cliente',
+        copy.customerName,
     )
     .replaceAll('{{barbearia}}', shopName || copy.fallbackShop);
 
@@ -240,10 +238,8 @@ export default function MensagensPage() {
       if (!response.ok)
         throw new Error(copy.emailSendFailed);
       toast.success(copy.emailSent);
-    } catch (error) {
-      toast.error(
-        copy.sendError,
-      );
+    } catch {
+      toast.error(copy.sendError);
     } finally {
       setSending(false);
     }
