@@ -109,11 +109,9 @@ export default function MarketplaceProductsPage() {
         throw new Error(localizedText(activeLocale, 'Não foi possível carregar os produtos.', 'Could not load products.'));
       setProducts(json.products ?? []);
       setPlan(typeof json.plan === 'string' ? json.plan : 'free');
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Erro ao carregar os produtos.', 'Could not load products.'),
+        localizedText(activeLocale, 'Erro ao carregar os produtos.', 'Could not load products.'),
       );
     } finally {
       setLoading(false);
@@ -135,11 +133,9 @@ export default function MarketplaceProductsPage() {
           ? 'physical_and_online'
           : 'physical_only',
       );
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Erro ao carregar as definições.', 'Could not load settings.'),
+        localizedText(activeLocale, 'Erro ao carregar as definições.', 'Could not load settings.'),
       );
     }
   }
@@ -200,7 +196,7 @@ export default function MarketplaceProductsPage() {
             : !product.marketplace_visible))
       );
     });
-  }, [products, search, category, visibility]);
+  }, [products, search, category, visibility, activeLocale]);
 
   async function saveSalesMode(next: SalesMode) {
     if (settingsSaving) return;
@@ -222,11 +218,9 @@ export default function MarketplaceProductsPage() {
           ? localizedText(activeLocale, 'Vendas online ativadas.', 'Online sales enabled.')
           : localizedText(activeLocale, 'Marketplace online desativado.', 'Online marketplace disabled.'),
       );
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Erro ao guardar as definições.', 'Could not save settings.'),
+        localizedText(activeLocale, 'Erro ao guardar as definições.', 'Could not save settings.'),
       );
     } finally {
       setSettingsSaving(false);
@@ -280,9 +274,9 @@ export default function MarketplaceProductsPage() {
       setForm(EMPTY_FORM);
       setFormOpen(false);
       await load();
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error ? error.message : localizedText(activeLocale, 'Erro ao guardar o produto.', 'Could not save the product.'),
+        localizedText(activeLocale, 'Erro ao guardar o produto.', 'Could not save the product.'),
       );
     } finally {
       setSaving(false);
@@ -307,8 +301,8 @@ export default function MarketplaceProductsPage() {
         throw new Error(localizedText(activeLocale, 'Não foi possível arquivar.', 'Could not archive the product.'));
       toast.success(localizedText(activeLocale, 'Produto arquivado.', 'Product archived.'));
       await load();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : localizedText(activeLocale, 'Erro ao arquivar.', 'Could not archive the product.'));
+    } catch {
+      toast.error(localizedText(activeLocale, 'Erro ao arquivar.', 'Could not archive the product.'));
     }
   }
 
