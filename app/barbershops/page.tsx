@@ -363,7 +363,7 @@ export default function BarbershopsDirectoryPage() {
                     Explora no mapa
                   </div>
                   <p className="mt-1 text-[11px] text-zinc-500">
-                    Seleciona uma barbearia para abrir a página completa.
+                    {t('directory.selectShopHint')}
                   </p>
                 </div>
                 <div className="min-h-[30rem] max-h-[38rem] overflow-hidden">

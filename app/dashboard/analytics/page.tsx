@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Analytics = {
   plan: 'free' | 'pro' | 'enterprise';
@@ -56,8 +57,8 @@ type Analytics = {
   };
 };
 
-function money(value: number) {
-  return new Intl.NumberFormat('pt-PT', {
+function money(value: number, locale: 'pt' | 'en' = 'pt') {
+  return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     style: 'currency',
     currency: 'EUR',
   }).format(value);
@@ -65,10 +66,10 @@ function money(value: number) {
 function dateInput(date: Date) {
   return date.toISOString().slice(0, 10);
 }
-function humanDate(value: string) {
+function humanDate(value: string, locale: 'pt' | 'en' = 'pt') {
   const date = new Date(`${value.slice(0, 10)}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('pt-PT', {
+  return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -89,6 +90,7 @@ function downloadUrl(
 
 export default function AnalyticsPage() {
   const { hasFeature, plan, loading: accessLoading } = useFeatureAccess();
+  const { t, locale } = useLanguage();
   const allowed = hasFeature('advanced_analytics');
   const [from, setFrom] = useState(() =>
     dateInput(new Date(Date.now() - 29 * 86400000)),
@@ -108,17 +110,17 @@ export default function AnalyticsPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          json.error ?? 'Não foi possível carregar os analytics.',
+          json.error ?? t('analyticsPage.loadError'),
         );
       setData(json as Analytics);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar analytics.',
+        error instanceof Error ? error.message : t('analyticsPage.loadGenericError'),
       );
     } finally {
       setLoading(false);
     }
-  }, [allowed, from, to]);
+  }, [allowed, from, to, t]);
 
   useEffect(() => {
     void load();
@@ -146,25 +148,25 @@ export default function AnalyticsPage() {
     if (data.overview.revenueChangePercent !== null) {
       messages.push(
         data.overview.revenueChangePercent >= 0
-          ? `A receita cresceu ${Math.abs(data.overview.revenueChangePercent).toFixed(1)}% face ao período anterior.`
-          : `A receita caiu ${Math.abs(data.overview.revenueChangePercent).toFixed(1)}% face ao período anterior.`,
+          ? t('analyticsPage.revenueUp', { percent: Math.abs(data.overview.revenueChangePercent).toFixed(1) })
+          : t('analyticsPage.revenueDown', { percent: Math.abs(data.overview.revenueChangePercent).toFixed(1) }),
       );
     }
     messages.push(
-      `Ticket médio de ${money(avgTicket)} por marcação concluída.`,
+      t('analyticsPage.ticketInsight', { amount: money(avgTicket, locale) }),
     );
     messages.push(
-      `${completionRate.toFixed(1)}% das marcações do período foram concluídas.`,
+      t('analyticsPage.completionInsight', { percent: completionRate.toFixed(1) }),
     );
     if (topService)
       messages.push(
-        `${topService.name} lidera em receita, com ${money(topService.revenue)}.`,
+        t('analyticsPage.topServiceInsight', { name: topService.name, amount: money(topService.revenue, locale) }),
       );
     messages.push(
-      `Média de ${avgDailyAppointments.toFixed(1)} marcações por dia.`,
+      t('analyticsPage.dailyAverageInsight', { count: avgDailyAppointments.toFixed(1) }),
     );
     return messages.slice(0, 5);
-  }, [data]);
+  }, [data, t, locale]);
 
   const businessMetrics = useMemo(() => {
     if (!data) return null;
@@ -211,12 +213,12 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">Analytics avançado</h1>
+              <h1 className="text-2xl font-semibold">{t('analyticsPage.advancedTitle')}</h1>
               <p className="text-muted-foreground">
-                Esta área está disponível no plano Pro e superiores.
+                {t('analyticsPage.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">Fazer upgrade</Link>
+                <Link href="/dashboard/billing">{t('analyticsPage.upgrade')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -253,17 +255,16 @@ export default function AnalyticsPage() {
                 {plan === 'enterprise' ? 'Enterprise' : 'Pro'}
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Performance do negócio
+                {t('analyticsPage.title')}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Uma leitura rápida do que está a acontecer na tua barbearia, com
-                foco em receita, operação, clientes e equipa.
+                {t('analyticsPage.description')}
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('analyticsPage.dashboard')}
               </Link>
             </Button>
           </div>
@@ -273,7 +274,7 @@ export default function AnalyticsPage() {
                 className="text-xs text-muted-foreground"
                 htmlFor="analytics-from"
               >
-                De
+                {t('analyticsPage.from')}
               </label>
               <Input
                 id="analytics-from"
@@ -288,7 +289,7 @@ export default function AnalyticsPage() {
                 className="text-xs text-muted-foreground"
                 htmlFor="analytics-to"
               >
-                Até
+                {t('analyticsPage.to')}
               </label>
               <Input
                 id="analytics-to"
@@ -302,7 +303,7 @@ export default function AnalyticsPage() {
               <RefreshCw
                 className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
               />
-              {loading ? 'A atualizar' : 'Atualizar'}
+              {loading ? t('analyticsPage.updating') : t('analyticsPage.update')}
             </Button>
           </div>
         </header>
@@ -318,12 +319,12 @@ export default function AnalyticsPage() {
           <>
             <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <Metric
-                title="Receita"
-                value={money(data.overview.revenue)}
+                title={t('analyticsPage.revenue')}
+                value={money(data.overview.revenue, locale)}
                 detail={
                   data.overview.revenueChangePercent === null
-                    ? 'Sem comparação disponível'
-                    : `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}% vs período anterior`
+                    ? t('analyticsPage.noComparison')
+                    : t('analyticsPage.vsPrevious', { value: `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}` })
                 }
                 icon={<Wallet className="h-4 w-4" />}
                 positive={
@@ -333,21 +334,21 @@ export default function AnalyticsPage() {
                 }
               />
               <Metric
-                title="Ticket médio"
-                value={money(businessMetrics?.averageTicket ?? 0)}
-                detail="Por marcação concluída"
+                title={t('analyticsPage.averageTicket')}
+                value={money(businessMetrics?.averageTicket ?? 0, locale)}
+                detail={t('analyticsPage.perCompletedBooking')}
                 icon={<Target className="h-4 w-4" />}
               />
               <Metric
-                title="Clientes ativos"
+                title={t('analyticsPage.activeClients')}
                 value={String(data.overview.activeClientsInPeriod)}
-                detail={`${data.overview.newClients} novos no período`}
+                detail={t('analyticsPage.newInPeriod', { count: data.overview.newClients })}
                 icon={<Users className="h-4 w-4" />}
               />
               <Metric
-                title="Taxa de conclusão"
+                title={t('analyticsPage.completionRate')}
                 value={`${(businessMetrics?.completionRate ?? 0).toFixed(1)}%`}
-                detail={`${data.overview.cancelledAppointments} cancelamentos`}
+                detail={t('analyticsPage.cancellations', { count: data.overview.cancelledAppointments })}
                 icon={<CheckCircle2 className="h-4 w-4" />}
                 positive={(businessMetrics?.completionRate ?? 0) >= 70}
               />
@@ -360,15 +361,15 @@ export default function AnalyticsPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <BarChart3 className="h-5 w-5 text-primary" />
-                        Receita ao longo do período
+                        {t('analyticsPage.revenueOverTime')}
                       </CardTitle>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {humanDate(data.period.from)} —{' '}
-                        {humanDate(data.period.to)}
+                        {humanDate(data.period.from, locale)} —{' '}
+                        {humanDate(data.period.to, locale)}
                       </p>
                     </div>
                     <span className="text-sm font-semibold">
-                      {money(data.overview.revenue)}
+                      {money(data.overview.revenue, locale)}
                     </span>
                   </div>
                 </CardHeader>
@@ -382,7 +383,7 @@ export default function AnalyticsPage() {
                           <div
                             key={item.date}
                             className="group flex h-full min-w-0 flex-1 flex-col justify-end"
-                            title={`${humanDate(item.date)} · ${money(item.value)}`}
+                            title={`${humanDate(item.date, locale)} · ${money(item.value)}`}
                           >
                             <div
                               className="rounded-t-md bg-primary/75 transition-all group-hover:bg-primary"
@@ -411,27 +412,27 @@ export default function AnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Resumo operacional</CardTitle>
+                  <CardTitle>{t('analyticsPage.operationalSummary')}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Volume e qualidade da operação.
+                    {t('analyticsPage.operationQuality')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  <Stat label="Marcações" value={data.overview.appointments} />
+                  <Stat label={t('analyticsPage.bookings')} value={data.overview.appointments} />
                   <Stat
-                    label="Concluídas"
+                    label={t('analyticsPage.completed')}
                     value={data.overview.completedAppointments}
                   />
                   <Stat
-                    label="Agendadas"
+                    label={t('analyticsPage.scheduled')}
                     value={data.overview.scheduledAppointments}
                   />
                   <Stat
-                    label="Canceladas"
+                    label={t('analyticsPage.cancelled')}
                     value={data.overview.cancelledAppointments}
                   />
                   <Stat
-                    label="Média / dia"
+                    label={t('analyticsPage.averagePerDay')}
                     value={(businessMetrics?.dailyAppointments ?? 0).toFixed(1)}
                   />
                 </CardContent>
@@ -443,10 +444,10 @@ export default function AnalyticsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Insights automáticos
+                    {t('analyticsPage.automaticInsights')}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Sinais úteis para decidir onde agir.
+                    {t('analyticsPage.insightsDescription')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -462,26 +463,26 @@ export default function AnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Saúde da base de clientes</CardTitle>
+                  <CardTitle>{t('analyticsPage.customerHealth')}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Indicadores derivados do período selecionado.
+                    {t('analyticsPage.selectedPeriodIndicators')}
                   </p>
                 </CardHeader>
                 <CardContent className="grid gap-4 sm:grid-cols-2">
                   <MetricMini
-                    label="Receita / cliente ativo"
-                    value={money(businessMetrics?.clientRevenue ?? 0)}
+                    label={t('analyticsPage.revenuePerActiveClient')}
+                    value={money(businessMetrics?.clientRevenue ?? 0, locale)}
                   />
                   <MetricMini
-                    label="Novos / base total"
+                    label={t('analyticsPage.newVsTotal')}
                     value={`${(businessMetrics?.newClientRate ?? 0).toFixed(1)}%`}
                   />
                   <MetricMini
-                    label="Taxa de cancelamento"
+                    label={t('analyticsPage.cancellationRate')}
                     value={`${(businessMetrics?.cancellationRate ?? 0).toFixed(1)}%`}
                   />
                   <MetricMini
-                    label="Clientes totais"
+                    label={t('analyticsPage.totalClients')}
                     value={String(data.overview.totalClients)}
                   />
                 </CardContent>
@@ -491,9 +492,9 @@ export default function AnalyticsPage() {
             <section className="grid gap-6 xl:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Serviços mais vendidos</CardTitle>
+                  <CardTitle>{t('analyticsPage.bestSellingServices')}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Ordenados por receita.
+                    {t('analyticsPage.sortedByRevenue')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -505,7 +506,7 @@ export default function AnalyticsPage() {
                             {item.name}
                           </span>
                           <span className="shrink-0 font-semibold">
-                            {money(item.revenue)}
+                            {money(item.revenue, locale)}
                           </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -517,7 +518,7 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.count} marcações
+                          {t('analyticsPage.bookingCount', { count: item.count })}
                         </p>
                       </div>
                     ))
@@ -528,9 +529,9 @@ export default function AnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Performance dos profissionais</CardTitle>
+                  <CardTitle>{t('analyticsPage.professionalPerformance')}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Receita e volume concluído por profissional.
+                    {t('analyticsPage.revenueAndBookings')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -542,7 +543,7 @@ export default function AnalyticsPage() {
                             {item.name}
                           </span>
                           <span className="shrink-0 font-semibold">
-                            {money(item.revenue)}
+                            {money(item.revenue, locale)}
                           </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -554,7 +555,7 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.appointments} marcações concluídas
+                          {t('analyticsPage.completedBookings', { count: item.appointments })}
                         </p>
                       </div>
                     ))
@@ -568,9 +569,9 @@ export default function AnalyticsPage() {
             <section className="grid gap-6 xl:grid-cols-[1fr_1.6fr]">
               <Card>
                 <CardHeader>
-                  <CardTitle>Perfil etário</CardTitle>
+                  <CardTitle>{t('analyticsPage.ageProfile')}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Clientes únicos com idade conhecida.
+                    {t('analyticsPage.knownAges')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -604,38 +605,37 @@ export default function AnalyticsPage() {
               {data.enterprise ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Enterprise · visão financeira</CardTitle>
+                    <CardTitle>{t('analyticsPage.enterpriseFinance')}</CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      POS combinado com a operação de marcações.
+                      {t('analyticsPage.posCombined')}
                     </p>
                   </CardHeader>
                   <CardContent className="grid gap-4 sm:grid-cols-3">
                     <MetricMini
-                      label="Receita POS"
-                      value={money(data.enterprise.posRevenue)}
+                      label={t('analyticsPage.posRevenue')}
+                      value={money(data.enterprise.posRevenue, locale)}
                     />
                     <MetricMini
-                      label="Transações POS"
+                      label={t('analyticsPage.posTransactions')}
                       value={String(data.enterprise.posTransactions)}
                     />
                     <MetricMini
-                      label="Receita combinada"
-                      value={money(data.enterprise.combinedRevenue)}
+                      label={t('analyticsPage.combinedRevenue')}
+                      value={money(data.enterprise.combinedRevenue, locale)}
                     />
                   </CardContent>
                 </Card>
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Próximo passo</CardTitle>
+                    <CardTitle>{t('analyticsPage.nextStep')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-4 text-sm text-muted-foreground">
-                      Ativa o Enterprise para acompanhar POS e receita combinada
-                      por localização.
+                      {t('analyticsPage.enableEnterprise')}
                     </div>
                     <Button asChild variant="outline" className="mt-4">
-                      <Link href="/plans">Comparar planos</Link>
+                      <Link href="/plans">{t('analyticsPage.comparePlans')}</Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -649,10 +649,10 @@ export default function AnalyticsPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Download className="h-5 w-5 text-primary" />
-                        Exportar dados
+                        {t('analyticsPage.exportData')}
                       </CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Relatórios prontos para arquivo e Excel.
+                        {t('analyticsPage.exportDescription')}
                       </p>
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -662,35 +662,35 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
                   <ExportCard
-                    title="Relatório de marcações"
-                    description="Operação, estados, profissionais e receita."
+                    title="{t('analyticsPage.bookingsReport')}"
+                    description="{t('analyticsPage.bookingsReportDescription')}"
                     type="appointments"
                     from={from}
                     to={to}
                   />
                   <ExportCard
-                    title="Relatório de clientes"
-                    description="Base CRM e evolução de clientes."
+                    title="{t('analyticsPage.clientsReport')}"
+                    description="{t('analyticsPage.clientsReportDescription')}"
                     type="clients"
                     from={from}
                     to={to}
                   />
                   {plan === 'enterprise' ? (
                     <ExportCard
-                      title="Relatório financeiro"
-                      description="Transações POS, descontos e pagamentos."
+                      title="{t('analyticsPage.financialReport')}"
+                      description="{t('analyticsPage.financialReportDescription')}"
                       type="pos"
                       from={from}
                       to={to}
                     />
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5">
-                      <p className="font-medium">Relatório financeiro</p>
+                      <p className="font-medium">{t('analyticsPage.financialReport')}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Disponível no Enterprise.
+                        {t('analyticsPage.availableEnterprise')}
                       </p>
                       <Button asChild variant="outline" className="mt-4 w-full">
-                        <Link href="/plans">Ver Enterprise</Link>
+                        <Link href="/plans">{t('analyticsPage.viewEnterprise')}</Link>
                       </Button>
                     </div>
                   )}
@@ -753,9 +753,10 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 function Empty() {
+  const { t } = useLanguage();
   return (
     <p className="py-8 text-center text-sm text-muted-foreground">
-      Sem dados para o período selecionado.
+      {t('analyticsPage.noData')}
     </p>
   );
 }
@@ -772,6 +773,7 @@ function ExportCard({
   from: string;
   to: string;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="rounded-2xl border border-border bg-background p-5">
       <div className="flex items-center gap-3">
@@ -787,13 +789,13 @@ function ExportCard({
         <Button asChild variant="outline" className="w-full">
           <a href={downloadUrl(type, from, to, 'html')}>
             <Download className="mr-2 h-4 w-4" />
-            Relatório
+            {t('analyticsPage.report')}
           </a>
         </Button>
         <Button asChild className="w-full">
           <a href={downloadUrl(type, from, to, 'excel')}>
             <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Excel
+            {t('analyticsPage.excel')}
           </a>
         </Button>
       </div>

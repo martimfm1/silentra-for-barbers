@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EarningRulesCard } from '@/components/dashboard/loyalty/earning-rules-card';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoyaltyPointsPage() {
+  const { t } = useLanguage();
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -11,15 +15,14 @@ export default function LoyaltyPointsPage() {
             href="/dashboard/loyalty"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-sm text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Fidelização
+            <ArrowLeft className="size-4" /> {t('loyaltyPointsPage.loyalty')}
           </Link>
-          <p className="mt-6 text-sm font-medium text-primary">PONTOS</p>
+          <p className="mt-6 text-sm font-medium text-primary">{t('loyaltyPointsPage.kicker')}</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-            Regras de pontos
+            {t('loyaltyPointsPage.title')}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Define quantos pontos cada serviço gera quando a marcação fica
-            concluída.
+            {t('loyaltyPointsPage.description')}
           </p>
         </header>
         <EarningRulesCard />
@@ -28,13 +31,13 @@ export default function LoyaltyPointsPage() {
             href="/dashboard/loyalty/validate"
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
           >
-            Validar recompensa
+            {t('loyaltyPointsPage.validateReward')}
           </Link>
           <Link
             href="/dashboard/loyalty"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-4 text-sm"
           >
-            Gerir recompensas
+            {t('loyaltyPointsPage.manageRewards')}
           </Link>
         </div>
       </div>

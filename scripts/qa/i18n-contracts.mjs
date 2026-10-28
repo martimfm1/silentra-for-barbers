@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import ts from 'typescript';
 
@@ -7,7 +7,7 @@ const localeFiles = {
   pt: ['app/locales/pt.ts', 'app/locales/pt-copy.ts'],
   en: ['app/locales/en.ts', 'app/locales/en-copy.ts'],
 };
-const localizedSources = [
+const explicitlyLocalizedSources = [
   'components/site-navbar.tsx',
   'app/marketplace/page.tsx',
   'app/dashboard/page.tsx',
@@ -31,6 +31,25 @@ const localizedSources = [
   'app/email-confirmed/page.tsx',
   'app/email-confirmation-error/page.tsx',
 ];
+
+function discoverTsxFiles(directory) {
+  return readdirSync(join(root, directory), { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name).replaceAll('\\', '/');
+    if (entry.isDirectory()) {
+      if (entry.name.startsWith('.') || entry.name === 'node_modules') return [];
+      return discoverTsxFiles(path);
+    }
+    return entry.isFile() && entry.name.endsWith('.tsx') ? [path] : [];
+  });
+}
+
+// Discover all application and shared component TSX files so no route or
+// reusable UI can silently fall outside the translation contract.
+const localizedSources = [...new Set([
+  ...explicitlyLocalizedSources,
+  ...discoverTsxFiles('app'),
+  ...discoverTsxFiles('components'),
+])].sort();
 
 const read = (path) => readFileSync(join(root, path), 'utf8');
 

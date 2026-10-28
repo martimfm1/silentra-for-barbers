@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Campaign = {
   id: string;
@@ -39,14 +40,14 @@ type Campaign = {
 
 const MAX_BODY_LENGTH = 10000;
 
-function formatStatus(status: string) {
+function formatStatus(status: string, t: (key: string) => string) {
   const labels: Record<string, string> = {
-    draft: 'Rascunho',
-    scheduled: 'Agendada',
-    sending: 'A enviar',
-    sent: 'Enviada',
-    failed: 'Falhou',
-    cancelled: 'Cancelada',
+    draft: t('marketingPage.statuses.draft'),
+    scheduled: t('marketingPage.statuses.scheduled'),
+    sending: t('marketingPage.statuses.sending'),
+    sent: t('marketingPage.statuses.sent'),
+    failed: t('marketingPage.statuses.failed'),
+    cancelled: t('marketingPage.statuses.cancelled'),
   };
   return labels[status] ?? status;
 }
@@ -62,6 +63,7 @@ function statusClass(status: string) {
 }
 
 export default function MarketingPage() {
+  const { t, locale } = useLanguage();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('marketing_campaigns');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -88,33 +90,33 @@ export default function MarketingPage() {
       const data = await response.json();
       if (!response.ok)
         throw new Error(
-          data.error ?? 'Não foi possível carregar as campanhas.',
+          data.error ?? t('marketingPage.loadError'),
         );
       setCampaigns(data.campaigns ?? []);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar campanhas.',
+        error instanceof Error ? error.message : t('marketingPage.loadGenericError'),
       );
     } finally {
       setLoading(false);
     }
-  }, [allowed]);
+  }, [allowed, t]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   const preview = useMemo(() => {
-    const fallbackName = form.name.trim() || 'Nova campanha';
-    const fallbackSubject = form.subject.trim() || 'Assunto da campanha';
+    const fallbackName = form.name.trim() || t('marketingPage.fallbackCampaignName');
+    const fallbackSubject = form.subject.trim() || t('marketingPage.fallbackSubject');
     const fallbackBody =
-      form.body.trim() || 'A tua mensagem vai aparecer aqui enquanto escreves.';
+      form.body.trim() || t('marketingPage.fallbackBody');
     return {
       name: fallbackName,
       subject: fallbackSubject,
       body: fallbackBody,
     };
-  }, [form]);
+  }, [form, t]);
 
   function openComposer() {
     setForm({ name: '', channel: 'email', subject: '', body: '' });
@@ -138,14 +140,14 @@ export default function MarketingPage() {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível criar a campanha.');
-      toast.success('Campanha criada como rascunho.');
+        throw new Error(data.error ?? t('marketingPage.createError'));
+      toast.success(t('marketingPage.createdDraft'));
       setCampaigns((current) => [data.campaign, ...current]);
       setForm({ name: '', channel: 'email', subject: '', body: '' });
       setOpen(false);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar campanha.',
+        error instanceof Error ? error.message : t('marketingPage.createGenericError'),
       );
     } finally {
       setCreating(false);
@@ -161,12 +163,12 @@ export default function MarketingPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">Campanhas de marketing</h1>
+              <h1 className="text-2xl font-semibold">{t('marketingPage.marketingCampaigns')}</h1>
               <p className="text-muted-foreground">
-                Crie campanhas segmentadas de email e SMS com o plano Pro.
+                {t('marketingPage.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">Fazer upgrade</Link>
+                <Link href="/dashboard/billing">{t('marketingPage.upgrade')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -182,14 +184,13 @@ export default function MarketingPage() {
           <div className="max-w-2xl">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <Sparkles className="h-3.5 w-3.5" />
-              Marketing · Pro
+              {t('marketingPage.marketingPro')}
             </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Campanhas
+              {t('marketingPage.campaigns')}
             </h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
-              Cria uma mensagem, escolhe o canal e vê imediatamente como ela
-              será apresentada ao cliente.
+              {t('marketingPage.subtitle')}
             </p>
           </div>
 
@@ -197,12 +198,12 @@ export default function MarketingPage() {
             <Button variant="outline" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('marketingPage.dashboard')}
               </Link>
             </Button>
             <Button onClick={openComposer} className="sm:min-w-40">
               <Plus className="mr-2 h-4 w-4" />
-              Nova campanha
+              {t('marketingPage.newCampaign')}
             </Button>
           </div>
         </header>
@@ -211,23 +212,23 @@ export default function MarketingPage() {
           {[
             {
               step: '01',
-              title: 'Define a campanha',
+              title: t('marketingPage.defineCampaign'),
               description:
-                'Dá-lhe um nome interno para conseguires identificá-la depois.',
+                t('marketingPage.defineCampaignDescription'),
               icon: Sparkles,
             },
             {
               step: '02',
-              title: 'Escolhe o canal',
+              title: t('marketingPage.chooseChannel'),
               description:
-                'Email permite assunto + mensagem; SMS é focado numa mensagem curta.',
+                t('marketingPage.chooseChannelDescription'),
               icon: Send,
             },
             {
               step: '03',
-              title: 'Revê antes de guardar',
+              title: t('marketingPage.reviewBeforeSave'),
               description:
-                'O preview atualiza-se enquanto escreves para evitares surpresas.',
+                t('marketingPage.reviewBeforeSaveDescription'),
               icon: Eye,
             },
           ].map(({ step, title, description, icon: Icon }) => (
@@ -241,7 +242,7 @@ export default function MarketingPage() {
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                    Passo {step}
+                    {t('marketingPage.step')} {step}
                   </div>
                   <p className="mt-1 text-sm font-semibold">{title}</p>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -259,21 +260,20 @@ export default function MarketingPage() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl">Nova campanha</CardTitle>
+                    <CardTitle className="text-xl">{t('marketingPage.newCampaign')}</CardTitle>
                     <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
-                      Rascunho
+                      {t('marketingPage.draft')}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Os dados abaixo servem para preparar a campanha. O nome
-                    interno não é enviado aos clientes.
+                    {t('marketingPage.preparationHint')}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={closeComposer}
-                  aria-label="Fechar editor"
+                  aria-label={t('marketingPage.closeEditor')}
                   disabled={creating}
                 >
                   <X className="h-4 w-4" />
@@ -293,11 +293,10 @@ export default function MarketingPage() {
                         <span className="flex size-6 items-center justify-center rounded-full bg-white text-[11px] text-zinc-950">
                           1
                         </span>
-                        Configuração
+                        {t('marketingPage.configuration')}
                       </div>
                       <p className="mt-1 pl-8 text-xs text-muted-foreground">
-                        Começa pelo contexto da campanha. Isto ajuda-te a
-                        organizá-la internamente.
+                        {t('marketingPage.configurationDescription')}
                       </p>
                     </div>
 
@@ -307,7 +306,7 @@ export default function MarketingPage() {
                           htmlFor="campaign-name"
                           className="text-sm font-medium"
                         >
-                          Nome interno
+                          {t('marketingPage.internalName')}
                         </label>
                         <Input
                           id="campaign-name"
@@ -317,11 +316,11 @@ export default function MarketingPage() {
                           onChange={(e) =>
                             setForm({ ...form, name: e.target.value })
                           }
-                          placeholder="Ex.: Campanha de aniversário"
+                          placeholder={t('marketingPage.campaignNamePlaceholder')}
                           required
                         />
                         <p className="mt-1.5 text-[11px] text-muted-foreground">
-                          Só aparece no teu painel.
+                          {t('marketingPage.internalOnly')}
                         </p>
                       </div>
 
@@ -330,7 +329,7 @@ export default function MarketingPage() {
                           htmlFor="campaign-channel"
                           className="text-sm font-medium"
                         >
-                          Canal
+                          {t('marketingPage.channel')}
                         </label>
                         <select
                           id="campaign-channel"
@@ -349,7 +348,7 @@ export default function MarketingPage() {
                           <option value="sms">SMS</option>
                         </select>
                         <p className="mt-1.5 text-[11px] text-muted-foreground">
-                          Escolhe onde a mensagem será recebida.
+                          {t('marketingPage.channelHint')}
                         </p>
                       </div>
                     </div>
@@ -361,11 +360,10 @@ export default function MarketingPage() {
                         <span className="flex size-6 items-center justify-center rounded-full bg-white text-[11px] text-zinc-950">
                           2
                         </span>
-                        Conteúdo
+                        {t('marketingPage.content')}
                       </div>
                       <p className="mt-1 pl-8 text-xs text-muted-foreground">
-                        Escreve como falarias com um cliente real. O preview
-                        acompanha cada alteração.
+                        {t('marketingPage.contentHint')}
                       </p>
                     </div>
 
@@ -376,7 +374,7 @@ export default function MarketingPage() {
                             htmlFor="campaign-subject"
                             className="text-sm font-medium"
                           >
-                            Assunto
+                            {t('marketingPage.subject')}
                           </label>
                           <span className="text-[11px] text-muted-foreground">
                             {form.subject.length}/200
@@ -390,11 +388,11 @@ export default function MarketingPage() {
                           onChange={(e) =>
                             setForm({ ...form, subject: e.target.value })
                           }
-                          placeholder="Ex.: Temos uma surpresa para ti"
+                          placeholder={t('marketingPage.subjectPlaceholder')}
                           required
                         />
                         <p className="mt-1.5 text-[11px] text-muted-foreground">
-                          É a primeira linha que o cliente verá no email.
+                          {t('marketingPage.subjectHint')}
                         </p>
                       </div>
                     )}
@@ -405,7 +403,7 @@ export default function MarketingPage() {
                           htmlFor="campaign-body"
                           className="text-sm font-medium"
                         >
-                          Mensagem
+                          {t('marketingPage.message')}
                         </label>
                         <span
                           className={`text-[11px] ${form.body.length > 9000 ? 'text-amber-400' : 'text-muted-foreground'}`}
@@ -423,15 +421,15 @@ export default function MarketingPage() {
                         }
                         placeholder={
                           form.channel === 'email'
-                            ? 'Olá! Temos uma novidade para ti...'
-                            : 'Olá! Temos uma novidade para ti...'
+                            ? t('marketingPage.messagePlaceholder')
+                            : t('marketingPage.messagePlaceholder')
                         }
                         required
                       />
                       <p className="mt-1.5 text-[11px] text-muted-foreground">
                         {form.channel === 'email'
-                          ? 'Mantém a mensagem clara, curta e com uma ação evidente.'
-                          : 'SMS funciona melhor com uma mensagem direta e fácil de ler num só momento.'}
+                          ? t('marketingPage.emailBodyHint')
+                          : t('marketingPage.smsBodyHint')}
                       </p>
                     </div>
                   </section>
@@ -441,13 +439,10 @@ export default function MarketingPage() {
                       <Info className="mt-0.5 size-4 shrink-0 text-sky-300" />
                       <div>
                         <p className="text-sm font-semibold text-sky-100">
-                          Antes de guardar
+                          {t('marketingPage.beforeSaving')}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-sky-100/65">
-                          Esta ação cria a campanha como{' '}
-                          <strong className="text-sky-100">rascunho</strong>.
-                          Usa o preview para confirmar o conteúdo antes de a
-                          utilizares noutro fluxo.
+                          {t('marketingPage.draftWarning')}
                         </p>
                       </div>
                     </div>
@@ -460,7 +455,7 @@ export default function MarketingPage() {
                       onClick={closeComposer}
                       disabled={creating}
                     >
-                      Cancelar
+                      {t('marketingPage.cancel')}
                     </Button>
                     <Button
                       type="submit"
@@ -472,7 +467,7 @@ export default function MarketingPage() {
                       ) : (
                         <Check className="mr-2 h-4 w-4" />
                       )}
-                      Guardar rascunho
+                      {t('marketingPage.saveDraft')}
                     </Button>
                   </div>
                 </form>
@@ -483,10 +478,10 @@ export default function MarketingPage() {
                       <div>
                         <div className="flex items-center gap-2 text-sm font-semibold">
                           <Eye className="size-4 text-primary" />
-                          Preview ao vivo
+                          {t('marketingPage.livePreview')}
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          É assim que a mensagem ficará visualmente.
+                          {t('marketingPage.previewHint')}
                         </p>
                       </div>
                       <div className="inline-flex w-fit rounded-lg border border-white/10 bg-white/[0.03] p-1">
@@ -495,14 +490,14 @@ export default function MarketingPage() {
                           onClick={() => setPreviewMode('desktop')}
                           className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${previewMode === 'desktop' ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
                         >
-                          <Monitor className="size-3.5" /> Desktop
+                          <Monitor className="size-3.5" /> {t('marketingPage.desktop')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setPreviewMode('mobile')}
                           className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${previewMode === 'mobile' ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
                         >
-                          <Smartphone className="size-3.5" /> Mobile
+                          <Smartphone className="size-3.5" /> {t('marketingPage.mobile')}
                         </button>
                       </div>
                     </div>
@@ -515,10 +510,10 @@ export default function MarketingPage() {
                           <div className="border-b border-zinc-800 bg-zinc-900 px-4 py-3">
                             <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                               <Mail className="size-3.5" />
-                              Email preview
+                              {t('marketingPage.emailPreview')}
                             </div>
                             <p className="mt-1 truncate text-xs text-zinc-300">
-                              Para: cliente@exemplo.pt
+                              {t('marketingPage.to')}: client@example.com
                             </p>
                           </div>
                           <div className="space-y-4 bg-white p-5 text-zinc-900 sm:p-6">
@@ -534,7 +529,7 @@ export default function MarketingPage() {
                               {preview.body}
                             </div>
                             <div className="rounded-xl bg-zinc-100 p-3 text-[11px] text-zinc-500">
-                              Mensagem de exemplo da tua barbearia.
+                              {t('marketingPage.sampleMessage')}
                             </div>
                           </div>
                         </div>
@@ -544,18 +539,18 @@ export default function MarketingPage() {
                         >
                           <div className="overflow-hidden rounded-[22px] border border-zinc-800 bg-zinc-900">
                             <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 py-3 text-[10px] text-zinc-500">
-                              <span>Mensagens</span>
+                              <span>{t('marketingPage.messages')}</span>
                               <MessageSquare className="size-3.5" />
                             </div>
                             <div className="min-h-64 bg-zinc-900 p-4">
                               <div className="mb-3 text-center text-[10px] text-zinc-600">
-                                Hoje, agora
+                                {t('marketingPage.todayNow')}
                               </div>
                               <div className="ml-auto max-w-[86%] rounded-2xl rounded-br-md bg-primary px-4 py-3 text-sm leading-5 text-primary-foreground shadow-lg">
                                 {preview.body}
                               </div>
                               <div className="mt-2 text-right text-[9px] text-zinc-600">
-                                Enviado pela barbearia
+                                {t('marketingPage.sentByShop')}
                               </div>
                             </div>
                           </div>
@@ -572,12 +567,12 @@ export default function MarketingPage() {
                         )}
                         <div>
                           <p className="text-sm font-semibold">
-                            O que este preview mostra?
+                            {t('marketingPage.previewExplainer')}
                           </p>
                           <p className="mt-1 text-xs leading-5 text-muted-foreground">
                             {form.channel === 'email'
-                              ? 'Vês o assunto e o corpo da mensagem num layout semelhante ao de um email real. O nome interno continua apenas no teu painel.'
-                              : 'Vês a mensagem num contexto de conversa para perceberes rapidamente o tamanho e a leitura em mobile.'}
+                              ? t('marketingPage.emailPreviewDescription')
+                              : t('marketingPage.smsPreviewDescription')}
                           </p>
                         </div>
                       </div>
@@ -592,9 +587,9 @@ export default function MarketingPage() {
         <Card className="border-white/10 bg-white/[0.015]">
           <CardHeader className="flex-row items-center justify-between gap-4">
             <div>
-              <CardTitle>Campanhas recentes</CardTitle>
+              <CardTitle>{t('marketingPage.recentCampaigns')}</CardTitle>
               <p className="mt-1 text-xs text-muted-foreground">
-                Os teus rascunhos e campanhas ficam reunidos aqui.
+                {t('marketingPage.recentDescription')}
               </p>
             </div>
             <Button
@@ -602,7 +597,7 @@ export default function MarketingPage() {
               size="icon"
               onClick={() => void load()}
               disabled={loading}
-              aria-label="Atualizar campanhas"
+              aria-label={t('marketingPage.refreshCampaigns')}
             >
               <RefreshCw
                 className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
@@ -612,8 +607,7 @@ export default function MarketingPage() {
           <CardContent>
             {loading && !campaigns.length ? (
               <div className="flex h-40 items-center justify-center text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />A carregar
-                campanhas…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('marketingPage.loading')}
               </div>
             ) : campaigns.length ? (
               <div className="space-y-2">
@@ -639,7 +633,7 @@ export default function MarketingPage() {
                           <span>·</span>
                           <span>
                             {new Date(campaign.created_at).toLocaleDateString(
-                              'pt-PT',
+                              locale === 'pt' ? 'pt-PT' : 'en-GB',
                             )}
                           </span>
                           {campaign.subject && (
@@ -656,7 +650,7 @@ export default function MarketingPage() {
                     <span
                       className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${statusClass(campaign.status)}`}
                     >
-                      {formatStatus(campaign.status)}
+                      {formatStatus(campaign.status, t)}
                     </span>
                   </div>
                 ))}
@@ -666,14 +660,13 @@ export default function MarketingPage() {
                 <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
                   <Send className="size-5 text-muted-foreground" />
                 </div>
-                <p className="mt-4 font-medium">Ainda não existem campanhas</p>
+                <p className="mt-4 font-medium">{t('marketingPage.noCampaigns')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cria a primeira campanha e confirma o conteúdo no preview
-                  antes de a guardares.
+                  {t('marketingPage.noCampaignsDescription')}
                 </p>
                 <Button className="mt-5" onClick={openComposer}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Criar campanha
+                  {t('marketingPage.createCampaign')}
                 </Button>
               </div>
             )}

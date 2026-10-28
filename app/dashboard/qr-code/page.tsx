@@ -15,9 +15,8 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/context/LanguageContext';
 
-const DEFAULT_TEXT =
-  'Faz scan para conhecer a nossa barbearia e marcar o teu proximo servico.';
 function download(href: string, filename: string) {
   const link = document.createElement('a');
   link.href = href;
@@ -26,10 +25,12 @@ function download(href: string, filename: string) {
 }
 
 export default function QrCodePage() {
+  const { t } = useLanguage();
+  const defaultText = t('qrCodePage.defaultText');
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('Barbearia');
-  const [text, setText] = useState(DEFAULT_TEXT);
-  const [savedText, setSavedText] = useState(DEFAULT_TEXT);
+  const [text, setText] = useState(defaultText);
+  const [savedText, setSavedText] = useState(defaultText);
   const [png, setPng] = useState('');
   const [svg, setSvg] = useState('');
   const [loading, setLoading] = useState(true);
@@ -59,9 +60,9 @@ export default function QrCodePage() {
         setText(data.text);
         setSavedText(data.text);
       })
-      .catch(() => toast.error('Nao foi possivel carregar o codigo QR.'))
+      .catch(() => toast.error(t('qrCodePage.loadError')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
   useEffect(() => {
     if (!publicUrl) return;
     void Promise.all([
@@ -92,16 +93,16 @@ export default function QrCodePage() {
       const data = (await response.json()) as { text: string };
       setText(data.text);
       setSavedText(data.text);
-      toast.success('Texto do codigo QR guardado.');
+      toast.success(t('qrCodePage.saveSuccess'));
     } catch {
-      toast.error('Nao foi possivel guardar o texto.');
+      toast.error(t('qrCodePage.saveError'));
     } finally {
       setSaving(false);
     }
   };
   const copyUrl = async () => {
     await navigator.clipboard.writeText(publicUrl);
-    toast.success('URL copiado.');
+    toast.success(t('qrCodePage.copiedUrl'));
   };
   const share = async () => {
     if (navigator.share) {
@@ -112,11 +113,11 @@ export default function QrCodePage() {
   };
   const print = () => {
     const page = window.open('about:blank', '_blank');
-    if (!page) return toast.error('Permite pop-ups para imprimir.');
+    if (!page) return toast.error(t('qrCodePage.popupError'));
 
     page.opener = null;
     const doc = page.document;
-    doc.title = `${name} — Código QR`;
+    doc.title = t('qrCodePage.documentTitle', { name });
 
     const styles = doc.createElement('style');
     styles.textContent = `
@@ -150,7 +151,7 @@ export default function QrCodePage() {
 
     const image = doc.createElement('img');
     image.src = png;
-    image.alt = 'Código QR';
+    image.alt = t('qrCodePage.qrAlt');
 
     const paragraph = doc.createElement('p');
     paragraph.textContent = text;
@@ -176,9 +177,9 @@ export default function QrCodePage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <ManagementPageHeader
           icon={QrCode}
-          eyebrow="Marcacoes online"
-          title="Codigo QR"
-          description="Leva clientes diretamente para a pagina publica da tua barbearia."
+          eyebrow={t('qrCodePage.kicker')}
+          title={t('qrCodePage.title')}
+          description={t('qrCodePage.description')}
           accentClassName="border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
         />
         {loading ? (
@@ -197,11 +198,11 @@ export default function QrCodePage() {
                     </p>
                     <img
                       src={png}
-                      alt="Codigo QR da pagina publica"
+                      alt={t('qrCodePage.previewAlt')}
                       className="mt-3 aspect-square w-full"
                     />
                     <p className="mt-4 text-center text-base font-semibold text-zinc-900">
-                      {text || DEFAULT_TEXT}
+                      {text || defaultText}
                     </p>
                     <p className="mt-2 break-all text-center text-xs text-zinc-500">
                       {publicUrl}
@@ -211,14 +212,14 @@ export default function QrCodePage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Pagina da barbearia</CardTitle>
+                  <CardTitle>{t('qrCodePage.pageTitle')}</CardTitle>
                   <CardDescription>
-                    Este QR aponta sempre para a URL publica por slug.
+                    {t('qrCodePage.pageDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <div className="silentra-form-field">
-                    <label htmlFor="qr-url">URL publica</label>
+                    <label htmlFor="qr-url">{t('qrCodePage.publicUrl')}</label>
                     <div className="flex gap-2">
                       <Input id="qr-url" value={publicUrl} readOnly />
                       <Button
@@ -226,14 +227,14 @@ export default function QrCodePage() {
                         variant="outline"
                         size="icon"
                         onClick={() => void copyUrl()}
-                        aria-label="Copiar URL"
+                        aria-label={t('qrCodePage.copyUrl')}
                       >
                         <Copy className="size-4" />
                       </Button>
                     </div>
                   </div>
                   <div className="silentra-form-field">
-                    <label htmlFor="qr-text">Texto junto ao QR Code</label>
+                    <label htmlFor="qr-text">{t('qrCodePage.adjacentText')}</label>
                     <Input
                       id="qr-text"
                       value={text}
@@ -241,21 +242,22 @@ export default function QrCodePage() {
                       onChange={(event) => setText(event.target.value)}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Mostrado no preview e na impressao.</span>
+                      <span>{t('qrCodePage.previewPrintHint')}</span>
                       <span>{text.length}/160</span>
                     </div>
                   </div>
                   <Button
+            aria-label={saving ? "A guardar texto do QR code" : "Guardar texto do QR code"}
                     type="button"
                     onClick={() => void saveText()}
                     disabled={saving || text === savedText}
                   >
                     {saving ? (
-                      'A guardar...'
+                      t('qrCodePage.saving')
                     ) : (
                       <>
                         <Check className="size-4" />
-                        Guardar texto
+                        {t('qrCodePage.saveText')}
                       </>
                     )}
                   </Button>
@@ -266,7 +268,7 @@ export default function QrCodePage() {
                       onClick={() => download(png, `${slug}-qr-code.png`)}
                     >
                       <Download className="size-4" />
-                      Descarregar PNG
+                      {t('qrCodePage.downloadPng')}
                     </Button>
                     <Button
                       type="button"
@@ -279,11 +281,11 @@ export default function QrCodePage() {
                       }
                     >
                       <Download className="size-4" />
-                      Descarregar SVG
+                      {t('qrCodePage.downloadSvg')}
                     </Button>
                     <Button type="button" variant="outline" onClick={print}>
                       <Printer className="size-4" />
-                      Imprimir
+                      {t('qrCodePage.print')}
                     </Button>
                     <Button
                       type="button"
@@ -291,7 +293,7 @@ export default function QrCodePage() {
                       onClick={() => void share()}
                     >
                       <Share2 className="size-4" />
-                      Partilhar
+                      {t('qrCodePage.share')}
                     </Button>
                   </div>
                 </CardContent>
@@ -299,7 +301,7 @@ export default function QrCodePage() {
             </div>
             <Card size="sm">
               <CardHeader>
-                <CardTitle>Como usar</CardTitle>
+                <CardTitle>{t('qrCodePage.howToUse')}</CardTitle>
                 <CardDescription>
                   Coloca o QR na rececao, em cartoes, junto aos espelhos ou nas
                   redes sociais para levar clientes diretamente ao agendamento.

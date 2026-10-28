@@ -12,8 +12,10 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoyaltyValidationPage() {
+  const { t } = useLanguage();
   const [slug, setSlug] = useState<string | null>(null);
   const [identifier, setIdentifier] = useState('');
   const [busy, setBusy] = useState(false);
@@ -32,26 +34,26 @@ export default function LoyaltyValidationPage() {
     fetch('/api/barbershops/public-profile', { cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok)
-          throw new Error('Não foi possível carregar a barbearia.');
+          throw new Error(t('loyaltyValidation.loadBarbershopError'));
         return response.json();
       })
       .then((data) => setSlug(data.data?.slug ?? null))
       .catch(() => {
-        setStatus('Não foi possível carregar a barbearia.');
-        toast.error('Não foi possível carregar a página pública.');
+        setStatus(t('loyaltyValidation.loadBarbershopError'));
+        toast.error(t('loyaltyValidation.loadPageError'));
       });
     return () => {
       scannerControlsRef.current?.stop();
       scannerControlsRef.current = null;
       streamRef.current?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [t]);
 
   async function validate(value = identifier) {
     const clean = value.trim();
     if (!clean || !slug || busy) return;
     setBusy(true);
-    setStatus('A validar recompensa…');
+    setStatus(t('loyaltyValidation.validateStatus'));
     try {
       const response = await fetch('/api/loyalty/validate', {
         method: 'POST',
@@ -60,7 +62,7 @@ export default function LoyaltyValidationPage() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível validar a recompensa.');
+        throw new Error(data.error || t('loyaltyValidation.validateError'));
       setResult(data.redemption);
       setIdentifier('');
       stopCamera();
@@ -70,7 +72,7 @@ export default function LoyaltyValidationPage() {
       toast.success('Recompensa validada.');
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Não foi possível validar.';
+        error instanceof Error ? error.message : t('loyaltyValidation.validateGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -83,7 +85,7 @@ export default function LoyaltyValidationPage() {
 
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
       const message =
-        'A leitura QR requer uma ligação segura (HTTPS) e acesso à câmara.';
+        t('loyaltyValidation.secureCameraError');
       toast.error(message);
       setStatus(message);
       return;
@@ -91,13 +93,13 @@ export default function LoyaltyValidationPage() {
 
     try {
       setCameraOpen(true);
-      setStatus('A abrir a câmara…');
+      setStatus(t('loyaltyValidation.openingCamera'));
       await new Promise<void>((resolve) =>
         requestAnimationFrame(() => resolve()),
       );
 
       const video = videoRef.current;
-      if (!video) throw new Error('Pré-visualização da câmara indisponível.');
+      if (!video) throw new Error(t('loyaltyValidation.cameraPreviewUnavailable'));
 
       const reader = new BrowserQRCodeReader();
       const controls = await reader.decodeFromConstraints(
@@ -122,15 +124,15 @@ export default function LoyaltyValidationPage() {
       scannerControlsRef.current = controls;
       streamRef.current =
         video.srcObject instanceof MediaStream ? video.srcObject : null;
-      setStatus('Câmara aberta. Aponta-a para o QR da recompensa.');
+      setStatus(t('loyaltyValidation.cameraReady'));
     } catch (error) {
       stopCamera();
       const message =
         error instanceof DOMException && error.name === 'NotAllowedError'
-          ? 'Acesso à câmara bloqueado. Permite a câmara nas definições do navegador e tenta novamente.'
+          ? t('loyaltyValidation.cameraBlocked')
           : error instanceof DOMException && error.name === 'NotFoundError'
-            ? 'Não foi encontrada uma câmara disponível neste dispositivo.'
-            : 'Não foi possível aceder à câmara. Usa o código manual.';
+            ? t('loyaltyValidation.noCamera')
+            : t('loyaltyValidation.cameraAccessError');
       toast.error(message);
       setStatus(message);
     }
@@ -143,9 +145,9 @@ export default function LoyaltyValidationPage() {
     streamRef.current = null;
     setCameraOpen(false);
     setStatus((current) =>
-      current === 'Câmara aberta. Aponta-a para o QR da recompensa.' ||
-      current === 'A abrir a câmara…'
-        ? 'Câmara fechada. Podes usar o código manual.'
+      current === t('loyaltyValidation.cameraReady') ||
+      current === t('loyaltyValidation.openingCamera')
+        ? t('loyaltyValidation.cameraClosed')
         : current,
     );
   }
@@ -160,7 +162,7 @@ export default function LoyaltyValidationPage() {
       className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6 sm:py-12"
     >
       <a className="skip-link" href="#validation-content">
-        Saltar para a validação
+        {t('loyaltyValidation.skip')}
       </a>
       <div
         id="validation-content"
@@ -170,20 +172,19 @@ export default function LoyaltyValidationPage() {
         <Link
           href="/dashboard/loyalty"
           className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 px-3 text-sm text-zinc-400 hover:text-white"
-          aria-label="Voltar à página de fidelização"
+          aria-label={t('loyaltyValidation.backAria')}
         >
-          <ArrowLeft className="size-4" aria-hidden="true" /> Fidelização
+          <ArrowLeft className="size-4" aria-hidden="true" /> {t('loyaltyValidation.loyalty')}
         </Link>
         <div className="mt-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-            Operações
+              {t('loyaltyValidation.operations')}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            Validar recompensa
+            {t('loyaltyValidation.title')}
           </h1>
           <p className="mt-3 text-sm leading-6 text-zinc-500">
-            Lê o QR mostrado pelo cliente ou introduz o código de utilização. A
-            validação é única e fica associada ao teu utilizador.
+            {t('loyaltyValidation.description')}
           </p>
           <p className="sr-announcer" aria-live="polite" aria-atomic="true">
             {status}
@@ -199,20 +200,20 @@ export default function LoyaltyValidationPage() {
               <CheckCircle2 className="size-6" aria-hidden="true" />
             </div>
             <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
-              Validada com sucesso
+              {t('loyaltyValidation.success')}
             </p>
             <h2 id="validation-success" className="mt-2 text-2xl font-semibold">
               {result.rewardName}
             </h2>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <dt className="text-xs text-zinc-500">Pontos usados</dt>
+                <dt className="text-xs text-zinc-500">{t('loyaltyValidation.pointsUsed')}</dt>
                 <dd className="mt-1 text-lg font-semibold">
                   {result.pointsCost}
                 </dd>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <dt className="text-xs text-zinc-500">Cliente</dt>
+                <dt className="text-xs text-zinc-500">{t('loyaltyValidation.client')}</dt>
                 <dd className="mt-1 truncate text-sm font-medium">
                   {maskedEmail}
                 </dd>
@@ -222,24 +223,24 @@ export default function LoyaltyValidationPage() {
               type="button"
               onClick={() => {
                 setResult(null);
-                setStatus('Pronto para validar outra recompensa.');
+                setStatus(t('loyaltyValidation.readyForNext'));
               }}
               className="mt-6 h-12 w-full rounded-xl bg-white text-sm font-semibold text-zinc-950 focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
-              Validar outra recompensa
+              {t('loyaltyValidation.validateAnother')}
             </button>
           </section>
         ) : (
-          <section className="mt-8 space-y-4" aria-label="Métodos de validação">
+          <section className="mt-8 space-y-4" aria-label={t('loyaltyValidation.methods')}>
             <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-7">
               <div className="flex items-center gap-3">
                 <div className="flex size-11 items-center justify-center rounded-2xl border border-emerald-400/15 bg-emerald-400/10 text-emerald-200">
                   <ScanLine className="size-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h2 className="font-semibold">Ler QR code</h2>
+                  <h2 className="font-semibold">{t('loyaltyValidation.readQr')}</h2>
                   <p className="text-xs text-zinc-500">
-                    Recomendado no telemóvel.
+                    {t('loyaltyValidation.mobileRecommended')}
                   </p>
                 </div>
               </div>
@@ -250,7 +251,7 @@ export default function LoyaltyValidationPage() {
                     autoPlay
                     playsInline
                     muted
-                    aria-label="Pré-visualização da câmara para leitura do QR code"
+                    aria-label={t('loyaltyValidation.cameraPreview')}
                     className="aspect-[4/3] w-full object-cover"
                   />
                   <button
@@ -258,7 +259,7 @@ export default function LoyaltyValidationPage() {
                     onClick={stopCamera}
                     className="min-h-11 w-full border-t border-white/10 text-sm text-zinc-300"
                   >
-                    Fechar câmara
+                    {t('loyaltyValidation.closeCamera')}
                   </button>
                 </div>
               ) : (
@@ -267,7 +268,7 @@ export default function LoyaltyValidationPage() {
                   onClick={() => void startCamera()}
                   className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-zinc-950"
                 >
-                  <Camera className="size-4" aria-hidden="true" /> Abrir câmara
+                  <Camera className="size-4" aria-hidden="true" /> {t('loyaltyValidation.openCamera')}
                 </button>
               )}
             </div>
@@ -278,9 +279,9 @@ export default function LoyaltyValidationPage() {
                   <ShieldCheck className="size-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h2 className="font-semibold">Ou introduz o código</h2>
+                  <h2 className="font-semibold">{t('loyaltyValidation.enterCode')}</h2>
                   <p className="text-xs text-zinc-500">
-                    O mesmo código é válido como fallback do QR.
+                    {t('loyaltyValidation.qrFallback')}
                   </p>
                 </div>
               </div>
@@ -294,7 +295,7 @@ export default function LoyaltyValidationPage() {
               >
                 <div className="min-w-0 flex-1">
                   <label htmlFor="loyalty-validation-code" className="sr-only">
-                    Código da recompensa
+                    {t('loyaltyValidation.rewardCode')}
                   </label>
                   <input
                     id="loyalty-validation-code"
@@ -305,7 +306,7 @@ export default function LoyaltyValidationPage() {
                         event.target.value.toUpperCase().slice(0, 256),
                       )
                     }
-                    placeholder="Ex.: 7K4P9X2M"
+                    placeholder={t('loyaltyValidation.codePlaceholder')}
                     aria-describedby="loyalty-validation-help"
                     className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm tracking-[0.08em] outline-none focus:border-white/30"
                   />
@@ -322,15 +323,14 @@ export default function LoyaltyValidationPage() {
                       aria-hidden="true"
                     />
                   ) : null}
-                  {busy ? 'A validar…' : 'Validar'}
+                  {busy ? t('loyaltyValidation.validating') : t('loyaltyValidation.validate')}
                 </button>
               </form>
               <p
                 id="loyalty-validation-help"
                 className="mt-2 text-xs text-zinc-600"
               >
-                Introduz o código recebido pelo cliente. Podes também usar o QR
-                acima.
+                {t('loyaltyValidation.codeHelp')}
               </p>
             </div>
           </section>

@@ -331,6 +331,7 @@ export function LocalizedPricingSection() {
                 </ul>
                 {cta.disabled ? (
                   <button
+            aria-label="Escolher plano"
                     type="button"
                     disabled
                     className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-zinc-500 disabled:cursor-default"

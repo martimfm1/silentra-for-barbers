@@ -189,6 +189,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
           {checkoutState.error.message}
         </p>
         <button
+            aria-label="Confirmar checkout"
           type="button"
           onClick={() => window.location.reload()}
           className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
@@ -355,6 +356,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
       </div>
       <div className="sticky bottom-0 z-10 -mx-4 border-t border-white/8 bg-zinc-950/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-1">
         <button
+          aria-label={submitting ? (english ? 'Confirming subscription' : 'A confirmar subscrição') : (english ? 'Subscribe' : 'Subscrever')}
           type="submit"
           disabled={submitting}
           className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_35px_rgba(52,211,153,0.12)] transition hover:-translate-y-0.5 hover:bg-emerald-300 active:translate-y-0 disabled:cursor-wait disabled:opacity-60"

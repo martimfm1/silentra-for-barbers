@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 import { Service } from '@/types';
 import { servicesService } from '@/app/dashboard/_services/services.service';
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function ServicosPage() {
+  const { t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const [services, setServices] = useState<Service[]>([]);
   const [showAddServiceForm, setShowAddServiceForm] = useState(false);
@@ -35,11 +37,11 @@ export default function ServicosPage() {
       setServices(res.data ?? []);
     } catch (error) {
       console.error('[Serviços Sync Error]:', error);
-      toast.error('Não foi possível carregar os serviços. Tenta novamente.');
+      toast.error(t('servicesPage.loadError'));
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (!isLoadingBarbershop && barbershopId) {
@@ -63,9 +65,9 @@ export default function ServicosPage() {
       <div className="mx-auto max-w-7xl space-y-6">
         <ManagementPageHeader
           icon={Scissors}
-          eyebrow="Menu e preços"
-          title="Serviços"
-          description="Define os serviços que os clientes podem escolher. Começa pelo essencial e ajusta o menu quando precisares."
+          eyebrow={t('servicesPage.eyebrow')}
+          title={t('servicesPage.title')}
+          description={t('servicesPage.description')}
           accentClassName="border-amber-500/20 bg-amber-500/10 text-amber-400"
         />
 
@@ -100,10 +102,11 @@ export default function ServicosPage() {
 // --- SUB-COMPONENTES PARA ORGANIZAÇÃO E MANTENABILIDADE ---
 
 function ServicesSkeletonGrid() {
+  const { t } = useLanguage();
   return (
     <div
       role="status"
-      aria-label="A carregar serviços"
+      aria-label={t('servicesPage.loading')}
       className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"
     >
       {Array.from({ length: 6 }).map((_, i) => (
@@ -129,6 +132,7 @@ function EditServiceDialog({
   handleUpdateService,
   loadingService,
 }: EditServiceDialogProps) {
+  const { t } = useLanguage();
   if (!editingService) return null;
 
   return (
@@ -138,7 +142,7 @@ function EditServiceDialog({
     >
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar serviço</DialogTitle>
+          <DialogTitle>{t('servicesPage.editTitle')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleUpdateService} className="grid gap-4 py-4">
@@ -147,7 +151,7 @@ function EditServiceDialog({
               htmlFor="edit-service-name"
               className="text-xs font-medium text-zinc-400"
             >
-              Nome do serviço
+              {t('servicesPage.name')}
             </label>
             <Input
               id="edit-service-name"
@@ -169,7 +173,7 @@ function EditServiceDialog({
               htmlFor="edit-service-price"
               className="text-xs font-medium text-zinc-400"
             >
-              Preço (€)
+              {t('servicesPage.price')}
             </label>
             <div className="relative">
               <Euro className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
@@ -197,7 +201,7 @@ function EditServiceDialog({
               htmlFor="edit-service-duration"
               className="text-xs font-medium text-zinc-400"
             >
-              Duração (min)
+              {t('servicesPage.duration')}
             </label>
             <div className="relative">
               <Clock3 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
@@ -224,6 +228,7 @@ function EditServiceDialog({
 
           <DialogFooter className="mt-2">
             <Button
+            aria-label={loadingService ? "A guardar serviço" : "Guardar alterações"}
               type="submit"
               disabled={loadingService}
               className="min-h-11 w-full bg-amber-600 text-white hover:bg-amber-500"
@@ -231,7 +236,7 @@ function EditServiceDialog({
               {loadingService ? (
                 <Spinner className="size-4" />
               ) : (
-                'Guardar alterações'
+                t('servicesPage.saveChanges')
               )}
             </Button>
           </DialogFooter>

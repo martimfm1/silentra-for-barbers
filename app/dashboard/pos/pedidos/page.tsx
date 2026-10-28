@@ -217,12 +217,12 @@ export default function MarketplaceOrdersPage() {
   async function changeStatus(order: Order, next: Status) {
     if (next === 'cancelled') {
       const confirmed = await confirm({
-        title: 'Cancelar encomenda?',
+        title: t('orderPage.cancelTitle'),
         description: t('orderManagement.cancelOrderConfirm', {
           reference: order.id.slice(0, 8),
           customer: order.customer_name,
         }),
-        confirmLabel: 'Cancelar encomenda',
+        confirmLabel: t('orderPage.cancelAction'),
         destructive: true,
       });
       if (!confirmed) return;
@@ -327,14 +327,13 @@ export default function MarketplaceOrdersPage() {
               ponto de venda
             </Link>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              Vendas
+              {t('orderPage.sales')}
             </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              Encomendas
+              {t('orderPage.orders')}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-              Acompanha cada encomenda desde a receção até à entrega, com o
-              histórico da atividade num só lugar.
+              {t('orderPage.subtitle')}
             </p>
           </div>
           <Button
@@ -491,7 +490,7 @@ export default function MarketplaceOrdersPage() {
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">
-                          Pedido{' '}
+                          {t('orderPage.order')}{' '}
                           <span className="font-mono text-zinc-400">
                             #{order.id.slice(0, 8)}
                           </span>{' '}
@@ -563,7 +562,7 @@ export default function MarketplaceOrdersPage() {
 
                         {order.notes && (
                           <div className="rounded-xl border border-amber-400/10 bg-amber-400/[0.03] p-3 text-xs leading-5 text-amber-100">
-                            <strong>Nota:</strong> {order.notes}
+                            <strong>{t('orderPage.note')}</strong> {order.notes}
                           </div>
                         )}
                       </div>
@@ -580,7 +579,7 @@ export default function MarketplaceOrdersPage() {
                         {events.length > 0 && (
                           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-600">
-                              Histórico
+                              {t('orderPage.history')}
                             </p>
                             <div className="mt-3 space-y-3">
                               {events.map((event) => (
@@ -694,7 +693,7 @@ export default function MarketplaceOrdersPage() {
             </div>
             <div className="mt-6 space-y-4">
               <label className="grid gap-1.5 text-xs text-zinc-400">
-                <span>Assunto</span>
+                <span>{t('orderPage.subject')}</span>
                 <Input
                   value={emailSubject}
                   onChange={(event) => setEmailSubject(event.target.value)}
@@ -702,7 +701,7 @@ export default function MarketplaceOrdersPage() {
                 />
               </label>
               <label className="grid gap-1.5 text-xs text-zinc-400">
-                <span>Mensagem</span>
+                <span>{t('orderPage.message')}</span>
                 <textarea
                   value={emailMessage}
                   onChange={(event) => setEmailMessage(event.target.value)}

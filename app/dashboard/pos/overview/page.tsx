@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 type TransactionItem = {
   id: string;
@@ -34,37 +35,38 @@ type Transaction = {
   pos_transaction_items?: TransactionItem[];
 };
 
-const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', {
+const money = (value: number, locale: 'pt' | 'en') =>
+  new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 2,
   }).format(Number(value) || 0);
 
-function paymentLabel(value: string) {
+function paymentLabel(value: string, locale: 'pt' | 'en') {
   return (
     (
       {
-        cash: 'Dinheiro',
-        card: 'Cartão',
-        transfer: 'Transferência',
-        other: 'Outro',
+        cash: locale === 'pt' ? 'Dinheiro' : 'Cash',
+        card: locale === 'pt' ? 'Cartão' : 'Card',
+        transfer: locale === 'pt' ? 'Transferência' : 'Bank transfer',
+        other: locale === 'pt' ? 'Outro' : 'Other',
       } as Record<string, string>
     )[value] ?? value
   );
 }
 
-async function authHeaders() {
+async function authHeaders(locale: 'pt' | 'en') {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token)
-    throw new Error('A tua sessão terminou. Volta a iniciar sessão.');
+    throw new Error(locale === 'pt' ? 'A tua sessão terminou. Volta a iniciar sessão.' : 'Your session has expired. Please sign in again.');
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
 export default function SalesOverviewPage() {
+  const { t, locale } = useLanguage();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -75,18 +77,18 @@ export default function SalesOverviewPage() {
     setLoading(true);
     try {
       const response = await fetch('/api/enterprise/pos', {
-        headers: await authHeaders(),
+        headers: await authHeaders(locale),
         cache: 'no-store',
       });
       const body = await response.json();
       if (!response.ok)
-        throw new Error(body.error || 'Não foi possível carregar as vendas.');
+        throw new Error(body.error || t('posOverviewPage.loadError'));
       setTransactions(body.transactions ?? []);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível carregar as vendas.',
+          : t('posOverviewPage.loadError'),
       );
     } finally {
       setLoading(false);
@@ -185,12 +187,12 @@ export default function SalesOverviewPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
               <ShoppingBag className="size-8 text-primary" />
-              <h1 className="text-2xl font-semibold">Gestão de vendas</h1>
+              <h1 className="text-2xl font-semibold">{t('posOverviewPage.managementTitle')}</h1>
               <p className="text-muted-foreground">
-                Consulta resultados, produtos vendidos e formas de pagamento.
+                {t('posOverviewPage.managementDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">Ver opções do plano</Link>
+                <Link href="/dashboard/billing">{t('posOverviewPage.viewPlans')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -208,17 +210,16 @@ export default function SalesOverviewPage() {
               href="/dashboard/pos"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <ArrowLeft className="size-4" /> Voltar ao ponto de venda
+              <ArrowLeft className="size-4" /> {t('posOverviewPage.backToPos')}
             </Link>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               Vendas
             </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              Visão geral das vendas
+              {t('posOverviewPage.title')}
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Uma leitura rápida do desempenho comercial, sem substituir o
-              histórico detalhado.
+              {t('posOverviewPage.description')}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -232,15 +233,15 @@ export default function SalesOverviewPage() {
                   className={`min-h-10 rounded-lg px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${period === value ? 'bg-white text-zinc-950' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {value === 'today'
-                    ? 'Hoje'
+                    ? t('posOverviewPage.today')
                     : value === '7d'
-                      ? '7 dias'
-                      : '30 dias'}
+                      ? t('posOverviewPage.sevenDays')
+                      : t('posOverviewPage.thirtyDays')}
                 </button>
               ))}
             </div>
             <Button asChild className="min-h-10">
-              <Link href="/dashboard/pos">Nova venda</Link>
+              <Link href="/dashboard/pos">{t('posOverviewPage.newSale')}</Link>
             </Button>
             <Button
               variant="outline"
@@ -248,7 +249,7 @@ export default function SalesOverviewPage() {
               className="min-h-10"
             >
               <RefreshCcw className="mr-2 size-4" />
-              Atualizar
+              {t('posOverviewPage.refresh')}
             </Button>
           </div>
         </header>
@@ -256,46 +257,46 @@ export default function SalesOverviewPage() {
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <Card>
             <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">Receita</p>
-              <p className="mt-2 text-2xl font-semibold">{money(revenue)}</p>
+              <p className="text-sm text-muted-foreground">{t('posOverviewPage.revenue')}</p>
+              <p className="mt-2 text-2xl font-semibold">{money(revenue, locale)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Vendas concluídas
+                {t('posOverviewPage.completedSales')}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">Vendas</p>
+              <p className="text-sm text-muted-foreground">{t('posOverviewPage.eyebrow')}</p>
               <p className="mt-2 text-2xl font-semibold">{completed.length}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Operações concluídas
+                {t('posOverviewPage.completedOperations')}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">Valor médio</p>
-              <p className="mt-2 text-2xl font-semibold">{money(average)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Por venda</p>
+              <p className="text-sm text-muted-foreground">{t('posOverviewPage.averageValue')}</p>
+              <p className="mt-2 text-2xl font-semibold">{money(average, locale)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t('posOverviewPage.perSale')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">Descontos</p>
-              <p className="mt-2 text-2xl font-semibold">{money(discounts)}</p>
+              <p className="text-sm text-muted-foreground">{t('posOverviewPage.discounts')}</p>
+              <p className="mt-2 text-2xl font-semibold">{money(discounts, locale)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Valor concedido
+                {t('posOverviewPage.discountValue')}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <p className="text-sm text-muted-foreground">
-                Reembolsos e anulações
+                {t('posOverviewPage.refundsVoids')}
               </p>
               <p className="mt-2 text-2xl font-semibold">{reversed.length}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {money(reversedValue)} revertidos
+                {money(reversedValue, locale)} {t('posOverviewPage.reversed')}
               </p>
             </CardContent>
           </Card>
@@ -306,13 +307,13 @@ export default function SalesOverviewPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="size-5" />
-                Produtos e serviços com maior receita
+                {t('posOverviewPage.topItems')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {topItems.length === 0 ? (
                 <p className="py-10 text-center text-muted-foreground">
-                  Ainda não existem vendas concluídas neste período.
+                  {t('posOverviewPage.noCompletedInPeriod')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -336,11 +337,11 @@ export default function SalesOverviewPage() {
                                 {item.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {item.quantity} unidade(s) · {share}% da receita
+                                {item.quantity} · {t('posOverviewPage.units')} · {share}% {t('posOverviewPage.ofRevenue')}
                               </p>
                             </div>
                           </div>
-                          <p className="font-semibold">{money(item.revenue)}</p>
+                          <p className="font-semibold">{money(item.revenue, locale)}</p>
                         </div>
                         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
                           <div
@@ -360,13 +361,13 @@ export default function SalesOverviewPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="size-5" />
-                Formas de pagamento
+                {t('posOverviewPage.paymentMethods')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {paymentBreakdown.length === 0 ? (
                 <p className="py-10 text-center text-muted-foreground">
-                  Sem vendas neste período.
+                  {t('posOverviewPage.noSalesInPeriod')}
                 </p>
               ) : (
                 paymentBreakdown.map(([method, stats]) => (
@@ -375,12 +376,12 @@ export default function SalesOverviewPage() {
                     className="flex items-center justify-between rounded-xl border border-white/10 p-3"
                   >
                     <div>
-                      <p className="font-medium">{paymentLabel(method)}</p>
+                      <p className="font-medium">{paymentLabel(method, locale)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {stats.count} venda(s)
+                        {stats.count} {t('posOverviewPage.salesCount')}
                       </p>
                     </div>
-                    <p className="font-semibold">{money(stats.revenue)}</p>
+                    <p className="font-semibold">{money(stats.revenue, locale)}</p>
                   </div>
                 ))
               )}
@@ -392,22 +393,22 @@ export default function SalesOverviewPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Receipt className="size-5" />
-              Últimas vendas
+              {t('posOverviewPage.latestSales')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {completed.length === 0 ? (
               <p className="py-10 text-center text-muted-foreground">
-                Sem vendas concluídas.
+                {t('posOverviewPage.noCompletedSales')}
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-sm">
                   <thead className="border-b border-white/10 text-left text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-3">Data</th>
-                      <th className="px-3 py-3">Itens</th>
-                      <th className="px-3 py-3">Pagamento</th>
+                      <th className="px-3 py-3">{t('posOverviewPage.date')}</th>
+                      <th className="px-3 py-3">{t('posOverviewPage.items')}</th>
+                      <th className="px-3 py-3">{t('posOverviewPage.payment')}</th>
                       <th className="px-3 py-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -415,9 +416,7 @@ export default function SalesOverviewPage() {
                     {completed.slice(0, 20).map((transaction) => (
                       <tr key={transaction.id}>
                         <td className="px-3 py-4 text-muted-foreground">
-                          {new Date(transaction.created_at).toLocaleString(
-                            'pt-PT',
-                          )}
+                          {new Date(transaction.created_at).toLocaleString(locale === 'pt' ? 'pt-PT' : 'en-GB')}
                         </td>
                         <td className="max-w-[420px] px-3 py-4">
                           {(transaction.pos_transaction_items ?? [])
@@ -428,10 +427,10 @@ export default function SalesOverviewPage() {
                             .join(', ') || '—'}
                         </td>
                         <td className="px-3 py-4">
-                          {paymentLabel(transaction.payment_method)}
+                          {paymentLabel(transaction.payment_method, locale)}
                         </td>
                         <td className="px-3 py-4 text-right font-semibold">
-                          {money(transaction.total)}
+                          {money(transaction.total, locale)}
                         </td>
                       </tr>
                     ))}

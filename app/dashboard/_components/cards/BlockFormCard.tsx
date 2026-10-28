@@ -155,6 +155,7 @@ export function BlockScheduleForm({
 
           {/* Submit */}
           <Button
+            aria-label={loading ? "A guardar bloqueio" : "Guardar bloqueio"}
             type="submit"
             disabled={loading}
             variant="ghost"

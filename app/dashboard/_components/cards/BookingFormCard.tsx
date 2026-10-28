@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { type BookingFormProps } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ export function BookingForm({
   setSelectedTime,
   onSubmit,
 }: BookingFormProps) {
+  const { t, locale } = useLanguage();
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -63,11 +65,10 @@ export function BookingForm({
           </div>
           <div>
             <CardTitle className="text-lg text-zinc-50">
-              Nova marcação
+              {t('bookingForm.title')}
             </CardTitle>
             <p className="mt-1 text-sm text-zinc-500">
-              Preenche o essencial. Podes voltar mais tarde para completar os
-              detalhes do cliente.
+              {t('bookingForm.description')}
             </p>
           </div>
         </div>
@@ -88,7 +89,7 @@ export function BookingForm({
                 id="booking-client-section"
                 className="text-sm font-semibold text-zinc-200"
               >
-                Cliente
+                {t('bookingForm.customer')}
               </h2>
               <span className="text-xs text-zinc-600">1/2</span>
             </div>
@@ -99,8 +100,8 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-client"
                 >
-                  Cliente existente{' '}
-                  <span className="font-normal text-zinc-600">(opcional)</span>
+                  {t('bookingForm.existingCustomer')}{' '}
+                  <span className="font-normal text-zinc-600">{t('bookingForm.optional')}</span>
                 </label>
                 <Combobox
                   value={formData.clientId || ''}
@@ -120,12 +121,12 @@ export function BookingForm({
                 >
                   <ComboboxInput
                     id="booking-client"
-                    placeholder="Pesquisar pelo nome do cliente…"
+                    placeholder={t('bookingForm.searchCustomer')}
                     className="min-h-11 border-white/10 bg-zinc-900 text-white"
                   />
                   <ComboboxContent className="border-white/10 bg-zinc-900 text-white">
                     <ComboboxList>
-                      <ComboboxEmpty>Nenhum cliente encontrado.</ComboboxEmpty>
+                      <ComboboxEmpty>{t('bookingForm.noCustomerFound')}</ComboboxEmpty>
                       {clients.map((c) => (
                         <ComboboxItem key={c.id} value={c.id}>
                           {c.name_complete}
@@ -141,12 +142,12 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-name"
                 >
-                  Nome completo
+                  {t('bookingForm.fullName')}
                 </label>
                 <input
                   id="booking-name"
                   required
-                  placeholder="Ex.: João Silva"
+                  placeholder={t('bookingForm.namePlaceholder')}
                   className="min-h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-emerald-500/50"
                   value={formData.name_complete}
                   onChange={(e) =>
@@ -163,7 +164,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-phone"
                 >
-                  Telemóvel
+                  {t('bookingForm.mobile')}
                 </label>
                 <input
                   id="booking-phone"
@@ -187,7 +188,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-birth-date"
                 >
-                  Data de nascimento{' '}
+                  {t('bookingForm.birthDate')}{' '}
                   <span className="font-normal text-zinc-600">(opcional)</span>
                 </label>
                 <input
@@ -214,7 +215,7 @@ export function BookingForm({
                 id="booking-details-section"
                 className="text-sm font-semibold text-zinc-200"
               >
-                Serviço e profissional
+                {t('bookingForm.serviceAndProfessional')}
               </h2>
               <span className="text-xs text-zinc-600">2/2</span>
             </div>
@@ -225,7 +226,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-service"
                 >
-                  Serviço
+                  {t('bookingForm.service')}
                 </label>
                 <Select
                   value={formData.service_id}
@@ -237,7 +238,7 @@ export function BookingForm({
                     id="booking-service"
                     className="min-h-11 cursor-pointer border-white/10 bg-zinc-900 text-white"
                   >
-                    <SelectValue placeholder="Escolher serviço" />
+                    <SelectValue placeholder={t('bookingForm.chooseService')} />
                   </SelectTrigger>
                   <SelectContent className="cursor-pointer border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
@@ -257,7 +258,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-barber"
                 >
-                  Barbeiro
+                  {t('bookingForm.barber')}
                 </label>
                 <Select
                   value={selectedProfessionalId}
@@ -267,7 +268,7 @@ export function BookingForm({
                     id="booking-barber"
                     className="min-h-11 cursor-pointer border-white/10 bg-zinc-900 text-white"
                   >
-                    <SelectValue placeholder="Escolher barbeiro" />
+                    <SelectValue placeholder={t('bookingForm.chooseProfessional')} />
                   </SelectTrigger>
                   <SelectContent className="cursor-pointer border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
@@ -296,14 +297,14 @@ export function BookingForm({
                 id="booking-time-section"
                 className="text-sm font-semibold text-zinc-200"
               >
-                Data e hora
+                {t('bookingForm.dateTime')}
               </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <label className="text-xs font-medium text-zinc-400">
-                  Data
+                  {t('bookingForm.date')}
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -320,8 +321,8 @@ export function BookingForm({
                         aria-hidden="true"
                       />
                       {selectedDate
-                        ? format(new Date(selectedDate + 'T00:00:00'), 'PPP')
-                        : 'Escolher data'}
+                        ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { dateStyle: 'long' }).format(new Date(selectedDate + 'T00:00:00'))
+                        : t('bookingForm.chooseDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto cursor-pointer border-zinc-800 bg-zinc-900 p-0">
@@ -345,7 +346,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-time"
                 >
-                  Hora
+                  {t('bookingForm.time')}
                 </label>
                 <input
                   id="booking-time"
@@ -361,8 +362,7 @@ export function BookingForm({
 
           <div className="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-zinc-500">
-              Os campos obrigatórios estão reduzidos ao essencial para criares a
-              marcação rapidamente.
+              {t('bookingForm.help')}
             </p>
             <Button
               type="submit"
@@ -374,7 +374,7 @@ export function BookingForm({
               ) : (
                 <ArrowRight className="mr-2 size-4" aria-hidden="true" />
               )}
-              {loading ? 'A guardar…' : 'Criar marcação'}
+              {loading ? t('bookingForm.saving') : t('bookingForm.save')}
             </Button>
           </div>
         </form>

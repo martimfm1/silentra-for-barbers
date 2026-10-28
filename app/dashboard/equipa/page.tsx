@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 import { Professional } from '@/types';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
@@ -27,29 +28,13 @@ import Link from 'next/link';
 type TeamSeatState = { used: number; limit: number; unlimited: boolean };
 type TeamTab = 'professionals' | 'members' | 'invite';
 
-const TEAM_TABS = [
-  {
-    value: 'professionals',
-    label: 'Barbeiros',
-    icon: <Briefcase className="size-4" aria-hidden="true" />,
-  },
-  {
-    value: 'members',
-    label: 'Membros e permissões',
-    icon: <UsersRound className="size-4" aria-hidden="true" />,
-  },
-  {
-    value: 'invite',
-    label: 'Convidar',
-    icon: <KeyRound className="size-4" aria-hidden="true" />,
-  },
-] satisfies Array<{
-  value: TeamTab;
-  label: string;
-  icon: React.ReactNode;
-}>;
-
 export default function EquipaPage() {
+  const { t } = useLanguage();
+  const teamTabs = [
+    { value: 'professionals', label: t('teamPage.barbers'), icon: <Briefcase className="size-4" aria-hidden="true" /> },
+    { value: 'members', label: t('teamPage.membersPermissions'), icon: <UsersRound className="size-4" aria-hidden="true" /> },
+    { value: 'invite', label: t('teamPage.invite'), icon: <KeyRound className="size-4" aria-hidden="true" /> },
+  ] satisfies Array<{ value: TeamTab; label: string; icon: React.ReactNode }>;
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const { plan, loading: isLoadingPlan } = useFeatureAccess();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -72,7 +57,7 @@ export default function EquipaPage() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
         throw new Error(
-          data.error || 'Não foi possível carregar o estado da equipa.',
+          data.error || t('teamPage.loadStateError'),
         );
       setTeamSeats(data.seats ?? { used: 0, limit: 1, unlimited: false });
     } catch (error) {
@@ -80,7 +65,7 @@ export default function EquipaPage() {
     } finally {
       setTeamLoading(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   const fetchProfessionals = useCallback(async () => {
     if (!barbershopId) return;
@@ -96,12 +81,12 @@ export default function EquipaPage() {
     } catch (error) {
       console.error('[Equipa Sync Error]:', error);
       toast.error(
-        'Não foi possível carregar os perfis de barbeiro. Tenta novamente.',
+        t('teamPage.loadProfilesError'),
       );
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   const refreshTeam = useCallback(async () => {
     await Promise.all([fetchProfessionals(), fetchTeamState()]);
@@ -138,14 +123,14 @@ export default function EquipaPage() {
       <div className="mx-auto max-w-7xl space-y-6">
         <ManagementPageHeader
           icon={Briefcase}
-          eyebrow="Equipa e permissões"
-          title="Equipa"
-          description="Um lugar por pessoa. Os convidados contam para o plano."
+          eyebrow={t('teamPage.eyebrow')}
+          title={t('teamPage.title')}
+          description={t('teamPage.teamDescription')}
           accentClassName="border-purple-500/20 bg-purple-500/10 text-purple-400"
           actions={
             teamLimitReached ? (
               <Button asChild className="min-h-11">
-                <Link href="/plans">Aumentar equipa</Link>
+                <Link href="/plans">{t('teamPage.upgradeTeam')}</Link>
               </Button>
             ) : undefined
           }
@@ -154,7 +139,7 @@ export default function EquipaPage() {
         <section className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-              Lugares de equipa
+              {t('teamPage.teamSeats')}
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">
               {teamLoading
@@ -164,23 +149,23 @@ export default function EquipaPage() {
                   : `${teamSeats.used} / ${teamSeats.limit}`}
             </p>
             <p className="mt-1 text-xs text-zinc-500">
-              Cada membro convidado consome 1 lugar. Tu contas como um.
+              {t('teamPage.seatDescription')}
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-              Perfis de barbeiro
+              {t('teamPage.barberProfiles')}
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">
               {professionals.length}
             </p>
             <p className="mt-1 text-xs text-zinc-500">
-              Aparecem aqui apenas perfis ativos.
+              {t('teamPage.activeProfilesHint')}
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-              Plano
+              {t('teamPage.plan')}
             </p>
             <p className="mt-2 text-2xl font-semibold capitalize text-white">
               {plan}
@@ -192,10 +177,10 @@ export default function EquipaPage() {
         </section>
 
         <AnimatedTabList
-          tabs={TEAM_TABS}
+          tabs={teamTabs}
           value={activeTab}
           onValueChange={setActiveTab}
-          ariaLabel="Secções da equipa"
+          ariaLabel={t('teamPage.sections')}
           layoutId="team-tab-indicator"
           className="grid grid-cols-3 overflow-visible"
           tabClassName="flex min-w-0 items-center justify-center"
@@ -214,12 +199,10 @@ export default function EquipaPage() {
                   <UserPlus className="mt-0.5 size-4 shrink-0 text-amber-300" />
                   <div>
                     <p className="text-sm font-semibold text-zinc-100">
-                      Limite da equipa atingido
+                      {t('teamPage.teamLimitReached')}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Para adicionar mais pessoas ou perfis, aumenta o plano.
-                      Uma pessoa convidada conta sempre para o limite, mesmo que
-                      não seja barbeiro.
+                      {t('teamPage.limitReachedDescription')}
                     </p>
                   </div>
                 </div>
@@ -228,7 +211,7 @@ export default function EquipaPage() {
             {loadingInitial ? (
               <div
                 role="status"
-                aria-label="A carregar perfis de barbeiro"
+                aria-label={t('teamPage.loadingProfiles')}
                 className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"
               >
                 {[...Array(6)].map((_, i) => (
@@ -277,7 +260,7 @@ export default function EquipaPage() {
             >
               <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Editar barbeiro</DialogTitle>
+                  <DialogTitle>{t('teamPage.editBarber')}</DialogTitle>
                 </DialogHeader>
                 {editingProfessional && (
                   <form
@@ -289,7 +272,7 @@ export default function EquipaPage() {
                         htmlFor="edit-professional-name"
                         className="text-xs text-zinc-400"
                       >
-                        Nome
+                        {t('teamPage.name')}
                       </label>
                       <input
                         id="edit-professional-name"
@@ -309,7 +292,7 @@ export default function EquipaPage() {
                         htmlFor="edit-professional-commission"
                         className="text-xs text-zinc-400"
                       >
-                        Comissão (%)
+                        {t('teamPage.commission')}
                       </label>
                       <input
                         id="edit-professional-commission"
@@ -334,12 +317,13 @@ export default function EquipaPage() {
                       />
                       {isFreePlan && (
                         <p className="text-xs text-zinc-500">
-                          No plano gratuito, a comissão é fixa em 100%.
+                          {t('teamPage.freeCommissionHint')}
                         </p>
                       )}
                     </div>
                     <DialogFooter>
                       <Button
+            aria-label={loadingProfessionals ? "A guardar profissional" : "Guardar profissional"}
                         type="submit"
                         disabled={loadingProfessionals}
                         className="min-h-11 w-full bg-purple-600 text-white hover:bg-purple-500"
@@ -347,7 +331,7 @@ export default function EquipaPage() {
                         {loadingProfessionals ? (
                           <Spinner className="size-4" />
                         ) : (
-                          'Guardar alterações'
+                          t('teamPage.saveChanges')
                         )}
                       </Button>
                     </DialogFooter>

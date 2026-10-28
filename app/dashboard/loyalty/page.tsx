@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useLanguage } from '@/context/LanguageContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type LoyaltySettings = {
@@ -51,6 +52,7 @@ const emptyReward = {
 };
 
 export default function LoyaltyPage() {
+  const { t } = useLanguage();
   const confirm = useDashboardConfirm();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('loyalty');
@@ -71,13 +73,13 @@ export default function LoyaltyPage() {
   const load = useCallback(async () => {
     if (!allowed) return;
     setLoading(true);
-    setStatus('A carregar a fidelização…');
+    setStatus(t('loyalty.loadingLoyalty'));
     try {
       const response = await fetch('/api/loyalty', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok)
         throw new Error(
-          data.error ?? 'Não foi possível carregar a fidelização.',
+          data.error ?? t('loyaltyPage.loadError'),
         );
       setSettings({
         enabled: data.settings?.enabled === true,
@@ -86,18 +88,18 @@ export default function LoyaltyPage() {
         referral_points: Number(data.settings?.referral_points ?? 0),
       });
       setRewards(data.rewards ?? []);
-      setStatus('Fidelização carregada.');
+      setStatus(t('loyalty.loaded'));
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Erro ao carregar fidelização.';
+          : t('loyaltyPage.loadGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [allowed]);
+  }, [allowed, t]);
 
   useEffect(() => {
     void load();
@@ -105,7 +107,7 @@ export default function LoyaltyPage() {
 
   const saveSettings = async () => {
     setSaving(true);
-    setStatus('A guardar as regras…');
+    setStatus(t('loyaltyPage.savingSettings'));
     try {
       const response = await fetch('/api/loyalty', {
         method: 'PATCH',
@@ -114,7 +116,7 @@ export default function LoyaltyPage() {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível guardar.');
+        throw new Error(data.error ?? t('loyaltyPage.saveError'));
       setSettings({
         enabled: data.settings.enabled === true,
         points_per_euro: Number(data.settings.points_per_euro),
@@ -122,13 +124,13 @@ export default function LoyaltyPage() {
         referral_points: Number(data.settings.referral_points),
       });
       const message = data.settings.enabled
-        ? 'Programa de fidelização ativado.'
-        : 'Programa de fidelização desativado.';
+        ? t('loyalty.programEnabled')
+        : t('loyalty.programDisabled');
       setStatus(message);
       toast.success(message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Erro ao guardar.';
+        error instanceof Error ? error.message : t('loyaltyPage.saveGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -138,7 +140,7 @@ export default function LoyaltyPage() {
 
   const saveReward = async () => {
     setSaving(true);
-    setStatus(editing ? 'A atualizar a recompensa…' : 'A criar a recompensa…');
+    setStatus(editing ? t('loyaltyPage.updatingReward') : t('loyaltyPage.savingReward'));
     try {
       const payload = {
         id: editing ?? undefined,
@@ -157,7 +159,7 @@ export default function LoyaltyPage() {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível guardar a recompensa.');
+        throw new Error(data.error ?? t('loyaltyPage.saveRewardError'));
       setRewards((current) =>
         editing
           ? current.map((item) =>
@@ -168,11 +170,11 @@ export default function LoyaltyPage() {
       setEditing(null);
       setCreating(false);
       setRewardForm(emptyReward);
-      setStatus(editing ? 'Recompensa atualizada.' : 'Recompensa criada.');
-      toast.success(editing ? 'Recompensa atualizada.' : 'Recompensa criada.');
+      setStatus(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
+      toast.success(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Erro ao guardar recompensa.';
+        error instanceof Error ? error.message : t('loyaltyPage.saveRewardGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -194,9 +196,9 @@ export default function LoyaltyPage() {
   };
   const deleteReward = async (id: string) => {
     const confirmed = await confirm({
-      title: 'Desativar recompensa?',
-      description: 'Os clientes deixam de poder resgatar esta recompensa. Os resgates anteriores continuam no histórico.',
-      confirmLabel: 'Desativar recompensa',
+      title: t('loyalty.deactivateRewardConfirm'),
+      description: t('loyalty.deactivateRewardConfirm'),
+      confirmLabel: t('loyalty.rewardDisabled'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -207,19 +209,19 @@ export default function LoyaltyPage() {
       );
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível desativar.');
+        throw new Error(data.error ?? t('loyaltyPage.disableError'));
       setRewards((current) =>
         current.map((item) =>
           item.id === id ? { ...item, active: false } : item,
         ),
       );
-      setStatus('Recompensa desativada.');
-      toast.success('Recompensa desativada.');
+      setStatus(t('loyalty.rewardDisabled'));
+      toast.success(t('loyalty.rewardDisabled'));
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Erro ao desativar recompensa.';
+          : t('loyaltyPage.disableRewardGenericError');
       setStatus(message);
       toast.error(message);
     }
@@ -229,7 +231,7 @@ export default function LoyaltyPage() {
     return (
       <main className="min-h-screen bg-background">
         <span className="sr-announcer" aria-live="polite">
-          A verificar o acesso à fidelização…
+          {t('loyaltyPage.statusLoading')}
         </span>
       </main>
     );
@@ -237,20 +239,20 @@ export default function LoyaltyPage() {
     return (
       <main id="main-content" className="min-h-screen bg-background px-4 py-24">
         <a className="skip-link" href="#loyalty-content">
-          Saltar para o conteúdo
+          {t('loyaltyPage.skipContent')}
         </a>
         <div id="loyalty-content" className="mx-auto max-w-xl" tabIndex={-1}>
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" aria-hidden="true" />
               <h1 className="text-2xl font-semibold">
-                Programa de fidelização
+                {t('loyalty.upgradeTitle')}
               </h1>
               <p className="text-muted-foreground">
-                Cria pontos e recompensas para incentivar os clientes a voltar.
+                {t('loyalty.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">Fazer upgrade</Link>
+                <Link href="/dashboard/billing">{t('loyaltyPage.upgrade')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -264,7 +266,7 @@ export default function LoyaltyPage() {
       className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-8"
     >
       <a className="skip-link" href="#loyalty-content">
-        Saltar para o conteúdo
+        {t('loyaltyPage.skipContent')}
       </a>
       <div
         id="loyalty-content"
@@ -273,35 +275,34 @@ export default function LoyaltyPage() {
       >
         <header className="flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-medium text-primary">FIDELIZAÇÃO</p>
+            <p className="text-sm font-medium text-primary">{t('loyalty.kicker')}</p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              Pontos e recompensas
+              {t('loyaltyPage.pointsAndRewards')}
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Configura como os clientes acumulam pontos, o que podem resgatar e
-              valida as recompensas no balcão.
+              {t('loyaltyPage.subtitle')}
             </p>
           </div>
           <nav
-            aria-label="Navegação de fidelização"
+            aria-label={t('loyaltyPage.navigation')}
             className="grid grid-cols-2 gap-2 sm:flex"
           >
             <Button variant="outline" asChild>
               <Link href="/dashboard/loyalty/points">
                 <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
-                Pontos
+                {t('loyaltyPage.pointsButton')}
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link href="/dashboard/loyalty/validate">
                 <QrCode className="mr-2 h-4 w-4" aria-hidden="true" />
-                Validar
+                {t('loyaltyPage.validateButton')}
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-                Dashboard
+                {t('dashboard.overview')}
               </Link>
             </Button>
             <Button
@@ -309,7 +310,7 @@ export default function LoyaltyPage() {
               size="icon"
               onClick={() => void load()}
               disabled={loading}
-              aria-label="Atualizar fidelização"
+              aria-label={t('loyaltyPage.refresh')}
               aria-busy={loading}
             >
               <RefreshCw
@@ -328,23 +329,22 @@ export default function LoyaltyPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
-                Regras do programa
+                {t('loyaltyPage.programRules')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <fieldset className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <legend className="px-1 text-sm font-medium">
-                  Estado do programa
+                  {t('loyaltyPage.programState')}
                 </legend>
                 <label className="mt-2 flex min-h-11 cursor-pointer items-center justify-between gap-4">
                   <span>
-                    <span className="block font-medium">Programa ativo</span>
+                    <span className="block font-medium">{t('loyaltyPage.active')}</span>
                     <span
                       id="loyalty-enabled-help"
                       className="mt-1 block text-xs text-muted-foreground"
                     >
-                      Quando desligado, o card público desaparece e novas
-                      adesões, acessos e resgates ficam bloqueados.
+                      {t('loyaltyPage.disabledDescription')}
                     </span>
                   </span>
                   <input
@@ -364,7 +364,7 @@ export default function LoyaltyPage() {
               </fieldset>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="silentra-form-field">
-                  <Label htmlFor="points-per-euro">€1 gasto = pontos</Label>
+                  <Label htmlFor="points-per-euro">{t('loyaltyPage.pointsPerEuroLabel')}</Label>
                   <Input
                     id="points-per-euro"
                     className="mt-1"
@@ -399,7 +399,7 @@ export default function LoyaltyPage() {
                   />
                 </div>
                 <div className="silentra-form-field">
-                  <Label htmlFor="referral-points">Pontos de referência</Label>
+                  <Label htmlFor="referral-points">{t('loyaltyPage.referralPointsLabel')}</Label>
                   <Input
                     id="referral-points"
                     className="mt-1"
@@ -423,7 +423,7 @@ export default function LoyaltyPage() {
                 aria-busy={saving}
               >
                 <Save className="mr-2 h-4 w-4" aria-hidden="true" />
-                {saving ? 'A guardar…' : 'Guardar regras'}
+                {saving ? t('loyaltyPage.saving') : t('loyaltyPage.saveRules')}
               </Button>
             </CardContent>
           </Card>
@@ -431,20 +431,20 @@ export default function LoyaltyPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" aria-hidden="true" />
-                Resumo
+                {t('loyalty.summary')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <dl>
                 <div className="rounded-xl border p-4">
-                  <dt className="text-xs text-muted-foreground">Estado</dt>
+                  <dt className="text-xs text-muted-foreground">{t('loyalty.state')}</dt>
                   <dd className="mt-1 text-2xl font-semibold">
-                    {settings.enabled ? 'Ativo' : 'Desativado'}
+                    {settings.enabled ? t('loyaltyPage.enabledState') : t('loyaltyPage.disabledState')}
                   </dd>
                 </div>
                 <div className="mt-4 rounded-xl border p-4">
                   <dt className="text-xs text-muted-foreground">
-                    Conversão base
+                    {t('loyaltyPage.baseConversion')}
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold">
                     €1 = {settings.points_per_euro} pts
@@ -452,7 +452,7 @@ export default function LoyaltyPage() {
                 </div>
                 <div className="mt-4 rounded-xl border p-4">
                   <dt className="text-xs text-muted-foreground">
-                    Recompensas ativas
+                    {t('loyalty.activeRewards')}
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold">
                     {rewards.filter((r) => r.active).length}
@@ -470,7 +470,7 @@ export default function LoyaltyPage() {
                 Recompensas
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Mantém as recompensas simples, claras e fáceis de resgatar.
+                {t('loyalty.rewardsDescription')}
               </p>
             </div>
             <Button
@@ -481,7 +481,7 @@ export default function LoyaltyPage() {
               }}
             >
               <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              Nova recompensa
+              {t('loyaltyPage.newReward')}
             </Button>
           </div>
           <Dialog
@@ -493,16 +493,16 @@ export default function LoyaltyPage() {
           >
             <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
               <DialogHeader className="sr-only">
-                <DialogTitle>{editing ? 'Editar recompensa' : 'Nova recompensa'}</DialogTitle>
+                <DialogTitle>{editing ? t('loyalty.editReward') : t('loyaltyPage.newReward')}</DialogTitle>
                 <DialogDescription>
-                  Configura o nome, os pontos necessários e o tipo de recompensa.
+                  {t('loyaltyPage.rewardFormDescription')}
                 </DialogDescription>
               </DialogHeader>
               {creating && (
             <Card className="mb-0 border-white/10 bg-white/[0.02]">
               <CardHeader>
                 <CardTitle>
-                  {editing ? 'Editar recompensa' : 'Nova recompensa'}
+                  {editing ? t('loyalty.editReward') : t('loyaltyPage.newReward')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -514,7 +514,7 @@ export default function LoyaltyPage() {
                   }}
                 >
                 <div className="silentra-form-field">
-                  <Label htmlFor="reward-name">Nome</Label>
+                  <Label htmlFor="reward-name">{t('loyaltyPage.rewardName')}</Label>
                   <Input
                     id="reward-name"
                     className="mt-1"
@@ -523,11 +523,11 @@ export default function LoyaltyPage() {
                       setRewardForm((v) => ({ ...v, name: e.target.value }))
                     }
                     maxLength={120}
-                    placeholder="Ex.: Corte gratuito"
+                    placeholder={t('loyaltyPage.rewardNamePlaceholder')}
                   />
                 </div>
                 <div className="silentra-form-field">
-                  <Label htmlFor="reward-points">Pontos necessários</Label>
+                  <Label htmlFor="reward-points">{t('loyaltyPage.requiredPoints')}</Label>
                   <Input
                     id="reward-points"
                     className="mt-1"
@@ -543,7 +543,7 @@ export default function LoyaltyPage() {
                   />
                 </div>
                 <div className="sm:col-span-2 silentra-form-field">
-                  <Label htmlFor="reward-description">Descrição</Label>
+                  <Label htmlFor="reward-description">{t('loyaltyPage.rewardDescription')}</Label>
                   <Textarea
                     id="reward-description"
                     className="mt-1"
@@ -555,11 +555,11 @@ export default function LoyaltyPage() {
                       }))
                     }
                     maxLength={1000}
-                    placeholder="O cliente vê esta explicação ao resgatar."
+                    placeholder={t('loyaltyPage.rewardDescriptionPlaceholder')}
                   />
                 </div>
                 <div className="silentra-form-field">
-                  <Label htmlFor="reward-type">Tipo</Label>
+                  <Label htmlFor="reward-type">{t('loyaltyPage.rewardType')}</Label>
                   <select
                     id="reward-type"
                     className="mt-1"
@@ -571,13 +571,13 @@ export default function LoyaltyPage() {
                       }))
                     }
                   >
-                    <option value="discount">Desconto</option>
-                    <option value="free_service">Serviço gratuito</option>
-                    <option value="custom">Personalizada</option>
+                    <option value="discount">{t('loyaltyPage.discount')}</option>
+                    <option value="free_service">{t('loyaltyPage.freeService')}</option>
+                    <option value="custom">{t('loyaltyPage.custom')}</option>
                   </select>
                 </div>
                 <div className="silentra-form-field">
-                  <Label htmlFor="reward-value">Valor (opcional)</Label>
+                  <Label htmlFor="reward-value">{t('loyaltyPage.rewardValue')}</Label>
                   <Input
                     id="reward-value"
                     className="mt-1"
@@ -601,7 +601,7 @@ export default function LoyaltyPage() {
                     aria-busy={saving}
                   >
                     <Save className="mr-2 h-4 w-4" aria-hidden="true" />
-                    Guardar
+                    {t('loyaltyPage.save')}
                   </Button>
                   <Button
                     type="button"
@@ -611,7 +611,7 @@ export default function LoyaltyPage() {
                       setEditing(null);
                     }}
                   >
-                    Cancelar
+                    {t('loyaltyPage.cancel')}
                   </Button>
                 </div>
                 </form>
@@ -629,7 +629,7 @@ export default function LoyaltyPage() {
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
-              A carregar…
+              {t('loyaltyPage.loadingRewards')}
             </div>
           ) : rewards.length ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -644,16 +644,16 @@ export default function LoyaltyPage() {
                         <Gift className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                        {reward.points_cost} pts
+                        {reward.points_cost} {t('loyaltyPage.pointsUnit')}
                       </span>
                     </div>
                     <h3 className="mt-5 font-semibold">{reward.name}</h3>
                     <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
-                      {reward.description || 'Recompensa de fidelização'}
+                      {reward.description || t('loyaltyPage.defaultRewardDescription')}
                     </p>
                     <p className="mt-4 text-xs text-muted-foreground">
-                      {reward.active ? 'Disponível' : 'Desativada'} ·{' '}
-                      {reward.reward_type}
+                      {reward.active ? t('loyaltyPage.available') : t('loyaltyPage.deactivated')} ·{' '}
+                      {reward.reward_type === 'discount' ? t('loyaltyPage.discount') : reward.reward_type === 'free_service' ? t('loyaltyPage.freeService') : t('loyaltyPage.custom')}
                       {reward.reward_value !== null
                         ? ` · ${reward.reward_value}`
                         : ''}
@@ -663,7 +663,7 @@ export default function LoyaltyPage() {
                         size="icon"
                         variant="ghost"
                         onClick={() => editReward(reward)}
-                        aria-label={`Editar recompensa ${reward.name}`}
+                        aria-label={t('loyaltyPage.editRewardAria', { name: reward.name })}
                       >
                         <Pencil className="h-4 w-4" aria-hidden="true" />
                       </Button>
@@ -672,7 +672,7 @@ export default function LoyaltyPage() {
                           size="icon"
                           variant="ghost"
                           onClick={() => void deleteReward(reward.id)}
-                          aria-label={`Desativar recompensa ${reward.name}`}
+                          aria-label={t('loyaltyPage.disableRewardAria', { name: reward.name })}
                         >
                           <Trash2
                             className="h-4 w-4 text-red-300"
@@ -692,9 +692,9 @@ export default function LoyaltyPage() {
                   className="h-8 w-8 text-muted-foreground"
                   aria-hidden="true"
                 />
-                <p className="font-medium">Ainda não existem recompensas</p>
+                <p className="font-medium">{t('loyaltyPage.noRewards')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Cria a primeira recompensa para começar.
+                  {t('loyaltyPage.noRewardsHint')}
                 </p>
               </CardContent>
             </Card>

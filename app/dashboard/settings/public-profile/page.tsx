@@ -490,6 +490,7 @@ export default function PublicProfileSettingsPage() {
             pública
           </Link>
           <Button
+            aria-label={saving ? "A guardar perfil público" : "Guardar alterações"}
             onClick={() => void save()}
             disabled={saving}
             className="min-h-11 rounded-xl bg-zinc-100 px-5 text-zinc-950 hover:bg-white"

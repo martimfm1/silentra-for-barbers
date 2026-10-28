@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -68,22 +69,23 @@ type Transaction = {
   pos_transaction_items?: PosItem[];
 };
 
-async function authHeaders() {
+async function authHeaders(t: (key: string) => string) {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token)
-    throw new Error('Sessão expirada. Volta a iniciar sessão.');
+    throw new Error(t('posPage.sessionExpired'));
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
-const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(
+const money = (value: number, locale: 'pt' | 'en' = 'pt') =>
+  new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-IE', { style: 'currency', currency: 'EUR' }).format(
     Number(value) || 0,
   );
 
 export default function POSPage() {
+  const { t, locale } = useLanguage();
   const confirm = useDashboardConfirm();
   const { hasFeature, loading: billingLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
@@ -128,22 +130,22 @@ export default function POSPage() {
           .limit(500),
       ]);
       if (productsError || servicesError || clientsError)
-        throw new Error('Não foi possível carregar o catálogo do POS.');
+        throw new Error(t('posPage.loadCatalogError'));
       setProducts(productRows ?? []);
       setServices(serviceRows ?? []);
       setClients(clientRows ?? []);
 
       const response = await fetch('/api/enterprise/pos', {
-        headers: await authHeaders(),
+        headers: await authHeaders(t),
         cache: 'no-store',
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error ?? 'Não foi possível carregar o histórico.');
+        throw new Error(json.error ?? t('posPage.loadHistoryError'));
       setTransactions(json.transactions ?? []);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar o POS.',
+        error instanceof Error ? error.message : t('posPage.posGenericError'),
       );
     } finally {
       setLoading(false);
@@ -185,7 +187,7 @@ export default function POSPage() {
       const existing = current.find((item) => item.productId === product.id);
       if (existing) {
         if (existing.quantity >= stock) {
-          toast.error('Stock insuficiente.');
+          toast.error(t('posPage.stockInsufficient'));
           return current;
         }
         return current.map((item) =>
@@ -284,7 +286,7 @@ export default function POSPage() {
 
     repeatedRef.current = repeatedTransactionId;
     if (!nextCart.length) {
-      toast.error('Não foi possível repetir esta venda com o catálogo atual.');
+      toast.error(t('posPage.repeatSaleError'));
       return;
     }
     setCart(nextCart);
@@ -293,10 +295,10 @@ export default function POSPage() {
     setClientId('');
     toast.success(
       missing.length
-        ? `Venda repetida com ${missing.length} item(ns) indisponível(is).`
-        : 'Venda repetida no carrinho. Confirma os dados antes de concluir.',
+        ? t('posPage.repeatedSale', { count: missing.length })
+        : t('posPage.repeatSaleComplete'),
     );
-  }, [products, repeatedTransactionId, services, transactions]);
+  }, [products, repeatedTransactionId, services, transactions, t]);
 
   function changeQuantity(key: string, delta: number) {
     setCart((current) =>
@@ -320,7 +322,7 @@ export default function POSPage() {
       const response = await fetch('/api/enterprise/pos', {
         method: 'POST',
         headers: {
-          ...(await authHeaders()),
+          ...(await authHeaders(t)),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -334,15 +336,15 @@ export default function POSPage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error ?? 'Não foi possível concluir a venda.');
-      toast.success(`Venda concluída · ${money(json.transaction.total)}`);
+        throw new Error(json.error ?? t('posPage.checkoutError'));
+      toast.success(t('posPage.saleCompleted', { total: money(json.transaction.total, locale) }));
       setCart([]);
       setDiscount(0);
       setClientId('');
       await loadData();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao concluir a venda.',
+        error instanceof Error ? error.message : t('posPage.checkoutGenericError'),
       );
     } finally {
       setSubmitting(false);
@@ -353,11 +355,11 @@ export default function POSPage() {
     transaction: Transaction,
     mode: 'refund' | 'void',
   ) {
-    const label = mode === 'refund' ? 'reembolsar' : 'anular';
+    const label = mode === 'refund' ? t('posPage.refund').toLowerCase() : t('posPage.voidAction').toLowerCase();
     const confirmed = await confirm({
-      title: mode === 'refund' ? 'Confirmar reembolso?' : 'Confirmar anulação?',
-      description: `Confirma ${label} a transação de ${money(transaction.total)}? O stock dos produtos será reposto automaticamente.`,
-      confirmLabel: mode === 'refund' ? 'Reembolsar' : 'Anular transação',
+      title: mode === 'refund' ? t('posPage.confirmRefund') : t('posPage.confirmVoid'),
+      description: t('posPage.confirmActionDescription', { action: label, total: money(transaction.total, locale) }),
+      confirmLabel: mode === 'refund' ? t('posPage.refund') : t('posPage.voidTransaction'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -368,7 +370,7 @@ export default function POSPage() {
         {
           method: 'POST',
           headers: {
-            ...(await authHeaders()),
+            ...(await authHeaders(t)),
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ mode }),
@@ -376,7 +378,7 @@ export default function POSPage() {
       );
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error ?? 'Não foi possível reverter a transação.');
+        throw new Error(json.error ?? t('posPage.reverseError'));
       setTransactions((current) =>
         current.map((item) =>
           item.id === transaction.id
@@ -385,14 +387,14 @@ export default function POSPage() {
         ),
       );
       toast.success(
-        mode === 'refund' ? 'Transação reembolsada.' : 'Transação anulada.',
+        mode === 'refund' ? t('posPage.refunded') : t('posPage.voided'),
       );
       await loadData();
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Erro ao reverter a transação.',
+          : t('posPage.reverseGenericError'),
       );
     } finally {
       setReversing(null);
@@ -407,12 +409,12 @@ export default function POSPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">POS Enterprise</h1>
+              <h1 className="text-2xl font-semibold">{t('posPage.enterpriseTitle')}</h1>
               <p className="text-muted-foreground">
-                Vendas, pagamentos, stock e reembolsos num único fluxo.
+                {t('posPage.enterpriseDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">Fazer upgrade</Link>
+                <Link href="/dashboard/billing">{t('posPage.upgrade')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -425,13 +427,12 @@ export default function POSPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-sm font-medium text-primary">ENTERPRISE · POS</p>
+            <p className="text-sm font-medium text-primary">{t('posPage.kicker')}</p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              Ponto de venda
+              {t('posPage.title')}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Cria vendas, associa clientes e gere reversões com stock
-              sincronizado.
+              {t('posPage.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -440,11 +441,11 @@ export default function POSPage() {
               onClick={() => void loadData()}
               disabled={loading}
             >
-              <RefreshCcw className="mr-2 h-4 w-4" /> Atualizar
+              <RefreshCcw className="mr-2 h-4 w-4" /> {t('posPage.refresh')}
             </Button>
             <Button variant="outline" asChild>
               <Link href="/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Dashboard
+                <ArrowLeft className="mr-2 h-4 w-4" /> {t('posPage.dashboard')}
               </Link>
             </Button>
           </div>
@@ -454,18 +455,18 @@ export default function POSPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" /> Catálogo
+                <Search className="h-5 w-5" /> {t('posPage.catalog')}
               </CardTitle>
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Pesquisar produto ou serviço..."
+                placeholder={t('posPage.searchPlaceholder')}
               />
             </CardHeader>
             <CardContent>
               {loading ? (
                 <p className="py-10 text-center text-muted-foreground">
-                  A carregar catálogo...
+                  {t('posPage.loadingCatalog')}
                 </p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -478,10 +479,10 @@ export default function POSPage() {
                     >
                       <p className="font-medium">{p.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Produto · {p.stock_quantity} em stock
+                        {t('posPage.productAndStock', { count: p.stock_quantity })}
                       </p>
                       <p className="mt-2 font-semibold">
-                        {money(p.unit_price)}
+                        {money(p.unit_price, locale)}
                       </p>
                     </button>
                   ))}
@@ -494,14 +495,14 @@ export default function POSPage() {
                     >
                       <p className="font-medium">{s.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Serviço · {s.duration} min
+                        {t('posPage.serviceDuration', { minutes: s.duration })}
                       </p>
-                      <p className="mt-2 font-semibold">{money(s.price)}</p>
+                      <p className="mt-2 font-semibold">{money(s.price, locale)}</p>
                     </button>
                   ))}
                   {!filteredProducts.length && !filteredServices.length && (
                     <p className="col-span-full py-10 text-center text-muted-foreground">
-                      Nenhum resultado.
+                      {t('posPage.noResults')}
                     </p>
                   )}
                 </div>
@@ -512,13 +513,13 @@ export default function POSPage() {
           <Card className="h-fit xl:sticky xl:top-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" /> Nova venda
+                <ShoppingCart className="h-5 w-5" /> {t('posPage.newSale')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {cart.length === 0 ? (
                 <p className="py-6 text-center text-muted-foreground">
-                  Adiciona produtos ou serviços.
+                  {t('posPage.emptyCart')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -531,7 +532,7 @@ export default function POSPage() {
                         <div>
                           <p className="font-medium">{item.description}</p>
                           <p className="text-sm text-muted-foreground">
-                            {money(item.unitPrice)} cada
+                            {money(item.unitPrice, locale)} {t('posPage.each')}
                           </p>
                         </div>
                         <button
@@ -541,7 +542,7 @@ export default function POSPage() {
                               current.filter((x) => x.key !== item.key),
                             )
                           }
-                          aria-label={`Remover ${item.description}`}
+                          aria-label={t('posPage.removeItem', { item: item.description })}
                           className="rounded-lg p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -553,13 +554,13 @@ export default function POSPage() {
                             size="icon"
                             variant="outline"
                             onClick={() => changeQuantity(item.key, -1)}
-                            aria-label="Diminuir quantidade"
+                            aria-label={t('posPage.decreaseQuantity')}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
                           <span
                             className="w-6 text-center"
-                            aria-label={`Quantidade ${item.quantity}`}
+                            aria-label={t('posPage.quantity', { count: item.quantity })}
                           >
                             {item.quantity}
                           </span>
@@ -567,13 +568,13 @@ export default function POSPage() {
                             size="icon"
                             variant="outline"
                             onClick={() => changeQuantity(item.key, 1)}
-                            aria-label="Aumentar quantidade"
+                            aria-label={t('posPage.increaseQuantity')}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
                         <span className="font-semibold">
-                          {money(item.quantity * item.unitPrice)}
+                          {money(item.quantity * item.unitPrice, locale)}
                         </span>
                       </div>
                     </div>
@@ -585,7 +586,7 @@ export default function POSPage() {
                   className="text-sm text-muted-foreground"
                   htmlFor="pos-client"
                 >
-                  Cliente (opcional)
+                  {t('posPage.clientOptional')}
                 </label>
                 <select
                   id="pos-client"
@@ -593,7 +594,7 @@ export default function POSPage() {
                   value={clientId}
                   onChange={(e) => setClientId(e.target.value)}
                 >
-                  <option value="">Cliente ocasional</option>
+                  <option value="">{t('posPage.walkInClient')}</option>
                   {clients.map((client) => (
                     <option key={client.id} value={client.id}>
                       {client.name_complete}
@@ -605,7 +606,7 @@ export default function POSPage() {
                   className="mt-4 block text-sm text-muted-foreground"
                   htmlFor="pos-discount"
                 >
-                  Desconto
+                  {t('posPage.discount')}
                 </label>
                 <Input
                   id="pos-discount"
@@ -620,7 +621,7 @@ export default function POSPage() {
                   className="mt-4 block text-sm text-muted-foreground"
                   htmlFor="pos-payment"
                 >
-                  Método de pagamento
+                  {t('posPage.paymentMethod')}
                 </label>
                 <select
                   id="pos-payment"
@@ -628,22 +629,22 @@ export default function POSPage() {
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 >
-                  <option value="cash">Dinheiro</option>
-                  <option value="card">Cartão</option>
-                  <option value="transfer">Transferência</option>
-                  <option value="other">Outro</option>
+                  <option value="cash">{t('posPage.cash')}</option>
+                  <option value="card">{t('posPage.card')}</option>
+                  <option value="transfer">{t('posPage.transfer')}</option>
+                  <option value="other">{t('posPage.other')}</option>
                 </select>
                 <div className="mt-5 flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span>{money(subtotal)}</span>
+                  <span>{t('posPage.subtotal')}</span>
+                  <span>{money(subtotal, locale)}</span>
                 </div>
                 <div className="mt-1 flex justify-between text-sm">
-                  <span>Desconto</span>
-                  <span>-{money(appliedDiscount)}</span>
+                  <span>{t('posPage.discount')}</span>
+                  <span>-{money(appliedDiscount, locale)}</span>
                 </div>
                 <div className="mt-2 flex justify-between text-xl font-semibold">
-                  <span>Total</span>
-                  <span>{money(total)}</span>
+                  <span>{t('posPage.total')}</span>
+                  <span>{money(total, locale)}</span>
                 </div>
                 <Button
                   className="mt-5 w-full"
@@ -651,7 +652,7 @@ export default function POSPage() {
                   disabled={!cart.length || submitting}
                   onClick={() => void checkout()}
                 >
-                  {submitting ? 'A processar...' : 'Concluir venda'}
+                  {submitting ? t('posPage.processing') : t('posPage.completeSale')}
                 </Button>
               </div>
             </CardContent>
@@ -661,25 +662,25 @@ export default function POSPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5" /> Histórico
+              <Receipt className="h-5 w-5" /> {t('posPage.history')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {transactions.length === 0 ? (
               <p className="py-10 text-center text-muted-foreground">
-                Ainda não existem transações.
+                {t('posPage.noTransactions')}
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[950px] text-sm">
                   <thead className="border-b border-white/10 text-left text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-3">Data</th>
-                      <th className="px-3 py-3">Itens</th>
-                      <th className="px-3 py-3">Pagamento</th>
-                      <th className="px-3 py-3">Total</th>
-                      <th className="px-3 py-3">Estado</th>
-                      <th className="px-3 py-3 text-right">Ações</th>
+                      <th className="px-3 py-3">{t('posPage.date')}</th>
+                      <th className="px-3 py-3">{t('posPage.items')}</th>
+                      <th className="px-3 py-3">{t('posPage.payment')}</th>
+                      <th className="px-3 py-3">{t('posPage.total')}</th>
+                      <th className="px-3 py-3">{t('posPage.state')}</th>
+                      <th className="px-3 py-3 text-right">{t('posPage.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10">
@@ -687,7 +688,7 @@ export default function POSPage() {
                       <tr key={transaction.id}>
                         <td className="px-3 py-4 text-muted-foreground">
                           {new Date(transaction.created_at).toLocaleString(
-                            'pt-PT',
+                            locale === 'pt' ? 'pt-PT' : 'en-IE',
                           )}
                         </td>
                         <td className="max-w-[300px] px-3 py-4">
@@ -699,14 +700,14 @@ export default function POSPage() {
                             .join(', ') || '—'}
                         </td>
                         <td className="px-3 py-4 capitalize">
-                          {transaction.payment_method}
+                          {transaction.payment_method === 'cash' ? t('posPage.cash') : transaction.payment_method === 'card' ? t('posPage.card') : transaction.payment_method === 'transfer' ? t('posPage.transfer') : t('posPage.other')}
                         </td>
                         <td className="px-3 py-4 font-medium">
-                          {money(transaction.total)}
+                          {money(transaction.total, locale)}
                         </td>
                         <td className="px-3 py-4">
                           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs capitalize">
-                            {transaction.status}
+                            {transaction.status === 'completed' ? t('posPage.transactionStatus.completed') : transaction.status === 'refunded' ? t('posPage.transactionStatus.refunded') : transaction.status === 'voided' ? t('posPage.transactionStatus.voided') : transaction.status}
                           </span>
                         </td>
                         <td className="px-3 py-4">
@@ -716,7 +717,7 @@ export default function POSPage() {
                                 <Link
                                   href={`/dashboard/pos?repeat=${encodeURIComponent(transaction.id)}`}
                                 >
-                                  Repetir venda
+                                  {t('posPage.repeatSale')}
                                 </Link>
                               </Button>
                               <Button
@@ -728,7 +729,7 @@ export default function POSPage() {
                                 }
                               >
                                 <Undo2 className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                Reembolsar
+                                {t('posPage.refundAction')}
                               </Button>
                               <Button
                                 size="sm"
@@ -739,12 +740,12 @@ export default function POSPage() {
                                 }
                               >
                                 <RotateCcw className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                Anular
+                                {t('posPage.voidAction')}
                               </Button>
                             </div>
                           ) : (
                             <span className="block text-right text-xs text-muted-foreground">
-                              Sem ações
+                              {t('posPage.noActions')}
                             </span>
                           )}
                         </td>
@@ -759,8 +760,7 @@ export default function POSPage() {
 
         <Card>
           <CardContent className="flex items-center gap-3 py-4 text-sm text-muted-foreground">
-            Os preços, stock e total são sempre revalidados pelo servidor antes
-            de concluir a venda.
+            {t('posPage.serverValidationNote')}
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Service, ServicesListCardProps } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Scissors,
   Plus,
@@ -41,6 +42,7 @@ export function ServicesListCard({
   handleDeleteService,
   loading,
 }: ServicesListCardProps) {
+  const { t } = useLanguage();
   return (
     <Card className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
       <CardHeader className="border-b border-white/10 p-5 sm:p-6">
@@ -51,12 +53,12 @@ export function ServicesListCard({
             </div>
             <div className="min-w-0">
               <CardTitle className="text-lg font-semibold text-zinc-50">
-                O teu menu
+                {t('servicesListCard.title')}
               </CardTitle>
               <p className="mt-1 text-sm text-zinc-500">
                 {servicesCount === 0
-                  ? 'Começa pelo serviço que os clientes mais procuram.'
-                  : `${servicesCount} ${servicesCount === 1 ? 'serviço configurado' : 'serviços configurados'}.`}
+                  ? t('servicesListCard.emptyDescription')
+                  : `${servicesCount} ${servicesCount === 1 ? t('servicesListCard.configuredSingular') : t('servicesListCard.configuredPlural')}.`}
               </p>
             </div>
           </div>
@@ -65,7 +67,7 @@ export function ServicesListCard({
             className="min-h-11 w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200 sm:w-auto"
           >
             <Plus className="mr-2 size-4" />
-            Adicionar serviço
+            {t('servicesListCard.addService')}
           </Button>
         </div>
       </CardHeader>
@@ -74,9 +76,9 @@ export function ServicesListCard({
         <Dialog open={showAddServiceForm} onOpenChange={setShowAddServiceForm}>
           <DialogContent className="border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>Adicionar serviço</DialogTitle>
+              <DialogTitle>{t('servicesListCard.addDialogTitle')}</DialogTitle>
               <DialogDescription>
-                Define o nome, o preço e a duração. Podes acrescentar mais serviços depois.
+                {t('servicesListCard.addDialogDescription')}
               </DialogDescription>
             </DialogHeader>
             <AddServiceForm
@@ -88,7 +90,7 @@ export function ServicesListCard({
             />
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddServiceForm(false)} className="border-white/10 bg-transparent">
-                Fechar
+                {t('common.close')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -97,9 +99,9 @@ export function ServicesListCard({
         {services.length === 0 ? (
           <EmptyState
             icon={Scissors}
-            title="Ainda não tens serviços"
-            description="Não precisas de criar o menu todo. Adiciona primeiro o serviço mais procurado e começa a receber marcações."
-            actionLabel="Adicionar primeiro serviço"
+            title={t('servicesListCard.noServicesTitle')}
+            description={t('servicesListCard.noServicesDescription')}
+            actionLabel={t('servicesListCard.addFirst')}
             onAction={() => setShowAddServiceForm(true)}
             tone="amber"
           />
@@ -137,6 +139,7 @@ function AddServiceForm({
   setShowAddServiceForm,
   loading,
 }: AddServiceFormProps) {
+  const { t } = useLanguage();
   async function submit(event: React.FormEvent) {
     const created = await handleCreateService(event);
     if (created) setShowAddServiceForm(false);
@@ -151,7 +154,7 @@ function AddServiceForm({
         <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" />
         <div>
           <p className="text-sm font-semibold text-zinc-100">
-            Adiciona apenas o essencial
+            {t('servicesListCard.formIntro')}
           </p>
         </div>
       </div>
@@ -169,7 +172,7 @@ function AddServiceForm({
             required
             disabled={loading}
             autoFocus
-            placeholder="Ex.: Corte + Barba"
+            placeholder={t('servicesListCard.namePlaceholder')}
             className="min-h-11 bg-zinc-950/70"
             value={newServiceData.name}
             onChange={(e) =>
@@ -186,7 +189,7 @@ function AddServiceForm({
             htmlFor="new-service-price"
             className="text-xs font-medium text-zinc-400"
           >
-            Preço
+            {t('servicesListCard.price')}
           </label>
           <div className="relative">
             <Euro className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
@@ -215,7 +218,7 @@ function AddServiceForm({
             htmlFor="new-service-duration"
             className="text-xs font-medium text-zinc-400"
           >
-            Duração
+            {t('servicesListCard.duration')}
           </label>
           <div className="relative">
             <Clock3 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
@@ -242,6 +245,7 @@ function AddServiceForm({
         </div>
 
         <Button
+            aria-label={loading ? "A guardar serviço" : "Guardar serviço"}
           type="submit"
           disabled={loading}
           className="min-h-11 bg-amber-600 text-white hover:bg-amber-500"
@@ -250,7 +254,7 @@ function AddServiceForm({
             <Spinner className="size-4" />
           ) : (
             <>
-              Adicionar <ArrowRight className="ml-2 size-4" />
+              {t('servicesListCard.submit')} <ArrowRight className="ml-2 size-4" />
             </>
           )}
         </Button>
@@ -270,6 +274,7 @@ function ServiceItemCard({
   setEditingService,
   handleDeleteService,
 }: ServiceItemCardProps) {
+  const { t } = useLanguage();
   return (
     <article className="group flex min-h-[150px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-amber-500/30 hover:bg-white/[0.045]">
       <div>
@@ -293,7 +298,7 @@ function ServiceItemCard({
           size="icon"
           onClick={() => setEditingService(service)}
           className="size-9 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white"
-          aria-label={`Editar ${service.name}`}
+          aria-label={t('servicesListCard.edit', { name: service.name })}
         >
           <Pencil className="size-4" />
         </Button>
@@ -304,28 +309,27 @@ function ServiceItemCard({
               variant="ghost"
               size="icon"
               className="size-9 rounded-lg text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
-              aria-label={`Eliminar ${service.name}`}
+              aria-label={t('servicesListCard.delete', { name: service.name })}
             >
               <Trash2 className="size-4" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>Eliminar este serviço?</AlertDialogTitle>
+              <AlertDialogTitle>{t('servicesListCard.deleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                As marcações existentes não devem ser alteradas. Confirma apenas
-                se já não precisas deste serviço.
+                {t('servicesListCard.deleteDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="border-white/10 bg-transparent text-white">
-                Manter
+                {t('servicesListCard.keep')}
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-red-600 text-white"
                 onClick={() => handleDeleteService(service.id)}
               >
-                Eliminar
+                {t('servicesListCard.deleteAction')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

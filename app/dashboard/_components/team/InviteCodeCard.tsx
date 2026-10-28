@@ -5,6 +5,7 @@ import { Check, Copy, KeyRound, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 type InviteCodeCardProps = {
   seats?: { used: number; limit: number; unlimited: boolean };
@@ -23,6 +24,7 @@ function normalizeInviteCode(value: string): string {
 }
 
 export function InviteCodeCard({ seats }: InviteCodeCardProps) {
+  const { t } = useLanguage();
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,20 +68,20 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error || 'Não foi possível gerar o convite.');
+        throw new Error(data.error || t('inviteCode.generateError'));
 
       const normalized = normalizeInviteCode(String(data.code ?? ''));
       if (!INVITE_PATTERN.test(normalized))
-        throw new Error('O convite gerado tem um formato inválido.');
+        throw new Error(t('inviteCode.invalidFormat'));
 
       setCode(normalized);
       setExpiresAt(data.expiresAt);
-      toast.success('Convite criado.');
+      toast.success(t('inviteCode.created'));
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível gerar o convite.',
+          : t('inviteCode.generateError'),
       );
     } finally {
       setLoading(false);
@@ -91,9 +93,9 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      toast.success('Código copiado.');
+      toast.success(t('inviteCode.copied'));
     } catch {
-      toast.error('Não foi possível copiar o código.');
+      toast.error(t('inviteCode.copyError'));
     }
   }
 
@@ -110,14 +112,14 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
           </div>
           <div className="min-w-0">
             <CardTitle className="text-lg font-semibold text-zinc-50">
-              Convidar para a equipa
+              {t('inviteCode.title')}
             </CardTitle>
             <p className="mt-1 text-sm leading-6 text-zinc-500">
-              Gera um código no mesmo formato aceite pelo onboarding:
+              {t('inviteCode.description')}
               <span className="ml-1 font-mono text-zinc-300">
                 BARB-XXXX-XXXX
               </span>
-              . O convite é válido durante 10 minutos.
+              {t('inviteCode.expiresInTenMinutes')}
             </p>
           </div>
         </div>
@@ -125,15 +127,16 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
       <CardContent className="grid gap-4 p-5 sm:p-6">
         {teamFull && (
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] p-4 text-sm text-amber-100">
-            <p className="font-semibold">Limite da equipa atingido</p>
+            <p className="font-semibold">{t('inviteCode.limitReached')}</p>
             <p className="mt-1 text-xs leading-5 text-amber-100/60">
-              Não existe espaço para adicionar outra pessoa neste plano.
+              {t('inviteCode.noSeats')}
             </p>
           </div>
         )}
         <Button
           onClick={generate}
           disabled={loading || teamFull}
+          aria-label={loading ? t('common.loading') : t('inviteCode.generate')}
           className="min-h-11 bg-emerald-600 text-white hover:bg-emerald-500 sm:w-fit"
         >
           {loading ? (
@@ -141,7 +144,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
           ) : (
             <>
               <RefreshCw className="mr-2 size-4" aria-hidden="true" />
-              Gerar convite
+              {t('inviteCode.generate')}
             </>
           )}
         </Button>
@@ -151,16 +154,16 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-wider text-zinc-500">
-                  Código de convite
+                  {t('inviteCode.code')}
                 </p>
                 <p
                   className="mt-1 break-all font-mono text-xl font-bold tracking-[0.14em] text-white sm:text-2xl"
-                  aria-label={`Código de convite ${code}`}
+                  aria-label={`${t('inviteCode.code')} ${code}`}
                 >
                   {code}
                 </p>
                 <p className="mt-1 text-xs text-zinc-500">
-                  Expira em {minutes}:{String(seconds).padStart(2, '0')}
+                  {t('inviteCode.expires')} {minutes}:{String(seconds).padStart(2, '0')}
                 </p>
               </div>
               <Button
@@ -173,13 +176,13 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
                 ) : (
                   <Copy className="mr-2 size-4" aria-hidden="true" />
                 )}
-                {copied ? 'Copiado' : 'Copiar'}
+                {copied ? t('inviteCode.copiedButton') : t('inviteCode.copy')}
               </Button>
             </div>
           </div>
         ) : (
           <p className="text-xs leading-5 text-zinc-500">
-            Cada código pode ser usado uma vez e expira automaticamente.
+            {t('inviteCode.usageHint')}
           </p>
         )}
       </CardContent>

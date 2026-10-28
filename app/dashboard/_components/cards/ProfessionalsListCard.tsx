@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { type ProfessionalsListCardProps } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Briefcase,
   Plus,
@@ -55,6 +56,7 @@ export function ProfessionalsListCard({
   isFreePlan,
   freeLimitReached,
 }: EquipaCardProps) {
+  const { t } = useLanguage();
   const canAddProfessional = !freeLimitReached;
   return (
     <Card className={shell}>
@@ -66,12 +68,12 @@ export function ProfessionalsListCard({
             </div>
             <div className="min-w-0">
               <CardTitle className="text-lg font-semibold text-zinc-50">
-                A tua equipa
+                {t('professionalsListCard.title')}
               </CardTitle>
               <p className="mt-1 text-sm text-zinc-500">
                 {professionalsCount === 0
-                  ? 'Adiciona o primeiro barbeiro e começa a organizar a agenda.'
-                  : `${professionalsCount} ${professionalsCount === 1 ? 'barbeiro' : 'barbeiros'} na equipa.`}
+                  ? t('professionalsListCard.addFirstHint')
+                  : `${professionalsCount} ${professionalsCount === 1 ? t('professionalsListCard.barberSingular') : t('professionalsListCard.barberPlural')} ${t('professionalsListCard.teamSuffix')}`}
               </p>
             </div>
           </div>
@@ -86,10 +88,10 @@ export function ProfessionalsListCard({
               <Plus className="mr-2 size-4" />
             )}
             {freeLimitReached
-              ? 'Limite atingido'
+              ? t('professionalsListCard.limitReached')
               : showAddProfessionalForm
-                ? 'Fechar'
-                : 'Adicionar barbeiro'}
+                ? t('professionalsListCard.close')
+                : t('professionalsListCard.addBarber')}
           </Button>
         </div>
       </CardHeader>
@@ -103,11 +105,10 @@ export function ProfessionalsListCard({
               <Sparkles className="mt-0.5 size-4 shrink-0 text-purple-400" />
               <div>
                 <p className="text-sm font-semibold text-zinc-100">
-                  Adiciona o essencial
+                  {t('professionalsListCard.formIntro')}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-zinc-500">
-                  No plano gratuito, o primeiro barbeiro tem comissão fixa de
-                  100%.
+                  {t('professionalsListCard.freePlanHint')} 100%.
                 </p>
               </div>
             </div>
@@ -117,13 +118,13 @@ export function ProfessionalsListCard({
                   htmlFor="new-professional-name"
                   className="text-xs font-medium text-zinc-400"
                 >
-                  Nome
+                  {t('professionalsListCard.name')}
                 </label>
                 <input
                   id="new-professional-name"
                   required
                   autoFocus
-                  placeholder="Ex.: João Silva"
+                  placeholder={t('professionalsListCard.namePlaceholder')}
                   className="min-h-11 rounded-lg border border-white/10 bg-zinc-950/70 px-3 text-sm text-white outline-none focus:border-purple-500/50"
                   value={newProfessionalData.name}
                   onChange={(e) =>
@@ -139,7 +140,7 @@ export function ProfessionalsListCard({
                   htmlFor="new-professional-commission"
                   className="text-xs font-medium text-zinc-400"
                 >
-                  Comissão
+                  {t('professionalsListCard.commission')}
                 </label>
                 {isFreePlan ? (
                   <div
@@ -148,7 +149,7 @@ export function ProfessionalsListCard({
                   >
                     100%{' '}
                     <span className="ml-2 text-xs font-normal text-zinc-600">
-                      fixa
+                      {t('professionalsListCard.fixed')}
                     </span>
                   </div>
                 ) : (
@@ -171,6 +172,7 @@ export function ProfessionalsListCard({
                 )}
               </div>
               <Button
+            aria-label={loading ? "A guardar profissional" : "Guardar profissional"}
                 type="submit"
                 disabled={loading}
                 className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
@@ -179,7 +181,7 @@ export function ProfessionalsListCard({
                   <Spinner className="size-4" />
                 ) : (
                   <>
-                    Adicionar <ArrowRight className="ml-2 size-4" />
+                    {t('professionalsListCard.add')} <ArrowRight className="ml-2 size-4" />
                   </>
                 )}
               </Button>
@@ -190,11 +192,10 @@ export function ProfessionalsListCard({
           <div className="mb-5 flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-zinc-200">
-                O teu barbeiro gratuito já está configurado.
+                {t('professionalsListCard.freeBarberConfigured')}
               </p>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Para adicionar mais profissionais ou alterar a comissão, escolhe
-                um plano superior.
+                {t('professionalsListCard.upgradeHint')}
               </p>
             </div>
             <Button
@@ -202,7 +203,7 @@ export function ProfessionalsListCard({
               variant="outline"
               className="shrink-0 border-white/10 rounded-lg"
             >
-              <Link href="/plans">Ver planos</Link>
+              <Link href="/plans">{t('professionalsListCard.viewPlans')}</Link>
             </Button>
           </div>
         )}
@@ -210,9 +211,9 @@ export function ProfessionalsListCard({
           <EmptyState
             icon={Briefcase}
             tone="violet"
-            title="A equipa ainda está vazia."
-            description="Adiciona o primeiro barbeiro. Não precisas de configurar uma equipa completa para começar."
-            actionLabel="Adicionar primeiro barbeiro"
+            title={t('professionalsListCard.emptyTitle')}
+            description={t('professionalsListCard.emptyDescription')}
+            actionLabel={t('professionalsListCard.addFirst')}
             onAction={() => setShowAddProfessionalForm(true)}
           />
         ) : (
@@ -231,12 +232,12 @@ export function ProfessionalsListCard({
                       <h3 className="truncate text-sm font-semibold text-zinc-100">
                         {professional.name}
                       </h3>
-                      <p className="mt-1 text-xs text-zinc-500">Barbeiro</p>
+                      <p className="mt-1 text-xs text-zinc-500">{t('professionalsListCard.barber')}</p>
                     </div>
                   </div>
                   <div className="mt-4 rounded-lg border border-white/5 bg-black/20 px-3 py-2">
                     <p className="text-[11px] uppercase tracking-wider text-zinc-600">
-                      Comissão
+                      {t('professionalsListCard.commission')}
                     </p>
                     <p className="mt-0.5 text-sm font-semibold text-purple-300">
                       {professional.commission_percentage ?? 100}%
@@ -249,7 +250,7 @@ export function ProfessionalsListCard({
                     size="icon"
                     onClick={() => setEditingProfessional(professional)}
                     className={iconButton}
-                    aria-label={`Editar ${professional.name}`}
+                    aria-label={t('professionalsListCard.edit', { name: professional.name })}
                   >
                     <Pencil className="size-4" />
                   </Button>
@@ -259,7 +260,7 @@ export function ProfessionalsListCard({
                         variant="ghost"
                         size="icon"
                         className={`${iconButton} text-zinc-500 hover:bg-red-500/10 hover:text-red-400`}
-                        aria-label={`Eliminar ${professional.name}`}
+                        aria-label={t('professionalsListCard.delete', { name: professional.name })}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -267,16 +268,15 @@ export function ProfessionalsListCard({
                     <AlertDialogContent className="border-white/10 bg-zinc-950">
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Eliminar este barbeiro?
+                          {t('professionalsListCard.deleteTitle')}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Esta ação pode não ser possível se existirem marcações
-                          ou histórico associado.
+                          {t('professionalsListCard.deleteDescription')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel className="border-white/10 bg-transparent text-white">
-                          Manter
+                          {t('professionalsListCard.keep')}
                         </AlertDialogCancel>
                         <AlertDialogAction
                           className="bg-red-600 text-white"
@@ -284,7 +284,7 @@ export function ProfessionalsListCard({
                             handleDeleteProfessional(professional.id)
                           }
                         >
-                          Eliminar
+                          {t('professionalsListCard.deleteAction')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

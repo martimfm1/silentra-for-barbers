@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { Client } from '@/types';
 import { useBarbershop } from '@/context/BarbershopContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { useClients } from '@/app/state/_hooks/dashboard/useClients';
 
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function ClientesPage() {
+  const { t } = useLanguage();
   // --- Context & State ---
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const [clients, setClients] = useState<Client[]>([]);
@@ -39,11 +41,11 @@ export default function ClientesPage() {
       setClients(res.data ?? []);
     } catch (error) {
       console.error('[Clientes Sync Error]:', error);
-      toast.error('Não foi possível carregar os clientes. Tenta novamente.');
+      toast.error(t('clientsPage.loadError'));
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (!isLoadingBarbershop && barbershopId) {
@@ -81,9 +83,9 @@ export default function ClientesPage() {
       <div className="mx-auto max-w-7xl space-y-6">
         <ManagementPageHeader
           icon={Users}
-          eyebrow="Clientes e contactos"
-          title="Clientes"
-          description="Mantém os contactos essenciais organizados. O histórico cresce com as marcações."
+          eyebrow={t('clientsPage.eyebrow')}
+          title={t('clientsPage.title')}
+          description={t('clientsPage.description')}
           accentClassName="text-blue-400 bg-blue-500/10 border-blue-500/20"
         />
 
@@ -121,10 +123,11 @@ export default function ClientesPage() {
 // --- Sub-componentes para melhor organização visual ---
 
 function ClientsListSkeleton() {
+  const { t } = useLanguage();
   return (
     <div
       role="status"
-      aria-label="A carregar clientes"
+      aria-label={t('clientsPage.loading')}
       className="grid gap-3 md:grid-cols-2 lg:grid-cols-3"
     >
       {[...Array(6)].map((_, i) => (
@@ -152,11 +155,12 @@ function EditClientDialog({
   onChange,
   loading,
 }: EditClientDialogProps) {
+  const { t } = useLanguage();
   return (
     <Dialog open={!!editingClient} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar cliente</DialogTitle>
+          <DialogTitle>{t('clientsPage.editTitle')}</DialogTitle>
         </DialogHeader>
 
         {editingClient && (
@@ -166,7 +170,7 @@ function EditClientDialog({
                 htmlFor="edit-client-name"
                 className="text-xs text-zinc-400"
               >
-                Nome
+                {t('clientsPage.name')}
               </label>
               <input
                 id="edit-client-name"
@@ -187,7 +191,7 @@ function EditClientDialog({
                 htmlFor="edit-client-phone"
                 className="text-xs text-zinc-400"
               >
-                Telefone
+                {t('clientsPage.phone')}
               </label>
               <input
                 id="edit-client-phone"
@@ -209,8 +213,8 @@ function EditClientDialog({
                 htmlFor="edit-client-birth-date"
                 className="text-xs text-zinc-400"
               >
-                Data de nascimento{' '}
-                <span className="text-zinc-600">(opcional)</span>
+                {t('clientsPage.birthDate')}{' '}
+                <span className="text-zinc-600">{t('clientsPage.optional')}</span>
               </label>
               <input
                 id="edit-client-birth-date"
@@ -228,6 +232,7 @@ function EditClientDialog({
 
             <DialogFooter>
               <Button
+            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
                 type="submit"
                 disabled={loading}
                 className="min-h-11 w-full bg-emerald-600 text-white hover:bg-emerald-500"
@@ -235,7 +240,7 @@ function EditClientDialog({
                 {loading ? (
                   <Spinner className="size-4" />
                 ) : (
-                  'Guardar alterações'
+                  t('clientsPage.saveChanges')
                 )}
               </Button>
             </DialogFooter>

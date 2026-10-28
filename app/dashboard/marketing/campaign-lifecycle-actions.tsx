@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Ban, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 
 const ACTIVE_STATES = ['scheduled', 'sending'] as const;
 const VISIBLE_STATES = ['scheduled', 'sending', 'cancelled'] as const;
@@ -17,14 +18,15 @@ type Campaign = {
   status: string;
 };
 
-function statusLabel(status: string) {
-  if (status === 'scheduled') return 'Agendada';
-  if (status === 'sending') return 'A enviar';
-  if (status === 'cancelled') return 'Cancelada';
+function statusLabel(status: string, t: (key: string) => string) {
+  if (status === 'scheduled') return t('marketingPage.statuses.scheduled');
+  if (status === 'sending') return t('marketingPage.statuses.sending');
+  if (status === 'cancelled') return t('marketingPage.statuses.cancelled');
   return status;
 }
 
 export function CampaignLifecycleActions() {
+  const { t } = useLanguage();
   const confirm = useDashboardConfirm();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [busyId, setBusyId] = useState('');
@@ -38,7 +40,7 @@ export function CampaignLifecycleActions() {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível carregar os envios.');
+        throw new Error(data.error ?? t('campaignLifecycle.loadError'));
       setCampaigns(
         (data.campaigns ?? []).filter((campaign: Campaign) =>
           VISIBLE_STATES.includes(
@@ -48,7 +50,7 @@ export function CampaignLifecycleActions() {
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar os envios.',
+        error instanceof Error ? error.message : t('campaignLifecycle.loadGenericError'),
       );
     } finally {
       setLoading(false);
@@ -57,13 +59,13 @@ export function CampaignLifecycleActions() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [t]);
 
   async function cancel(campaign: Campaign) {
     const confirmed = await confirm({
-      title: 'Cancelar envio?',
-      description: `Cancelar o envio de “${campaign.name}”? Os destinatários ainda não enviados deixam de estar na fila.`,
-      confirmLabel: 'Cancelar envio',
+      title: t('campaignLifecycle.cancelTitle'),
+      description: t('campaignLifecycle.cancelDescription', { name: campaign.name }),
+      confirmLabel: t('campaignLifecycle.cancelAction'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -75,12 +77,12 @@ export function CampaignLifecycleActions() {
       );
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível cancelar o envio.');
-      toast.success(data.message ?? 'Envio cancelado.');
+        throw new Error(data.error ?? t('campaignLifecycle.cancelError'));
+      toast.success(data.message ?? t('campaignLifecycle.cancelled'));
       await load();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao cancelar o envio.',
+        error instanceof Error ? error.message : t('campaignLifecycle.cancelGenericError'),
       );
     } finally {
       setBusyId('');
@@ -89,9 +91,9 @@ export function CampaignLifecycleActions() {
 
   async function remove(campaign: Campaign) {
     const confirmed = await confirm({
-      title: 'Apagar campanha?',
-      description: `“${campaign.name}” será apagada permanentemente. Esta ação não pode ser desfeita.`,
-      confirmLabel: 'Apagar campanha',
+      title: t('campaignLifecycle.deleteTitle'),
+      description: t('campaignLifecycle.deleteDescription', { name: campaign.name }),
+      confirmLabel: t('campaignLifecycle.deleteAction'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -103,12 +105,12 @@ export function CampaignLifecycleActions() {
       );
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error ?? 'Não foi possível apagar a campanha.');
-      toast.success('Campanha cancelada apagada.');
+        throw new Error(data.error ?? t('campaignLifecycle.deleteError'));
+      toast.success(t('campaignLifecycle.deleted'));
       await load();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao apagar a campanha.',
+        error instanceof Error ? error.message : t('campaignLifecycle.deleteGenericError'),
       );
     } finally {
       setBusyId('');
@@ -128,10 +130,10 @@ export function CampaignLifecycleActions() {
             id="campaign-lifecycle-title"
             className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
           >
-            Gestão de envios
+            {t('campaignLifecycle.title')}
           </p>
           <p className="mt-1 text-sm text-zinc-300">
-            Cancela envios ativos ou limpa campanhas já canceladas.
+            {t('campaignLifecycle.description')}
           </p>
         </div>
         <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 lg:justify-end">
@@ -151,7 +153,7 @@ export function CampaignLifecycleActions() {
                   </p>
                   <p className="text-[11px] text-zinc-500">
                     {campaign.channel.toUpperCase()} ·{' '}
-                    {statusLabel(campaign.status)}
+                    {statusLabel(campaign.status, t)}
                   </p>
                 </div>
                 {active ? (
@@ -170,7 +172,7 @@ export function CampaignLifecycleActions() {
                     ) : (
                       <Ban className="mr-1.5 size-4" aria-hidden="true" />
                     )}
-                    {busy ? 'A cancelar…' : 'Cancelar'}
+                    {busy ? t('campaignLifecycle.cancelling') : t('campaignLifecycle.cancel')}
                   </Button>
                 ) : (
                   <Button
@@ -188,7 +190,7 @@ export function CampaignLifecycleActions() {
                     ) : (
                       <Trash2 className="mr-1.5 size-4" aria-hidden="true" />
                     )}
-                    {busy ? 'A apagar…' : 'Apagar'}
+                    {busy ? t('campaignLifecycle.deleting') : t('campaignLifecycle.delete')}
                   </Button>
                 )}
               </div>
@@ -200,7 +202,7 @@ export function CampaignLifecycleActions() {
           size="sm"
           onClick={() => void load()}
           disabled={loading}
-          aria-label="Atualizar gestão de envios"
+          aria-label={t('campaignLifecycle.refresh')}
         >
           <RefreshCw
             className={`size-4 ${loading ? 'animate-spin' : ''}`}

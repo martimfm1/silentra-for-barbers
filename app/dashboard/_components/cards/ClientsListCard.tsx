@@ -1,6 +1,7 @@
 'use client';
 
 import { Client, ClientsListCardProps } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 import type { FormEvent } from 'react';
 import {
   Users,
@@ -47,6 +48,7 @@ export function ClientsListCard({
   handleDeleteClient,
   loading,
 }: ClientsListCardProps) {
+  const { t } = useLanguage();
   const hasSearch = searchClientQuery.trim().length > 0;
 
   return (
@@ -60,12 +62,12 @@ export function ClientsListCard({
             </div>
             <div className="min-w-0">
               <CardTitle className="text-lg font-semibold text-zinc-50">
-                A tua base de clientes
+                {t('clientsListCard.title')}
               </CardTitle>
               <p className="mt-1 text-sm text-zinc-500">
                 {clientsCount === 0
-                  ? 'Começa pelo essencial. O histórico cresce com as marcações.'
-                  : `${clientsCount} ${clientsCount === 1 ? 'cliente' : 'clientes'} na tua base.`}
+                  ? t('clientsListCard.emptyDescription')
+                  : `${clientsCount} ${clientsCount === 1 ? t('clientsListCard.countSingular') : t('clientsListCard.countPlural')} ${t('clientsListCard.countSuffix')}`}
               </p>
             </div>
           </div>
@@ -77,15 +79,15 @@ export function ClientsListCard({
               <Input
                 value={searchClientQuery}
                 onChange={(e) => setSearchClientQuery(e.target.value)}
-                placeholder="Pesquisar por nome ou telemóvel"
-                aria-label="Pesquisar clientes por nome ou telemóvel"
+                placeholder={t('clientsListCard.searchPlaceholder')}
+                aria-label={t('clientsListCard.searchLabel')}
                 className="min-h-11 rounded-lg bg-zinc-950/70 pl-9 pr-10"
               />
               {hasSearch && (
                 <button
                   type="button"
                   onClick={() => setSearchClientQuery('')}
-                  aria-label="Limpar pesquisa"
+                  aria-label={t('clientsListCard.clearSearch')}
                   className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 hover:bg-white/10 hover:text-white"
                 >
                   <X className="size-4" />
@@ -97,7 +99,7 @@ export function ClientsListCard({
               className="min-h-11 rounded-lg bg-zinc-50 text-zinc-950 hover:bg-white"
             >
               <UserPlus className="mr-2 size-4" />
-              Adicionar cliente
+              {t('clientsListCard.addClient')}
             </Button>
           </div>
         </div>
@@ -107,9 +109,9 @@ export function ClientsListCard({
         <Dialog open={showAddClientForm} onOpenChange={setShowAddClientForm}>
           <DialogContent className="border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Adicionar cliente</DialogTitle>
+              <DialogTitle>{t('clientsListCard.addDialogTitle')}</DialogTitle>
               <DialogDescription>
-                Guarda os contactos essenciais. A data de nascimento pode ser adicionada ao editar o cliente.
+                {t('clientsListCard.formIntro')}
               </DialogDescription>
             </DialogHeader>
             <AddClientForm
@@ -121,7 +123,7 @@ export function ClientsListCard({
             />
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddClientForm(false)} className="border-white/10 bg-transparent">
-                Fechar
+                {t('common.close')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -168,6 +170,7 @@ function AddClientForm({
   setShowAddClientForm,
   loading,
 }: AddClientFormProps) {
+  const { t } = useLanguage();
   async function submit(event: FormEvent) {
     const created = await handleCreateClient(event);
     if (created) setShowAddClientForm(false);
@@ -182,7 +185,7 @@ function AddClientForm({
         <Sparkles className="mt-0.5 size-4 shrink-0 text-blue-400" />
         <div>
           <p className="text-sm font-semibold text-zinc-100">
-            Adiciona apenas o essencial
+            {t('clientsListCard.addDialogDescription')}
           </p>
         </div>
       </div>
@@ -193,14 +196,14 @@ function AddClientForm({
             htmlFor="new-client-name"
             className="text-xs font-medium text-zinc-400"
           >
-            Nome completo
+            {t('clientsListCard.fullName')}
           </label>
           <input
             id="new-client-name"
             required
             disabled={loading}
             autoFocus
-            placeholder="Ex.: João Silva"
+            placeholder={t('clientsListCard.namePlaceholder')}
             className="min-h-11 rounded-lg border border-white/10 bg-zinc-950/70 px-3 text-sm text-white outline-none focus:border-blue-500/50"
             value={newClientData.name_complete}
             onChange={(e) =>
@@ -217,7 +220,7 @@ function AddClientForm({
             htmlFor="new-client-phone"
             className="text-xs font-medium text-zinc-400"
           >
-            Telemóvel
+            {t('clientsListCard.mobile')}
           </label>
           <input
             id="new-client-phone"
@@ -242,13 +245,13 @@ function AddClientForm({
             htmlFor="new-client-email"
             className="text-xs font-medium text-zinc-400"
           >
-            Email
+            {t('auth.email')}
           </label>
           <input
             id="new-client-email"
             disabled={loading}
             type="email"
-            placeholder="cliente@email.com"
+            placeholder={t('clientsListCard.emailPlaceholder')}
             className="min-h-11 rounded-lg border border-white/10 bg-zinc-950/70 px-3 text-sm text-white outline-none focus:border-blue-500/50"
             value={newClientData.email}
             onChange={(e) =>
@@ -261,6 +264,7 @@ function AddClientForm({
         </div>
 
         <Button
+            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
           type="submit"
           disabled={loading}
           className="min-h-11 rounded-lg bg-blue-600 text-white hover:bg-blue-500"
@@ -269,7 +273,7 @@ function AddClientForm({
             <Spinner className="size-4" />
           ) : (
             <>
-              Adicionar <ArrowRight className="ml-2 size-4" />
+              {t('clientsListCard.submit')} <ArrowRight className="ml-2 size-4" />
             </>
           )}
         </Button>
@@ -289,13 +293,14 @@ function EmptyClientsState({
   setSearchClientQuery,
   setShowAddClientForm,
 }: EmptyClientsStateProps) {
+  const { t } = useLanguage();
   if (hasSearch) {
     return (
       <EmptyState
         icon={Users}
-        title="Não encontrámos esse cliente"
-        description="Experimenta outro nome ou telemóvel."
-        actionLabel="Limpar pesquisa"
+        title={t('clientsListCard.notFound')}
+        description={t('clientsListCard.tryAnotherSearch')}
+        actionLabel={t('clientsListCard.clearSearch')}
         onAction={() => setSearchClientQuery('')}
         tone="blue"
       />
@@ -305,9 +310,9 @@ function EmptyClientsState({
   return (
     <EmptyState
       icon={Users}
-      title="A tua base ainda está vazia"
-      description="Adiciona o primeiro cliente agora ou deixa o Silentra criá-lo a partir de uma marcação concluída."
-      actionLabel="Adicionar primeiro cliente"
+      title={t('clientsListCard.emptyTitle')}
+      description={t('clientsListCard.emptyDescriptionLong')}
+      actionLabel={t('clientsListCard.addFirst')}
       onAction={() => setShowAddClientForm(true)}
       tone="blue"
     />
@@ -325,6 +330,7 @@ function ClientItemCard({
   setEditingClient,
   handleDeleteClient,
 }: ClientItemCardProps) {
+  const { t, locale } = useLanguage();
   return (
     <article className="group flex min-h-[190px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-blue-500/30 hover:bg-white/[0.045]">
       <div>
@@ -336,7 +342,7 @@ function ClientItemCard({
             <h3 className="truncate text-sm font-semibold text-zinc-100">
               {client.name_complete}
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">Cliente</p>
+            <p className="mt-1 text-xs text-zinc-500">{t('clientsListCard.client')}</p>
           </div>
         </div>
 
@@ -357,7 +363,7 @@ function ClientItemCard({
             <p className="flex items-center gap-2 text-xs text-zinc-500">
               <Cake className="size-3.5 text-zinc-600" />
               {new Date(`${client.birth_date}T12:00:00`).toLocaleDateString(
-                'pt-PT',
+                locale === 'pt' ? 'pt-PT' : 'en-GB',
               )}
             </p>
           )}
@@ -370,7 +376,7 @@ function ClientItemCard({
           size="icon"
           onClick={() => setEditingClient(client)}
           className="size-9 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white"
-          aria-label={`Editar ${client.name_complete}`}
+          aria-label={t('clientsListCard.edit', { name: client.name_complete })}
         >
           <Pencil className="size-4" />
         </Button>
@@ -381,28 +387,27 @@ function ClientItemCard({
               variant="ghost"
               size="icon"
               className="size-9 rounded-lg text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
-              aria-label={`Eliminar ${client.name_complete}`}
+              aria-label={t('clientsListCard.delete', { name: client.name_complete })}
             >
               <Trash2 className="size-4" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>Eliminar este cliente?</AlertDialogTitle>
+              <AlertDialogTitle>{t('clientsListCard.deleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta ação é permanente. Se existirem marcações associadas, o
-                histórico deve ser preservado.
+                {t('clientsListCard.deleteDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="border-white/10 bg-transparent text-white">
-                Manter
+                {t('clientsListCard.keep')}
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-red-600 text-white"
                 onClick={() => handleDeleteClient(client.id)}
               >
-                Eliminar
+                {t('clientsListCard.deleteAction')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
