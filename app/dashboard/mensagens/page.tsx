@@ -105,7 +105,7 @@ const pageCopy = {
     disabled: 'Desativado',
     smsEnableDescription: 'Quando o serviço SMS for ativado, esta área poderá ser disponibilizada sem alterar o compositor de email.',
     sendSms: 'Enviar SMS', fallbackShop: 'a tua barbearia',
-    customerName: copy.customerName, selectClient: 'Seleciona um cliente.',
+    customerName: 'Nome do cliente', selectClient: 'Seleciona um cliente.',
     noEmail: 'O cliente selecionado não tem email.',
     requiredMessage: 'Preenche o assunto e a mensagem.',
     loadClientsFailed: 'Não foi possível carregar os clientes.',
