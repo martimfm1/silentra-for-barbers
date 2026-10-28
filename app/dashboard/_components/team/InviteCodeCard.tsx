@@ -157,7 +157,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
                 </p>
                 <p
                   className="mt-1 break-all font-mono text-xl font-bold tracking-[0.14em] text-white sm:text-2xl"
-                  aria-label={`Código de convite ${code}`}
+                  aria-label={`${t('inviteCode.code')} ${code}`}
                 >
                   {code}
                 </p>
