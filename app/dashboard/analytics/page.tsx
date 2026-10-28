@@ -323,7 +323,7 @@ export default function AnalyticsPage() {
                 value={money(data.overview.revenue, locale)}
                 detail={
                   data.overview.revenueChangePercent === null
-                    ? 'Sem comparação disponível'
+                    ? t('analyticsPage.noComparison')
                     : t('analyticsPage.vsPrevious', { value: `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}` })
                 }
                 icon={<Wallet className="h-4 w-4" />}
@@ -632,8 +632,7 @@ export default function AnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-4 text-sm text-muted-foreground">
-                      Ativa o Enterprise para acompanhar POS e receita combinada
-                      por localização.
+                      {t('analyticsPage.enableEnterprise')}
                     </div>
                     <Button asChild variant="outline" className="mt-4">
                       <Link href="/plans">{t('analyticsPage.comparePlans')}</Link>
