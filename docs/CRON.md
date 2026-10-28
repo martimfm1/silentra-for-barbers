@@ -6,6 +6,8 @@ Tarefas frequentes que alteram dados da aplicação devem correr no Supabase/Pos
 
 ## Campanhas de marketing e aniversários
 
+O worker de marketing também é acionado pelo workflow do GitHub Actions a cada 5 minutos para processar filas sem esperar pelo cron diário do Vercel. O endpoint é público, mas a execução é protegida por segredo. Configurar o segredo de repositório `CRON_SECRET` em **Settings → Secrets and variables → Actions** com o mesmo valor de `CRON_SECRET` do ambiente de produção do Vercel. Não criar nem publicar o valor no repositório.
+
 O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às 00:10 UTC (a hora local em Portugal muda com o horário de verão). Requer `CRON_SECRET` configurado no ambiente de produção e processa:
 - campanhas de aniversário e respetivos vouchers;
 - campanhas de marketing agendadas;

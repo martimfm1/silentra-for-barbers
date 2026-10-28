@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Invoke production marketing worker
         env:
-          MARKETING_CRON_URL: ${{ secrets.MARKETING_CRON_URL }}
+          MARKETING_CRON_URL: https://barbers.silentra.me/api/cron/marketing
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           set -euo pipefail
