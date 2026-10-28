@@ -64,6 +64,9 @@ jobs:
       - name: Internationalization contracts
         run: pnpm qa:i18n
 
+      - name: Closed-day localization contracts
+        run: pnpm qa:closed-days
+
       - name: Button accessible-name audit
         run: pnpm qa:buttons
 

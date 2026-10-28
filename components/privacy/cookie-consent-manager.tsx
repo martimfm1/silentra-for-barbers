@@ -39,9 +39,8 @@ const copy = {
     close: 'Fechar preferências de cookies',
     footer: 'Consulta a',
     policy: 'Política de Cookies',
-    launcher: 'Preferências de cookies',
     settingsSaved:
-      'As preferências são aplicadas após recarregar a página. Podes voltar aqui a qualquer momento.',
+      'As preferências são aplicadas após recarregar a página. Podes alterá-las na página da Política de Cookies.',
   },
   en: {
     bannerTitle: 'Your privacy matters',
@@ -67,9 +66,8 @@ const copy = {
     close: 'Close cookie preferences',
     footer: 'Read the',
     policy: 'Cookie Policy',
-    launcher: 'Cookie preferences',
     settingsSaved:
-      'Preferences take effect after the page reloads. You can return here at any time.',
+      'Preferences take effect after the page reloads. You can change them from the Cookie Policy page.',
   },
 } as const;
 
@@ -118,6 +116,22 @@ export function CookieConsentManager() {
       marketing: stored?.marketing ?? false,
     });
     setReady(true);
+  }, []);
+
+  useEffect(() => {
+    const openFromCookiePolicy = () => {
+      const stored = readStoredConsent();
+      setSaved(stored);
+      setDraft({
+        analytics: stored?.analytics ?? false,
+        marketing: stored?.marketing ?? false,
+      });
+      setPreferencesOpen(true);
+    };
+
+    window.addEventListener('silentra:open-cookie-preferences', openFromCookiePolicy);
+    return () =>
+      window.removeEventListener('silentra:open-cookie-preferences', openFromCookiePolicy);
   }, []);
 
   if (!ready) return null;
@@ -186,18 +200,6 @@ export function CookieConsentManager() {
             </div>
           </div>
         </aside>
-      ) : null}
-
-      {saved && !preferencesOpen ? (
-        <button
-          type="button"
-          onClick={openPreferences}
-          aria-label={t.launcher}
-          className="fixed bottom-3 left-3 z-[110] inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 bg-zinc-950/90 px-3 py-2 text-xs font-medium text-zinc-200 shadow-lg shadow-black/25 backdrop-blur-xl transition hover:border-white/25 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:bottom-4 sm:left-4"
-        >
-          <Cookie className="size-4 text-emerald-200" aria-hidden="true" />
-          {t.launcher}
-        </button>
       ) : null}
 
       {preferencesOpen ? (

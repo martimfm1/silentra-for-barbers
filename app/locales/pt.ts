@@ -475,6 +475,9 @@ export const pt = {
     subtitle:
       'Pesquisa, filtra e abre rapidamente a marcação que precisa da tua atenção.',
     loadingError: 'Não foi possível atualizar a agenda. Tenta novamente.',
+    all: 'Todas',
+    pending: 'Por confirmar',
+    confirmed: 'Confirmadas',
     bookingTodayOne: 'marcação hoje',
     bookingTodayMany: 'marcações hoje',
     closeBooking: 'Fechar marcação',
@@ -483,6 +486,7 @@ export const pt = {
     blockTime: 'Bloquear horário',
     upcomingToday: 'Próximas hoje',
     completed: 'Concluídas',
+    cancelled: 'Canceladas',
     searchPlaceholder: 'Pesquisar cliente, serviço, barbeiro ou contacto',
     filterStatus: 'Estado das marcações',
     noMatches: 'Não encontrámos marcações com estes filtros.',

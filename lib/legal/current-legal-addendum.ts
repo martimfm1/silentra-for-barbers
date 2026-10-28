@@ -26,7 +26,7 @@ export const currentTermsAddendum = {
       'Users should review the total, discount, billing interval, and terms shown at checkout before confirming a subscription. If a promotional message conflicts with the final checkout amount, the conditions and values actually presented at checkout and recorded by the payment processor prevail, subject to mandatory legal rights.',
       'Features may include public bookings, customer management, scheduling, professionals, loyalty, email, analytics, automations, and other tools made available under the applicable plan. Limits and availability may vary by plan, configuration, and account state.',
       'Use of non-essential cookies, advertising identifiers, or analytics technologies depends on the user’s prior choice wherever required by law. Refusing them must not prevent access to essential features.',
-      'Preferences are stored for a limited period and can be changed or withdrawn through the cookie-preferences shortcut. Withdrawal does not affect the lawfulness of processing carried out before withdrawal.',
+      'Preferences are stored for a limited period and can be changed or withdrawn using the preference control on the Cookie Policy page. Withdrawal does not affect the lawfulness of processing carried out before withdrawal.',
     ],
   },
 } as const;
@@ -58,7 +58,7 @@ export const currentPrivacyAddendum = {
       'Email and notifications: the platform may process email addresses and technical data needed to send booking confirmations, operational messages, access codes, and other configured communications. Commercial communications must be supported by an appropriate lawful basis and respect applicable preferences.',
       "Cookies and analytics: strictly necessary identifiers may be used for sessions, security, and essential operation. Where optional measurement tools or technologies requiring consent are used, processing should respect the user's configured consent preferences and applicable law.",
       'Security and minimization: access policies aim to apply barbershop-level segregation, least privilege, and server-side validation. These controls are intended to support GDPR principles of data minimization, purpose limitation, integrity, and confidentiality.',
-      'The consent banner lets visitors accept all optional categories, reject optional categories, or configure analytics and marketing separately. Non-essential technologies remain disabled until a valid choice is recorded. The preference is stored in a first-party cookie for a limited period and can be changed through the cookie-preferences shortcut or the Cookie Policy page.',
+      'The consent banner lets visitors accept all optional categories, reject optional categories, or configure analytics and marketing separately. Non-essential technologies remain disabled until a valid choice is recorded. The preference is stored in a first-party cookie for a limited period and can be changed using the preference control on the Cookie Policy page.',
       'Google Tag Manager can execute third-party tags and is therefore loaded only when the required consent categories are enabled. The Whop pixel depends on marketing consent; Vercel Analytics and Speed Insights depend on analytics consent. Tags configured in Google Tag Manager must respect these categories and must not bypass recorded preferences.',
     ],
   },
@@ -90,7 +90,7 @@ export const currentTermsFeatureSections = {
       paragraphs: [
         'A Plataforma utiliza tecnologias estritamente necessárias para autenticação, segurança, idioma e memorização da escolha de cookies. As tecnologias opcionais de estatísticas e marketing só são carregadas conforme as categorias escolhidas no painel de preferências.',
         'A escolha fica registada no cookie «silentra_cookie_consent» durante 180 dias. O Google Tag Manager só é carregado quando as categorias de estatísticas e marketing estão ambas autorizadas; o pixel Whop depende da autorização de marketing e Vercel Analytics/Speed Insights dependem da autorização de estatísticas.',
-        'Podes aceitar, rejeitar as categorias opcionais ou selecionar preferências individualmente e alterar a escolha a qualquer momento através do atalho «Preferências de cookies». A recusa de tecnologias opcionais não impede o acesso às funcionalidades que não dependam delas.',
+        'Podes aceitar, rejeitar as categorias opcionais ou selecionar preferências individualmente. Depois de guardar a escolha, o banner desaparece; podes alterar as preferências através do controlo disponível na página da Política de Cookies. A recusa de tecnologias opcionais não impede o acesso às funcionalidades que não dependam delas.',
       ],
     },
   ],
@@ -118,7 +118,7 @@ export const currentTermsFeatureSections = {
       paragraphs: [
         'The Platform uses strictly necessary technologies for authentication, security, language, and remembering the cookie choice. Optional analytics and marketing technologies are loaded only according to the categories selected in the preference panel.',
         'The choice is stored in the «silentra_cookie_consent» cookie for 180 days. Google Tag Manager loads only when both analytics and marketing are authorized; the Whop pixel depends on marketing consent and Vercel Analytics/Speed Insights depend on analytics consent.',
-        'You may accept, reject optional categories, or choose individual preferences, and change your choice at any time through the «Cookie preferences» shortcut. Rejecting optional technologies does not prevent access to features that do not depend on them.',
+        'You may accept, reject optional categories, or choose individual preferences, and change your choice at any time using the preference controls on the Cookie Policy page. Rejecting optional technologies does not prevent access to features that do not depend on them.',
       ],
     },
   ],
@@ -133,7 +133,7 @@ export const currentPrivacyFeatureSections = {
         'Os cookies e mecanismos estritamente necessários podem suportar autenticação e sessão, segurança, idioma e funcionalidades solicitadas. Não são usados para ativar marketing opcional. A sua duração pode depender da sessão, do mecanismo de autenticação ou da preferência que servem.',
         'Quando autorizadas, as estatísticas podem incluir Vercel Analytics e Speed Insights para medir a utilização e o desempenho da plataforma. Quando autorizas marketing, pode ser carregado o pixel Whop. O Google Tag Manager, por poder executar etiquetas de diferentes finalidades, só é carregado quando autorizas simultaneamente estatísticas e marketing.',
         'As etiquetas de terceiros podem utilizar identificadores ou tecnologias de armazenamento próprias, conforme a configuração ativa do serviço externo. A lista exata e a duração desses identificadores podem variar consoante as etiquetas efetivamente publicadas no contentor Google Tag Manager e as definições dos fornecedores; estas configurações devem ser revistas antes de novas etiquetas serem ativadas.',
-        'Podes alterar ou retirar o consentimento a qualquer momento através do atalho «Preferências de cookies». Ao guardar uma nova escolha, a página é recarregada para aplicar a preferência no servidor e impedir o carregamento subsequente de categorias não autorizadas. Retirar consentimento não afeta a licitude do tratamento anterior à retirada.',
+        'Podes alterar ou retirar o consentimento a qualquer momento através do controlo disponível na página da Política de Cookies. Ao guardar uma nova escolha, a página é recarregada para aplicar a preferência no servidor e impedir o carregamento subsequente de categorias não autorizadas. Retirar consentimento não afeta a licitude do tratamento anterior à retirada.',
       ],
     },
     {
@@ -169,7 +169,7 @@ export const currentPrivacyFeatureSections = {
         'Strictly necessary cookies and mechanisms may support authentication and session management, security, language, and requested features. They are not used to enable optional marketing. Their lifetime may depend on the session, authentication mechanism, or preference they serve.',
         'When authorized, analytics may include Vercel Analytics and Speed Insights to measure platform usage and performance. When marketing is authorized, the Whop pixel may load. Because it can run tags for different purposes, Google Tag Manager is loaded only when you authorize both analytics and marketing.',
         'Third-party tags may use their own identifiers or storage technologies depending on the active configuration of the external service. The exact list and lifetime of those identifiers may vary with the tags actually published in the Google Tag Manager container and vendor settings; those configurations should be reviewed before new tags are activated.',
-        'You may change or withdraw consent at any time through the «Cookie preferences» shortcut. Saving a new choice reloads the page so the preference is applied on the server and unauthorized categories are not loaded subsequently. Withdrawal does not affect the lawfulness of processing before withdrawal.',
+        'You may change or withdraw consent at any time using the preference control on the Cookie Policy page. Saving a new choice reloads the page so the preference is applied on the server and unauthorized categories are not loaded subsequently. Withdrawal does not affect the lawfulness of processing before withdrawal.',
       ],
     },
     {

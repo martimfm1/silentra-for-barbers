@@ -474,6 +474,9 @@ export const en = {
     subtitle:
       'Search, filter and quickly open the booking that needs your attention.',
     loadingError: 'Unable to update the calendar. Please try again.',
+    all: 'All',
+    pending: 'Pending',
+    confirmed: 'Confirmed',
     bookingTodayOne: 'booking today',
     bookingTodayMany: 'bookings today',
     closeBooking: 'Close booking',
@@ -482,6 +485,7 @@ export const en = {
     blockTime: 'Block time',
     upcomingToday: 'Upcoming today',
     completed: 'Completed',
+    cancelled: 'Cancelled',
     searchPlaceholder: 'Search client, service, barber or contact',
     filterStatus: 'Booking status',
     noMatches: 'No bookings match these filters.',
