@@ -98,7 +98,7 @@ export function formatClosedDays(
     if (!dayIndexes.includes(dayIndex)) dayIndexes.push(dayIndex);
   }
 
-  const labels = dayIndexes.map((index) => DAY_LABELS[locale][index]);
+  const labels: string[] = dayIndexes.map((index) => DAY_LABELS[locale][index]);
   labels.push(...unknownTokens);
   return labels.join(', ');
 }
