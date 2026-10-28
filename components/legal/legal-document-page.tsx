@@ -38,6 +38,7 @@ type LegalDocumentPageProps = {
   subtitle: LocalizedText;
   documentByLocale: Record<Locale, LegalDocument>;
   highlights: Highlight[];
+  headerAction?: React.ReactNode;
   supportLabel: LocalizedText;
   supportValue: string;
   backLabel: LocalizedText;
@@ -77,6 +78,7 @@ export function LegalDocumentPage({
   subtitle,
   documentByLocale,
   highlights,
+  headerAction,
   supportLabel,
   supportValue,
   backLabel,
@@ -128,6 +130,7 @@ export function LegalDocumentPage({
               <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-400 sm:text-lg">
                 {subtitle[activeLocale]}
               </p>
+              {headerAction ? <div className="mt-6">{headerAction}</div> : null}
               <div className="mt-8 flex flex-wrap gap-3 text-sm text-zinc-300">
                 <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
                   {copy.updated}: {document.lastUpdated}
