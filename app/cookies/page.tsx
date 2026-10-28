@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cookie, Fingerprint, ShieldCheck } from 'lucide-react';
 import { LegalDocumentPage } from '@/components/legal/legal-document-page';
 import { cookiePolicy } from '@/lib/legal/cookie-policy';
+import { CookiePreferencesLink } from '@/components/privacy/cookie-preferences-link';
 
 const CANONICAL_URL = 'https://barbers.silentra.me/cookies';
 
@@ -32,6 +33,7 @@ export default function CookiePolicyPage() {
         en: 'We explain which technologies we use, when they are activated, and how you can choose or withdraw consent.',
       }}
       documentByLocale={cookiePolicy}
+      headerAction={<CookiePreferencesLink />}
       highlights={[
         {
           label: { pt: 'Necessários', en: 'Necessary' },
@@ -52,8 +54,8 @@ export default function CookiePolicyPage() {
         {
           label: { pt: 'Revisão', en: 'Review' },
           value: {
-            pt: 'Podes alterar as preferências em qualquer momento no atalho fixo.',
-            en: 'You can change your preferences at any time from the persistent shortcut.',
+            pt: 'Podes alterar as preferências nesta página, sem manter um banner fixo no ecrã.',
+            en: 'You can change preferences from this page without a persistent on-screen banner.',
           },
           icon: <Fingerprint className="size-4" />,
         },
