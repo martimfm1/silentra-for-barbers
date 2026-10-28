@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Cookie, Settings2, ShieldCheck, X } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import {
@@ -41,7 +42,7 @@ const copy = {
     policy: 'Política de Cookies',
     launcher: 'Preferências de cookies',
     settingsSaved:
-      'As preferências são aplicadas após recarregar a página. Podes voltar aqui a qualquer momento.',
+      'As preferências são aplicadas após recarregar a página. Podes alterá-las na página da Política de Cookies.',
   },
   en: {
     bannerTitle: 'Your privacy matters',
@@ -69,7 +70,7 @@ const copy = {
     policy: 'Cookie Policy',
     launcher: 'Cookie preferences',
     settingsSaved:
-      'Preferences take effect after the page reloads. You can return here at any time.',
+      'Preferences take effect after the page reloads. You can change them from the Cookie Policy page.',
   },
 } as const;
 
@@ -100,6 +101,7 @@ function persistConsent(choices: OptionalChoices) {
 }
 
 export function CookieConsentManager() {
+  const pathname = usePathname();
   const { locale } = useLanguage();
   const t = copy[locale === 'en' ? 'en' : 'pt'];
   const [ready, setReady] = useState(false);
@@ -188,7 +190,7 @@ export function CookieConsentManager() {
         </aside>
       ) : null}
 
-      {saved && !preferencesOpen ? (
+      {saved && !preferencesOpen && pathname === '/cookies' ? (
         <button
           type="button"
           onClick={openPreferences}
