@@ -17,26 +17,27 @@ import {
 } from '@/components/ui/card';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 
 const sections = [
   {
     href: '/dashboard/mensagens',
-    title: 'Mensagens',
-    description: 'Envia e acompanha mensagens para os teus clientes.',
+    titleKey: 'messagesTitle',
+    descriptionKey: 'messagesDescription',
     icon: MessageCircle,
     feature: 'messaging' as const,
   },
   {
     href: '/dashboard/marketing',
-    title: 'Campanhas',
-    description: 'Cria campanhas e mantém os clientes envolvidos.',
+    titleKey: 'campaignsTitle',
+    descriptionKey: 'campaignsDescription',
     icon: Megaphone,
     feature: 'marketing_campaigns' as const,
   },
   {
     href: '/dashboard/mensagens/birthdays',
-    title: 'Aniversários',
-    description: 'Automatiza mensagens de aniversário para os teus clientes.',
+    titleKey: 'birthdaysTitle',
+    descriptionKey: 'birthdaysDescription',
     icon: Cake,
     feature: 'messaging' as const,
   },
@@ -44,6 +45,7 @@ const sections = [
 
 export default function CommunicationPage() {
   const { hasFeature, loading } = useFeatureAccess();
+  const { t } = useLanguage();
 
   if (loading) return <main className="min-h-screen bg-background" />;
 
@@ -52,14 +54,13 @@ export default function CommunicationPage() {
       <div className="mx-auto max-w-6xl space-y-8">
         <header className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Comunicação
+            {t('communicationPage.eyebrow')}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Fala com os teus clientes no momento certo.
+            {t('communicationPage.title')}
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Mensagens, campanhas e aniversários reunidos numa única área para
-            tornares a relação com os clientes mais simples e eficaz.
+            {t('communicationPage.description')}
           </p>
         </header>
 
@@ -76,18 +77,18 @@ export default function CommunicationPage() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </div>
-                  <CardTitle className="mt-2">{section.title}</CardTitle>
-                  <CardDescription>{section.description}</CardDescription>
+                  <CardTitle className="mt-2">{t(`communicationPage.${section.titleKey}`)}</CardTitle>
+                  <CardDescription>{t(`communicationPage.${section.descriptionKey}`)}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {locked ? (
                     <Button asChild variant="outline" className="w-full">
-                      <Link href="/dashboard/billing">Ver planos</Link>
+                      <Link href="/dashboard/billing">{t('communicationPage.viewPlans')}</Link>
                     </Button>
                   ) : (
                     <Button asChild className="w-full">
                       <Link href={section.href}>
-                        Abrir {section.title.toLowerCase()}{' '}
+                        {t('communicationPage.open', { section: t(`communicationPage.${section.titleKey}`).toLowerCase() })}{' '}
                         <ArrowUpRight className="ml-2 size-4" />
                       </Link>
                     </Button>
@@ -103,15 +104,14 @@ export default function CommunicationPage() {
             <div className="flex items-start gap-3">
               <Bell className="mt-0.5 size-5 shrink-0 text-primary" />
               <div>
-                <p className="font-medium">Tudo centralizado</p>
+                <p className="font-medium">{t('communicationPage.centralTitle')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Usa esta área como ponto de partida para qualquer comunicação
-                  com clientes.
+                  {t('communicationPage.centralDescription')}
                 </p>
               </div>
             </div>
             <Button asChild variant="outline">
-              <Link href="/dashboard">Voltar ao resumo</Link>
+              <Link href="/dashboard">{t('communicationPage.backToOverview')}</Link>
             </Button>
           </CardContent>
         </Card>
