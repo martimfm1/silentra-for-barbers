@@ -326,6 +326,7 @@ export function PricingCard({
 
         <div className="mt-8 border-t border-white/8 pt-5">
           <button
+            aria-label="Selecionar plano"
             type="button"
             onClick={handleAction}
             disabled={
