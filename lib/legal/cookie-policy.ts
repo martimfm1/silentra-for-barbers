@@ -115,7 +115,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '6. Managing or withdrawing consent',
         paragraphs: [
           'On your first visit, you can accept all optional categories, reject them, or open settings and choose analytics and marketing separately. No optional category is pre-selected.',
-          'After you save your choice, the «Cookie preferences» shortcut remains available in the bottom-left corner. You can change your choice at any time; the page reloads to apply the new preference and prevent subsequent loading of unauthorized categories.',
+          'After you save your choice, the banner disappears. You can change your choice from the «Cookie preferences» shortcut on this Cookie Policy page; the page reloads to apply the new preference and prevent subsequent loading of unauthorized categories.',
           'Withdrawal does not affect the lawfulness of processing before withdrawal. Immediate removal of third-party cookies already placed may depend on the domain and provider mechanisms; blocking loading prevents activation on future visits when a category is no longer authorized.',
         ],
       },
