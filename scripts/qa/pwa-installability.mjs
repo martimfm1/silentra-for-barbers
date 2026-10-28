@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const root = process.cwd();
 const read = (path) => readFile(join(root, path), 'utf8');
 
-const [manifestSource, metadata, layout, registration, worker, topBar, siteNavbar, installPage, packageJson] =
+const [manifestSource, metadata, layout, registration, worker, topBar, siteNavbar, installPage, packageJson, installButton, dialog] =
   await Promise.all([
     read('public/site.webmanifest'),
     read('lib/site-metadata.ts'),
@@ -16,6 +16,8 @@ const [manifestSource, metadata, layout, registration, worker, topBar, siteNavba
     read('components/site-navbar.tsx'),
     read('app/instalar/page.tsx'),
     read('package.json'),
+    read('components/pwa-install-button.tsx'),
+    read('components/ui/dialog.tsx'),
   ]);
 
 const manifest = JSON.parse(manifestSource);
@@ -41,8 +43,13 @@ assert.match(siteNavbar, /href: '\/instalar'/);
 assert.match(installPage, /<PwaInstallButton locale=\{locale\} \/>/);
 assert.match(installPage, /Adicionar ao ecrã principal/);
 assert.match(installPage, /href="\/dashboard"/);
+assert.ok(installButton.includes('role="tablist"'));
+assert.ok(installButton.includes('isAndroid = /Android/i'));
+assert.ok(installButton.includes('Add to Dock'));
+assert.ok(dialog.includes('z-[10000]'));
+assert.ok(dialog.includes('z-[10001]'));
 assert.match(worker, /url\.pathname\.startsWith\('\/_next\/static\/'\)/);
 assert.match(worker, /if \(!isStaticAsset && !isPwaAsset\) return/);
 assert.match(packageJson, /"qa:pwa": "node scripts\/qa\/pwa-installability\.mjs"/);
 
-console.log('[PWA_INSTALLABILITY_QA] manifest, iOS metadata, install entry point and safe cache allowlist passed');
+console.log('[PWA_INSTALLABILITY_QA] manifest, install guides, modal stacking and safe cache allowlist passed');
