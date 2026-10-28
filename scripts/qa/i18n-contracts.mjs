@@ -197,6 +197,7 @@ for (const status of [
 }
 
 const localeAwareSources = {
+  'app/dashboard/settings/public-profile/page.tsx': ["useLanguage()", 'PUBLIC_PROFILE_COPY', 'AMENITIES_EN', 'copy.saveSuccess'],
   'app/dashboard/mensagens/page.tsx': ["useLanguage()", 'Appointment reminder', 'copy.loadClientsFailed', 'copy.emailSent'],
   'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
   'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
