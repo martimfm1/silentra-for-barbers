@@ -169,11 +169,9 @@ export default function POSStorePage() {
     setLoading(true);
     try {
       await Promise.all([loadProducts(), loadOrders()]);
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Não foi possível carregar a loja.', 'Could not load the store.'),
+        localizedText(activeLocale, 'Não foi possível carregar a loja.', 'Could not load the store.'),
       );
     } finally {
       setLoading(false);
@@ -257,11 +255,9 @@ export default function POSStorePage() {
       toast.success(editing ? localizedText(activeLocale, 'Produto atualizado.', 'Product updated.') : localizedText(activeLocale, 'Produto criado.', 'Product created.'));
       setProductOpen(false);
       await loadProducts();
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Não foi possível guardar o produto.', 'Could not save the product.'),
+        localizedText(activeLocale, 'Não foi possível guardar o produto.', 'Could not save the product.'),
       );
     } finally {
       setSaving(false);
@@ -286,11 +282,9 @@ export default function POSStorePage() {
         throw new Error(localizedText(activeLocale, 'Não foi possível arquivar o produto.', 'Could not archive the product.'));
       toast.success(localizedText(activeLocale, 'Produto arquivado.', 'Product archived.'));
       await loadProducts();
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Não foi possível arquivar o produto.', 'Could not archive the product.'),
+        localizedText(activeLocale, 'Não foi possível arquivar o produto.', 'Could not archive the product.'),
       );
     }
   }
@@ -312,11 +306,9 @@ export default function POSStorePage() {
         );
       toast.success(localizedText(activeLocale, `Encomenda ${statusLabel(next, activeLocale).toLowerCase()}.`, `Order ${statusLabel(next, activeLocale).toLowerCase()}.`));
       await loadOrders();
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Não foi possível atualizar a encomenda.', 'Could not update the order.'),
+        localizedText(activeLocale, 'Não foi possível atualizar a encomenda.', 'Could not update the order.'),
       );
     } finally {
       setOrderBusy(null);
@@ -348,11 +340,9 @@ export default function POSStorePage() {
         throw new Error(localizedText(activeLocale, 'Não foi possível cancelar a encomenda.', 'Could not cancel the order.'));
       toast.success(localizedText(activeLocale, 'Encomenda cancelada.', 'Order cancelled.'));
       await loadOrders();
-    } catch (error) {
+    } catch {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : localizedText(activeLocale, 'Não foi possível cancelar a encomenda.', 'Could not cancel the order.'),
+        localizedText(activeLocale, 'Não foi possível cancelar a encomenda.', 'Could not cancel the order.'),
       );
     } finally {
       setOrderBusy(null);
