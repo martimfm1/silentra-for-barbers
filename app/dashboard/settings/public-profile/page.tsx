@@ -172,7 +172,7 @@ const AMENITIES_EN: Record<
 
 const PUBLIC_PROFILE_COPY = {
   pt: {
-    loadError: copy.loadError,
+    loadError: 'Não foi possível carregar o perfil público.',
     saveError: 'Não foi possível guardar as alterações.',
     saveSuccess: 'Presença online atualizada.',
     settings: 'Definições',
