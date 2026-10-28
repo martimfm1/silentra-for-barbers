@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -10,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
 import { Appointment } from '@/types';
 import { Check, Trash2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AppointmentsTableProps {
   appointments: Appointment[];
@@ -18,14 +21,14 @@ interface AppointmentsTableProps {
   isPending: boolean;
 }
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('pt-PT', {
+const formatDate = (value: string, locale: 'pt' | 'en') =>
+  new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));
 
-const customerName = (appointment: Appointment) =>
-  appointment.users?.name_complete || appointment.manual_name || 'Cliente';
+const customerName = (appointment: Appointment, fallback: string) =>
+  appointment.users?.name_complete || appointment.manual_name || fallback;
 
 export function AppointmentsTable({
   appointments,
@@ -33,13 +36,14 @@ export function AppointmentsTable({
   onDelete,
   isPending,
 }: AppointmentsTableProps) {
+  const { t, locale } = useLanguage();
   if (appointments.length === 0) {
     return (
       <div
         className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center text-sm text-zinc-500 sm:p-10"
         role="status"
       >
-        Não existem marcações para apresentar.
+        {t('appointmentsTable.empty')}
       </div>
     );
   }
@@ -50,12 +54,12 @@ export function AppointmentsTable({
         <Table>
           <TableHeader className="border-white/5 bg-zinc-900">
             <TableRow>
-              <TableHead className="text-zinc-400">Cliente</TableHead>
-              <TableHead className="text-zinc-400">Serviço</TableHead>
-              <TableHead className="text-zinc-400">Barbeiro</TableHead>
-              <TableHead className="text-zinc-400">Data e hora</TableHead>
-              <TableHead className="text-zinc-400">Estado</TableHead>
-              <TableHead className="text-right text-zinc-400">Ações</TableHead>
+              <TableHead className="text-zinc-400">{t('appointmentsTable.customer')}</TableHead>
+              <TableHead className="text-zinc-400">{t('appointmentsTable.service')}</TableHead>
+              <TableHead className="text-zinc-400">{t('appointmentsTable.barber')}</TableHead>
+              <TableHead className="text-zinc-400">{t('appointmentsTable.dateTime')}</TableHead>
+              <TableHead className="text-zinc-400">{t('appointmentsTable.status')}</TableHead>
+              <TableHead className="text-right text-zinc-400">{t('appointmentsTable.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,16 +69,16 @@ export function AppointmentsTable({
                 className="border-white/5 hover:bg-white/[0.02]"
               >
                 <TableCell className="font-medium text-white">
-                  {customerName(apt)}
+                  {customerName(apt, t('appointmentsTable.customer'))}
                 </TableCell>
                 <TableCell className="text-zinc-300">
-                  {apt.services?.name || 'Serviço'}
+                  {apt.services?.name || t('appointmentsTable.service')}
                 </TableCell>
                 <TableCell className="text-zinc-300">
-                  {apt.professionals?.name || 'Qualquer barbeiro'}
+                  {apt.professionals?.name || t('appointmentsTable.anyBarber')}
                 </TableCell>
                 <TableCell className="text-zinc-300">
-                  {formatDate(apt.date_hour)}
+                  {formatDate(apt.date_hour, locale)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={apt.status} />
@@ -90,7 +94,7 @@ export function AppointmentsTable({
                         disabled={isPending}
                         onClick={() => onFinalize(apt.id)}
                         aria-label={`Concluir marcação de ${customerName(apt)}`}
-                        title="Concluir marcação"
+                        title={t('appointmentsTable.completeBooking')}
                       >
                         <Check className="size-4" aria-hidden="true" />
                       </Button>
@@ -103,7 +107,7 @@ export function AppointmentsTable({
                       disabled={isPending}
                       onClick={() => onDelete(apt.id)}
                       aria-label={`Apagar marcação de ${customerName(apt)}`}
-                      title="Apagar marcação"
+                      title={t('appointmentsTable.deleteBooking')}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
@@ -135,13 +139,13 @@ export function AppointmentsTable({
 
             <dl className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <dt className="text-zinc-600">Data e hora</dt>
+                <dt className="text-zinc-600">{t('appointmentsTable.dateTime')}</dt>
                 <dd className="mt-1 text-zinc-300">
                   {formatDate(apt.date_hour)}
                 </dd>
               </div>
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <dt className="text-zinc-600">Barbeiro</dt>
+                <dt className="text-zinc-600">{t('appointmentsTable.barber')}</dt>
                 <dd className="mt-1 truncate text-zinc-300">
                   {apt.professionals?.name || 'Qualquer barbeiro'}
                 </dd>
@@ -158,7 +162,7 @@ export function AppointmentsTable({
                   className="min-h-10 flex-1 border-emerald-500/15 bg-emerald-500/[0.04] text-xs text-emerald-300 hover:bg-emerald-500/10"
                 >
                   <Check className="mr-1.5 size-4" aria-hidden="true" />
-                  Concluir
+                  {t('appointmentsTable.complete')}
                 </Button>
               )}
               <Button
@@ -169,7 +173,7 @@ export function AppointmentsTable({
                 className="min-h-10 flex-1 border-rose-500/15 bg-rose-500/[0.04] text-xs text-rose-300 hover:bg-rose-500/10"
               >
                 <Trash2 className="mr-1.5 size-4" aria-hidden="true" />
-                Apagar
+                {t('appointmentsTable.delete')}
               </Button>
             </div>
           </article>
