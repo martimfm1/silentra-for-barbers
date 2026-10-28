@@ -780,6 +780,7 @@ export default function PlatformAdminConsole() {
                 }
               />
               <button
+            aria-label="Ver pedidos de pagamento"
                 type="button"
                 onClick={() => {
                   setManualRequestFilter('ALL');
