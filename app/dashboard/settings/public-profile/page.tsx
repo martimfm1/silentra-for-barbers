@@ -277,12 +277,8 @@ export default function PublicProfileSettingsPage() {
       setSeoDescription(next.seo_description || '');
       setOgImageUrl(next.og_image_url || '');
       setAmenities(normalizeBarbershopAmenities(next.amenities));
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível carregar o perfil público.',
-      );
+    } catch {
+      toast.error(copy.loadError);
     } finally {
       setLoading(false);
     }
