@@ -172,6 +172,7 @@ export function ProfessionalsListCard({
                 )}
               </div>
               <Button
+            aria-label={loading ? "A guardar profissional" : "Guardar profissional"}
                 type="submit"
                 disabled={loading}
                 className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
