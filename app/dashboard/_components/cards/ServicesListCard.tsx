@@ -245,6 +245,7 @@ function AddServiceForm({
         </div>
 
         <Button
+            aria-label={loading ? "A guardar serviço" : "Guardar serviço"}
           type="submit"
           disabled={loading}
           className="min-h-11 bg-amber-600 text-white hover:bg-amber-500"
