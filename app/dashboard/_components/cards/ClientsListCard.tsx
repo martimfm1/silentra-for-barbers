@@ -264,6 +264,7 @@ function AddClientForm({
         </div>
 
         <Button
+            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
           type="submit"
           disabled={loading}
           className="min-h-11 rounded-lg bg-blue-600 text-white hover:bg-blue-500"
