@@ -382,6 +382,7 @@ export default function SupportPage() {
                   {pt ? 'O ticket fica pendente até ser aceite. Ainda não será possível enviar mensagens no chat.' : 'The ticket remains pending until accepted. Chat messages will not be available yet.'}
                 </p>
                 <button
+            aria-label={creating ? (pt ? "A submeter ticket" : "Submitting ticket") : (pt ? "Submeter ticket" : "Submit ticket")}
                   type="submit"
                   disabled={creating || !canCreateTicket || subjectDraft.trim().length < 3 || descriptionDraft.trim().length < 10}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
