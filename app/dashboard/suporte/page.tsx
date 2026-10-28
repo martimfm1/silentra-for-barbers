@@ -531,6 +531,7 @@ export default function SupportPage() {
                             {pt ? 'Recebes um email quando a equipa enviar uma nova mensagem.' : 'You will receive an email when the team sends a new message.'}
                           </p>
                           <button
+            aria-label={sending ? (pt ? "A enviar mensagem" : "Sending message") : (pt ? "Enviar mensagem" : "Send message")}
                             type="submit"
                             disabled={sending || !draft.trim() || draft.trim().length > 4000}
                             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
