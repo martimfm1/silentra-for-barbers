@@ -26,6 +26,7 @@ import {
   CalendarCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -146,7 +147,107 @@ const AMENITIES: AmenityOption[] = [
   },
 ];
 
+const AMENITIES_EN: Record<
+  AmenityOption['key'],
+  Pick<AmenityOption, 'label' | 'description'>
+> = {
+  wifi: { label: 'Wi-Fi', description: 'Internet access for customers.' },
+  wheelchair_accessible: {
+    label: 'Wheelchair accessible',
+    description: 'Space adapted for reduced mobility.',
+  },
+  accessible_entrance: { label: 'Accessible entrance', description: 'Step-free or adapted entrance.' },
+  accessible_toilet: { label: 'Accessible restroom', description: 'Accessible restroom facilities.' },
+  kids_friendly: { label: 'Family friendly', description: 'Welcomes children and families.' },
+  waiting_area: { label: 'Waiting area', description: 'A comfortable place to wait.' },
+  restroom: { label: 'Restroom', description: 'Restroom facilities available on site.' },
+  air_conditioning: { label: 'Air conditioning', description: 'Air conditioning is available.' },
+  card_payments: { label: 'Card payments', description: 'Accepts card and contactless payments.' },
+  walk_ins: { label: 'Walk-ins welcome', description: 'Accepts customers without an appointment.' },
+  coffee: { label: 'Coffee', description: 'Coffee is available for customers.' },
+  water: { label: 'Water', description: 'Water is available for customers.' },
+  pet_friendly: { label: 'Pet friendly', description: 'Pets are welcome.' },
+  appointment_required: { label: 'Appointment required', description: 'An appointment is required before visiting.' },
+};
+
+const PUBLIC_PROFILE_COPY = {
+  pt: {
+    loadError: 'Não foi possível carregar o perfil público.',
+    saveError: 'Não foi possível guardar as alterações.',
+    saveSuccess: 'Presença online atualizada.',
+    settings: 'Definições',
+    onlinePresence: 'Presença online',
+    pageTitle: 'Página pública da barbearia',
+    pageDescription: 'Define o que os clientes precisam de saber antes de visitar ou reservar.',
+    plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
+    establishmentInfo: 'Informações do estabelecimento',
+    amenitiesDescription: 'Seleciona as opções verdadeiras para a tua barbearia. Só as opções selecionadas aparecem publicamente.',
+    selectedCount: (count: number) => count === 1 ? '1 opção selecionada' : `${count} opções selecionadas`,
+    parking: 'Estacionamento',
+    parkingHint: 'Indica se existe estacionamento e se é gratuito ou pago.',
+    parkingAvailability: 'Disponibilidade de estacionamento',
+    noParking: 'Sem estacionamento',
+    freeParking: 'Estacionamento gratuito',
+    paidParking: 'Estacionamento pago',
+    publicUrl: 'URL público',
+    publicSlug: 'Slug público',
+    includedEnterprise: 'Incluído no Enterprise',
+    exclusiveEnterprise: 'Exclusivo do Enterprise',
+    advancedSeo: 'SEO avançado',
+    seoTitle: 'Título SEO',
+    seoDescription: 'Descrição SEO',
+    advancedSeoEnterprise: 'O SEO avançado está disponível no Enterprise.',
+    ogImageUrl: 'URL da imagem OG',
+    ogImageEnterprise: 'A imagem OG personalizada está disponível no Enterprise.',
+    ogRecommendation: 'Recomendado: 1200×630.',
+    viewPage: 'Ver página pública',
+    savingProfile: 'A guardar perfil público',
+    saving: 'A guardar…',
+    saveChanges: 'Guardar alterações',
+  },
+  en: {
+    loadError: 'Could not load the public profile.',
+    saveError: 'Could not save your changes.',
+    saveSuccess: 'Online presence updated.',
+    settings: 'Settings',
+    onlinePresence: 'Online presence',
+    pageTitle: 'Public barbershop page',
+    pageDescription: 'Set the information customers should know before visiting or booking.',
+    plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
+    establishmentInfo: 'Business information',
+    amenitiesDescription: 'Select the options that apply to your barbershop. Only selected options appear publicly.',
+    selectedCount: (count: number) => count === 1 ? '1 option selected' : `${count} options selected`,
+    parking: 'Parking',
+    parkingHint: 'Tell customers whether parking is available and if it is free or paid.',
+    parkingAvailability: 'Parking availability',
+    noParking: 'No parking',
+    freeParking: 'Free parking',
+    paidParking: 'Paid parking',
+    publicUrl: 'Public URL',
+    publicSlug: 'Public slug',
+    includedEnterprise: 'Included in Enterprise',
+    exclusiveEnterprise: 'Enterprise only',
+    advancedSeo: 'Advanced SEO',
+    seoTitle: 'SEO title',
+    seoDescription: 'SEO description',
+    advancedSeoEnterprise: 'Advanced SEO is available on the Enterprise plan.',
+    ogImageUrl: 'OG image URL',
+    ogImageEnterprise: 'Custom OG images are available on the Enterprise plan.',
+    ogRecommendation: 'Recommended: 1200×630.',
+    viewPage: 'View public page',
+    savingProfile: 'Saving public profile',
+    saving: 'Saving…',
+    saveChanges: 'Save changes',
+  },
+} as const;
+
 export default function PublicProfileSettingsPage() {
+  const { locale } = useLanguage();
+  const english = locale === 'en';
+  const copy = PUBLIC_PROFILE_COPY[english ? 'en' : 'pt'];
+  const displayAmenities = english
+    ? AMENITIES.map((option) => ({ ...option, ...AMENITIES_EN[option.key] }))
+    : AMENITIES;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [slug, setSlug] = useState('');
   const [seoTitle, setSeoTitle] = useState('');
@@ -167,7 +268,7 @@ export default function PublicProfileSettingsPage() {
       const body = await response.json().catch(() => ({}));
       if (!response.ok || !body.data)
         throw new Error(
-          body.error || 'Não foi possível carregar o perfil público.',
+          copy.loadError,
         );
       const next = body.data as Profile;
       setProfile(next);
@@ -176,12 +277,8 @@ export default function PublicProfileSettingsPage() {
       setSeoDescription(next.seo_description || '');
       setOgImageUrl(next.og_image_url || '');
       setAmenities(normalizeBarbershopAmenities(next.amenities));
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível carregar o perfil público.',
-      );
+    } catch {
+      toast.error(copy.loadError);
     } finally {
       setLoading(false);
     }
@@ -189,7 +286,7 @@ export default function PublicProfileSettingsPage() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [locale]);
 
   async function save() {
     if (!profile) return;
@@ -208,14 +305,12 @@ export default function PublicProfileSettingsPage() {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(body.error || 'Não foi possível guardar.');
+        throw new Error(copy.saveError);
       setAmenities(normalizeBarbershopAmenities(body.data?.amenities));
-      toast.success('Presença online atualizada.');
+      toast.success(copy.saveSuccess);
       await load();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Não foi possível guardar.',
-      );
+    } catch {
+      toast.error(copy.saveError);
     } finally {
       setSaving(false);
     }
@@ -253,21 +348,20 @@ export default function PublicProfileSettingsPage() {
               href="/dashboard/settings"
               className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-zinc-500 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              <ArrowLeft className="size-4" aria-hidden="true" /> Definições
+              <ArrowLeft className="size-4" aria-hidden="true" /> {copy.settings}
             </Link>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              Presença online
+              {copy.onlinePresence}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Página pública da barbearia
+              {copy.pageTitle}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">
-              Define o que os clientes precisam de saber antes de visitar ou
-              reservar.
+              {copy.pageDescription}
             </p>
           </div>
           <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
-            {profile.plan}
+            {copy.plan[profile.plan]}
           </span>
         </header>
 
@@ -283,16 +377,15 @@ export default function PublicProfileSettingsPage() {
                   aria-hidden="true"
                 />
                 <h2 id="amenities-title" className="font-semibold">
-                  Informações do estabelecimento
+                  {copy.establishmentInfo}
                 </h2>
               </div>
               <p className="mt-2 text-sm text-zinc-500">
-                Clica nas opções que são verdadeiras para a tua barbearia. Só as
-                selecionadas aparecem publicamente.
+                {copy.amenitiesDescription}
               </p>
             </div>
             <span className="text-xs text-zinc-600" aria-live="polite">
-              {selectedCount} selecionada(s)
+              {copy.selectedCount(selectedCount)}
             </span>
           </div>
 
@@ -304,13 +397,12 @@ export default function PublicProfileSettingsPage() {
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">Estacionamento</p>
+                  <p className="text-sm font-medium">{copy.parking}</p>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Indica ao cliente se existe estacionamento e se é gratuito
-                    ou pago.
+                    {copy.parkingHint}
                   </p>
                   <select
-                    aria-label="Disponibilidade de estacionamento"
+                    aria-label={copy.parkingAvailability}
                     value={amenities.parking}
                     onChange={(e) =>
                       setAmenities((current) => ({
@@ -321,14 +413,14 @@ export default function PublicProfileSettingsPage() {
                     }
                     className="mt-3 min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-100"
                   >
-                    <option value="none">Não tem estacionamento</option>
-                    <option value="free">Estacionamento gratuito</option>
-                    <option value="paid">Estacionamento pago</option>
+                    <option value="none">{copy.noParking}</option>
+                    <option value="free">{copy.freeParking}</option>
+                    <option value="paid">{copy.paidParking}</option>
                   </select>
                 </div>
               </div>
             </div>
-            {AMENITIES.map(({ key, label, description, Icon }) => {
+            {displayAmenities.map(({ key, label, description, Icon }) => {
               const checked = amenities[key];
               return (
                 <button
@@ -370,7 +462,7 @@ export default function PublicProfileSettingsPage() {
           <div className="flex items-center gap-3">
             <Globe2 className="size-5 text-emerald-400" aria-hidden="true" />
             <h2 id="url-title" className="font-semibold">
-              URL público
+              {copy.publicUrl}
             </h2>
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -379,7 +471,7 @@ export default function PublicProfileSettingsPage() {
                 barbers.silentra.me/barbershops/
               </span>
               <Input
-                aria-label="Slug público"
+                aria-label={copy.publicSlug}
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase())}
                 disabled={!profile.canCustomizeSlug}
@@ -387,10 +479,10 @@ export default function PublicProfileSettingsPage() {
               />
             </div>
             {profile.canCustomizeSlug ? (
-              <span className="text-xs text-emerald-300">Incluído no Enterprise</span>
+              <span className="text-xs text-emerald-300">{copy.includedEnterprise}</span>
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-zinc-600">
-                <Lock className="size-3" aria-hidden="true" /> Exclusivo do Enterprise
+                <Lock className="size-3" aria-hidden="true" /> {copy.exclusiveEnterprise}
               </span>
             )}
           </div>
@@ -403,7 +495,7 @@ export default function PublicProfileSettingsPage() {
           <div className="flex items-center gap-3">
             <Sparkles className="size-5 text-amber-300" aria-hidden="true" />
             <h2 id="seo-title" className="font-semibold">
-              SEO avançado
+              {copy.advancedSeo}
             </h2>
           </div>
           {profile.canCustomizeEnterprise ? (
@@ -413,7 +505,7 @@ export default function PublicProfileSettingsPage() {
                   htmlFor="seo-title-input"
                   className="text-sm font-medium"
                 >
-                  Título SEO
+                  {copy.seoTitle}
                 </label>
                 <Input
                   id="seo-title-input"
@@ -428,7 +520,7 @@ export default function PublicProfileSettingsPage() {
                   htmlFor="seo-description-input"
                   className="text-sm font-medium"
                 >
-                  Descrição SEO
+                  {copy.seoDescription}
                 </label>
                 <Textarea
                   id="seo-description-input"
@@ -441,8 +533,7 @@ export default function PublicProfileSettingsPage() {
             </div>
           ) : (
             <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
-              <Lock className="size-4" aria-hidden="true" /> SEO avançado está
-              disponível no Enterprise.
+              <Lock className="size-4" aria-hidden="true" /> {copy.advancedSeoEnterprise}
             </div>
           )}
         </section>
@@ -460,7 +551,7 @@ export default function PublicProfileSettingsPage() {
           {profile.canCustomizeEnterprise ? (
             <div className="mt-5 grid gap-2">
               <label htmlFor="og-url" className="text-sm font-medium">
-                URL da imagem OG
+                {copy.ogImageUrl}
               </label>
               <Input
                 id="og-url"
@@ -469,12 +560,11 @@ export default function PublicProfileSettingsPage() {
                 className={inputClass}
                 placeholder="https://.../og-image.webp"
               />
-              <p className="text-xs text-zinc-600">Recomendado: 1200×630.</p>
+              <p className="text-xs text-zinc-600">{copy.ogRecommendation}</p>
             </div>
           ) : (
             <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
-              <Lock className="size-4" aria-hidden="true" /> Imagem OG
-              personalizada está disponível no Enterprise.
+              <Lock className="size-4" aria-hidden="true" /> {copy.ogImageEnterprise}
             </div>
           )}
         </section>
@@ -486,21 +576,20 @@ export default function PublicProfileSettingsPage() {
             rel="noreferrer"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-medium hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
-            <ExternalLink className="size-4" aria-hidden="true" /> Ver página
-            pública
+            <ExternalLink className="size-4" aria-hidden="true" /> {copy.viewPage}
           </Link>
           <Button
-            aria-label={saving ? "A guardar perfil público" : "Guardar alterações"}
+            aria-label={saving ? copy.savingProfile : copy.saveChanges}
             onClick={() => void save()}
             disabled={saving}
             className="min-h-11 rounded-xl bg-zinc-100 px-5 text-zinc-950 hover:bg-white"
           >
             {saving ? (
-              'A guardar…'
+              copy.saving
             ) : (
               <>
                 <Save className="mr-2 size-4" aria-hidden="true" />
-                Guardar alterações
+                {copy.saveChanges}
               </>
             )}
           </Button>
