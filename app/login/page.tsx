@@ -292,6 +292,7 @@ export default function LoginPage() {
                         </div>
 
                         <Button
+            aria-label={isSubmitting ? "A iniciar sessão" : "Iniciar sessão"}
                           type="submit"
                           disabled={isSubmitting}
                           className="min-h-11 w-full rounded-full font-semibold"
