@@ -258,7 +258,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-barber"
                 >
-                  Barbeiro
+                  {t('bookingForm.barber')}
                 </label>
                 <Select
                   value={selectedProfessionalId}
@@ -268,7 +268,7 @@ export function BookingForm({
                     id="booking-barber"
                     className="min-h-11 cursor-pointer border-white/10 bg-zinc-900 text-white"
                   >
-                    <SelectValue placeholder="Escolher barbeiro" />
+                    <SelectValue placeholder={t('bookingForm.chooseProfessional')} />
                   </SelectTrigger>
                   <SelectContent className="cursor-pointer border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
@@ -297,14 +297,14 @@ export function BookingForm({
                 id="booking-time-section"
                 className="text-sm font-semibold text-zinc-200"
               >
-                Data e hora
+                {t('bookingForm.dateTime')}
               </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <label className="text-xs font-medium text-zinc-400">
-                  Data
+                  {t('bookingForm.date')}
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -321,8 +321,8 @@ export function BookingForm({
                         aria-hidden="true"
                       />
                       {selectedDate
-                        ? format(new Date(selectedDate + 'T00:00:00'), 'PPP')
-                        : 'Escolher data'}
+                        ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { dateStyle: 'long' }).format(new Date(selectedDate + 'T00:00:00'))
+                        : t('bookingForm.chooseDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto cursor-pointer border-zinc-800 bg-zinc-900 p-0">
@@ -346,7 +346,7 @@ export function BookingForm({
                   className="text-xs font-medium text-zinc-400"
                   htmlFor="booking-time"
                 >
-                  Hora
+                  {t('bookingForm.time')}
                 </label>
                 <input
                   id="booking-time"
@@ -362,8 +362,7 @@ export function BookingForm({
 
           <div className="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-zinc-500">
-              Os campos obrigatórios estão reduzidos ao essencial para criares a
-              marcação rapidamente.
+              {t('bookingForm.help')}
             </p>
             <Button
               type="submit"
