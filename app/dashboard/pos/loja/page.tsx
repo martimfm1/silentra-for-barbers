@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Product = {
   id: string;
@@ -91,14 +92,22 @@ const statuses = [
   ['cancelled', 'Cancelada'],
 ] as const;
 
-const money = (value: number) =>
-  new Intl.NumberFormat('pt-PT', {
+const money = (value: number, locale: 'pt' | 'en') =>
+  new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
     style: 'currency',
     currency: 'EUR',
   }).format(Number(value) || 0);
 
-function statusLabel(status: string) {
-  return statuses.find(([value]) => value === status)?.[1] ?? status;
+const localizedText = (locale: 'pt' | 'en', pt: string, en: string) =>
+  locale === 'en' ? en : pt;
+
+const orderStatusLabels = {
+  pt: { pending: 'Recebida', confirmed: 'Confirmada', preparing: 'Em preparação', ready: 'Pronta', shipped: 'Enviada', delivered: 'Entregue', completed: 'Concluída', cancelled: 'Cancelada' },
+  en: { pending: 'Received', confirmed: 'Confirmed', preparing: 'Preparing', ready: 'Ready', shipped: 'Shipped', delivered: 'Delivered', completed: 'Completed', cancelled: 'Cancelled' },
+} as const;
+
+function statusLabel(status: string, locale: 'pt' | 'en') {
+  return orderStatusLabels[locale][status as keyof typeof orderStatusLabels.pt] ?? status;
 }
 
 function nextStatus(status: string) {
@@ -126,6 +135,8 @@ const emptyProduct = {
 };
 
 export default function POSStorePage() {
+  const { locale } = useLanguage();
+  const activeLocale = locale === 'en' ? 'en' : 'pt';
   const confirm = useDashboardConfirm();
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('pos');
@@ -148,7 +159,7 @@ export default function POSStorePage() {
     });
     const json = await response.json();
     if (!response.ok)
-      throw new Error(json.error || 'Não foi possível carregar os produtos.');
+      throw new Error(localizedText(activeLocale, 'Não foi possível carregar os produtos.', 'Could not load products.'));
     setProducts(json.products ?? []);
     setPlan(typeof json.plan === 'string' ? json.plan : 'free');
   }
@@ -159,7 +170,7 @@ export default function POSStorePage() {
     });
     const json = await response.json();
     if (!response.ok)
-      throw new Error(json.error || 'Não foi possível carregar as encomendas.');
+      throw new Error(localizedText(activeLocale, 'Não foi possível carregar as encomendas.', 'Could not load orders.'));
     setOrders(json.orders ?? []);
   }
 
@@ -180,7 +191,7 @@ export default function POSStorePage() {
 
   useEffect(() => {
     if (!accessLoading && allowed) void loadAll();
-  }, [accessLoading, allowed]);
+  }, [accessLoading, allowed, locale]);
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -251,8 +262,8 @@ export default function POSStorePage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error || 'Não foi possível guardar o produto.');
-      toast.success(editing ? 'Produto atualizado.' : 'Produto criado.');
+        throw new Error(localizedText(activeLocale, 'Não foi possível guardar o produto.', 'Could not save the product.'));
+      toast.success(editing ? localizedText(activeLocale, 'Produto atualizado.', 'Product updated.') : localizedText(activeLocale, 'Produto criado.', 'Product created.'));
       setProductOpen(false);
       await loadProducts();
     } catch (error) {
@@ -268,9 +279,9 @@ export default function POSStorePage() {
 
   async function archiveProduct(item: Product) {
     const confirmed = await confirm({
-      title: 'Arquivar produto?',
-      description: `“${item.name}” deixará de aparecer na loja. O histórico da encomenda será preservado.`,
-      confirmLabel: 'Arquivar produto',
+      title: localizedText(activeLocale, 'Arquivar produto?', 'Archive product?'),
+      description: localizedText(activeLocale, `“${item.name}” deixará de aparecer na loja. O histórico da encomenda será preservado.`, `“${item.name}” will no longer appear in the store. Order history will be preserved.`),
+      confirmLabel: localizedText(activeLocale, 'Arquivar produto', 'Archive product'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -281,8 +292,8 @@ export default function POSStorePage() {
       );
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error || 'Não foi possível arquivar o produto.');
-      toast.success('Produto arquivado.');
+        throw new Error(localizedText(activeLocale, 'Não foi possível arquivar o produto.', 'Could not archive the product.'));
+      toast.success(localizedText(activeLocale, 'Produto arquivado.', 'Product archived.'));
       await loadProducts();
     } catch (error) {
       toast.error(
@@ -306,9 +317,9 @@ export default function POSStorePage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          json.error || 'Não foi possível atualizar a encomenda.',
+          localizedText(activeLocale, 'Não foi possível atualizar a encomenda.', 'Could not update the order.'),
         );
-      toast.success(`Encomenda ${statusLabel(next).toLowerCase()}.`);
+      toast.success(localizedText(activeLocale, `Encomenda ${statusLabel(next, activeLocale).toLowerCase()}.`, `Order ${statusLabel(next, activeLocale).toLowerCase()}.`));
       await loadOrders();
     } catch (error) {
       toast.error(
@@ -328,9 +339,9 @@ export default function POSStorePage() {
     )
       return;
     const confirmed = await confirm({
-      title: 'Cancelar encomenda?',
-      description: `A encomenda de ${order.customer_name} será marcada como cancelada. Esta ação deve ser usada apenas quando a encomenda não vai avançar.`,
-      confirmLabel: 'Cancelar encomenda',
+      title: localizedText(activeLocale, 'Cancelar encomenda?', 'Cancel order?'),
+      description: localizedText(activeLocale, `A encomenda de ${order.customer_name} será marcada como cancelada. Esta ação deve ser usada apenas quando a encomenda não vai avançar.`, `The order for ${order.customer_name} will be marked as cancelled. Only use this action if the order will not proceed.`),
+      confirmLabel: localizedText(activeLocale, 'Cancelar encomenda', 'Cancel order'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -343,8 +354,8 @@ export default function POSStorePage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(json.error || 'Não foi possível cancelar a encomenda.');
-      toast.success('Encomenda cancelada.');
+        throw new Error(localizedText(activeLocale, 'Não foi possível cancelar a encomenda.', 'Could not cancel the order.'));
+      toast.success(localizedText(activeLocale, 'Encomenda cancelada.', 'Order cancelled.'));
       await loadOrders();
     } catch (error) {
       toast.error(
@@ -371,12 +382,12 @@ export default function POSStorePage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Package className="mx-auto size-8 text-emerald-400" />
-            <h1 className="mt-4 text-2xl font-semibold">Loja Enterprise</h1>
+            <h1 className="mt-4 text-2xl font-semibold">{localizedText(activeLocale, 'Loja Enterprise', 'Enterprise store')}</h1>
             <p className="mt-2 text-zinc-500">
-              A loja e o POS fazem parte do módulo Enterprise.
+              {localizedText(activeLocale, 'A loja e o POS fazem parte do módulo Enterprise.', 'The store and POS are part of the Enterprise module.')}
             </p>
             <Button className="mt-5" asChild>
-              <Link href="/dashboard/billing">Ver planos</Link>
+              <Link href="/dashboard/billing">{localizedText(activeLocale, 'Ver planos', 'View plans')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -394,7 +405,7 @@ export default function POSStorePage() {
               className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-100"
             >
               <ArrowLeft className="size-4" />
-              Voltar ao POS
+              {localizedText(activeLocale, 'Voltar ao POS', 'Back to POS')}
             </Link>
             <div className="mt-5 flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
@@ -405,23 +416,22 @@ export default function POSStorePage() {
                   POS · Loja
                 </p>
                 <h1 className="text-3xl font-semibold tracking-tight">
-                  Centro de vendas
+                  {localizedText(activeLocale, 'Centro de vendas', 'Sales centre')}
                 </h1>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-              Gere anúncios, stock e encomendas num fluxo de marketplace. A
-              experiência pública usa o mesmo catálogo e stock do POS.
+              {localizedText(activeLocale, 'Gere anúncios, stock e encomendas num fluxo de marketplace. A experiência pública usa o mesmo catálogo e stock do POS.', 'Manage listings, inventory and orders in one marketplace workflow. The public store uses the same catalogue and stock as the POS.')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => void loadAll()}>
               <RefreshCcw className="mr-2 size-4" />
-              Atualizar
+              {localizedText(activeLocale, 'Atualizar', 'Refresh')}
             </Button>
             <Button onClick={openCreate}>
               <Plus className="mr-2 size-4" />
-              Novo produto
+              {localizedText(activeLocale, 'Novo produto', 'New product')}
             </Button>
           </div>
         </header>
@@ -429,19 +439,19 @@ export default function POSStorePage() {
         <section className="grid gap-3 sm:grid-cols-3">
           {[
             {
-              label: 'Produtos publicados',
+              label: localizedText(activeLocale, 'Produtos publicados', 'Published products'),
               value: publishedProducts,
-              note: 'Visíveis na loja pública',
+              note: localizedText(activeLocale, 'Visíveis na loja pública', 'Visible in the public store'),
             },
             {
-              label: 'Encomendas em curso',
+              label: localizedText(activeLocale, 'Encomendas em curso', 'Active orders'),
               value: pendingOrders,
-              note: 'Ainda precisam de ação',
+              note: localizedText(activeLocale, 'Ainda precisam de ação', 'Require action'),
             },
             {
-              label: 'Produtos no catálogo',
+              label: localizedText(activeLocale, 'Produtos no catálogo', 'Catalogue products'),
               value: products.length,
-              note: 'Inclui arquivados',
+              note: localizedText(activeLocale, 'Inclui arquivados', 'Includes archived items'),
             },
           ].map((metric) => (
             <Card
@@ -466,15 +476,13 @@ export default function POSStorePage() {
             type="button"
             onClick={() => setTab('products')}
             className={`min-h-11 border-b-2 px-2 text-sm font-semibold ${tab === 'products' ? 'border-emerald-400 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
-          >
-            Produtos
-          </button>
+          >{localizedText(activeLocale, 'Produtos', 'Products')}</button>
           <button
             type="button"
             onClick={() => setTab('orders')}
             className={`min-h-11 border-b-2 px-2 text-sm font-semibold ${tab === 'orders' ? 'border-emerald-400 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
           >
-            Encomendas{pendingOrders > 0 ? ` · ${pendingOrders}` : ''}
+            {localizedText(activeLocale, 'Encomendas', 'Orders')}{pendingOrders > 0 ? ` · ${pendingOrders}` : ''}
           </button>
         </div>
 
@@ -489,9 +497,9 @@ export default function POSStorePage() {
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Pesquisar produto, categoria ou SKU..."
+                  placeholder={localizedText(activeLocale, 'Pesquisar produto, categoria ou SKU...', 'Search product, category or SKU...')}
                   className="h-11 border-white/10 bg-white/[0.03] pl-9"
-                  aria-label="Pesquisar produtos"
+                  aria-label={localizedText(activeLocale, 'Pesquisar produtos', 'Search products')}
                 />
               </label>
               <button
@@ -504,7 +512,7 @@ export default function POSStorePage() {
                 ) : (
                   <Eye className="size-4" />
                 )}
-                {showInactive ? 'Ocultar arquivados' : 'Mostrar arquivados'}
+                {showInactive ? localizedText(activeLocale, 'Ocultar arquivados', 'Hide archived') : localizedText(activeLocale, 'Mostrar arquivados', 'Show archived')}
               </button>
             </div>
             {filteredProducts.length === 0 ? (
@@ -512,7 +520,7 @@ export default function POSStorePage() {
                 <CardContent className="py-16 text-center">
                   <Boxes className="mx-auto size-8 text-zinc-700" />
                   <p className="mt-4 text-sm text-zinc-500">
-                    Não existem produtos neste filtro.
+                    {localizedText(activeLocale, 'Não existem produtos neste filtro.', 'No products match this filter.')}
                   </p>
                 </CardContent>
               </Card>
@@ -538,44 +546,38 @@ export default function POSStorePage() {
                       )}
                       <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
                         {item.marketplace_visible && item.active ? (
-                          <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-semibold text-emerald-300">
-                            Publicado
-                          </span>
+                          <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-semibold text-emerald-300">{localizedText(activeLocale, 'Publicado', 'Published')}</span>
                         ) : (
-                          <span className="rounded-full bg-black/50 px-2 py-1 text-[10px] font-semibold text-zinc-400">
-                            Oculto
-                          </span>
+                          <span className="rounded-full bg-black/50 px-2 py-1 text-[10px] font-semibold text-zinc-400">{localizedText(activeLocale, 'Oculto', 'Hidden')}</span>
                         )}
                         {item.marketplace_featured && (
-                          <span className="rounded-full bg-amber-300/15 px-2 py-1 text-[10px] font-semibold text-amber-200">
-                            Destaque
-                          </span>
+                          <span className="rounded-full bg-amber-300/15 px-2 py-1 text-[10px] font-semibold text-amber-200">{localizedText(activeLocale, 'Destaque', 'Featured')}</span>
                         )}
                       </div>
                       <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-zinc-950/80 px-2.5 py-1 text-[10px] text-zinc-300 backdrop-blur">
-                        {item.stock_quantity} em stock
+                        {item.stock_quantity} {localizedText(activeLocale, 'em stock', 'in stock')}
                       </div>
                     </div>
                     <CardContent className="space-y-4 p-4">
                       <div className="min-w-0">
                         <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-600">
-                          {item.category || 'Produto'}
+                          {item.category || localizedText(activeLocale, 'Produto', 'Product')}
                         </p>
                         <h2 className="mt-1 truncate font-semibold text-white">
                           {item.name}
                         </h2>
                         <p className="mt-1 line-clamp-2 min-h-10 text-xs leading-5 text-zinc-500">
-                          {item.description || 'Sem descrição.'}
+                          {item.description || localizedText(activeLocale, 'Sem descrição.', 'No description.')}
                         </p>
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div>
                           <p className="text-lg font-semibold">
-                            {money(item.unit_price)}
+                            {money(item.unit_price, activeLocale, activeLocale)}
                           </p>
                           {item.compare_at_price != null && (
                             <p className="text-[11px] text-zinc-600 line-through">
-                              {money(item.compare_at_price)}
+                              {money(item.compare_at_price, activeLocale, activeLocale)}
                             </p>
                           )}
                         </div>
@@ -583,7 +585,7 @@ export default function POSStorePage() {
                           size="icon"
                           variant="outline"
                           onClick={() => openEdit(item)}
-                          aria-label={`Editar ${item.name}`}
+                          aria-label={localizedText(activeLocale, `Editar ${item.name}`, `Edit ${item.name}`)}
                         >
                           <Pencil className="size-4" />
                         </Button>
@@ -593,17 +595,13 @@ export default function POSStorePage() {
                           variant="outline"
                           className="flex-1"
                           onClick={() => openEdit(item)}
-                        >
-                          Editar
-                        </Button>
+                        >{localizedText(activeLocale, 'Editar', 'Edit')}</Button>
                         {item.active ? (
                           <Button
                             variant="ghost"
                             onClick={() => void archiveProduct(item)}
-                            aria-label={`Arquivar ${item.name}`}
-                          >
-                            Arquivar
-                          </Button>
+                            aria-label={localizedText(activeLocale, `Arquivar ${item.name}`, `Archive ${item.name}`)}
+                          >{localizedText(activeLocale, 'Arquivar', 'Archive')}</Button>
                         ) : null}
                       </div>
                     </CardContent>
@@ -619,7 +617,7 @@ export default function POSStorePage() {
                 <CardContent className="py-16 text-center">
                   <Package className="mx-auto size-8 text-zinc-700" />
                   <p className="mt-4 text-sm text-zinc-500">
-                    Ainda não existem encomendas.
+                    {localizedText(activeLocale, 'Ainda não existem encomendas.', 'There are no orders yet.')}
                   </p>
                 </CardContent>
               </Card>
@@ -637,7 +635,7 @@ export default function POSStorePage() {
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300">
-                              {statusLabel(order.status)}
+                              {statusLabel(order.status, activeLocale)}
                             </span>
                             <span className="font-mono text-xs text-zinc-600">
                               #{order.id.slice(0, 8)}
@@ -650,11 +648,11 @@ export default function POSStorePage() {
                             {order.customer_email} · {order.customer_phone}
                           </p>
                           <p className="mt-2 text-xs text-zinc-500">
-                            {new Date(order.created_at).toLocaleString('pt-PT')}{' '}
+                            {new Date(order.created_at).toLocaleString(activeLocale === 'en' ? 'en-GB' : 'pt-PT')}{' '}
                             ·{' '}
                             {order.fulfillment_method === 'delivery'
-                              ? 'Entrega'
-                              : 'Levantamento'}
+                              ? localizedText(activeLocale, 'Entrega', 'Delivery')
+                               : localizedText(activeLocale, 'Levantamento', 'Collection')}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -664,7 +662,7 @@ export default function POSStorePage() {
                               disabled={busy}
                             >
                               <Check className="mr-2 size-4" />
-                              Avançar para {statusLabel(next)}
+                              {localizedText(activeLocale, `Avançar para ${statusLabel(next, activeLocale)}`, `Move to ${statusLabel(next, activeLocale)}`)}
                             </Button>
                           )}
                           {order.status !== 'cancelled' &&
@@ -693,19 +691,19 @@ export default function POSStorePage() {
                                   {item.product_name}
                                 </p>
                                 <p className="text-xs text-zinc-500">
-                                  {item.quantity} × {money(item.unit_price)}
+                                  {item.quantity} × {money(item.unit_price, activeLocale)}
                                 </p>
                               </div>
                               <p className="text-sm font-semibold">
-                                {money(item.total)}
+                                {money(item.total, activeLocale, activeLocale)}
                               </p>
                             </div>
                           ))}
                         </div>
                         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 lg:min-w-44">
-                          <p className="text-xs text-zinc-500">Total</p>
+                          <p className="text-xs text-zinc-500">{localizedText(activeLocale, 'Total', 'Total')}</p>
                           <p className="mt-1 text-2xl font-semibold">
-                            {money(order.total)}
+                            {money(order.total, activeLocale, activeLocale)}
                           </p>
                           <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
                             {order.fulfillment_method === 'delivery' ? (
@@ -715,13 +713,13 @@ export default function POSStorePage() {
                             )}
                             {order.fulfillment_method === 'delivery'
                               ? `${order.shipping_postal_code ?? ''} ${order.shipping_city ?? ''}`
-                              : 'Levantamento na barbearia'}
+                              : localizedText(activeLocale, 'Levantamento na barbearia', 'Collection at the barbershop')}
                           </div>
                         </div>
                       </div>
                       {order.notes && (
                         <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-zinc-400">
-                          <strong className="text-zinc-200">Nota:</strong>{' '}
+                          <strong className="text-zinc-200">{localizedText(activeLocale, 'Nota:', 'Note:')}</strong>{' '}
                           {order.notes}
                         </div>
                       )}
@@ -729,7 +727,7 @@ export default function POSStorePage() {
                         order.marketplace_order_events.length > 0 && (
                           <div className="mt-5 border-t border-white/10 pt-4">
                             <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
-                              Histórico
+                              {localizedText(activeLocale, 'Histórico', 'History')}
                             </p>
                             <div className="mt-3 space-y-2">
                               {order.marketplace_order_events
@@ -741,12 +739,12 @@ export default function POSStorePage() {
                                   >
                                     <span className="text-zinc-400">
                                       {event.customer_message ||
-                                        `${event.previous_status ? statusLabel(event.previous_status) + ' → ' : ''}${statusLabel(event.new_status)}`}
+                                        `${event.previous_status ? statusLabel(event.previous_status, activeLocale) + ' → ' : ''}${statusLabel(event.new_status, activeLocale)}`}
                                     </span>
                                     <span className="shrink-0 text-zinc-700">
                                       {new Date(
                                         event.created_at,
-                                      ).toLocaleString('pt-PT')}
+                                      ).toLocaleString(activeLocale === 'en' ? 'en-GB' : 'pt-PT')}
                                     </span>
                                   </div>
                                 ))}
@@ -767,7 +765,7 @@ export default function POSStorePage() {
               type="button"
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => !saving && setProductOpen(false)}
-              aria-label="Fechar"
+              aria-label={localizedText(activeLocale, 'Fechar', 'Close')}
             />
             <form
               onSubmit={saveProduct}
@@ -776,24 +774,22 @@ export default function POSStorePage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-400">
-                    {editing ? 'Editar anúncio' : 'Novo anúncio'}
+                    {editing ? localizedText(activeLocale, 'Editar anúncio', 'Edit listing') : localizedText(activeLocale, 'Novo anúncio', 'New listing')}
                   </p>
                   <h2 className="mt-1 text-2xl font-semibold text-white">
-                    {editing ? editing.name : 'Publicar produto'}
+                    {editing ? editing.name : localizedText(activeLocale, 'Publicar produto', 'Publish product')}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => !saving && setProductOpen(false)}
                   className="rounded-xl px-3 py-2 text-zinc-500 hover:bg-white/5 hover:text-white"
-                >
-                  Fechar
-                </button>
+                >{localizedText(activeLocale, 'Fechar', 'Close')}</button>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <label className="grid gap-1.5 sm:col-span-2">
                   <span className="text-xs font-medium text-zinc-300">
-                    Nome *
+                    {localizedText(activeLocale, 'Nome *', 'Name *')}
                   </span>
                   <Input
                     required
@@ -805,7 +801,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5 sm:col-span-2">
                   <span className="text-xs font-medium text-zinc-300">
-                    Descrição
+                    {localizedText(activeLocale, 'Descrição', 'Description')}
                   </span>
                   <textarea
                     value={product.description}
@@ -817,7 +813,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-medium text-zinc-300">
-                    Categoria
+                    {localizedText(activeLocale, 'Categoria', 'Category')}
                   </span>
                   <Input
                     value={product.category}
@@ -827,7 +823,7 @@ export default function POSStorePage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">SKU</span>
+                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'SKU', 'SKU')}</span>
                   <Input
                     value={product.sku}
                     onChange={(e) =>
@@ -837,7 +833,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-medium text-zinc-300">
-                    Preço *
+                    {localizedText(activeLocale, 'Preço *', 'Price *')}
                   </span>
                   <Input
                     required
@@ -852,7 +848,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-medium text-zinc-300">
-                    Preço anterior
+                    {localizedText(activeLocale, 'Preço anterior', 'Previous price')}
                   </span>
                   <Input
                     type="number"
@@ -866,7 +862,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-medium text-zinc-300">
-                    Stock *
+                    {localizedText(activeLocale, 'Stock *', 'Stock *')}
                   </span>
                   <Input
                     required
@@ -887,7 +883,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-medium text-zinc-300">
-                    Aviso de stock baixo
+                    {localizedText(activeLocale, 'Aviso de stock baixo', 'Low-stock alert')}
                   </span>
                   <Input
                     type="number"
@@ -904,7 +900,7 @@ export default function POSStorePage() {
                 </label>
                 <label className="grid gap-1.5 sm:col-span-2">
                   <span className="text-xs font-medium text-zinc-300">
-                    Imagem (URL)
+                    {localizedText(activeLocale, 'Imagem (URL)', 'Image URL')}
                   </span>
                   <Input
                     type="url"
@@ -931,10 +927,10 @@ export default function POSStorePage() {
                   />
                   <span>
                     <strong className="block text-sm text-white">
-                      Publicar na loja online
+                      {localizedText(activeLocale, 'Publicar na loja online', 'Publish to online store')}
                     </strong>
                     <span className="text-xs text-zinc-500">
-                      O produto aparece no marketplace quando existe stock.
+                      {localizedText(activeLocale, 'O produto aparece no marketplace quando existe stock.', 'The product appears in the marketplace when stock is available.')}
                     </span>
                   </span>
                 </label>
@@ -963,21 +959,21 @@ export default function POSStorePage() {
                   />
                   <span>
                     <strong className="flex items-center gap-2 text-sm text-white">
-                      Destaque Enterprise · 3 dias
+                      {localizedText(activeLocale, 'Destaque Enterprise · 3 dias', 'Enterprise featured · 3 days')}
                     </strong>
                     <span className="mt-1 block text-xs leading-5 text-zinc-500">
                       {plan !== 'enterprise'
-                        ? 'Disponível exclusivamente no plano Enterprise.'
+                        ? localizedText(activeLocale, 'Disponível exclusivamente no plano Enterprise.', 'Only available on the Enterprise plan.')
                         : !product.marketplaceVisible
-                          ? 'Ativa primeiro a publicação online.'
+                          ? localizedText(activeLocale, 'Ativa primeiro a publicação online.', 'Enable online publishing first.')
                           : Number(product.stockQuantity) <= 0
-                            ? 'O produto tem de estar ativo e ter stock disponível.'
+                            ? localizedText(activeLocale, 'O produto tem de estar ativo e ter stock disponível.', 'The product must be active and have stock available.')
                             : editing?.marketplace_published_at &&
                                 Date.now() >=
                                   Date.parse(editing.marketplace_published_at) +
                                     3 * 24 * 60 * 60 * 1000
-                              ? 'A janela de destaque deste produto já terminou.'
-                              : 'Coloca o produto em destaque até 3 dias após a primeira publicação.'}
+                              ? localizedText(activeLocale, 'A janela de destaque deste produto já terminou.', 'The featured period for this product has ended.')
+                              : localizedText(activeLocale, 'Coloca o produto em destaque até 3 dias após a primeira publicação.', 'Feature the product for up to 3 days after its first publication.')}
                     </span>
                   </span>
                 </label>
@@ -998,9 +994,9 @@ export default function POSStorePage() {
                     <Check className="mr-2 size-4" />
                   )}
                   {saving
-                    ? 'A guardar…'
+                    ? localizedText(activeLocale, 'A guardar…', 'Saving…')
                     : editing
-                      ? 'Guardar alterações'
+                      ? localizedText(activeLocale, 'Guardar alterações', 'Save changes')
                       : 'Publicar produto'}
                 </Button>
               </div>
