@@ -53,7 +53,7 @@ export function BookingForm({
   setSelectedTime,
   onSubmit,
 }: BookingFormProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const today = new Date().toISOString().slice(0, 10);
 
   return (
