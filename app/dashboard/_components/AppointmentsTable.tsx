@@ -131,7 +131,7 @@ export function AppointmentsTable({
                   {customerName(apt)}
                 </h3>
                 <p className="mt-1 truncate text-xs text-zinc-500">
-                  {apt.services?.name || 'Serviço'}
+                  {apt.services?.name || t('appointmentsTable.service')}
                 </p>
               </div>
               <StatusBadge status={apt.status} />
