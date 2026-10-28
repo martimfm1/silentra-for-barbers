@@ -128,6 +128,7 @@ export const ptCopy = {
     planFeaturesNote: 'As funcionalidades disponíveis pelo plano continuam disponíveis para a barbearia.',
     member: 'Membro',
     permission: 'Permissão',
+    noEmail: 'Sem email',
   },
 
   statusBadge: {
