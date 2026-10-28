@@ -393,3 +393,40 @@ body :where(
   }
 }
 
+/* Dashboard mobile viewport guard.
+   Page transitions use transforms and some nested dashboard panels contain
+   wide controls; clip those at the dashboard surface without disabling Y scroll. */
+@media (max-width: 767px) {
+  .silentra-dashboard-shell,
+  .silentra-dashboard-shell > .dashboard-content,
+  .silentra-dashboard-main,
+  .silentra-dashboard-main > main,
+  .silentra-dashboard-main .dashboard-page {
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow-x: clip;
+  }
+
+  .silentra-dashboard-main > div,
+  .silentra-dashboard-main [data-dashboard-section],
+  .silentra-dashboard-main [data-dashboard-section] > main,
+  .silentra-dashboard-main [data-dashboard-section] > div {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .silentra-dashboard-main [data-dashboard-section] {
+    overflow-wrap: anywhere;
+  }
+
+  .silentra-dashboard-main :is(.flex, .grid) > * {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .silentra-dashboard-main :is(input, select, textarea, table, canvas, svg, video, img) {
+    max-inline-size: 100%;
+  }
+}
+
