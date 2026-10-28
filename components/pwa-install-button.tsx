@@ -120,13 +120,13 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
   }[] = [
     {
       id: 'apple',
-      label: isEnglish ? 'iPhone / iPad' : 'iPhone / iPad',
+      label: 'iPhone / iPad',
       Icon: Smartphone,
     },
     { id: 'android', label: 'Android', Icon: Smartphone },
     {
       id: 'desktop',
-      label: isEnglish ? 'PC / Mac' : 'PC / Mac',
+      label: 'PC / Mac',
       Icon: Monitor,
     },
   ];
