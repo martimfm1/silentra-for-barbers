@@ -25,6 +25,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
 import { publicBarbershopService } from './services/public-barbershop.service';
@@ -115,6 +116,7 @@ export default function BarbershopPublicPageFinal({
   initialData: BarbershopPublicDetails;
 }) {
   const shop = initialData as PublicData;
+  const { locale } = useLanguage();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
@@ -331,9 +333,9 @@ export default function BarbershopPublicPageFinal({
             </div>
           )}
           <div className="silentra-section-block rounded-2xl p-4 glassmorphism">
-            <p className="text-xs text-zinc-500">Dias de fecho</p>
+            <p className="text-xs text-zinc-500">{locale === 'en' ? 'Closed days' : 'Dias de fecho'}</p>
             <p className="mt-1 text-sm font-semibold">
-              {formatClosedDays(shop.closed_days) || 'Nenhum'}
+              {formatClosedDays(shop.closed_days, locale === 'en' ? 'en' : 'pt') || (locale === 'en' ? 'None' : 'Nenhum')}
             </p>
           </div>
         </section>
