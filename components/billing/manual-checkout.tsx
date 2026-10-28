@@ -565,6 +565,7 @@ export function ManualCheckout({
                   }}
                 />
                 <button
+            aria-label="Continuar checkout manual"
                   type="button"
                   onClick={() => void applyPromotion()}
                   disabled={promotionLoading || submitting}
