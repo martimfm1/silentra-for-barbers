@@ -93,7 +93,7 @@ export function AppointmentsTable({
                         className="size-9 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
                         disabled={isPending}
                         onClick={() => onFinalize(apt.id)}
-                        aria-label={`Concluir marcação de ${customerName(apt)}`}
+                        aria-label={`${t('appointmentsTable.completeBooking')}: ${customerName(apt, t('appointmentsTable.customer'))}`}
                         title={t('appointmentsTable.completeBooking')}
                       >
                         <Check className="size-4" aria-hidden="true" />
@@ -106,7 +106,7 @@ export function AppointmentsTable({
                       className="size-9 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
                       disabled={isPending}
                       onClick={() => onDelete(apt.id)}
-                      aria-label={`Apagar marcação de ${customerName(apt)}`}
+                      aria-label={`${t('appointmentsTable.deleteBooking')}: ${customerName(apt, t('appointmentsTable.customer'))}`}
                       title={t('appointmentsTable.deleteBooking')}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
