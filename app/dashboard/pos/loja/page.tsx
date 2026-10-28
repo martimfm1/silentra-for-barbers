@@ -81,16 +81,7 @@ type Order = {
   marketplace_order_events?: OrderEvent[];
 };
 
-const statuses = [
-  ['pending', 'Recebida'],
-  ['confirmed', 'Confirmada'],
-  ['preparing', 'Em preparação'],
-  ['ready', 'Pronta'],
-  ['shipped', 'Enviada'],
-  ['delivered', 'Entregue'],
-  ['completed', 'Concluída'],
-  ['cancelled', 'Cancelada'],
-] as const;
+const statuses = ['pending', 'confirmed', 'preparing', 'ready', 'shipped', 'delivered', 'completed', 'cancelled'] as const;
 
 const money = (value: number, locale: 'pt' | 'en') =>
   new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
@@ -111,13 +102,13 @@ function statusLabel(status: string, locale: 'pt' | 'en') {
 }
 
 function nextStatus(status: string) {
-  const index = statuses.findIndex(([value]) => value === status);
+  const index = statuses.findIndex((value) => value === status);
   if (index < 0 || status === 'cancelled' || status === 'completed')
     return null;
   if (status === 'ready') return 'shipped';
   if (status === 'shipped') return 'delivered';
   if (status === 'delivered') return 'completed';
-  return statuses[index + 1]?.[0] ?? null;
+  return statuses[index + 1] ?? null;
 }
 
 const emptyProduct = {
@@ -182,7 +173,7 @@ export default function POSStorePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível carregar a loja.',
+          : localizedText(activeLocale, 'Não foi possível carregar a loja.', 'Could not load the store.'),
       );
     } finally {
       setLoading(false);
@@ -270,7 +261,7 @@ export default function POSStorePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível guardar o produto.',
+          : localizedText(activeLocale, 'Não foi possível guardar o produto.', 'Could not save the product.'),
       );
     } finally {
       setSaving(false);
@@ -299,7 +290,7 @@ export default function POSStorePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível arquivar o produto.',
+          : localizedText(activeLocale, 'Não foi possível arquivar o produto.', 'Could not archive the product.'),
       );
     }
   }
@@ -325,7 +316,7 @@ export default function POSStorePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível atualizar a encomenda.',
+          : localizedText(activeLocale, 'Não foi possível atualizar a encomenda.', 'Could not update the order.'),
       );
     } finally {
       setOrderBusy(null);
@@ -361,7 +352,7 @@ export default function POSStorePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Não foi possível cancelar a encomenda.',
+          : localizedText(activeLocale, 'Não foi possível cancelar a encomenda.', 'Could not cancel the order.'),
       );
     } finally {
       setOrderBusy(null);
@@ -997,7 +988,7 @@ export default function POSStorePage() {
                     ? localizedText(activeLocale, 'A guardar…', 'Saving…')
                     : editing
                       ? localizedText(activeLocale, 'Guardar alterações', 'Save changes')
-                      : 'Publicar produto'}
+                      : localizedText(activeLocale, 'Publicar produto', 'Publish product')}
                 </Button>
               </div>
             </form>
