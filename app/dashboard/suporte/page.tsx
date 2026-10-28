@@ -298,6 +298,7 @@ export default function SupportPage() {
               {pt ? 'Atualizar' : 'Refresh'}
             </button>
             <button
+            aria-label={createTicketOpen ? (pt ? "Cancelar criação de ticket" : "Cancel ticket creation") : (pt ? "Criar novo ticket" : "Create new ticket")}
               type="button"
               onClick={() => setCreateTicketOpen((value) => !value)}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
