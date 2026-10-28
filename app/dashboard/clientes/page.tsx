@@ -232,6 +232,7 @@ function EditClientDialog({
 
             <DialogFooter>
               <Button
+            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
                 type="submit"
                 disabled={loading}
                 className="min-h-11 w-full bg-emerald-600 text-white hover:bg-emerald-500"
