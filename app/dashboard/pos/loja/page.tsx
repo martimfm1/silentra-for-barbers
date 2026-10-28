@@ -554,11 +554,11 @@ export default function POSStorePage() {
                       <div className="flex items-end justify-between gap-3">
                         <div>
                           <p className="text-lg font-semibold">
-                            {money(item.unit_price, activeLocale, activeLocale)}
+                            {money(item.unit_price, activeLocale)}
                           </p>
                           {item.compare_at_price != null && (
                             <p className="text-[11px] text-zinc-600 line-through">
-                              {money(item.compare_at_price, activeLocale, activeLocale)}
+                              {money(item.compare_at_price, activeLocale)}
                             </p>
                           )}
                         </div>
@@ -676,7 +676,7 @@ export default function POSStorePage() {
                                 </p>
                               </div>
                               <p className="text-sm font-semibold">
-                                {money(item.total, activeLocale, activeLocale)}
+                                {money(item.total, activeLocale)}
                               </p>
                             </div>
                           ))}
@@ -684,7 +684,7 @@ export default function POSStorePage() {
                         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 lg:min-w-44">
                           <p className="text-xs text-zinc-500">{localizedText(activeLocale, 'Total', 'Total')}</p>
                           <p className="mt-1 text-2xl font-semibold">
-                            {money(order.total, activeLocale, activeLocale)}
+                            {money(order.total, activeLocale)}
                           </p>
                           <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
                             {order.fulfillment_method === 'delivery' ? (
