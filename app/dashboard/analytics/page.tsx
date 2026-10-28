@@ -319,12 +319,12 @@ export default function AnalyticsPage() {
           <>
             <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <Metric
-                title="Receita"
+                title={t('analyticsPage.revenue')}
                 value={money(data.overview.revenue, locale)}
                 detail={
                   data.overview.revenueChangePercent === null
                     ? 'Sem comparação disponível'
-                    : `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}% vs período anterior`
+                    : t('analyticsPage.vsPrevious', { value: `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}` })
                 }
                 icon={<Wallet className="h-4 w-4" />}
                 positive={
@@ -334,21 +334,21 @@ export default function AnalyticsPage() {
                 }
               />
               <Metric
-                title="Ticket médio"
+                title={t('analyticsPage.averageTicket')}
                 value={money(businessMetrics?.averageTicket ?? 0, locale)}
-                detail="Por marcação concluída"
+                detail={t('analyticsPage.perCompletedBooking')}
                 icon={<Target className="h-4 w-4" />}
               />
               <Metric
-                title="Clientes ativos"
+                title={t('analyticsPage.activeClients')}
                 value={String(data.overview.activeClientsInPeriod)}
-                detail={`${data.overview.newClients} novos no período`}
+                detail={t('analyticsPage.newInPeriod', { count: data.overview.newClients })}
                 icon={<Users className="h-4 w-4" />}
               />
               <Metric
-                title="Taxa de conclusão"
+                title={t('analyticsPage.completionRate')}
                 value={`${(businessMetrics?.completionRate ?? 0).toFixed(1)}%`}
-                detail={`${data.overview.cancelledAppointments} cancelamentos`}
+                detail={t('analyticsPage.cancellations', { count: data.overview.cancelledAppointments })}
                 icon={<CheckCircle2 className="h-4 w-4" />}
                 positive={(businessMetrics?.completionRate ?? 0) >= 70}
               />
@@ -418,21 +418,21 @@ export default function AnalyticsPage() {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  <Stat label="Marcações" value={data.overview.appointments} />
+                  <Stat label={t('analyticsPage.bookings')} value={data.overview.appointments} />
                   <Stat
-                    label="Concluídas"
+                    label={t('analyticsPage.completed')}
                     value={data.overview.completedAppointments}
                   />
                   <Stat
-                    label="Agendadas"
+                    label={t('analyticsPage.scheduled')}
                     value={data.overview.scheduledAppointments}
                   />
                   <Stat
-                    label="Canceladas"
+                    label={t('analyticsPage.cancelled')}
                     value={data.overview.cancelledAppointments}
                   />
                   <Stat
-                    label="Média / dia"
+                    label={t('analyticsPage.averagePerDay')}
                     value={(businessMetrics?.dailyAppointments ?? 0).toFixed(1)}
                   />
                 </CardContent>
@@ -470,19 +470,19 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent className="grid gap-4 sm:grid-cols-2">
                   <MetricMini
-                    label="Receita / cliente ativo"
+                    label={t('analyticsPage.revenuePerActiveClient')}
                     value={money(businessMetrics?.clientRevenue ?? 0, locale)}
                   />
                   <MetricMini
-                    label="Novos / base total"
+                    label={t('analyticsPage.newVsTotal')}
                     value={`${(businessMetrics?.newClientRate ?? 0).toFixed(1)}%`}
                   />
                   <MetricMini
-                    label="Taxa de cancelamento"
+                    label={t('analyticsPage.cancellationRate')}
                     value={`${(businessMetrics?.cancellationRate ?? 0).toFixed(1)}%`}
                   />
                   <MetricMini
-                    label="Clientes totais"
+                    label={t('analyticsPage.totalClients')}
                     value={String(data.overview.totalClients)}
                   />
                 </CardContent>
@@ -518,7 +518,7 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.count} marcações
+                          {t('analyticsPage.bookingCount', { count: item.count })}
                         </p>
                       </div>
                     ))
@@ -555,7 +555,7 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.appointments} marcações concluídas
+                          {t('analyticsPage.completedBookings', { count: item.appointments })}
                         </p>
                       </div>
                     ))
@@ -612,15 +612,15 @@ export default function AnalyticsPage() {
                   </CardHeader>
                   <CardContent className="grid gap-4 sm:grid-cols-3">
                     <MetricMini
-                      label="Receita POS"
+                      label={t('analyticsPage.posRevenue')}
                       value={money(data.enterprise.posRevenue, locale)}
                     />
                     <MetricMini
-                      label="Transações POS"
+                      label={t('analyticsPage.posTransactions')}
                       value={String(data.enterprise.posTransactions)}
                     />
                     <MetricMini
-                      label="Receita combinada"
+                      label={t('analyticsPage.combinedRevenue')}
                       value={money(data.enterprise.combinedRevenue, locale)}
                     />
                   </CardContent>
@@ -686,7 +686,7 @@ export default function AnalyticsPage() {
                     />
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5">
-                      <p className="font-medium">Relatório financeiro</p>
+                      <p className="font-medium">{t('analyticsPage.financialReport')}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {t('analyticsPage.availableEnterprise')}
                       </p>
@@ -774,6 +774,7 @@ function ExportCard({
   from: string;
   to: string;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="rounded-2xl border border-border bg-background p-5">
       <div className="flex items-center gap-3">
