@@ -54,6 +54,10 @@ export const enCopy = {
     save: 'Create booking',
     saving: 'Saving…',
     help: 'Only the essential required fields are needed to create a booking quickly.',
+    barber: 'Barber',
+    dateTime: 'Date and time',
+    date: 'Date',
+    time: 'Time',
   },
   inviteCode: {
     generateError: 'Unable to generate the invite.',
@@ -118,6 +122,8 @@ export const enCopy = {
     remove: 'Remove',
     loading: 'Loading team members…',
     planFeaturesNote: 'Features included in the plan remain available to the barbershop.',
+    member: 'Member',
+    permission: 'Permission',
   },
 
   dashboard: {
