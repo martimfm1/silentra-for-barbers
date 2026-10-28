@@ -197,6 +197,7 @@ for (const status of [
 }
 
 const localeAwareSources = {
+  'app/dashboard/mensagens/page.tsx': ["useLanguage()", 'Appointment reminder', 'copy.loadClientsFailed', 'copy.emailSent'],
   'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
   'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
   'app/checkout/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
