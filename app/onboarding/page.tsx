@@ -802,6 +802,7 @@ export default function OnboardingPage() {
                       para gerar um novo convite.
                     </div>
                     <Button
+            aria-label={loading ? "A validar convite" : "Continuar com convite"}
                       type="submit"
                       disabled={loading || !inviteCode.trim()}
                       className="min-h-12 w-full rounded-xl bg-zinc-50 font-semibold text-zinc-950 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-400"
