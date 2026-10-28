@@ -323,6 +323,7 @@ export default function EquipaPage() {
                     </div>
                     <DialogFooter>
                       <Button
+            aria-label={loadingProfessionals ? "A guardar profissional" : "Guardar profissional"}
                         type="submit"
                         disabled={loadingProfessionals}
                         className="min-h-11 w-full bg-purple-600 text-white hover:bg-purple-500"
