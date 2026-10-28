@@ -215,7 +215,7 @@ export function TeamMembersManager({
                       )}
                     </div>
                     <p className="mt-1 text-xs text-zinc-500">
-                      {member.email || 'Sem email'}
+                      {member.email || t('teamMembers.noEmail')}
                       {member.num_phone ? ` · ${member.num_phone}` : ''}
                     </p>
                   </div>
@@ -296,12 +296,13 @@ export function TeamMembersManager({
                         disabled={savingId === member.user_id}
                         className="min-h-11 border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 sm:w-auto"
                       >
-                        <Trash2 className="mr-2 size-4" /> Remover
+                        <Trash2 className="mr-2 size-4" /> {t('teamMembers.remove')}
                       </Button>
                       <Button
                         onClick={() => void save(member)}
                         disabled={savingId === member.user_id}
                         className="min-h-11 bg-purple-600 text-white hover:bg-purple-500 sm:w-auto"
+                        aria-label={savingId === member.user_id ? t('teamMembers.saving') : t('teamMembers.save')}
                       >
                         {savingId === member.user_id ? (
                           <Loader2 className="size-4 animate-spin" />
