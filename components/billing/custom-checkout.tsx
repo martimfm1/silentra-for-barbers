@@ -189,6 +189,7 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
           {checkoutState.error.message}
         </p>
         <button
+            aria-label="Confirmar checkout"
           type="button"
           onClick={() => window.location.reload()}
           className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
