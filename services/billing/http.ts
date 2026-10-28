@@ -156,6 +156,45 @@ function getAllowedOrigins(request: Request): Set<string> {
   return allowedOrigins;
 }
 
+function isLoopbackHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return (
+    normalized === 'localhost' ||
+    normalized === '127.0.0.1' ||
+    normalized === '[::1]'
+  );
+}
+
+/**
+ * A local reverse proxy can expose the app over HTTP while passing an HTTPS
+ * internal URL to Next.js (or the reverse). Keep this exception loopback-only,
+ * with an exact hostname and port match; never use it for deployed hostnames.
+ */
+function isSameLoopbackHostWithPort(
+  receivedOrigin: string | null,
+  requestUrl: string,
+): boolean {
+  if (!receivedOrigin) return false;
+
+  try {
+    const origin = new URL(receivedOrigin);
+    const target = new URL(requestUrl);
+    const validProtocol = (protocol: string) =>
+      protocol === 'http:' || protocol === 'https:';
+
+    return (
+      validProtocol(origin.protocol) &&
+      validProtocol(target.protocol) &&
+      origin.protocol !== target.protocol &&
+      isLoopbackHostname(origin.hostname) &&
+      origin.hostname.toLowerCase() === target.hostname.toLowerCase() &&
+      origin.port === target.port
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function assertSameOrigin(request: Request): void {
   const allowedOrigins = getAllowedOrigins(request);
   const originHeader = request.headers.get('origin');
@@ -164,7 +203,12 @@ export function assertSameOrigin(request: Request): void {
   // Prefer the browser Origin header. If it is present but unexpected, never
   // fall back to Referer or Fetch Metadata because that would weaken CSRF.
   if (originHeader?.trim()) {
-    if (receivedOrigin && allowedOrigins.has(receivedOrigin)) return;
+    if (
+      receivedOrigin &&
+      (allowedOrigins.has(receivedOrigin) ||
+        isSameLoopbackHostWithPort(receivedOrigin, request.url))
+    )
+      return;
 
     console.warn('[CSRF_ORIGIN_REJECTED]', {
       receivedOrigin: receivedOrigin ?? 'invalid',
