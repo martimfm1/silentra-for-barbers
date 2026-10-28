@@ -129,6 +129,14 @@ export const ptCopy = {
     permission: 'Permissão',
   },
 
+  statusBadge: {
+    pending: 'Por confirmar',
+    scheduled: 'Confirmada',
+    completed: 'Concluída',
+    cancelled: 'Cancelada',
+    label: 'Estado',
+  },
+
   dashboard: {
     overview: 'Resumo',
     appointments: 'Marcações',
