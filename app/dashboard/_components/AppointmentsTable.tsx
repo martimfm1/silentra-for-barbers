@@ -128,7 +128,7 @@ export function AppointmentsTable({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="truncate text-sm font-semibold text-zinc-100">
-                  {customerName(apt)}
+                  {customerName(apt, t('appointmentsTable.customer'))}
                 </h3>
                 <p className="mt-1 truncate text-xs text-zinc-500">
                   {apt.services?.name || t('appointmentsTable.service')}
