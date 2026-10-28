@@ -451,6 +451,7 @@ export default function LoginPage() {
                         </label>
 
                         <Button
+            aria-label={isSubmitting ? "A iniciar sessão" : "Continuar"}
                           type="submit"
                           disabled={isSubmitting}
                           className="min-h-11 w-full rounded-full font-semibold"
