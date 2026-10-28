@@ -17,6 +17,7 @@ export const enCopy = {
     confirmed: 'Confirmed',
     cancelled: 'Cancelled',
     completed: 'Completed',
+    skipToMain: 'Skip to main content',
   },
   appointmentsTable: {
     empty: 'There are no bookings to display.',
