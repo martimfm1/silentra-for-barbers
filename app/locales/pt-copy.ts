@@ -20,6 +20,7 @@ export const ptCopy = {
     confirmed: 'Confirmado',
     cancelled: 'Cancelado',
     completed: 'Concluído',
+    skipToMain: 'Saltar para o conteúdo principal',
   },
   appointmentsTable: {
     empty: 'Não existem marcações para apresentar.',
