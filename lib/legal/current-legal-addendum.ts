@@ -118,7 +118,7 @@ export const currentTermsFeatureSections = {
       paragraphs: [
         'The Platform uses strictly necessary technologies for authentication, security, language, and remembering the cookie choice. Optional analytics and marketing technologies are loaded only according to the categories selected in the preference panel.',
         'The choice is stored in the «silentra_cookie_consent» cookie for 180 days. Google Tag Manager loads only when both analytics and marketing are authorized; the Whop pixel depends on marketing consent and Vercel Analytics/Speed Insights depend on analytics consent.',
-        'You may accept, reject optional categories, or choose individual preferences, and change your choice at any time through the «Cookie preferences» shortcut. Rejecting optional technologies does not prevent access to features that do not depend on them.',
+        'You may accept, reject optional categories, or choose individual preferences, and change your choice at any time using the preference controls on the Cookie Policy page. Rejecting optional technologies does not prevent access to features that do not depend on them.',
       ],
     },
   ],
