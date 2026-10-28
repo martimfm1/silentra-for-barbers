@@ -210,6 +210,23 @@ export const enCopy = {
     dailyAverageInsight: 'Average of {count} bookings per day.',
   },
 
+  communicationPage: {
+    messagesTitle: 'Messages',
+    messagesDescription: 'Send messages to your customers and track their delivery.',
+    campaignsTitle: 'Campaigns',
+    campaignsDescription: 'Create campaigns and keep customers engaged.',
+    birthdaysTitle: 'Birthdays',
+    birthdaysDescription: 'Automate birthday messages for your customers.',
+    eyebrow: 'Communication',
+    title: 'Reach your customers at the right moment.',
+    description: 'Messages, campaigns and birthdays in one place to make customer relationships easier and more effective.',
+    viewPlans: 'View plans',
+    open: 'Open {section}',
+    centralTitle: 'Everything in one place',
+    centralDescription: 'Use this area as the starting point for customer communication.',
+    backToOverview: 'Back to overview',
+  },
+
   dashboard: {
     overview: 'Overview',
     appointments: 'Bookings',
