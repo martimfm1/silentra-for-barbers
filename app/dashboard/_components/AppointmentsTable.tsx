@@ -141,13 +141,13 @@ export function AppointmentsTable({
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
                 <dt className="text-zinc-600">{t('appointmentsTable.dateTime')}</dt>
                 <dd className="mt-1 text-zinc-300">
-                  {formatDate(apt.date_hour)}
+                  {formatDate(apt.date_hour, locale)}
                 </dd>
               </div>
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
                 <dt className="text-zinc-600">{t('appointmentsTable.barber')}</dt>
                 <dd className="mt-1 truncate text-zinc-300">
-                  {apt.professionals?.name || 'Qualquer barbeiro'}
+                  {apt.professionals?.name || t('appointmentsTable.anyBarber')}
                 </dd>
               </div>
             </dl>
