@@ -213,6 +213,23 @@ export const ptCopy = {
     dailyAverageInsight: 'Média de {count} marcações por dia.',
   },
 
+  communicationPage: {
+    messagesTitle: 'Mensagens',
+    messagesDescription: 'Envia e acompanha mensagens para os teus clientes.',
+    campaignsTitle: 'Campanhas',
+    campaignsDescription: 'Cria campanhas e mantém os clientes envolvidos.',
+    birthdaysTitle: 'Aniversários',
+    birthdaysDescription: 'Automatiza mensagens de aniversário para os teus clientes.',
+    eyebrow: 'Comunicação',
+    title: 'Fala com os teus clientes no momento certo.',
+    description: 'Mensagens, campanhas e aniversários reunidos numa única área para tornares a relação com os clientes mais simples e eficaz.',
+    viewPlans: 'Ver planos',
+    open: 'Abrir {section}',
+    centralTitle: 'Tudo centralizado',
+    centralDescription: 'Usa esta área como ponto de partida para qualquer comunicação com clientes.',
+    backToOverview: 'Voltar ao resumo',
+  },
+
   dashboard: {
     overview: 'Resumo',
     appointments: 'Marcações',
