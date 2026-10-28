@@ -728,6 +728,7 @@ export default function OnboardingPage() {
                       </p>
                     </div>
                     <Button
+            aria-label={loading ? "A criar barbearia" : "Criar barbearia"}
                       type="submit"
                       disabled={loading || createProgress < 90}
                       className="min-h-12 w-full rounded-xl bg-zinc-50 font-semibold text-zinc-950 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-400"
