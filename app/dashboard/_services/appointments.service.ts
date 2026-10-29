@@ -67,7 +67,7 @@ export const appointmentService = {
         .limit(20);
       if (lookupError) return { data: null, error: lookupError };
       const normalizePhone = (value: string) => {
-        let digits = value.replace(/\\D/g, '');
+        let digits = value.replace(/\D/g, '');
         if (digits.startsWith('00')) digits = digits.slice(2);
         if (digits.startsWith('351') && digits.length === 12) digits = digits.slice(3);
         return digits;
