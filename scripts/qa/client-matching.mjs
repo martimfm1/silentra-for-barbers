@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [profileRoute, bookingRoute, bookingService, clientsService, drawer, helper, packageJson, workflow] = await Promise.all([
+const [profileRoute, bookingService, clientsService, drawer, helper, packageJson, workflow] = await Promise.all([
   readFile('app/api/bookings/customer-profile/route.ts', 'utf8'),
-  readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('app/dashboard/_services/appointments.service.ts', 'utf8'),
   readFile('app/dashboard/_services/clients.service.ts', 'utf8'),
   readFile('app/barbershops/components/booking-drawer-canonical.tsx', 'utf8'),
