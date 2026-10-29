@@ -27,6 +27,7 @@ assert.match(booking, /isBeforeMinimumBookingNotice\(bookingDate, bookingTime, m
 assert.match(availability, /isBeforeMinimumBookingNotice\(/);
 assert.match(legacySlots, /isBeforeMinimumBookingNotice\(/);
 assert.match(portal, /isBeforeMinimumBookingNotice\(/);
+assert.match(portal, /currentAppointmentTime - minimumNoticeMinutes \* 60_000/);
 for (const key of ['lunchBreak:', 'daysOffInHours:', 'minimumBookingNotice:', 'minimumBookingNoticeDescription:', 'minimumBookingNoticeInvalid:', 'noticeUnit:', 'noticeMinutes:', 'noticeHours:']) {
   assert.ok(pt.includes(key), `Portuguese locale is missing ${key}`);
   assert.ok(en.includes(key), `English locale is missing ${key}`);
