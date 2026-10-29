@@ -16,6 +16,7 @@ export interface BarbershopConfigPayload {
   lunch_end?: string;
   is_public_in_directory?: boolean;
   time_limit_cancellation_hours?: number;
+  minimum_booking_notice_minutes?: number;
   default_language: 'pt' | 'en';
 }
 
@@ -29,7 +30,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, default_language',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language',
       )
       .eq('id', barbershopId)
       .single();
@@ -66,6 +67,7 @@ export async function getBarbershopConfig(
           0,
           Math.min(720, Number(barberData.time_limit_cancellation_hours ?? 24)),
         ),
+        minimum_booking_notice_minutes: Math.max(0, Math.min(43200, Number(barberData.minimum_booking_notice_minutes ?? 0))),
         popular_service_id: shopData?.popular_service_id ?? null,
       },
       error: null,
@@ -103,12 +105,19 @@ export async function updateBarbershopConfig(
       }
     }
 
+    if (payload.minimum_booking_notice_minutes !== undefined) {
+      const minutes = Number(payload.minimum_booking_notice_minutes);
+      if (!Number.isInteger(minutes) || minutes < 0 || minutes > 43200)
+        throw new Error('A antecedência mínima tem de estar entre 0 minutos e 30 dias.');
+    }
+
     const directoryVisibility = payload.is_public_in_directory;
     const popularServiceId = payload.popular_service_id;
     const expectedCancellationHours =
       payload.time_limit_cancellation_hours !== undefined
         ? Number(payload.time_limit_cancellation_hours)
         : undefined;
+    const expectedNoticeMinutes = payload.minimum_booking_notice_minutes !== undefined ? Number(payload.minimum_booking_notice_minutes) : undefined;
 
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
@@ -189,6 +198,10 @@ export async function updateBarbershopConfig(
       );
     }
 
+    if (expectedNoticeMinutes !== undefined && result.data && result.data.minimum_booking_notice_minutes !== expectedNoticeMinutes) {
+      console.error('[Barbershop Config Persistence Mismatch]', { field: 'minimum_booking_notice_minutes', expected: expectedNoticeMinutes, actual: result.data.minimum_booking_notice_minutes });
+      throw new Error('A antecedência mínima não foi guardada. Atualiza as migrations da base de dados e tenta novamente.');
+    }
     return result;
   } catch (error: unknown) {
     console.error('[Service Exception - updateBarbershopConfig]:', error);

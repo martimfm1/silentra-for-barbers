@@ -9,6 +9,7 @@ import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
+import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 import {
   isSafePublicBookingDate,
   isValidTime,
@@ -190,7 +191,7 @@ async function POST__unobserved(request: Request) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select(
-        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days)`,
+        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes)`,
       )
       .eq('id', shopId)
       .maybeSingle();
@@ -265,6 +266,9 @@ async function POST__unobserved(request: Request) {
       : shop.barbershops;
     const barbershopName = shopRelation?.name || 'Barbearia';
     const barbershopAddress = shopRelation?.address || 'Endereço sob consulta';
+    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(shopRelation?.minimum_booking_notice_minutes ?? 0)));
+    if (isBeforeMinimumBookingNotice(bookingDate, bookingTime, minimumNoticeMinutes))
+      return NextResponse.json({ success: false, error: 'Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.' }, { status: 409 });
     const selectedWeekday = new Date(`${bookingDate}T12:00:00`).getDay();
     const closedDays = parseClosedDays(shopRelation?.closed_days);
     if (closedDays.has(selectedWeekday))

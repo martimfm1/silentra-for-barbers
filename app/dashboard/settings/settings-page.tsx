@@ -73,6 +73,7 @@ type Config = {
   lunch_start: string;
   lunch_end: string;
   closed_days: string;
+  minimum_booking_notice_minutes: number;
   allow_online_bookings: boolean;
   is_public_in_directory: boolean;
   time_limit_cancellation_hours: number;
@@ -123,6 +124,7 @@ const normalize = (v: Partial<Config>): Config => ({
   lunch_start: v.lunch_start ?? '',
   lunch_end: v.lunch_end ?? '',
   closed_days: v.closed_days ?? 'None',
+  minimum_booking_notice_minutes: Math.max(0, Math.min(43200, Math.round(Number(v.minimum_booking_notice_minutes ?? 0)))),
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
   time_limit_cancellation_hours: Math.max(
@@ -154,6 +156,7 @@ export default function SettingsPageOrganized() {
   const [saving, setSaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [config, setConfig] = useState<Config>(normalize({}));
+  const [noticeUnit, setNoticeUnit] = useState<'minutes' | 'hours'>('minutes');
   const [initial, setInitial] = useState<Config | null>(null);
   const [amenities, setAmenities] = useState<BarbershopAmenities>(
     DEFAULT_BARBERSHOP_AMENITIES,
@@ -187,6 +190,7 @@ export default function SettingsPageOrganized() {
       const n = normalize(c.data);
       setConfig(n);
       setInitial(n);
+      setNoticeUnit(n.minimum_booking_notice_minutes > 0 && n.minimum_booking_notice_minutes % 60 === 0 ? 'hours' : 'minutes');
     }
     try {
       const body = await p.json();
@@ -263,6 +267,8 @@ export default function SettingsPageOrganized() {
         config.lunch_start >= config.lunch_end)
     )
       return toast.error(t('settingsPage.lunchInvalid'));
+    if (!Number.isInteger(config.minimum_booking_notice_minutes) || config.minimum_booking_notice_minutes < 0 || config.minimum_booking_notice_minutes > 43200)
+      return toast.error(t('settingsPage.minimumBookingNoticeInvalid'));
     setSaving(true);
     try {
       const payload = { ...config };
@@ -671,142 +677,68 @@ export default function SettingsPageOrganized() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Input
-                      type="time"
-                      aria-label={t('settingsPage.openingTime')}
-                      value={config.opening_time}
-                      onChange={(e) => set({ opening_time: e.target.value })}
-                      className={INPUT_CLASS}
-                    />
-                    <Input
-                      type="time"
-                      aria-label={t('settingsPage.closingTime')}
-                      value={config.closing_time}
-                      onChange={(e) => set({ closing_time: e.target.value })}
-                      className={INPUT_CLASS}
-                    />
+                    <div className="grid gap-2">
+                      <label htmlFor="settings-opening-time" className="text-sm font-medium text-zinc-200">{t('settingsPage.openingTime')}</label>
+                      <Input id="settings-opening-time" type="time" aria-label={t('settingsPage.openingTime')} value={config.opening_time} onChange={(e) => set({ opening_time: e.target.value })} className={INPUT_CLASS} />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="settings-closing-time" className="text-sm font-medium text-zinc-200">{t('settingsPage.closingTime')}</label>
+                      <Input id="settings-closing-time" type="time" aria-label={t('settingsPage.closingTime')} value={config.closing_time} onChange={(e) => set({ closing_time: e.target.value })} className={INPUT_CLASS} />
+                    </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Input
-                      type="time"
-                      aria-label={t('settingsPage.lunchStart')}
-                      value={config.lunch_start}
-                      onChange={(e) => set({ lunch_start: e.target.value })}
-                      className={INPUT_CLASS}
-                    />
-                    <Input
-                      type="time"
-                      aria-label={t('settingsPage.lunchEnd')}
-                      value={config.lunch_end}
-                      onChange={(e) => set({ lunch_end: e.target.value })}
-                      className={INPUT_CLASS}
-                    />
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {days.map(([v, enLabel, ptLabel]) => {
-                      const active = closed.includes(v);
-                      return (
-                        <button
-                          key={v}
-                          type="button"
-                          aria-pressed={active}
-                          onClick={() => {
-                            const n = active
-                              ? closed.filter((x) => x !== v)
-                              : [...closed, v];
-                            set({
-                              closed_days: n.length ? n.join(',') : 'None',
-                            });
-                          }}
-                          className={cn(
-                            'min-h-12 rounded-xl border px-3 text-left text-sm',
-                            active
-                              ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
-                              : 'border-white/10 bg-white/[.02] text-zinc-400',
-                          )}
-                        >
-                          {locale === 'pt' ? ptLabel : enLabel}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {t('settingsPage.allowOnline')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.allowOnlineDescription')}
-                        </p>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-zinc-200">{t('settingsPage.lunchBreak')}</h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-2">
+                        <label htmlFor="settings-lunch-start" className="text-sm font-medium text-zinc-300">{t('settingsPage.lunchStart')}</label>
+                        <Input id="settings-lunch-start" type="time" aria-label={t('settingsPage.lunchStart')} value={config.lunch_start} onChange={(e) => set({ lunch_start: e.target.value })} className={INPUT_CLASS} />
                       </div>
-                      <Switch
-                        checked={config.allow_online_bookings}
-                        onCheckedChange={(v) =>
-                          set({ allow_online_bookings: v })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {t('settingsPage.autoConfirm')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.autoConfirmDescription')}
-                        </p>
+                      <div className="grid gap-2">
+                        <label htmlFor="settings-lunch-end" className="text-sm font-medium text-zinc-300">{t('settingsPage.lunchEnd')}</label>
+                        <Input id="settings-lunch-end" type="time" aria-label={t('settingsPage.lunchEnd')} value={config.lunch_end} onChange={(e) => set({ lunch_end: e.target.value })} className={INPUT_CLASS} />
                       </div>
-                      <Switch
-                        disabled={!automationAllowed}
-                        checked={
-                          automationAllowed && config.auto_confirm_bookings
-                        }
-                        onCheckedChange={(v) =>
-                          automationAllowed && set({ auto_confirm_bookings: v })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {t('settingsPage.autoComplete')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.autoCompleteDescription')}
-                        </p>
-                      </div>
-                      <Switch
-                        disabled={!automationAllowed}
-                        checked={
-                          automationAllowed && config.auto_complete_bookings
-                        }
-                        onCheckedChange={(v) =>
-                          automationAllowed &&
-                          set({ auto_complete_bookings: v })
-                        }
-                      />
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4">
-                    <div className="flex items-center gap-2">
-                      <CalendarCheck2 className="size-4 text-amber-300" />
-                      <p className="text-sm font-medium">
-                        {t('settingsPage.cancellationWindow')}
-                      </p>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-zinc-200">{t('settingsPage.daysOffInHours')}</h3>
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {days.map(([v, enLabel, ptLabel]) => {
+                        const active = closed.includes(v);
+                        return (
+                          <button key={v} type="button" aria-pressed={active}
+                            onClick={() => {
+                              const n = active ? closed.filter((x) => x !== v) : [...closed, v];
+                              set({ closed_days: n.length ? n.join(',') : 'None' });
+                            }}
+                            className={cn('min-h-12 rounded-xl border px-3 text-left text-sm',
+                              active ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200' : 'border-white/10 bg-white/[.02] text-zinc-400')}>
+                            {locale === 'pt' ? ptLabel : enLabel}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={720}
-                      step={1}
-                      value={config.time_limit_cancellation_hours}
-                      onChange={(e) =>
-                        set({
-                          time_limit_cancellation_hours: Number(e.target.value),
-                        })
-                      }
-                      className={`${INPUT_CLASS} mt-4 sm:max-w-xs`}
-                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="settings-minimum-booking-notice" className="text-sm font-medium text-zinc-200">{t('settingsPage.minimumBookingNotice')}</label>
+                    <p className="text-xs leading-5 text-zinc-500">{t('settingsPage.minimumBookingNoticeDescription')}</p>
+                    <div className="grid max-w-lg grid-cols-[minmax(0,1fr)_auto] gap-2">
+                      <Input id="settings-minimum-booking-notice" type="number" inputMode="decimal" min={0}
+                        max={noticeUnit === 'hours' ? 720 : 43200} step={noticeUnit === 'hours' ? 0.25 : 1}
+                        value={noticeUnit === 'hours' ? config.minimum_booking_notice_minutes / 60 : config.minimum_booking_notice_minutes}
+                        onChange={(e) => {
+                          const amount = Number(e.target.value);
+                          if (!Number.isFinite(amount)) return;
+                          const minutes = Math.round(amount * (noticeUnit === 'hours' ? 60 : 1));
+                          set({ minimum_booking_notice_minutes: Math.max(0, Math.min(43200, minutes)) });
+                        }}
+                        aria-label={t('settingsPage.minimumBookingNotice')} className={INPUT_CLASS} />
+                      <select aria-label={t('settingsPage.noticeUnit')} value={noticeUnit}
+                        onChange={(e) => setNoticeUnit(e.target.value as 'minutes' | 'hours')}
+                        className="min-h-11 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200">
+                        <option value="minutes">{t('settingsPage.noticeMinutes')}</option>
+                        <option value="hours">{t('settingsPage.noticeHours')}</option>
+                      </select>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
