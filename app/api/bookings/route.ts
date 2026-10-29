@@ -445,21 +445,23 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
-    void notifyBarbersOfNewBooking({
-      appointmentId: appointment.id,
-      barbershopId,
-      professionalId: normalizedProfessionalId,
-      customerName: name,
-      customerPhone: phone,
-      customerEmail: email,
-      serviceName: selectedService.name || 'Serviço',
-      date: bookingDate,
-      time: bookingTime,
-      durationMinutes,
-      status: appointment.status === 'scheduled' ? 'confirmed' : 'pending',
-    }).catch((error) => {
+    try {
+      await notifyBarbersOfNewBooking({
+        appointmentId: appointment.id,
+        barbershopId,
+        professionalId: normalizedProfessionalId,
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email,
+        serviceName: selectedService.name || 'Serviço',
+        date: bookingDate,
+        time: bookingTime,
+        durationMinutes,
+        status: appointment.status === 'scheduled' ? 'confirmed' : 'pending',
+      });
+    } catch (error) {
       console.error('[BARBER_BOOKING_NOTIFICATION_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
-    });
+    }
 
     if (appointment.status === 'scheduled') {
       void sendBookingConfirmationEmail({
