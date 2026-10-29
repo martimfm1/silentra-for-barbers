@@ -74,7 +74,7 @@ export const clientsService = {
         .eq('role', 'client')
         .or([
           normalizedEmail ? `email.eq.${normalizedEmail.replace(/[,.()]/g, '')}` : '',
-          `num_phone.eq.${clientData.num_phone.trim().replace(/[,.()]/g, '')}`,
+          `num_phone.ilike.%${normalizedPhone.slice(-7)}%`,
         ].filter(Boolean).join(','))
         .limit(50);
       if (lookupError) throw lookupError;
