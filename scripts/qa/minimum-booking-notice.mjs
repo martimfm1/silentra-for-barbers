@@ -9,7 +9,7 @@ const [settings, service, booking, availability, legacySlots, portal, helper, mi
   readFile('app/api/shops/[id]/slots/route.ts', 'utf8'),
   readFile('app/api/customer-portal/appointments/[appointmentId]/route.ts', 'utf8'),
   readFile('lib/bookings/minimum-notice.ts', 'utf8'),
-  readFile('supabase/migrations/20261029200000_minimum_booking_notice_minutes.sql', 'utf8'),
+  readFile('supabase/migrations/20261029190459_minimum_booking_notice_minutes.sql', 'utf8'),
   readFile('app/locales/pt.ts', 'utf8'),
   readFile('app/locales/en.ts', 'utf8'),
   readFile('package.json', 'utf8').then(JSON.parse),
