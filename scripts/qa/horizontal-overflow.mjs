@@ -39,6 +39,8 @@ assert.match(responsiveCss, /overflow-wrap:\s*anywhere/);
 assert.match(responsiveCss, /@media \(max-width: 767px\)/);
 assert.match(responsiveCss, /table-layout:\s*fixed/);
 assert.match(responsiveCss, /overflow-x:\s*clip/);
+assert.match(responsiveCss, /body:has\(\.silentra-dashboard-shell\)[\s\S]*?overflow-x:\s*hidden/);
+assert.match(responsiveCss, /\.dashboard-transition-panel[\s\S]*?transform:\s*none !important/);
 assert.match(globalsCss, /\.dashboard-page/);
 
 // Guard cannot silently fall out of the standard quality command or CI.
