@@ -56,8 +56,31 @@ export const appointmentService = {
       }
     }
 
+    let resolvedClientId = payload.client_id;
+    if (!resolvedClientId && clientEmail && payload.manual_phone?.trim()) {
+      const { data: possibleClients, error: lookupError } = await supabase
+        .from('users')
+        .select('id,num_phone')
+        .eq('barbershop_id', payload.barbershop_id)
+        .eq('role', 'client')
+        .eq('email', clientEmail)
+        .limit(20);
+      if (lookupError) return { data: null, error: lookupError };
+      const normalizePhone = (value: string) => {
+        let digits = value.replace(/\\D/g, '');
+        if (digits.startsWith('00')) digits = digits.slice(2);
+        if (digits.startsWith('351') && digits.length === 12) digits = digits.slice(3);
+        return digits;
+      };
+      const normalizedPhone = normalizePhone(payload.manual_phone);
+      resolvedClientId = (possibleClients ?? []).find(
+        (client) => normalizePhone(String(client.num_phone ?? '')) === normalizedPhone,
+      )?.id ?? null;
+    }
+
     const normalizedPayload = {
       ...payload,
+      client_id: resolvedClientId,
       manual_email: clientEmail,
     };
 
