@@ -66,7 +66,7 @@ export const clientsService = {
 
     const normalizedEmail = clientData.email?.trim().toLowerCase() || '';
     const normalizedPhone = clientData.num_phone.replace(/\D/g, '');
-    if (normalizedEmail || normalizedPhone) {
+    if (normalizedEmail || normalizedPhone.length >= 7) {
       const { data: existingClients, error: lookupError } = await supabase
         .from('users')
         .select('id,name_complete,num_phone,email')
@@ -74,7 +74,7 @@ export const clientsService = {
         .eq('role', 'client')
         .or([
           normalizedEmail ? `email.eq.${normalizedEmail.replace(/[,.()]/g, '')}` : '',
-          `num_phone.ilike.%${normalizedPhone.slice(-7)}%`,
+          normalizedPhone.length >= 7 ? `num_phone.ilike.%${normalizedPhone.slice(-7)}%` : '',
         ].filter(Boolean).join(','))
         .limit(50);
       if (lookupError) throw lookupError;
