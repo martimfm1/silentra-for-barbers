@@ -55,6 +55,9 @@ jobs:
       - name: Client matching and tenant isolation contracts
         run: pnpm qa:client-matching
 
+      - name: Barber booking email contracts
+        run: pnpm qa:barber-booking-email
+
       - name: Plan contracts
         run: pnpm qa:plans
 
