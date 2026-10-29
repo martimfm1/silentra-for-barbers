@@ -65,7 +65,7 @@ export const clientsService = {
       );
 
     const normalizedEmail = clientData.email?.trim().toLowerCase() || '';
-    const normalizedPhone = clientData.num_phone.replace(/\\D/g, '');
+    const normalizedPhone = clientData.num_phone.replace(/\D/g, '');
     if (normalizedEmail || normalizedPhone) {
       const { data: existingClients, error: lookupError } = await supabase
         .from('users')
@@ -80,7 +80,7 @@ export const clientsService = {
       if (lookupError) throw lookupError;
       const sameClient = (existingClients ?? []).find((existing) => {
         const existingEmail = String(existing.email ?? '').trim().toLowerCase();
-        const existingPhone = String(existing.num_phone ?? '').replace(/\\D/g, '');
+        const existingPhone = String(existing.num_phone ?? '').replace(/\D/g, '');
         return (normalizedEmail && existingEmail === normalizedEmail) ||
           (normalizedPhone.length >= 7 && existingPhone === normalizedPhone);
       });
