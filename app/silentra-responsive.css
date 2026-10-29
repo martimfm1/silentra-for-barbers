@@ -430,3 +430,39 @@ body :where(
   }
 }
 
+
+/* Mobile dashboard must behave like the public landing page: fixed viewport width,
+   no horizontal panning, and no transformed page layer expanding its visual bounds. */
+@media (max-width: 767px) {
+  body:has(.silentra-dashboard-shell) {
+    overflow-x: hidden;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .silentra-dashboard-shell {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    contain: paint;
+  }
+
+  .silentra-dashboard-shell > .dashboard-content,
+  .silentra-dashboard-shell .silentra-dashboard-main,
+  .silentra-dashboard-shell .dashboard-page,
+  .silentra-dashboard-shell [data-dashboard-section] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Keep mobile route changes subtle; scale/3D transforms can make the whole
+     dashboard look zoomed out and enlarge its painted bounds on iOS Safari. */
+  .silentra-dashboard-shell .dashboard-transition-panel {
+    transform: none !important;
+    transform-style: flat !important;
+    perspective: none !important;
+    will-change: opacity !important;
+  }
+}

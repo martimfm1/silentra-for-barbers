@@ -166,7 +166,7 @@ export function DashboardPageTransition({
                   filter: { duration: 0.28, ease: 'easeOut' },
                 }
           }
-          className="col-start-1 row-start-1 min-w-0 will-change-transform [backface-visibility:hidden]"
+          className="dashboard-transition-panel col-start-1 row-start-1 min-w-0 will-change-transform [backface-visibility:hidden]"
           data-dashboard-section={section}
           data-dashboard-direction={transition.direction > 0 ? 'down' : 'up'}
         >
