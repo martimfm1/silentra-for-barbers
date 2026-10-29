@@ -64,6 +64,31 @@ export const clientsService = {
         'Não foi possível encontrar a barbearia do utilizador autenticado.',
       );
 
+    const normalizedEmail = clientData.email?.trim().toLowerCase() || '';
+    const normalizedPhone = clientData.num_phone.replace(/\\D/g, '');
+    if (normalizedEmail || normalizedPhone) {
+      const { data: existingClients, error: lookupError } = await supabase
+        .from('users')
+        .select('id,name_complete,num_phone,email')
+        .eq('barbershop_id', resolvedBarbershopId)
+        .eq('role', 'client')
+        .or([
+          normalizedEmail ? `email.eq.${normalizedEmail.replace(/[,.()]/g, '')}` : '',
+          `num_phone.eq.${clientData.num_phone.trim().replace(/[,.()]/g, '')}`,
+        ].filter(Boolean).join(','))
+        .limit(50);
+      if (lookupError) throw lookupError;
+      const sameClient = (existingClients ?? []).find((existing) => {
+        const existingEmail = String(existing.email ?? '').trim().toLowerCase();
+        const existingPhone = String(existing.num_phone ?? '').replace(/\\D/g, '');
+        return (normalizedEmail && existingEmail === normalizedEmail) ||
+          (normalizedPhone.length >= 7 && existingPhone === normalizedPhone);
+      });
+      if (sameClient) {
+        throw new Error('Já existe um cliente com este email ou telemóvel nesta barbearia.');
+      }
+    }
+
     return await supabase
       .from('users')
       .insert([{ ...clientData, barbershop_id: resolvedBarbershopId }])
