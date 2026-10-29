@@ -343,7 +343,21 @@ async function PATCH__unobserved(
     if (!['pending', 'scheduled'].includes(appointment.status))
       return jsonError('Esta marcação já não pode ser reagendada.', 409);
     const shop = getShop(appointment);
-    if (isBeforeMinimumBookingNotice(date, slot, Number(shop?.minimum_booking_notice_minutes ?? 0)))
+    const minimumNoticeMinutes = Math.max(
+      0,
+      Math.min(43200, Number(shop?.minimum_booking_notice_minutes ?? 0)),
+    );
+    const currentAppointmentTime = new Date(appointment.date_hour).getTime();
+    if (
+      minimumNoticeMinutes > 0 &&
+      Number.isFinite(currentAppointmentTime) &&
+      Date.now() > currentAppointmentTime - minimumNoticeMinutes * 60_000
+    )
+      return jsonError(
+        'Já não podes alterar esta marcação dentro da antecedência mínima configurada.',
+        409,
+      );
+    if (isBeforeMinimumBookingNotice(date, slot, minimumNoticeMinutes))
       return jsonError('Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.', 409);
     const cancellationHours = Math.max(
       0,
