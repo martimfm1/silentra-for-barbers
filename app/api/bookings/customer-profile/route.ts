@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { normalizeText, UUID_PATTERN } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 
@@ -31,8 +32,25 @@ async function POST__unobserved(request: Request) {
       );
     }
 
+    // The public drawer sends shops.id, while customer records belong to barbershops.id.
+    // Resolve the public shop first so customer matching is scoped to the correct tenant.
+    const admin = createAdminClient();
+    const { data: shop, error: shopError } = await admin
+      .from('shops')
+      .select('barbershop_id,is_active')
+      .eq('id', shopId)
+      .maybeSingle();
+
+    if (shopError) throw shopError;
+    if (!shop?.barbershop_id || !shop.is_active) {
+      return NextResponse.json(
+        { success: false, error: 'Barbearia indisponível.' },
+        { status: 404 },
+      );
+    }
+
     const customer = await findPublicBookingCustomer({
-      barbershopId: shopId,
+      barbershopId: shop.barbershop_id,
       email,
       phone,
     });
