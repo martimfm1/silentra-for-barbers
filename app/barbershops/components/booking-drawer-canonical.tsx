@@ -327,7 +327,7 @@ export function BookingDrawerCanonical({
         .then((payload) => {
           if (controller.signal.aborted) return;
           setCustomerState(
-            payload.matched && payload.hasBirthDate ? 'matched' : 'new',
+            payload.matched ? 'matched' : 'new',
           );
         })
         .catch((reason) => {
