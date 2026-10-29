@@ -55,6 +55,9 @@ jobs:
       - name: Client matching and tenant isolation contracts
         run: pnpm qa:client-matching
 
+      - name: Minimum booking notice contracts
+        run: pnpm qa:minimum-booking-notice
+
       - name: Plan contracts
         run: pnpm qa:plans
 

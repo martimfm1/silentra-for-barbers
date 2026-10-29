@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
+import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 
 type AppointmentRow = {
   date_hour: string | null;
@@ -106,7 +107,7 @@ async function GET__unobserved(
     const { data: shopRecord, error: shopError } = await admin
       .from('shops')
       .select(
-        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days)`,
+        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days, minimum_booking_notice_minutes)`,
       )
       .eq('id', shopId)
       .single();
@@ -130,6 +131,7 @@ async function GET__unobserved(
 
     const openTime = relation.opening_time || '09:00:00';
     const closeTime = relation.closing_time || '19:00:00';
+    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(relation.minimum_booking_notice_minutes ?? 0)));
     const lunchStart = relation.lunch_start || null;
     const lunchEnd = relation.lunch_end || null;
     const closedDays = normalizeClosedDays(relation.closed_days);
@@ -349,7 +351,8 @@ async function GET__unobserved(
       if (
         slotEnd > closeTotalMinutes ||
         (isToday && slotStart <= currentMinutesNow) ||
-        isClosedDay
+        isClosedDay ||
+        isBeforeMinimumBookingNotice(date, minutesToTime(slotStart), minimumNoticeMinutes)
       )
         continue;
       if (

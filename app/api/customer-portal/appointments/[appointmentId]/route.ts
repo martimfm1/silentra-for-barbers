@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import {
   isSafePublicBookingDate,
@@ -71,7 +72,7 @@ async function getAuthorizedAppointment(request: Request, appointmentId: string)
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(opening_time,closing_time,lunch_start,lunch_end,closed_days,time_limit_cancellation_hours),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(opening_time,closing_time,lunch_start,lunch_end,closed_days,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
@@ -192,7 +193,9 @@ async function getAvailability(
       continue;
     if (occupied.some((item) => overlaps(start, end, item.start, item.end)))
       continue;
-    slots.push(minutesToTime(start));
+    const candidateTime = minutesToTime(start);
+    if (isBeforeMinimumBookingNotice(date, candidateTime, Number(shop?.minimum_booking_notice_minutes ?? 0))) continue;
+    slots.push(candidateTime);
   }
   const todayPortugal = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Lisbon',
@@ -340,6 +343,22 @@ async function PATCH__unobserved(
     if (!['pending', 'scheduled'].includes(appointment.status))
       return jsonError('Esta marcação já não pode ser reagendada.', 409);
     const shop = getShop(appointment);
+    const minimumNoticeMinutes = Math.max(
+      0,
+      Math.min(43200, Number(shop?.minimum_booking_notice_minutes ?? 0)),
+    );
+    const currentAppointmentTime = new Date(appointment.date_hour).getTime();
+    if (
+      minimumNoticeMinutes > 0 &&
+      Number.isFinite(currentAppointmentTime) &&
+      Date.now() > currentAppointmentTime - minimumNoticeMinutes * 60_000
+    )
+      return jsonError(
+        'Já não podes alterar esta marcação dentro da antecedência mínima configurada.',
+        409,
+      );
+    if (isBeforeMinimumBookingNotice(date, slot, minimumNoticeMinutes))
+      return jsonError('Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.', 409);
     const cancellationHours = Math.max(
       0,
       Number(shop?.time_limit_cancellation_hours ?? 24),

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateTimeSlots } from '@/app/barbershops/utils/booking-slots';
 import { isSafePublicBookingDate, UUID_PATTERN } from '@/lib/validation';
+import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 
 async function GET__unobserved(
   request: Request,
@@ -38,7 +39,8 @@ async function GET__unobserved(
           name,
           opening_time,
           closing_time,
-          off_days
+          off_days,
+          minimum_booking_notice_minutes
         )
       `,
       )
@@ -79,7 +81,8 @@ async function GET__unobserved(
       ? barbershop.closing_time.substring(0, 5)
       : '19:00';
 
-    const slots = generateTimeSlots(openTime, closeTime, 30);
+    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(barbershop?.minimum_booking_notice_minutes ?? 0)));
+    const slots = generateTimeSlots(openTime, closeTime, 30).filter((slot) => !isBeforeMinimumBookingNotice(dateParam, slot, minimumNoticeMinutes));
 
     return NextResponse.json(
       {
