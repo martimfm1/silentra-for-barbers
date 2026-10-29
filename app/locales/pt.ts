@@ -966,7 +966,7 @@ export const pt = {
     publicLoadFailed: 'Não foi possível carregar as informações públicas.',
     openingAfterClosing: 'O horário de fecho tem de ser posterior ao horário de abertura.',
     lunchInvalid: 'Verifica o início e o fim da pausa.',
-    minimumBookingNoticeInvalid: 'Introduz uma antecedência entre 0 minutos e 30 dias.'
+    minimumBookingNoticeInvalid: 'Introduz uma antecedência entre 0 minutos e 30 dias.',
     locationUpdateFailed: 'Não foi possível atualizar a localização.',
     amenitiesSaveFailed: 'Não foi possível guardar as informações do espaço.',
     saved: 'Todas as alterações foram guardadas.',
