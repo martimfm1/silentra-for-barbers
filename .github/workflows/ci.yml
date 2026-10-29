@@ -61,6 +61,9 @@ jobs:
       - name: Security audit
         run: pnpm qa:security
 
+      - name: CSRF origin contracts
+        run: pnpm qa:csrf
+
       - name: UI copy audit
         run: pnpm qa:copy
 
