@@ -5,7 +5,7 @@ const [dashboard, editor, api, migration, grantsMigration] = await Promise.all([
   readFile('app/dashboard/page.tsx', 'utf8'),
   readFile('app/dashboard/_components/DashboardCustomization.tsx', 'utf8'),
   readFile('app/api/dashboard/customizations/route.ts', 'utf8'),
-  readFile('supabase/migrations/20261030120000_dashboard_customizations.sql', 'utf8'),
+  readFile('supabase/migrations/20261030120137_dashboard_customizations.sql', 'utf8'),
 ]);
 
 // Dashboard renders only the selected shortcuts and independently toggleable sections.
