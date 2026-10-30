@@ -122,7 +122,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { hasFeature } = useFeatureAccess();
   const { barbershopAvatarUrl } = useBarbershop();
-  const { t, locale } = useLanguage();
+  const { locale } = useLanguage();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreTriggerRef = useRef<HTMLButtonElement>(null);
   const moreDialogRef = useRef<HTMLElement>(null);
