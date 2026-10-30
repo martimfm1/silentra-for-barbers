@@ -236,6 +236,19 @@ for (const status of [
   }
 }
 
+const loyaltyValidation = read('app/dashboard/loyalty/validate/page.tsx');
+for (const fragment of [
+  "t('loyaltyValidation.successStatus'",
+  "t('loyaltyValidation.successToast')",
+]) {
+  if (!loyaltyValidation.includes(fragment)) {
+    failures.push('app/dashboard/loyalty/validate/page.tsx: missing localized success copy marker "' + fragment + '"');
+  }
+}
+if (loyaltyValidation.includes("toast.success('Recompensa validada.')") || loyaltyValidation.includes('Recompensa ${data.redemption')) {
+  failures.push('app/dashboard/loyalty/validate/page.tsx: hardcoded Portuguese success copy must use translations');
+}
+
 const localeAwareSources = {
   'app/dashboard/settings/public-profile/page.tsx': ["useLanguage()", 'PUBLIC_PROFILE_COPY', 'AMENITIES_EN', 'copy.saveSuccess'],
   'app/dashboard/pos/loja/page.tsx': ["useLanguage()", 'orderStatusLabels', 'Could not load products.', 'Could not load orders.'],
