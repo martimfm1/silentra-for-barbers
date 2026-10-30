@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useState } from 'react';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
 import type { MarketplaceShop } from '@/types/marketplace/shops';
@@ -120,7 +121,7 @@ export default function AgendaDoVictorPage({
           </div>
 
           <footer className="px-5 py-6 text-center text-xs text-[#969690] sm:px-9">
-            <a href="/terms" className="underline underline-offset-4 hover:text-[#333]">Política de privacidade e cookies</a>
+            <Link href="/terms" className="underline underline-offset-4 hover:text-[#333]">Política de privacidade e cookies</Link>
             <p className="mt-3">Powered by <span className="font-semibold tracking-wide text-[#555]">SILENTRA</span></p>
           </footer>
         </div>
