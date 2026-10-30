@@ -586,6 +586,21 @@ const checks = [
       source.includes('Nova marcação') &&
       source.includes('Selecionar um serviço'),
   },
+  {
+    name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
+    file: 'app/barbershops/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID") &&
+      source.includes("permanentRedirect('/agendadovictor')") &&
+      source.includes("? '/agendadovictor'"),
+  },
+  {
+    name: 'Agenda do Victor replaces the old shop URL in the public sitemap',
+    file: 'app/sitemap.ts',
+    test: (source) =>
+      source.includes("url: `${SITE_URL}/agendadovictor`") &&
+      source.includes('slug === AGENDA_DO_VICTOR_SHOP_SLUG'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
