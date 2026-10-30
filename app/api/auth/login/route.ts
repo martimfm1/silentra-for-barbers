@@ -34,9 +34,19 @@ async function POST__unobserved(request: Request) {
       await supabase.auth.signInWithPassword({ email, password });
 
     if (authError || !authData.user) {
+      // Keep unknown accounts and incorrect passwords indistinguishable to
+      // prevent email enumeration. Unconfirmed email is actionable only
+      // after Supabase has accepted the credentials.
+      if (authError?.code === 'email_not_confirmed') {
+        return NextResponse.json(
+          { code: 'EMAIL_NOT_CONFIRMED' },
+          { status: 403, headers: { 'Cache-Control': 'no-store' } },
+        );
+      }
+
       return NextResponse.json(
-        { error: 'Credenciais inválidas.' },
-        { status: 401 },
+        { code: 'INVALID_CREDENTIALS' },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
@@ -62,6 +72,7 @@ async function POST__unobserved(request: Request) {
         user: profile
           ? {
               ...profile,
+              barbershopId: profile.barbershop_id ?? null,
               email: authData.user.email ?? null,
             }
           : {
@@ -71,6 +82,7 @@ async function POST__unobserved(request: Request) {
                   ? authData.user.user_metadata.name_complete
                   : null,
               barbershop_id: null,
+              barbershopId: null,
               role: null,
               email: authData.user.email ?? null,
             },
