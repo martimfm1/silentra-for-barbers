@@ -50,10 +50,13 @@ interface LoginParams {
   setIsSubmitting: (loading: boolean) => void;
   setErrorMsg: (msg: string | null) => void;
   router: RouterLike;
+  invalidCredentialsMessage?: string;
+  unconfirmedEmailMessage?: string;
 }
 
 interface LoginResponse {
   error?: string;
+  code?: 'EMAIL_NOT_CONFIRMED' | 'INVALID_CREDENTIALS';
   session?: { access_token: string; refresh_token: string };
   user?: { barbershopId?: string | null };
 }
@@ -104,7 +107,12 @@ export async function handleLogin({
     }
 
     if (!res.ok) {
-      const errorText = result.error || 'Credenciais inválidas.';
+      const errorText =
+        result.code === 'EMAIL_NOT_CONFIRMED'
+          ? unconfirmedEmailMessage || 'O email ainda não foi confirmado.'
+          : result.code === 'INVALID_CREDENTIALS'
+            ? invalidCredentialsMessage || 'Credenciais inválidas.'
+            : result.error || 'Não foi possível iniciar sessão.';
       toast.error(errorText);
       setErrorMsg(errorText);
       return;
@@ -151,6 +159,7 @@ interface RegisterParams {
   acceptedTerms: boolean;
   termsErrorMessage?: string;
   onSuccess?: () => void;
+  successMessage?: string;
 }
 
 export async function handleRegister({
@@ -160,6 +169,7 @@ export async function handleRegister({
   acceptedTerms,
   termsErrorMessage = 'Deves aceitar os termos e condições.',
   onSuccess,
+  successMessage,
 }: RegisterParams) {
   event.preventDefault();
 
@@ -213,7 +223,7 @@ export async function handleRegister({
       email_confirmation_required: data.requiresEmailConfirmation ?? true,
     });
 
-    toast.success('Conta criada! Confirma o teu e-mail para continuar.');
+    toast.success(successMessage || 'Verifica a tua caixa de entrada para os próximos passos.');
 
     if (onSuccess) {
       onSuccess();
