@@ -43,7 +43,7 @@ export default async function AgendaDoVictorRoute() {
         .order('name', { ascending: true }),
       database
         .from('shops')
-        .select('id,slug,city,address,lat,lng')
+        .select('id,slug,city,address,lat,lng,opening_time,closing_time')
         .eq('barbershop_id', profile.barbershop_id)
         .maybeSingle(),
     ]);
