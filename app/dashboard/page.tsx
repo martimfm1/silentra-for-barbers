@@ -278,7 +278,7 @@ export default function DashboardPage() {
                 {userName ? `, ${userName}` : ''} 👋
               </h1>
               <p className="mt-1 text-sm capitalize text-zinc-400">
-                {new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : locale === 'en' ? 'en-GB' : 'pt-PT', {
+                {new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
