@@ -281,20 +281,6 @@ export function SiteNavbar() {
         href: '/dashboard/analytics',
         permission: 'analytics',
       },
-      {
-        label: t('dashboard.team', { defaultValue: 'Equipa' }),
-        href: '/dashboard/equipa',
-        permission: 'team',
-      },
-      {
-        label: t('dashboard.settings', { defaultValue: 'Definições' }),
-        href: '/dashboard/settings',
-        permission: 'settings',
-      },
-      {
-        label: t('nav.documentation'),
-        href: '/documentation',
-      },
     ],
     [t],
   );
@@ -310,16 +296,8 @@ export function SiteNavbar() {
         href: '/my-bookings',
       },
       {
-        label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
-        href: '/#howitworks',
-      },
-      {
         label: locale === 'pt' ? 'Aplicação' : 'Get the app',
         href: '/instalar',
-      },
-      {
-        label: t('nav.documentation', { defaultValue: 'Documentação' }),
-        href: '/documentation',
       },
     ],
     [t, locale],
@@ -341,20 +319,8 @@ export function SiteNavbar() {
         href: '/plans',
       },
       {
-        label: t('nav.howItWorks', { defaultValue: 'Como funciona' }),
-        href: '/#howitworks',
-      },
-      {
         label: t('nav.forBarbers', { defaultValue: 'Para barbeiros' }),
         href: '/registo',
-      },
-      {
-        label: locale === 'pt' ? 'Aplicação' : 'Get the app',
-        href: '/instalar',
-      },
-      {
-        label: t('nav.documentation', { defaultValue: 'Documentação' }),
-        href: '/documentation',
       },
     ],
     [t, locale],
@@ -640,6 +606,7 @@ export function SiteNavbar() {
               <LanguageSwitcher />
             </div>
             <motion.div
+              className="lg:hidden"
               whileTap={isMotionEnabled ? { scale: 0.95 } : undefined}
               transition={microSpring}
             >
@@ -672,7 +639,7 @@ export function SiteNavbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={NAVBAR_TRANSITION}
-            className="glassmorphism fixed inset-0 z-[150] flex flex-col bg-zinc-950/97 px-5 pb-8 pt-28 text-zinc-50 backdrop-blur-2xl sm:px-8 sm:pt-32"
+            className="glassmorphism fixed inset-0 z-[150] flex flex-col bg-zinc-950/97 px-5 pb-6 pt-24 text-zinc-50 backdrop-blur-2xl sm:px-8 sm:pt-28"
             role="dialog"
             aria-modal="true"
             aria-label={t('dashboard.mainNavigation', {
@@ -713,7 +680,7 @@ export function SiteNavbar() {
                           : undefined
                       }
                       className={cn(
-                        'group flex min-h-14 items-center rounded-2xl border px-4 font-heading text-2xl font-semibold tracking-tight transition-[background-color,border-color,color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 sm:min-h-16 sm:px-5 sm:text-4xl',
+                        'group flex min-h-12 items-center rounded-xl border px-3 font-heading text-lg font-semibold tracking-tight transition-[background-color,border-color,color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 sm:min-h-14 sm:px-4 sm:text-2xl',
                         active
                           ? 'border-white/12 bg-white/[0.07] text-white'
                           : 'border-transparent text-zinc-300 hover:border-white/8 hover:bg-white/[0.04] hover:text-white',
