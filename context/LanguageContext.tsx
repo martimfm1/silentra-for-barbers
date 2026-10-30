@@ -94,9 +94,13 @@ export function LanguageProvider({
   useEffect(() => {
     let active = true;
     const saved = window.localStorage.getItem('locale');
-    if (saved === 'pt' || saved === 'en') setLocaleState(saved);
+    const hasSavedPreference = saved === 'pt' || saved === 'en';
+    if (hasSavedPreference) setLocaleState(saved);
 
     const syncBarbershopLanguage = async () => {
+      // A language selected and saved in this browser takes precedence over
+      // the barbershop default. The shop language is only the initial default.
+      if (hasSavedPreference) return;
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -144,8 +148,13 @@ export function LanguageProvider({
 
   const t = useMemo(
     () => (path: string, variables?: Record<string, unknown>) => {
-      const translated = resolveTranslation(locale, path);
-      if (translated === undefined) return path;
+      const fallbackLocale = locale === 'pt' ? 'en' : 'pt';
+      const translated =
+        resolveTranslation(locale, path) ??
+        resolveTranslation(fallbackLocale, path);
+      // Never expose internal translation keys to customers. If neither
+      // locale contains a key, render nothing until the copy is supplied.
+      if (translated === undefined) return '';
       return interpolate(translated, variables);
     },
     [locale],
