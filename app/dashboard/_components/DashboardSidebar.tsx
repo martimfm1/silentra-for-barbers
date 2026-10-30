@@ -17,16 +17,15 @@ import {
   Briefcase,
   MessageCircle,
   Headset,
-  Menu,
-  X,
   Lock,
   QrCode,
   Globe2,
-  ChevronDown,
-  Wrench,
+  MoreHorizontal,
+  X,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
@@ -42,88 +41,29 @@ interface SidebarItem {
   feature?: FeatureKey;
 }
 
-type BrandAvatarProps = { mobile?: boolean; avatarUrl: string | null };
-
-function BrandAvatar({ mobile = false, avatarUrl }: BrandAvatarProps) {
-  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
-  const displayedAvatarUrl =
-    avatarUrl && failedImageUrl !== avatarUrl
-      ? avatarUrl
-      : DEFAULT_BARBERSHOP_AVATAR;
-
-  return (
-    <span
-      className={cn(
-        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] text-zinc-100',
-        mobile ? 'size-8' : 'size-9',
-      )}
-    >
-      <Image
-        src={displayedAvatarUrl}
-        alt="Avatar da barbearia"
-        fill
-        sizes={mobile ? '32px' : '36px'}
-        className="object-cover"
-        unoptimized
-        onError={() =>
-          setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)
-        }
-      />
-    </span>
-  );
-}
-
 const primaryItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Início', icon: LayoutDashboard },
   { href: '/dashboard/agenda', label: 'Agenda', icon: CalendarDays },
   { href: '/dashboard/clientes', label: 'Clientes', icon: Users },
   { href: '/dashboard/servicos', label: 'Serviços', icon: Scissors },
-  {
-    href: '/dashboard/equipa',
-    label: 'Equipa',
-    icon: Briefcase,
-    feature: 'team_management',
-  },
+];
+
+const teamItems: SidebarItem[] = [
+  { href: '/dashboard/equipa', label: 'Equipa', icon: Briefcase, feature: 'team_management' },
 ];
 
 const communicationItems: SidebarItem[] = [
   { href: '/dashboard/comunicacao', label: 'Comunicação', icon: Megaphone },
-  {
-    href: '/dashboard/mensagens',
-    label: 'Mensagens',
-    icon: MessageCircle,
-    feature: 'messaging',
-  },
-  {
-    href: '/dashboard/marketing',
-    label: 'Campanhas',
-    icon: Megaphone,
-    feature: 'marketing_campaigns',
-  },
-  {
-    href: '/dashboard/automations',
-    label: 'Automações',
-    icon: Zap,
-    feature: 'marketing_campaigns',
-  },
+  { href: '/dashboard/mensagens', label: 'Mensagens', icon: MessageCircle, feature: 'messaging' },
+  { href: '/dashboard/marketing', label: 'Campanhas', icon: Megaphone, feature: 'marketing_campaigns' },
+  { href: '/dashboard/automations', label: 'Automações', icon: Zap, feature: 'marketing_campaigns' },
 ];
 
 const toolsItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
-  {
-    href: '/dashboard/analytics',
-    label: 'Relatórios',
-    icon: BarChart3,
-    feature: 'advanced_analytics',
-  },
-  {
-    href: '/dashboard/loyalty',
-    label: 'Fidelização',
-    icon: Heart,
-    feature: 'loyalty',
-  },
+  { href: '/dashboard/analytics', label: 'Relatórios', icon: BarChart3, feature: 'advanced_analytics' },
+  { href: '/dashboard/loyalty', label: 'Fidelização', icon: Heart, feature: 'loyalty' },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
-  // Keep the entry available on every plan; the page explains purchase and access.
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
 ];
 
@@ -157,41 +97,38 @@ function localizeNavLabel(label: string, locale: string) {
   return locale === 'en' ? (englishLabels[label] ?? label) : label;
 }
 
+function BrandAvatar({ avatarUrl }: { avatarUrl: string | null }) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const displayedAvatarUrl =
+    avatarUrl && failedImageUrl !== avatarUrl ? avatarUrl : DEFAULT_BARBERSHOP_AVATAR;
+
+  return (
+    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] text-zinc-100">
+      <Image
+        src={displayedAvatarUrl}
+        alt=""
+        fill
+        sizes="32px"
+        className="object-cover"
+        unoptimized
+        onError={() => setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)}
+      />
+    </span>
+  );
+}
+
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { hasFeature } = useFeatureAccess();
   const { barbershopAvatarUrl } = useBarbershop();
-  const { t, locale } = useLanguage();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
-  const mobileDialogRef = useRef<HTMLElement>(null);
-  const [toolsOpen, setToolsOpen] = useState(() =>
-    ['/dashboard/qr-code', '/dashboard/analytics', '/dashboard/loyalty', '/dashboard/pos', '/dashboard/website'].some(
-      (path) => pathname === path || pathname.startsWith(`${path}/`),
-    ),
-  );
-  const [communicationOpen, setCommunicationOpen] = useState(
-    () =>
-      pathname.startsWith('/dashboard/comunicacao') ||
-      pathname.startsWith('/dashboard/mensagens') ||
-      pathname.startsWith('/dashboard/marketing'),
-  );
+  const { locale } = useLanguage();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  const moreDialogRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const motionEnabled = !prefersReducedMotion;
 
-  useEffect(() => {
-    const matchesCurrentPath = (items: SidebarItem[]) =>
-      items.some(
-        (item) =>
-          pathname === item.href || pathname.startsWith(`${item.href}/`),
-      );
-
-    // Keep a parent section expanded when navigation reaches one of its routes
-    // from another part of the application. Users can still collapse it again.
-    if (matchesCurrentPath(communicationItems)) setCommunicationOpen(true);
-    if (matchesCurrentPath(toolsItems)) setToolsOpen(true);
-  }, [pathname]);
-
-  const mobilePrimary = primaryItems.slice(0, 4);
   const isLocked = (item: SidebarItem) =>
     Boolean(item.feature && !hasFeature(item.feature));
 
@@ -214,13 +151,15 @@ export function DashboardSidebar() {
     );
   };
 
-  const closeMobile = () => setMobileOpen(false);
+  const closeMore = () => setMoreOpen(false);
 
   useEffect(() => {
-    if (!mobileOpen) return;
-    const dialog = mobileDialogRef.current;
+    if (!moreOpen) return;
+    const dialog = moreDialogRef.current;
     if (!dialog) return;
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const selector =
       'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const getFocusable = () =>
@@ -233,11 +172,10 @@ export function DashboardSidebar() {
     const handleDialogKeys = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setMobileOpen(false);
+        setMoreOpen(false);
         return;
       }
       if (event.key !== 'Tab') return;
-
       const elements = getFocusable();
       if (!elements.length) {
         event.preventDefault();
@@ -256,18 +194,30 @@ export function DashboardSidebar() {
 
     document.addEventListener('keydown', handleDialogKeys);
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleDialogKeys);
-      mobileTriggerRef.current?.focus();
+      moreTriggerRef.current?.focus();
     };
-  }, [mobileOpen]);
+  }, [moreOpen]);
 
-  const renderItem = (item: SidebarItem, mobile = false) => {
+  const isActive = (item: SidebarItem) =>
+    pathname === item.href ||
+    (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+  const moreItems = [...teamItems, ...communicationItems, ...toolsItems, ...secondaryItems];
+  const moreActive = moreItems.some(isActive);
+
+  const renderItem = (item: SidebarItem) => {
     const locked = isLocked(item);
-    const active =
-      pathname === item.href ||
-      (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+    const active = isActive(item);
     const Icon = item.icon;
-    const itemLabel = localizeNavLabel(item.label, locale);
+    const label = localizeNavLabel(item.label, locale);
+    const className = cn(
+      'flex min-h-11 min-w-0 items-center gap-2.5 rounded-xl border px-3 text-left text-sm font-medium transition-[background-color,border-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+      active
+        ? 'border-white/10 bg-white/[0.09] text-white'
+        : 'border-transparent bg-white/[0.025] text-zinc-300 hover:border-white/8 hover:bg-white/[0.06] hover:text-white',
+      locked && 'text-zinc-500 hover:text-zinc-300',
+    );
 
     if (locked) {
       return (
@@ -275,18 +225,12 @@ export function DashboardSidebar() {
           key={item.href}
           type="button"
           onClick={() => handleLocked(item)}
-          className={cn(
-            'group relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-[background-color,color,transform] duration-200 motion-reduce:transition-none text-zinc-500 hover:bg-white/5 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-            mobile && 'min-h-12',
-          )}
-          aria-label={locale === 'en' ? `${itemLabel}, available on a higher plan` : `${itemLabel}, disponível num plano superior`}
+          className={className}
+          aria-label={locale === 'en' ? `${label}, available on a higher plan` : `${label}, disponível num plano superior`}
         >
-          <Icon className="size-4 shrink-0 text-zinc-600" aria-hidden="true" />
-          <span className="truncate">{itemLabel}</span>
-          <Lock
-            className="ml-auto size-3.5 shrink-0 text-zinc-600"
-            aria-hidden="true"
-          />
+          <Icon className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+          <span className="min-w-0 flex-1 truncate">{label}</span>
+          <Lock className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />
         </button>
       );
     }
@@ -295,271 +239,155 @@ export function DashboardSidebar() {
       <Link
         key={item.href}
         href={item.href}
-        onClick={mobile ? closeMobile : undefined}
-        className={cn(
-          'glassmorphism group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 text-sm transition-[background-color,color,transform] duration-200 motion-reduce:transition-none',
-          active
-            ? 'bg-white/10 text-white shadow-sm'
-            : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-          mobile && 'min-h-12',
-        )}
+        onClick={closeMore}
+        className={className}
         aria-current={active ? 'page' : undefined}
       >
-        <span
-          aria-hidden="true"
-          className={cn(
-            'absolute inset-y-2 left-0 w-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-200 motion-reduce:transition-none',
-            active ? 'scale-y-100' : 'scale-y-0',
-          )}
-        />
-        <Icon
-          className={cn(
-            'size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none',
-            active
-              ? 'translate-x-0.5 text-emerald-400'
-              : 'text-zinc-500 group-hover:translate-x-0.5 group-hover:text-zinc-300',
-          )}
-          aria-hidden="true"
-        />
-        <span className="truncate">{itemLabel}</span>
+        <Icon className={cn('size-4 shrink-0', active ? 'text-emerald-400' : 'text-zinc-500')} aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate">{label}</span>
+        {active ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-400" aria-hidden="true" /> : null}
       </Link>
     );
   };
 
-  const renderCommunication = (mobile = false) => {
-    const active = communicationItems.some(
-      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-    );
-    return (
-      <div key="communication" className="space-y-1">
-        <button
-          type="button"
-          onClick={() => setCommunicationOpen((value) => !value)}
-          className={cn(
-            'group relative flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-left text-sm transition-[background-color,color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-            active
-              ? 'bg-white/[0.06] text-white'
-              : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100',
-            mobile && 'min-h-12',
-          )}
-          aria-expanded={communicationOpen}
-          aria-controls={mobile ? 'dashboard-communication-mobile' : 'dashboard-communication-desktop'}
-        >
-          <span
-            aria-hidden="true"
-            className={cn(
-              'absolute inset-y-2 left-0 w-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-200 motion-reduce:transition-none',
-              active ? 'scale-y-100' : 'scale-y-0',
-            )}
-          />
-          <Megaphone
-            className={cn(
-              'size-4 shrink-0',
-              active ? 'text-emerald-400' : 'text-zinc-500',
-            )}
-            aria-hidden="true"
-          />
-          <span className="truncate">{locale === 'en' ? 'Communication' : 'Comunicação'}</span>
-          <ChevronDown
-            className={cn(
-              'ml-auto size-4 transition-transform duration-200 motion-reduce:transition-none',
-              communicationOpen && 'rotate-180',
-            )}
-            aria-hidden="true"
-          />
-        </button>
-        <div
-          id={mobile ? 'dashboard-communication-mobile' : 'dashboard-communication-desktop'}
-          className={cn(
-            'grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none',
-            communicationOpen
-              ? 'grid-rows-[1fr] opacity-100'
-              : 'grid-rows-[0fr] opacity-0 pointer-events-none',
-          )}
-          hidden={!communicationOpen}
-        >
-          <div className="min-h-0 ml-3 space-y-1 border-l border-white/10 pl-3">
-            {communicationItems.map((item) => renderItem(item, mobile))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderTools = (mobile = false) => {
-    const active = toolsItems.some(
-      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-    );
-    const panelId = mobile ? 'dashboard-tools-mobile' : 'dashboard-tools-desktop';
-
-    return (
-      <div key="tools" className="space-y-1">
-        <button
-          type="button"
-          onClick={() => setToolsOpen((value) => !value)}
-          className={cn(
-            'group relative flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-left text-sm transition-[background-color,color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-            active ? 'bg-white/[0.06] text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100',
-            mobile && 'min-h-12',
-          )}
-          aria-expanded={toolsOpen}
-          aria-controls={panelId}
-        >
-          <Wrench className={cn('size-4 shrink-0', active ? 'text-emerald-400' : 'text-zinc-500')} aria-hidden="true" />
-          <span className="truncate">{locale === 'en' ? 'Tools & insights' : 'Ferramentas e análise'}</span>
-          <ChevronDown className={cn('ml-auto size-4 transition-transform duration-200 motion-reduce:transition-none', toolsOpen && 'rotate-180')} aria-hidden="true" />
-        </button>
-        <div
-          id={panelId}
-          className={cn(
-            'grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none',
-            toolsOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none',
-          )}
-          hidden={!toolsOpen}
-        >
-          <div className="min-h-0 ml-3 space-y-1 border-l border-white/10 pl-3">
-            {toolsItems.map((item) => renderItem(item, mobile))}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const sectionTitle = (pt: string, en: string) => (
+    <h2 className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+      {locale === 'en' ? en : pt}
+    </h2>
+  );
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/10 bg-zinc-950/10 backdrop-blur-xl lg:block">
-        <div className="flex h-full flex-col">
-          <div className="flex h-20 shrink-0 items-center border-b border-white/10 px-5">
-            <Link
-              href="/dashboard"
-              className="group flex min-h-11 items-center gap-3 rounded-xl px-2 text-zinc-100 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              aria-label={t('dashboard.backToOverview')}
-            >
-              <BrandAvatar avatarUrl={barbershopAvatarUrl} />
-              <span className="font-heading text-lg font-semibold tracking-tight">
-                Silentra
-              </span>
-            </Link>
-          </div>
-          <nav
-            aria-label={locale === 'en' ? 'Main navigation' : 'Navegação principal'}
-            className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-5"
-          >
-            <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
-              Menu
-            </p>
-            {primaryItems.map((item) => renderItem(item))}
-            <div className="my-2 border-t border-white/[0.06]" />
-            {renderCommunication()}
-            {renderTools()}
-            <div className="my-2 border-t border-white/[0.06]" />
-            {secondaryItems.map((item) => renderItem(item))}
-          </nav>
-        </div>
-      </aside>
-
       <nav
-        aria-label={locale === 'en' ? 'Quick navigation' : 'Navegação rápida'}
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
+        aria-label={locale === 'en' ? 'Dashboard quick navigation' : 'Navegação rápida do painel'}
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.28)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:w-[min(94vw,760px)] lg:-translate-x-1/2 lg:rounded-2xl lg:border lg:px-3 lg:pb-2"
       >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
-          {mobilePrimary.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== '/dashboard' &&
-                pathname.startsWith(`${item.href}/`));
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:max-w-none lg:gap-2">
+          {primaryItems.map((item) => {
+            const active = isActive(item);
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'group relative flex min-h-12 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-                  active
-                    ? 'bg-white/10 text-white'
-                    : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-200',
-                )}
                 aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'group relative flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
+                  active ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+                )}
               >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute inset-x-3 bottom-1 h-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-200 motion-reduce:transition-none',
-                    active ? 'scale-x-100' : 'scale-x-0',
-                  )}
-                />
-                <Icon
-                  className={cn(
-                    'size-4 transition-transform duration-200 motion-reduce:transition-none',
-                    active && '-translate-y-0.5 text-emerald-400',
-                  )}
-                  aria-hidden="true"
-                />
+                <Icon className={cn('size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-[18px]', active && 'text-emerald-400')} aria-hidden="true" />
                 <span className="max-w-full truncate">{localizeNavLabel(item.label, locale)}</span>
+                <span aria-hidden="true" className={cn('absolute inset-x-3 bottom-0.5 h-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-150 motion-reduce:transition-none lg:inset-y-3 lg:inset-x-auto lg:left-0 lg:h-auto lg:w-0.5', active ? 'scale-100' : 'scale-0')} />
               </Link>
             );
           })}
           <button
-            ref={mobileTriggerRef}
+            ref={moreTriggerRef}
             type="button"
-            onClick={() => setMobileOpen(true)}
-            className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-            aria-label={t('dashboard.openMenu')}
-            aria-expanded={mobileOpen}
+            onClick={() => setMoreOpen(true)}
+            aria-label={locale === 'en' ? 'Open more dashboard sections' : 'Abrir mais secções da dashboard'}
+            aria-expanded={moreOpen}
+            aria-controls="dashboard-more-panel"
+            className={cn(
+              'flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
+              moreOpen || moreActive ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+            )}
           >
-            <Menu className="size-4" aria-hidden="true" />
+            <MoreHorizontal className="size-4 lg:size-[18px]" aria-hidden="true" />
             <span>{locale === 'en' ? 'More' : 'Mais'}</span>
           </button>
         </div>
       </nav>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[60] lg:hidden"
-          role="dialog"
-          aria-modal="true"
-          aria-label={locale === 'en' ? 'Dashboard menu' : 'Menu do painel'}
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/70"
-            onClick={closeMobile}
-            aria-label={locale === 'en' ? 'Close menu' : 'Fechar menu'}
-          />
-          <aside ref={mobileDialogRef} className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-white/10 bg-zinc-950 p-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <Link
-                href="/dashboard"
-                onClick={closeMobile}
-                className="flex min-h-10 items-center gap-2 rounded-lg text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              >
-                <BrandAvatar avatarUrl={barbershopAvatarUrl} mobile />
-                <span className="font-heading font-semibold">Silentra</span>
-              </Link>
-              <button
-                type="button"
-                onClick={closeMobile}
-                className="inline-flex size-10 items-center justify-center rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                aria-label="Fechar menu"
-              >
-                <X className="size-5" aria-hidden="true" />
-              </button>
-            </div>
-            <nav
-              aria-label={locale === 'en' ? 'All areas' : 'Todas as áreas'}
-              className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto py-4"
+      <AnimatePresence>
+        {moreOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[60]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: motionEnabled ? 0.16 : 0 }}
+          >
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/65 backdrop-blur-[2px]"
+              onClick={closeMore}
+              aria-label={locale === 'en' ? 'Close more menu' : 'Fechar menu Mais'}
+            />
+            <motion.aside
+              id="dashboard-more-panel"
+              ref={moreDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="dashboard-more-title"
+              initial={motionEnabled ? { opacity: 0, y: 24, scale: 0.985 } : false}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={motionEnabled ? { opacity: 0, y: 16, scale: 0.99 } : undefined}
+              transition={motionEnabled ? { type: 'spring', stiffness: 420, damping: 36, mass: 0.75 } : { duration: 0 }}
+              className="absolute inset-x-2 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] mx-auto flex max-h-[min(72vh,42rem)] max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/98 shadow-2xl shadow-black/50 sm:inset-x-4 lg:bottom-[5.75rem]"
             >
-              {primaryItems.map((item) => renderItem(item, true))}
-              <div className="my-2 border-t border-white/[0.06]" />
-              {renderCommunication(true)}
-              {renderTools(true)}
-              <div className="my-2 border-t border-white/[0.06]" />
-              {secondaryItems.map((item) => renderItem(item, true))}
-            </nav>
-          </aside>
-        </div>
-      )}
+              <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-3 sm:px-5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <BrandAvatar avatarUrl={barbershopAvatarUrl} />
+                  <div className="min-w-0">
+                    <h2 id="dashboard-more-title" className="text-sm font-semibold text-white">
+                      {locale === 'en' ? 'More sections' : 'Mais secções'}
+                    </h2>
+                    <p className="text-xs text-zinc-500">
+                      {locale === 'en' ? 'Everything else, organised by task' : 'O resto da plataforma, organizado por área'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeMore}
+                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  aria-label={locale === 'en' ? 'Close menu' : 'Fechar menu'}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <section>
+                    {sectionTitle('Equipa', 'Team')}
+                    <div className="grid gap-1.5">{teamItems.map(renderItem)}</div>
+                    <div className="mt-5">
+                      {sectionTitle('Comunicação', 'Communication')}
+                      <div className="grid gap-1.5">{communicationItems.map(renderItem)}</div>
+                    </div>
+                  </section>
+                  <section>
+                    {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
+                    <div className="grid gap-1.5">{toolsItems.map(renderItem)}</div>
+                  </section>
+                  <section>
+                    {sectionTitle('Conta e ajuda', 'Account & support')}
+                    <div className="grid gap-1.5">{secondaryItems.map(renderItem)}</div>
+                    <Link
+                      href="/documentation"
+                      onClick={closeMore}
+                      className="mt-1 flex min-h-11 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    >
+                      <Globe2 className="size-4 text-zinc-500" aria-hidden="true" />
+                      {locale === 'en' ? 'Documentation' : 'Documentação'}
+                    </Link>
+                  </section>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/8 px-4 py-2.5 text-xs text-zinc-500 sm:px-5">
+                <span>{locale === 'en' ? 'Quick access' : 'Acesso rápido'}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                  Silentra
+                </span>
+              </div>
+            </motion.aside>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

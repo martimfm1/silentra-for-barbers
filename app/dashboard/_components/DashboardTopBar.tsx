@@ -44,7 +44,7 @@ export function DashboardTopBar() {
   const currentLabel = routeLabels[labelKey][locale === 'en' ? 'en' : 'pt'];
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30 border-b border-white/5 bg-zinc-950/65 backdrop-blur-xl lg:left-64">
+    <header className="fixed inset-x-0 top-0 z-30 border-b border-white/5 bg-zinc-950/65 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <nav
           aria-label={locale === 'en' ? 'Page navigation' : 'Navegação da página'}
