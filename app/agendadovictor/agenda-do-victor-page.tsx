@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
-import type { MarketplaceShop, MarketplaceService } from '@/types/marketplace/shops';
+import type { MarketplaceShop } from '@/types/marketplace/shops';
 
 const BookingDrawer = dynamic(
   () => import('@/app/barbershops/components/booking-drawer').then((module) => module.BookingDrawer),
