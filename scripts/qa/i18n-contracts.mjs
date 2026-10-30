@@ -139,6 +139,17 @@ const localeTrees = Object.fromEntries(
   }),
 );
 
+const languageContext = read('context/LanguageContext.tsx');
+if (!languageContext.includes('resolveTranslation(fallbackLocale, path)')) {
+  failures.push('LanguageContext: missing fallback to the other supported locale');
+}
+if (languageContext.includes('if (translated === undefined) return path;')) {
+  failures.push('LanguageContext: missing translation keys must never be rendered to users');
+}
+if (!languageContext.includes('if (hasSavedPreference) return;')) {
+  failures.push('LanguageContext: saved browser language must take precedence over the barbershop default');
+}
+
 const failures = [];
 for (const path of localizedSources) {
   const source = read(path);
