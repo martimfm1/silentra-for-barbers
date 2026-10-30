@@ -184,17 +184,20 @@ export function DashboardCustomizationDialog({
   }
 
   function toggleShortcut(id: string, checked: boolean) {
-    setDraftShortcuts((current) => checked ? [...current, id] : current.filter((item) => item !== id));
+    const next = checked
+      ? [...draftShortcuts, id]
+      : draftShortcuts.filter((item) => item !== id);
+    setDraftShortcuts(next);
+    customization.setConfig((current) => ({ ...current, shortcuts: next }));
   }
 
   function moveShortcut(index: number, direction: -1 | 1) {
-    setDraftShortcuts((current) => {
-      const next = [...current];
-      const target = index + direction;
-      if (target < 0 || target >= next.length) return current;
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    const next = [...draftShortcuts];
+    const target = index + direction;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setDraftShortcuts(next);
+    customization.setConfig((current) => ({ ...current, shortcuts: next }));
   }
 
   async function handleSave(asNew = false) {
