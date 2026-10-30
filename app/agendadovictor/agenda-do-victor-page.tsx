@@ -13,7 +13,7 @@ const BookingDrawer = dynamic(
 );
 
 type AgendaService = { id: string; name: string; price: number; duration: number };
-type AgendaShop = { id: string; slug: string; city: string | null; address: string | null; lat: number | null; lng: number | null };
+type AgendaShop = { id: string; slug: string; city: string | null; address: string | null; lat: number | null; lng: number | null; opening_time: string | null; closing_time: string | null };
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
 
@@ -87,6 +87,12 @@ export default function AgendaDoVictorPage({
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8a8a84]">{profile.name}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Nova marcação</h2>
             <p className="mt-2 text-sm text-[#777771]">Seleciona o serviço que pretendes marcar.</p>
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#777771]">
+              {profile.address && <span>{profile.address}{profile.city ? `, ${profile.city}` : ''}</span>}
+              {!profile.address && profile.city && <span>{profile.city}</span>}
+              {profile.phone && <a className="underline underline-offset-4 hover:text-[#222]" href={`tel:${profile.phone}`}>{profile.phone}</a>}
+              {(shop.opening_time || shop.closing_time) && <span>Horário: {shop.opening_time?.slice(0, 5) || '--:--'} – {shop.closing_time?.slice(0, 5) || '--:--'}</span>}
+            </div>
           </header>
 
           <div className="px-5 sm:px-9">
