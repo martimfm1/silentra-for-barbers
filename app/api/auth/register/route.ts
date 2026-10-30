@@ -108,9 +108,10 @@ async function POST__unobserved(request: Request) {
       {
         success: true,
         requiresEmailConfirmation: !data.session,
-        message: data.session
-          ? 'Conta criada com sucesso.'
-          : 'Conta criada. Enviámos um email de confirmação.',
+        // Keep the response neutral because Supabase intentionally obfuscates
+        // whether an email is already registered when enumeration protection
+        // is enabled.
+        message: 'REGISTRATION_NEXT_STEPS',
       },
       { status: 201, headers: { 'Cache-Control': 'no-store' } },
     );
