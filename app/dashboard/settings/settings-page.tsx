@@ -740,6 +740,45 @@ export default function SettingsPageOrganized() {
                       </select>
                     </div>
                   </div>
+                  <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium">{t('settingsPage.allowOnline')}</p>
+                        <p className="text-xs text-zinc-600">{t('settingsPage.allowOnlineDescription')}</p>
+                      </div>
+                      <Switch checked={config.allow_online_bookings} onCheckedChange={(v) => set({ allow_online_bookings: v })} />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div>
+                        <p className="text-sm font-medium">{t('settingsPage.autoConfirm')}</p>
+                        <p className="text-xs text-zinc-600">{t('settingsPage.autoConfirmDescription')}</p>
+                      </div>
+                      <Switch disabled={!automationAllowed} checked={automationAllowed && config.auto_confirm_bookings} onCheckedChange={(v) => automationAllowed && set({ auto_confirm_bookings: v })} />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div>
+                        <p className="text-sm font-medium">{t('settingsPage.autoComplete')}</p>
+                        <p className="text-xs text-zinc-600">{t('settingsPage.autoCompleteDescription')}</p>
+                      </div>
+                      <Switch disabled={!automationAllowed} checked={automationAllowed && config.auto_complete_bookings} onCheckedChange={(v) => automationAllowed && set({ auto_complete_bookings: v })} />
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                    <div className="flex items-center gap-2">
+                      <CalendarCheck2 className="size-4 text-amber-300" />
+                      <p className="text-sm font-medium">{t('settingsPage.cancellationWindow')}</p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={720}
+                      step={1}
+                      value={config.time_limit_cancellation_hours}
+                      aria-label={t('settingsPage.cancellationWindow')}
+                      onChange={(e) => set({ time_limit_cancellation_hours: Number(e.target.value) })}
+                      className={`${INPUT_CLASS} mt-4 sm:max-w-xs`}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </section>

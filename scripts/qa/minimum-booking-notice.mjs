@@ -9,7 +9,7 @@ const [settings, service, booking, availability, legacySlots, portal, helper, mi
   readFile('app/api/shops/[id]/slots/route.ts', 'utf8'),
   readFile('app/api/customer-portal/appointments/[appointmentId]/route.ts', 'utf8'),
   readFile('lib/bookings/minimum-notice.ts', 'utf8'),
-  readFile('supabase/migrations/20261029200000_minimum_booking_notice_minutes.sql', 'utf8'),
+  readFile('supabase/migrations/20261029190459_minimum_booking_notice_minutes.sql', 'utf8'),
   readFile('app/locales/pt.ts', 'utf8'),
   readFile('app/locales/en.ts', 'utf8'),
   readFile('package.json', 'utf8').then(JSON.parse),
@@ -19,6 +19,10 @@ assert.match(settings, /htmlFor="settings-closing-time"/);
 assert.match(settings, /settingsPage\.lunchBreak/);
 assert.match(settings, /settingsPage\.daysOffInHours/);
 assert.match(settings, /settingsPage\.minimumBookingNotice/);
+assert.match(settings, /settingsPage\.allowOnline/);
+assert.match(settings, /settingsPage\.autoConfirm/);
+assert.match(settings, /settingsPage\.autoComplete/);
+assert.match(settings, /settingsPage\.cancellationWindow/);
 assert.match(service, /minimum_booking_notice_minutes/);
 assert.match(migration, /add column if not exists minimum_booking_notice_minutes integer not null default 0/i);
 assert.match(migration, /minimum_booking_notice_minutes = case[\s\S]*?v_booking_notice_minutes/);
