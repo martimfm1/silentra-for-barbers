@@ -794,6 +794,8 @@ title: 'O teu menu',
     validate: 'Validar',
     codeHelp: 'Introduz o código recebido pelo cliente. Também podes usar o código QR acima.',
     readyForNext: 'Pronto para validar outra recompensa.',
+    successStatus: 'Recompensa {reward} validada com sucesso.',
+    successToast: 'Recompensa validada.',
   },
   qrCodePage: {
     loadError: 'Não foi possível carregar o código QR.',
