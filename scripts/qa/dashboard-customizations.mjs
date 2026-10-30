@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [dashboard, editor, api, migration] = await Promise.all([
+const [dashboard, editor, api, migration, grantsMigration] = await Promise.all([
   readFile('app/dashboard/page.tsx', 'utf8'),
   readFile('app/dashboard/_components/DashboardCustomization.tsx', 'utf8'),
   readFile('app/api/dashboard/customizations/route.ts', 'utf8'),
