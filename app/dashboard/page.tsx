@@ -394,41 +394,21 @@ export default function DashboardPage() {
           )}
 
           <section aria-label={t('dashboard.quickActions')} className="pb-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                O que precisas de fazer?
-              </h2>
-              <Link
-                href="/dashboard/agenda"
-                className="text-xs font-medium text-zinc-500 transition hover:text-zinc-200"
-              >
-                Abrir agenda <span aria-hidden="true">→</span>
-              </Link>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.14em] text-zinc-400">{t('dashboard.quickActions')}</h2>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setPreferencesOpen(true)} className="inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-medium text-zinc-300 transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" aria-label={t('dashboard.customizeDashboard')}>
+                  <Settings2 className="size-3.5" aria-hidden="true" />{t('dashboard.customize')}
+                </button>
+                <Link href="/dashboard/agenda" className="text-xs font-medium text-zinc-500 transition hover:text-zinc-200">{t('dashboard.openAgenda')} →</Link>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Link
-                    key={action.href}
-                    href={action.href}
-                    className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4"
-                  >
-                    <span
-                      className={cn(
-                        'flex size-8 shrink-0 items-center justify-center rounded-full border',
-                        iconVariants[action.color],
-                      )}
-                    >
-                      <Icon className="size-4" aria-hidden="true" />
-                    </span>
-                    <span className="block font-heading text-sm font-semibold tracking-tight text-zinc-50">
-                      {action.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
+            {visibleQuickActions.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+              {visibleQuickActions.map((action) => { const Icon = action.icon; return <Link key={action.id} href={action.href} className="glassmorphism group flex min-h-[68px] min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 sm:p-4">
+                <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl border', iconVariants[action.color])}><Icon className="size-4" aria-hidden="true" /></span>
+                <span className="min-w-0 text-sm font-semibold tracking-tight text-zinc-50">{action.label}</span>
+              </Link>; })}
+            </div> : <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center text-sm text-zinc-500">{t('dashboard.noShortcuts')} <button type="button" onClick={() => setPreferencesOpen(true)} className="ml-1 text-emerald-300 underline underline-offset-4">{t('dashboard.addShortcuts')}</button></div>}
           </section>
 
           {visibleWidgets.includes('next') && nextAppointment && !loadingInitial && (
@@ -544,8 +524,8 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="grid gap-3 pt-5 md:gap-4 lg:grid-cols-[1fr_360px]">
-            <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+          {(visibleWidgets.includes('chart') || visibleWidgets.includes('upcoming')) && <section className={cn("grid gap-3 pt-5 md:gap-4", visibleWidgets.includes('chart') && visibleWidgets.includes('upcoming') ? "lg:grid-cols-[1fr_360px]" : "grid-cols-1")}>
+            {visibleWidgets.includes('chart') && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -645,9 +625,9 @@ export default function DashboardPage() {
                   </span>
                 </span>
               </div>
-            </Card>
+            </Card>}
 
-            <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+            {visibleWidgets.includes('upcoming') && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg font-medium text-zinc-100">
                   <CalendarDays
@@ -716,10 +696,27 @@ export default function DashboardPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </section>
+            </Card>}
+          </section>}
         </div>
       </main>
+      <Dialog open={preferencesOpen} onOpenChange={setPreferencesOpen}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Settings2 className="size-5 text-emerald-400" />{t('dashboard.customizeDashboard')}</DialogTitle>
+            <DialogDescription className="text-zinc-400">{t('dashboard.customizeDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-2">
+            <section className="space-y-3"><h3 className="text-sm font-semibold text-zinc-200">{t('dashboard.dashboardWidgets')}</h3>
+              {widgetOptions.map((option) => <label key={option.id} className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-2 text-sm"><span>{option.label}</span><input type="checkbox" checked={visibleWidgets.includes(option.id)} onChange={() => togglePreference(visibleWidgets, setVisibleWidgets, option.id)} className="size-4 accent-emerald-400" /></label>)}
+            </section>
+            <section className="space-y-3"><h3 className="text-sm font-semibold text-zinc-200">{t('dashboard.shortcuts')}</h3><p className="text-xs text-zinc-500">{t('dashboard.shortcutsDescription')}</p>
+              {quickActions.map((action) => { const Icon = action.icon; return <label key={action.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-2 text-sm"><Icon className="size-4 text-zinc-400" /><span className="min-w-0 flex-1">{action.label}</span><input type="checkbox" checked={visibleShortcuts.includes(action.id)} onChange={() => togglePreference(visibleShortcuts, setVisibleShortcuts, action.id)} className="size-4 accent-emerald-400" /></label>; })}
+            </section>
+          </div>
+          <div className="flex flex-wrap justify-between gap-2"><Button type="button" variant="ghost" onClick={() => { setVisibleWidgets(['metrics','chart','upcoming','next']); setVisibleShortcuts(['booking','clients','services','team','stats','loyalty-scan','qr','rewards']); }} className="text-zinc-300">{t('dashboard.resetDashboard')}</Button><Button type="button" onClick={() => setPreferencesOpen(false)} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">{t('common.done')}</Button></div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }
