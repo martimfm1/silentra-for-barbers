@@ -34,15 +34,25 @@ import {
   ChevronRight,
   Crown,
   CalendarPlus,
+  Gift,
+  QrCode,
+  Zap,
+  MessageSquare,
+  Megaphone,
+  ShoppingBag,
+  Globe,
+  Headset,
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
+import { DashboardCustomizationDialog, useDashboardCustomization } from '@/app/dashboard/_components/DashboardCustomization';
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const { plan } = useFeatureAccess();
+  const customization = useDashboardCustomization();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -228,42 +238,28 @@ export default function DashboardPage() {
     purple: 'hover:border-purple-500/40 hover:bg-purple-500/10',
     default: 'hover:border-zinc-500/40 hover:bg-zinc-500/10',
   } as const;
-  const quickActions = [
-    {
-      href: '/dashboard/agenda',
-      label: t('dashboard.newBooking'),
-      icon: CalendarPlus,
-      color: 'emerald' as const,
-    },
-    {
-      href: '/dashboard/clientes',
-      label: 'Clientes',
-      icon: Users,
-      color: 'blue' as const,
-    },
-    {
-      href: '/dashboard/servicos',
-      label: t('dashboard.services'),
-      icon: Scissors,
-      color: 'amber' as const,
-    },
-    {
-      href: '/dashboard/equipa',
-      label: 'Equipa',
-      icon: Briefcase,
-      color: 'purple' as const,
-    },
-    {
-      href: '/dashboard/stats',
-      label: t('dashboard.stats'),
-      icon: Clock,
-      color: 'blue' as const,
-    },
+  const quickActionCatalog = [
+    { id: 'new-booking', href: '/dashboard/agenda', label: t('dashboard.newBooking'), icon: CalendarPlus },
+    { id: 'clients', href: '/dashboard/clientes', label: locale === 'en' ? 'Clients' : 'Clientes', icon: Users },
+    { id: 'services', href: '/dashboard/servicos', label: t('dashboard.services'), icon: Scissors },
+    { id: 'team', href: '/dashboard/equipa', label: locale === 'en' ? 'Team' : 'Equipa', icon: Briefcase },
+    { id: 'analytics', href: '/dashboard/stats', label: t('dashboard.stats'), icon: Clock },
+    { id: 'loyalty', href: '/dashboard/loyalty', label: locale === 'en' ? 'Loyalty' : 'Fidelização', icon: Gift },
+    { id: 'qr-code', href: '/dashboard/qr-code', label: locale === 'en' ? 'QR code' : 'Código QR', icon: QrCode },
+    { id: 'automations', href: '/dashboard/automations', label: locale === 'en' ? 'Automations' : 'Automações', icon: Zap },
+    { id: 'messages', href: '/dashboard/mensagens', label: locale === 'en' ? 'Messages' : 'Mensagens', icon: MessageSquare },
+    { id: 'marketing', href: '/dashboard/marketing', label: locale === 'en' ? 'Campaigns' : 'Campanhas', icon: Megaphone },
+    { id: 'sales', href: '/dashboard/pos', label: locale === 'en' ? 'Sales' : 'Vendas', icon: ShoppingBag },
+    { id: 'website', href: '/dashboard/website', label: locale === 'en' ? 'Website' : 'Site próprio', icon: Globe },
+    { id: 'support', href: '/dashboard/suporte', label: locale === 'en' ? 'Support' : 'Suporte', icon: Headset },
   ];
+  const quickActions = customization.config.shortcuts
+    .map((id) => quickActionCatalog.find((action) => action.id === id))
+    .filter((action): action is (typeof quickActionCatalog)[number] => Boolean(action));
 
   return (
     <TooltipProvider>
-      <main className="relative min-h-screen overflow-hidden pb-5 pt-16 text-foreground">
+      <main className="relative min-h-screen overflow-hidden pb-5 pt-16 text-foreground" style={{ "--dashboard-accent": customization.config.accentColor } as React.CSSProperties}>
         <div className="relative px-3 pb-5 pt-8 sm:px-5 md:px-8 md:pb-12">
           <section
             className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
@@ -289,17 +285,17 @@ export default function DashboardPage() {
                 })}
               </p>
             </div>
-            <Link
-              href="/dashboard/billing"
-              className="glassmorphism inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-            >
-              <Crown className="size-4 text-emerald-400" aria-hidden="true" />
-              Plano atual: {PLAN_NAMES[plan]}
-              <ChevronRight
-                className="size-4 text-zinc-500"
-                aria-hidden="true"
-              />
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <DashboardCustomizationDialog customization={customization} locale={locale} />
+              <Link
+                href="/dashboard/billing"
+                className="glassmorphism inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dashboard-accent)]"
+              >
+                <Crown className="size-4" style={{ color: 'var(--dashboard-accent)' }} aria-hidden="true" />
+                {locale === 'en' ? 'Current plan:' : 'Plano atual:'} {PLAN_NAMES[plan]}
+                <ChevronRight className="size-4 text-zinc-500" aria-hidden="true" />
+              </Link>
+            </div>
           </section>
 
           {!loadingInitial && nextSetupStep && !hasBusinessSetup && (
@@ -359,7 +355,7 @@ export default function DashboardPage() {
             </section>
           )}
 
-          <section aria-label={t('dashboard.quickActions')} className="pb-5">
+          {customization.config.sections.quickActions && <section aria-label={t('dashboard.quickActions')} className="pb-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
                 O que precisas de fazer?
@@ -371,20 +367,21 @@ export default function DashboardPage() {
                 Abrir agenda <span aria-hidden="true">→</span>
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-4">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <Link
-                    key={action.href}
+                    key={action.id}
                     href={action.href}
                     className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4"
                   >
                     <span
                       className={cn(
                         'flex size-8 shrink-0 items-center justify-center rounded-full border',
-                        iconVariants[action.color],
+                        iconVariants.default,
                       )}
+                      style={{ backgroundColor: 'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)', color: 'var(--dashboard-accent)', borderColor: 'color-mix(in srgb, var(--dashboard-accent) 34%, transparent)' }}
                     >
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
@@ -395,9 +392,9 @@ export default function DashboardPage() {
                 );
               })}
             </div>
-          </section>
+          </section>}
 
-          {nextAppointment && !loadingInitial && (
+          {customization.config.sections.nextAppointment && nextAppointment && !loadingInitial && (
             <section
               className="glassmorphism mb-5 rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur-xl sm:p-5"
               aria-labelledby="next-appointment-title"
@@ -443,7 +440,7 @@ export default function DashboardPage() {
             </section>
           )}
 
-          <section className="pt-1" aria-labelledby="business-overview">
+          {customization.config.sections.metrics && <section className="pt-1" aria-labelledby="business-overview">
             <div className="mb-3 flex items-center justify-between">
               <h2
                 id="business-overview"
@@ -498,8 +495,9 @@ export default function DashboardPage() {
                           <span
                             className={cn(
                               'flex size-10 shrink-0 items-center justify-center rounded-full',
-                              iconVariants[metric.variant],
+                              iconVariants.default,
                             )}
+                            style={{ backgroundColor: 'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)', color: 'var(--dashboard-accent)' }}
                           >
                             <metric.icon className="size-5" />
                           </span>
@@ -508,10 +506,10 @@ export default function DashboardPage() {
                     </Link>
                   ))}
             </div>
-          </section>
+          </section>}
 
-          <section className="grid gap-3 pt-5 md:gap-4 lg:grid-cols-[1fr_360px]">
-            <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+          {(customization.config.sections.activityChart || customization.config.sections.upcomingAppointments) && <section className="grid gap-3 pt-5 md:gap-4 lg:grid-cols-[1fr_360px]">
+            {customization.config.sections.activityChart && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -567,8 +565,8 @@ export default function DashboardPage() {
                                 <div
                                   title={locale === 'en' ? `${point.day}: ${point.revenue.toFixed(2)} EUR in completed service revenue` : `${point.day}: ${point.revenue.toFixed(2).replace('.', ',')} € de receita de serviços concluídos`}
                                   aria-label={locale === 'en' ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros` : `${point.day}, receita ${point.revenue.toFixed(2)} euros`}
-                                  className="w-1/2 max-w-7 rounded-t-md bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
-                                  style={{ height: `${revenueHeight}%`, minHeight: point.revenue > 0 ? '8px' : '2px' }}
+                                  className="w-1/2 max-w-7 rounded-t-md shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
+                                  style={{ backgroundColor: 'var(--dashboard-accent)', height: `${revenueHeight}%`, minHeight: point.revenue > 0 ? '8px' : '2px' }}
                                 />
                                 <div
                                   title={locale === 'en' ? `${point.day}: ${point.bookings} bookings` : `${point.day}: ${point.bookings} marcações`}
@@ -611,9 +609,9 @@ export default function DashboardPage() {
                   </span>
                 </span>
               </div>
-            </Card>
+            </Card>}
 
-            <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+            {customization.config.sections.upcomingAppointments && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg font-medium text-zinc-100">
                   <CalendarDays
@@ -682,8 +680,8 @@ export default function DashboardPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </section>
+            </Card>}
+          </section>}
         </div>
       </main>
     </TooltipProvider>

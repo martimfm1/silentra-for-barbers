@@ -49,6 +49,9 @@ jobs:
       - name: Authentication account-state contracts
         run: pnpm qa:auth-account-state
 
+      - name: Dashboard customization contracts
+        run: pnpm qa:dashboard-customizations
+
       - name: Lint
         run: pnpm lint
 
