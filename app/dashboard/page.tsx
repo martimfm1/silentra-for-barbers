@@ -382,7 +382,6 @@ export default function DashboardPage() {
                         iconVariants.default,
                       )}
                       style={{ backgroundColor: 'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)', color: 'var(--dashboard-accent)', borderColor: 'color-mix(in srgb, var(--dashboard-accent) 34%, transparent)' }}
-                      )}
                     >
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
