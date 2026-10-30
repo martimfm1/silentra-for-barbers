@@ -519,7 +519,7 @@ export default function DashboardPage() {
                     </Link>
                   ))}
             </div>
-          </section>
+          </section>}
 
           {(visibleWidgets.includes('chart') || visibleWidgets.includes('upcoming')) && <section className={cn("grid gap-3 pt-5 md:gap-4", visibleWidgets.includes('chart') && visibleWidgets.includes('upcoming') ? "lg:grid-cols-[1fr_360px]" : "grid-cols-1")}>
             {visibleWidgets.includes('chart') && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
