@@ -403,7 +403,7 @@ export default function DashboardPage() {
                   <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
                     <span className="text-sm font-bold">
                       {new Date(nextAppointment.date_hour).toLocaleTimeString(
-                        'pt-PT',
+                        locale === 'en' ? 'en-GB' : 'pt-PT',
                         { hour: '2-digit', minute: '2-digit' },
                       )}
                     </span>
@@ -651,13 +651,13 @@ export default function DashboardPage() {
                         <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]">
                           <span className="text-xs font-semibold text-zinc-200">
                             {new Date(appointment.date_hour).toLocaleTimeString(
-                              'pt-PT',
+                              locale === 'en' ? 'en-GB' : 'pt-PT',
                               { hour: '2-digit', minute: '2-digit' },
                             )}
                           </span>
                           <span className="text-[10px] text-zinc-500">
                             {new Date(appointment.date_hour).toLocaleDateString(
-                              'pt-PT',
+                              locale === 'en' ? 'en-GB' : 'pt-PT',
                               { day: '2-digit', month: '2-digit' },
                             )}
                           </span>
