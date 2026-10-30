@@ -564,7 +564,7 @@ const checks = [
       source.includes("process.env.NODE_ENV === 'development'") &&
       source.includes("      : [],"),
   },
-];
+
 
   {
     name: 'Agenda do Victor is tenant-bound and requires an effective paid plan',
@@ -586,6 +586,7 @@ const checks = [
       source.includes('Nova marcação') &&
       source.includes('Selecionar um serviço'),
   },
+];
 let failed = 0;
 for (const check of checks) {
   try {
