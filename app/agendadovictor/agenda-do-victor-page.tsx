@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
 import type { MarketplaceShop } from '@/types/marketplace/shops';
+import { DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
 
 const BookingDrawer = dynamic(
   () => import('@/app/barbershops/components/booking-drawer').then((module) => module.BookingDrawer),
@@ -39,7 +40,7 @@ export default function AgendaDoVictorPage({
 }) {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const image = coverUrl(profile.cover_url, profile.barbershop_id || profile.id);
+  const image = coverUrl(profile.cover_url, profile.barbershop_id || profile.id) || DEFAULT_BARBERSHOP_BANNER;
   const bookingShop: MarketplaceShop = {
     id: shop.id,
     barbershop_id: profile.barbershop_id || profile.id,
