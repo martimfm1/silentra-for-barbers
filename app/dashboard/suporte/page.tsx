@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 type SupportPlan = 'free' | 'pro' | 'enterprise';
+type FeedbackCategory = 'problem' | 'suggestion' | 'feedback';
 type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 type SupportMessage = {
   id: string;
@@ -107,6 +108,7 @@ export default function SupportPage() {
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [subjectDraft, setSubjectDraft] = useState('');
+  const [ticketCategory, setTicketCategory] = useState<FeedbackCategory>('problem');
   const [descriptionDraft, setDescriptionDraft] = useState('');
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -179,13 +181,18 @@ export default function SupportPage() {
 
   const createTicket = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const subject = subjectDraft.trim();
+    const subjectPrefix = ticketCategory === 'problem'
+      ? (pt ? '[Problema]' : '[Issue]')
+      : ticketCategory === 'suggestion'
+        ? (pt ? '[Sugestão]' : '[Suggestion]')
+        : (pt ? '[Feedback]' : '[Feedback]');
+    const subject = `${subjectPrefix} ${subjectDraft.trim()}`;
     const description = descriptionDraft.trim();
     if (!canCreateTicket) {
       toast.error(pt ? 'Atingiste o limite de tickets abertos do teu plano.' : 'You have reached your plan limit for open tickets.');
       return;
     }
-    if (subject.length < 3 || subject.length > 120 || description.length < 10 || description.length > 4000 || creating) return;
+    if (subjectDraft.trim().length < 3 || subject.length > 120 || description.length < 10 || description.length > 4000 || creating) return;
 
     setCreating(true);
     setError(null);
@@ -201,6 +208,7 @@ export default function SupportPage() {
       }
       setSubjectDraft('');
       setDescriptionDraft('');
+      setTicketCategory('problem');
       setCreateTicketOpen(false);
       setSelectedTicketId(payload.ticket.id);
       toast.success(pt ? 'Ticket enviado. O chat ficará disponível após a aceitação.' : 'Ticket submitted. The chat will be available after acceptance.');
@@ -337,11 +345,34 @@ export default function SupportPage() {
               <div>
                 <h2 className="font-semibold">{pt ? 'Criar um ticket' : 'Create a ticket'}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {pt ? 'Usa um assunto por problema para manter cada pedido separado.' : 'Use one ticket per issue to keep every request separate.'}
+                  {pt ? 'O teu feedback ajuda-nos a tornar a Silentra mais útil no dia a dia da barbearia.' : 'Your feedback helps us make Silentra more useful in your barbershop every day.'}
                 </p>
               </div>
             </div>
             <form onSubmit={createTicket} className="mt-5 space-y-4">
+              <div>
+                <label htmlFor="support-ticket-category" className="mb-1.5 block text-sm font-medium">
+                  {pt ? 'Tipo de feedback' : 'Feedback type'}
+                </label>
+                <select
+                  id="support-ticket-category"
+                  value={ticketCategory}
+                  onChange={(event) => setTicketCategory(event.target.value as FeedbackCategory)}
+                  disabled={creating}
+                  className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                >
+                  <option value="problem">{pt ? 'Reportar um problema' : 'Report a problem'}</option>
+                  <option value="suggestion">{pt ? 'Sugerir uma melhoria' : 'Suggest an improvement'}</option>
+                  <option value="feedback">{pt ? 'Partilhar feedback geral' : 'Share general feedback'}</option>
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {ticketCategory === 'problem'
+                    ? (pt ? 'Indica o que aconteceu e os passos para reproduzir o problema.' : 'Tell us what happened and how to reproduce the problem.')
+                    : ticketCategory === 'suggestion'
+                      ? (pt ? 'Explica como esta melhoria ajudaria no trabalho diário.' : 'Explain how this improvement would help your daily work.')
+                      : (pt ? 'Partilha a tua experiência, positiva ou negativa.' : 'Share your experience, positive or negative.')}
+                </p>
+              </div>
               <div>
                 <label htmlFor="support-ticket-subject" className="mb-1.5 block text-sm font-medium">
                   {pt ? 'Assunto' : 'Subject'}
@@ -351,13 +382,13 @@ export default function SupportPage() {
                   value={subjectDraft}
                   onChange={(event) => setSubjectDraft(event.target.value)}
                   placeholder={pt ? 'Ex.: Problema com a faturação' : 'e.g. Billing issue'}
-                  maxLength={120}
+                  maxLength={100}
                   required
                   minLength={3}
                   disabled={creating}
                   className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
                 />
-                <p className="mt-1 text-right text-[11px] text-muted-foreground">{subjectDraft.trim().length}/120</p>
+                <p className="mt-1 text-right text-[11px] text-muted-foreground">{subjectDraft.trim().length}/100</p>
               </div>
               <div>
                 <label htmlFor="support-ticket-description" className="mb-1.5 block text-sm font-medium">
@@ -384,7 +415,7 @@ export default function SupportPage() {
                 <button
             aria-label={creating ? (pt ? "A submeter ticket" : "Submitting ticket") : (pt ? "Submeter ticket" : "Submit ticket")}
                   type="submit"
-                  disabled={creating || !canCreateTicket || subjectDraft.trim().length < 3 || descriptionDraft.trim().length < 10}
+                  disabled={creating || !canCreateTicket || subjectDraft.trim().length < 3 || subjectDraft.trim().length > 100 || descriptionDraft.trim().length < 10}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Ticket className="size-4" /> {creating ? (pt ? 'A criar…' : 'Creating…') : (pt ? 'Submeter ticket' : 'Submit ticket')}
