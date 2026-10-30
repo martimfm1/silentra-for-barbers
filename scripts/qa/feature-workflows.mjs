@@ -139,7 +139,7 @@ assert.ok(
   'The public prices endpoint must return the payment mode for the pricing UI.',
 );
 assert.ok(
-  dashboardPage.includes('Atividade por dia da semana') &&
+  dashboardPage.includes("t('dashboard.weeklyActivity')") &&
     dashboardPage.includes('role="img"') &&
     dashboardPage.includes('grid h-full min-w-0 grid-cols-7') &&
     dashboardPage.includes('hasChartActivity') &&
