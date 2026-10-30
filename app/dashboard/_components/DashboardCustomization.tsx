@@ -123,15 +123,15 @@ export function useDashboardCustomization() {
     [activeId, presets],
   );
 
-  const save = useCallback(async (name: string) => {
+  const save = useCallback(async (name: string, nextConfig: DashboardCustomizationConfig = config) => {
     if (!activeId) throw new Error('Não existe uma personalização ativa.');
-    const payload = await requestJson('PATCH', { id: activeId, name, config });
+    const payload = await requestJson('PATCH', { id: activeId, name, config: nextConfig });
     await refresh();
     return payload.data as DashboardCustomizationPreset;
   }, [activeId, config, refresh]);
 
-  const create = useCallback(async (name: string) => {
-    const payload = await requestJson('POST', { name, config });
+  const create = useCallback(async (name: string, nextConfig: DashboardCustomizationConfig = config) => {
+    const payload = await requestJson('POST', { name, config: nextConfig });
     await requestJson('PATCH', { id: payload.data.id, activate: true });
     await refresh();
     return payload.data as DashboardCustomizationPreset;
@@ -200,12 +200,13 @@ export function DashboardCustomizationDialog({
   async function handleSave(asNew = false) {
     setSaving(true);
     try {
-      customization.setConfig({ ...customization.config, shortcuts: draftShortcuts });
+      const nextConfig = { ...customization.config, shortcuts: draftShortcuts };
+      customization.setConfig(nextConfig);
       if (asNew || newPreset) {
-        await customization.create(name.trim());
+        await customization.create(name.trim(), nextConfig);
         toast.success(t('Nova personalização guardada.', 'New customization saved.'));
       } else {
-        await customization.save(name.trim());
+        await customization.save(name.trim(), nextConfig);
         toast.success(t('Personalização guardada.', 'Customization saved.'));
       }
       setNewPreset(false);
