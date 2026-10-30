@@ -401,7 +401,7 @@ export function DashboardCustomizationDialog({
             </div>
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>{t('Cancelar', 'Cancel')}</Button>
-              <Button type="button" disabled={saving || !name.trim() || draftShortcuts.length === 0} onClick={() => void handleSave(newPreset)} className="bg-white text-zinc-950 hover:bg-zinc-200">
+              <Button type="button" disabled={saving || !name.trim() || (draftShortcuts.length === 0 && customization.config.sections.quickActions)} onClick={() => void handleSave(newPreset)} className="bg-white text-zinc-950 hover:bg-zinc-200">
                 {saving ? t('A guardar…', 'Saving…') : <><Save className="mr-2 size-4" />{newPreset ? t('Criar personalização', 'Create customization') : t('Guardar alterações', 'Save changes')}</>}
               </Button>
             </div>
