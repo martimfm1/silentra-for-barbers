@@ -566,6 +566,26 @@ const checks = [
   },
 ];
 
+  {
+    name: 'Agenda do Victor is tenant-bound and requires an effective paid plan',
+    file: 'app/agendadovictor/page.tsx',
+    test: (source) =>
+      source.includes("getPublicProfileBySlug(SLUG)") &&
+      source.includes("profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d'") &&
+      source.includes("!['pro', 'enterprise'].includes(profile.plan)") &&
+      source.includes(".eq('barbershop_id', profile.barbershop_id)"),
+  },
+  {
+    name: 'Agenda do Victor reuses Silentra booking drawer and shop booking identity',
+    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    test: (source) =>
+      source.includes("import('@/app/barbershops/components/booking-drawer')") &&
+      source.includes('selectedServiceId={selectedServiceId}') &&
+      source.includes('barbershop_id: profile.barbershop_id || profile.id') &&
+      source.includes('AGENDA DO VICTOR') &&
+      source.includes('Nova marcação') &&
+      source.includes('Selecionar um serviço'),
+  },
 let failed = 0;
 for (const check of checks) {
   try {
