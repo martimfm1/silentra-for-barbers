@@ -45,7 +45,7 @@ const [
 
 // Navigation correctness: catch the old English slugs that silently led to 404s.
 assert.match(navbar, /href: '\/dashboard\/clientes'/);
-assert.match(navbar, /href: '\/dashboard\/equipa'/);
+assert.match(sidebar, /href: '\/dashboard\/equipa'/);
 assert.doesNotMatch(navbar, /href: '\/dashboard\/clients'/);
 assert.doesNotMatch(navbar, /href: '\/dashboard\/team'/);
 for (const route of [
