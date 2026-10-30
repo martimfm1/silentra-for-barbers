@@ -46,6 +46,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Authentication account-state contracts
+        run: pnpm qa:auth-account-state
+
       - name: Lint
         run: pnpm lint
 

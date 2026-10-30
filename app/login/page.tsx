@@ -49,6 +49,7 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isUnconfirmed, setIsUnconfirmed] = useState(false);
+  const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
@@ -76,6 +77,7 @@ export default function LoginPage() {
     setErrorMsg(null);
     setSuccessMsg(null);
     setIsUnconfirmed(false);
+    setIsInvalidCredentials(false);
   };
 
   const switchTab = (tab: 'login' | 'register') => {
@@ -165,6 +167,15 @@ export default function LoginPage() {
                         aria-live="assertive"
                       >
                         <p>{errorMsg}</p>
+                        {isInvalidCredentials ? (
+                          <button
+                            type="button"
+                            onClick={() => switchTab('register')}
+                            className="inline-flex min-h-10 items-center rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/10"
+                          >
+                            {t('auth.registerTab')}
+                          </button>
+                        ) : null}
                         {isUnconfirmed ? (
                           <Link
                             href={`/confirm-email${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
@@ -184,18 +195,12 @@ export default function LoginPage() {
                             event,
                             router,
                             setIsSubmitting,
+                            invalidCredentialsMessage: t('auth.invalidCredentials'),
+                            unconfirmedEmailMessage: t('auth.unconfirmedLogin'),
                             setErrorMsg: (message) => {
                               setErrorMsg(message);
-                              if (
-                                message
-                                  ?.toLowerCase()
-                                  .includes('email not confirmed') ||
-                                message
-                                  ?.toLowerCase()
-                                  .includes('não confirmado')
-                              ) {
-                                setIsUnconfirmed(true);
-                              }
+                              setIsUnconfirmed(message === t('auth.unconfirmedLogin'));
+                              setIsInvalidCredentials(message === t('auth.invalidCredentials'));
                             },
                           })
                         }
@@ -322,6 +327,7 @@ export default function LoginPage() {
                             setErrorMsg,
                             acceptedTerms,
                             termsErrorMessage: t('legal.acceptRequired'),
+                            successMessage: t('auth.registered'),
                             onSuccess: () =>
                               router.push(
                                 `/confirm-email${email ? `?email=${encodeURIComponent(email)}` : ''}`,

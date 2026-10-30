@@ -139,7 +139,32 @@ const localeTrees = Object.fromEntries(
   }),
 );
 
+const languageContext = read('context/LanguageContext.tsx');
+if (!languageContext.includes('resolveTranslation(fallbackLocale, path)')) {
+  failures.push('LanguageContext: missing fallback to the other supported locale');
+}
+if (languageContext.includes('if (translated === undefined) return path;')) {
+  failures.push('LanguageContext: missing translation keys must never be rendered to users');
+}
+if (!languageContext.includes('if (hasSavedPreference) return;')) {
+  failures.push('LanguageContext: saved browser language must take precedence over the barbershop default');
+}
+
 const failures = [];
+
+const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
+  /(?:^|\/)page\.tsx$/.test(path),
+);
+const delegatedDashboardRoutes = ['SettingsPage', 'MarketingWorkspace'];
+for (const path of dashboardRouteFiles) {
+  const source = read(path);
+  const isLocalized = source.includes('useLanguage(') || source.includes('redirect(') ||
+    delegatedDashboardRoutes.some((component) => source.includes(component));
+  if (!isLocalized) {
+    failures.push(path + ': dashboard route must use LanguageContext, redirect, or delegate to an audited localized workspace');
+  }
+}
+
 for (const path of localizedSources) {
   const source = read(path);
   const keys = [...source.matchAll(/\bt\(\s*['"]([A-Za-z0-9_.]+)['"]/g)]
