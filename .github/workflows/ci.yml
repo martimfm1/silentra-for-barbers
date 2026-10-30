@@ -58,6 +58,9 @@ jobs:
       - name: Minimum booking notice contracts
         run: pnpm qa:minimum-booking-notice
 
+      - name: Dashboard personalization contracts
+        run: pnpm qa:dashboard-preferences
+
       - name: Plan contracts
         run: pnpm qa:plans
 
