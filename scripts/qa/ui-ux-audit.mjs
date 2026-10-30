@@ -60,20 +60,31 @@ for (const route of [
   await access(route);
 }
 
-// Navigation density and disclosure controls must remain understandable.
+// Navigation density, fixed bottom placement and the More sheet must stay consistent.
 assert.match(sidebar, /const primaryItems:[\s\S]*?\/dashboard\/agenda[\s\S]*?\/dashboard\/clientes[\s\S]*?\/dashboard\/servicos/);
-assert.match(sidebar, /communicationItems\.map\(\(item\) => renderItem\(item, mobile\)\)/);
+assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
+assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
-assert.match(sidebar, /aria-expanded=\{communicationOpen\}/);
-assert.match(sidebar, /aria-controls=\{mobile \? 'dashboard-communication-mobile'/);
-assert.match(sidebar, /aria-expanded=\{toolsOpen\}/);
-assert.match(sidebar, /aria-controls=\{panelId\}/);
-assert.match(sidebar, /matchesCurrentPath\(communicationItems\)/);
-assert.match(sidebar, /matchesCurrentPath\(toolsItems\)/);
-assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
+assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
+assert.match(sidebar, /fixed inset-x-0 bottom-0/);
+assert.match(sidebar, /lg:bottom-4/);
+assert.match(sidebar, /aria-expanded=\{moreOpen\}/);
+assert.match(sidebar, /aria-controls="dashboard-more-panel"/);
+assert.match(sidebar, /aria-modal="true"/);
+assert.match(sidebar, /AnimatePresence/);
+assert.match(sidebar, /motion\.aside/);
+assert.match(sidebar, /prefersReducedMotion/);
+assert.match(sidebar, /env\(safe-area-inset-bottom\)/);
 assert.match(sidebar, /handleDialogKeys/);
-assert.match(sidebar, /mobileTriggerRef\.current\?\.focus\(\)/);
+assert.match(sidebar, /moreTriggerRef\.current\?\.focus\(\)/);
+assert.match(sidebar, /moreItems\.some\(isActive\)/);
+assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
 
+// Public navigation stays compact at desktop widths and uses a reduced mobile menu.
+assert.match(navbar, /className="hidden min-w-0 items-center gap-1 lg:flex"/);
+assert.match(navbar, /className="lg:hidden"/);
+assert.match(navbar, /const guestLinks = useMemo<NavLink\[\]>/);
+assert.match(navbar, /href: '\/software-gestao-barbearia'/);
 assert.match(sidebar, /href: '\/dashboard\/automations'/);
 assert.doesNotMatch(sidebar, /href: '\/dashboard\/mensagens\/birthdays'/);
 assert.doesNotMatch(sidebar, /label: 'Aniversários'/);
