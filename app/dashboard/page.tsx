@@ -30,14 +30,12 @@ import {
   Scissors,
   Briefcase,
   CalendarDays,
-  Clock,
   ChevronRight,
   Crown,
   CalendarPlus,
   ArrowRight,
   CheckCircle2,
   QrCode,
-  Heart,
   Gift,
   MessageCircle,
   BarChart3,
@@ -45,7 +43,6 @@ import {
   Megaphone,
   Zap,
   Settings2,
-  X,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 import { Button } from '@/components/ui/button';
