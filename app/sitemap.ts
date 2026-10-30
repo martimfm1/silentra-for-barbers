@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getPublicProfileById } from '@/lib/barbershops/public-profile';
 
 const SITE_URL = 'https://barbers.silentra.me';
+const AGENDA_DO_VICTOR_SHOP_SLUG = 'silveira-salon-6f1e9637';
 
 // Refresh database-backed public profile URLs hourly without querying on every crawler request.
 export const revalidate = 3600;
@@ -83,7 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (!shop.slug || shop.public_profile_enabled === false) continue;
 
         const slug = String(shop.slug).trim();
-        if (!slug || seen.has(slug)) continue;
+        if (!slug || seen.has(slug) || slug === AGENDA_DO_VICTOR_SHOP_SLUG) continue;
         seen.add(slug);
 
         const parsedLastModified = shop.updated_at
@@ -201,6 +202,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...dynamicShopRoutes,
+    {
+      url: `${SITE_URL}/agendadovictor`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
     ...enterpriseLandingRoutes,
     ...customWebsiteRoutes,
   ];
