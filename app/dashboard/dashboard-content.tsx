@@ -58,7 +58,7 @@ const dashboardSurfaceStyles = `
 
   @media (max-width: 1023px) {
     .silentra-dashboard-shell .dashboard-page {
-      padding-bottom: 5rem;
+      padding-bottom: calc(6.25rem + env(safe-area-inset-bottom));
     }
   }
 `;
@@ -81,7 +81,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {!isSettingsPage && <DashboardTopBar />}
       <DashboardSidebar />
       <div
-        className={`dashboard-content silentra-dashboard-main min-w-0 lg:pl-64 ${
+        className={`dashboard-content silentra-dashboard-main min-w-0 ${
           isSettingsPage ? 'pt-0' : 'pt-16'
         }`}
       >
