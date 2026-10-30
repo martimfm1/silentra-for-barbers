@@ -344,13 +344,18 @@ export const en = {
     fullNamePlaceholder: 'e.g. John Smith',
     mobilePhone: 'Mobile phone',
     createAccountWorkspace: 'Create workspace',
-    registered: 'Account created! We sent a verification link to your email.',
+    registered:
+      'Check your inbox. If your account needs to be created or confirmed, you will receive an email with the next steps.',
+    invalidCredentials:
+      'We could not sign in with these details. Check your email and password, or create an account.',
+    unconfirmedLogin:
+      'The email address for this account has not been confirmed yet. Check your inbox or request a new confirmation email.',
     confirmed: 'Email confirmed successfully! You can now sign in.',
     unconfirmed:
       'Your email has not been verified yet. Check your inbox to continue.',
     resendConfirmation: 'Resend confirmation email',
     confirmEmailTitle: 'Check your inbox',
-    confirmEmailSubtitle: 'We sent a confirmation link to:',
+    confirmEmailSubtitle: 'If this address can create an account or needs confirmation, you will receive an email with the next steps:',
     backToLogin: 'Back to sign in',
     accountSecurity: 'Account security',
     useAccountEmail:
@@ -385,7 +390,7 @@ export const en = {
     emailConfirmationErrorSubtitle:
       'The link may have expired or already been used. Request a new confirmation email.',
     confirmEmailInstructions:
-      'Open the email and click the confirmation link to activate your account. If you cannot find it, check your spam folder.',
+      'If you do not receive an email, the account may already be confirmed or the address may not be eligible for registration. Try signing in or resetting your password. Also check your spam folder.',
     resendEmail: 'Resend confirmation email',
     emailConfirmedTag: 'Account confirmed',
     emailConfirmedBody:
