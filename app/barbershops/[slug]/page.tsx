@@ -18,6 +18,8 @@ interface BarbershopPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
+
 const PUBLIC_ORIGIN = (
   process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://barbers.silentra.me'
 ).replace(/\/$/, '');
@@ -43,7 +45,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const profile = await getPublicProfileBySlug(slug);
   if (!profile) return {};
-  const canonicalPath = `/barbershops/${encodeURIComponent(profile.slug)}`;
+  const canonicalPath =
+    profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID
+      ? '/agendadovictor'
+      : `/barbershops/${encodeURIComponent(profile.slug)}`;
   const title =
     profile.seo_title?.trim() ||
     `${profile.name} — Barbearia${profile.city ? ` em ${profile.city}` : ''} | Agendamento Online`;
@@ -270,6 +275,10 @@ export default async function BarbershopPage({ params }: BarbershopPageProps) {
       publicProfileEnabled: profile.public_profile_enabled,
     });
     permanentRedirect(getResolvedProfileUrl(profile));
+  }
+
+  if (profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID) {
+    permanentRedirect('/agendadovictor');
   }
 
   const loyaltyEnabled = await getPublicLoyaltyEnabled(profile);
