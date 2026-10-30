@@ -34,8 +34,11 @@ export default async function AgendaDoVictorRoute() {
   }
 
   const database = createAdminClient();
-  const [{ data: services, error: servicesError }, { data: shop, error: shopError }] =
-    await Promise.all([
+  const [
+    { data: services, error: servicesError },
+    { data: shop, error: shopError },
+    { data: hours, error: hoursError },
+  ] = await Promise.all([
       database
         .from('services')
         .select('id,name,price,duration')
@@ -43,15 +46,21 @@ export default async function AgendaDoVictorRoute() {
         .order('name', { ascending: true }),
       database
         .from('shops')
-        .select('id,slug,city,address,lat,lng,opening_time,closing_time')
+        .select('id,slug,city,address,lat,lng')
         .eq('barbershop_id', profile.barbershop_id)
+        .maybeSingle(),
+      database
+        .from('barbershops')
+        .select('opening_time,closing_time')
+        .eq('id', profile.barbershop_id)
         .maybeSingle(),
     ]);
 
-  if (servicesError || shopError || !shop || !services) {
+  if (servicesError || shopError || hoursError || !shop || !services || !hours) {
     console.error('[AGENDA_DO_VICTOR]', {
       services: servicesError?.code ?? null,
       shop: shopError?.code ?? null,
+      hours: hoursError?.code ?? null,
     });
     notFound();
   }
@@ -60,7 +69,7 @@ export default async function AgendaDoVictorRoute() {
   return (
     <AgendaDoVictorPage
       profile={publicProfile}
-      shop={shop}
+      shop={{ ...shop, opening_time: hours.opening_time, closing_time: hours.closing_time }}
       services={services.map((service) => ({
         id: service.id,
         name: service.name,
