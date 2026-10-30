@@ -165,7 +165,7 @@ export function DashboardCustomizationDialog({
   const [saving, setSaving] = useState(false);
   const [newPreset, setNewPreset] = useState(false);
   const [draftShortcuts, setDraftShortcuts] = useState<string[]>([]);
-  const t = (pt: string, en: string) => isEnglish ? en : pt;
+  const copy = (pt: string, en: string) => isEnglish ? en : pt;
 
   useEffect(() => {
     if (customization.activePreset && !newPreset) setName(customization.activePreset.name);
@@ -178,7 +178,7 @@ export function DashboardCustomizationDialog({
 
   function openEditor() {
     setDraftShortcuts([...customization.config.shortcuts]);
-    setName(customization.activePreset?.name ?? t('A minha dashboard', 'My dashboard'));
+    setName(customization.activePreset?.name ?? copy('A minha dashboard', 'My dashboard'));
     setNewPreset(false);
     setOpen(true);
   }
@@ -207,15 +207,15 @@ export function DashboardCustomizationDialog({
       customization.setConfig(nextConfig);
       if (asNew || newPreset) {
         await customization.create(name.trim(), nextConfig);
-        toast.success(t('Nova personalização guardada.', 'New customization saved.'));
+        toast.success(copy('Nova personalização guardada.', 'New customization saved.'));
       } else {
         await customization.save(name.trim(), nextConfig);
-        toast.success(t('Personalização guardada.', 'Customization saved.'));
+        toast.success(copy('Personalização guardada.', 'Customization saved.'));
       }
       setNewPreset(false);
       setOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('Não foi possível guardar.', 'Could not save changes.'));
+      toast.error(error instanceof Error ? error.message : copy('Não foi possível guardar.', 'Could not save changes.'));
     } finally {
       setSaving(false);
     }
@@ -230,7 +230,7 @@ export function DashboardCustomizationDialog({
         setName(selected.name);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('Não foi possível mudar a personalização.', 'Could not switch customization.'));
+      toast.error(error instanceof Error ? error.message : copy('Não foi possível mudar a personalização.', 'Could not switch customization.'));
     }
   }
 
@@ -239,9 +239,9 @@ export function DashboardCustomizationDialog({
     try {
       await customization.remove(customization.activeId);
       setNewPreset(false);
-      toast.success(t('Personalização eliminada.', 'Customization deleted.'));
+      toast.success(copy('Personalização eliminada.', 'Customization deleted.'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('Não foi possível eliminar.', 'Could not delete customization.'));
+      toast.error(error instanceof Error ? error.message : copy('Não foi possível eliminar.', 'Could not delete customization.'));
     }
   }
 
@@ -259,29 +259,29 @@ export function DashboardCustomizationDialog({
         className="gap-2 border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/10"
       >
         <Settings2 className="size-4" />
-        {t('Personalizar', 'Customize')}
+        {copy('Personalizar', 'Customize')}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100">
           <DialogHeader>
-            <DialogTitle>{t('A tua dashboard, à tua maneira', 'Your dashboard, your way')}</DialogTitle>
+            <DialogTitle>{copy('A tua dashboard, à tua maneira', 'Your dashboard, your way')}</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              {t('Organiza os atalhos, escolhe o que queres ver e define a cor dos detalhes.', 'Organize shortcuts, choose what you see and set the accent color.')}
+              {copy('Organiza os atalhos, escolhe o que queres ver e define a cor dos detalhes.', 'Organize shortcuts, choose what you see and set the accent color.')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <label className="text-sm font-medium" htmlFor="dashboard-preset-name">{t('Personalização', 'Customization')}</label>
+                <label className="text-sm font-medium" htmlFor="dashboard-preset-name">{copy('Personalização', 'Customization')}</label>
                 <div className="flex items-center gap-2">
                   <select
-                    aria-label={t('Escolher personalização', 'Choose customization')}
+                    aria-label={copy('Escolher personalização', 'Choose customization')}
                     value={newPreset ? '__new__' : customization.activeId ?? ''}
                     onChange={(event) => {
                       if (event.target.value === '__new__') {
                         setNewPreset(true);
-                        setName(t('Nova personalização', 'New customization'));
+                        setName(copy('Nova personalização', 'New customization'));
                         setDraftShortcuts([...customization.config.shortcuts]);
                       } else {
                         setNewPreset(false);
@@ -293,7 +293,7 @@ export function DashboardCustomizationDialog({
                     {customization.presets.map((preset) => (
                       <option key={preset.id} value={preset.id}>{preset.name}</option>
                     ))}
-                    <option value="__new__">{t('+ Nova personalização', '+ New customization')}</option>
+                    <option value="__new__">{copy('+ Nova personalização', '+ New customization')}</option>
                   </select>
                   <ChevronDown className="size-4 text-zinc-500" aria-hidden="true" />
                 </div>
@@ -306,8 +306,8 @@ export function DashboardCustomizationDialog({
 
             <section className="space-y-3">
               <div>
-                <h3 className="text-sm font-semibold">{t('Atalhos', 'Shortcuts')}</h3>
-                <p className="text-xs text-zinc-500">{t('Escolhe os atalhos e usa as setas para alterar a ordem.', 'Choose shortcuts and use the arrows to change their order.')}</p>
+                <h3 className="text-sm font-semibold">{copy('Atalhos', 'Shortcuts')}</h3>
+                <p className="text-xs text-zinc-500">{copy('Escolhe os atalhos e usa as setas para alterar a ordem.', 'Choose shortcuts and use the arrows to change their order.')}</p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SHORTCUTS.map((shortcut) => (
@@ -324,20 +324,20 @@ export function DashboardCustomizationDialog({
                     </label>
                     {draftShortcuts.includes(shortcut.id) && (
                       <span className="flex items-center gap-1">
-                        <button type="button" aria-label={t('Mover para cima', 'Move up')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), -1)} disabled={draftShortcuts.indexOf(shortcut.id) === 0} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowUp className="size-3.5" /></button>
-                        <button type="button" aria-label={t('Mover para baixo', 'Move down')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), 1)} disabled={draftShortcuts.indexOf(shortcut.id) === draftShortcuts.length - 1} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowDown className="size-3.5" /></button>
+                        <button type="button" aria-label={copy('Mover para cima', 'Move up')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), -1)} disabled={draftShortcuts.indexOf(shortcut.id) === 0} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowUp className="size-3.5" /></button>
+                        <button type="button" aria-label={copy('Mover para baixo', 'Move down')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), 1)} disabled={draftShortcuts.indexOf(shortcut.id) === draftShortcuts.length - 1} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowDown className="size-3.5" /></button>
                       </span>
                     )}
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-zinc-500">{t('Atalhos selecionados:', 'Selected shortcuts:')} {orderedShortcuts.length}/13</p>
+              <p className="text-xs text-zinc-500">{copy('Atalhos selecionados:', 'Selected shortcuts:')} {orderedShortcuts.length}/13</p>
             </section>
 
             <section className="space-y-3">
               <div>
-                <h3 className="text-sm font-semibold">{t('Elementos da dashboard', 'Dashboard sections')}</h3>
-                <p className="text-xs text-zinc-500">{t('Oculta os cartões e gráficos que não utilizas.', 'Hide cards and charts you do not use.')}</p>
+                <h3 className="text-sm font-semibold">{copy('Elementos da dashboard', 'Dashboard sections')}</h3>
+                <p className="text-xs text-zinc-500">{copy('Oculta os cartões e gráficos que não utilizas.', 'Hide cards and charts you do not use.')}</p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SECTION_LABELS.map((section) => (
@@ -357,7 +357,7 @@ export function DashboardCustomizationDialog({
             <section className="space-y-3">
               <div className="flex items-center gap-2">
                 <Palette className="size-4 text-zinc-400" />
-                <h3 className="text-sm font-semibold">{t('Cor dos detalhes', 'Accent color')}</h3>
+                <h3 className="text-sm font-semibold">{copy('Cor dos detalhes', 'Accent color')}</h3>
               </div>
               <div className="flex flex-wrap gap-3">
                 {COLORS.map((color) => (
@@ -373,10 +373,10 @@ export function DashboardCustomizationDialog({
                     {customization.config.accentColor === color.value && <Check className="size-4 text-zinc-950" />}
                   </button>
                 ))}
-                <label className="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/20 bg-zinc-900" title={t('Escolher cor personalizada', 'Choose custom color')}>
+                <label className="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/20 bg-zinc-900" title={copy('Escolher cor personalizada', 'Choose custom color')}>
                   <input
                     type="color"
-                    aria-label={t('Escolher cor personalizada', 'Choose custom color')}
+                    aria-label={copy('Escolher cor personalizada', 'Choose custom color')}
                     value={customization.config.accentColor}
                     onChange={(event) => customization.setConfig((current) => ({ ...current, accentColor: event.target.value }))}
                     className="size-12 cursor-pointer border-0 bg-transparent"
@@ -386,8 +386,8 @@ export function DashboardCustomizationDialog({
               <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-3">
                 <span className="size-8 rounded-lg" style={{ backgroundColor: customization.config.accentColor }} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-zinc-400">{t('Pré-visualização', 'Preview')}</p>
-                  <p className="text-sm font-semibold" style={{ color: customization.config.accentColor }}>{t('Detalhes com a tua cor', 'Details in your color')}</p>
+                  <p className="text-xs text-zinc-400">{copy('Pré-visualização', 'Preview')}</p>
+                  <p className="text-sm font-semibold" style={{ color: customization.config.accentColor }}>{copy('Detalhes com a tua cor', 'Details in your color')}</p>
                 </div>
                 <code className="text-xs text-zinc-500">{customization.config.accentColor.toUpperCase()}</code>
               </div>
@@ -398,17 +398,17 @@ export function DashboardCustomizationDialog({
             <div className="flex gap-2">
               {!newPreset && customization.presets.length > 1 && (
                 <Button type="button" variant="ghost" onClick={() => void handleDelete()} className="text-rose-300 hover:bg-rose-500/10 hover:text-rose-200">
-                  <Trash2 className="mr-2 size-4" />{t('Eliminar', 'Delete')}
+                  <Trash2 className="mr-2 size-4" />{copy('Eliminar', 'Delete')}
                 </Button>
               )}
               <Button type="button" variant="ghost" onClick={() => { customization.setConfig(DEFAULT_CONFIG); setDraftShortcuts([...DEFAULT_CONFIG.shortcuts]); }} className="text-zinc-400">
-                <RotateCcw className="mr-2 size-4" />{t('Repor', 'Reset')}
+                <RotateCcw className="mr-2 size-4" />{copy('Repor', 'Reset')}
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>{t('Cancelar', 'Cancel')}</Button>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>{copy('Cancelar', 'Cancel')}</Button>
               <Button type="button" disabled={saving || !name.trim() || (draftShortcuts.length === 0 && customization.config.sections.quickActions)} onClick={() => void handleSave(newPreset)} className="bg-white text-zinc-950 hover:bg-zinc-200">
-                {saving ? t('A guardar…', 'Saving…') : <><Save className="mr-2 size-4" />{newPreset ? t('Criar personalização', 'Create customization') : t('Guardar alterações', 'Save changes')}</>}
+                {saving ? copy('A guardar…', 'Saving…') : <><Save className="mr-2 size-4" />{newPreset ? copy('Criar personalização', 'Create customization') : copy('Guardar alterações', 'Save changes')}</>}
               </Button>
             </div>
           </div>
