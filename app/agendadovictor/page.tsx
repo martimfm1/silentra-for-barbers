@@ -11,6 +11,15 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Agenda do Victor | SILVEIRA SALON',
   description: 'Marca o teu próximo serviço na SILVEIRA SALON.',
+  alternates: { canonical: 'https://barbers.silentra.me/agendadovictor' },
+  openGraph: {
+    type: 'website',
+    title: 'Agenda do Victor | SILVEIRA SALON',
+    description: 'Marca o teu próximo serviço na SILVEIRA SALON.',
+    url: 'https://barbers.silentra.me/agendadovictor',
+    siteName: 'SILENTRA',
+    locale: 'pt_PT',
+  },
   robots: { index: true, follow: true },
 };
 
