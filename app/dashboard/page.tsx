@@ -240,18 +240,18 @@ export default function DashboardPage() {
   } as const;
   const quickActionCatalog = [
     { id: 'new-booking', href: '/dashboard/agenda', label: t('dashboard.newBooking'), icon: CalendarPlus },
-    { id: 'clients', href: '/dashboard/clientes', label: locale === 'en' ? 'Clients' : 'Clientes', icon: Users },
+    { id: 'clients', href: '/dashboard/clientes', label: t('dashboard.clients'), icon: Users },
     { id: 'services', href: '/dashboard/servicos', label: t('dashboard.services'), icon: Scissors },
-    { id: 'team', href: '/dashboard/equipa', label: locale === 'en' ? 'Team' : 'Equipa', icon: Briefcase },
+    { id: 'team', href: '/dashboard/equipa', label: t('dashboard.team'), icon: Briefcase },
     { id: 'analytics', href: '/dashboard/stats', label: t('dashboard.stats'), icon: Clock },
-    { id: 'loyalty', href: '/dashboard/loyalty', label: locale === 'en' ? 'Loyalty' : 'Fidelização', icon: Gift },
-    { id: 'qr-code', href: '/dashboard/qr-code', label: locale === 'en' ? 'QR code' : 'Código QR', icon: QrCode },
-    { id: 'automations', href: '/dashboard/automations', label: locale === 'en' ? 'Automations' : 'Automações', icon: Zap },
-    { id: 'messages', href: '/dashboard/mensagens', label: locale === 'en' ? 'Messages' : 'Mensagens', icon: MessageSquare },
-    { id: 'marketing', href: '/dashboard/marketing', label: locale === 'en' ? 'Campaigns' : 'Campanhas', icon: Megaphone },
-    { id: 'sales', href: '/dashboard/pos', label: locale === 'en' ? 'Sales' : 'Vendas', icon: ShoppingBag },
-    { id: 'website', href: '/dashboard/website', label: locale === 'en' ? 'Website' : 'Site próprio', icon: Globe },
-    { id: 'support', href: '/dashboard/suporte', label: locale === 'en' ? 'Support' : 'Suporte', icon: Headset },
+    { id: 'loyalty', href: '/dashboard/loyalty', label: t('dashboard.loyalty'), icon: Gift },
+    { id: 'qr-code', href: '/dashboard/qr-code', label: t('dashboard.qrCode'), icon: QrCode },
+    { id: 'automations', href: '/dashboard/automations', label: t('dashboard.automations'), icon: Zap },
+    { id: 'messages', href: '/dashboard/mensagens', label: t('dashboard.messages'), icon: MessageSquare },
+    { id: 'marketing', href: '/dashboard/marketing', label: t('dashboard.marketing'), icon: Megaphone },
+    { id: 'sales', href: '/dashboard/pos', label: t('dashboard.sales'), icon: ShoppingBag },
+    { id: 'website', href: '/dashboard/website', label: t('dashboard.website'), icon: Globe },
+    { id: 'support', href: '/dashboard/suporte', label: t('dashboard.support'), icon: Headset },
   ];
   const quickActions = customization.config.shortcuts
     .map((id) => quickActionCatalog.find((action) => action.id === id))
@@ -271,14 +271,14 @@ export default function DashboardPage() {
                 className="mt-1 font-heading text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl"
               >
                 {new Date().getHours() < 12
-                  ? 'Bom dia'
+                  ? t('dashboard.goodMorning')
                   : new Date().getHours() < 20
-                    ? 'Boa tarde'
-                    : 'Boa noite'}
+                    ? t('dashboard.goodAfternoon')
+                    : t('dashboard.goodEvening')}
                 {userName ? `, ${userName}` : ''} 👋
               </h1>
               <p className="mt-1 text-sm capitalize text-zinc-400">
-                {new Date().toLocaleDateString('pt-PT', {
+                {new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : locale === 'en' ? 'en-GB' : 'pt-PT', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                 className="glassmorphism inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dashboard-accent)]"
               >
                 <Crown className="size-4" style={{ color: 'var(--dashboard-accent)' }} aria-hidden="true" />
-                {locale === 'en' ? 'Current plan:' : 'Plano atual:'} {PLAN_NAMES[plan]}
+                {t('dashboard.currentPlan')} {PLAN_NAMES[plan]}
                 <ChevronRight className="size-4 text-zinc-500" aria-hidden="true" />
               </Link>
             </div>
@@ -322,8 +322,7 @@ export default function DashboardPage() {
                       completed: setupCompleted,
                       total: setupSteps.length,
                     })}
-                    Só falta completar o próximo passo para começares a aceitar
-                    marcações.
+                    {t('dashboard.setupNextStep')}
                   </p>
                   <div
                     className="mt-4 h-1.5 max-w-md overflow-hidden rounded-full bg-white/10"
@@ -358,13 +357,13 @@ export default function DashboardPage() {
           {customization.config.sections.quickActions && <section aria-label={t('dashboard.quickActions')} className="pb-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                O que precisas de fazer?
+                {t('dashboard.whatToDo')}
               </h2>
               <Link
                 href="/dashboard/agenda"
                 className="text-xs font-medium text-zinc-500 transition hover:text-zinc-200"
               >
-                Abrir agenda <span aria-hidden="true">→</span>
+                {t('dashboard.openAgenda')} <span aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-4">
@@ -419,7 +418,7 @@ export default function DashboardPage() {
                     >
                       {nextAppointment.users?.name_complete ||
                         nextAppointment.manual_name ||
-                        'Cliente'}
+                        t('dashboard.client')}
                     </h2>
                     <p className="mt-1 truncate text-sm text-zinc-400">
                       {nextAppointment.services?.name || t('dashboard.service')}{' '}
@@ -433,7 +432,7 @@ export default function DashboardPage() {
                   href="/dashboard/agenda"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10"
                 >
-                  Ver agenda{' '}
+                  {t('dashboard.viewAgenda')}{' '}
                   <ChevronRight className="size-4" aria-hidden="true" />
                 </Link>
               </div>
@@ -450,8 +449,8 @@ export default function DashboardPage() {
               </h2>
               {!loadingInitial && (
                 <span className="text-xs text-zinc-500">
-                  {services.length} serviços · {professionals.length}{' '}
-                  profissionais
+                  {services.length} {t('dashboard.services')} · {professionals.length}{' '}
+                  {t('dashboard.professionals')}
                 </span>
               )}
             </div>
@@ -514,7 +513,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg font-medium text-zinc-100">
-                      {locale === 'en' ? 'Weekly activity by weekday' : 'Atividade por dia da semana'}
+                      {t('dashboard.weeklyActivity')}
                     </CardTitle>
                     <CardDescription className="mt-1 text-zinc-500">
                       {t('dashboard.compareDaily')}
@@ -533,7 +532,7 @@ export default function DashboardPage() {
                   <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
                     <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
                     <p className="mt-3 text-sm font-medium text-zinc-200">
-                      {locale === 'en' ? 'No bookings to chart yet' : 'Ainda não existem marcações para apresentar'}
+                      {t('dashboard.noBookingsToChart')}
                     </p>
                     <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
                       {locale === 'en' ? 'Bookings and completed service revenue will appear here when the barbershop has appointments.' : 'As marcações e a receita dos serviços concluídos aparecerão aqui quando existirem marcações.'}
@@ -546,8 +545,8 @@ export default function DashboardPage() {
                     aria-label={locale === 'en' ? 'Bar chart comparing completed revenue and bookings by weekday' : 'Gráfico de barras que compara a receita concluída e as marcações por dia da semana'}
                   >
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
-                      <span>{locale === 'en' ? 'Relative scale for each metric' : 'Escala relativa para cada indicador'}</span>
-                      <span>{locale === 'en' ? 'Hover or tap a bar for details' : 'Passa o cursor ou toca numa barra para ver detalhes'}</span>
+                      <span>{t('dashboard.relativeMetricScale')}</span>
+                      <span>{t('dashboard.chartInteractionHint')}</span>
                     </div>
                     <div className="relative min-h-0 flex-1">
                       <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex flex-col justify-between">
@@ -582,8 +581,8 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-zinc-500 sm:text-xs">
-                      <span>{locale === 'en' ? `Peak revenue: ${maxRevenue.toFixed(2)} €` : `Receita máxima: ${maxRevenue.toFixed(2).replace('.', ',')} €`}</span>
-                      <span className="text-right">{locale === 'en' ? `Peak bookings: ${maxBookings}` : `Marcações máximas: ${maxBookings}`}</span>
+                      <span>{t('dashboard.peakRevenue', { value: maxRevenue.toFixed(2).replace('.', locale === 'en' ? '.' : ',') })}</span>
+                      <span className="text-right">{t('dashboard.peakBookings', { count: maxBookings })}</span>
                     </div>
                   </div>
                 )}
@@ -597,7 +596,7 @@ export default function DashboardPage() {
                     className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
                     aria-hidden="true"
                   />
-                  <span className="text-zinc-300">{locale === 'en' ? 'Revenue' : 'Receita'}</span>
+                  <span className="text-zinc-300">{t('dashboard.revenueLabel')}</span>
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <span
@@ -635,7 +634,7 @@ export default function DashboardPage() {
                       aria-hidden="true"
                     />
                     <p className="mt-3 text-sm font-medium text-zinc-300">
-                      Tudo tranquilo por agora
+                      {t('dashboard.allQuiet')}
                     </p>
                     <p className="mt-1 text-xs text-zinc-500">
                       {t('dashboard.upcomingAppointmentsEmpty')}
@@ -667,7 +666,7 @@ export default function DashboardPage() {
                           <p className="truncate text-sm font-medium text-zinc-200">
                             {appointment.users?.name_complete ||
                               appointment.manual_name ||
-                              'Cliente'}
+                              t('dashboard.client')}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-zinc-500">
                             {appointment.services?.name ||
