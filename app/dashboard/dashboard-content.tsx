@@ -61,6 +61,12 @@ const dashboardSurfaceStyles = `
       padding-bottom: calc(6.25rem + env(safe-area-inset-bottom));
     }
   }
+
+  @media (min-width: 1024px) {
+    .silentra-dashboard-shell .dashboard-page {
+      padding-bottom: 7.5rem;
+    }
+  }
 `;
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
