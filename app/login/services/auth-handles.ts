@@ -66,6 +66,8 @@ export async function handleLogin({
   setIsSubmitting,
   setErrorMsg,
   router,
+  invalidCredentialsMessage,
+  unconfirmedEmailMessage,
 }: LoginParams) {
   event.preventDefault();
   setIsSubmitting(true);
