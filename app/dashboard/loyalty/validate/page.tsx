@@ -67,9 +67,11 @@ export default function LoyaltyValidationPage() {
       setIdentifier('');
       stopCamera();
       setStatus(
-        `Recompensa ${data.redemption?.rewardName ?? ''} validada com sucesso.`,
+        t('loyaltyValidation.successStatus', {
+          reward: data.redemption?.rewardName ?? '',
+        }),
       );
-      toast.success('Recompensa validada.');
+      toast.success(t('loyaltyValidation.successToast'));
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t('loyaltyValidation.validateGenericError');
