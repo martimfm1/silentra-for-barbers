@@ -139,6 +139,8 @@ const localeTrees = Object.fromEntries(
   }),
 );
 
+const failures = [];
+
 const languageContext = read('context/LanguageContext.tsx');
 if (!languageContext.includes('resolveTranslation(fallbackLocale, path)')) {
   failures.push('LanguageContext: missing fallback to the other supported locale');
@@ -149,8 +151,12 @@ if (languageContext.includes('if (translated === undefined) return path;')) {
 if (!languageContext.includes('if (hasSavedPreference) return;')) {
   failures.push('LanguageContext: saved browser language must take precedence over the barbershop default');
 }
-
-const failures = [];
+if (!languageContext.includes("window.localStorage.setItem('locale', newLocale)")) {
+  failures.push('LanguageContext: changing locale must persist the browser preference');
+}
+if (!languageContext.includes('document.documentElement.lang = locale ===')) {
+  failures.push('LanguageContext: document language must track the selected locale');
+}
 
 const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
   /(?:^|\/)page\.tsx$/.test(path),
