@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, production-hardening]
   pull_request:
-    branches: [main]
+    branches: [main, integration/resolve-open-prs-106-107]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
