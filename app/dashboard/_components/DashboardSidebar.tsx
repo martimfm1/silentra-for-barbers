@@ -151,6 +151,9 @@ export function DashboardSidebar() {
     );
   };
 
+  const moreItems = [...teamItems, ...communicationItems, ...toolsItems, ...secondaryItems];
+  const moreActive = moreItems.some(isActive);
+
   const closeMore = () => setMoreOpen(false);
 
   useEffect(() => {
@@ -289,7 +292,7 @@ export function DashboardSidebar() {
             aria-controls="dashboard-more-panel"
             className={cn(
               'flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
-              moreOpen ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+              moreOpen || moreActive ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
             )}
           >
             <MoreHorizontal className="size-4 lg:size-[18px]" aria-hidden="true" />
@@ -323,7 +326,7 @@ export function DashboardSidebar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={motionEnabled ? { opacity: 0, y: 16, scale: 0.99 } : undefined}
               transition={motionEnabled ? { type: 'spring', stiffness: 420, damping: 36, mass: 0.75 } : { duration: 0 }}
-              className="absolute inset-x-2 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] mx-auto flex max-h-[min(72vh,42rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/98 shadow-2xl shadow-black/50 sm:inset-x-4 lg:bottom-[5.75rem]"
+              className="absolute inset-x-2 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] mx-auto flex max-h-[min(72vh,42rem)] max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/98 shadow-2xl shadow-black/50 sm:inset-x-4 lg:bottom-[5.75rem]"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-3 sm:px-5">
                 <div className="flex min-w-0 items-center gap-3">
