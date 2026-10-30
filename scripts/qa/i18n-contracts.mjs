@@ -153,7 +153,7 @@ if (!languageContext.includes('if (hasSavedPreference) return;')) {
 const failures = [];
 
 const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
-  /(?:^|\\/)page\\.tsx$/.test(path),
+  /(?:^|\/)page\.tsx$/.test(path),
 );
 const delegatedDashboardRoutes = ['SettingsPage', 'MarketingWorkspace'];
 for (const path of dashboardRouteFiles) {
