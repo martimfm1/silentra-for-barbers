@@ -308,21 +308,24 @@ export function DashboardCustomizationDialog({
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SHORTCUTS.map((shortcut) => (
-                  <label key={shortcut.id} className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-sm">
+                  <div key={shortcut.id} className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-sm">
                     <input
+                      id={`dashboard-shortcut-${shortcut.id}`}
                       type="checkbox"
                       checked={draftShortcuts.includes(shortcut.id)}
                       onChange={(event) => toggleShortcut(shortcut.id, event.target.checked)}
                       className="size-4 accent-emerald-400"
                     />
-                    <span className="min-w-0 flex-1">{isEnglish ? shortcut.en : shortcut.pt}</span>
+                    <label htmlFor={`dashboard-shortcut-${shortcut.id}`} className="min-w-0 flex-1 cursor-pointer">
+                      {isEnglish ? shortcut.en : shortcut.pt}
+                    </label>
                     {draftShortcuts.includes(shortcut.id) && (
                       <span className="flex items-center gap-1">
                         <button type="button" aria-label={t('Mover para cima', 'Move up')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), -1)} disabled={draftShortcuts.indexOf(shortcut.id) === 0} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowUp className="size-3.5" /></button>
                         <button type="button" aria-label={t('Mover para baixo', 'Move down')} onClick={() => moveShortcut(draftShortcuts.indexOf(shortcut.id), 1)} disabled={draftShortcuts.indexOf(shortcut.id) === draftShortcuts.length - 1} className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"><ArrowDown className="size-3.5" /></button>
                       </span>
                     )}
-                  </label>
+                  </div>
                 ))}
               </div>
               <p className="text-xs text-zinc-500">{t('Atalhos selecionados:', 'Selected shortcuts:')} {orderedShortcuts.length}/13</p>
