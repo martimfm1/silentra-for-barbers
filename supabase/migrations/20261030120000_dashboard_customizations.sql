@@ -110,6 +110,6 @@ select
 from public.users u
 where u.barbershop_id is not null
   and u.role not in ('client', 'customer')
-on conflict (barbershop_id, user_id, lower(name)) do nothing;
+on conflict (barbershop_id, user_id, (lower(name))) do nothing;
 
 commit;
