@@ -791,6 +791,8 @@ title: 'Your menu',
     validate: 'Validate',
     codeHelp: 'Enter the code received by the customer. You can also use the QR code above.',
     readyForNext: 'Ready to validate another reward.',
+    successStatus: 'Reward {reward} validated successfully.',
+    successToast: 'Reward validated.',
   },
   qrCodePage: {
     loadError: 'Unable to load the QR code.',
