@@ -355,7 +355,7 @@ export const en = {
       'Your email has not been verified yet. Check your inbox to continue.',
     resendConfirmation: 'Resend confirmation email',
     confirmEmailTitle: 'Check your inbox',
-    confirmEmailSubtitle: 'We sent a confirmation link to:',
+    confirmEmailSubtitle: 'If this address can create an account or needs confirmation, you will receive an email with the next steps:',
     backToLogin: 'Back to sign in',
     accountSecurity: 'Account security',
     useAccountEmail:
@@ -390,7 +390,7 @@ export const en = {
     emailConfirmationErrorSubtitle:
       'The link may have expired or already been used. Request a new confirmation email.',
     confirmEmailInstructions:
-      'Open the email and click the confirmation link to activate your account. If you cannot find it, check your spam folder.',
+      'If you do not receive an email, the account may already be confirmed or the address may not be eligible for registration. Try signing in or resetting your password. Also check your spam folder.',
     resendEmail: 'Resend confirmation email',
     emailConfirmedTag: 'Account confirmed',
     emailConfirmedBody:
