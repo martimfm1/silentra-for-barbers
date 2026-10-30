@@ -319,6 +319,10 @@ export function SiteNavbar() {
         href: '/plans',
       },
       {
+        label: t('nav.documentation', { defaultValue: 'Documentação' }),
+        href: '/documentation',
+      },
+      {
         label: t('nav.forBarbers', { defaultValue: 'Para barbeiros' }),
         href: '/registo',
       },
