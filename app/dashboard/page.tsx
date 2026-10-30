@@ -36,19 +36,36 @@ import {
   CalendarPlus,
   ArrowRight,
   CheckCircle2,
+  QrCode,
+  Heart,
+  Gift,
+  MessageCircle,
+  BarChart3,
+  CreditCard,
+  Megaphone,
+  Zap,
+  Settings2,
+  X,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
-  const { plan } = useFeatureAccess();
+  const { plan, hasFeature } = useFeatureAccess();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [preferencesReady, setPreferencesReady] = useState(false);
+  const [visibleWidgets, setVisibleWidgets] = useState<string[]>(['metrics', 'chart', 'upcoming', 'next']);
+  const [visibleShortcuts, setVisibleShortcuts] = useState<string[]>(['booking', 'clients', 'services', 'team', 'stats', 'loyalty-scan', 'qr', 'rewards']);
 
   const fetchInitialData = useCallback(async () => {
     if (!barbershopId) {
@@ -117,12 +134,40 @@ export default function DashboardPage() {
     let cancelled = false;
     void authService.getCurrentUser().then(({ data }) => {
       if (cancelled || !data) return;
+      setUserId(data.id ?? null);
       setUserName(data.name_complete || data.email?.split('@')[0] || null);
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const preferencesStorageKey = userId && barbershopId ? `silentra:dashboard-preferences:${userId}:${barbershopId}` : null;
+
+  useEffect(() => {
+    if (!preferencesStorageKey) return;
+    try {
+      const saved = localStorage.getItem(preferencesStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved) as { widgets?: unknown; shortcuts?: unknown };
+        if (Array.isArray(parsed.widgets)) setVisibleWidgets(parsed.widgets.filter((value): value is string => typeof value === 'string'));
+        if (Array.isArray(parsed.shortcuts)) setVisibleShortcuts(parsed.shortcuts.filter((value): value is string => typeof value === 'string'));
+      }
+    } catch {
+      localStorage.removeItem(preferencesStorageKey);
+    } finally {
+      setPreferencesReady(true);
+    }
+  }, [preferencesStorageKey]);
+
+  useEffect(() => {
+    if (!preferencesReady || !preferencesStorageKey) return;
+    localStorage.setItem(preferencesStorageKey, JSON.stringify({ widgets: visibleWidgets, shortcuts: visibleShortcuts }));
+  }, [preferencesReady, preferencesStorageKey, visibleWidgets, visibleShortcuts]);
+
+  const togglePreference = (list: string[], setList: (value: string[]) => void, id: string) => {
+    setList(list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
+  };
 
   const dynamicChartData = useMemo(() => {
     const days = [
@@ -229,36 +274,25 @@ export default function DashboardPage() {
     default: 'hover:border-zinc-500/40 hover:bg-zinc-500/10',
   } as const;
   const quickActions = [
-    {
-      href: '/dashboard/agenda',
-      label: t('dashboard.newBooking'),
-      icon: CalendarPlus,
-      color: 'emerald' as const,
-    },
-    {
-      href: '/dashboard/clientes',
-      label: 'Clientes',
-      icon: Users,
-      color: 'blue' as const,
-    },
-    {
-      href: '/dashboard/servicos',
-      label: t('dashboard.services'),
-      icon: Scissors,
-      color: 'amber' as const,
-    },
-    {
-      href: '/dashboard/equipa',
-      label: 'Equipa',
-      icon: Briefcase,
-      color: 'purple' as const,
-    },
-    {
-      href: '/dashboard/stats',
-      label: t('dashboard.stats'),
-      icon: Clock,
-      color: 'blue' as const,
-    },
+    { id: 'booking', href: '/dashboard/agenda', label: t('dashboard.newBooking'), icon: CalendarPlus, color: 'emerald' as const },
+    { id: 'clients', href: '/dashboard/clientes', label: t('dashboard.clients'), icon: Users, color: 'blue' as const },
+    { id: 'services', href: '/dashboard/servicos', label: t('dashboard.services'), icon: Scissors, color: 'amber' as const },
+    { id: 'team', href: '/dashboard/equipa', label: t('dashboard.team'), icon: Briefcase, color: 'purple' as const, feature: 'team_management' },
+    { id: 'stats', href: '/dashboard/analytics', label: t('dashboard.stats'), icon: BarChart3, color: 'blue' as const, feature: 'advanced_analytics' },
+    { id: 'loyalty-scan', href: '/dashboard/loyalty/validate', label: t('dashboard.scanLoyalty'), icon: QrCode, color: 'emerald' as const, feature: 'loyalty' },
+    { id: 'qr', href: '/dashboard/qr-code', label: t('dashboard.barbershopQr'), icon: QrCode, color: 'purple' as const },
+    { id: 'rewards', href: '/dashboard/loyalty', label: t('dashboard.loyaltyRewards'), icon: Gift, color: 'amber' as const, feature: 'loyalty' },
+    { id: 'messages', href: '/dashboard/mensagens', label: t('dashboard.messages'), icon: MessageCircle, color: 'blue' as const, feature: 'messaging' },
+    { id: 'marketing', href: '/dashboard/marketing', label: t('dashboard.marketing'), icon: Megaphone, color: 'purple' as const, feature: 'marketing_campaigns' },
+    { id: 'automations', href: '/dashboard/automations', label: t('dashboard.automations'), icon: Zap, color: 'amber' as const, feature: 'marketing_campaigns' },
+    { id: 'sales', href: '/dashboard/pos', label: t('dashboard.pos'), icon: CreditCard, color: 'emerald' as const, feature: 'pos' },
+  ].filter((action) => !action.feature || hasFeature(action.feature as Parameters<typeof hasFeature>[0]));
+  const visibleQuickActions = quickActions.filter((action) => visibleShortcuts.includes(action.id));
+  const widgetOptions = [
+    { id: 'metrics', label: t('dashboard.widgetMetrics') },
+    { id: 'chart', label: t('dashboard.widgetChart') },
+    { id: 'upcoming', label: t('dashboard.widgetUpcoming') },
+    { id: 'next', label: t('dashboard.widgetNext') },
   ];
 
   return (
@@ -397,7 +431,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {nextAppointment && !loadingInitial && (
+          {visibleWidgets.includes('next') && nextAppointment && !loadingInitial && (
             <section
               className="glassmorphism mb-5 rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur-xl sm:p-5"
               aria-labelledby="next-appointment-title"
@@ -443,7 +477,7 @@ export default function DashboardPage() {
             </section>
           )}
 
-          <section className="pt-1" aria-labelledby="business-overview">
+          {visibleWidgets.includes('metrics') && <section className="pt-1" aria-labelledby="business-overview">
             <div className="mb-3 flex items-center justify-between">
               <h2
                 id="business-overview"
