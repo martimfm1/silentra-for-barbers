@@ -16,7 +16,11 @@ export const metadata: Metadata = {
 
 export default async function AgendaDoVictorRoute() {
   const profile = await getPublicProfileBySlug(SLUG);
-  if (!profile || profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d') {
+  if (
+    !profile ||
+    profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d' ||
+    !['pro', 'enterprise'].includes(profile.plan)
+  ) {
     notFound();
   }
 
