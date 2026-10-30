@@ -346,7 +346,11 @@ export const pt = {
     mobilePhone: 'Telemóvel',
     createAccountWorkspace: 'Criar espaço de trabalho',
     registered:
-      'Conta criada! Enviámos um link de verificação para o teu email.',
+      'Verifica a tua caixa de entrada. Se for necessário confirmar ou criar a conta, receberás um email com os próximos passos.',
+    invalidCredentials:
+      'Não foi possível iniciar sessão com estes dados. Confirma o email e a palavra-passe ou cria uma conta.',
+    unconfirmedLogin:
+      'O email associado a esta conta ainda não foi confirmado. Verifica a tua caixa de entrada ou pede um novo email de confirmação.',
     confirmed: 'Email confirmado com sucesso! Já podes iniciar sessão.',
     unconfirmed:
       'O teu email ainda não foi verificado. Confirma a tua caixa de entrada para continuar.',
