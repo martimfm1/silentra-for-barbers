@@ -21,7 +21,7 @@
     "qa:buttons": "node scripts/qa/button-accessibility.mjs",
     "qa:performance": "node scripts/qa/performance-audit.mjs",
     "qa:product": "node scripts/qa/product-contracts.mjs",
-    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:client-matching && pnpm qa:minimum-booking-notice && pnpm qa:plans && pnpm qa:security && pnpm qa:copy && pnpm qa:i18n && pnpm qa:agenda-dialogs && pnpm qa:closed-days && pnpm qa:buttons && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:overflow && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo && pnpm qa:pwa && pnpm qa:feature-workflows && pnpm qa:cookies",
+    "qa": "pnpm typecheck && pnpm lint && pnpm build && pnpm qa:api && pnpm qa:client-matching && pnpm qa:barber-booking-email && pnpm qa:minimum-booking-notice && pnpm qa:plans && pnpm qa:security && pnpm qa:csrf && pnpm qa:copy && pnpm qa:i18n && pnpm qa:agenda-dialogs && pnpm qa:closed-days && pnpm qa:buttons && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:overflow && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo && pnpm qa:pwa && pnpm qa:feature-workflows && pnpm qa:cookies",
     "translate": "tsx scripts/translate.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -36,7 +36,9 @@
     "qa:cookies": "node scripts/qa/cookie-consent.mjs",
     "qa:overflow": "node scripts/qa/horizontal-overflow.mjs",
     "qa:client-matching": "node scripts/qa/client-matching.mjs",
-    "qa:minimum-booking-notice": "node scripts/qa/minimum-booking-notice.mjs"
+    "qa:minimum-booking-notice": "node scripts/qa/minimum-booking-notice.mjs",
+    "qa:csrf": "tsx scripts/qa/csrf-origin.ts",
+    "qa:barber-booking-email": "node scripts/qa/barber-booking-email.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",

@@ -64,6 +64,12 @@ jobs:
       - name: Security audit
         run: pnpm qa:security
 
+      - name: CSRF origin contracts
+        run: pnpm qa:csrf
+
+      - name: Barber booking email contracts
+        run: pnpm qa:barber-booking-email
+
       - name: UI copy audit
         run: pnpm qa:copy
 
