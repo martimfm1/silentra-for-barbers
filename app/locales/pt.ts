@@ -356,7 +356,7 @@ export const pt = {
       'O teu email ainda não foi verificado. Confirma a tua caixa de entrada para continuar.',
     resendConfirmation: 'Reenviar email de confirmação',
     confirmEmailTitle: 'Verifica a tua caixa de entrada',
-    confirmEmailSubtitle: 'Enviámos um email com o link de confirmação para:',
+    confirmEmailSubtitle: 'Se este endereço puder criar uma conta ou precisar de confirmação, receberás um email com os próximos passos:',
     backToLogin: 'Voltar ao início de sessão',
     accountSecurity: 'Segurança da conta',
     useAccountEmail: 'Usa o email associado à tua conta Silentra.',
@@ -390,7 +390,7 @@ export const pt = {
     emailConfirmationErrorSubtitle:
       'O link pode ter expirado ou já ter sido utilizado. Pede um novo email de confirmação.',
     confirmEmailInstructions:
-      'Abre o email e clica no link de confirmação para ativares a tua conta. Se não o encontrares, verifica também a pasta de spam.',
+      'Se não receberes um email, a conta pode já estar confirmada ou o endereço pode não estar elegível para registo. Experimenta iniciar sessão ou recuperar a palavra-passe. Verifica também a pasta de spam.',
     resendEmail: 'Reenviar email de confirmação',
     emailConfirmedTag: 'Conta confirmada',
     emailConfirmedBody:
