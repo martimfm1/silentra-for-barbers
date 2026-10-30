@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
-  ArrowDown, ArrowUp, Check, ChevronDown, Palette, Plus, RotateCcw,
+  ArrowDown, ArrowUp, Check, ChevronDown, Palette, RotateCcw,
   Save, Settings2, Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
