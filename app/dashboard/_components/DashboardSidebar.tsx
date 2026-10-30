@@ -151,9 +151,6 @@ export function DashboardSidebar() {
     );
   };
 
-  const moreItems = [...teamItems, ...communicationItems, ...toolsItems, ...secondaryItems];
-  const moreActive = moreItems.some(isActive);
-
   const closeMore = () => setMoreOpen(false);
 
   useEffect(() => {
@@ -206,6 +203,8 @@ export function DashboardSidebar() {
   const isActive = (item: SidebarItem) =>
     pathname === item.href ||
     (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+  const moreItems = [...teamItems, ...communicationItems, ...toolsItems, ...secondaryItems];
+  const moreActive = moreItems.some(isActive);
 
   const renderItem = (item: SidebarItem) => {
     const locked = isLocked(item);
