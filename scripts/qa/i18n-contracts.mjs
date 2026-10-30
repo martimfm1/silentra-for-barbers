@@ -52,6 +52,19 @@ const localizedSources = [...new Set([
 ])].sort();
 
 const read = (path) => readFileSync(join(root, path), 'utf8');
+const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
+  /(?:^|\\/)page\\.tsx$/.test(path),
+);
+const delegatedDashboardRoutes = ['SettingsPage', 'MarketingWorkspace'];
+for (const path of dashboardRouteFiles) {
+  const source = read(path);
+  const isLocalized = source.includes('useLanguage(') || source.includes('redirect(') ||
+    delegatedDashboardRoutes.some((component) => source.includes(component));
+  if (!isLocalized) {
+    failures.push(path + ': dashboard route must use LanguageContext, redirect, or delegate to an audited localized workspace');
+  }
+}
+
 
 function objectTreeFromFile(path, exportName) {
   const source = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true);
