@@ -184,6 +184,8 @@ export default function LoginPage() {
                             event,
                             router,
                             setIsSubmitting,
+                            invalidCredentialsMessage: t('auth.invalidCredentials'),
+                            unconfirmedEmailMessage: t('auth.unconfirmedLogin'),
                             setErrorMsg: (message) => {
                               setErrorMsg(message);
                               if (
@@ -322,6 +324,7 @@ export default function LoginPage() {
                             setErrorMsg,
                             acceptedTerms,
                             termsErrorMessage: t('legal.acceptRequired'),
+                            successMessage: t('auth.registered'),
                             onSuccess: () =>
                               router.push(
                                 `/confirm-email${email ? `?email=${encodeURIComponent(email)}` : ''}`,
