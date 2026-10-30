@@ -3,11 +3,7 @@ import { assertSameOrigin } from '@/services/billing/http';
 import { BillingError } from '@/types/stripe';
 
 // This also covers a local production build behind a scheme-rewriting proxy.
-Object.defineProperty(process.env, 'NODE_ENV', {
-  value: 'production',
-  configurable: true,
-  writable: true,
-});
+process.env.NODE_ENV = 'production';
 
 const loopbackSchemeMismatch = new Request(
   'https://localhost:3000/api/dashboard/custom-website',
