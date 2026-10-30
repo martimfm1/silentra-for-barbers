@@ -94,7 +94,7 @@ export async function notifyBarbersOfNewBooking(input: BookingNotification): Pro
 
   const uniqueRecipients = [...new Map(recipients.map((recipient) => [recipient.email, recipient])).values()];
   if (!uniqueRecipients.length) {
-    console.warn('[BARBER_BOOKING_NOTIFICATION_NO_RECIPIENT]', { barbershopId: input.barbershopId });
+    console.warn('[BARBER_BOOKING_NOTIFICATION_NO_RECIPIENT]');
     return;
   }
 
@@ -127,9 +127,6 @@ export async function notifyBarbersOfNewBooking(input: BookingNotification): Pro
     return result.success;
   }));
   if (results.some((success) => !success)) {
-    console.error('[BARBER_BOOKING_NOTIFICATION_PARTIAL_FAILURE]', {
-      barbershopId: input.barbershopId, attempted: results.length,
-      failed: results.filter((success) => !success).length,
-    });
+    console.error('[BARBER_BOOKING_NOTIFICATION_PARTIAL_FAILURE]', { attempted: results.length, failed: results.filter((success) => !success).length });
   }
 }
