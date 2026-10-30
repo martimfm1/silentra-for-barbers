@@ -167,6 +167,7 @@ async function POST__unobserved(request: Request) {
     const parsed = await readBody(request);
     if ('response' in parsed) return parsed.response;
 
+    if (Object.keys(parsed.body).some((key) => !['name', 'config'].includes(key))) return fail('O pedido contém campos não permitidos.', 400);
     const { name, config } = parsed.body;
     const cleanName = typeof name === 'string' ? name.trim().slice(0, 48) : '';
     const validConfig = parseConfig(config);
@@ -210,6 +211,7 @@ async function PATCH__unobserved(request: Request) {
     const parsed = await readBody(request);
     if ('response' in parsed) return parsed.response;
 
+    if (Object.keys(parsed.body).some((key) => !['id', 'name', 'config', 'activate'].includes(key))) return fail('O pedido contém campos não permitidos.', 400);
     const { id, name, config, activate } = parsed.body;
     if (typeof id !== 'string') return fail('Personalização inválida.', 400);
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -253,6 +255,7 @@ async function PATCH__unobserved(request: Request) {
       .eq('user_id', context.user.id)
       .select('id, barbershop_id, user_id, name, config, is_active, created_at, updated_at')
       .single();
+    if (error?.code === '23505') return fail('Já existe uma personalização com esse nome.', 409);
     if (error || !data) throw error ?? new Error('Update failed');
     return NextResponse.json({ data }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
@@ -270,6 +273,7 @@ async function DELETE__unobserved(request: Request) {
     if ('response' in context) return context.response;
     const parsed = await readBody(request);
     if ('response' in parsed) return parsed.response;
+    if (Object.keys(parsed.body).some((key) => key !== 'id')) return fail('O pedido contém campos não permitidos.', 400);
     const id = parsed.body.id;
     if (typeof id !== 'string') return fail('Personalização inválida.', 400);
 
