@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { assertSameOrigin } from '@/services/billing/http';
 import { BillingError } from '@/types/stripe';
 
-process.env.NODE_ENV = 'production';
 
 const loopbackSchemeMismatch = new Request('https://localhost:3000/api/dashboard/custom-website', {
   method: 'POST',
