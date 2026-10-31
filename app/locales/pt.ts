@@ -546,6 +546,8 @@ export const pt = {
     calendarSyncActivating: 'A ativar…',
     calendarSyncEnabled: 'Sincronização ativada.',
     calendarSyncActive: 'Sincronização ativa · apenas leitura',
+    calendarSyncPrivacyNotice:
+      'Trata este link como uma palavra-passe: qualquer pessoa que o tenha pode consultar a agenda. Não o partilhes publicamente.',
     calendarSyncUrlLabel: 'Link privado do calendário',
     calendarSyncCopy: 'Copiar link',
     calendarSyncCopied: 'Link copiado.',
