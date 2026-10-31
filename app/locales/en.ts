@@ -533,6 +533,43 @@ export const en = {
     clientsAvailable: 'clients available',
     servicesAvailable: 'services',
     barbersAvailable: 'barbers',
+    calendarSyncTitle: 'Sync with iPhone',
+    calendarSyncDescription:
+      'Add your barbershop calendar to the iPhone Calendar app. The private link only includes the service, professional, time and address — never customer details.',
+    calendarSyncLoading: 'Loading sync settings…',
+    calendarSyncLoadFailed: 'Could not load calendar sync settings.',
+    calendarSyncRetry: 'Try again',
+    calendarSyncDisabledDescription:
+      'Create a private link to see Silentra bookings in the iPhone Calendar app.',
+    calendarSyncEnable: 'Enable sync',
+    calendarSyncActivating: 'Enabling…',
+    calendarSyncEnabled: 'Calendar sync enabled.',
+    calendarSyncActive: 'Sync active · read-only',
+    calendarSyncPrivacyNotice:
+      'Treat this link like a password: anyone who has it can view the calendar. Do not share it publicly.',
+    calendarSyncUrlLabel: 'Private calendar link',
+    calendarSyncCopy: 'Copy link',
+    calendarSyncCopied: 'Link copied.',
+    calendarSyncCopyFailed: 'Could not copy the link.',
+    calendarSyncInstructions: 'How to add it on iPhone',
+    calendarSyncHideInstructions: 'Hide instructions',
+    calendarSyncHowTo: 'Add the calendar on iPhone',
+    calendarSyncStepOne:
+      'Open the Calendar app on your iPhone and tap “Calendars”.',
+    calendarSyncStepTwo:
+      'Choose “Add Calendar”, then “Add Subscribed Calendar”.',
+    calendarSyncStepThree:
+      'Paste the link above, tap “Find”, and confirm the subscription.',
+    calendarSyncRefreshNotice:
+      'The subscription is read-only. iPhone refreshes it periodically, so changes may take a little while to appear.',
+    calendarSyncRotate: 'Generate new link',
+    calendarSyncRotateConfirm:
+      'Generating a new link invalidates the current one. You will need to update the subscription on your iPhone. Continue?',
+    calendarSyncDisable: 'Disable',
+    calendarSyncDisableConfirm:
+      'Disabling sync invalidates the link and removes access from subscribed devices. Continue?',
+    calendarSyncDisabled: 'Calendar sync disabled.',
+    calendarSyncSaveFailed: 'Could not update calendar sync settings.',
   },
   orderManagement: {
     title: 'Orders',

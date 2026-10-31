@@ -45,6 +45,15 @@ const specializedGuards = [
     markers: ['verifyCalendarToken'],
   },
   {
+    pattern: /\/calendar\/feed\/route\.ts$/,
+    markers: [
+      'verifyBarbershopCalendarFeedToken',
+      'calendar_feed_enabled',
+      'calendar_feed_version',
+      ".eq('barbershop_id', payload.barbershopId)",
+    ],
+  },
+  {
     pattern: /\/loyalty\/redemption\/qr\/route\.ts$/,
     markers: ['hashLoyaltyToken'],
   },
