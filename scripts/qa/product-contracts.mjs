@@ -601,6 +601,30 @@ const checks = [
       source.includes("url: `${SITE_URL}/agendadovictor`") &&
       source.includes('slug === AGENDA_DO_VICTOR_SHOP_SLUG'),
   },
+  {
+    name: 'Agenda do Victor passes barbershop closed weekdays to the booking drawer',
+    file: 'app/agendadovictor/page.tsx',
+    test: (source) =>
+      source.includes(".select('opening_time,closing_time,closed_days')") &&
+      source.includes('closed_days: hours.closed_days'),
+  },
+  {
+    name: 'Agenda do Victor booking drawer uses the page light theme',
+    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    test: (source) =>
+      source.includes('appearance="agenda"') &&
+      source.includes('closed_days: shop.closed_days'),
+  },
+  {
+    name: 'Booking drawer excludes configured closed weekdays from date choices',
+    file: 'app/barbershops/components/booking-drawer-canonical.tsx',
+    test: (source) =>
+      source.includes('const availableDays = useMemo(') &&
+      source.includes('days.filter((day) => !closedDays.has(') &&
+      source.includes('availableDays.map((day, index)') &&
+      source.includes("t('bookingDrawer.noOpenDays')") &&
+      source.includes('data-booking-theme={appearance}'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
