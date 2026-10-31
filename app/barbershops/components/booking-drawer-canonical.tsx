@@ -180,7 +180,6 @@ export function BookingDrawerCanonical({
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
   }, [isOpen, step]);
 
-  const currentDay = days[dayIndex];
   const service = services.find((item) => item.id === serviceId) ?? null;
   const closedDays = useMemo(
     () =>
