@@ -127,7 +127,7 @@ const requestValidationChecks = [
     markers: [
       'readJsonObject(request',
       "allowedKeys: ['plan', 'interval']",
-      "body.interval !== 'month' && body.interval !== 'year'",
+      "body.interval !== undefined && body.interval !== 'month' && body.interval !== 'year'",
       'StripePriceService.resolveVerifiedPrice(plan, interval)',
       'BillingService.assertBillingOwner(user.id)',
       "from('subscriptions')",
@@ -200,7 +200,7 @@ const requestValidationChecks = [
       'toLisbonISOString(date, time)',
       'getLisbonDayBounds(date)',
       "getLisbonParts(String(item.date_hour ?? ''))",
-      "withApiObservability('/api/appointments/[appointmentId]/reschedule'",
+      "withApiObservability( '/api/appointments/[appointmentId]/reschedule'",
     ],
     label:
       'Professional appointment rescheduling validates request, permissions, plan, tenant, availability and audit trail',
@@ -361,8 +361,8 @@ const requestValidationChecks = [
   {
     file: 'app/api/loyalty/rewards/route.ts',
     markers: [
-      "allowedKeys: ['name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active']",
-      "allowedKeys: ['id', 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active']",
+      "allowedKeys: [ 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active',",
+      "allowedKeys: [ 'id', 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active',",
       ".eq('barbershop_id', barbershopId)",
       'REWARD_TYPES.has',
     ],
@@ -417,10 +417,10 @@ const requestValidationChecks = [
   {
     file: 'app/api/customer-portal/appointments/[appointmentId]/route.ts',
     markers: [
-      'async function getAuthorizedAppointment(request: Request, appointmentId: string)',
+      'async function getAuthorizedAppointment( request: Request, appointmentId: string, )',
       'getPortalSession(request)',
       'ownsAppointment',
-      'getAuthorizedAppointment(request, appointmentId)',
+      'getAuthorizedAppointment( request, appointmentId,',
       ".eq('id', appointment.id)",
       'CUSTOMER_PORTAL_CANCEL_ERROR',
       'readJsonObject(request',
@@ -569,8 +569,10 @@ for (const check of requestValidationChecks) {
   const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
     encoding: 'utf8',
   });
+  const normalizedSource = source.replace(/\s+/g, ' ').trim();
   for (const marker of check.markers) {
-    if (!source.includes(marker)) {
+    const normalizedMarker = marker.replace(/\s+/g, ' ').trim();
+    if (!normalizedSource.includes(normalizedMarker)) {
       findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
     }
   }
@@ -713,8 +715,10 @@ for (const check of routeSecurityChecks) {
   const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
     encoding: 'utf8',
   });
+  const normalizedSource = source.replace(/\s+/g, ' ').trim();
   for (const marker of check.markers) {
-    if (!source.includes(marker)) {
+    const normalizedMarker = marker.replace(/\s+/g, ' ').trim();
+    if (!normalizedSource.includes(normalizedMarker)) {
       findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
     }
   }

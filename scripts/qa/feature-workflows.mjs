@@ -40,7 +40,7 @@ const marketingCron = read('app/api/cron/marketing/route.ts');
 const bookingApi = read('app/api/bookings/route.ts');
 const mbwayBookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
 const mbwayConfirmationApi = read('app/api/appointments/[appointmentId]/confirm/route.ts');
-const mbwayMigration = read('supabase/migrations/20261031114500_manual_mbway_prepayment.sql');
+const mbwayMigration = read('supabase/migrations/20261031112123_manual_mbway_prepayment.sql');
 const bookingSettings = read(
   'components/dashboard/settings-automatic-booking-panel.tsx',
 );

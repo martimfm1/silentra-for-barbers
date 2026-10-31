@@ -79,7 +79,7 @@ assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
 assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
 assert.match(sidebar, /fixed inset-x-0 bottom-0/);
-assert.match(sidebar, /lg:bottom-4/);
+assert.match(sidebar, /lg:bottom-5/);
 assert.match(sidebar, /aria-expanded=\{moreOpen\}/);
 assert.match(sidebar, /aria-controls="dashboard-more-panel"/);
 assert.match(sidebar, /aria-modal="true"/);
