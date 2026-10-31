@@ -656,7 +656,7 @@ export function DashboardCustomizationDialog({
                         customization.setConfig((current) => ({
                           ...current,
                           visibleMetrics: event.target.checked
-                            ? [...new Set([...current.visibleMetrics, metric.id])],
+                            ? [...new Set([...current.visibleMetrics, metric.id])]
                             : current.visibleMetrics.filter((key) => key !== metric.id),
                         }))
                       }
