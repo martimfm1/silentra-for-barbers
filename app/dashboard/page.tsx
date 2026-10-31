@@ -209,6 +209,10 @@ export default function DashboardPage() {
     }));
   }, [appointments, clients, services, t]);
 
+  const visibleMetrics = metrics.filter((metric) =>
+    customization.config.visibleMetrics.includes(metric.key),
+  );
+
   const upcomingAppointments = useMemo(
     () =>
       appointments
@@ -556,7 +560,7 @@ export default function DashboardPage() {
               </section>
             )}
 
-          {customization.config.sections.metrics && (
+          {customization.config.sections.metrics && visibleMetrics.length > 0 && (
             <section className="pt-1" aria-labelledby="business-overview">
               <div className="mb-3 flex items-center justify-between">
                 <h2
@@ -574,7 +578,7 @@ export default function DashboardPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {loadingInitial
-                  ? [...Array(4)].map((_, i) => (
+                  ? [...Array(visibleMetrics.length)].map((_, i) => (
                       <Card
                         key={i}
                         className="border border-white/10 bg-white/[0.04]"
@@ -588,7 +592,7 @@ export default function DashboardPage() {
                         </CardHeader>
                       </Card>
                     ))
-                  : metrics.map((metric) => (
+                  : visibleMetrics.map((metric) => (
                       <Link
                         key={metric.key}
                         href="/dashboard/stats"
