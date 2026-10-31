@@ -162,7 +162,7 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
-assert.match(settingsPage, /className="min-h-11 max-w-sm/);
+assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
 assert.match(settingsPage, /role="progressbar"/);
 assert.match(settingsPage, /completedSetupSteps/);
 assert.match(settingsPage, /function closeSettingsDialog\(\)/);
