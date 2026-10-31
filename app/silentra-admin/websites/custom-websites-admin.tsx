@@ -297,10 +297,10 @@ export default function CustomWebsitesAdmin() {
               Autorizar sites para Free e Pro
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-              Depois de confirmares a aquisição do serviço, concede aqui a
-              permissão sem alterar o plano da subscrição. Free: criação 150 € +
-              6,99 €/mês. Pro: criação 150 € + 4,99 €/mês. Enterprise: desconto
-              de 100 € na criação (50 € finais) + 2,99 €/mês.
+              Depois de confirmares a aquisição, concede aqui o acesso para
+              Free e Pro sem alterar a subscrição. Free: criação 150 € +
+              6,99 €/mês. Pro: criação 150 € + 4,99 €/mês. Enterprise: ativação
+              única de 50 €, sem mensalidade adicional e com domínio Silentra incluído.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.7fr)]">
