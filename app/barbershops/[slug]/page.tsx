@@ -48,7 +48,8 @@ export async function generateMetadata({
   const profile = await getPublicProfileBySlug(slug);
   if (!profile) return {};
   let canonicalPath =
-    profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID
+    profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID &&
+    profile.plan === 'pro'
       ? '/agendadovictor'
       : `/barbershops/${encodeURIComponent(profile.slug)}`;
   if (profile.plan === 'enterprise' && profile.barbershop_id) {
@@ -305,7 +306,7 @@ export default async function BarbershopPage({
 
   if (
     profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID &&
-    profile.plan !== 'enterprise'
+    profile.plan === 'pro'
   ) {
     permanentRedirect('/agendadovictor');
   }
