@@ -216,8 +216,10 @@ assert.ok(
     dashboardPage.includes('role="img"') &&
     dashboardPage.includes('grid h-full min-w-0 grid-cols-7') &&
     dashboardPage.includes('hasChartActivity') &&
-    dashboardPage.includes('maxRevenue'),
-  'Dashboard overview must render visible responsive weekday bars with an empty state.',
+    dashboardPage.includes("appointment.status !== 'cancelled'") &&
+    dashboardPage.includes('point.bookings / maxBookings') &&
+    !dashboardPage.includes('maxRevenue'),
+  'Dashboard overview must render a clear single-metric weekday booking chart with an empty state.',
 );
 assert.ok(
   automationPage.includes('MarketingWorkspace initialView="automation"') &&
