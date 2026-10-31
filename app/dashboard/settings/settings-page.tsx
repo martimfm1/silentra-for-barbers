@@ -235,21 +235,6 @@ export default function SettingsPageOrganized() {
     () => closedList(config.closed_days),
     [config.closed_days],
   );
-  const completion = useMemo(
-    () =>
-      Math.round(
-        ([
-          config.name,
-          config.phone,
-          config.address,
-          config.opening_time && config.closing_time,
-          config.allow_online_bookings,
-        ].filter(Boolean).length /
-          5) *
-          100,
-      ),
-    [config],
-  );
   const filtered = useMemo(() => {
     const q = search.trim().toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
     return q
