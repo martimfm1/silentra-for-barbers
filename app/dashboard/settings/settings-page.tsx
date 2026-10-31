@@ -104,8 +104,8 @@ type Config = {
 };
 const sections: [Section, string, string, typeof Settings][] = [
   ['overview', 'Visão geral', 'Estado da configuração', Settings],
-  ['business', 'Negócio', 'Identidade e dados públicos', Store],
-  ['location', 'Localização', 'Morada e informações do espaço', MapPin],
+  ['business', 'Informações', 'Nome, contactos e preferências públicas', Store],
+  ['location', 'Localização', 'Morada e características do espaço', MapPin],
   ['hours', 'Horários', 'Funcionamento da barbearia', Clock3],
   ['rules', 'Regras', 'Antecedência, cancelamento e confirmações', CalendarCheck2],
   ['appearance', 'Aparência', 'Logótipo e imagem de capa', ImageIcon],
@@ -427,6 +427,21 @@ export default function SettingsPageOrganized() {
     barbershopId && origin
       ? `${origin}/storage/v1/object/public/banner/${barbershopId}/banner.webp?t=${bannerTick}`
       : null;
+  const setupStepStatus = {
+    business: config.name.trim().length >= 2,
+    location: config.address.trim().length >= 6,
+    hours: Boolean(
+      config.opening_time &&
+      config.closing_time &&
+      config.opening_time < config.closing_time,
+    ),
+    rules:
+      Number.isInteger(config.minimum_booking_notice_minutes) &&
+      config.minimum_booking_notice_minutes >= 0 &&
+      Number.isInteger(config.time_limit_cancellation_hours) &&
+      config.time_limit_cancellation_hours >= 0,
+  };
+  const completedSetupSteps = Object.values(setupStepStatus).filter(Boolean).length;
   if (loading || planLoading)
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
@@ -605,6 +620,25 @@ export default function SettingsPageOrganized() {
                       {t('settingsPage.overviewDescription')}
                     </p>
                   </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
+                    <div className="mb-3 flex items-center justify-between gap-3 text-xs">
+                      <span className="font-medium text-zinc-300">{t('settingsPage.setupProgress')}</span>
+                      <span className="font-semibold tabular-nums text-emerald-300">{completedSetupSteps}/4</span>
+                    </div>
+                    <div
+                      role="progressbar"
+                      aria-label={t('settingsPage.setupProgress')}
+                      aria-valuemin={0}
+                      aria-valuemax={4}
+                      aria-valuenow={completedSetupSteps}
+                      className="h-2 overflow-hidden rounded-full bg-white/10"
+                    >
+                      <div
+                        className="h-full rounded-full bg-emerald-400 transition-[width] duration-300"
+                        style={{ width: `${completedSetupSteps * 25}%` }}
+                      />
+                    </div>
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <button
                       type="button"
@@ -612,7 +646,7 @@ export default function SettingsPageOrganized() {
                       className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
                     >
                       <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">01</span>
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.business ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '01'}</span>
                         <Store className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
                       </span>
                       <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
@@ -625,7 +659,7 @@ export default function SettingsPageOrganized() {
                       className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
                     >
                       <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">02</span>
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.location ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '02'}</span>
                         <MapPin className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
                       </span>
                       <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
@@ -638,7 +672,7 @@ export default function SettingsPageOrganized() {
                       className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
                     >
                       <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">03</span>
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.hours ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '03'}</span>
                         <Clock3 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
                       </span>
                       <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
@@ -651,7 +685,7 @@ export default function SettingsPageOrganized() {
                       className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
                     >
                       <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">04</span>
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.rules ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '04'}</span>
                         <CalendarCheck2 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
                       </span>
                       <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.rules')}</span>
@@ -675,16 +709,18 @@ export default function SettingsPageOrganized() {
                 <Card className={CARD_CLASS}>
                   <CardContent className="grid gap-5 sm:grid-cols-2 ">
                     <div className="grid gap-2">
-                    <label>{t('settingsPage.shopName')}</label>
+                    <label htmlFor="settings-shop-name">{t('settingsPage.shopName')}</label>
                     <Input
+                      id="settings-shop-name"
                       value={config.name}
                       onChange={(e) => set({ name: e.target.value })}
                       className={INPUT_CLASS}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <label>{t('settingsPage.phone')}</label>
+                    <label htmlFor="settings-shop-phone">{t('settingsPage.phone')}</label>
                     <Input
+                      id="settings-shop-phone"
                       type="tel"
                       value={config.phone}
                       onChange={(e) => set({ phone: e.target.value })}
@@ -1085,7 +1121,7 @@ export default function SettingsPageOrganized() {
                       >
                         <SelectTrigger
                           aria-label={t('settingsPage.noticeUnit')}
-                          className="h-11 w-32 min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                          className="h-11 w-28 min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -1152,11 +1188,12 @@ export default function SettingsPageOrganized() {
                   <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div className="flex items-center gap-2">
                       <CalendarCheck2 className="size-4 text-amber-300" />
-                      <p className="text-sm font-medium">
+                      <label htmlFor="settings-cancellation-window" className="text-sm font-medium">
                         {t('settingsPage.cancellationWindow')}
-                      </p>
+                      </label>
                     </div>
                     <Input
+                      id="settings-cancellation-window"
                       type="number"
                       min={0}
                       max={720}
