@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from 'react';
 import { toast } from 'sonner';
 import {
   ArrowDown,
@@ -23,8 +33,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+export type DashboardMetricKey = 'revenue' | 'appointments' | 'clients' | 'services';
+
 export type DashboardCustomizationConfig = {
   shortcuts: string[];
+  visibleMetrics: DashboardMetricKey[];
   sections: {
     quickActions: boolean;
     metrics: boolean;
@@ -46,6 +59,7 @@ export type DashboardCustomizationPreset = {
 
 const DEFAULT_CONFIG: DashboardCustomizationConfig = {
   shortcuts: ['new-booking', 'clients', 'services', 'team', 'analytics'],
+  visibleMetrics: ['revenue', 'appointments', 'clients', 'services'],
   sections: {
     quickActions: true,
     metrics: true,
@@ -108,7 +122,58 @@ async function requestJson(method: string, body?: Record<string, unknown>) {
   return payload;
 }
 
-export function useDashboardCustomization() {
+type DashboardCustomizationContextValue = {
+  presets: DashboardCustomizationPreset[];
+  activeId: string | null;
+  activePreset: DashboardCustomizationPreset | null;
+  config: DashboardCustomizationConfig;
+  setConfig: Dispatch<SetStateAction<DashboardCustomizationConfig>>;
+  loading: boolean;
+  refresh: () => Promise<void>;
+  save: (name: string, nextConfig?: DashboardCustomizationConfig) => Promise<DashboardCustomizationPreset>;
+  create: (name: string, nextConfig?: DashboardCustomizationConfig) => Promise<DashboardCustomizationPreset>;
+  activate: (id: string) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+};
+
+const DashboardCustomizationContext =
+  createContext<DashboardCustomizationContextValue | null>(null);
+
+const METRIC_KEYS: DashboardMetricKey[] = [
+  'revenue',
+  'appointments',
+  'clients',
+  'services',
+];
+
+function normalizeConfig(
+  input?: Partial<DashboardCustomizationConfig> | null,
+): DashboardCustomizationConfig {
+  const visibleMetrics = Array.isArray(input?.visibleMetrics)
+    ? input.visibleMetrics.filter((key): key is DashboardMetricKey =>
+        METRIC_KEYS.includes(key as DashboardMetricKey),
+      )
+    : DEFAULT_CONFIG.visibleMetrics;
+
+  return {
+    ...DEFAULT_CONFIG,
+    ...input,
+    shortcuts: Array.isArray(input?.shortcuts)
+      ? input.shortcuts
+      : DEFAULT_CONFIG.shortcuts,
+    visibleMetrics,
+    sections: {
+      ...DEFAULT_CONFIG.sections,
+      ...input?.sections,
+    },
+  };
+}
+
+export function DashboardCustomizationProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [presets, setPresets] = useState<DashboardCustomizationPreset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [config, setConfig] =
@@ -122,15 +187,10 @@ export function useDashboardCustomization() {
         []) as DashboardCustomizationPreset[];
       setPresets(nextPresets);
       const active =
-        nextPresets.find((item) => item.is_active) ?? nextPresets[0];
-      if (active) {
-        setActiveId(active.id);
-        setConfig({
-          ...DEFAULT_CONFIG,
-          ...active.config,
-          sections: { ...DEFAULT_CONFIG.sections, ...active.config.sections },
-        });
-      }
+        nextPresets.find((item) => item.is_active) ?? nextPresets[0] ?? null;
+
+      setActiveId(active?.id ?? null);
+      setConfig(normalizeConfig(active?.config));
     } catch (error) {
       console.error('[DASHBOARD_CUSTOMIZATION_LOAD_FAILED]', error);
       toast.error('Não foi possível carregar a personalização da dashboard.');
@@ -188,19 +248,49 @@ export function useDashboardCustomization() {
     [refresh],
   );
 
-  return {
-    presets,
-    activeId,
-    activePreset,
-    config,
-    setConfig,
-    loading,
-    refresh,
-    save,
-    create,
-    activate,
-    remove,
-  };
+  const value = useMemo(
+    () => ({
+      presets,
+      activeId,
+      activePreset,
+      config,
+      setConfig,
+      loading,
+      refresh,
+      save,
+      create,
+      activate,
+      remove,
+    }),
+    [
+      presets,
+      activeId,
+      activePreset,
+      config,
+      loading,
+      refresh,
+      save,
+      create,
+      activate,
+      remove,
+    ],
+  );
+
+  return (
+    <DashboardCustomizationContext.Provider value={value}>
+      {children}
+    </DashboardCustomizationContext.Provider>
+  );
+}
+
+export function useDashboardCustomization() {
+  const context = useContext(DashboardCustomizationContext);
+  if (!context) {
+    throw new Error(
+      'useDashboardCustomization must be used within DashboardCustomizationProvider.',
+    );
+  }
+  return context;
 }
 
 type CustomizationState = ReturnType<typeof useDashboardCustomization>;
@@ -531,6 +621,48 @@ export function DashboardCustomizationDialog({
                       className="size-4 accent-emerald-400"
                     />
                     {isEnglish ? section.en : section.pt}
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold">
+                  {copy('Estatísticas da overview', 'Overview statistics')}
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  {copy(
+                    'Escolhe os indicadores que aparecem no resumo do teu negócio.',
+                    'Choose which metrics appear in your business overview.',
+                  )}
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {([
+                  { id: 'revenue', pt: 'Faturação', en: 'Revenue' },
+                  { id: 'appointments', pt: 'Marcações ativas', en: 'Active appointments' },
+                  { id: 'clients', pt: 'Clientes registados', en: 'Registered clients' },
+                  { id: 'services', pt: 'Serviços', en: 'Services' },
+                ] as const).map((metric) => (
+                  <label
+                    key={metric.id}
+                    className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={customization.config.visibleMetrics.includes(metric.id)}
+                      onChange={(event) =>
+                        customization.setConfig((current) => ({
+                          ...current,
+                          visibleMetrics: event.target.checked
+                            ? [...new Set([...current.visibleMetrics, metric.id])],
+                            : current.visibleMetrics.filter((key) => key !== metric.id),
+                        }))
+                      }
+                      className="size-4 accent-emerald-400"
+                    />
+                    {isEnglish ? metric.en : metric.pt}
                   </label>
                 ))}
               </div>
