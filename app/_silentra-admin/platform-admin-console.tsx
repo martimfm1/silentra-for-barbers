@@ -694,11 +694,11 @@ export default function PlatformAdminConsole() {
               </div>
             </div>
 
-            <nav aria-label="Navegação de administração" className="mt-2 flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:overflow-visible">
+            <nav aria-label="Navegação de administração" className="mt-2 grid min-w-0 grid-cols-2 gap-3 pb-1 lg:flex lg:flex-col lg:overflow-visible">
               {navigationGroups.map((group) => (
-                <div key={group.label} className="min-w-max lg:min-w-0">
-                  <p className="mb-1 px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">{group.label}</p>
-                  <div className="flex gap-1 lg:flex-col">
+                <div key={group.label} className="min-w-0">
+                  <p className="mb-1 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600">{group.label}</p>
+                  <div className="flex min-w-0 flex-col gap-1">
                     {group.items.map((id) => {
                       const item = tabs.find((candidate) => candidate.id === id);
                       if (!item) return null;
@@ -714,10 +714,10 @@ export default function PlatformAdminConsole() {
                             setTab(id);
                             if (id === 'api_health') void loadObservability();
                           }}
-                          className={`flex min-h-10 items-center gap-2.5 rounded-xl border px-3 text-left text-xs font-medium transition lg:w-full ${selected ? 'border-emerald-400/20 bg-emerald-400/[0.09] text-emerald-100 shadow-sm' : 'border-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.035] hover:text-zinc-200'}`}
+                          className={`flex min-h-10 min-w-0 w-full items-center gap-2 rounded-xl border px-2.5 text-left text-[11px] font-medium transition sm:px-3 sm:text-xs ${selected ? 'border-emerald-400/20 bg-emerald-400/[0.09] text-emerald-100 shadow-sm' : 'border-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.035] hover:text-zinc-200'}`}
                         >
                           <Icon className={`size-4 shrink-0 ${selected ? 'text-emerald-300' : 'text-zinc-600'}`} />
-                          <span className="whitespace-nowrap">{item.label}</span>
+                          <span className="min-w-0 whitespace-normal break-words leading-4">{item.label}</span>
                           {selected ? <span className="ml-auto hidden size-1.5 rounded-full bg-emerald-300 lg:block" /> : null}
                         </button>
                       );
@@ -729,8 +729,8 @@ export default function PlatformAdminConsole() {
 
             <div className="mt-4 border-t border-white/[0.07] pt-3">
               <p className="mb-1 hidden px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600 lg:block">Ferramentas</p>
-              <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
-                <Link href="/silentra-admin/reports" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+              <div className="grid min-w-0 grid-cols-1 gap-1 sm:grid-cols-2 lg:flex lg:flex-col">
+                <Link href="/silentra-admin/reports" className="flex min-h-10 min-w-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
                   <BarChart3 className="size-4 text-zinc-600" /> Relatórios
                   <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
                 </Link>
