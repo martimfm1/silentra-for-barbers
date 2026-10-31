@@ -965,6 +965,20 @@ export function BookingDrawerCanonical({
                 {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
                 {selectedSlot}.
               </p>
+              {paymentInstructions && (
+                <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentAmount')}</span>
+                    <strong className="text-lg tabular-nums text-zinc-100">{paymentInstructions.amount.toFixed(2)} €</strong>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentNumber')}</span>
+                    <strong className="text-zinc-100">{paymentInstructions.mbwayPhone}</strong>
+                  </div>
+                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })}</p>
+                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentEmailNotice')}</p>
+                </div>
+              )}
               <Button type="button" className="mt-6 w-full" onClick={onClose}>
                 {t('bookingDrawer.finish')}
               </Button>
