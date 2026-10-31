@@ -10,20 +10,16 @@ alter table public.appointments
   add column if not exists payment_expires_at timestamptz,
   add column if not exists payment_reviewed_at timestamptz;
 
-do $$
+do $
 begin
-  select coalesce(s.price, 0)::numeric(12,2)
-    into v_payment_amount
-  from public.services s
-  where s.id = p_service_id
-    and s.barbershop_id = p_barbershop_id;
-
-  if not found then
-    raise exception using errcode = '22023', message = 'BOOKING_SERVICE_NOT_AVAILABLE';
-  end if;
-
-  if v_is_prepayment and coalesce(v_payment_amount, 0) <= 0 then
-    raise exception using errcode = '22023', message = 'BOOKING_PREPAYMENT_AMOUNT_INVALID';
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.appointments'::regclass
+      and conname = 'appointments_payment_status_check'
+  ) then
+    alter table public.appointments
+      add constraint appointments_payment_status_check
+      check (payment_status is null or payment_status in ('awaiting_review', 'confirmed', 'rejected', 'expired'));
   end if;
   if not exists (
     select 1 from pg_constraint
@@ -35,7 +31,7 @@ begin
       check (payment_amount is null or payment_amount >= 0);
   end if;
 end;
-$$;
+$;
 
 create index if not exists appointments_mbway_expiry_idx
   on public.appointments (payment_expires_at)
@@ -262,13 +258,18 @@ begin
     v_status := 'scheduled'::public.appointment_status;
   end if;
 
-  if not exists (
-    select 1
-    from public.services s
-    where s.id = p_service_id
-      and s.barbershop_id = p_barbershop_id
-  ) then
+  select coalesce(s.price, 0)::numeric(12,2)
+    into v_payment_amount
+  from public.services s
+  where s.id = p_service_id
+    and s.barbershop_id = p_barbershop_id;
+
+  if not found then
     raise exception using errcode = '22023', message = 'BOOKING_SERVICE_NOT_AVAILABLE';
+  end if;
+
+  if v_is_prepayment and coalesce(v_payment_amount, 0) <= 0 then
+    raise exception using errcode = '22023', message = 'BOOKING_PREPAYMENT_AMOUNT_INVALID';
   end if;
 
   if p_professional_id is not null and not exists (
@@ -343,7 +344,7 @@ begin
     manual_phone,
     manual_email,
     manual_birth_date,
-    duration_minutes
+    duration_minutes,
     payment_method,
     payment_status,
     payment_amount,
@@ -360,7 +361,7 @@ begin
     nullif(left(trim(coalesce(p_manual_phone, '')), 40), ''),
     v_email,
     p_manual_birth_date,
-    v_duration
+    v_duration,
     case when v_is_prepayment then 'mbway' else null end,
     case when v_is_prepayment then 'awaiting_review' else null end,
     case when v_is_prepayment then v_payment_amount else null end,
