@@ -793,7 +793,11 @@ export default function DashboardPage() {
                   >
                     <span className="inline-flex items-center gap-2">
                       <span
-                        className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
+                        className="size-2.5 rounded-full bg-emerald-400"
+                        style={{
+                          boxShadow:
+                            '0 0 10px color-mix(in srgb, var(--dashboard-accent) 45%, transparent)',
+                        }}
                         aria-hidden="true"
                       />
                       <span className="text-zinc-300">
