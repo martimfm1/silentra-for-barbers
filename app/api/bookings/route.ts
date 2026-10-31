@@ -512,35 +512,34 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
+    // The database RPC reserves the slot and stores all payment metadata in the same transaction.
     const paymentExpiresAt = isPrepayment
-      ? new Date(Date.now() + 15 * 60 * 1000).toISOString()
+      ? (appointment.payment_expires_at as string | null)
       : null;
-    const paymentAmount = isPrepayment ? Number(selectedService.price ?? 0) : 0;
-    if (isPrepayment) {
-      const { error: paymentUpdateError } = await admin
+    const paymentAmount = isPrepayment
+      ? Number(appointment.payment_amount ?? 0)
+      : 0;
+    if (
+      isPrepayment &&
+      (appointment.payment_status !== 'awaiting_review' ||
+        !paymentExpiresAt ||
+        paymentAmount <= 0 ||
+        appointment.payment_method !== 'mbway')
+    ) {
+      await admin
         .from('appointments')
         .update({
-          payment_method: 'mbway',
-          payment_status: 'awaiting_review',
-          payment_amount: paymentAmount,
-          payment_expires_at: paymentExpiresAt,
+          status: 'cancelled',
+          cancellation_reason: 'Metadados de pré-pagamento MB WAY não foram preparados.',
         })
         .eq('id', appointment.id)
         .eq('barbershop_id', barbershopId)
         .eq('status', 'pending');
-      if (paymentUpdateError) {
-        await admin
-          .from('appointments')
-          .update({ status: 'cancelled', cancellation_reason: 'Falha ao preparar o pré-pagamento MB WAY.' })
-          .eq('id', appointment.id)
-          .eq('barbershop_id', barbershopId)
-          .eq('status', 'pending');
-        console.error('[BOOKING_PREPAYMENT_METADATA_ERROR]', paymentUpdateError.code ?? 'UNKNOWN');
-        return NextResponse.json(
-          { success: false, error: 'Não foi possível preparar o pré-pagamento. Tenta novamente.' },
-          { status: 503 },
-        );
-      }
+      console.error('[BOOKING_PREPAYMENT_METADATA_MISSING]');
+      return NextResponse.json(
+        { success: false, error: 'Não foi possível preparar o pré-pagamento. Tenta novamente.' },
+        { status: 503 },
+      );
     }
 
     try {
