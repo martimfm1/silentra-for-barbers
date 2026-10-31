@@ -533,6 +533,7 @@ export default function SettingsPageOrganized() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('settingsPage.search')}
+                  aria-label={t('settingsPage.search')}
                   className={`${INPUT_CLASS} pl-9`}
                 />
               </div>
@@ -542,6 +543,9 @@ export default function SettingsPageOrganized() {
                 onChange={(e) => go(e.target.value as Section)}
                 className="min-h-11 max-w-[48%] rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
               >
+                {!filtered.some(([id]) => id === section) && (
+                  <option value={section}>{t(`settingsPage.${section}`)}</option>
+                )}
                 {filtered.some(([id]) => id === 'overview') && (
                   <option value="overview">{t('settingsPage.overview')}</option>
                 )}
