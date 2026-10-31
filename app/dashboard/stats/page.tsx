@@ -506,7 +506,7 @@ export default function StatsPage() {
               </Card>
 
               {/* GRÁFICO 3: TOP SERVIÇOS EM FATURAÇÃO */}
-              <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex min-w-0 flex-col justify-between md:col-span-2">
+              <Card className="flex min-w-0 flex-col justify-between border border-white/10 bg-zinc-900/60 shadow-lg md:col-span-2">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
                     {t('statsPage.topServices')}
@@ -536,13 +536,21 @@ export default function StatsPage() {
                             strokeDasharray="3 3"
                             stroke="rgba(255,255,255,0.06)"
                           />
-                          <XAxis type="number" hide />
+                          <XAxis
+                            type="number"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
+                            tickFormatter={(value: number) =>
+                              currencyFormatter.format(value)
+                            }
+                          />
                           <YAxis
                             dataKey="name"
                             type="category"
                             tickLine={false}
                             axisLine={false}
-                            width={85}
+                            width={110}
                             tick={{ fill: '#a1a1aa', fontSize: 10 }}
                             tickFormatter={(value: string) =>
                               value.length > 20
