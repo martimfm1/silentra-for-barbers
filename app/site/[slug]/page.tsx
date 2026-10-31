@@ -148,7 +148,8 @@ function PurchasedCustomWebsitePage({
   const description =
     website.site_description?.trim() ||
     'Conhece os nossos serviços e marca o teu próximo horário online.';
-  const bookingUrl = '/barbershops/' + encodeURIComponent(website.booking_slug);
+  const bookingUrl =
+    '/barbershops/' + encodeURIComponent(website.booking_slug) + '?booking=1';
   return (
     <main className="min-h-screen overflow-x-clip bg-[#090b0e] text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
