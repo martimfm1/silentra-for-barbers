@@ -132,8 +132,8 @@ async function GET__unobserved(
       enabled:
         relation.mbway_enabled === true &&
         ['pro', 'enterprise'].includes(String(effectivePlan ?? '').toLowerCase()) &&
-        mbwayPhone.replace(/\\D/g, '').length >= 9 &&
-        whatsappPhone.replace(/\\D/g, '').length >= 9,
+        mbwayPhone.replace(/\D/g, '').length >= 9 &&
+        whatsappPhone.replace(/\D/g, '').length >= 9,
       mbwayPhone,
       whatsappPhone,
     };
