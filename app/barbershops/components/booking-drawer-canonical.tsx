@@ -34,7 +34,7 @@ type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
 type ManualPrepaymentInstructions = { amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
 function normalizeWhatsAppNumber(value: string): string {
-  let digits = value.replace(/\\D/g, '');
+  let digits = value.replace(/\D/g, '');
   if (digits.startsWith('00')) digits = digits.slice(2);
   if (digits.length === 9 && digits.startsWith('9')) digits = `351${digits}`;
   return digits;
@@ -464,7 +464,7 @@ export function BookingDrawerCanonical({
         `${currentDay?.dateStr || ''} ${selectedSlot || ''}`,
         `MB WAY: ${paymentInstructions.amount.toFixed(2)} €`,
         `Ref.: ${email.trim()}`,
-      ].join('\\n')
+      ].join('\n')
     : '';
   const whatsappProofUrl = whatsappDigits
     ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(whatsappMessage)}`
