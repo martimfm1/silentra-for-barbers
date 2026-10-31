@@ -33,14 +33,15 @@
     "qa:seo": "node scripts/qa/seo-foundation.mjs",
     "qa:pwa": "node scripts/qa/pwa-installability.mjs",
     "qa:support": "node scripts/qa/support-chat.mjs",
-    "qa:ux": "node scripts/qa/ui-ux-audit.mjs",
+    "qa:ux": "node scripts/qa/ui-ux-audit.mjs && pnpm qa:admin-navigation",
     "qa:feature-workflows": "node scripts/qa/feature-workflows.mjs",
     "qa:cookies": "node scripts/qa/cookie-consent.mjs",
     "qa:overflow": "node scripts/qa/horizontal-overflow.mjs",
     "qa:client-matching": "node scripts/qa/client-matching.mjs",
     "qa:minimum-booking-notice": "node scripts/qa/minimum-booking-notice.mjs",
     "qa:csrf": "tsx scripts/qa/csrf-origin.ts",
-    "qa:barber-booking-email": "node scripts/qa/barber-booking-email.mjs"
+    "qa:barber-booking-email": "node scripts/qa/barber-booking-email.mjs",
+    "qa:admin-navigation": "node scripts/qa/silentra-admin-navigation.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",

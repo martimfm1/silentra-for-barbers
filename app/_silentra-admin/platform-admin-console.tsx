@@ -1,11 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import SupportInbox from './support-inbox';
 
 import {
   Activity,
   AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
   Building2,
   CheckCircle2,
   CreditCard,
@@ -15,6 +18,8 @@ import {
   Copy,
   Database,
   Gauge,
+  Gift,
+  Globe2,
   KeyRound,
   MailWarning,
   MessageCircle,
@@ -142,18 +147,38 @@ type Observability = {
 };
 
 const tabs = [
-  { id: 'overview', label: 'Overview', icon: Gauge },
+  { id: 'overview', label: 'Visão geral', icon: Gauge },
   { id: 'shops', label: 'Barbearias', icon: Building2 },
-  { id: 'plans', label: 'Planos', icon: KeyRound },
+  { id: 'plans', label: 'Planos e acessos', icon: KeyRound },
+  { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'payments', label: 'Pagamentos', icon: CreditCard },
   { id: 'payment_requests', label: 'Pedidos de pagamento', icon: MailCheck },
   { id: 'support', label: 'Suporte', icon: MessageCircle },
-  { id: 'subscriptions', label: 'Subscrições', icon: Database },
-  { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
   { id: 'api_health', label: 'Saúde da API', icon: Activity },
+  { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
 ] as const;
 
 type Tab = (typeof tabs)[number]['id'];
+
+const navigationGroups: { label: string; items: Tab[] }[] = [
+  { label: 'Visão geral', items: ['overview'] },
+  { label: 'Negócio', items: ['shops', 'plans', 'subscriptions'] },
+  { label: 'Financeiro', items: ['payments', 'payment_requests'] },
+  { label: 'Acompanhamento', items: ['support'] },
+  { label: 'Sistema', items: ['api_health', 'diagnostics'] },
+];
+
+const tabDescriptions: Record<Tab, string> = {
+  overview: 'Uma visão consolidada do crescimento, receita, clientes e estado do SaaS.',
+  shops: 'Pesquisa e acompanha todas as barbearias e respetivos dados operacionais.',
+  plans: 'Gere os planos efetivos, acessos especiais e respetivas condições.',
+  subscriptions: 'Acompanha pedidos, renovações, estados e histórico de subscrições.',
+  payments: 'Configura o método de cobrança e acompanha a operação financeira.',
+  payment_requests: 'Trata pedidos de pagamento, confirma transferências e resolve pendências.',
+  support: 'Responde aos pedidos de ajuda e acompanha as conversas com clientes.',
+  api_health: 'Monitoriza disponibilidade, latência, erros e rotas da API.',
+  diagnostics: 'Executa verificações técnicas e consulta informação de segurança.',
+};
 
 type PaymentMode = 'MANUAL' | 'STRIPE';
 
@@ -266,6 +291,7 @@ function StatCard({
 
 export default function PlatformAdminConsole() {
   const [tab, setTab] = useState<Tab>('overview');
+  const activeTab = tabs.find((item) => item.id === tab) ?? tabs[0];
 
   useEffect(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('tab');
@@ -652,95 +678,157 @@ export default function PlatformAdminConsole() {
 
   return (
     <main className="min-h-screen bg-[#09090b] text-zinc-100">
-      <div className="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-5 sm:px-6 lg:px-8">
-        <header className="sticky top-3 z-20 mb-5 rounded-2xl border border-red-400/15 bg-zinc-950/90 p-4 shadow-2xl backdrop-blur-xl sm:p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-red-300">
-                <ShieldCheck className="size-3.5" /> Internal / Platform Control
+      <div className="mx-auto w-full max-w-[1680px] px-3 pb-10 pt-4 sm:px-5 lg:px-7 lg:pt-6">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[248px_minmax(0,1fr)] xl:gap-6">
+          <aside className="h-fit min-w-0 rounded-3xl border border-white/[0.08] bg-[#101013] p-3 shadow-xl lg:sticky lg:top-5">
+            <div className="px-3 py-3">
+              <div className="flex items-center gap-2">
+                <div className="flex size-9 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.08]">
+                  <ShieldCheck className="size-4 text-emerald-300" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold tracking-tight text-white">Silentra</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-600">Centro de controlo</p>
+                </div>
+                <span className="ml-auto rounded-full border border-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Administração</span>
               </div>
-              <div className="mt-2 flex items-center gap-2">
-                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-                  Silentra Control Center
-                </h1>
-                <span className="rounded-full border border-red-400/20 bg-red-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-red-300">
-                  Private
-                </span>
-              </div>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-                Operação interna. Esta área não é exposta na navegação pública
-                nem deve substituir as permissões normais das barbearias.
-              </p>
             </div>
-            <button
-              type="button"
-              onClick={() => void load(query)}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium hover:bg-white/[0.08]"
-            >
-              <RefreshCw
-                className={`size-4 ${loading ? 'animate-spin' : ''}`}
-              />
-              Atualizar
-            </button>
-          </div>
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {tabs.map(({ id, label: label, icon: Icon }) => (
+
+            <nav aria-label="Navegação de administração" className="mt-2 flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:overflow-visible">
+              {navigationGroups.map((group) => (
+                <div key={group.label} className="min-w-max lg:min-w-0">
+                  <p className="mb-1 px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">{group.label}</p>
+                  <div className="flex gap-1 lg:flex-col">
+                    {group.items.map((id) => {
+                      const item = tabs.find((candidate) => candidate.id === id);
+                      if (!item) return null;
+                      const Icon = item.icon;
+                      const selected = tab === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          aria-current={selected ? 'page' : undefined}
+                          onClick={() => {
+                            if (id === 'payment_requests') setManualRequestFilter('ALL');
+                            setTab(id);
+                            if (id === 'api_health') void loadObservability();
+                          }}
+                          className={`flex min-h-10 items-center gap-2.5 rounded-xl border px-3 text-left text-xs font-medium transition lg:w-full ${selected ? 'border-emerald-400/20 bg-emerald-400/[0.09] text-emerald-100 shadow-sm' : 'border-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.035] hover:text-zinc-200'}`}
+                        >
+                          <Icon className={`size-4 shrink-0 ${selected ? 'text-emerald-300' : 'text-zinc-600'}`} />
+                          <span className="whitespace-nowrap">{item.label}</span>
+                          {selected ? <span className="ml-auto hidden size-1.5 rounded-full bg-emerald-300 lg:block" /> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
+
+            <div className="mt-4 border-t border-white/[0.07] pt-3">
+              <p className="mb-1 hidden px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600 lg:block">Ferramentas</p>
+              <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
+                <Link href="/silentra-admin/reports" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                  <BarChart3 className="size-4 text-zinc-600" /> Relatórios
+                  <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
+                </Link>
+                <Link href="/silentra-admin/websites" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                  <Globe2 className="size-4 text-zinc-600" /> Sites Enterprise
+                  <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
+                </Link>
+                <Link href="/silentra-admin/loyalty" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                  <Gift className="size-4 text-zinc-600" /> Programa de pontos
+                  <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-4 hidden rounded-2xl border border-white/[0.06] bg-black/20 p-3 lg:block">
+              <div className="flex items-center gap-2 text-[10px] font-medium text-zinc-400">
+                <ShieldCheck className="size-3.5 text-emerald-300" /> Acesso restrito
+              </div>
+              <p className="mt-1.5 text-[10px] leading-4 text-zinc-600">Ferramentas internas da plataforma. As ações são validadas no servidor.</p>
+            </div>
+          </aside>
+
+          <section className="min-w-0">
+            <header className="mb-4 flex flex-col gap-4 rounded-3xl border border-white/[0.08] bg-[#101013] p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  <span>Administração da plataforma</span>
+                  <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-1 text-[9px] text-emerald-200">Privado</span>
+                </div>
+                <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">{activeTab.label}</h1>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">{tabDescriptions[tab]}</p>
+              </div>
               <button
-                key={id}
                 type="button"
                 onClick={() => {
-                  if (id === 'payment_requests') setManualRequestFilter('ALL');
-                  setTab(id);
-                  if (id === 'api_health') void loadObservability();
+                  void load(query);
+                  if (tab === 'api_health') void loadObservability();
+                  if (tab === 'payment_requests' || tab === 'subscriptions') setRequestsRefreshKey((value) => value + 1);
                 }}
-                className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-sm font-medium ${tab === id ? 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200' : 'border-white/10 bg-white/[0.025] text-zinc-500 hover:text-zinc-200'}`}
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-4 text-xs font-semibold text-zinc-200 transition hover:bg-white/[0.08]"
               >
-                <Icon className="size-4" />
-                {label}
+                <RefreshCw className={`size-4 ${loading || observabilityLoading ? 'animate-spin' : ''}`} /> Atualizar dados
               </button>
-            ))}
-          </div>
-        </header>
+            </header>
 
-        {message ? (
-          <div className="mb-4 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-sm text-emerald-200">
-            {message}
-          </div>
-        ) : null}
-        {error ? (
-          <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">
-            {error}
-          </div>
-        ) : null}
+            {message ? (
+              <div role="status" className="mb-4 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-sm text-emerald-200">{message}</div>
+            ) : null}
+            {error ? (
+              <div role="alert" className="mb-4 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">{error}</div>
+            ) : null}
 
         {tab === 'support' ? <SupportInbox /> : null}
 
         {tab === 'overview' && data ? (
-          <section className="space-y-5">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="min-w-0 space-y-5">
+            <div className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-emerald-400/[0.07] via-white/[0.025] to-transparent p-4 sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Resumo executivo</p>
+              <h2 className="mt-1 text-base font-semibold tracking-tight text-white sm:text-lg">A tua plataforma, num só lugar</h2>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                Acompanha a utilização, o desempenho comercial e os pontos que precisam da tua atenção.
+              </p>
+            </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Utilização da plataforma</h2>
+                <span className="text-[10px] text-zinc-600">Totais atuais</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Barbearias"
                 value={data.stats.barbershops}
-                meta="tenants"
+                meta="barbearias"
               />
               <StatCard
                 label="Utilizadores"
                 value={data.stats.users}
-                meta={`${data.stats.owners} owners · ${data.stats.barbers} barbeiros`}
+                meta={`${data.stats.owners} responsáveis · ${data.stats.barbers} barbeiros`}
               />
               <StatCard
                 label="Clientes"
                 value={data.stats.clients}
-                meta="CRM por tenant"
+                meta="CRM por barbearia"
               />
               <StatCard
-                label="Bookings"
+                label="Marcações"
                 value={data.stats.appointments}
                 meta={`${data.stats.upcomingAppointments} futuros`}
                 tone={data.stats.upcomingAppointments > 0 ? 'good' : 'default'}
               />
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Distribuição de planos</h2>
+                <span className="text-[10px] text-zinc-600">Plano efetivo</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Free"
                 value={data.plans.free}
@@ -764,7 +852,13 @@ export default function PlatformAdminConsole() {
                 meta={`${data.stats.planAssignments} overrides`}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Desempenho financeiro</h2>
+                <span className="text-[10px] text-zinc-600">Últimos 30 dias</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Receita manual · 30d"
                 value={formatMoney(data.operations.manualRevenue30d)}
@@ -805,7 +899,9 @@ export default function PlatformAdminConsole() {
               />
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+            </div>
+
+            <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
               <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="size-4 text-emerald-300" />
@@ -814,12 +910,12 @@ export default function PlatformAdminConsole() {
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
-                      Novos tenants
+                      Novas barbearias
                     </p>
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.newShops7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
@@ -828,16 +924,16 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.newUsers7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
-                      Bookings próximos
+                      Marcações próximas
                     </p>
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.appointmentsNext7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">próximos 7d</p>
+                    <p className="text-[11px] text-zinc-600">próximos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
@@ -846,7 +942,7 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.canceledSubscriptions30d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 30d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 30 dias</p>
                   </div>
                 </div>
               </section>
@@ -941,8 +1037,8 @@ export default function PlatformAdminConsole() {
                 </div>
                 <div className="mt-4 space-y-2">
                   {[
-                    ['Admin identity', data.system.adminIdentityConfigured],
-                    ['Email / Brevo', data.system.emailConfigured],
+                    ['Identidade de administrador', data.system.adminIdentityConfigured],
+                    ['Serviço de email', data.system.emailConfigured],
                     ['Stripe', data.system.stripeConfigured],
                     ['Preços manuais', data.system.manualPricingConfigured],
                     [
@@ -972,7 +1068,7 @@ export default function PlatformAdminConsole() {
                   <div>
                     <h2 className="font-semibold">Barbearias recentes</h2>
                     <p className="mt-1 text-xs text-zinc-500">
-                      Pesquisa por nome, slug ou ID.
+                      Pesquisa por nome, endereço público ou ID.
                     </p>
                   </div>
                   <button
@@ -1014,7 +1110,7 @@ export default function PlatformAdminConsole() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center gap-2">
                   <Database className="size-4 text-emerald-300" />
-                  <h2 className="font-semibold">System health</h2>
+                  <h2 className="font-semibold">Estado do sistema</h2>
                 </div>
                 <p className="mt-1 text-xs text-zinc-500">
                   Health endpoint público de baixo risco.
@@ -1034,7 +1130,7 @@ export default function PlatformAdminConsole() {
                           health.ok ? 'text-emerald-300' : 'text-red-300'
                         }
                       >
-                        {health.ok ? 'Healthy' : 'Error'}
+                        {health.ok ? 'Operacional' : 'Erro'}
                       </span>
                       <span className="font-mono text-xs text-zinc-500">
                         {health.status} · {health.latencyMs}ms
@@ -1068,7 +1164,7 @@ export default function PlatformAdminConsole() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') void load(query);
                     }}
-                    placeholder="Nome, slug ou ID…"
+                    placeholder="Nome, endereço público ou ID…"
                     className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-emerald-400/30"
                   />
                 </div>
@@ -2338,7 +2434,7 @@ export default function PlatformAdminConsole() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
               <div className="flex items-center gap-2">
                 <Activity className="size-4 text-emerald-300" />
-                <h2 className="font-semibold">Quick checks</h2>
+                <h2 className="font-semibold">Verificações rápidas</h2>
               </div>
               <div className="mt-4 space-y-2">
                 <button
@@ -2358,7 +2454,7 @@ export default function PlatformAdminConsole() {
                   onClick={() => void load(query)}
                   className="flex min-h-11 w-full items-center justify-between rounded-xl border border-white/10 bg-black/15 px-4 text-sm hover:bg-white/[0.04]"
                 >
-                  <span>Admin overview query</span>
+                  <span>Resumo administrativo</span>
                   <span>{loading ? 'A executar…' : 'Executar'}</span>
                 </button>
               </div>
@@ -2374,25 +2470,27 @@ export default function PlatformAdminConsole() {
               </p>
               <div className="mt-4 space-y-2 text-xs text-zinc-500">
                 <p>
-                  <span className="text-zinc-300">Auth:</span> sessão Supabase
+                  <span className="text-zinc-300">Autenticação:</span> sessão Supabase
                   obrigatória
                 </p>
                 <p>
-                  <span className="text-zinc-300">Allowlist:</span>{' '}
+                  <span className="text-zinc-300">Lista de permissões:</span>{' '}
                   SILENTRA_PLATFORM_ADMIN_USER_ID / EMAIL
                 </p>
                 <p>
-                  <span className="text-zinc-300">Secrets:</span> nunca expostos
+                  <span className="text-zinc-300">Segredos:</span> nunca expostos
                   ao browser
                 </p>
                 <p>
-                  <span className="text-zinc-300">Mutations:</span> apenas via
+                  <span className="text-zinc-300">Alterações:</span> apenas via
                   API interna autenticada
                 </p>
               </div>
             </div>
           </section>
         ) : null}
+          </section>
+        </div>
       </div>
     </main>
   );

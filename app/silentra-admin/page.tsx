@@ -1,13 +1,11 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { BarChart3, Gift, Globe2 } from 'lucide-react';
 import { getPlatformAdminContext } from '@/lib/internal/platform-admin';
 import PlatformAdminConsole from '@/app/_silentra-admin/platform-admin-console';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'Silentra Internal',
+  title: 'Silentra | Centro de controlo',
   robots: { index: false, follow: false },
 };
 
@@ -44,30 +42,5 @@ export default async function SilentraAdminPage({
     notFound();
   }
 
-  return (
-    <div className="relative">
-      <PlatformAdminConsole />
-      <Link
-        href="/silentra-admin/reports"
-        className="fixed bottom-32 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/95 px-4 text-xs font-semibold text-zinc-100 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"
-      >
-        <BarChart3 className="size-4 text-sky-300" />
-        Relatórios da plataforma
-      </Link>
-      <Link
-        href="/silentra-admin/websites"
-        className="fixed bottom-20 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/95 px-4 text-xs font-semibold text-zinc-100 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"
-      >
-        <Globe2 className="size-4 text-emerald-300" />
-        Sites Enterprise
-      </Link>
-      <Link
-        href="/silentra-admin/loyalty"
-        className="fixed bottom-5 right-5 z-50 inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-400/20 bg-zinc-950/95 px-4 text-xs font-semibold text-emerald-200 shadow-2xl backdrop-blur-xl transition hover:bg-zinc-900"
-      >
-        <Gift className="size-4" />
-        Gestão de pontos
-      </Link>
-    </div>
-  );
+  return <PlatformAdminConsole />;
 }
