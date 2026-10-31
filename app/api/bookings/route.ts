@@ -28,6 +28,7 @@ type BookingRequestBody = {
   customerPhone?: unknown;
   customerEmail?: unknown;
   customerBirthDate?: unknown;
+  prepayment?: unknown;
 };
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BIRTH_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -125,6 +126,7 @@ async function POST__unobserved(request: Request) {
         'customerPhone',
         'customerEmail',
         'customerBirthDate',
+        'prepayment',
       ],
     });
     if (!payloadResult.ok) return payloadResult.response;
@@ -139,7 +141,14 @@ async function POST__unobserved(request: Request) {
       customerPhone,
       customerEmail,
       customerBirthDate,
+      prepayment,
     } = payload as BookingRequestBody;
+    const isPrepayment = prepayment === true;
+    if (prepayment !== undefined && typeof prepayment !== 'boolean')
+      return NextResponse.json(
+        { success: false, error: 'Opção de pré-pagamento inválida.' },
+        { status: 400 },
+      );
     const name = normalizeText(customerName, 120);
     const phone = normalizeText(customerPhone, 30);
     const email = normalizeText(customerEmail, 254)?.toLowerCase();
@@ -192,7 +201,7 @@ async function POST__unobserved(request: Request) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select(
-        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes)`,
+        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes,phone,mbway_enabled,mbway_phone)`,
       )
       .eq('id', shopId)
       .maybeSingle();
@@ -204,6 +213,41 @@ async function POST__unobserved(request: Request) {
       );
     }
     const barbershopId = shop.barbershop_id;
+    const shopRelation = Array.isArray(shop.barbershops)
+      ? shop.barbershops[0]
+      : shop.barbershops;
+    let prepaymentSettings: { mbwayPhone: string; whatsappPhone: string } | null = null;
+    if (isPrepayment) {
+      const { data: effectivePlan, error: planError } = await admin.rpc(
+        'get_effective_billing_plan_for_barbershop',
+        { p_barbershop_id: barbershopId },
+      );
+      const mbwayPhone = String(shopRelation?.mbway_phone ?? '').trim();
+      const whatsappPhone = String(shopRelation?.phone ?? '').trim();
+      const validPhone = (value: string) => {
+        const digits = value.replace(/\\D/g, '');
+        return digits.length >= 9 && digits.length <= 15;
+      };
+      if (
+        planError ||
+        !['pro', 'enterprise'].includes(String(effectivePlan ?? '').toLowerCase())
+      )
+        return NextResponse.json(
+          { success: false, error: 'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.' },
+          { status: 403 },
+        );
+      if (shopRelation?.mbway_enabled !== true || !validPhone(mbwayPhone))
+        return NextResponse.json(
+          { success: false, error: 'O pré-pagamento MB WAY não está configurado nesta barbearia.' },
+          { status: 409 },
+        );
+      if (!validPhone(whatsappPhone))
+        return NextResponse.json(
+          { success: false, error: 'A barbearia ainda não configurou o número de telefone/WhatsApp.' },
+          { status: 409 },
+        );
+      prepaymentSettings = { mbwayPhone, whatsappPhone };
+    }
 
     let birthDate = '';
     let existingCustomerId: string | null = null;
@@ -262,9 +306,6 @@ async function POST__unobserved(request: Request) {
       }
     }
 
-    const shopRelation = Array.isArray(shop.barbershops)
-      ? shop.barbershops[0]
-      : shop.barbershops;
     const barbershopName = shopRelation?.name || 'Barbearia';
     const barbershopAddress = shopRelation?.address || 'Endereço sob consulta';
     const minimumNoticeMinutes = Math.max(
@@ -304,7 +345,7 @@ async function POST__unobserved(request: Request) {
     const requestedStart = timeToMinutes(bookingTime);
     const { data: selectedService, error: serviceError } = await supabase
       .from('services')
-      .select('id,name,duration')
+      .select('id,name,duration,price')
       .eq('id', service)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
@@ -406,8 +447,8 @@ async function POST__unobserved(request: Request) {
         p_manual_phone: phone,
         p_manual_email: email,
         p_manual_birth_date: birthDate,
-        // Start as pending; the database promotes it to scheduled only when auto-confirm is enabled.
-        p_status: 'pending',
+        // Prepayment requests must bypass automatic confirmation until the barber reviews the transfer.
+        p_status: isPrepayment ? 'prepayment_pending' : 'pending',
       },
     );
     if (createError || !appointment) {
@@ -462,6 +503,37 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
+    const paymentExpiresAt = isPrepayment
+      ? new Date(Date.now() + 15 * 60 * 1000).toISOString()
+      : null;
+    const paymentAmount = isPrepayment ? Number(selectedService.price ?? 0) : 0;
+    if (isPrepayment) {
+      const { error: paymentUpdateError } = await admin
+        .from('appointments')
+        .update({
+          payment_method: 'mbway',
+          payment_status: 'awaiting_review',
+          payment_amount: paymentAmount,
+          payment_expires_at: paymentExpiresAt,
+        })
+        .eq('id', appointment.id)
+        .eq('barbershop_id', barbershopId)
+        .eq('status', 'pending');
+      if (paymentUpdateError) {
+        await admin
+          .from('appointments')
+          .update({ status: 'cancelled', cancellation_reason: 'Falha ao preparar o pré-pagamento MB WAY.' })
+          .eq('id', appointment.id)
+          .eq('barbershop_id', barbershopId)
+          .eq('status', 'pending');
+        console.error('[BOOKING_PREPAYMENT_METADATA_ERROR]', paymentUpdateError.code ?? 'UNKNOWN');
+        return NextResponse.json(
+          { success: false, error: 'Não foi possível preparar o pré-pagamento. Tenta novamente.' },
+          { status: 503 },
+        );
+      }
+    }
+
     try {
       await notifyBarbersOfNewBooking({
         appointmentId: appointment.id,
@@ -475,6 +547,9 @@ async function POST__unobserved(request: Request) {
         time: bookingTime,
         durationMinutes,
         status: appointment.status === 'scheduled' ? 'confirmed' : 'pending',
+        prepaymentReview: isPrepayment
+          ? { amount: paymentAmount, expiresAt: paymentExpiresAt!, method: 'mbway' as const }
+          : undefined,
       });
     } catch (error) {
       console.error(
@@ -501,7 +576,7 @@ async function POST__unobserved(request: Request) {
           err instanceof Error ? err.name : 'UNKNOWN',
         ),
       );
-    } else {
+    } else if (!isPrepayment) {
       const escapeEmailHtml = (value: string) =>
         value.replace(
           /[&<>"']/g,
@@ -538,10 +613,20 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message:
-          appointment.status === 'scheduled'
+        message: isPrepayment
+          ? 'Pedido de pré-pagamento criado. Envia o comprovativo pelo WhatsApp e aguarda a validação da barbearia.'
+          : appointment.status === 'scheduled'
             ? 'Marcação confirmada com sucesso!'
             : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
+        payment: isPrepayment
+          ? {
+              method: 'mbway',
+              amount: paymentAmount,
+              mbwayPhone: prepaymentSettings!.mbwayPhone,
+              whatsappPhone: prepaymentSettings!.whatsappPhone,
+              expiresAt: paymentExpiresAt,
+            }
+          : null,
         booking: {
           id: appointment.id,
           barbershopId: appointment.barbershop_id,
