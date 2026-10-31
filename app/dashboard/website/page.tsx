@@ -437,7 +437,7 @@ export default function CustomWebsiteDashboardPage() {
               ? 'Nome pretendido para o endereço'
               : 'Preferred website address'}
             <div className="flex min-w-0 items-center rounded-xl border border-white/10 bg-black/20 focus-within:border-emerald-400/40">
-              <span className="shrink-0 pl-3 text-xs text-zinc-500">
+              <span className="min-w-0 shrink pl-3 text-[10px] text-zinc-500 sm:text-xs">
                 barbers.silentra.me/
               </span>
               <input
