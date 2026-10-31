@@ -54,7 +54,10 @@ const checks = [
   {
     name: 'Silveira Salon reuses the shared Pro booking layout and redirects Enterprise to its landing page',
     file: 'app/agendadovictor/agenda-do-victor-page.tsx',
-    test: (source) => source.includes('ProBookingPage'),
+    test: (source) =>
+      source.includes('ProBookingPage') &&
+      source.includes("if (profile.plan === 'enterprise')") ,
+
   },
   {
     name: 'Final booking migration uses appointment_status',
