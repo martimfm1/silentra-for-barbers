@@ -122,6 +122,14 @@ async function GET__unobserved(
     }
 
     const barbershopId = shopRecord.barbershop_id;
+    const relation = Array.isArray(shopRecord.barbershops)
+      ? shopRecord.barbershops[0]
+      : shopRecord.barbershops;
+    if (!barbershopId || !relation)
+      return NextResponse.json(
+        { error: 'Configuração da barbearia indisponível.' },
+        { status: 503 },
+      );
     const { data: effectivePlan } = await admin.rpc(
       'get_effective_billing_plan_for_barbershop',
       { p_barbershop_id: barbershopId },
@@ -137,15 +145,6 @@ async function GET__unobserved(
       mbwayPhone,
       whatsappPhone,
     };
-    const relation = Array.isArray(shopRecord.barbershops)
-      ? shopRecord.barbershops[0]
-      : shopRecord.barbershops;
-    if (!barbershopId || !relation)
-      return NextResponse.json(
-        { error: 'Configuração da barbearia indisponível.' },
-        { status: 503 },
-      );
-
     const openTime = relation.opening_time || '09:00:00';
     const closeTime = relation.closing_time || '19:00:00';
     const minimumNoticeMinutes = Math.max(
