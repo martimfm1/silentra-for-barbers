@@ -765,6 +765,34 @@ const checks = [
       source.includes('calendarSyncRotate') &&
       source.includes('calendarSyncDisable'),
   },
+  {
+    name: 'Silentra demo barbershop landing is bilingual, responsive and non-transactional',
+    file: 'app/silentra/silentra-demo-barbershop.tsx',
+    test: (source) =>
+      source.includes('const PT =') &&
+      source.includes('const EN =') &&
+      source.includes('id="servicos"') &&
+      source.includes('id="experiencia"') &&
+      source.includes('id="equipa"') &&
+      source.includes('id="marcacao"') &&
+      source.includes('id="contactos"') &&
+      source.includes('setSimulated(true)') &&
+      source.includes('bookingDemo') &&
+      source.includes("setLocale('pt')") &&
+      source.includes("setLocale('en')") &&
+      source.includes('fixed inset-x-4 bottom-4') &&
+      !source.includes('fetch(') &&
+      !source.includes('/api/appointments'),
+  },
+  {
+    name: 'Silentra demo barbershop page publishes canonical search metadata',
+    file: 'app/silentra/page.tsx',
+    test: (source) =>
+      source.includes('Silentra Barbershop') &&
+      source.includes('Barbearia de Demonstração') &&
+      source.includes("canonical: 'https://barbers.silentra.me/silentra'") &&
+      source.includes('<SilentraDemoBarbershop />'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
