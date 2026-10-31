@@ -117,7 +117,8 @@ assert.match(sidebar, /moreItems\.some\(isActive\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
 assert.match(settingsPage, /const sectionGroups/);
 assert.match(settingsPage, /navigationGroups\.map/);
-assert.match(settingsPage, /<optgroup/);
+assert.match(settingsPage, /<SelectGroup/);
+assert.match(settingsPage, /<SelectLabel/);
 assert.match(settingsPage, /aria-current=\{section === id \? 'location'/);
 assert.doesNotMatch(settingsPage, /<CardDescription>/);
 
@@ -150,6 +151,31 @@ for (const source of confirmationTargets) {
   assert.match(source, /useDashboardConfirm/);
   assert.doesNotMatch(source, /window\.confirm/);
 }
+
+// Settings should expose focused, independently saveable dialogs instead of one long form.
+for (const category of ['business', 'location', 'hours', 'rules']) {
+  assert.ok(
+    settingsPage.includes(`open={activeDialog === '${category}'}`),
+    `Settings ${category} form must have its own dialog`,
+  );
+}
+assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
+assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
+assert.match(settingsPage, /role="progressbar"/);
+assert.match(settingsPage, /completedSetupSteps/);
+assert.match(settingsPage, /function closeSettingsDialog\(\)/);
+assert.doesNotMatch(settingsPage, /<select\b/);
+assert.match(settingsPage, /<SelectTrigger/);
+assert.match(settingsPage, /<SelectContent/);
+
+// Dashboard zoom-out is blocked in-page while pinch/keyboard zoom-in remains available.
+assert.match(dashboardShell, /previousPinchDistance/);
+assert.match(dashboardShell, /nextDistance < previousPinchDistance/);
+assert.match(dashboardShell, /event\.ctrlKey && event\.deltaY > 0/);
+assert.match(dashboardShell, /\['-', '_', 'Subtract'\]/);
+assert.doesNotMatch(dashboardShell, /userScalable:\s*false|maxScale:\s*1/);
 
 // Core accessibility regressions: keyboard focus, landmarks, target sizes and motion.
 assert.match(navbar, /keepFocusInside/);
