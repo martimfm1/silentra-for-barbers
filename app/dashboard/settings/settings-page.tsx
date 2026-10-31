@@ -281,6 +281,10 @@ export default function SettingsPageOrganized() {
   );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
+  function closeSettingsDialog() {
+    setActiveDialog(null);
+    setSection('overview');
+  }
   function go(s: Section) {
     setSection(s);
     if (
@@ -661,7 +665,7 @@ export default function SettingsPageOrganized() {
             </section>
             <Dialog
               open={activeDialog === 'business'}
-              onOpenChange={(open) => setActiveDialog(open ? 'business' : null)}
+              onOpenChange={(open) => open ? setActiveDialog('business') : closeSettingsDialog()}
             >
               <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
@@ -773,7 +777,7 @@ export default function SettingsPageOrganized() {
                   </CardContent>
                 </Card>
                 <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
                   {t('settingsPage.closeDialog')}
                 </Button>
                 <Button
@@ -790,7 +794,7 @@ export default function SettingsPageOrganized() {
             </Dialog>
             <Dialog
               open={activeDialog === 'location'}
-              onOpenChange={(open) => setActiveDialog(open ? 'location' : null)}
+              onOpenChange={(open) => open ? setActiveDialog('location') : closeSettingsDialog()}
             >
               <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
@@ -878,7 +882,7 @@ export default function SettingsPageOrganized() {
                   </CardContent>
                 </Card>
                 <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
                   {t('settingsPage.closeDialog')}
                 </Button>
                 <Button
@@ -895,7 +899,7 @@ export default function SettingsPageOrganized() {
             </Dialog>
             <Dialog
               open={activeDialog === 'hours'}
-              onOpenChange={(open) => setActiveDialog(open ? 'hours' : null)}
+              onOpenChange={(open) => open ? setActiveDialog('hours') : closeSettingsDialog()}
             >
               <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
@@ -1013,7 +1017,7 @@ export default function SettingsPageOrganized() {
                   </CardContent>
                 </Card>
                 <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
                   {t('settingsPage.closeDialog')}
                 </Button>
                 <Button
@@ -1030,7 +1034,7 @@ export default function SettingsPageOrganized() {
             </Dialog>
             <Dialog
               open={activeDialog === 'rules'}
-              onOpenChange={(open) => setActiveDialog(open ? 'rules' : null)}
+              onOpenChange={(open) => open ? setActiveDialog('rules') : closeSettingsDialog()}
             >
               <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
@@ -1177,7 +1181,7 @@ export default function SettingsPageOrganized() {
                   </CardContent>
                 </Card>
                 <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
                   {t('settingsPage.closeDialog')}
                 </Button>
                 <Button
