@@ -443,8 +443,8 @@ body
     position: relative;
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
-    contain: paint;
+    /* Keep fixed navigation anchored to the viewport, not this scrolling shell. */
+    overflow-x: clip;
   }
 
   .silentra-dashboard-shell > .dashboard-content,

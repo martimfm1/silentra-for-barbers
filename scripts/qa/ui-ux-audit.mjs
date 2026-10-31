@@ -38,6 +38,7 @@ const [
   navbar,
   sidebar,
   globalCss,
+  responsiveCss,
   dashboardShell,
   topBar,
   button,
@@ -47,6 +48,7 @@ const [
   read('components/site-navbar.tsx'),
   read('app/dashboard/_components/DashboardSidebar.tsx'),
   read('app/globals.css'),
+  read('app/silentra-responsive.css'),
   read('app/dashboard/dashboard-content.tsx'),
   read('app/dashboard/_components/DashboardTopBar.tsx'),
   read('components/ui/button.tsx'),
@@ -99,6 +101,16 @@ assert.match(sidebar, /transformOrigin: 'bottom center'/);
 assert.doesNotMatch(sidebar, /lg:absolute lg:bottom-\[calc\(100%\+0\.85rem\)\]/);
 assert.match(sidebar, /prefersReducedMotion/);
 assert.match(sidebar, /env\(safe-area-inset-bottom\)/);
+const mobileDashboardShellRule = responsiveCss.match(
+  /Mobile dashboard must behave[\s\S]*?\.silentra-dashboard-shell\s*\{([^}]*)\}/,
+)?.[1] ?? '';
+assert.ok(mobileDashboardShellRule, 'Mobile dashboard shell rule must exist');
+assert.match(mobileDashboardShellRule, /overflow-x:\s*clip/);
+assert.doesNotMatch(
+  mobileDashboardShellRule,
+  /contain:\s*(?:paint|layout|strict|content)/,
+  'Mobile dashboard shell must not establish a containing block for the fixed dock',
+);
 assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /moreTriggerRef\.current\?\.focus\(\)/);
 assert.match(sidebar, /moreItems\.some\(isActive\)/);
