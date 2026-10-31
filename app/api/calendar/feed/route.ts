@@ -122,7 +122,11 @@ async function GET__unobserved(request: Request) {
   if (!payload) {
     return new NextResponse('Calendar not found.', {
       status: 404,
-      headers: { 'Cache-Control': 'no-store' },
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
     });
   }
 
@@ -141,7 +145,11 @@ async function GET__unobserved(request: Request) {
   ) {
     return new NextResponse('Calendar not found.', {
       status: 404,
-      headers: { 'Cache-Control': 'no-store' },
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
     });
   }
 
@@ -182,7 +190,11 @@ async function GET__unobserved(request: Request) {
     );
     return new NextResponse('Calendar temporarily unavailable.', {
       status: 503,
-      headers: { 'Cache-Control': 'no-store' },
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
     });
   }
 
@@ -220,7 +232,11 @@ async function GET__unobserved(request: Request) {
     );
     return new NextResponse('Calendar temporarily unavailable.', {
       status: 503,
-      headers: { 'Cache-Control': 'no-store' },
+      headers: {
+        'Cache-Control': 'no-store',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
     });
   }
 
