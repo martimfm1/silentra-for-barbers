@@ -1200,7 +1200,10 @@ CREATE TABLE IF NOT EXISTS "public"."barbershops" (
     "lunch_start" time without time zone,
     "lunch_end" time without time zone,
     "is_public_in_directory" boolean DEFAULT true NOT NULL,
-    "created_by" "uuid"
+    "created_by" "uuid",
+    "calendar_feed_enabled" boolean DEFAULT false NOT NULL,
+    "calendar_feed_version" integer DEFAULT 1 NOT NULL,
+    CONSTRAINT "barbershops_calendar_feed_version_positive" CHECK (("calendar_feed_version" >= 1))
 );
 
 
@@ -1212,6 +1215,10 @@ COMMENT ON COLUMN "public"."barbershops"."whatsapp_status" IS 'Estado atual do b
 
 
 COMMENT ON COLUMN "public"."barbershops"."is_public_in_directory" IS 'Controla se a barbearia aparece no diretório público /barbearias. O link direto continua disponível quando false.';
+
+COMMENT ON COLUMN "public"."barbershops"."calendar_feed_enabled" IS 'Whether the private read-only iCalendar subscription feed is active.';
+
+COMMENT ON COLUMN "public"."barbershops"."calendar_feed_version" IS 'Version used to revoke previously issued private iCalendar feed URLs.';
 
 
 
