@@ -454,6 +454,21 @@ export function BookingDrawerCanonical({
   }
 
   if (!shop) return null;
+  const whatsappDigits = paymentInstructions
+    ? normalizeWhatsAppNumber(paymentInstructions.whatsappPhone)
+    : '';
+  const whatsappMessage = paymentInstructions
+    ? [
+        t('bookingDrawer.whatsappProofMessage'),
+        `${shop.name} — ${service?.name || 'Serviço'}`,
+        `${currentDay?.dateStr || ''} ${selectedSlot || ''}`,
+        `MB WAY: ${paymentInstructions.amount.toFixed(2)} €`,
+        `Ref.: ${email.trim()}`,
+      ].join('\\n')
+    : '';
+  const whatsappProofUrl = whatsappDigits
+    ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(whatsappMessage)}`
+    : '';
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
