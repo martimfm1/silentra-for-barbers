@@ -9,6 +9,15 @@ async function read(path) {
 
 const checks = [
   {
+    name: 'Public profile resolution fails closed when the canonical plan lookup is unavailable',
+    file: 'lib/barbershops/public-profile.ts',
+    test: (source) =>
+      source.includes('plan: BillingPlan | null') &&
+      source.includes('plan: null') &&
+      source.includes('if (!plan) return null;') &&
+      source.includes(': null;'),
+  },
+  {
     name: 'Public booking page layout is selected from the effective subscription plan',
     file: 'app/barbershops/[slug]/page.tsx',
     test: (source) =>
