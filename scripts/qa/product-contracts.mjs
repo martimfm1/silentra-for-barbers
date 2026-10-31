@@ -732,6 +732,8 @@ const checks = [
       source.includes(".eq('barbershop_id', payload.barbershopId)") &&
       source.includes(".in('status', ['pending', 'scheduled'])") &&
       source.includes('verifyBarbershopCalendarFeedToken') &&
+      source.includes("from('schedule_blocks')") &&
+      source.includes('lisbonLocalDateTime') &&
       !source.includes('manual_name') &&
       !source.includes('manual_phone') &&
       !source.includes('manual_email'),
