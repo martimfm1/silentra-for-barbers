@@ -3,6 +3,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createBarbershopCalendarFeedToken } from '@/lib/calendar/feed-token';
 import { getPublicAppUrl } from '@/lib/email/calendar-link';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -157,6 +158,15 @@ async function GET__unobserved(request: Request) {
 }
 
 async function POST__unobserved(request: Request) {
+  try {
+    assertSameOrigin(request);
+  } catch {
+    return NextResponse.json(
+      { error: 'A origem do pedido não pôde ser validada.' },
+      { status: 403, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
   const context = await getAuthorizedContext(request);
   if (!context.ok) {
     return NextResponse.json(
@@ -201,6 +211,15 @@ async function POST__unobserved(request: Request) {
 }
 
 async function DELETE__unobserved(request: Request) {
+  try {
+    assertSameOrigin(request);
+  } catch {
+    return NextResponse.json(
+      { error: 'A origem do pedido não pôde ser validada.' },
+      { status: 403, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
   const context = await getAuthorizedContext(request);
   if (!context.ok) {
     return NextResponse.json(
