@@ -876,7 +876,6 @@ body[data-dashboard-theme='true'] :is(
 
 body[data-dashboard-theme='true'] :is(
   [class~='bg-emerald-400'],
-  [class~='bg-emerald-400'],
   [class~='bg-emerald-500'],
   [class~='bg-emerald-600'],
   [class~='bg-green-400'],
@@ -946,7 +945,7 @@ body[data-dashboard-theme='true'] :is(
   [class~='via-emerald-500'],
   [class~='via-emerald-600']
 ) {
-  --tw-gradient-stops: var(--tw-gradient-via-stops) !important;
+  --tw-gradient-via: var(--dashboard-accent) !important;
 }
 
 body[data-dashboard-theme='true'] :is(
@@ -961,6 +960,60 @@ body[data-dashboard-theme='true'] :is(
   [class~='shadow-emerald-500/20']
 ) {
   --tw-shadow-color: var(--dashboard-accent-glow);
+}
+
+/* Catch utility shades and opacity variants added by individual dashboard pages. */
+body[data-dashboard-theme='true'] :is(
+  [class*='text-emerald-'],
+  [class*='text-green-']
+) {
+  color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class*='bg-emerald-'],
+  [class*='bg-green-']
+) {
+  background-color: var(--dashboard-accent-soft) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='bg-emerald-400'],
+  [class~='bg-emerald-500'],
+  [class~='bg-emerald-600'],
+  [class~='bg-green-400'],
+  [class~='bg-green-500'],
+  [class~='bg-green-600']
+) {
+  background-color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class*='border-emerald-'],
+  [class*='border-green-']
+) {
+  border-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class*='ring-emerald-'],
+  [class*='ring-green-']
+) {
+  --tw-ring-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class*='stroke-emerald-'],
+  [class*='stroke-green-']
+) {
+  stroke: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class*='fill-emerald-'],
+  [class*='fill-green-']
+) {
+  fill: var(--dashboard-accent) !important;
 }
 
 /* Dock magnification, with subtle neighbour scaling like a desktop launcher. */
