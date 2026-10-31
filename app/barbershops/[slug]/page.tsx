@@ -11,11 +11,13 @@ import {
 import { normalizeBarbershopAmenities } from '@/lib/barbershops/amenities';
 import { DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
 import BarbershopPublicPage from './public-barbershop-page';
+import ProBookingPage from './pro-booking-page';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
 
 interface BarbershopPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ booking?: string }>;
 }
 
 const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
@@ -45,10 +47,27 @@ export async function generateMetadata({
   const { slug } = await params;
   const profile = await getPublicProfileBySlug(slug);
   if (!profile) return {};
-  const canonicalPath =
+  let canonicalPath =
     profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID
       ? '/agendadovictor'
       : `/barbershops/${encodeURIComponent(profile.slug)}`;
+  if (profile.plan === 'enterprise' && profile.barbershop_id) {
+    const database = createAdminClient();
+    const { data: landingPage, error } = await database
+      .from('barbershop_landing_pages')
+      .select('status')
+      .eq('barbershop_id', profile.barbershop_id)
+      .maybeSingle();
+    if (error) {
+      console.error('[PUBLIC_BARBERSHOP]', {
+        event: 'landing_page_metadata_lookup_failed',
+        slug: profile.slug,
+        code: error.code ?? 'UNKNOWN',
+      });
+    } else if (landingPage?.status === 'active') {
+      canonicalPath = `/site/${encodeURIComponent(profile.slug)}`;
+    }
+  }
   const title =
     profile.seo_title?.trim() ||
     `${profile.name} — Barbearia${profile.city ? ` em ${profile.city}` : ''} | Agendamento Online`;
@@ -232,8 +251,15 @@ async function getPublicLoyaltyEnabled(
   return data?.enabled === true;
 }
 
-export default async function BarbershopPage({ params }: BarbershopPageProps) {
-  const { slug } = await params;
+export default async function BarbershopPage({
+  params,
+  searchParams,
+}: BarbershopPageProps) {
+  const [{ slug }, query] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve({}),
+  ]);
+  const bookingMode = query.booking === '1';
   logPublicProfile('info', 'request', slug, {
     isUuid: UUID_PATTERN.test(slug),
   });
@@ -277,13 +303,55 @@ export default async function BarbershopPage({ params }: BarbershopPageProps) {
     permanentRedirect(getResolvedProfileUrl(profile));
   }
 
-  if (profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID) {
+  if (
+    profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID &&
+    profile.plan !== 'enterprise'
+  ) {
     permanentRedirect('/agendadovictor');
+  }
+
+  const initialData = await getInitialPublicDetails(profile);
+  if (
+    profile.plan === 'enterprise' &&
+    initialData.landing_page_url &&
+    !bookingMode
+  ) {
+    permanentRedirect(initialData.landing_page_url);
+  }
+
+  if (profile.plan === 'pro' || (profile.plan === 'enterprise' && bookingMode)) {
+    const canonicalPath =
+      profile.plan === 'enterprise'
+        ? `/site/${encodeURIComponent(profile.slug)}`
+        : getResolvedProfileUrl(profile);
+    return (
+      <>
+        <PublicBusinessJsonLd
+          name={profile.name}
+          url={absoluteUrl(canonicalPath)}
+          address={profile.address}
+          city={profile.city}
+          phone={profile.phone}
+          image={
+            profile.og_image_url ||
+            profile.cover_url ||
+            profile.avatar_url ||
+            absoluteUrl(DEFAULT_BARBERSHOP_BANNER)
+          }
+        />
+        <ProBookingPage
+          profile={initialData}
+          services={initialData.services}
+          openingTime={initialData.opening_time ?? null}
+          closingTime={initialData.closing_time ?? null}
+          closedDays={initialData.closed_days ?? null}
+        />
+      </>
+    );
   }
 
   const loyaltyEnabled = await getPublicLoyaltyEnabled(profile);
   logPublicProfile('info', 'render', slug, { loyaltyEnabled });
-  const initialData = await getInitialPublicDetails(profile);
   const canonicalUrl = absoluteUrl(getResolvedProfileUrl(profile));
   const image =
     profile.og_image_url ||
