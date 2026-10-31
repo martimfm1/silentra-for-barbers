@@ -832,3 +832,123 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
     justify-content: flex-start;
   }
 }
+
+  
+/* User-selected dashboard accent: applied to every dashboard route and portal layer. */
+body[data-dashboard-theme='true'] {
+  --dashboard-accent-soft: color-mix(in srgb, var(--dashboard-accent) 14%, transparent);
+  --dashboard-accent-muted: color-mix(in srgb, var(--dashboard-accent) 22%, transparent);
+  --dashboard-accent-border: color-mix(in srgb, var(--dashboard-accent) 36%, transparent);
+  --dashboard-accent-glow: color-mix(in srgb, var(--dashboard-accent) 18%, transparent);
+}
+
+body[data-dashboard-theme='true'] :focus-visible {
+  outline-color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  .text-emerald-300,
+  .text-emerald-400,
+  .text-emerald-500,
+  .text-green-300,
+  .text-green-400,
+  .text-green-500
+) {
+  color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='bg-emerald-400/10'],
+  [class~='bg-emerald-400/15'],
+  [class~='bg-emerald-400/20'],
+  [class~='bg-emerald-500/10'],
+  [class~='bg-emerald-500/15'],
+  [class~='bg-emerald-500/20'],
+  [class~='bg-green-400/10'],
+  [class~='bg-green-500/10']
+) {
+  background-color: var(--dashboard-accent-soft) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='bg-emerald-400'],
+  [class~='bg-emerald-500'],
+  [class~='bg-green-400'],
+  [class~='bg-green-500']
+) {
+  background-color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='border-emerald-400/20'],
+  [class~='border-emerald-400/30'],
+  [class~='border-emerald-500/20'],
+  [class~='border-emerald-500/30'],
+  [class~='border-green-400/20'],
+  [class~='border-green-500/20']
+) {
+  border-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='ring-emerald-400/20'],
+  [class~='ring-emerald-500/20'],
+  [class~='ring-emerald-500/30']
+) {
+  --tw-ring-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='hover:bg-emerald-500/10'],
+  [class~='hover:bg-emerald-400/10']
+):hover {
+  background-color: var(--dashboard-accent-soft) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='hover:border-emerald-500/40'],
+  [class~='hover:border-emerald-400/40']
+):hover {
+  border-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='shadow-emerald-500/10'],
+  [class~='shadow-emerald-500/20']
+) {
+  --tw-shadow-color: var(--dashboard-accent-glow);
+}
+
+/* Dock magnification, with subtle neighbour scaling like a desktop launcher. */
+@media (min-width: 1024px) {
+  .dashboard-dock-item {
+    transform-origin: center bottom;
+    transition:
+      transform 180ms cubic-bezier(0.2, 0.75, 0.25, 1),
+      background-color 160ms ease,
+      color 160ms ease;
+    will-change: transform;
+  }
+
+  .dashboard-dock-item:hover,
+  .dashboard-dock-item:focus-visible {
+    transform: translateY(-0.45rem) scale(1.16);
+  }
+
+  .dashboard-dock-item:has(+ .dashboard-dock-item:hover),
+  .dashboard-dock-item:hover + .dashboard-dock-item,
+  .dashboard-dock-item:has(+ .dashboard-dock-item:focus-visible),
+  .dashboard-dock-item:focus-visible + .dashboard-dock-item {
+    transform: translateY(-0.16rem) scale(1.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-dock-item {
+    transition: none !important;
+  }
+}
