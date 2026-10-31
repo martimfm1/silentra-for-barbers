@@ -361,7 +361,7 @@ export function BookingDrawerCanonical({
   }
 
   async function submit() {
-    if (!shop || !professional || !service || !selectedSlot) return;
+    if (!shop || !professional || !service || !selectedSlot || !currentDay) return;
     if (!name.trim() || !phone.trim() || !email.trim())
       return toast.error(t('bookingDrawer.requiredFields'));
     const birthDateIso = birthDateToIso(birthDate);
@@ -645,7 +645,7 @@ export function BookingDrawerCanonical({
                     </h3>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {professional?.name} · {currentDay.fullDateFormatted}
+                    {professional?.name} · {currentDay?.fullDateFormatted}
                   </p>
                 </div>
                 <Button
@@ -705,7 +705,7 @@ export function BookingDrawerCanonical({
                     {t('bookingDrawer.stepThreeDetails')}
                   </h3>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {service?.name} · {currentDay.fullDateFormatted} ·{' '}
+                    {service?.name} · {currentDay?.fullDateFormatted} ·{' '}
                     {selectedSlot}
                   </p>
                 </div>
@@ -848,7 +848,7 @@ export function BookingDrawerCanonical({
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
-                {currentDay.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
+                {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
               </p>
               <Button type="button" className="mt-6 w-full" onClick={onClose}>
                 {t('bookingDrawer.finish')}
