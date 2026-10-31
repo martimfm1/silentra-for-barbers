@@ -717,6 +717,45 @@ const checks = [
       );
     },
   },
+  {
+    name: 'iCalendar feed tokens are purpose-scoped and timing-safe verified',
+    file: 'lib/calendar/feed-token.ts',
+    test: (source) =>
+      source.includes('timingSafeEqual') &&
+      source.includes('RATE_LIMIT_SECRET') &&
+      source.includes('silentra:barbershop-calendar-feed:'),
+  },
+  {
+    name: 'Private iCalendar feed is tenant-scoped and excludes customer personal data',
+    file: 'app/api/calendar/feed/route.ts',
+    test: (source) =>
+      source.includes(".eq('barbershop_id', payload.barbershopId)") &&
+      source.includes(".in('status', ['pending', 'scheduled'])") &&
+      source.includes('verifyBarbershopCalendarFeedToken') &&
+      !source.includes('manual_name') &&
+      !source.includes('manual_phone') &&
+      !source.includes('manual_email'),
+  },
+  {
+    name: 'Calendar subscription management checks agenda access and supports revocation',
+    file: 'app/api/calendar/feed/settings/route.ts',
+    test: (source) =>
+      source.includes('hasAgendaGrant') &&
+      source.includes('calendar_feed_version') &&
+      source.includes('calendar_feed_enabled: false') &&
+      source.includes('export const POST') &&
+      source.includes('export const DELETE'),
+  },
+  {
+    name: 'Dashboard agenda exposes the bilingual iPhone calendar subscription controls',
+    file: 'components/dashboard/calendar-sync-card.tsx',
+    test: (source) =>
+      source.includes('/api/calendar/feed/settings') &&
+      source.includes('navigator.clipboard.writeText') &&
+      source.includes('calendarSyncInstructions') &&
+      source.includes('calendarSyncRotate') &&
+      source.includes('calendarSyncDisable'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
