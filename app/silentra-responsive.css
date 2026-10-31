@@ -435,7 +435,7 @@ body
    no horizontal panning, and no transformed page layer expanding its visual bounds. */
 @media (max-width: 767px) {
   body:has(.silentra-dashboard-shell) {
-    overflow-x: hidden;
+    overflow-x: clip;
     touch-action: pan-y pinch-zoom;
   }
 
@@ -465,4 +465,51 @@ body
     perspective: none !important;
     will-change: opacity !important;
   }
+}
+
+
+/* Dashboard viewport contract: every route stays within the viewport, with no
+   document-level horizontal pan or artificial right-side gutter. */
+html:has(.silentra-dashboard-shell),
+body:has(.silentra-dashboard-shell) {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  overflow-x: clip !important;
+}
+
+.silentra-dashboard-shell {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: clip;
+}
+
+.silentra-dashboard-shell .dashboard-content,
+.silentra-dashboard-shell .silentra-dashboard-main {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.silentra-dashboard-shell .dashboard-page,
+.silentra-dashboard-shell [data-dashboard-section] {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Viewport-width utilities inside a dashboard must not include the browser's
+   vertical scrollbar or extend past the dashboard content box. */
+.silentra-dashboard-shell [class~='w-screen'],
+.silentra-dashboard-shell [style*='100vw'] {
+  max-inline-size: 100%;
+}
+
+/* Explicitly keep the quick-navigation dock viewport-fixed on every route. */
+.silentra-dashboard-shell nav[aria-label='Navegação rápida do painel'],
+.silentra-dashboard-shell nav[aria-label='Dashboard quick navigation'] {
+  position: fixed !important;
+  z-index: 50;
 }
