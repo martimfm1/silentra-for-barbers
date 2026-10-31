@@ -125,7 +125,7 @@ export async function updateBarbershopConfig(
 
     const directoryVisibility = payload.is_public_in_directory;
     const mbwayEnabled = payload.mbway_enabled;
-    const mbwayPhone = payload.mbway_phone;
+    const mbwayPhone = payload.mbway_phone?.trim() ?? payload.mbway_phone;
     const popularServiceId = payload.popular_service_id;
     const expectedCancellationHours =
       payload.time_limit_cancellation_hours !== undefined
@@ -247,7 +247,7 @@ export async function updateBarbershopConfig(
     if (
       mbwayPhone !== undefined &&
       result.data &&
-      (result.data.mbway_phone ?? '') !== mbwayPhone
+      (result.data.mbway_phone ?? '') !== (mbwayPhone ?? '')
     ) {
       throw new Error('O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.');
     }
