@@ -338,34 +338,34 @@ export function DashboardSidebar() {
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
-                <Link
-                href={item.href}
-                aria-label={label}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
-                  active
-                    ? 'bg-white/[0.09] text-white'
-                    : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
-                    active && 'text-emerald-400',
-                  )}
-                  aria-hidden="true"
-                />
-                <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-                  {label}
-                </span>
-                {active ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
-                  />
-                ) : null}
-                </Link>
+                  <Link
+                    href={item.href}
+                    aria-label={label}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
+                      active
+                        ? 'bg-white/[0.09] text-white'
+                        : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
+                        active && 'text-emerald-400',
+                      )}
+                      aria-hidden="true"
+                    />
+                    <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
+                      {label}
+                    </span>
+                    {active ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
+                      />
+                    ) : null}
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
