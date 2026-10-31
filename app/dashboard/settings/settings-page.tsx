@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
+  ArrowUpRight,
   CalendarCheck2,
   Camera,
   Check,
@@ -48,6 +49,23 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   DEFAULT_BARBERSHOP_AMENITIES,
   normalizeBarbershopAmenities,
   type BarbershopAmenities,
@@ -58,10 +76,12 @@ type Section =
   | 'business'
   | 'location'
   | 'hours'
+  | 'rules'
   | 'appearance'
   | 'billing'
   | 'account';
-const INPUT_CLASS = 'min-h-11 rounded-xl border-white/10 bg-white/5 text-sm';
+const INPUT_CLASS = 'min-h-11 max-w-sm rounded-xl border-white/10 bg-white/5 text-sm';
+type SettingsDialog = 'business' | 'location' | 'hours' | 'rules';
 const CARD_CLASS = 'rounded-2xl border border-white/10 bg-white/[.02]';
 type Config = {
   name: string;
@@ -86,7 +106,8 @@ const sections: [Section, string, string, typeof Settings][] = [
   ['overview', 'Visão geral', 'Estado da configuração', Settings],
   ['business', 'Negócio', 'Identidade e dados públicos', Store],
   ['location', 'Localização', 'Morada e informações do espaço', MapPin],
-  ['hours', 'Horários', 'Funcionamento e regras', Clock3],
+  ['hours', 'Horários', 'Funcionamento da barbearia', Clock3],
+  ['rules', 'Regras', 'Antecedência, cancelamento e confirmações', CalendarCheck2],
   ['appearance', 'Aparência', 'Logótipo e imagem de capa', ImageIcon],
   ['billing', 'Plano e faturação', 'Subscrição e faturas', CreditCard],
   ['account', 'Conta e segurança', 'Sessão e acesso', ShieldCheck],
@@ -96,7 +117,7 @@ const sectionGroups: {
   sections: Section[];
 }[] = [
   { id: 'barbershopGroup', sections: ['business', 'location', 'appearance'] },
-  { id: 'bookingGroup', sections: ['hours'] },
+  { id: 'bookingGroup', sections: ['hours', 'rules'] },
   { id: 'accountGroup', sections: ['billing', 'account'] },
 ];
 const days = [
@@ -166,6 +187,7 @@ export default function SettingsPageOrganized() {
   const canManualMbway = hasFeature('manual_mbway_prepayment');
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
   const [section, setSection] = useState<Section>('overview');
+  const [activeDialog, setActiveDialog] = useState<SettingsDialog | null>(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -261,6 +283,16 @@ export default function SettingsPageOrganized() {
     setConfig((c) => ({ ...c, ...patch }));
   function go(s: Section) {
     setSection(s);
+    if (
+      s === 'business' ||
+      s === 'location' ||
+      s === 'hours' ||
+      s === 'rules'
+    ) {
+      setActiveDialog(s);
+      return;
+    }
+    setActiveDialog(null);
     requestAnimationFrame(() =>
       document
         .getElementById(`settings-${s}`)
@@ -333,6 +365,8 @@ export default function SettingsPageOrganized() {
       setLocale(n.default_language);
       setSuggestion(null);
       toast.success(t('settingsPage.saved'));
+      setActiveDialog(null);
+      setSection('overview');
     } catch (e) {
       toast.error(e instanceof Error && e.message ? e.message : t('settingsPage.saveFailed'));
     } finally {
@@ -458,7 +492,7 @@ export default function SettingsPageOrganized() {
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={t('settingsPage.search')}
                   aria-label={t('settingsPage.search')}
-                  className={`${INPUT_CLASS} pl-9`}
+                  className={`${INPUT_CLASS} max-w-none pl-9`}
                 />
               </div>
               <nav
@@ -519,52 +553,124 @@ export default function SettingsPageOrganized() {
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('settingsPage.search')}
                   aria-label={t('settingsPage.search')}
-                  className={`${INPUT_CLASS} pl-9`}
+                  className={`${INPUT_CLASS} max-w-none pl-9`}
                 />
               </div>
-              <select
-                aria-label={t('settingsPage.section')}
-                value={section}
-                onChange={(e) => go(e.target.value as Section)}
-                className="min-h-11 max-w-[48%] rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
-              >
-                {!filtered.some(([id]) => id === section) && (
-                  <option value={section}>{t(`settingsPage.${section}`)}</option>
-                )}
-                {filtered.some(([id]) => id === 'overview') && (
-                  <option value="overview">{t('settingsPage.overview')}</option>
-                )}
-                {navigationGroups.map((group) => (
-                  <optgroup key={group.id} label={t(`settingsPage.${group.id}`)}>
-                    {group.entries.map(([id]) => (
-                      <option key={id} value={id}>
-                        {t(`settingsPage.${id}`)}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+              <Select value={section} onValueChange={(value) => go(value as Section)}>
+                <SelectTrigger
+                  aria-label={t('settingsPage.section')}
+                  className="h-11 w-[min(48%,14rem)] min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                >
+                  <SelectValue placeholder={t('settingsPage.section')} />
+                </SelectTrigger>
+                <SelectContent
+                  position="popper"
+                  align="end"
+                  className="w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]"
+                >
+                  {section !== 'overview' && !filtered.some(([id]) => id === section) && (
+                    <SelectItem value={section}>{t(`settingsPage.${section}`)}</SelectItem>
+                  )}
+                  {filtered.some(([id]) => id === 'overview') && (
+                    <SelectItem value="overview">{t('settingsPage.overview')}</SelectItem>
+                  )}
+                  {navigationGroups.map((group) => (
+                    <SelectGroup key={group.id}>
+                      <SelectLabel>{t(`settingsPage.${group.id}`)}</SelectLabel>
+                      {group.entries.map(([id]) => (
+                        <SelectItem key={id} value={id}>
+                          {t(`settingsPage.${id}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <section id="settings-overview">
               <Card className={CARD_CLASS}>
-                <CardContent className="p-6 sm:p-8">
-                  <h2 className="text-xl font-semibold">
-                    {t('settingsPage.overviewTitle')}
-                  </h2>
+                <CardContent className="space-y-6 p-5 sm:p-7">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300">
+                      {t('settingsPage.overviewEyebrow')}
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold sm:text-2xl">
+                      {t('settingsPage.overviewTitle')}
+                    </h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
+                      {t('settingsPage.overviewDescription')}
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => go('business')}
+                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">01</span>
+                        <Store className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
+                      </span>
+                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
+                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.name || t('settingsPage.notConfigured')}</span>
+                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => go('location')}
+                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">02</span>
+                        <MapPin className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
+                      </span>
+                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
+                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.address || t('settingsPage.notConfigured')}</span>
+                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => go('hours')}
+                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">03</span>
+                        <Clock3 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
+                      </span>
+                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
+                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.opening_time} – {config.closing_time}</span>
+                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => go('rules')}
+                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">04</span>
+                        <CalendarCheck2 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
+                      </span>
+                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.rules')}</span>
+                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.time_limit_cancellation_hours === 0 ? t('settingsPage.cancellationWindowNoLimitShort') : t('settingsPage.cancellationWindowSummary', { hours: config.time_limit_cancellation_hours })}</span>
+                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
+                    </button>
+                  </div>
+                  <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.saveAllHint')}</p>
                 </CardContent>
               </Card>
             </section>
-            <section id="settings-business">
-              <Card className={CARD_CLASS}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Store className="size-4 text-emerald-400" />
-                    {t('settingsPage.business')}
-                  </CardTitle>
-
-                </CardHeader>
-                <CardContent className="grid gap-5 sm:grid-cols-2">
-                  <div className="grid gap-2">
+            <Dialog
+              open={activeDialog === 'business'}
+              onOpenChange={(open) => setActiveDialog(open ? 'business' : null)}
+            >
+              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t('settingsPage.business')}</DialogTitle>
+                  <DialogDescription>{t('settingsPage.businessDialogDescription')}</DialogDescription>
+                </DialogHeader>
+                <Card className={CARD_CLASS}>
+                  <CardContent className="grid gap-5 sm:grid-cols-2 ">
+                    <div className="grid gap-2">
                     <label>{t('settingsPage.shopName')}</label>
                     <Input
                       value={config.name}
@@ -591,20 +697,23 @@ export default function SettingsPageOrganized() {
                     <p className="text-xs text-zinc-500">
                       {t('settingsLanguage.description')}
                     </p>
-                    <select
-                      id="settings-default-language"
+                    <Select
                       value={config.default_language}
-                      onChange={(event) =>
-                        set({
-                          default_language:
-                            event.target.value === 'en' ? 'en' : 'pt',
-                        })
+                      onValueChange={(value) =>
+                        set({ default_language: value === 'en' ? 'en' : 'pt' })
                       }
-                      className={INPUT_CLASS}
                     >
-                      <option value="pt">Português (Portugal)</option>
-                      <option value="en">English</option>
-                    </select>
+                      <SelectTrigger
+                        id="settings-default-language"
+                        className="h-11 w-full max-w-sm rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent position="popper" className="w-[var(--radix-select-trigger-width)]">
+                        <SelectItem value="pt">Português (Portugal)</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -661,19 +770,36 @@ export default function SettingsPageOrganized() {
                       }
                     />
                   </div>
-                </CardContent>
-              </Card>
-            </section>
-            <section id="settings-location">
-              <Card className={CARD_CLASS}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="size-4 text-emerald-400" />
-                    {t('settingsPage.locationInfo')}
-                  </CardTitle>
-
-                </CardHeader>
-                <CardContent className="space-y-6">
+                  </CardContent>
+                </Card>
+                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
+                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                  {t('settingsPage.closeDialog')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void saveAll()}
+                  disabled={!dirty || saving}
+                  className="bg-white text-zinc-950 hover:bg-zinc-100"
+                >
+                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
+                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
+                </Button>
+              </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog
+              open={activeDialog === 'location'}
+              onOpenChange={(open) => setActiveDialog(open ? 'location' : null)}
+            >
+              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t('settingsPage.location')}</DialogTitle>
+                  <DialogDescription>{t('settingsPage.locationDialogDescription')}</DialogDescription>
+                </DialogHeader>
+                <Card className={CARD_CLASS}>
+                  <CardContent className="space-y-6 ">
+                    <div className="w-full max-w-2xl">
                   <AddressAutocomplete
                     value={config.address}
                     onChange={(v) => {
@@ -688,6 +814,7 @@ export default function SettingsPageOrganized() {
                     placeholder={t('settingsPage.searchAddress')}
                     className="border-white/10 bg-white/5"
                   />
+                  </div>
                   {suggestion && (
                     <p className="text-xs text-emerald-300">
                       {t('settingsPage.selectedAddress', {
@@ -748,20 +875,36 @@ export default function SettingsPageOrganized() {
                       ))}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </section>
-            <section id="settings-hours">
-              <Card className={CARD_CLASS}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock3 className="size-4 text-blue-400" />
-                    {t('settingsPage.hoursRules')}
-                  </CardTitle>
-
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  </CardContent>
+                </Card>
+                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
+                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                  {t('settingsPage.closeDialog')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void saveAll()}
+                  disabled={!dirty || saving}
+                  className="bg-white text-zinc-950 hover:bg-zinc-100"
+                >
+                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
+                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
+                </Button>
+              </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog
+              open={activeDialog === 'hours'}
+              onOpenChange={(open) => setActiveDialog(open ? 'hours' : null)}
+            >
+              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t('settingsPage.hours')}</DialogTitle>
+                  <DialogDescription>{t('settingsPage.hoursDialogDescription')}</DialogDescription>
+                </DialogHeader>
+                <Card className={CARD_CLASS}>
+                  <CardContent className="space-y-6 ">
+                    <div className="grid gap-4 sm:grid-cols-2">
                     <div className="grid gap-2">
                       <label
                         htmlFor="settings-opening-time"
@@ -867,7 +1010,36 @@ export default function SettingsPageOrganized() {
                       })}
                     </div>
                   </div>
-                  <div className="grid gap-2">
+                  </CardContent>
+                </Card>
+                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
+                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                  {t('settingsPage.closeDialog')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void saveAll()}
+                  disabled={!dirty || saving}
+                  className="bg-white text-zinc-950 hover:bg-zinc-100"
+                >
+                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
+                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
+                </Button>
+              </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog
+              open={activeDialog === 'rules'}
+              onOpenChange={(open) => setActiveDialog(open ? 'rules' : null)}
+            >
+              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t('settingsPage.rules')}</DialogTitle>
+                  <DialogDescription>{t('settingsPage.rulesDialogDescription')}</DialogDescription>
+                </DialogHeader>
+                <Card className={CARD_CLASS}>
+                  <CardContent className="space-y-6 ">
+                    <div className="grid gap-2">
                     <label
                       htmlFor="settings-minimum-booking-notice"
                       className="text-sm font-medium text-zinc-200"
@@ -903,21 +1075,21 @@ export default function SettingsPageOrganized() {
                         aria-label={t('settingsPage.minimumBookingNotice')}
                         className={INPUT_CLASS}
                       />
-                      <select
-                        aria-label={t('settingsPage.noticeUnit')}
+                      <Select
                         value={noticeUnit}
-                        onChange={(e) =>
-                          setNoticeUnit(e.target.value as 'minutes' | 'hours')
-                        }
-                        className="min-h-11 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                        onValueChange={(value) => setNoticeUnit(value as 'minutes' | 'hours')}
                       >
-                        <option value="minutes">
-                          {t('settingsPage.noticeMinutes')}
-                        </option>
-                        <option value="hours">
-                          {t('settingsPage.noticeHours')}
-                        </option>
-                      </select>
+                        <SelectTrigger
+                          aria-label={t('settingsPage.noticeUnit')}
+                          className="h-11 w-32 min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent position="popper" className="w-32">
+                          <SelectItem value="minutes">{t('settingsPage.noticeMinutes')}</SelectItem>
+                          <SelectItem value="hours">{t('settingsPage.noticeHours')}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
@@ -992,12 +1164,34 @@ export default function SettingsPageOrganized() {
                           time_limit_cancellation_hours: Number(e.target.value),
                         })
                       }
-                      className={`${INPUT_CLASS} mt-4 sm:max-w-xs`}
+                      className={`${INPUT_CLASS} mt-4 max-w-48`}
                     />
+                    <p className="mt-2 max-w-xl text-xs leading-5 text-zinc-500">
+                      {config.time_limit_cancellation_hours === 0
+                        ? t('settingsPage.cancellationWindowNoLimit')
+                        : t('settingsPage.cancellationWindowHelp', {
+                            hours: config.time_limit_cancellation_hours,
+                          })}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            </section>
+                  </CardContent>
+                </Card>
+                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
+                <Button type="button" variant="ghost" onClick={() => setActiveDialog(null)}>
+                  {t('settingsPage.closeDialog')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void saveAll()}
+                  disabled={!dirty || saving}
+                  className="bg-white text-zinc-950 hover:bg-zinc-100"
+                >
+                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
+                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
+                </Button>
+              </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <section id="settings-appearance">
               <Card className={CARD_CLASS}>
                 <CardHeader>
