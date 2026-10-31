@@ -545,6 +545,8 @@ export const en = {
     calendarSyncActivating: 'Enabling…',
     calendarSyncEnabled: 'Calendar sync enabled.',
     calendarSyncActive: 'Sync active · read-only',
+    calendarSyncPrivacyNotice:
+      'Treat this link like a password: anyone who has it can view the calendar. Do not share it publicly.',
     calendarSyncUrlLabel: 'Private calendar link',
     calendarSyncCopy: 'Copy link',
     calendarSyncCopied: 'Link copied.',
