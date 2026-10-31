@@ -821,6 +821,7 @@ export default function PlatformAdminConsole() {
                 meta={`${data.stats.upcomingAppointments} futuros`}
                 tone={data.stats.upcomingAppointments > 0 ? 'good' : 'default'}
               />
+              </div>
             </div>
             <div>
               <div className="mb-2 flex items-center justify-between gap-3">
