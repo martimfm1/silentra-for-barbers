@@ -12,14 +12,18 @@ alter table public.appointments
 
 do $$
 begin
-  if not exists (
-    select 1 from pg_constraint
-    where conrelid = 'public.appointments'::regclass
-      and conname = 'appointments_payment_status_check'
-  ) then
-    alter table public.appointments
-      add constraint appointments_payment_status_check
-      check (payment_status is null or payment_status in ('awaiting_review', 'confirmed', 'rejected', 'expired'));
+  select coalesce(s.price, 0)::numeric(12,2)
+    into v_payment_amount
+  from public.services s
+  where s.id = p_service_id
+    and s.barbershop_id = p_barbershop_id;
+
+  if not found then
+    raise exception using errcode = '22023', message = 'BOOKING_SERVICE_NOT_AVAILABLE';
+  end if;
+
+  if v_is_prepayment and coalesce(v_payment_amount, 0) <= 0 then
+    raise exception using errcode = '22023', message = 'BOOKING_PREPAYMENT_AMOUNT_INVALID';
   end if;
   if not exists (
     select 1 from pg_constraint
@@ -188,11 +192,13 @@ declare
     else 'scheduled'::public.appointment_status
   end;
   v_email text := lower(nullif(trim(coalesce(p_manual_email, '')), ''));
-  v_phone_digits text := regexp_replace(coalesce(p_manual_phone, ''), '\\D', '', 'g');
+  v_phone_digits text := regexp_replace(coalesce(p_manual_phone, ''), '[^0-9]', '', 'g');
   v_phone text;
   v_closed_days text;
   v_auto_confirm boolean := false;
   v_local_dow integer;
+  v_is_prepayment boolean := lower(trim(coalesce(p_status, 'scheduled'))) = 'prepayment_pending';
+  v_payment_amount numeric(12,2);
 begin
   if p_barbershop_id is null or p_service_id is null or p_date_hour is null then
     raise exception using errcode = '22023', message = 'BOOKING_REQUIRED_FIELDS';
@@ -314,12 +320,12 @@ begin
       and lower(trim(coalesce(u.email, ''))) = v_email
       and (
         case
-          when left(regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g'), 2) = '00'
-            then substring(regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g') from 3)
-          when left(regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g'), 3) = '351'
-               and length(regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g')) = 12
-            then substring(regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g') from 4)
-          else regexp_replace(coalesce(u.num_phone, ''), '\\D', '', 'g')
+          when left(regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g'), 2) = '00'
+            then substring(regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g') from 3)
+          when left(regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g'), 3) = '351'
+               and length(regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g')) = 12
+            then substring(regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g') from 4)
+          else regexp_replace(coalesce(u.num_phone, ''), '[^0-9]', '', 'g')
         end
       ) = v_phone
     order by u.created_at asc
@@ -338,6 +344,10 @@ begin
     manual_email,
     manual_birth_date,
     duration_minutes
+    payment_method,
+    payment_status,
+    payment_amount,
+    payment_expires_at
   )
   values (
     p_barbershop_id,
@@ -351,6 +361,10 @@ begin
     v_email,
     p_manual_birth_date,
     v_duration
+    case when v_is_prepayment then 'mbway' else null end,
+    case when v_is_prepayment then 'awaiting_review' else null end,
+    case when v_is_prepayment then v_payment_amount else null end,
+    case when v_is_prepayment then now() + interval '15 minutes' else null end
   )
   returning * into v_appointment;
 
