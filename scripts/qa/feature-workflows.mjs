@@ -139,6 +139,7 @@ assert.match(mbwayMigration, /MBWAY_PREPAYMENT_PRO_REQUIRED/);
 assert.match(mbwayMigration, /expire_manual_mbway_prepayments/);
 assert.match(mbwayMigration, /silentra-mbway-prepayment-expiry/);
 assert.match(mbwayMigration, /<> 'prepayment_pending'/);
+assert.match(mbwayMigration, /notify pgrst, 'reload schema'/);
 assert.match(bookingSettings, /auto_confirm_bookings/);
 assert.match(bookingSettings, /auto_complete_bookings/);
 assert.match(bookingSettings, /barbershopService\.updateConfig/);
