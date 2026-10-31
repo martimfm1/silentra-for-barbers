@@ -79,7 +79,7 @@ export default async function CustomBarbershopWebsitePage({
   const description =
     website.site_description ||
     `Descobre os serviços de ${website.shop_name} e marca o teu próximo horário online.`;
-  const bookingUrl = `/barbershops/${encodeURIComponent(website.booking_slug)}`;
+  const bookingUrl = `/barbershops/${encodeURIComponent(website.booking_slug)}?booking=1`;
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#090b0e] text-zinc-50">

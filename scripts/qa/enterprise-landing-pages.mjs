@@ -47,13 +47,17 @@ assert.match(
 );
 assert.match(features, /'landing_page'/);
 assert.match(features, /landing_page: 'Landing page profissional incluída'/);
-assert.match(pricing, /Landing page profissional incluída/);
+assert.match(pricing, /Landing page profissional e domínio Silentra incluídos/);
+assert.match(pricing, /Site próprio com ativação única de 50 €/);
 assert.match(
   comparison,
   /title: 'Presença online',\s*features: \['landing_page', 'custom_website'\]/,
 );
 assert.match(landingPage, /profile\.plan !== 'enterprise'/);
 assert.match(landingPage, /entitlement\.status !== 'active'/);
+assert.match(landingPage, /\?booking=1/);
+assert.match(landingPage, /profile\.plan !== 'enterprise'/);
+assert.match(publicProfileApi, /landing_page_url/);
 assert.match(landingPage, /from\('barbershop_landing_pages'\)/);
 assert.match(landingPage, /notFound\(\)/);
 assert.match(publicApi, /consumePublicRateLimit/);

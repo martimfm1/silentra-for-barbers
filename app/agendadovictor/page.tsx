@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
 import AgendaDoVictorPage from './agenda-do-victor-page';
@@ -31,6 +31,9 @@ export default async function AgendaDoVictorRoute() {
     !['pro', 'enterprise'].includes(profile.plan)
   ) {
     notFound();
+  }
+  if (profile.plan === 'enterprise') {
+    permanentRedirect('/site/' + encodeURIComponent(profile.slug));
   }
 
   const database = createAdminClient();

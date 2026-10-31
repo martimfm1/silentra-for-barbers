@@ -378,6 +378,18 @@ export const enCopy = {
     otherService: 'Other',
     generalProfessional: 'Shop / General',
   },
+  proBookingPage: {
+    eyebrow: 'Online bookings',
+    onlineBooking: 'Online booking',
+    title: 'Choose your service',
+    subtitle: 'Select a service and book the time that works best for you.',
+    services: 'Available services',
+    duration: '{minutes} min',
+    choose: 'Choose',
+    noServices: 'There are no services available for booking right now.',
+    terms: 'Terms and privacy',
+    poweredBy: 'Powered by',
+  },
   posOverviewPage: {
     cash: 'Cash',
     card: 'Card',

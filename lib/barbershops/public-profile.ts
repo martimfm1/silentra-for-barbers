@@ -167,8 +167,8 @@ async function getBarbershopByCustomSlug(
 
 async function getPlanForShop(
   barbershopId: string | null,
-): Promise<{ plan: BillingPlan; ownerUserId: string | null }> {
-  if (!barbershopId) return { plan: 'free', ownerUserId: null };
+): Promise<{ plan: BillingPlan | null; ownerUserId: string | null }> {
+  if (!barbershopId) return { plan: null, ownerUserId: null };
 
   const database = createAdminClient();
   const [
@@ -193,7 +193,7 @@ async function getPlanForShop(
     });
     // Public pages fail closed if the canonical plan resolver is unavailable.
     return {
-      plan: 'free',
+      plan: null,
       ownerUserId: barbershop?.created_by ?? null,
     };
   }
@@ -201,7 +201,7 @@ async function getPlanForShop(
   const validPlans: readonly string[] = ['free', 'pro', 'enterprise'];
   const plan = validPlans.includes(String(effectivePlan))
     ? (effectivePlan as BillingPlan)
-    : 'free';
+    : null;
 
   return {
     plan,
@@ -270,6 +270,8 @@ async function resolvePublicBarbershop(
 
   const shop = await getShopByBarbershopId(barbershop.id);
   const { plan, ownerUserId } = await getPlanForShop(barbershop.id);
+  if (!plan) return null;
+
   const profile = buildPublicProfile(barbershop, shop, plan, ownerUserId);
 
   if (!isValidPublicProfileSlug(profile.slug)) return null;

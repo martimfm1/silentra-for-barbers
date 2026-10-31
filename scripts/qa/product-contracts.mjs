@@ -9,6 +9,68 @@ async function read(path) {
 
 const checks = [
   {
+    name: 'Public profile resolution fails closed when the canonical plan lookup is unavailable',
+    file: 'lib/barbershops/public-profile.ts',
+    test: (source) =>
+      source.includes('plan: BillingPlan | null') &&
+      source.includes('plan: null') &&
+      source.includes('if (!plan) return null;') &&
+      source.includes(': null;'),
+  },
+  {
+    name: 'Public booking page layout is selected from the effective subscription plan',
+    file: 'app/barbershops/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("profile.plan === 'pro'") &&
+      source.includes("profile.plan === 'enterprise' && bookingMode") &&
+      source.includes('initialData.landing_page_url') &&
+      source.includes('<ProBookingPage') &&
+      source.includes('<BarbershopPublicPage'),
+  },
+  {
+    name: 'Pro booking layout reuses the secure booking drawer and supports closed days',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
+    test: (source) =>
+      source.includes('BookingDrawer') &&
+      source.includes('appearance="agenda"') &&
+      source.includes('selectedServiceId={selectedServiceId}') &&
+      source.includes('closed_days: closedDays ?? null') &&
+      source.includes("t('proBookingPage.services')"),
+  },
+  {
+    name: 'Enterprise landing-page booking CTA opens the direct booking variant',
+    file: 'app/site/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("?booking=1") &&
+      source.includes("'/barbershops/' + encodeURIComponent(website.booking_slug)"),
+  },
+  {
+    name: 'Enterprise custom website includes Silentra domain and a one-time €50 fee',
+    file: 'app/api/dashboard/custom-website/route.ts',
+    test: (source) =>
+      source.includes('setupFee: 50') &&
+      source.includes('monthlyFee: 0'),
+  },
+  {
+    name: 'Enterprise website request displays the included Silentra domain and one-time activation',
+    file: 'app/dashboard/website/page.tsx',
+    test: (source) =>
+      source.includes('barbers.silentra.me/') &&
+      source.includes('pagamento único') &&
+      source.includes('Sem mensalidade adicional.') &&
+      source.includes('href={`/${encodeURIComponent(latest.public_slug)}`}'),
+  },
+  {
+    name: 'Silveira Salon reuses the shared Pro booking layout',
+    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    test: (source) =>
+      source.includes('ProBookingPage') &&
+      source.includes('<ProBookingPage') &&
+      source.includes('profile={profile}') &&
+      source.includes('services={services}') &&
+      source.includes('closedDays={shop.closed_days}'),
+  },
+  {
     name: 'Final booking migration uses appointment_status',
     file: 'supabase/migrations/20260905150000_finalize_atomic_booking_contract.sql',
     test: (source) =>
@@ -395,7 +457,7 @@ const checks = [
     test: (source) =>
       source.includes("'custom_website'") &&
       source.includes(
-        "custom_website: 'Site próprio personalizado (por orçamento)'",
+        "custom_website: 'Site próprio no domínio Silentra (ativação única de 50 €)'",
       ) &&
       source.includes("'custom_website',"),
   },
@@ -405,7 +467,10 @@ const checks = [
     test: (source) =>
       source.includes("intent.plan === 'enterprise'") &&
       source.includes('mailto:silentra.contact@gmail.com') &&
-      source.includes('sujeito a orçamento'),
+      source.includes('pagamento único)') &&
+      source.includes('one-time €50 fee') &&
+      source.includes('domínio Silentra') &&
+      source.includes('no extra monthly charge'),
   },
   {
     name: 'Custom website requests are protected by a service-role-only database table',
@@ -593,20 +658,18 @@ const checks = [
         "profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d'",
       ) &&
       source.includes("!['pro', 'enterprise'].includes(profile.plan)") &&
+      source.includes("if (profile.plan === 'enterprise')") &&
+      source.includes("permanentRedirect('/site/'") &&
       source.includes(".eq('barbershop_id', profile.barbershop_id)"),
   },
   {
-    name: 'Agenda do Victor reuses Silentra booking drawer and shop booking identity',
+    name: 'Agenda do Victor delegates to the shared Pro booking template',
     file: 'app/agendadovictor/agenda-do-victor-page.tsx',
     test: (source) =>
-      source.includes(
-        "import('@/app/barbershops/components/booking-drawer')",
-      ) &&
-      source.includes('selectedServiceId={selectedServiceId}') &&
-      source.includes('barbershop_id: profile.barbershop_id || profile.id') &&
-      source.includes('AGENDA DO VICTOR') &&
-      source.includes('Nova marcação') &&
-      source.includes('Selecionar um serviço'),
+      source.includes('ProBookingPage') &&
+      source.includes('<ProBookingPage') &&
+      source.includes('openingTime={shop.opening_time}') &&
+      source.includes('closedDays={shop.closed_days}'),
   },
   {
     name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
@@ -633,11 +696,12 @@ const checks = [
       source.includes('closed_days: hours.closed_days'),
   },
   {
-    name: 'Agenda do Victor booking drawer uses the page light theme',
-    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    name: 'Shared Pro booking drawer uses the light theme and preserves closed days',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
     test: (source) =>
       source.includes('appearance="agenda"') &&
-      source.includes('closed_days: shop.closed_days'),
+      source.includes('closed_days: closedDays ?? null') &&
+      source.includes('shop={bookingShop}'),
   },
   {
     name: 'Booking drawer excludes configured closed weekdays from date choices',

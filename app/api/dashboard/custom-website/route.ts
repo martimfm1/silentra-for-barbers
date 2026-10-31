@@ -91,7 +91,7 @@ async function getOwnerContext() {
       access: {
         allowed: true,
         setupFee: 50,
-        monthlyFee: 2.99,
+        monthlyFee: 0,
         source: 'enterprise' as const,
       },
     } as const;

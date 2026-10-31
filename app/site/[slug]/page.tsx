@@ -148,7 +148,8 @@ function PurchasedCustomWebsitePage({
   const description =
     website.site_description?.trim() ||
     'Conhece os nossos serviços e marca o teu próximo horário online.';
-  const bookingUrl = '/barbershops/' + encodeURIComponent(website.booking_slug);
+  const bookingUrl =
+    '/barbershops/' + encodeURIComponent(website.booking_slug) + '?booking=1';
   return (
     <main className="min-h-screen overflow-x-clip bg-[#090b0e] text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
@@ -370,7 +371,9 @@ export default async function EnterpriseBarbershopLandingPage({
 
   const profile = data.profile;
   const canonicalProfileUrl =
-    '/barbershops/' + encodeURIComponent(profile.slug);
+    '/site/' + encodeURIComponent(profile.slug);
+  const bookingUrl =
+    '/barbershops/' + encodeURIComponent(profile.slug) + '?booking=1';
   const heroBackground = data.coverUrl
     ? {
         backgroundImage:
@@ -432,16 +435,16 @@ export default async function EnterpriseBarbershopLandingPage({
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href={canonicalProfileUrl + '#services-heading'}
+                href={bookingUrl}
                 className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-300 px-5 text-sm font-bold text-zinc-950 transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               >
                 Agendar agora
               </Link>
               <Link
-                href={canonicalProfileUrl}
+                href="#servicos"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-5 text-sm font-semibold text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               >
-                Perfil e avaliações
+                Ver serviços
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-400">
@@ -497,7 +500,7 @@ export default async function EnterpriseBarbershopLandingPage({
                     </p>
                   </div>
                   <Link
-                    href={canonicalProfileUrl + '#services-heading'}
+                    href={bookingUrl}
                     className="mt-5 inline-flex min-h-10 items-center text-sm font-semibold text-zinc-200 underline decoration-white/20 underline-offset-4 hover:text-emerald-200"
                   >
                     Agendar este serviço

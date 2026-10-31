@@ -41,8 +41,8 @@ const HERO_FEATURES = {
     'POS, stock e comissões',
     'Permissões e gestão global',
     'Relatórios empresariais avançados',
-    'Landing page profissional incluída',
-    'Site próprio personalizado disponível por orçamento',
+    'Landing page profissional e domínio Silentra incluídos',
+    'Site próprio com ativação única de 50 €',
   ],
 } as const;
 
@@ -64,8 +64,8 @@ const HERO_FEATURES_EN = {
     'POS, inventory and commissions',
     'Global permissions and management',
     'Advanced business reports',
-    'Professional landing page included',
-    'Custom website available at a separate quote',
+    'Professional landing page and Silentra domain included',
+    'Custom website with a one-time €50 setup fee',
   ],
 } as const;
 
@@ -84,13 +84,13 @@ export function PricingSection({
         free: 'The essentials to start taking bookings and keep your barbershop organised.',
         pro: 'For barbershops ready to grow, retain customers and automate daily operations.',
         enterprise:
-          'For larger teams, multiple locations and advanced operational control.',
+          'For larger teams, with a landing page and public address on the Silentra domain included.',
       }
     : {
         free: 'O essencial para começar a receber marcações e organizar a barbearia.',
         pro: 'Para barbearias que querem crescer, fidelizar clientes e automatizar o dia a dia.',
         enterprise:
-          'Para equipas maiores, várias localizações e controlo operacional avançado.',
+          'Para equipas maiores, landing page e endereço público no domínio Silentra incluídos.',
       };
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
@@ -392,8 +392,8 @@ export function PricingSection({
             </p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
               {english
-                ? 'Available to Enterprise customers. This is arranged directly with Silentra and quoted separately — it is not automatically charged with your subscription.'
-                : 'Disponível para clientes Enterprise. A criação é combinada diretamente com a Silentra, com orçamento próprio — não é cobrada automaticamente no checkout da subscrição.'}
+                ? 'Enterprise includes the landing page and a public address on the Silentra domain. A custom website has a one-time €50 activation fee, with no additional monthly charge.'
+                : 'O Enterprise inclui a landing page e um endereço público no domínio Silentra. O site próprio tem uma ativação única de 50 €, sem mensalidade adicional.'}
             </p>
           </div>
         </div>
@@ -401,7 +401,7 @@ export function PricingSection({
           href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Enterprise custom website' : 'Site próprio Enterprise')}`}
           className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto"
         >
-          {english ? 'Request a custom website' : 'Contactar para um site'}{' '}
+          {english ? 'Request website activation' : 'Pedir ativação do site'}{' '}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>

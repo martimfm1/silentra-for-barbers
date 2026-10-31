@@ -384,6 +384,18 @@ export const ptCopy = {
     otherService: 'Outros',
     generalProfessional: 'Casa / Geral',
   },
+  proBookingPage: {
+    eyebrow: 'Marcações online',
+    onlineBooking: 'Agendamento online',
+    title: 'Escolhe o teu serviço',
+    subtitle: 'Seleciona um serviço e reserva o horário que melhor te convém.',
+    services: 'Serviços disponíveis',
+    duration: '{minutes} min',
+    choose: 'Escolher',
+    noServices: 'Não existem serviços disponíveis para marcação neste momento.',
+    terms: 'Termos e privacidade',
+    poweredBy: 'Powered by',
+  },
   posOverviewPage: {
     cash: 'Dinheiro',
     card: 'Cartão',
