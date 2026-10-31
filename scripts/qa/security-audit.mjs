@@ -417,7 +417,7 @@ const requestValidationChecks = [
   {
     file: 'app/api/customer-portal/appointments/[appointmentId]/route.ts',
     markers: [
-      'async function getAuthorizedAppointment( request: Request, appointmentId: string )',
+      'async function getAuthorizedAppointment( request: Request, appointmentId: string, )',
       'getPortalSession(request)',
       'ownsAppointment',
       'getAuthorizedAppointment( request, appointmentId,',
@@ -715,8 +715,10 @@ for (const check of routeSecurityChecks) {
   const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
     encoding: 'utf8',
   });
+  const normalizedSource = source.replace(/\s+/g, ' ').trim();
   for (const marker of check.markers) {
-    if (!source.includes(marker)) {
+    const normalizedMarker = marker.replace(/\s+/g, ' ').trim();
+    if (!normalizedSource.includes(normalizedMarker)) {
       findings.push(`${check.label}: missing guard ${marker} in ${check.file}`);
     }
   }
