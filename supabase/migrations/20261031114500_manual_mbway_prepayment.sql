@@ -50,6 +50,10 @@ as $$
 declare
   v_plan text;
   v_whatsapp_phone text;
+  v_current_mbway_enabled boolean;
+  v_current_mbway_phone text;
+  v_target_mbway_enabled boolean;
+  v_target_mbway_phone text;
   v_mbway_digits text;
   v_whatsapp_digits text;
 begin
@@ -71,18 +75,14 @@ begin
     raise exception 'barbershop update not permitted';
   end if;
 
-  v_plan := public.get_effective_billing_plan_for_barbershop(p_barbershop_id);
-  if coalesce(p_enabled, false)
-     and coalesce(v_plan, 'free') not in ('pro', 'enterprise') then
-    raise exception using errcode = '42501', message = 'MBWAY_PREPAYMENT_PRO_REQUIRED';
-  end if;
-
-  v_mbway_digits := regexp_replace(coalesce(p_phone, ''), '[^0-9]', '', 'g');
-  if coalesce(p_enabled, false) and length(v_mbway_digits) not between 9 and 15 then
-    raise exception using errcode = '22023', message = 'MBWAY_PHONE_INVALID';
-  end if;
-
-  select b.phone into v_whatsapp_phone
+  select
+    coalesce(b.mbway_enabled, false),
+    b.mbway_phone,
+    b.phone
+  into
+    v_current_mbway_enabled,
+    v_current_mbway_phone,
+    v_whatsapp_phone
   from public.barbershops b
   where b.id = p_barbershop_id;
 
@@ -90,18 +90,32 @@ begin
     raise exception 'barbershop not found';
   end if;
 
+  v_target_mbway_enabled := coalesce(p_enabled, v_current_mbway_enabled);
+  v_target_mbway_phone := case
+    when p_phone is not null then nullif(btrim(p_phone), '')
+    else v_current_mbway_phone
+  end;
+
+  v_plan := public.get_effective_billing_plan_for_barbershop(p_barbershop_id);
+  if v_target_mbway_enabled
+     and coalesce(v_plan, 'free') not in ('pro', 'enterprise') then
+    raise exception using errcode = '42501', message = 'MBWAY_PREPAYMENT_PRO_REQUIRED';
+  end if;
+
+  v_mbway_digits := regexp_replace(coalesce(v_target_mbway_phone, ''), '[^0-9]', '', 'g');
+  if v_target_mbway_enabled and length(v_mbway_digits) not between 9 and 15 then
+    raise exception using errcode = '22023', message = 'MBWAY_PHONE_INVALID';
+  end if;
+
   v_whatsapp_digits := regexp_replace(coalesce(v_whatsapp_phone, ''), '[^0-9]', '', 'g');
-  if coalesce(p_enabled, false) and length(v_whatsapp_digits) not between 9 and 15 then
+  if v_target_mbway_enabled and length(v_whatsapp_digits) not between 9 and 15 then
     raise exception using errcode = '22023', message = 'MBWAY_WHATSAPP_PHONE_REQUIRED';
   end if;
 
   update public.barbershops
   set
-    mbway_enabled = coalesce(p_enabled, false),
-    mbway_phone = case
-      when p_phone is not null then nullif(btrim(p_phone), '')
-      else mbway_phone
-    end,
+    mbway_enabled = v_target_mbway_enabled,
+    mbway_phone = v_target_mbway_phone,
     updated_at = now()
   where id = p_barbershop_id;
 end;
