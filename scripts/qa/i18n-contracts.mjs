@@ -354,7 +354,7 @@ const localeAwareSources = {
     'useLanguage()',
     "locale === 'en'",
     'Confirming your subscription…',
-    'formatMoney(payload.promotion.discountAmount, payload.promotion.currency, locale)',
+    'formatMoney( payload.promotion.discountAmount, payload.promotion.currency, locale,',
   ],
   'app/checkout/error/page.tsx': ['useLanguage()', 'Checkout not completed'],
   'app/api/stripe/embedded-checkout/route.ts': [
@@ -388,9 +388,10 @@ const localeAwareSources = {
 };
 
 for (const [path, expectedFragments] of Object.entries(localeAwareSources)) {
-  const source = read(path);
+  const source = read(path).replace(/\s+/g, ' ').trim();
   for (const fragment of expectedFragments) {
-    if (!source.includes(fragment)) {
+    const normalizedFragment = fragment.replace(/\s+/g, ' ').trim();
+    if (!source.includes(normalizedFragment)) {
       failures.push(
         path + ': missing locale-aware UI marker "' + fragment + '"',
       );
