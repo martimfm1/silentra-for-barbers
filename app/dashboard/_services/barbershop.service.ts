@@ -195,8 +195,8 @@ export async function updateBarbershopConfig(
     if (mbwayEnabled !== undefined || mbwayPhone !== undefined) {
       const { error } = await supabase.rpc('update_barbershop_mbway_settings', {
         p_barbershop_id: barbershopId,
-        p_enabled: mbwayEnabled ?? false,
-        p_phone: mbwayPhone ?? '',
+        p_enabled: mbwayEnabled ?? null,
+        p_phone: mbwayPhone ?? null,
       });
       if (error) {
         const message = error.message || '';
