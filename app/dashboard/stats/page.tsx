@@ -368,7 +368,7 @@ export default function StatsPage() {
             </dl>
           </section>
 
-                      <section
+            <section
               aria-label={t('statsPage.charts')}
               className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2"
             >
@@ -485,12 +485,12 @@ export default function StatsPage() {
                             axisLine={false}
                             tick={{ fill: '#a1a1aa', fontSize: 10 }}
                             tickFormatter={(value: string) =>
-                              value.length > 14
-                                ? `${value.slice(0, 14)}…`
+                              value.length > 20
+                                ? `${value.slice(0, 20)}…`
                                 : value
                             }
                           />
-                          <RechartsTooltip content={<CustomChartTooltip />} />
+                          <RechartsTooltip content={<CustomChartTooltip locale={locale} />} />
                           <Bar
                             dataKey="value"
                             name={t('statsPage.revenue')}
@@ -545,13 +545,13 @@ export default function StatsPage() {
                             width={85}
                             tick={{ fill: '#a1a1aa', fontSize: 10 }}
                             tickFormatter={(value: string) =>
-                              value.length > 14
-                                ? `${value.slice(0, 14)}…`
+                              value.length > 20
+                                ? `${value.slice(0, 20)}…`
                                 : value
                             }
                           />
                           <RechartsTooltip
-                            content={<CustomChartTooltip />}
+                            content={<CustomChartTooltip locale={locale} />}
                             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
                           />
                           <Bar
