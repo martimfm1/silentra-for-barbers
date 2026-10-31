@@ -1093,6 +1093,7 @@ export const pt = {
     overviewDescription:
       'Vamos configurar a tua barbearia em quatro passos simples. Abre cada cartão, faz as alterações e guarda no final.',
     openSection: 'Editar passo',
+    setupProgress: 'Progresso da configuração',
     notConfigured: 'Ainda não definido',
     closeDialog: 'Fechar',
     saveAllHint: 'Podes guardar cada passo individualmente. As alterações ficam aplicadas assim que confirmares.',
