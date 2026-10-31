@@ -77,13 +77,29 @@ async function DELETE__unobserved(
         { status: 403 },
       );
 
-    const { data: appointment, error } = await tenant.admin
+    const { data: currentAppointment, error: currentAppointmentError } = await tenant.admin
       .from('appointments')
-      .update({ status: 'cancelled' })
+      .select('payment_status')
       .eq('id', appointmentId)
       .eq('barbershop_id', tenant.barbershopId)
       .in('status', ['pending', 'scheduled'])
-      .select('id,client_id,manual_email,manual_name,service_id')
+      .maybeSingle();
+    if (currentAppointmentError)
+      return NextResponse.json(
+        { success: false, error: 'Não foi possível consultar o estado do pagamento.' },
+        { status: 503 },
+      );
+
+    const paymentReviewUpdate = currentAppointment?.payment_status === 'awaiting_review'
+      ? { payment_status: 'rejected', payment_reviewed_at: new Date().toISOString() }
+      : {};
+    const { data: appointment, error } = await tenant.admin
+      .from('appointments')
+      .update({ status: 'cancelled', ...paymentReviewUpdate })
+      .eq('id', appointmentId)
+      .eq('barbershop_id', tenant.barbershopId)
+      .in('status', ['pending', 'scheduled'])
+      .select('id,client_id,manual_email,manual_name,service_id,payment_status')
       .maybeSingle();
     if (error)
       return NextResponse.json(
