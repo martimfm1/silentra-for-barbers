@@ -312,6 +312,8 @@ async function GET__unobserved(request: Request) {
       'Content-Disposition': 'inline; filename="silentra-agenda.ics"',
       'Cache-Control': 'private, no-store, max-age=0',
       'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer',
+      'X-Robots-Tag': 'noindex, nofollow',
     },
   });
 }
