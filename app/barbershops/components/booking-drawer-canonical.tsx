@@ -976,6 +976,12 @@ export function BookingDrawerCanonical({
                     <strong className="text-zinc-100">{paymentInstructions.mbwayPhone}</strong>
                   </div>
                   <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })}</p>
+                  {whatsappProofUrl ? (
+                    <a href={whatsappProofUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-300">
+                      <MessageCircle className="size-4" aria-hidden="true" />
+                      {t('bookingDrawer.sendProofWhatsApp')}
+                    </a>
+                  ) : null}
                   <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentEmailNotice')}</p>
                 </div>
               )}
