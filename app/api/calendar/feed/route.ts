@@ -8,6 +8,22 @@ export const dynamic = 'force-dynamic';
 
 type NamedRelation = { name?: string | null };
 type Relation = NamedRelation | NamedRelation[] | null;
+type CalendarAppointmentRow = {
+  id: string;
+  date_hour: string;
+  duration_minutes: number | null;
+  status: string;
+  services: Relation;
+  professionals: Relation;
+};
+type CalendarBlockRow = {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  reason: string | null;
+  professionals: Relation;
+};
 
 function relation(value: Relation): NamedRelation | null {
   return Array.isArray(value) ? value[0] ?? null : value;
@@ -132,17 +148,32 @@ async function GET__unobserved(request: Request) {
   const now = new Date();
   const from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const until = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const { data: appointments, error: appointmentsError } = await admin
-    .from('appointments')
-    .select(
-      'id,date_hour,duration_minutes,status,services(name),professionals(name)',
-    )
-    .eq('barbershop_id', payload.barbershopId)
-    .in('status', ['pending', 'scheduled'])
-    .gte('date_hour', from.toISOString())
-    .lte('date_hour', until.toISOString())
-    .order('date_hour', { ascending: true })
-    .limit(5000);
+  const appointmentPageSize = 1000;
+  const appointments: CalendarAppointmentRow[] = [];
+  let appointmentsError: { code?: string } | null = null;
+
+  for (let offset = 0; offset < 5000; offset += appointmentPageSize) {
+    const { data, error } = await admin
+      .from('appointments')
+      .select(
+        'id,date_hour,duration_minutes,status,services(name),professionals(name)',
+      )
+      .eq('barbershop_id', payload.barbershopId)
+      .in('status', ['pending', 'scheduled'])
+      .gte('date_hour', from.toISOString())
+      .lte('date_hour', until.toISOString())
+      .order('date_hour', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + appointmentPageSize - 1);
+
+    if (error) {
+      appointmentsError = error;
+      break;
+    }
+
+    appointments.push(...(data ?? []));
+    if ((data?.length ?? 0) < appointmentPageSize) break;
+  }
 
   if (appointmentsError) {
     console.error(
@@ -157,14 +188,30 @@ async function GET__unobserved(request: Request) {
 
   const fromDate = lisbonDate(from);
   const untilDate = lisbonDate(until);
-  const { data: blocks, error: blocksError } = await admin
-    .from('schedule_blocks')
-    .select('id,date,start_time,end_time,reason,professionals(name)')
-    .eq('barbershop_id', payload.barbershopId)
-    .gte('date', fromDate)
-    .lte('date', untilDate)
-    .order('date', { ascending: true })
-    .limit(2000);
+  const blockPageSize = 1000;
+  const blocks: CalendarBlockRow[] = [];
+  let blocksError: { code?: string } | null = null;
+
+  for (let offset = 0; offset < 2000; offset += blockPageSize) {
+    const { data, error } = await admin
+      .from('schedule_blocks')
+      .select('id,date,start_time,end_time,reason,professionals(name)')
+      .eq('barbershop_id', payload.barbershopId)
+      .gte('date', fromDate)
+      .lte('date', untilDate)
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + blockPageSize - 1);
+
+    if (error) {
+      blocksError = error;
+      break;
+    }
+
+    blocks.push(...(data ?? []));
+    if ((data?.length ?? 0) < blockPageSize) break;
+  }
 
   if (blocksError) {
     console.error(
