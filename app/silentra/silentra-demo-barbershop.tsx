@@ -312,7 +312,7 @@ export default function SilentraDemoBarbershop() {
 
       <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#11100e]/90 backdrop-blur-xl">
         <div className="mx-auto flex min-h-[76px] w-full max-w-[1440px] items-center justify-between gap-5 px-5 sm:px-8 lg:px-14">
-          <Link href="/silentra" className="group flex min-w-0 items-center gap-3" aria-label="Silentra Barbershop">
+          <Link href="/site/barbearia-silentra-ecf1da6c" className="group flex min-w-0 items-center gap-3" aria-label="Silentra Barbershop">
             <span className="flex size-10 shrink-0 items-center justify-center border border-[#b88450]/45 bg-[#b88450]/10 text-[#d8ad7d] transition group-hover:bg-[#b88450]/20">
               <Scissors className="size-5" strokeWidth={1.3} aria-hidden="true" />
             </span>
