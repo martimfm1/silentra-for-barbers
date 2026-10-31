@@ -434,6 +434,12 @@ export function BookingDrawerCanonical({
             [data-booking-theme="agenda"] .text-zinc-400,
             [data-booking-theme="agenda"] .text-zinc-500 { color: #777770 !important; }
             [data-booking-theme="agenda"] .text-zinc-600 { color: #92928a !important; }
+            [data-booking-theme="agenda"] [data-slot="input"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [data-slot="input"]::placeholder { color: #92928a !important; }
+            [data-booking-theme="agenda"] [data-slot="input"]:focus-visible { border-color: #999 !important; --tw-ring-color: rgba(23,23,23,.12) !important; }
+            [data-booking-theme="agenda"] [class~="bg-white/10"] { background-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [class~="bg-white/[0.035]"],
+            [data-booking-theme="agenda"] [class~="bg-white/[0.055]"] { background-color: #f8f8f6 !important; }
             [data-booking-theme="agenda"] .text-emerald-300,
             [data-booking-theme="agenda"] .text-emerald-100 { color: #33332f !important; }
             [data-booking-theme="agenda"] [class~="bg-zinc-950"] { background-color: #fff !important; }
