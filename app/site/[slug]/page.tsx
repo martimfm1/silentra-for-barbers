@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cache } from 'react';
+import SilentraDemoBarbershop from '@/app/silentra/silentra-demo-barbershop';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -32,6 +33,8 @@ interface LandingPageData {
 const SITE_ORIGIN = (
   process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://barbers.silentra.me'
 ).replace(/\/$/, '');
+
+const SILENTRA_DEMO_PUBLIC_SLUG = 'barbearia-silentra-ecf1da6c';
 
 function safeHttpsUrl(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -218,6 +221,33 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  if (slug === SILENTRA_DEMO_PUBLIC_SLUG) {
+    const canonicalPath =
+      '/site/' + encodeURIComponent(SILENTRA_DEMO_PUBLIC_SLUG);
+    const title = 'Silentra Barbershop — Barbearia de Demonstração';
+    const description =
+      'Conhece a experiência digital de uma barbearia criada com a Silentra: serviços, equipa, galeria e uma simulação de marcação online.';
+    return {
+      title,
+      description,
+      alternates: { canonical: SITE_ORIGIN + canonicalPath },
+      robots: { index: true, follow: true },
+      openGraph: {
+        type: 'website',
+        title: 'Silentra Barbershop — Uma experiência de barbearia',
+        description:
+          'Uma página de demonstração para mostrar como a tua barbearia pode estar online com a Silentra.',
+        url: SITE_ORIGIN + canonicalPath,
+        siteName: 'Silentra for Barbers',
+        locale: 'pt_PT',
+      },
+      twitter: {
+        card: 'summary',
+        title,
+        description: 'Serviços, equipa, galeria e uma simulação de marcação online.',
+      },
+    };
+  }
   const customWebsite = await getPurchasedCustomWebsite(slug);
   if (customWebsite) {
     const title = customWebsite.site_title?.trim() || customWebsite.shop_name;
@@ -355,6 +385,10 @@ export default async function EnterpriseBarbershopLandingPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (slug === SILENTRA_DEMO_PUBLIC_SLUG) {
+    return <SilentraDemoBarbershop />;
+  }
+
   const customWebsite = await getPurchasedCustomWebsite(slug);
   if (customWebsite) {
     if (slug !== customWebsite.public_slug)

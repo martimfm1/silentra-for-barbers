@@ -765,6 +765,42 @@ const checks = [
       source.includes('calendarSyncRotate') &&
       source.includes('calendarSyncDisable'),
   },
+  {
+    name: 'Silentra demo barbershop landing is bilingual, responsive and non-transactional',
+    file: 'app/silentra/silentra-demo-barbershop.tsx',
+    test: (source) =>
+      source.includes('const PT =') &&
+      source.includes('const EN =') &&
+      source.includes('id="servicos"') &&
+      source.includes('id="experiencia"') &&
+      source.includes('id="equipa"') &&
+      source.includes('id="marcacao"') &&
+      source.includes('id="contactos"') &&
+      source.includes('setSimulated(true)') &&
+      source.includes('bookingDemo') &&
+      source.includes("setLocale('pt')") &&
+      source.includes("setLocale('en')") &&
+      source.includes('fixed inset-x-4 bottom-4') &&
+      !source.includes('fetch(') &&
+      !source.includes('/api/appointments'),
+  },
+  {
+    name: 'Silentra demo barbershop is rendered by its public barbershop route with canonical metadata',
+    file: 'app/site/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("SILENTRA_DEMO_PUBLIC_SLUG = 'barbearia-silentra-ecf1da6c'") &&
+      source.includes('if (slug === SILENTRA_DEMO_PUBLIC_SLUG)') &&
+      source.includes('return <SilentraDemoBarbershop />') &&
+      source.includes('alternates: { canonical: SITE_ORIGIN + canonicalPath }') &&
+      source.includes('robots: { index: true, follow: true }'),
+  },
+  {
+    name: 'Legacy /silentra route permanently redirects to the public barbershop page',
+    file: 'app/silentra/page.tsx',
+    test: (source) =>
+      source.includes('permanentRedirect') &&
+      source.includes("'/site/barbearia-silentra-ecf1da6c'"),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
