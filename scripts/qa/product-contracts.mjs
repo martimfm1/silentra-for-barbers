@@ -748,6 +748,7 @@ const checks = [
       source.includes('hasAgendaGrant') &&
       source.includes('calendar_feed_version') &&
       source.includes('calendar_feed_enabled: false') &&
+      source.includes('assertSameOrigin(request)') &&
       source.includes('export const POST') &&
       source.includes('export const DELETE'),
   },
