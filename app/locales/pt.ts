@@ -84,6 +84,8 @@ export const pt = {
     chartLegend: 'Legenda do gráfico',
     upcomingAppointments: 'Próximas marcações',
     upcomingAppointmentsEmpty: 'As próximas marcações vão aparecer aqui.',
+    upcomingAppointmentProfessional: 'Barbeiro',
+    upcomingAppointmentNotes: 'Notas do cliente',
     today: 'Hoje',
     appointmentSingular: 'marcação hoje',
     appointmentPlural: 'marcações hoje',
