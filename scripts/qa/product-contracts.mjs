@@ -785,13 +785,21 @@ const checks = [
       !source.includes('/api/appointments'),
   },
   {
-    name: 'Silentra demo barbershop page publishes canonical search metadata',
+    name: 'Silentra demo barbershop is rendered by its public barbershop route with canonical metadata',
+    file: 'app/site/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("SILENTRA_DEMO_PUBLIC_SLUG = 'barbearia-silentra-ecf1da6c'") &&
+      source.includes('if (slug === SILENTRA_DEMO_PUBLIC_SLUG)') &&
+      source.includes('return <SilentraDemoBarbershop />') &&
+      source.includes('alternates: { canonical: SITE_ORIGIN + canonicalPath }') &&
+      source.includes('robots: { index: true, follow: true }'),
+  },
+  {
+    name: 'Legacy /silentra route permanently redirects to the public barbershop page',
     file: 'app/silentra/page.tsx',
     test: (source) =>
-      source.includes('Silentra Barbershop') &&
-      source.includes('Barbearia de Demonstração') &&
-      source.includes("canonical: 'https://barbers.silentra.me/silentra'") &&
-      source.includes('<SilentraDemoBarbershop />'),
+      source.includes('permanentRedirect') &&
+      source.includes("'/site/barbearia-silentra-ecf1da6c'"),
   },
 ];
 let failed = 0;
