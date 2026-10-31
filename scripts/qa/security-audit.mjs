@@ -691,7 +691,7 @@ const routeSecurityChecks = [
     label: 'Rate limit secret environment validation',
   },
   {
-    file: 'supabase/migrations/20261013010000_grant_public_rate_limit_service_role.sql',
+    file: 'supabase/migrations/20261013141402_grant_public_rate_limit_service_role.sql',
     markers: [
       'public.consume_public_rate_limit(text, integer, integer)',
       'to service_role;',
@@ -699,7 +699,7 @@ const routeSecurityChecks = [
     label: 'Public rate-limit RPC service-role permission',
   },
   {
-    file: 'supabase/migrations/20261013020000_harden_public_security_definer_privileges.sql',
+    file: 'supabase/migrations/20261013141420_harden_public_security_definer_privileges.sql',
     markers: [
       'revoke all on function public.create_professional_with_quota',
       'from public, anon, authenticated;',
