@@ -130,7 +130,10 @@ assert.match(clientsListCard, /<Dialog open=\{showAddClientForm\}/);
 assert.match(servicesListCard, /<Dialog open=\{showAddServiceForm\}/);
 assert.match(overviewPage, /role="img"/);
 assert.match(overviewPage, /grid h-full min-w-0 grid-cols-7/);
-assert.match(overviewPage, /maxRevenue/);
+assert.match(overviewPage, /maxBookings/);
+assert.doesNotMatch(overviewPage, /maxRevenue/);
+assert.match(overviewPage, /point.bookings > 0/);
+assert.doesNotMatch(overviewPage, /dashboard.chartLegend/);
 for (const source of confirmationTargets) {
   assert.match(source, /useDashboardConfirm/);
   assert.doesNotMatch(source, /window\.confirm/);
