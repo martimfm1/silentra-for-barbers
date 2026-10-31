@@ -948,9 +948,9 @@ export function BookingDrawerCanonical({
               className="flex min-h-80 flex-col items-center justify-center text-center"
               aria-labelledby="booking-success-title"
             >
-              <div className="flex size-16 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10">
+              <div className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}>
                 <CheckCircle2
-                  className="size-8 text-emerald-300"
+                  className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
                   aria-hidden="true"
                 />
               </div>
@@ -958,7 +958,7 @@ export function BookingDrawerCanonical({
                 id="booking-success-title"
                 className="mt-5 text-xl font-semibold"
               >
-                {t('bookingDrawer.bookingConfirmed')}
+                {paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
