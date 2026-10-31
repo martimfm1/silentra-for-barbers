@@ -91,7 +91,12 @@ async function DELETE__unobserved(
       );
 
     const paymentReviewUpdate = currentAppointment?.payment_status === 'awaiting_review'
-      ? { payment_status: 'rejected', payment_reviewed_at: new Date().toISOString() }
+      ? {
+          payment_status: 'rejected',
+          payment_reviewed_at: new Date().toISOString(),
+          cancelled_at: new Date().toISOString(),
+          cancellation_reason: 'Pré-pagamento MB WAY rejeitado pelo barbeiro.',
+        }
       : {};
     const { data: appointment, error } = await tenant.admin
       .from('appointments')
