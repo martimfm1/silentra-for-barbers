@@ -43,8 +43,8 @@ const faqs = [
     'Os pagamentos, métodos de pagamento e faturas são processados com segurança pela Stripe através do checkout da Silentra.',
   ],
   [
-    'O Enterprise inclui uma landing page?',
-    'Sim. A subscrição Enterprise inclui uma landing page pública ligada ao perfil e aos serviços. Um site próprio, com design personalizado e endereço /nome-da-barbearia, é um serviço adicional por orçamento: o cliente contacta a Silentra e a publicação só acontece após acordo.',
+    'O Enterprise inclui uma landing page e domínio?',
+    'Sim. A subscrição Enterprise inclui a landing page e um endereço público no domínio barbers.silentra.me. Se também quiseres um site próprio personalizado, a ativação custa 50 € uma única vez, sem mensalidade adicional. A Silentra confirma o nome e publica depois da aprovação e confirmação do pagamento.',
   ],
   [
     'O que acontece se cancelar?',
@@ -66,8 +66,8 @@ const englishFaqs = [
     'Payments, payment methods and invoices are securely processed by Stripe through Silentra checkout.',
   ],
   [
-    'Does Enterprise include a landing page?',
-    'Yes. Enterprise includes a public landing page linked to the barbershop profile and services. A bespoke website with a custom design and /your-barbershop address is a separately quoted service, agreed directly with Silentra.',
+    'Does Enterprise include a landing page and domain?',
+    'Yes. Enterprise includes the landing page and a public address on barbers.silentra.me. A custom website can also be activated for a one-time €50 fee, with no additional monthly charge. Silentra confirms the address and publishes the site after approval and payment confirmation.',
   ],
   [
     'What happens if I cancel?',
