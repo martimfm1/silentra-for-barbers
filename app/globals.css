@@ -876,7 +876,9 @@ body[data-dashboard-theme='true'] :is(
 
 body[data-dashboard-theme='true'] :is(
   [class~='bg-emerald-400'],
+  [class~='bg-emerald-400'],
   [class~='bg-emerald-500'],
+  [class~='bg-emerald-600'],
   [class~='bg-green-400'],
   [class~='bg-green-500']
 ) {
@@ -888,6 +890,8 @@ body[data-dashboard-theme='true'] :is(
   [class~='border-emerald-400/30'],
   [class~='border-emerald-500/20'],
   [class~='border-emerald-500/30'],
+  [class~='border-emerald-500/40'],
+  [class~='border-emerald-400/40'],
   [class~='border-green-400/20'],
   [class~='border-green-500/20']
 ) {
@@ -914,6 +918,42 @@ body[data-dashboard-theme='true'] :is(
   [class~='hover:border-emerald-400/40']
 ):hover {
   border-color: var(--dashboard-accent-border) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='hover:text-emerald-300'],
+  [class~='hover:text-emerald-400'],
+  [class~='hover:text-emerald-500']
+):hover {
+  color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='focus-visible:ring-emerald-400'],
+  [class~='focus-visible:ring-emerald-500']
+):focus-visible {
+  --tw-ring-color: var(--dashboard-accent) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='from-emerald-500'],
+  [class~='from-emerald-600']
+) {
+  --tw-gradient-from: var(--dashboard-accent) var(--tw-gradient-from-position) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='via-emerald-500'],
+  [class~='via-emerald-600']
+) {
+  --tw-gradient-stops: var(--tw-gradient-via-stops) !important;
+}
+
+body[data-dashboard-theme='true'] :is(
+  [class~='to-emerald-500'],
+  [class~='to-emerald-600']
+) {
+  --tw-gradient-to: var(--dashboard-accent) var(--tw-gradient-to-position) !important;
 }
 
 body[data-dashboard-theme='true'] :is(
