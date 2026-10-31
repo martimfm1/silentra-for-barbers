@@ -255,7 +255,7 @@ export default function SilentraDemoBarbershop() {
     { id: 'wash', name: copy.serviceWash, description: copy.serviceWashDesc, duration: 25, price: 10 },
   ];
 
-  const selectedService = services.find((service) => service.id === selectedServiceId) ?? services[0];
+  const selectedService = services.find((service) => service.id === selectedServiceId) ?? services[0]!;
   const selectedDateLabel = dates.find((date) => date.value === selectedDate);
 
   useEffect(() => {
