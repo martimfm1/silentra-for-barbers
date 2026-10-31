@@ -78,19 +78,25 @@ export default async function InstallAppPage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-100 sm:text-xs">
                 <Smartphone className="size-3.5" aria-hidden="true" />
-                {english ? 'Silentra on your phone' : 'Silentra no teu telemóvel'}
+                {english
+                  ? 'Silentra on your phone'
+                  : 'Silentra no teu telemóvel'}
               </span>
 
               <h1 className="mt-6 max-w-3xl text-[2.65rem] font-semibold leading-[0.98] tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
                 {english ? (
                   <>
                     Your barbershop.
-                    <span className="mt-1 block text-zinc-400">One tap away.</span>
+                    <span className="mt-1 block text-zinc-400">
+                      One tap away.
+                    </span>
                   </>
                 ) : (
                   <>
                     A tua barbearia.
-                    <span className="mt-1 block text-zinc-400">Sempre à mão.</span>
+                    <span className="mt-1 block text-zinc-400">
+                      Sempre à mão.
+                    </span>
                   </>
                 )}
               </h1>
@@ -113,7 +119,10 @@ export default async function InstallAppPage() {
               </div>
 
               <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-zinc-500">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-200/70" aria-hidden="true" />
+                <ShieldCheck
+                  className="mt-0.5 size-4 shrink-0 text-emerald-200/70"
+                  aria-hidden="true"
+                />
                 {english
                   ? 'No App Store download or Apple Developer subscription is required. This is the web app, not a native iOS package.'
                   : 'Não precisas da App Store nem de uma subscrição Apple Developer. Esta é a aplicação Web, não um pacote iOS nativo.'}
@@ -146,7 +155,9 @@ export default async function InstallAppPage() {
                       <p className="mt-4 text-[10px] text-zinc-500">
                         {english ? 'Appointments' : 'Marcações'}
                       </p>
-                      <p className="mt-1 text-2xl font-semibold text-white">12</p>
+                      <p className="mt-1 text-2xl font-semibold text-white">
+                        12
+                      </p>
                     </div>
                     <div className="rounded-2xl border border-white/8 bg-white/[0.035] p-3">
                       <div className="flex size-8 items-center justify-center rounded-xl bg-sky-400/10 text-sky-200">
@@ -155,7 +166,9 @@ export default async function InstallAppPage() {
                       <p className="mt-4 text-[10px] text-zinc-500">
                         {english ? 'Clients' : 'Clientes'}
                       </p>
-                      <p className="mt-1 text-2xl font-semibold text-white">86</p>
+                      <p className="mt-1 text-2xl font-semibold text-white">
+                        86
+                      </p>
                     </div>
                   </div>
 
@@ -169,12 +182,33 @@ export default async function InstallAppPage() {
                       </span>
                     </div>
                     <div className="mt-4 space-y-3">
-                      {[['09:30', english ? 'Haircut' : 'Corte de cabelo'], ['11:00', english ? 'Beard trim' : 'Aparar barba'], ['14:30', english ? 'Haircut + beard' : 'Corte + barba']].map(([time, service], index) => (
+                      {[
+                        ['09:30', english ? 'Haircut' : 'Corte de cabelo'],
+                        ['11:00', english ? 'Beard trim' : 'Aparar barba'],
+                        [
+                          '14:30',
+                          english ? 'Haircut + beard' : 'Corte + barba',
+                        ],
+                      ].map(([time, service], index) => (
                         <div key={time} className="flex items-center gap-3">
-                          <span className="w-10 text-[10px] tabular-nums text-zinc-500">{time}</span>
-                          <span className={index === 0 ? 'h-8 w-0.5 rounded-full bg-emerald-300/70' : 'h-8 w-0.5 rounded-full bg-white/15'} aria-hidden="true" />
-                          <span className="min-w-0 flex-1 truncate text-xs text-zinc-300">{service}</span>
-                          <CheckCircle2 className="size-3.5 shrink-0 text-emerald-200/70" aria-hidden="true" />
+                          <span className="w-10 text-[10px] tabular-nums text-zinc-500">
+                            {time}
+                          </span>
+                          <span
+                            className={
+                              index === 0
+                                ? 'h-8 w-0.5 rounded-full bg-emerald-300/70'
+                                : 'h-8 w-0.5 rounded-full bg-white/15'
+                            }
+                            aria-hidden="true"
+                          />
+                          <span className="min-w-0 flex-1 truncate text-xs text-zinc-300">
+                            {service}
+                          </span>
+                          <CheckCircle2
+                            className="size-3.5 shrink-0 text-emerald-200/70"
+                            aria-hidden="true"
+                          />
                         </div>
                       ))}
                     </div>
@@ -189,7 +223,9 @@ export default async function InstallAppPage() {
                         {english ? 'On your home screen' : 'No ecrã principal'}
                       </p>
                       <p className="mt-0.5 text-[10px] text-zinc-500">
-                        {english ? 'Tap to launch Silentra' : 'Toca para abrir a Silentra'}
+                        {english
+                          ? 'Tap to launch Silentra'
+                          : 'Toca para abrir a Silentra'}
                       </p>
                     </div>
                   </div>
@@ -230,7 +266,9 @@ export default async function InstallAppPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-white">
-                {english ? 'How to add it on iPhone' : 'Como instalar no iPhone'}
+                {english
+                  ? 'How to add it on iPhone'
+                  : 'Como instalar no iPhone'}
               </h2>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
                 {english

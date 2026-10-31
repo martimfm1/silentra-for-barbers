@@ -267,10 +267,7 @@ export default function AgendaPage() {
               <Plus className="size-4" aria-hidden="true" />
               {t('agenda.newBooking')}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setBlockDialogOpen(true)}
-            >
+            <Button variant="outline" onClick={() => setBlockDialogOpen(true)}>
               <CalendarOff className="size-4" aria-hidden="true" />
               {t('agenda.blockTime')}
             </Button>
@@ -366,7 +363,7 @@ export default function AgendaPage() {
               </button>
             </div>
             <div className="mt-4 space-y-4">
-                            <section
+              <section
                 className="silentra-section-block overflow-hidden"
                 aria-labelledby="agenda-list-title"
               >
@@ -464,7 +461,9 @@ export default function AgendaPage() {
       </div>
       <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
         <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-zinc-950/95 p-3 sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,900px)] sm:p-5">
-          <DialogTitle className="sr-only">{t('bookingForm.title')}</DialogTitle>
+          <DialogTitle className="sr-only">
+            {t('bookingForm.title')}
+          </DialogTitle>
           <DialogDescription className="sr-only">
             {t('bookingForm.description')}
           </DialogDescription>

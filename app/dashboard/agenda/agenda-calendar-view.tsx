@@ -117,13 +117,18 @@ function weekdayKey(date: Date) {
 
 function appointmentName(appointment: Appointment, t: (key: string) => string) {
   return (
-    appointment.manual_name || appointment.users?.name_complete || t('agendaCalendar.client')
+    appointment.manual_name ||
+    appointment.users?.name_complete ||
+    t('agendaCalendar.client')
   );
 }
 
 export function AgendaCalendarView() {
   const { t, locale } = useLanguage();
-  const weekdayLabels = locale === 'pt' ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekdayLabels =
+    locale === 'pt'
+      ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const dateLocale = locale === 'pt' ? pt : enGB;
   const { barbershopId } = useBarbershop();
   const [month, setMonth] = useState(() => new Date());
@@ -167,9 +172,7 @@ export function AgendaCalendarView() {
       );
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : t('agendaCalendar.loadError'),
+        cause instanceof Error ? cause.message : t('agendaCalendar.loadError'),
       );
     } finally {
       setLoading(false);
@@ -416,7 +419,9 @@ export function AgendaCalendarView() {
                     />
                   </div>
                   <p className="mt-1 truncate text-[8px] font-medium text-zinc-600 sm:mt-2 sm:text-[10px]">
-                    {isClosed ? t('agendaCalendar.dayOffShort') : occupancyLabel(level, t)}
+                    {isClosed
+                      ? t('agendaCalendar.dayOffShort')
+                      : occupancyLabel(level, t)}
                   </p>
 
                   <div className="mt-1.5 space-y-1 sm:mt-2">
@@ -484,7 +489,9 @@ export function AgendaCalendarView() {
                 {t('agendaCalendar.selectedDay')}
               </p>
               <CardTitle className="mt-1 text-lg capitalize sm:text-xl">
-                {format(selectedDate, "EEEE, d 'de' MMMM", { locale: dateLocale })}
+                {format(selectedDate, "EEEE, d 'de' MMMM", {
+                  locale: dateLocale,
+                })}
               </CardTitle>
               <p
                 className={cn(
@@ -618,14 +625,16 @@ export function AgendaCalendarView() {
                           {format(new Date(appointment.date_hour), 'HH:mm')}
                         </span>
                         <span className="min-w-0 truncate text-[10px] text-zinc-600">
-                          {appointment.services?.name ?? t('agendaCalendar.service')}
+                          {appointment.services?.name ??
+                            t('agendaCalendar.service')}
                         </span>
                       </div>
                       <p className="mt-1 truncate text-xs text-zinc-300">
                         {appointmentName(appointment, t)}
                       </p>
                       <p className="mt-1 truncate text-[10px] text-zinc-600">
-                        {appointment.professionals?.name ?? t('agendaCalendar.team')}
+                        {appointment.professionals?.name ??
+                          t('agendaCalendar.team')}
                       </p>
                     </div>
                   ))}

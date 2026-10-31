@@ -15,8 +15,14 @@ import {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const STATUSES = new Set<SupportStatus>(['open', 'waiting_customer', 'closed', 'closed_unresolved']);
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const STATUSES = new Set<SupportStatus>([
+  'open',
+  'waiting_customer',
+  'closed',
+  'closed_unresolved',
+]);
 
 function jsonError(error: string, status: number) {
   return NextResponse.json(
@@ -35,7 +41,8 @@ async function GET__unobserved(request: Request) {
       return jsonError('ID da conversa inválido.', 400);
     }
 
-    const ticketSelection = 'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
+    const ticketSelection =
+      'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at';
     const [pendingResult, activeResult, historyResult] = await Promise.all([
       admin
         .from('support_conversations')
@@ -72,10 +79,13 @@ async function GET__unobserved(request: Request) {
     if (conversationId && !rows.some((row) => row.id === conversationId)) {
       const extra = await admin
         .from('support_conversations')
-        .select('id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at')
+        .select(
+          'id,barbershop_id,customer_user_id,subject,description,status,plan,priority,last_message_at,last_message_preview,accepted_at,accepted_by,created_at,updated_at',
+        )
         .eq('id', conversationId)
         .maybeSingle();
-      if (extra.error) throw new Error('SUPPORT_ADMIN_SELECTED_CONVERSATION_LOOKUP_FAILED');
+      if (extra.error)
+        throw new Error('SUPPORT_ADMIN_SELECTED_CONVERSATION_LOOKUP_FAILED');
       if (extra.data) rows.push(extra.data);
       else return jsonError('Conversa não encontrada.', 404);
     }
@@ -83,34 +93,42 @@ async function GET__unobserved(request: Request) {
     const customerIds = [...new Set(rows.map((row) => row.customer_user_id))];
     const shopIds = [...new Set(rows.map((row) => row.barbershop_id))];
 
-    const [usersResult, shopsResult, unreadResult, assignmentsResult, subscriptionsResult] =
-      conversationIds.length
-        ? await Promise.all([
-            customerIds.length
-              ? admin.from('users').select('id,name_complete,email').in('id', customerIds)
-              : Promise.resolve({ data: [], error: null }),
-            shopIds.length
-              ? admin.from('barbershops').select('id,name,slug').in('id', shopIds)
-              : Promise.resolve({ data: [], error: null }),
-            admin.rpc('support_unread_counts', {
-              p_conversation_ids: conversationIds,
-            }),
-            admin
-              .from('barbershop_plan_assignments')
-              .select('barbershop_id,plan,expires_at')
-              .in('barbershop_id', shopIds),
-            admin
-              .from('subscriptions')
-              .select('barbershop_id,plan,plan_override,status')
-              .in('barbershop_id', shopIds),
-          ])
-        : [
-            { data: [], error: null },
-            { data: [], error: null },
-            { data: [], error: null },
-            { data: [], error: null },
-            { data: [], error: null },
-          ];
+    const [
+      usersResult,
+      shopsResult,
+      unreadResult,
+      assignmentsResult,
+      subscriptionsResult,
+    ] = conversationIds.length
+      ? await Promise.all([
+          customerIds.length
+            ? admin
+                .from('users')
+                .select('id,name_complete,email')
+                .in('id', customerIds)
+            : Promise.resolve({ data: [], error: null }),
+          shopIds.length
+            ? admin.from('barbershops').select('id,name,slug').in('id', shopIds)
+            : Promise.resolve({ data: [], error: null }),
+          admin.rpc('support_unread_counts', {
+            p_conversation_ids: conversationIds,
+          }),
+          admin
+            .from('barbershop_plan_assignments')
+            .select('barbershop_id,plan,expires_at')
+            .in('barbershop_id', shopIds),
+          admin
+            .from('subscriptions')
+            .select('barbershop_id,plan,plan_override,status')
+            .in('barbershop_id', shopIds),
+        ])
+      : [
+          { data: [], error: null },
+          { data: [], error: null },
+          { data: [], error: null },
+          { data: [], error: null },
+          { data: [], error: null },
+        ];
 
     if (
       usersResult.error ||
@@ -122,36 +140,51 @@ async function GET__unobserved(request: Request) {
       throw new Error('SUPPORT_ADMIN_CONTEXT_LOOKUP_FAILED');
     }
 
-    const userById = new Map((usersResult.data ?? []).map((item) => [item.id, item]));
-    const shopById = new Map((shopsResult.data ?? []).map((item) => [item.id, item]));
+    const userById = new Map(
+      (usersResult.data ?? []).map((item) => [item.id, item]),
+    );
+    const shopById = new Map(
+      (shopsResult.data ?? []).map((item) => [item.id, item]),
+    );
     const unreadByConversation = new Map<string, number>(
-      ((unreadResult.data ?? []) as Array<{
-        conversation_id: string;
-        unread_count: number | string;
-      }>).map((message) => [
+      (
+        (unreadResult.data ?? []) as Array<{
+          conversation_id: string;
+          unread_count: number | string;
+        }>
+      ).map((message) => [
         message.conversation_id,
         Number(message.unread_count) || 0,
       ]),
     );
     const assignmentByShop = new Map(
-      (assignmentsResult.data ?? []).map((assignment) => [assignment.barbershop_id, assignment]),
+      (assignmentsResult.data ?? []).map((assignment) => [
+        assignment.barbershop_id,
+        assignment,
+      ]),
     );
     const subscriptionByShop = new Map(
-      (subscriptionsResult.data ?? []).map((subscription) => [subscription.barbershop_id, subscription]),
+      (subscriptionsResult.data ?? []).map((subscription) => [
+        subscription.barbershop_id,
+        subscription,
+      ]),
     );
     const resolveEffectivePlan = (barbershopId: string): SupportPlan => {
       const assignment = assignmentByShop.get(barbershopId);
       if (
         assignment &&
-        (!assignment.expires_at || Date.parse(assignment.expires_at) > Date.now())
+        (!assignment.expires_at ||
+          Date.parse(assignment.expires_at) > Date.now())
       ) {
         return normalizeSupportPlan(assignment.plan);
       }
 
       const subscription = subscriptionByShop.get(barbershopId);
-      if (subscription?.plan_override) return normalizeSupportPlan(subscription.plan_override);
+      if (subscription?.plan_override)
+        return normalizeSupportPlan(subscription.plan_override);
       if (
-        (subscription?.status === 'active' || subscription?.status === 'trialing') &&
+        (subscription?.status === 'active' ||
+          subscription?.status === 'trialing') &&
         (subscription?.plan === 'pro' || subscription?.plan === 'enterprise')
       ) {
         return subscription.plan;
@@ -195,7 +228,9 @@ async function GET__unobserved(request: Request) {
       if (selected.status !== 'pending') {
         const messageResult = await admin
           .from('support_messages')
-          .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
+          .select(
+            'id,conversation_id,sender_type,sender_user_id,body,created_at,read_at',
+          )
           .eq('conversation_id', conversationId)
           .order('created_at', { ascending: false })
           .limit(100);
@@ -207,14 +242,19 @@ async function GET__unobserved(request: Request) {
       // GET remains read-only: plan/priority are recalculated for the response,
       // while persistent sync happens only when a ticket changes.
       const effectivePlan = resolveEffectivePlan(selected.barbershop_id);
-      const updated = normalizedConversations.find((row) => row.id === conversationId);
+      const updated = normalizedConversations.find(
+        (row) => row.id === conversationId,
+      );
       if (updated) {
         updated.plan = effectivePlan;
         updated.priority = supportPriority(effectivePlan);
       }
     }
 
-    const totalUnread = normalizedConversations.reduce((sum, row) => sum + row.unreadCount, 0);
+    const totalUnread = normalizedConversations.reduce(
+      (sum, row) => sum + row.unreadCount,
+      0,
+    );
     return NextResponse.json(
       {
         ok: true,
@@ -229,7 +269,10 @@ async function GET__unobserved(request: Request) {
     if (error instanceof Error && error.name === 'PlatformAdminError') {
       return jsonError('Não encontrado.', 404);
     }
-    console.error('[SUPPORT_ADMIN_GET_FAILED]', error instanceof Error ? error.name : 'UNKNOWN');
+    console.error(
+      '[SUPPORT_ADMIN_GET_FAILED]',
+      error instanceof Error ? error.name : 'UNKNOWN',
+    );
     return jsonError('Não foi possível carregar a caixa de suporte.', 500);
   }
 }
@@ -246,7 +289,8 @@ async function POST__unobserved(request: Request) {
       .select('id')
       .eq('id', user.id)
       .maybeSingle();
-    if (senderProfileError) throw new Error('SUPPORT_ADMIN_SENDER_LOOKUP_FAILED');
+    if (senderProfileError)
+      throw new Error('SUPPORT_ADMIN_SENDER_LOOKUP_FAILED');
     const senderUserId = senderProfile?.id ?? null;
 
     const bodyResult = await readJsonObject(request, {
@@ -255,11 +299,18 @@ async function POST__unobserved(request: Request) {
     });
     if (!bodyResult.ok) return bodyResult.response;
     const payload = bodyResult.value;
-    const conversationId = typeof payload.conversationId === 'string' ? payload.conversationId.trim() : '';
-    const message = typeof payload.message === 'string' ? payload.message.trim() : '';
+    const conversationId =
+      typeof payload.conversationId === 'string'
+        ? payload.conversationId.trim()
+        : '';
+    const message =
+      typeof payload.message === 'string' ? payload.message.trim() : '';
 
     if (!UUID_RE.test(conversationId) || !message || message.length > 4000) {
-      return jsonError('Conversa e mensagem válida são obrigatórias (máximo 4000 caracteres).', 400);
+      return jsonError(
+        'Conversa e mensagem válida são obrigatórias (máximo 4000 caracteres).',
+        400,
+      );
     }
 
     const since = new Date(Date.now() - 60_000).toISOString();
@@ -272,7 +323,10 @@ async function POST__unobserved(request: Request) {
       .gte('created_at', since);
     if (rateError) throw new Error('SUPPORT_ADMIN_RATE_LIMIT_LOOKUP_FAILED');
     if ((recentMessages ?? 0) >= 30) {
-      return jsonError('Limite de mensagens atingido. Tenta novamente dentro de um minuto.', 429);
+      return jsonError(
+        'Limite de mensagens atingido. Tenta novamente dentro de um minuto.',
+        429,
+      );
     }
 
     const { data: conversation, error: conversationError } = await admin
@@ -280,13 +334,23 @@ async function POST__unobserved(request: Request) {
       .select('id,customer_user_id,barbershop_id,status')
       .eq('id', conversationId)
       .maybeSingle();
-    if (conversationError) throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
+    if (conversationError)
+      throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
     if (!conversation) return jsonError('Ticket não encontrado.', 404);
     if (conversation.status === 'pending') {
-      return jsonError('Aceita o ticket antes de responder. O chat ainda não está ativo.', 409);
+      return jsonError(
+        'Aceita o ticket antes de responder. O chat ainda não está ativo.',
+        409,
+      );
     }
-    if (conversation.status === 'closed' || conversation.status === 'closed_unresolved') {
-      return jsonError('Este ticket está fechado. Reabre-o antes de enviar uma resposta.', 409);
+    if (
+      conversation.status === 'closed' ||
+      conversation.status === 'closed_unresolved'
+    ) {
+      return jsonError(
+        'Este ticket está fechado. Reabre-o antes de enviar uma resposta.',
+        409,
+      );
     }
 
     const [customerResult, authCustomerResult, shopResult] = await Promise.all([
@@ -306,8 +370,10 @@ async function POST__unobserved(request: Request) {
       throw new Error('SUPPORT_ADMIN_RECIPIENT_LOOKUP_FAILED');
     }
 
-    const customerEmail = authCustomerResult.data.user?.email || customerResult.data?.email;
-    if (!customerEmail) return jsonError('A conta do membro não tem um email disponível.', 409);
+    const customerEmail =
+      authCustomerResult.data.user?.email || customerResult.data?.email;
+    if (!customerEmail)
+      return jsonError('A conta do membro não tem um email disponível.', 409);
 
     const planAssignment = await admin
       .from('barbershop_plan_assignments')
@@ -325,13 +391,21 @@ async function POST__unobserved(request: Request) {
     }
 
     let plan: SupportPlan = 'free';
-    if (planAssignment.data?.plan === 'pro' || planAssignment.data?.plan === 'enterprise') {
+    if (
+      planAssignment.data?.plan === 'pro' ||
+      planAssignment.data?.plan === 'enterprise'
+    ) {
       plan = planAssignment.data.plan;
-    } else if (subscription.data?.plan_override === 'pro' || subscription.data?.plan_override === 'enterprise') {
+    } else if (
+      subscription.data?.plan_override === 'pro' ||
+      subscription.data?.plan_override === 'enterprise'
+    ) {
       plan = subscription.data.plan_override;
     } else if (
-      (subscription.data?.status === 'active' || subscription.data?.status === 'trialing') &&
-      (subscription.data?.plan === 'pro' || subscription.data?.plan === 'enterprise')
+      (subscription.data?.status === 'active' ||
+        subscription.data?.status === 'trialing') &&
+      (subscription.data?.plan === 'pro' ||
+        subscription.data?.plan === 'enterprise')
     ) {
       plan = subscription.data.plan;
     }
@@ -350,22 +424,32 @@ async function POST__unobserved(request: Request) {
       p_recipient_name: customerResult.data?.name_complete || customerEmail,
     });
     if (rpc.error) {
-      console.error('[SUPPORT_ADMIN_SEND_MESSAGE_FAILED]', rpc.error.code ?? 'UNKNOWN');
+      console.error(
+        '[SUPPORT_ADMIN_SEND_MESSAGE_FAILED]',
+        rpc.error.code ?? 'UNKNOWN',
+      );
       return jsonError('Não foi possível enviar a resposta.', 500);
     }
 
-    const result = rpc.data as { message_id?: string; notification_id?: string | null } | null;
-    if (!result?.message_id) throw new Error('SUPPORT_ADMIN_MESSAGE_RPC_INVALID_RESULT');
+    const result = rpc.data as {
+      message_id?: string;
+      notification_id?: string | null;
+    } | null;
+    if (!result?.message_id)
+      throw new Error('SUPPORT_ADMIN_MESSAGE_RPC_INVALID_RESULT');
     if (result.notification_id) {
       await deliverSupportEmailNotification(admin, result.notification_id);
     }
 
     const { data: savedMessage, error: savedMessageError } = await admin
       .from('support_messages')
-      .select('id,conversation_id,sender_type,sender_user_id,body,created_at,read_at')
+      .select(
+        'id,conversation_id,sender_type,sender_user_id,body,created_at,read_at',
+      )
       .eq('id', result.message_id)
       .single();
-    if (savedMessageError || !savedMessage) throw new Error('SUPPORT_ADMIN_SENT_MESSAGE_LOOKUP_FAILED');
+    if (savedMessageError || !savedMessage)
+      throw new Error('SUPPORT_ADMIN_SENT_MESSAGE_LOOKUP_FAILED');
 
     return NextResponse.json(
       { ok: true, message: savedMessage, conversationId: conversation.id },
@@ -375,7 +459,10 @@ async function POST__unobserved(request: Request) {
     if (error instanceof Error && error.name === 'PlatformAdminError') {
       return jsonError('Não encontrado.', 404);
     }
-    console.error('[SUPPORT_ADMIN_POST_FAILED]', error instanceof Error ? error.name : 'UNKNOWN');
+    console.error(
+      '[SUPPORT_ADMIN_POST_FAILED]',
+      error instanceof Error ? error.name : 'UNKNOWN',
+    );
     return jsonError('Não foi possível enviar a resposta.', 500);
   }
 }
@@ -393,22 +480,30 @@ async function PATCH__unobserved(request: Request) {
     });
     if (!bodyResult.ok) return bodyResult.response;
     const payload = bodyResult.value;
-    const conversationId = typeof payload.conversationId === 'string' ? payload.conversationId.trim() : '';
+    const conversationId =
+      typeof payload.conversationId === 'string'
+        ? payload.conversationId.trim()
+        : '';
     const action = typeof payload.action === 'string' ? payload.action : '';
 
-    if (!UUID_RE.test(conversationId)) return jsonError('ID da conversa inválido.', 400);
+    if (!UUID_RE.test(conversationId))
+      return jsonError('ID da conversa inválido.', 400);
 
     const { data: conversation, error: lookupError } = await admin
       .from('support_conversations')
       .select('id,status,accepted_at')
       .eq('id', conversationId)
       .maybeSingle();
-    if (lookupError) throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
+    if (lookupError)
+      throw new Error('SUPPORT_ADMIN_CONVERSATION_LOOKUP_FAILED');
     if (!conversation) return jsonError('Ticket não encontrado.', 404);
 
     if (action === 'accept') {
       if (conversation.status !== 'pending') {
-        return jsonError('Este ticket já foi aceite ou deixou de estar pendente.', 409);
+        return jsonError(
+          'Este ticket já foi aceite ou deixou de estar pendente.',
+          409,
+        );
       }
       const acceptedAt = new Date().toISOString();
       const { data: accepted, error } = await admin
@@ -424,8 +519,15 @@ async function PATCH__unobserved(request: Request) {
         .select('id,status,accepted_at,accepted_by')
         .maybeSingle();
       if (error) throw new Error('SUPPORT_ADMIN_TICKET_ACCEPT_FAILED');
-      if (!accepted) return jsonError('Outro pedido já alterou este ticket. Atualiza a caixa de entrada.', 409);
-      return NextResponse.json({ ok: true, ticket: accepted }, { headers: { 'Cache-Control': 'no-store' } });
+      if (!accepted)
+        return jsonError(
+          'Outro pedido já alterou este ticket. Atualiza a caixa de entrada.',
+          409,
+        );
+      return NextResponse.json(
+        { ok: true, ticket: accepted },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     if (action === 'read') {
@@ -436,7 +538,10 @@ async function PATCH__unobserved(request: Request) {
         .eq('sender_type', 'customer')
         .is('read_at', null);
       if (error) throw new Error('SUPPORT_ADMIN_MARK_READ_FAILED');
-      return NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } });
+      return NextResponse.json(
+        { ok: true },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     if (action === 'status') {
@@ -447,10 +552,16 @@ async function PATCH__unobserved(request: Request) {
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', conversationId);
       if (error?.message?.includes('SUPPORT_TICKET_LIMIT_REACHED')) {
-        return jsonError('O limite de tickets abertos deste plano foi atingido. Fecha outro ticket antes de o reabrir.', 409);
+        return jsonError(
+          'O limite de tickets abertos deste plano foi atingido. Fecha outro ticket antes de o reabrir.',
+          409,
+        );
       }
       if (error) throw new Error('SUPPORT_ADMIN_STATUS_UPDATE_FAILED');
-      return NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } });
+      return NextResponse.json(
+        { ok: true },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     return jsonError('Ação não suportada.', 400);
@@ -458,11 +569,23 @@ async function PATCH__unobserved(request: Request) {
     if (error instanceof Error && error.name === 'PlatformAdminError') {
       return jsonError('Não encontrado.', 404);
     }
-    console.error('[SUPPORT_ADMIN_PATCH_FAILED]', error instanceof Error ? error.name : 'UNKNOWN');
+    console.error(
+      '[SUPPORT_ADMIN_PATCH_FAILED]',
+      error instanceof Error ? error.name : 'UNKNOWN',
+    );
     return jsonError('Não foi possível atualizar a conversa.', 500);
   }
 }
 
-export const GET = withApiObservability('/api/silentra-admin/support', GET__unobserved);
-export const POST = withApiObservability('/api/silentra-admin/support', POST__unobserved);
-export const PATCH = withApiObservability('/api/silentra-admin/support', PATCH__unobserved);
+export const GET = withApiObservability(
+  '/api/silentra-admin/support',
+  GET__unobserved,
+);
+export const POST = withApiObservability(
+  '/api/silentra-admin/support',
+  POST__unobserved,
+);
+export const PATCH = withApiObservability(
+  '/api/silentra-admin/support',
+  PATCH__unobserved,
+);

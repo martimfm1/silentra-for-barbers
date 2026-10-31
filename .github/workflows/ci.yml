@@ -121,7 +121,6 @@ jobs:
       - name: Dependency audit
         run: pnpm qa:deps
 
-
       - name: SEO foundation contracts
         run: pnpm qa:seo
 

@@ -41,8 +41,26 @@ const COPY = {
 } as const;
 
 const COPY_EN = {
-  pro: { name: 'Barbers Pro', description: 'For barbershops ready to grow with CRM, automation and marketing.', features: ['CRM and customers', 'Campaigns and automation', 'Loyalty and analytics'] },
-  enterprise: { name: 'Barbers Enterprise', description: 'For larger operations, multiple locations and advanced management.', features: ['Teams and locations', 'POS and inventory', 'Advanced permissions and management'] },
+  pro: {
+    name: 'Barbers Pro',
+    description:
+      'For barbershops ready to grow with CRM, automation and marketing.',
+    features: [
+      'CRM and customers',
+      'Campaigns and automation',
+      'Loyalty and analytics',
+    ],
+  },
+  enterprise: {
+    name: 'Barbers Enterprise',
+    description:
+      'For larger operations, multiple locations and advanced management.',
+    features: [
+      'Teams and locations',
+      'POS and inventory',
+      'Advanced permissions and management',
+    ],
+  },
 } as const;
 
 type Plan = keyof typeof COPY;
@@ -172,7 +190,11 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not validate the promo code.' : english ? 'Could not validate the promo code.' : 'Não foi possível validar o código promocional.', 
+            : english
+              ? 'Could not validate the promo code.'
+              : english
+                ? 'Could not validate the promo code.'
+                : 'Não foi possível validar o código promocional.',
         );
       }
 
@@ -182,8 +204,12 @@ export function ManualCheckout({
       setPromotionCode(quote.promotionCode ?? '');
       setPromotionMessage(
         quote.discountAmount > 0
-          ? (english ? `Code ${quote.promotionCode} applied: ${quote.discountDescription}.` : `Código ${quote.promotionCode} aplicado: ${quote.discountDescription}.`)
-          : (english ? 'This code does not change the plan price.' : 'Este código não altera o preço do plano.'),
+          ? english
+            ? `Code ${quote.promotionCode} applied: ${quote.discountDescription}.`
+            : `Código ${quote.promotionCode} aplicado: ${quote.discountDescription}.`
+          : english
+            ? 'This code does not change the plan price.'
+            : 'Este código não altera o preço do plano.',
       );
     } catch (err) {
       setPricing(initialPricing);
@@ -206,7 +232,9 @@ export function ManualCheckout({
       promotionCode.trim().toUpperCase() !== appliedPromotionCode
     ) {
       setError(
-        english ? 'Apply the promo code or clear the field before continuing.' : 'Aplica o código promocional ou limpa o campo antes de continuar.', 
+        english
+          ? 'Apply the promo code or clear the field before continuing.'
+          : 'Aplica o código promocional ou limpa o campo antes de continuar.',
       );
       return;
     }
@@ -233,7 +261,9 @@ export function ManualCheckout({
         throw new Error(
           typeof body?.error === 'string'
             ? body.error
-            : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.', 
+            : english
+              ? 'Could not submit the request.'
+              : 'Não foi possível enviar o pedido.',
         );
 
       router.replace(body.redirectUrl || '/dashboard/billing?manual=pending');
@@ -241,7 +271,9 @@ export function ManualCheckout({
       setError(
         err instanceof Error
           ? err.message
-          : english ? 'Could not submit the request.' : 'Não foi possível enviar o pedido.',
+          : english
+            ? 'Could not submit the request.'
+            : 'Não foi possível enviar o pedido.',
       );
       setSubmitting(false);
     }
@@ -254,7 +286,8 @@ export function ManualCheckout({
           href="/plans"
           className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-500 transition hover:text-white"
         >
-          <ArrowLeft className="size-3.5" /> {english ? 'Back to plans' : 'Voltar aos planos'}
+          <ArrowLeft className="size-3.5" />{' '}
+          {english ? 'Back to plans' : 'Voltar aos planos'}
         </Link>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-[0.72fr_1.28fr]">
@@ -278,18 +311,46 @@ export function ManualCheckout({
               </p>
               <div className="mt-2 flex items-end justify-between gap-3">
                 <span className="text-sm text-zinc-300">
-                  {interval === 'year' ? (english ? 'Annual billing' : 'Faturação anual') : (english ? 'Monthly billing' : 'Faturação mensal')}
+                  {interval === 'year'
+                    ? english
+                      ? 'Annual billing'
+                      : 'Faturação anual'
+                    : english
+                      ? 'Monthly billing'
+                      : 'Faturação mensal'}
                 </span>
                 <div className="text-right">
                   {pricing.discountAmount > 0 ? (
                     <p className="text-xs text-zinc-500 line-through">
-                      {formatMoney(pricing.originalPrice, 'EUR', english ? 'en-GB' : 'pt-PT')} /{' '}
-                      {interval === 'year' ? (english ? 'year' : 'ano') : (english ? 'month' : 'mês')}
+                      {formatMoney(
+                        pricing.originalPrice,
+                        'EUR',
+                        english ? 'en-GB' : 'pt-PT',
+                      )}{' '}
+                      /{' '}
+                      {interval === 'year'
+                        ? english
+                          ? 'year'
+                          : 'ano'
+                        : english
+                          ? 'month'
+                          : 'mês'}
                     </p>
                   ) : null}
                   <p className="text-xl font-semibold text-white">
-                    {formatMoney(pricing.finalPrice, 'EUR', english ? 'en-GB' : 'pt-PT')} /{' '}
-                    {interval === 'year' ? (english ? 'year' : 'ano') : (english ? 'month' : 'mês')}
+                    {formatMoney(
+                      pricing.finalPrice,
+                      'EUR',
+                      english ? 'en-GB' : 'pt-PT',
+                    )}{' '}
+                    /{' '}
+                    {interval === 'year'
+                      ? english
+                        ? 'year'
+                        : 'ano'
+                      : english
+                        ? 'month'
+                        : 'mês'}
                   </p>
                 </div>
               </div>
@@ -312,10 +373,14 @@ export function ManualCheckout({
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300" />
                 <div>
                   <p className="text-xs font-semibold text-zinc-200">
-                    {english ? 'Secure manual payment' : 'Pagamento manual e seguro'}
+                    {english
+                      ? 'Secure manual payment'
+                      : 'Pagamento manual e seguro'}
                   </p>
                   <p className="mt-1 text-[11px] leading-5 text-zinc-600">
-                    {english ? 'The team uses these details to prepare billing and send you the payment method.' : 'Estes dados são usados pela equipa para preparar a faturação e enviar o método de pagamento.'}
+                    {english
+                      ? 'The team uses these details to prepare billing and send you the payment method.'
+                      : 'Estes dados são usados pela equipa para preparar a faturação e enviar o método de pagamento.'}
                   </p>
                 </div>
               </div>
@@ -330,13 +395,19 @@ export function ManualCheckout({
                 </span>
                 {english ? 'Subscription request' : 'Pedido de subscrição'}
                 <ArrowRight className="size-3.5" />
-                <span className="text-zinc-700">{english ? 'Payment' : 'Pagamento'}</span>
+                <span className="text-zinc-700">
+                  {english ? 'Payment' : 'Pagamento'}
+                </span>
               </div>
               <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl">
-                {english ? 'Tell us how to bill your barbershop.' : 'Conta-nos como devemos faturar a tua barbearia.'}
+                {english
+                  ? 'Tell us how to bill your barbershop.'
+                  : 'Conta-nos como devemos faturar a tua barbearia.'}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                {english ? 'Fill in these details once. We will review your request and email you payment instructions or a payment link.' : 'Preenche estes dados uma única vez. Depois analisamos o pedido e enviamos-te por email as instruções ou o link de pagamento.'}
+                {english
+                  ? 'Fill in these details once. We will review your request and email you payment instructions or a payment link.'
+                  : 'Preenche estes dados uma única vez. Depois analisamos o pedido e enviamos-te por email as instruções ou o link de pagamento.'}
               </p>
             </header>
 
@@ -350,32 +421,51 @@ export function ManualCheckout({
                     {english ? 'Barbershop details' : 'Dados da barbearia'}
                   </h2>
                   <p className="text-xs text-zinc-600">
-                    {english ? 'Information to help prepare your subscription.' : 'Informação que ajuda a preparar a subscrição.'}
+                    {english
+                      ? 'Information to help prepare your subscription.'
+                      : 'Informação que ajuda a preparar a subscrição.'}
                   </p>
                 </div>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Field label={english ? 'Company / barbershop name' : 'Nome da empresa / barbearia'} required>
+                <Field
+                  label={
+                    english
+                      ? 'Company / barbershop name'
+                      : 'Nome da empresa / barbearia'
+                  }
+                  required
+                >
                   <input
                     className={inputClass}
                     required
                     maxLength={160}
                     value={form.billingName}
                     onChange={(e) => set('billingName', e.target.value)}
-                    placeholder={english ? 'e.g. Martim Barbershop' : 'Ex.: Barbearia Martim'}
+                    placeholder={
+                      english
+                        ? 'e.g. Martim Barbershop'
+                        : 'Ex.: Barbearia Martim'
+                    }
                     autoComplete="organization"
                   />
                 </Field>
                 <Field
                   label="NIF / VAT ID"
-                  hint={english ? 'Optional, but recommended for invoicing.' : 'Opcional, mas recomendado para faturação.'}
+                  hint={
+                    english
+                      ? 'Optional, but recommended for invoicing.'
+                      : 'Opcional, mas recomendado para faturação.'
+                  }
                 >
                   <input
                     className={inputClass}
                     maxLength={40}
                     value={form.taxId}
                     onChange={(e) => set('taxId', e.target.value)}
-                    placeholder={english ? 'e.g. PT123456789' : 'Ex.: PT123456789'}
+                    placeholder={
+                      english ? 'e.g. PT123456789' : 'Ex.: PT123456789'
+                    }
                     autoComplete="tax-id"
                   />
                 </Field>
@@ -385,14 +475,23 @@ export function ManualCheckout({
                     value={form.businessType}
                     onChange={(e) => set('businessType', e.target.value)}
                   >
-                    <option value="">{english ? 'Select' : 'Selecionar'}</option>
-                    <option value="barbershop">{english ? 'Barbershop' : 'Barbearia'}</option>
+                    <option value="">
+                      {english ? 'Select' : 'Selecionar'}
+                    </option>
+                    <option value="barbershop">
+                      {english ? 'Barbershop' : 'Barbearia'}
+                    </option>
                     <option value="salon">{english ? 'Salon' : 'Salão'}</option>
-                    <option value="barbershop_salon">{english ? 'Barbershop + salon' : 'Barbearia + salão'}</option>
+                    <option value="barbershop_salon">
+                      {english ? 'Barbershop + salon' : 'Barbearia + salão'}
+                    </option>
                     <option value="other">{english ? 'Other' : 'Outro'}</option>
                   </select>
                 </Field>
-                <Field label="Website" hint={english ? 'Optional.' : 'Opcional.'}>
+                <Field
+                  label="Website"
+                  hint={english ? 'Optional.' : 'Opcional.'}
+                >
                   <input
                     className={inputClass}
                     type="url"
@@ -404,8 +503,14 @@ export function ManualCheckout({
                   />
                 </Field>
                 <Field
-                  label={english ? 'Number of locations' : 'Número de localizações'}
-                  hint={english ? 'Helps us understand your plan needs.' : 'Ajuda-nos a enquadrar o plano.'}
+                  label={
+                    english ? 'Number of locations' : 'Número de localizações'
+                  }
+                  hint={
+                    english
+                      ? 'Helps us understand your plan needs.'
+                      : 'Ajuda-nos a enquadrar o plano.'
+                  }
                 >
                   <input
                     className={inputClass}
@@ -418,7 +523,10 @@ export function ManualCheckout({
                     inputMode="numeric"
                   />
                 </Field>
-                <Field label={english ? 'Team size' : 'Elementos da equipa'} hint={english ? 'Approximate.' : 'Aproximado.'}>
+                <Field
+                  label={english ? 'Team size' : 'Elementos da equipa'}
+                  hint={english ? 'Approximate.' : 'Aproximado.'}
+                >
                   <input
                     className={inputClass}
                     type="number"
@@ -443,12 +551,17 @@ export function ManualCheckout({
                     {english ? 'Billing details' : 'Dados de faturação'}
                   </h2>
                   <p className="text-xs text-zinc-600">
-                    {english ? 'Where billing should be associated.' : 'Onde devemos associar a faturação.'}
+                    {english
+                      ? 'Where billing should be associated.'
+                      : 'Onde devemos associar a faturação.'}
                   </p>
                 </div>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Field label={english ? 'Billing email' : 'Email de faturação'} required>
+                <Field
+                  label={english ? 'Billing email' : 'Email de faturação'}
+                  required
+                >
                   <input
                     className={inputClass}
                     required
@@ -456,7 +569,9 @@ export function ManualCheckout({
                     maxLength={254}
                     value={form.billingEmail}
                     onChange={(e) => set('billingEmail', e.target.value)}
-                    placeholder={english ? 'billing@company.com' : 'faturacao@empresa.pt'}
+                    placeholder={
+                      english ? 'billing@company.com' : 'faturacao@empresa.pt'
+                    }
                     autoComplete="email"
                   />
                 </Field>
@@ -480,7 +595,11 @@ export function ManualCheckout({
                       maxLength={200}
                       value={form.addressLine1}
                       onChange={(e) => set('addressLine1', e.target.value)}
-                      placeholder={english ? 'Street, number and unit' : 'Rua, número e complemento'}
+                      placeholder={
+                        english
+                          ? 'Street, number and unit'
+                          : 'Rua, número e complemento'
+                      }
                       autoComplete="street-address"
                     />
                   </Field>
@@ -491,11 +610,16 @@ export function ManualCheckout({
                     maxLength={200}
                     value={form.addressLine2}
                     onChange={(e) => set('addressLine2', e.target.value)}
-                    placeholder={english ? 'Floor, unit, etc.' : 'Andar, porta, etc.'}
+                    placeholder={
+                      english ? 'Floor, unit, etc.' : 'Andar, porta, etc.'
+                    }
                     autoComplete="address-line2"
                   />
                 </Field>
-                <Field label={english ? 'Postal code' : 'Código postal'} required>
+                <Field
+                  label={english ? 'Postal code' : 'Código postal'}
+                  required
+                >
                   <input
                     className={inputClass}
                     required
@@ -526,7 +650,19 @@ export function ManualCheckout({
                   >
                     {countries.map(([code, name]) => (
                       <option key={code} value={code}>
-                        {english ? ({ PT: 'Portugal', ES: 'Spain', FR: 'France', DE: 'Germany', GB: 'United Kingdom', BR: 'Brazil', AO: 'Angola', CH: 'Switzerland', US: 'United States' }[code] ?? name) : name}
+                        {english
+                          ? ({
+                              PT: 'Portugal',
+                              ES: 'Spain',
+                              FR: 'France',
+                              DE: 'Germany',
+                              GB: 'United Kingdom',
+                              BR: 'Brazil',
+                              AO: 'Angola',
+                              CH: 'Switzerland',
+                              US: 'United States',
+                            }[code] ?? name)
+                          : name}
                       </option>
                     ))}
                   </select>
@@ -542,7 +678,9 @@ export function ManualCheckout({
                 {english ? 'Promo code' : 'Código promocional'}
               </h2>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                {english ? 'Enter a valid code to automatically update the total shown.' : 'Introduz um código válido para atualizar automaticamente o total apresentado.'}
+                {english
+                  ? 'Enter a valid code to automatically update the total shown.'
+                  : 'Introduz um código válido para atualizar automaticamente o total apresentado.'}
               </p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <input
@@ -565,13 +703,19 @@ export function ManualCheckout({
                   }}
                 />
                 <button
-            aria-label="Continuar checkout manual"
+                  aria-label="Continuar checkout manual"
                   type="button"
                   onClick={() => void applyPromotion()}
                   disabled={promotionLoading || submitting}
                   className="min-h-12 shrink-0 rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-5 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/15 disabled:cursor-wait disabled:opacity-60"
                 >
-                  {promotionLoading ? (english ? 'Validating…' : 'A validar…') : (english ? 'Apply code' : 'Aplicar código')}
+                  {promotionLoading
+                    ? english
+                      ? 'Validating…'
+                      : 'A validar…'
+                    : english
+                      ? 'Apply code'
+                      : 'Aplicar código'}
                 </button>
               </div>
               {promotionError ? (
@@ -589,9 +733,16 @@ export function ManualCheckout({
               ) : null}
               {pricing.discountAmount > 0 ? (
                 <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
-                  <span className="text-zinc-400">{english ? 'Discount applied' : 'Desconto aplicado'}</span>
+                  <span className="text-zinc-400">
+                    {english ? 'Discount applied' : 'Desconto aplicado'}
+                  </span>
                   <span className="font-semibold text-emerald-200">
-                    −{formatMoney(pricing.discountAmount, 'EUR', english ? 'en-GB' : 'pt-PT')}
+                    −
+                    {formatMoney(
+                      pricing.discountAmount,
+                      'EUR',
+                      english ? 'en-GB' : 'pt-PT',
+                    )}
                   </span>
                 </div>
               ) : null}
@@ -604,10 +755,14 @@ export function ManualCheckout({
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-white">
-                    {english ? 'Additional information' : 'Informação adicional'}
+                    {english
+                      ? 'Additional information'
+                      : 'Informação adicional'}
                   </h2>
                   <p className="text-xs text-zinc-600">
-                    {english ? 'Optional — share any useful context with the team.' : 'Opcional — deixa qualquer contexto útil para a equipa.'}
+                    {english
+                      ? 'Optional — share any useful context with the team.'
+                      : 'Opcional — deixa qualquer contexto útil para a equipa.'}
                   </p>
                 </div>
               </div>
@@ -616,7 +771,11 @@ export function ManualCheckout({
                 maxLength={2000}
                 value={form.customerMessage}
                 onChange={(e) => set('customerMessage', e.target.value)}
-                placeholder={english ? 'e.g. We have two locations, need company invoicing and want to enable POS…' : 'Ex.: temos duas localizações, precisamos de faturação para a empresa e queremos ativar o POS…'}
+                placeholder={
+                  english
+                    ? 'e.g. We have two locations, need company invoicing and want to enable POS…'
+                    : 'Ex.: temos duas localizações, precisamos de faturação para a empresa e queremos ativar o POS…'
+                }
               />
             </section>
 
@@ -637,7 +796,9 @@ export function ManualCheckout({
                     {english ? 'What happens next?' : 'O que acontece depois?'}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-zinc-500">
-                    {english ? 'We receive your request, validate the details and send a payment link or instructions to the email you provided.' : 'Recebemos o teu pedido, validamos os dados e a equipa envia o link ou as instruções de pagamento para o email indicado.'}
+                    {english
+                      ? 'We receive your request, validate the details and send a payment link or instructions to the email you provided.'
+                      : 'Recebemos o teu pedido, validamos os dados e a equipa envia o link ou as instruções de pagamento para o email indicado.'}
                   </p>
                 </div>
               </div>
@@ -645,18 +806,24 @@ export function ManualCheckout({
 
             <div className="sticky bottom-0 z-20 -mx-4 border-t border-white/8 bg-zinc-950/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0">
               <button
-            aria-label="Confirmar pedido de pagamento"
+                aria-label="Confirmar pedido de pagamento"
                 type="submit"
                 disabled={submitting}
                 className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 shadow-[0_14px_40px_rgba(52,211,153,0.12)] transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-60"
               >
                 {submitting
-                  ? (english ? 'Sending request…' : 'A enviar pedido…')
-                  : (english ? 'Submit subscription request' : 'Enviar pedido de subscrição')}
+                  ? english
+                    ? 'Sending request…'
+                    : 'A enviar pedido…'
+                  : english
+                    ? 'Submit subscription request'
+                    : 'Enviar pedido de subscrição'}
                 {!submitting ? <ArrowRight className="size-4" /> : null}
               </button>
               <p className="mt-2 text-center text-[11px] leading-5 text-zinc-600">
-                {english ? 'By submitting, you confirm the details are accurate and may be used to process your subscription.' : 'Ao enviar, confirmas que os dados fornecidos são corretos e podem ser usados para processar a tua subscrição.'}
+                {english
+                  ? 'By submitting, you confirm the details are accurate and may be used to process your subscription.'
+                  : 'Ao enviar, confirmas que os dados fornecidos são corretos e podem ser usados para processar a tua subscrição.'}
               </p>
             </div>
           </form>

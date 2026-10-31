@@ -21,7 +21,9 @@ export function parseCookieConsent(
   if (!rawValue) return null;
 
   try {
-    const value = JSON.parse(decodeURIComponent(rawValue)) as Partial<CookieConsent>;
+    const value = JSON.parse(
+      decodeURIComponent(rawValue),
+    ) as Partial<CookieConsent>;
     if (
       value.version !== COOKIE_CONSENT_VERSION ||
       value.necessary !== true ||

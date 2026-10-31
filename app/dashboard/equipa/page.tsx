@@ -31,9 +31,21 @@ type TeamTab = 'professionals' | 'members' | 'invite';
 export default function EquipaPage() {
   const { t } = useLanguage();
   const teamTabs = [
-    { value: 'professionals', label: t('teamPage.barbers'), icon: <Briefcase className="size-4" aria-hidden="true" /> },
-    { value: 'members', label: t('teamPage.membersPermissions'), icon: <UsersRound className="size-4" aria-hidden="true" /> },
-    { value: 'invite', label: t('teamPage.invite'), icon: <KeyRound className="size-4" aria-hidden="true" /> },
+    {
+      value: 'professionals',
+      label: t('teamPage.barbers'),
+      icon: <Briefcase className="size-4" aria-hidden="true" />,
+    },
+    {
+      value: 'members',
+      label: t('teamPage.membersPermissions'),
+      icon: <UsersRound className="size-4" aria-hidden="true" />,
+    },
+    {
+      value: 'invite',
+      label: t('teamPage.invite'),
+      icon: <KeyRound className="size-4" aria-hidden="true" />,
+    },
   ] satisfies Array<{ value: TeamTab; label: string; icon: React.ReactNode }>;
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const { plan, loading: isLoadingPlan } = useFeatureAccess();
@@ -56,9 +68,7 @@ export default function EquipaPage() {
       const response = await fetch('/api/team/members', { cache: 'no-store' });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(
-          data.error || t('teamPage.loadStateError'),
-        );
+        throw new Error(data.error || t('teamPage.loadStateError'));
       setTeamSeats(data.seats ?? { used: 0, limit: 1, unlimited: false });
     } catch (error) {
       console.error('[TEAM_STATE_LOAD_FAIL]', error);
@@ -80,9 +90,7 @@ export default function EquipaPage() {
       );
     } catch (error) {
       console.error('[Equipa Sync Error]:', error);
-      toast.error(
-        t('teamPage.loadProfilesError'),
-      );
+      toast.error(t('teamPage.loadProfilesError'));
     } finally {
       setLoadingInitial(false);
     }
@@ -323,7 +331,11 @@ export default function EquipaPage() {
                     </div>
                     <DialogFooter>
                       <Button
-            aria-label={loadingProfessionals ? "A guardar profissional" : "Guardar profissional"}
+                        aria-label={
+                          loadingProfessionals
+                            ? 'A guardar profissional'
+                            : 'Guardar profissional'
+                        }
                         type="submit"
                         disabled={loadingProfessionals}
                         className="min-h-11 w-full bg-purple-600 text-white hover:bg-purple-500"

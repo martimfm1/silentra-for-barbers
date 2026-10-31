@@ -69,8 +69,11 @@ function ageGroup(age: number) {
 
 async function GET__unobserved(request: Request) {
   try {
-    const { admin, barbershopId, plan } =
-      await requireModuleContext('advanced_analytics', undefined, request);
+    const { admin, barbershopId, plan } = await requireModuleContext(
+      'advanced_analytics',
+      undefined,
+      request,
+    );
     const url = new URL(request.url);
     const now = new Date();
     const from = startOfDay(

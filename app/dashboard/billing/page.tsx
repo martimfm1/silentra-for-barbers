@@ -45,7 +45,8 @@ export default function BillingPage() {
         <header className="dashboard-page-header border-b border-white/10 pb-6">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              <CreditCard className="size-4" aria-hidden="true" /> {t('billingPage.section')}
+              <CreditCard className="size-4" aria-hidden="true" />{' '}
+              {t('billingPage.section')}
             </div>
             <h1 className="mt-2 text-2xl font-heading font-bold tracking-tight sm:text-4xl">
               {t('billingPage.title')}
@@ -65,7 +66,10 @@ export default function BillingPage() {
             </Link>
           </Button>
         </header>
-        <section className="grid gap-3 sm:grid-cols-2" aria-label={t('billingPage.billingLabel')}>
+        <section
+          className="grid gap-3 sm:grid-cols-2"
+          aria-label={t('billingPage.billingLabel')}
+        >
           <div className="border border-white/10 bg-white/[0.025] px-4 py-4">
             <p className="flex items-center gap-2 text-sm font-medium text-zinc-100">
               <ReceiptText

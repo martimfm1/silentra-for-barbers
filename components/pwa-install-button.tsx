@@ -168,21 +168,27 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
       : guide === 'android'
         ? [
             {
-              title: isEnglish ? 'Open the browser menu' : 'Abre o menu do navegador',
+              title: isEnglish
+                ? 'Open the browser menu'
+                : 'Abre o menu do navegador',
               description: isEnglish
                 ? 'In Chrome or a compatible browser, tap the three-dot menu.'
                 : 'No Chrome ou num navegador compatível, toca no menu dos três pontos.',
               Icon: EllipsisVertical,
             },
             {
-              title: isEnglish ? 'Choose Install app' : 'Escolhe Instalar aplicação',
+              title: isEnglish
+                ? 'Choose Install app'
+                : 'Escolhe Instalar aplicação',
               description: isEnglish
                 ? 'Depending on the browser, it may say “Install app” or “Add to Home screen”.'
                 : 'Consoante o navegador, pode aparecer «Instalar aplicação» ou «Adicionar ao ecrã principal».',
               Icon: Download,
             },
             {
-              title: isEnglish ? 'Confirm installation' : 'Confirma a instalação',
+              title: isEnglish
+                ? 'Confirm installation'
+                : 'Confirma a instalação',
               description: isEnglish
                 ? 'Accept the browser prompt. You can then open Silentra from your home screen.'
                 : 'Aceita a confirmação do navegador. Depois, podes abrir a Silentra no ecrã principal.',
@@ -192,14 +198,18 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
         : desktopBrowser === 'safari'
           ? [
               {
-                title: isEnglish ? 'Open the File menu' : 'Abre o menu Ficheiro',
+                title: isEnglish
+                  ? 'Open the File menu'
+                  : 'Abre o menu Ficheiro',
                 description: isEnglish
                   ? 'In a compatible version of Safari on macOS, use the menu at the top of your screen.'
                   : 'Numa versão compatível do Safari no macOS, abre o menu no topo do ecrã.',
                 Icon: Monitor,
               },
               {
-                title: isEnglish ? 'Choose Add to Dock' : 'Escolhe Adicionar à Dock',
+                title: isEnglish
+                  ? 'Choose Add to Dock'
+                  : 'Escolhe Adicionar à Dock',
                 description: isEnglish
                   ? 'Select “Add to Dock” to keep Silentra available like an app.'
                   : 'Seleciona «Adicionar à Dock» para teres a Silentra disponível como uma aplicação.',
@@ -226,7 +236,9 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                 Icon: EllipsisVertical,
               },
               {
-                title: isEnglish ? 'Confirm installation' : 'Confirma a instalação',
+                title: isEnglish
+                  ? 'Confirm installation'
+                  : 'Confirma a instalação',
                 description: isEnglish
                   ? 'Silentra will open in its own app window when supported by your browser.'
                   : 'Quando o navegador for compatível, a Silentra passa a abrir numa janela própria.',
@@ -242,7 +254,9 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
         size="sm"
         onClick={() => void handleInstallClick()}
         className="h-10 shrink-0 gap-2 rounded-xl border-emerald-300/20 bg-emerald-300/[0.07] px-3 text-xs font-semibold text-emerald-100 hover:border-emerald-200/35 hover:bg-emerald-300/[0.12] sm:px-3.5 sm:text-sm"
-        aria-label={isEnglish ? 'Install Silentra app' : 'Instalar aplicação Silentra'}
+        aria-label={
+          isEnglish ? 'Install Silentra app' : 'Instalar aplicação Silentra'
+        }
       >
         <Download className="size-4" aria-hidden="true" />
         <span className="sm:hidden">{isEnglish ? 'Install' : 'Instalar'}</span>
@@ -270,8 +284,13 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                   {isEnglish ? 'Silentra web app' : 'Aplicação Web Silentra'}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-2.5 py-1.5 text-[10px] font-medium text-zinc-400 sm:text-[11px]">
-                  <ShieldCheck className="size-3.5 text-emerald-200" aria-hidden="true" />
-                  {isEnglish ? 'Free · No store needed' : 'Gratuita · Sem loja de apps'}
+                  <ShieldCheck
+                    className="size-3.5 text-emerald-200"
+                    aria-hidden="true"
+                  />
+                  {isEnglish
+                    ? 'Free · No store needed'
+                    : 'Gratuita · Sem loja de apps'}
                 </span>
               </div>
               <DialogTitle className="max-w-3xl text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
@@ -289,7 +308,9 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
             <div className="relative px-5 pb-5 sm:px-8 sm:pb-8">
               <div
                 role="tablist"
-                aria-label={isEnglish ? 'Choose your device' : 'Escolhe o teu dispositivo'}
+                aria-label={
+                  isEnglish ? 'Choose your device' : 'Escolhe o teu dispositivo'
+                }
                 className="grid grid-cols-3 gap-1.5 rounded-2xl border border-white/[0.07] bg-black/25 p-1.5 sm:gap-2"
               >
                 {devices.map(({ id, label, Icon }) => {
@@ -333,7 +354,9 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-sm font-semibold text-white sm:text-base">
-                        {isEnglish ? 'Made for everyday use' : 'Feita para o dia a dia'}
+                        {isEnglish
+                          ? 'Made for everyday use'
+                          : 'Feita para o dia a dia'}
                       </h3>
                       <p className="mt-0.5 text-xs leading-5 text-zinc-400">
                         {isEnglish
@@ -345,7 +368,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
 
                   <div className="mt-5 space-y-3">
                     <div className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-200" aria-hidden="true" />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-emerald-200"
+                        aria-hidden="true"
+                      />
                       <p className="text-sm leading-5 text-zinc-300">
                         {isEnglish
                           ? 'Quick access from your home screen or taskbar.'
@@ -353,7 +379,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                       </p>
                     </div>
                     <div className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-200" aria-hidden="true" />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-emerald-200"
+                        aria-hidden="true"
+                      />
                       <p className="text-sm leading-5 text-zinc-300">
                         {isEnglish
                           ? 'Uses your existing Silentra account and dashboard.'
@@ -361,7 +390,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                       </p>
                     </div>
                     <div className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-200" aria-hidden="true" />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-emerald-200"
+                        aria-hidden="true"
+                      />
                       <p className="text-sm leading-5 text-zinc-300">
                         {isEnglish
                           ? 'No App Store download or separate account required.'
@@ -372,7 +404,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
 
                   <div className="mt-5 rounded-xl border border-white/[0.07] bg-black/20 p-3.5">
                     <div className="flex items-start gap-2.5">
-                      <ShieldCheck className="mt-0.5 size-4 shrink-0 text-zinc-400" aria-hidden="true" />
+                      <ShieldCheck
+                        className="mt-0.5 size-4 shrink-0 text-zinc-400"
+                        aria-hidden="true"
+                      />
                       <p className="text-xs leading-5 text-zinc-400">
                         {isEnglish
                           ? 'The install option depends on your browser. If it is unavailable, Silentra still works normally in the browser.'
@@ -395,7 +430,9 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-sm font-semibold text-white sm:text-base">
-                        {isEnglish ? 'Installation steps' : 'Passos de instalação'}
+                        {isEnglish
+                          ? 'Installation steps'
+                          : 'Passos de instalação'}
                       </h3>
                       <p className="mt-1 text-xs text-zinc-500">
                         {isEnglish
@@ -421,7 +458,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <StepIcon className="size-4 shrink-0 text-zinc-300" aria-hidden="true" />
+                              <StepIcon
+                                className="size-4 shrink-0 text-zinc-300"
+                                aria-hidden="true"
+                              />
                               <h4 className="text-sm font-semibold leading-5 text-zinc-100">
                                 {step.title}
                               </h4>
@@ -438,7 +478,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
               </div>
 
               <p className="mt-4 flex items-start justify-center gap-2 px-1 text-center text-[11px] leading-5 text-zinc-500 sm:text-xs">
-                <ShieldCheck className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                <ShieldCheck
+                  className="mt-0.5 size-3.5 shrink-0"
+                  aria-hidden="true"
+                />
                 <span>
                   {isEnglish
                     ? 'Installing creates a shortcut to the web app; you can keep using Silentra in your browser.'

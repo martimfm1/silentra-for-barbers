@@ -28,7 +28,8 @@ const patterns = [
 
 // Do not let callers choose rate-limit buckets by forging the leftmost
 // X-Forwarded-For value. Route handlers must use the shared, validated IP helper.
-const spoofableForwardedForPattern = /headers\.get\(['"]x-forwarded-for['"]\)\?\.split\(['"],['"]\)\[0\]/;
+const spoofableForwardedForPattern =
+  /headers\.get\(['"]x-forwarded-for['"]\)\?\.split\(['"],['"]\)\[0\]/;
 
 const sensitiveIdentifierPattern =
   /(?:userId|barbershopId|customerId|stripeCustomerId|subscriptionId|stripeSubscriptionId|sessionId|email|phone|address)\s*[:=]/i;
@@ -116,7 +117,7 @@ const requestValidationChecks = [
       "'shopId'",
       "'professionalId'",
       'payloadResult.value',
-      "create_booking_atomic",
+      'create_booking_atomic',
       ".eq('barbershop_id', barbershopId)",
     ],
     label: 'Booking request validation and server-side source-of-truth checks',
@@ -148,7 +149,8 @@ const requestValidationChecks = [
       'getLisbonDayBounds(date)',
       "export const GET = withApiObservability('/api/appointments', GET__unobserved)",
     ],
-    label: 'Authenticated appointment request validation, tenant binding, and mobile agenda read',
+    label:
+      'Authenticated appointment request validation, tenant binding, and mobile agenda read',
   },
   {
     file: 'app/api/appointments/[appointmentId]/complete/route.ts',
@@ -166,7 +168,8 @@ const requestValidationChecks = [
       'sendBookingReviewRequestEmail',
       'A marcação já foi alterada',
     ],
-    label: 'Appointment completion supports Bearer/cookie auth, agenda permissions, plan entitlement and tenant scoping',
+    label:
+      'Appointment completion supports Bearer/cookie auth, agenda permissions, plan entitlement and tenant scoping',
   },
   {
     file: 'app/api/appointments/[appointmentId]/confirm/route.ts',
@@ -177,7 +180,8 @@ const requestValidationChecks = [
       'dispatchAppointmentAutomations',
       'sendBookingConfirmationEmail',
     ],
-    label: 'Appointment confirmation supports Bearer/cookie auth and remains tenant-scoped',
+    label:
+      'Appointment confirmation supports Bearer/cookie auth and remains tenant-scoped',
   },
   {
     file: 'app/api/appointments/[appointmentId]/reschedule/route.ts',
@@ -198,7 +202,8 @@ const requestValidationChecks = [
       "getLisbonParts(String(item.date_hour ?? ''))",
       "withApiObservability('/api/appointments/[appointmentId]/reschedule'",
     ],
-    label: 'Professional appointment rescheduling validates request, permissions, plan, tenant, availability and audit trail',
+    label:
+      'Professional appointment rescheduling validates request, permissions, plan, tenant, availability and audit trail',
   },
   {
     file: 'app/api/auth/register/route.ts',
@@ -225,62 +230,121 @@ const requestValidationChecks = [
   },
   {
     file: 'app/api/auth/login/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['email', 'password']", 'signInWithPassword'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['email', 'password']",
+      'signInWithPassword',
+    ],
     label: 'Login request validation',
   },
   {
     file: 'app/api/auth/reset-password/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['password']", 'supabase.auth.getUser()', 'supabase.auth.updateUser({ password })'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['password']",
+      'supabase.auth.getUser()',
+      'supabase.auth.updateUser({ password })',
+    ],
     label: 'Password reset request validation and authenticated session',
   },
   {
     file: 'app/api/crm/tags/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['name', 'color']", ".eq('barbershop_id', barbershopId)"],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['name', 'color']",
+      ".eq('barbershop_id', barbershopId)",
+    ],
     label: 'CRM tag request validation and tenant binding',
   },
   {
     file: 'app/api/enterprise/reports/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['name', 'reportType', 'filters']", ".eq('barbershop_id', barbershopId)", 'REPORT_TYPES.includes'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['name', 'reportType', 'filters']",
+      ".eq('barbershop_id', barbershopId)",
+      'REPORT_TYPES.includes',
+    ],
     label: 'Enterprise report request validation and tenant binding',
   },
   {
     file: 'app/api/marketplace/orders/[orderId]/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['status']", "STATUSES.includes", "requireModuleContext('pos', 'pos')"],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['status']",
+      'STATUSES.includes',
+      "requireModuleContext('pos', 'pos')",
+    ],
     label: 'Marketplace order status request validation and tenant binding',
   },
   {
     file: 'app/api/public/reviews/route.ts',
-    markers: ['readJsonObject(request', "'barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'", 'submit_public_review_with_token', 'createHash'],
+    markers: [
+      'readJsonObject(request',
+      "'barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'",
+      'submit_public_review_with_token',
+      'createHash',
+    ],
     label: 'Public review request validation and one-time token RPC',
   },
   {
     file: 'app/api/_silentra-admin/subscription-requests/[requestId]/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['action', 'paymentLink', 'reason']", 'assertSameOrigin(request)', 'requirePlatformAdmin()'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['action', 'paymentLink', 'reason']",
+      'assertSameOrigin(request)',
+      'requirePlatformAdmin()',
+    ],
     label: 'Manual billing admin request validation and authorization',
   },
   {
     file: 'app/api/marketplace/orders/[orderId]/email/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['subject', 'message']", ".eq('barbershop_id', barbershopId)", 'sendBrevoEmail'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['subject', 'message']",
+      ".eq('barbershop_id', barbershopId)",
+      'sendBrevoEmail',
+    ],
     label: 'Marketplace order email request validation and tenant binding',
   },
   {
     file: 'app/api/barbershops/avatar/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['avatarUrl']", 'requireTenantAuthorization(request', 'expectedPath', ".eq('id', tenant.barbershopId)"],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['avatarUrl']",
+      'requireTenantAuthorization(request',
+      'expectedPath',
+      ".eq('id', tenant.barbershopId)",
+    ],
     label: 'Avatar update request validation and tenant-scoped storage path',
   },
   {
     file: 'app/api/marketplace/manage/settings/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['marketplaceSalesMode']", "requireModuleContext('pos', 'pos')", 'MODES.includes'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['marketplaceSalesMode']",
+      "requireModuleContext('pos', 'pos')",
+      'MODES.includes',
+    ],
     label: 'Marketplace settings request validation and tenant authorization',
   },
   {
     file: 'app/api/bookings/customer-profile/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['shopId', 'email', 'phone']", 'UUID_PATTERN.test(shopId)', 'findPublicBookingCustomer'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['shopId', 'email', 'phone']",
+      'UUID_PATTERN.test(shopId)',
+      'findPublicBookingCustomer',
+    ],
     label: 'Public booking customer profile request validation',
   },
   {
     file: 'app/api/loyalty/validate/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['identifier']", 'consumePublicRateLimit', 'validate_loyalty_redemption'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['identifier']",
+      'consumePublicRateLimit',
+      'validate_loyalty_redemption',
+    ],
     label: 'Loyalty redemption validation request envelope and rate limit',
   },
   {
@@ -291,7 +355,8 @@ const requestValidationChecks = [
       ".eq('barbershop_id', barbershopId)",
       'uuid(body.serviceId)',
     ],
-    label: 'Loyalty earning rule create/update request validation and tenant binding',
+    label:
+      'Loyalty earning rule create/update request validation and tenant binding',
   },
   {
     file: 'app/api/loyalty/rewards/route.ts',
@@ -305,12 +370,22 @@ const requestValidationChecks = [
   },
   {
     file: 'app/api/loyalty/redeem/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'rewardId']", 'getLoyaltyTenantBySlug', 'getLoyaltySession'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['slug', 'rewardId']",
+      'getLoyaltyTenantBySlug',
+      'getLoyaltySession',
+    ],
     label: 'Loyalty redemption request validation and session checks',
   },
   {
     file: 'app/api/customer-portal/request-code/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['email']", 'consume_public_rate_limit', 'normalizePortalEmail'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['email']",
+      'consume_public_rate_limit',
+      'normalizePortalEmail',
+    ],
     label: 'Customer portal verification request validation and rate limiting',
   },
   {
@@ -324,7 +399,8 @@ const requestValidationChecks = [
       "clientPlatform === 'mobile' ? { sessionToken: token, expiresAt }",
       "'Cache-Control': 'no-store'",
     ],
-    label: 'Customer portal OTP verification supports secure mobile session tokens without changing web cookie login',
+    label:
+      'Customer portal OTP verification supports secure mobile session tokens without changing web cookie login',
   },
   {
     file: 'app/api/customer-portal/appointments/route.ts',
@@ -332,10 +408,11 @@ const requestValidationChecks = [
       'async function GET__unobserved(request: Request)',
       'getPortalSession(request)',
       ".eq('manual_email', session.email)",
-      '.in(\'client_id\', clientIds)',
+      ".in('client_id', clientIds)",
       "headers: { 'Cache-Control': 'no-store' }",
     ],
-    label: 'Customer booking history validates cookie or Bearer session and remains email-scoped',
+    label:
+      'Customer booking history validates cookie or Bearer session and remains email-scoped',
   },
   {
     file: 'app/api/customer-portal/appointments/[appointmentId]/route.ts',
@@ -352,7 +429,8 @@ const requestValidationChecks = [
       'availableSlots',
       'CUSTOMER_PORTAL_RESCHEDULE_ERROR',
     ],
-    label: 'Customer booking actions accept the session token, verify appointment ownership and validate reschedule payloads',
+    label:
+      'Customer booking actions accept the session token, verify appointment ownership and validate reschedule payloads',
   },
   {
     file: 'app/api/customer-portal/logout/route.ts',
@@ -363,16 +441,27 @@ const requestValidationChecks = [
       'clearPortalCookie()',
       "'Cache-Control': 'no-store'",
     ],
-    label: 'Customer portal logout revokes server-side session by validated session ID',
+    label:
+      'Customer portal logout revokes server-side session by validated session ID',
   },
   {
     file: 'app/api/loyalty/request-code/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'email']", 'consumePublicRateLimit', 'getLoyaltyTenantBySlug'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['slug', 'email']",
+      'consumePublicRateLimit',
+      'getLoyaltyTenantBySlug',
+    ],
     label: 'Loyalty OTP request validation and rate limiting',
   },
   {
     file: 'app/api/loyalty/verify-code/route.ts',
-    markers: ['readJsonObject(request', "allowedKeys: ['slug', 'email', 'code', 'name']", 'consumePublicRateLimit', 'getLoyaltyTenantBySlug'],
+    markers: [
+      'readJsonObject(request',
+      "allowedKeys: ['slug', 'email', 'code', 'name']",
+      'consumePublicRateLimit',
+      'getLoyaltyTenantBySlug',
+    ],
     label: 'Loyalty OTP verification request validation and rate limiting',
   },
   {
@@ -449,9 +538,7 @@ const requestValidationChecks = [
 
   {
     file: 'lib/barbershops/public-profile.ts',
-    markers: [
-      "return plan === 'enterprise';",
-    ],
+    markers: ["return plan === 'enterprise';"],
     label: 'Custom public URL is restricted to Enterprise plans',
   },
   {
@@ -497,17 +584,19 @@ const routeSecurityChecks = [
       'getCurrentUser(request)',
       'SubscriptionService.getAccessPlan(userId)',
     ],
-    label: 'Request-aware plan guard supports mobile Bearer tokens without changing cookie callers',
+    label:
+      'Request-aware plan guard supports mobile Bearer tokens without changing cookie callers',
   },
   {
     file: 'services/modules/authorization.ts',
     markers: [
       'request?: Request',
       'getAccessPlanForRequest(request)',
-      "PERMISSION_ALIASES:",
+      'PERMISSION_ALIASES:',
       "clients: ['clients']",
     ],
-    label: 'Module authorization supports request-bound client access and preserved member permissions',
+    label:
+      'Module authorization supports request-bound client access and preserved member permissions',
   },
   {
     file: 'app/api/crm/clients/route.ts',
@@ -515,10 +604,11 @@ const routeSecurityChecks = [
       "requireModuleContext('clients', 'clients', req)",
       ".eq('barbershop_id', tenant.barbershopId)",
       ".eq('role', 'client')",
-      'const search = url.searchParams.get(\'search\')?.trim().slice(0, 80)',
+      "const search = url.searchParams.get('search')?.trim().slice(0, 80)",
       'Cache-Control',
     ],
-    label: 'Mobile client directory requires authenticated tenant, module permission and bounded search',
+    label:
+      'Mobile client directory requires authenticated tenant, module permission and bounded search',
   },
   {
     file: 'app/api/crm/clients/[clientId]/route.ts',
@@ -530,7 +620,8 @@ const routeSecurityChecks = [
       'services(name,price), professionals(name)',
       'Cache-Control',
     ],
-    label: 'Client details and history are tenant-scoped and protected by plan/module permission',
+    label:
+      'Client details and history are tenant-scoped and protected by plan/module permission',
   },
   {
     file: 'app/api/crm/clients/[clientId]/notes/route.ts',
@@ -545,7 +636,8 @@ const routeSecurityChecks = [
       'author_id: tenant.userId',
       'Cache-Control',
     ],
-    label: 'CRM note creation validates request, plan/module permissions and tenant before writing',
+    label:
+      'CRM note creation validates request, plan/module permissions and tenant before writing',
   },
   {
     file: 'lib/marketing/brevo-webhook.ts',
@@ -556,7 +648,8 @@ const routeSecurityChecks = [
       'payloads.length > 100',
       "errorType: error instanceof Error ? error.name : 'UnknownError'",
     ],
-    label: 'Brevo webhook bounded payload parsing and non-sensitive error logging',
+    label:
+      'Brevo webhook bounded payload parsing and non-sensitive error logging',
   },
 
   {

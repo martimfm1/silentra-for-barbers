@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 
 type Plan = 'free' | 'pro' | 'enterprise';
-type Status = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
+type Status =
+  'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 type Message = {
   id: string;
   conversation_id: string;
@@ -83,8 +84,10 @@ function formatDate(value: string | null) {
 }
 
 function planTone(plan: Plan) {
-  if (plan === 'enterprise') return 'border-violet-400/25 bg-violet-400/10 text-violet-200';
-  if (plan === 'pro') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200';
+  if (plan === 'enterprise')
+    return 'border-violet-400/25 bg-violet-400/10 text-violet-200';
+  if (plan === 'pro')
+    return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200';
   return 'border-white/10 bg-white/[0.04] text-zinc-400';
 }
 
@@ -94,41 +97,61 @@ export default function SupportInbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | Status>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | Status>(
+    'all',
+  );
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const load = useCallback(async (id = selectedId, quiet = false) => {
-    if (!quiet) setLoading(true);
-    try {
-      const queryString = id ? `?conversationId=${encodeURIComponent(id)}` : '';
-      const response = await fetch(`/api/silentra-admin/support${queryString}`, {
-        cache: 'no-store',
-      });
-      const payload = (await response.json()) as Payload;
-      if (!response.ok || !payload.ok || !Array.isArray(payload.conversations)) {
-        throw new Error(payload.error || 'Não foi possível carregar o chat.');
-      }
-      setConversations(payload.conversations);
-      if (id) setMessages(payload.messages ?? []);
-      setError(null);
+  const load = useCallback(
+    async (id = selectedId, quiet = false) => {
+      if (!quiet) setLoading(true);
+      try {
+        const queryString = id
+          ? `?conversationId=${encodeURIComponent(id)}`
+          : '';
+        const response = await fetch(
+          `/api/silentra-admin/support${queryString}`,
+          {
+            cache: 'no-store',
+          },
+        );
+        const payload = (await response.json()) as Payload;
+        if (
+          !response.ok ||
+          !payload.ok ||
+          !Array.isArray(payload.conversations)
+        ) {
+          throw new Error(payload.error || 'Não foi possível carregar o chat.');
+        }
+        setConversations(payload.conversations);
+        if (id) setMessages(payload.messages ?? []);
+        setError(null);
 
-      if (!id && payload.conversations.length) {
-        const first = payload.conversations.find((item) => item.unreadCount > 0) ?? payload.conversations[0];
-        setSelectedId((current) => current ?? first.id);
+        if (!id && payload.conversations.length) {
+          const first =
+            payload.conversations.find((item) => item.unreadCount > 0) ??
+            payload.conversations[0];
+          setSelectedId((current) => current ?? first.id);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Erro ao carregar o chat.',
+        );
+      } finally {
+        if (!quiet) setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar o chat.');
-    } finally {
-      if (!quiet) setLoading(false);
-    }
-  }, [selectedId]);
+    },
+    [selectedId],
+  );
 
   useEffect(() => {
-    const requestedConversation = new URLSearchParams(window.location.search).get('conversationId');
+    const requestedConversation = new URLSearchParams(
+      window.location.search,
+    ).get('conversationId');
     if (requestedConversation) setSelectedId(requestedConversation);
   }, []);
 
@@ -178,25 +201,31 @@ export default function SupportInbox() {
 
   const visibleConversations = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return conversations.filter((conversation) => {
-      const matchesQuery = !normalizedQuery || [
-        conversation.customer.name,
-        conversation.customer.email ?? '',
-        conversation.barbershop.name,
-        conversation.subject,
-      ].some((value) => value.toLowerCase().includes(normalizedQuery));
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'unread'
-          ? conversation.unreadCount > 0
-          : conversation.status === statusFilter);
-      return matchesQuery && matchesStatus;
-    }).sort((a, b) =>
-      Number(b.status === 'pending') - Number(a.status === 'pending') ||
-      planRank[b.plan] - planRank[a.plan] ||
-      b.unreadCount - a.unreadCount ||
-      (Date.parse(b.last_message_at ?? b.created_at) - Date.parse(a.last_message_at ?? a.created_at)),
-    );
+    return conversations
+      .filter((conversation) => {
+        const matchesQuery =
+          !normalizedQuery ||
+          [
+            conversation.customer.name,
+            conversation.customer.email ?? '',
+            conversation.barbershop.name,
+            conversation.subject,
+          ].some((value) => value.toLowerCase().includes(normalizedQuery));
+        const matchesStatus =
+          statusFilter === 'all' ||
+          (statusFilter === 'unread'
+            ? conversation.unreadCount > 0
+            : conversation.status === statusFilter);
+        return matchesQuery && matchesStatus;
+      })
+      .sort(
+        (a, b) =>
+          Number(b.status === 'pending') - Number(a.status === 'pending') ||
+          planRank[b.plan] - planRank[a.plan] ||
+          b.unreadCount - a.unreadCount ||
+          Date.parse(b.last_message_at ?? b.created_at) -
+            Date.parse(a.last_message_at ?? a.created_at),
+      );
   }, [conversations, query, statusFilter]);
 
   const sendReply = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -219,10 +248,16 @@ export default function SupportInbox() {
       }
       setMessages((current) => [...current, payload.message!]);
       setDraft('');
-      setNotice('Resposta enviada. O membro recebe um email quando tiver uma mensagem por ler.');
+      setNotice(
+        'Resposta enviada. O membro recebe um email quando tiver uma mensagem por ler.',
+      );
       await load(selectedId, true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível enviar a resposta.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível enviar a resposta.',
+      );
     } finally {
       setSending(false);
     }
@@ -237,14 +272,23 @@ export default function SupportInbox() {
       const response = await fetch('/api/silentra-admin/support', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'status', conversationId: selectedId, status }),
+        body: JSON.stringify({
+          action: 'status',
+          conversationId: selectedId,
+          status,
+        }),
       });
       const payload = (await response.json()) as Payload;
-      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Não foi possível atualizar o estado.');
+      if (!response.ok || !payload.ok)
+        throw new Error(
+          payload.error || 'Não foi possível atualizar o estado.',
+        );
       setNotice(`Estado alterado para “${statusNames[status]}”.`);
       await load(selectedId, true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar o estado.');
+      setError(
+        err instanceof Error ? err.message : 'Erro ao atualizar o estado.',
+      );
     } finally {
       setUpdatingStatus(false);
     }
@@ -262,11 +306,16 @@ export default function SupportInbox() {
         body: JSON.stringify({ action: 'accept', conversationId: selectedId }),
       });
       const payload = (await response.json()) as Payload;
-      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Não foi possível aceitar o ticket.');
+      if (!response.ok || !payload.ok)
+        throw new Error(payload.error || 'Não foi possível aceitar o ticket.');
       setNotice('Ticket aceite. O chat ficou ativo para o membro.');
       await load(selectedId, true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível aceitar o ticket.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível aceitar o ticket.',
+      );
     } finally {
       setUpdatingStatus(false);
     }
@@ -278,11 +327,16 @@ export default function SupportInbox() {
         <div>
           <div className="flex items-center gap-2 text-emerald-300">
             <MessageCircle className="size-5" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em]">Tickets · Suporte</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em]">
+              Tickets · Suporte
+            </p>
           </div>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">Tickets de suporte</h2>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">
+            Tickets de suporte
+          </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Revê cada pedido, aceita-o para ativar o chat e mantém assuntos diferentes em tickets separados.
+            Revê cada pedido, aceita-o para ativar o chat e mantém assuntos
+            diferentes em tickets separados.
           </p>
         </div>
         <button
@@ -291,16 +345,20 @@ export default function SupportInbox() {
           disabled={loading}
           className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-zinc-300 hover:bg-white/[0.08] disabled:opacity-50 sm:self-auto"
         >
-          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />{' '}
+          Atualizar
         </button>
       </header>
 
       {notice ? (
-        <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] px-4 py-3 text-sm text-emerald-200">{notice}</div>
+        <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] px-4 py-3 text-sm text-emerald-200">
+          {notice}
+        </div>
       ) : null}
       {error ? (
         <div className="flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/[0.05] px-4 py-3 text-sm text-red-200">
-          <AlertCircle className="mt-0.5 size-4 shrink-0" /> <span>{error}</span>
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />{' '}
+          <span>{error}</span>
         </div>
       ) : null}
 
@@ -315,18 +373,28 @@ export default function SupportInbox() {
                 placeholder="Procurar membro ou barbearia"
                 className="min-w-0 flex-1 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-600"
               />
-              {query ? <button type="button" onClick={() => setQuery('')} aria-label="Limpar pesquisa"><X className="size-3.5" /></button> : null}
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  aria-label="Limpar pesquisa"
+                >
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
             </label>
             <div className="mt-3 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {([
-                ['all', 'Todas'],
-                ['unread', 'Por ler'],
-                ['pending', 'Pendentes'],
-                ['open', 'Chat ativo'],
-                ['waiting_customer', 'À espera'],
-                ['closed', 'Resolvidas'],
-                ['closed_unresolved', 'Fechadas sem resolução'],
-              ] as const).map(([value, label]) => (
+              {(
+                [
+                  ['all', 'Todas'],
+                  ['unread', 'Por ler'],
+                  ['pending', 'Pendentes'],
+                  ['open', 'Chat ativo'],
+                  ['waiting_customer', 'À espera'],
+                  ['closed', 'Resolvidas'],
+                  ['closed_unresolved', 'Fechadas sem resolução'],
+                ] as const
+              ).map(([value, label]) => (
                 <button
                   key={value}
                   type="button"
@@ -341,49 +409,78 @@ export default function SupportInbox() {
 
           <div className="flex-1 overflow-y-auto">
             {loading && !conversations.length ? (
-              <div className="p-6 text-center text-sm text-zinc-500">A carregar conversas…</div>
-            ) : visibleConversations.length ? visibleConversations.map((conversation) => (
-              <button
-                key={conversation.id}
-                type="button"
-                onClick={() => {
-                  setSelectedId(conversation.id);
-                  setNotice(null);
-                  setError(null);
-                }}
-                className={`block w-full border-b border-white/[0.06] p-4 text-left transition hover:bg-white/[0.035] ${selectedId === conversation.id ? 'bg-white/[0.055] shadow-[inset_2px_0_0_0_rgb(52,211,153)]' : ''}`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300">
-                    <UserRound className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="truncate text-sm font-semibold text-zinc-100">{conversation.customer.name}</p>
-                      {conversation.unreadCount > 0 ? (
-                        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950">{conversation.unreadCount}</span>
-                      ) : null}
+              <div className="p-6 text-center text-sm text-zinc-500">
+                A carregar conversas…
+              </div>
+            ) : visibleConversations.length ? (
+              visibleConversations.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(conversation.id);
+                    setNotice(null);
+                    setError(null);
+                  }}
+                  className={`block w-full border-b border-white/[0.06] p-4 text-left transition hover:bg-white/[0.035] ${selectedId === conversation.id ? 'bg-white/[0.055] shadow-[inset_2px_0_0_0_rgb(52,211,153)]' : ''}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300">
+                      <UserRound className="size-4" />
                     </div>
-                    <p className="mt-0.5 truncate text-xs text-zinc-500">{conversation.barbershop.name}</p>
-                    <p className="mt-2 line-clamp-2 break-words text-xs leading-5 text-zinc-400">{conversation.last_message_preview || conversation.description || 'Ticket sem descrição.'}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-zinc-100">
+                          {conversation.customer.name}
+                        </p>
+                        {conversation.unreadCount > 0 ? (
+                          <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950">
+                            {conversation.unreadCount}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 truncate text-xs text-zinc-500">
+                        {conversation.barbershop.name}
+                      </p>
+                      <p className="mt-2 line-clamp-2 break-words text-xs leading-5 text-zinc-400">
+                        {conversation.last_message_preview ||
+                          conversation.description ||
+                          'Ticket sem descrição.'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded-md border px-1.5 py-1 text-[9px] font-semibold ${planTone(conversation.plan)}`}>{planNames[conversation.plan]}</span>
-                  <span className="rounded-md border border-white/8 px-1.5 py-1 text-[9px] text-zinc-500">{statusNames[conversation.status]}</span>
-                  <span className="ml-auto text-[10px] text-zinc-600">{formatDate(conversation.last_message_at)}</span>
-                </div>
-              </button>
-            )) : (
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <span
+                      className={`rounded-md border px-1.5 py-1 text-[9px] font-semibold ${planTone(conversation.plan)}`}
+                    >
+                      {planNames[conversation.plan]}
+                    </span>
+                    <span className="rounded-md border border-white/8 px-1.5 py-1 text-[9px] text-zinc-500">
+                      {statusNames[conversation.status]}
+                    </span>
+                    <span className="ml-auto text-[10px] text-zinc-600">
+                      {formatDate(conversation.last_message_at)}
+                    </span>
+                  </div>
+                </button>
+              ))
+            ) : (
               <div className="flex flex-col items-center px-5 py-12 text-center">
                 <Inbox className="size-7 text-zinc-700" />
-                <p className="mt-3 text-sm font-medium text-zinc-400">Sem tickets a mostrar</p>
-                <p className="mt-1 text-xs leading-5 text-zinc-600">Os novos tickets aparecem aqui para serem analisados e aceites.</p>
+                <p className="mt-3 text-sm font-medium text-zinc-400">
+                  Sem tickets a mostrar
+                </p>
+                <p className="mt-1 text-xs leading-5 text-zinc-600">
+                  Os novos tickets aparecem aqui para serem analisados e
+                  aceites.
+                </p>
               </div>
             )}
           </div>
           <div className="border-t border-white/8 px-4 py-3 text-[10px] text-zinc-600">
-            {conversations.length} ticket(s) · {conversations.reduce((sum, item) => sum + item.unreadCount, 0)} mensagem(ns) por ler
+            {conversations.length} ticket(s) ·{' '}
+            {conversations.reduce((sum, item) => sum + item.unreadCount, 0)}{' '}
+            mensagem(ns) por ler
           </div>
         </aside>
 
@@ -396,10 +493,20 @@ export default function SupportInbox() {
                     <UserRound className="size-4" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-zinc-100">{selected.subject}</h3>
-                    <p className="mt-0.5 truncate text-xs text-zinc-300">{selected.customer.name} · {selected.barbershop.name}</p>
-                    <p className="truncate text-xs text-zinc-500">{selected.customer.email || 'Sem email disponível'}</p>
-                    <span className={`mt-1 inline-flex rounded-md border px-1.5 py-0.5 text-[9px] font-semibold ${planTone(selected.plan)}`}>{planNames[selected.plan]}</span>
+                    <h3 className="truncate text-sm font-semibold text-zinc-100">
+                      {selected.subject}
+                    </h3>
+                    <p className="mt-0.5 truncate text-xs text-zinc-300">
+                      {selected.customer.name} · {selected.barbershop.name}
+                    </p>
+                    <p className="truncate text-xs text-zinc-500">
+                      {selected.customer.email || 'Sem email disponível'}
+                    </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-md border px-1.5 py-0.5 text-[9px] font-semibold ${planTone(selected.plan)}`}
+                    >
+                      {planNames[selected.plan]}
+                    </span>
                   </div>
                 </div>
                 {selected.status === 'pending' ? (
@@ -409,7 +516,8 @@ export default function SupportInbox() {
                     disabled={updatingStatus}
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-200 disabled:opacity-50"
                   >
-                    <CheckCheck className="size-4" /> {updatingStatus ? 'A aceitar…' : 'Aceitar ticket'}
+                    <CheckCheck className="size-4" />{' '}
+                    {updatingStatus ? 'A aceitar…' : 'Aceitar ticket'}
                   </button>
                 ) : (
                   <label className="flex items-center gap-2 text-xs text-zinc-500">
@@ -417,79 +525,130 @@ export default function SupportInbox() {
                     <select
                       value={selected.status}
                       disabled={updatingStatus}
-                      onChange={(event) => void updateStatus(event.target.value as Status)}
+                      onChange={(event) =>
+                        void updateStatus(event.target.value as Status)
+                      }
                       className="min-h-9 rounded-lg border border-white/10 bg-[#121216] px-2.5 text-xs text-zinc-200 outline-none focus:border-emerald-400/30 disabled:opacity-50"
                     >
                       <option value="open">Chat ativo</option>
-                      <option value="waiting_customer">À espera do membro</option>
+                      <option value="waiting_customer">
+                        À espera do membro
+                      </option>
                       <option value="closed">Resolvida</option>
-                      <option value="closed_unresolved">Fechado sem resolução</option>
+                      <option value="closed_unresolved">
+                        Fechado sem resolução
+                      </option>
                     </select>
                   </label>
                 )}
               </div>
 
-{selected.status === 'pending' ? (
+              {selected.status === 'pending' ? (
                 <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 text-center">
                   <div className="w-full max-w-xl rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200">Descrição do problema</p>
-                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">{selected.description}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200">
+                      Descrição do problema
+                    </p>
+                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">
+                      {selected.description}
+                    </p>
                   </div>
-                  <p className="mt-4 text-sm text-zinc-400">O chat só fica disponível para o membro depois de aceitares este ticket.</p>
-
+                  <p className="mt-4 text-sm text-zinc-400">
+                    O chat só fica disponível para o membro depois de aceitares
+                    este ticket.
+                  </p>
                 </div>
               ) : (
-              <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
-                {messages.length ? messages.map((message) => {
-                  const adminMessage = message.sender_type === 'admin';
-                  return (
-                    <div key={message.id} className={`flex ${adminMessage ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[94%] rounded-2xl px-4 py-3 sm:max-w-[80%] ${adminMessage ? 'rounded-br-md bg-emerald-400/10 text-zinc-100 ring-1 ring-emerald-400/15' : 'rounded-bl-md bg-white/[0.045] text-zinc-200 ring-1 ring-white/[0.06]'}`}>
-                        <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
-                        <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-zinc-600">
-                          <span>{adminMessage ? 'Silentra' : selected.customer.name}</span>
-                          <span>·</span>
-                          <time dateTime={message.created_at}>{formatDate(message.created_at)}</time>
-                          {adminMessage ? <CheckCheck className="size-3" /> : null}
+                <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
+                  {messages.length ? (
+                    messages.map((message) => {
+                      const adminMessage = message.sender_type === 'admin';
+                      return (
+                        <div
+                          key={message.id}
+                          className={`flex ${adminMessage ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[94%] rounded-2xl px-4 py-3 sm:max-w-[80%] ${adminMessage ? 'rounded-br-md bg-emerald-400/10 text-zinc-100 ring-1 ring-emerald-400/15' : 'rounded-bl-md bg-white/[0.045] text-zinc-200 ring-1 ring-white/[0.06]'}`}
+                          >
+                            <p className="whitespace-pre-wrap break-words text-sm leading-6">
+                              {message.body}
+                            </p>
+                            <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-zinc-600">
+                              <span>
+                                {adminMessage
+                                  ? 'Silentra'
+                                  : selected.customer.name}
+                              </span>
+                              <span>·</span>
+                              <time dateTime={message.created_at}>
+                                {formatDate(message.created_at)}
+                              </time>
+                              {adminMessage ? (
+                                <CheckCheck className="size-3" />
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center">
+                      <MessageCircle className="size-8 text-zinc-700" />
+                      <p className="mt-3 text-sm text-zinc-400">
+                        Conversa sem mensagens
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-600">
+                        A primeira mensagem aparecerá aqui.
+                      </p>
                     </div>
-                  );
-                }) : (
-                  <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center">
-                    <MessageCircle className="size-8 text-zinc-700" />
-                    <p className="mt-3 text-sm text-zinc-400">Conversa sem mensagens</p>
-                    <p className="mt-1 text-xs text-zinc-600">A primeira mensagem aparecerá aqui.</p>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
               )}
 
-{selected.status !== 'pending' && selected.status !== 'closed' && selected.status !== 'closed_unresolved' ? (
-              <form onSubmit={sendReply} className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
-                <label htmlFor="admin-support-reply" className="sr-only">Resposta ao membro</label>
-                <textarea
-                  id="admin-support-reply"
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  placeholder="Escreve uma resposta ao membro…"
-                  maxLength={4000}
-                  rows={3}
-                  disabled={sending}
-                  className="w-full resize-y rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-400/30 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
-                />
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="inline-flex items-center gap-1.5 text-[10px] leading-5 text-zinc-600">
-                    <ShieldCheck className="size-3.5 shrink-0" /> Mensagens privadas · Email automático apenas quando há mensagens por ler
-                  </p>
-                  <button type="submit" disabled={sending || !draft.trim()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-40">
-                    <Send className="size-4" /> {sending ? 'A enviar…' : 'Enviar resposta'}
-                  </button>
-                </div>
-              </form>
-              ) : selected.status === 'closed' || selected.status === 'closed_unresolved' ? (
+              {selected.status !== 'pending' &&
+              selected.status !== 'closed' &&
+              selected.status !== 'closed_unresolved' ? (
+                <form
+                  onSubmit={sendReply}
+                  className="border-t border-white/10 bg-black/10 p-3 sm:p-4"
+                >
+                  <label htmlFor="admin-support-reply" className="sr-only">
+                    Resposta ao membro
+                  </label>
+                  <textarea
+                    id="admin-support-reply"
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="Escreve uma resposta ao membro…"
+                    maxLength={4000}
+                    rows={3}
+                    disabled={sending}
+                    className="w-full resize-y rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-400/30 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
+                  />
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="inline-flex items-center gap-1.5 text-[10px] leading-5 text-zinc-600">
+                      <ShieldCheck className="size-3.5 shrink-0" /> Mensagens
+                      privadas · Email automático apenas quando há mensagens por
+                      ler
+                    </p>
+                    <button
+                      type="submit"
+                      disabled={sending || !draft.trim()}
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Send className="size-4" />{' '}
+                      {sending ? 'A enviar…' : 'Enviar resposta'}
+                    </button>
+                  </div>
+                </form>
+              ) : selected.status === 'closed' ||
+                selected.status === 'closed_unresolved' ? (
                 <div className="border-t border-white/10 bg-black/10 p-4 text-sm text-zinc-500">
-                  {selected.status === 'closed' ? 'Este ticket foi resolvido.' : 'Este ticket foi fechado sem resolução.'} Se o membro tiver outro problema, deverá criar um novo ticket.
+                  {selected.status === 'closed'
+                    ? 'Este ticket foi resolvido.'
+                    : 'Este ticket foi fechado sem resolução.'}{' '}
+                  Se o membro tiver outro problema, deverá criar um novo ticket.
                 </div>
               ) : null}
             </>
@@ -498,9 +657,17 @@ export default function SupportInbox() {
               <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
                 <CircleDot className="size-6 text-zinc-600" />
               </div>
-              <h3 className="mt-4 text-base font-semibold text-zinc-200">Escolhe uma conversa</h3>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-500">Os membros Free, Pro e Enterprise contactam a equipa nesta caixa de entrada. A prioridade do plano é aplicada automaticamente.</p>
-              <div className="mt-4 flex items-center gap-2 text-xs text-zinc-600"><Clock3 className="size-3.5" /> Atualização automática a cada 30 segundos</div>
+              <h3 className="mt-4 text-base font-semibold text-zinc-200">
+                Escolhe uma conversa
+              </h3>
+              <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-500">
+                Os membros Free, Pro e Enterprise contactam a equipa nesta caixa
+                de entrada. A prioridade do plano é aplicada automaticamente.
+              </p>
+              <div className="mt-4 flex items-center gap-2 text-xs text-zinc-600">
+                <Clock3 className="size-3.5" /> Atualização automática a cada 30
+                segundos
+              </div>
             </div>
           )}
         </div>

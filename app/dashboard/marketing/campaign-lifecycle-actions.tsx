@@ -50,7 +50,9 @@ export function CampaignLifecycleActions() {
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('campaignLifecycle.loadGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('campaignLifecycle.loadGenericError'),
       );
     } finally {
       setLoading(false);
@@ -64,7 +66,9 @@ export function CampaignLifecycleActions() {
   async function cancel(campaign: Campaign) {
     const confirmed = await confirm({
       title: t('campaignLifecycle.cancelTitle'),
-      description: t('campaignLifecycle.cancelDescription', { name: campaign.name }),
+      description: t('campaignLifecycle.cancelDescription', {
+        name: campaign.name,
+      }),
       confirmLabel: t('campaignLifecycle.cancelAction'),
       destructive: true,
     });
@@ -82,7 +86,9 @@ export function CampaignLifecycleActions() {
       await load();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('campaignLifecycle.cancelGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('campaignLifecycle.cancelGenericError'),
       );
     } finally {
       setBusyId('');
@@ -92,7 +98,9 @@ export function CampaignLifecycleActions() {
   async function remove(campaign: Campaign) {
     const confirmed = await confirm({
       title: t('campaignLifecycle.deleteTitle'),
-      description: t('campaignLifecycle.deleteDescription', { name: campaign.name }),
+      description: t('campaignLifecycle.deleteDescription', {
+        name: campaign.name,
+      }),
       confirmLabel: t('campaignLifecycle.deleteAction'),
       destructive: true,
     });
@@ -110,7 +118,9 @@ export function CampaignLifecycleActions() {
       await load();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('campaignLifecycle.deleteGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('campaignLifecycle.deleteGenericError'),
       );
     } finally {
       setBusyId('');
@@ -172,7 +182,9 @@ export function CampaignLifecycleActions() {
                     ) : (
                       <Ban className="mr-1.5 size-4" aria-hidden="true" />
                     )}
-                    {busy ? t('campaignLifecycle.cancelling') : t('campaignLifecycle.cancel')}
+                    {busy
+                      ? t('campaignLifecycle.cancelling')
+                      : t('campaignLifecycle.cancel')}
                   </Button>
                 ) : (
                   <Button
@@ -190,7 +202,9 @@ export function CampaignLifecycleActions() {
                     ) : (
                       <Trash2 className="mr-1.5 size-4" aria-hidden="true" />
                     )}
-                    {busy ? t('campaignLifecycle.deleting') : t('campaignLifecycle.delete')}
+                    {busy
+                      ? t('campaignLifecycle.deleting')
+                      : t('campaignLifecycle.delete')}
                   </Button>
                 )}
               </div>

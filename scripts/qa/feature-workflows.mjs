@@ -6,45 +6,82 @@ const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
 
 const dashboardPage = read('app/dashboard/page.tsx');
 const automationPage = read('app/dashboard/automations/page.tsx');
-const automationSidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
-const marketingWorkspace = read('app/dashboard/marketing/marketing-workspace.tsx');
+const automationSidebar = read(
+  'app/dashboard/_components/DashboardSidebar.tsx',
+);
+const marketingWorkspace = read(
+  'app/dashboard/marketing/marketing-workspace.tsx',
+);
 const stripePricesRoute = read('app/api/stripe/prices/route.ts');
 const billingSummaryRoute = read('app/api/stripe/billing-summary/route.ts');
-const subscriptionDriftMigration = read('supabase/migrations/20261022181644_restore_subscription_cancellation_requested_at.sql');
+const subscriptionDriftMigration = read(
+  'supabase/migrations/20261022181644_restore_subscription_cancellation_requested_at.sql',
+);
 
 const websitePage = read('app/[slug]/page.tsx');
 const enterpriseWebsitePage = read('app/site/[slug]/page.tsx');
 const websiteRequestApi = read('app/api/dashboard/custom-website/route.ts');
-const websiteAdminApi = read('app/api/silentra-admin/custom-websites/[requestId]/route.ts');
-const websiteMigration = read('supabase/migrations/20261016180000_enterprise_custom_website_requests.sql');
+const websiteAdminApi = read(
+  'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
+);
+const websiteMigration = read(
+  'supabase/migrations/20261016180000_enterprise_custom_website_requests.sql',
+);
 const sitemap = read('app/sitemap.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
 const publicApiDocs = read('docs/API_PUBLICA.md');
 const openApi = read('public/openapi-v1.yaml');
 const birthdayApi = read('app/api/messages/birthdays/route.ts');
 const birthdayWorker = read('lib/marketing/birthday-delivery.ts');
-const birthdayReconciliation = read('supabase/migrations/20261022161843_reconcile_legacy_birthday_campaigns.sql');
+const birthdayReconciliation = read(
+  'supabase/migrations/20261022161843_reconcile_legacy_birthday_campaigns.sql',
+);
 const marketingCron = read('app/api/cron/marketing/route.ts');
 const bookingApi = read('app/api/bookings/route.ts');
-const bookingSettings = read('components/dashboard/settings-automatic-booking-panel.tsx');
-const bookingSettingsMigration = read('supabase/migrations/20260827133000_automatic_booking_settings.sql');
-const bookingRpcMigration = read('supabase/migrations/20260905150000_finalize_atomic_booking_contract.sql');
-const completionMigration = read('supabase/migrations/20260827134500_enable_booking_completion_worker.sql');
-const completionSchedule = read('supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql');
+const bookingSettings = read(
+  'components/dashboard/settings-automatic-booking-panel.tsx',
+);
+const bookingSettingsMigration = read(
+  'supabase/migrations/20260827133000_automatic_booking_settings.sql',
+);
+const bookingRpcMigration = read(
+  'supabase/migrations/20260905150000_finalize_atomic_booking_contract.sql',
+);
+const completionMigration = read(
+  'supabase/migrations/20260827134500_enable_booking_completion_worker.sql',
+);
+const completionSchedule = read(
+  'supabase/migrations/20260827180000_schedule_booking_completion_with_pg_cron.sql',
+);
 const completionCronApi = read('app/api/cron/booking-completion/route.ts');
-const bookingOutboxSchedule = read('supabase/migrations/20261022165654_schedule_booking_automation_outbox.sql');
-const bookingOutboxTimeout = read('supabase/migrations/20261022170213_increase_booking_outbox_http_timeout.sql');
-const bookingOutboxMigration = read('supabase/migrations/20261022165242_booking_automation_outbox.sql');
-const bookingOutboxWorker = read('app/api/cron/booking-automation-outbox/route.ts');
+const bookingOutboxSchedule = read(
+  'supabase/migrations/20261022165654_schedule_booking_automation_outbox.sql',
+);
+const bookingOutboxTimeout = read(
+  'supabase/migrations/20261022170213_increase_booking_outbox_http_timeout.sql',
+);
+const bookingOutboxMigration = read(
+  'supabase/migrations/20261022165242_booking_automation_outbox.sql',
+);
+const bookingOutboxWorker = read(
+  'app/api/cron/booking-automation-outbox/route.ts',
+);
 const bookingLifecycleCron = read('app/api/cron/booking-lifecycle/route.ts');
-const appointmentCompleteApi = read('app/api/appointments/[appointmentId]/complete/route.ts');
+const appointmentCompleteApi = read(
+  'app/api/appointments/[appointmentId]/complete/route.ts',
+);
 const adminReportsPage = read('app/silentra-admin/reports/page.tsx');
 const adminReportsUi = read('app/_silentra-admin/reports-page.tsx');
 const adminReportsApi = read('app/api/silentra-admin/reports/route.ts');
-const adminReportsMigration = read('supabase/migrations/20261022165246_platform_admin_reports.sql');
+const adminReportsMigration = read(
+  'supabase/migrations/20261022165246_platform_admin_reports.sql',
+);
 const vercel = JSON.parse(read('vercel.json'));
 
-assert.match(websiteRequestApi, /require\(['"]@\/services\/billing\/barbershop-stripe\.service|BarbershopStripeService/);
+assert.match(
+  websiteRequestApi,
+  /require\(['"]@\/services\/billing\/barbershop-stripe\.service|BarbershopStripeService/,
+);
 assert.match(websiteRequestApi, /custom_website_requests/);
 assert.match(websiteRequestApi, /assertSameOrigin/);
 assert.match(websiteAdminApi, /requirePlatformAdmin/);
@@ -56,7 +93,10 @@ assert.match(websitePage, /notFound\(\)/);
 assert.match(enterpriseWebsitePage, /barbershop_landing_pages/);
 assert.match(websiteMigration, /custom_website_requests_one_active_per_shop/);
 assert.match(websiteMigration, /enable row level security/i);
-assert.match(sitemap, /customWebsiteRoutes\.push\([\s\S]*url: `\$\{SITE_URL\}\/\$\{encodeURIComponent\(slug\)\}`/);
+assert.match(
+  sitemap,
+  /customWebsiteRoutes\.push\([\s\S]*url: `\$\{SITE_URL\}\/\$\{encodeURIComponent\(slug\)\}`/,
+);
 
 assert.match(publicApi, /consumePublicRateLimit/);
 assert.match(publicApi, /Access-Control-Allow-Origin/);
@@ -75,7 +115,10 @@ assert.match(birthdayWorker, /birthday:\$\{birthdayDate\}/);
 assert.match(birthdayWorker, /status === 'sent'/);
 assert.match(birthdayReconciliation, /birthday_email_automations/);
 assert.match(birthdayReconciliation, /legacy.enabled = true/);
-assert.match(birthdayReconciliation, /not exists \([\s\S]*campaign.trigger_type = 'birthday'/);
+assert.match(
+  birthdayReconciliation,
+  /not exists \([\s\S]*campaign.trigger_type = 'birthday'/,
+);
 assert.match(marketingCron, /processBirthdayCampaignDelivery/);
 assert.match(marketingCron, /CRON_SECRET/);
 assert.ok(vercel.crons.some((job) => job.path === '/api/cron/marketing'));
@@ -86,9 +129,18 @@ assert.match(bookingApi, /appointment\.status === 'scheduled'/);
 assert.match(bookingSettings, /auto_confirm_bookings/);
 assert.match(bookingSettings, /auto_complete_bookings/);
 assert.match(bookingSettings, /barbershopService\.updateConfig/);
-assert.match(bookingSettingsMigration, /auto_confirm_bookings boolean not null default false/);
-assert.match(bookingSettingsMigration, /auto_complete_bookings boolean not null default false/);
-assert.match(bookingRpcMigration, /coalesce\(b\.auto_confirm_bookings, false\)/);
+assert.match(
+  bookingSettingsMigration,
+  /auto_confirm_bookings boolean not null default false/,
+);
+assert.match(
+  bookingSettingsMigration,
+  /auto_complete_bookings boolean not null default false/,
+);
+assert.match(
+  bookingRpcMigration,
+  /coalesce\(b\.auto_confirm_bookings, false\)/,
+);
 assert.match(bookingRpcMigration, /if v_auto_confirm then/);
 assert.match(bookingRpcMigration, /v_status := 'scheduled'/);
 
@@ -124,14 +176,21 @@ assert.match(adminReportsUi, /Exportar CSV/);
 assert.match(adminReportsApi, /requirePlatformAdmin/);
 assert.match(adminReportsApi, /get_platform_admin_reports/);
 assert.match(adminReportsMigration, /get_platform_admin_reports/);
-assert.match(adminReportsMigration, /revoke all on function public\.get_platform_admin_reports/);
+assert.match(
+  adminReportsMigration,
+  /revoke all on function public\.get_platform_admin_reports/,
+);
 
 assert.ok(
-  subscriptionDriftMigration.includes('add column if not exists cancellation_requested_at timestamptz'),
+  subscriptionDriftMigration.includes(
+    'add column if not exists cancellation_requested_at timestamptz',
+  ),
   'Billing schema repair must add the cancellation timestamp queried by billing-summary.',
 );
 assert.ok(
-  billingSummaryRoute.includes('canceled_by_user_id, cancellation_requested_at, updated_at'),
+  billingSummaryRoute.includes(
+    'canceled_by_user_id, cancellation_requested_at, updated_at',
+  ),
   'Billing summary must keep the cancellation data contract covered by a migration.',
 );
 assert.ok(
@@ -161,4 +220,6 @@ assert.ok(
   'Automations must provide an idempotent one-click birthday automation setup.',
 );
 
-console.log('Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.');
+console.log(
+  'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
+);

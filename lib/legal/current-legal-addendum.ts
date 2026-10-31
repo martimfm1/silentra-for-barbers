@@ -64,7 +64,6 @@ export const currentPrivacyAddendum = {
   },
 } as const;
 
-
 export const currentTermsFeatureSections = {
   pt: [
     {
@@ -77,7 +76,8 @@ export const currentTermsFeatureSections = {
       ],
     },
     {
-      title: '17. Reservas automáticas e mensagens de aniversário — 25 de outubro de 2026',
+      title:
+        '17. Reservas automáticas e mensagens de aniversário — 25 de outubro de 2026',
       paragraphs: [
         'Quando a funcionalidade estiver disponível no plano e for ativada por uma pessoa autorizada da barbearia, novas marcações podem ser confirmadas automaticamente em vez de aguardarem confirmação manual. A conclusão automática pode alterar para «concluída» uma marcação agendada depois de terminar a duração registada, através de processamento periódico.',
         'A barbearia deve configurar estas opções de forma adequada à sua operação, monitorizar a agenda e informar os clientes sobre o processo de marcação. Continua responsável por resolver conflitos, corrigir dados incorretos e prestar o serviço reservado. A execução automática depende da configuração, da disponibilidade técnica e da informação registada.',
@@ -127,7 +127,8 @@ export const currentTermsFeatureSections = {
 export const currentPrivacyFeatureSections = {
   pt: [
     {
-      title: '16. Cookies, consentimento e tecnologias de terceiros — 25 de outubro de 2026',
+      title:
+        '16. Cookies, consentimento e tecnologias de terceiros — 25 de outubro de 2026',
       paragraphs: [
         'O cookie «silentra_cookie_consent» guarda a versão da política de consentimento, as categorias escolhidas e a data/hora da escolha durante 180 dias. É utilizado para respeitar e recordar as tuas preferências. Se o valor for inválido ou corresponder a uma versão desconhecida, as tecnologias opcionais ficam desativadas até ser feita uma nova escolha.',
         'Os cookies e mecanismos estritamente necessários podem suportar autenticação e sessão, segurança, idioma e funcionalidades solicitadas. Não são usados para ativar marketing opcional. A sua duração pode depender da sessão, do mecanismo de autenticação ou da preferência que servem.',
@@ -137,7 +138,8 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '17. Reservas, automações e mensagens de aniversário — 25 de outubro de 2026',
+      title:
+        '17. Reservas, automações e mensagens de aniversário — 25 de outubro de 2026',
       paragraphs: [
         'A plataforma pode tratar estados e horários de marcações para confirmar automaticamente novas reservas, quando a opção se encontra ativa, e para concluir marcações agendadas depois de terminar a duração registada, quando a conclusão automática está ativada. Estas operações servem a gestão da agenda e podem atualizar o estado operacional da marcação.',
         'As campanhas de aniversário podem tratar a data de nascimento, nome, email ou telefone do cliente para enviar uma mensagem no dia correspondente ou num dia relativo configurado, e podem registar o resultado de envio e um identificador de destinatário. A barbearia configura a campanha e determina a finalidade e a base legal do tratamento dos dados dos seus clientes.',
@@ -145,7 +147,8 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '18. Sites próprios, API pública e dados publicados — 25 de outubro de 2026',
+      title:
+        '18. Sites próprios, API pública e dados publicados — 25 de outubro de 2026',
       paragraphs: [
         'O serviço de sites próprios permite publicar determinados conteúdos de uma barbearia, como nome, texto descritivo, imagem, ligação para marcação e outros campos configurados. A barbearia decide que conteúdo fornece e deve assegurar que tem autorização para o publicar, incluindo dados, fotografias e testemunhos que possam identificar terceiros.',
         'A API pública v1 fornece dados previamente definidos e destinados à publicação, como perfil público, serviços, horários, avaliações e ligações públicas, dentro dos limites documentados. Não foi concebida para devolver credenciais, dados de sessão, contactos privados ou o conteúdo interno de contas.',
@@ -153,7 +156,8 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '19. Fornecedores, conservação e transferências — 25 de outubro de 2026',
+      title:
+        '19. Fornecedores, conservação e transferências — 25 de outubro de 2026',
       paragraphs: [
         'Consoante a funcionalidade utilizada e o consentimento dado, podem intervir fornecedores de alojamento e infraestrutura (incluindo Vercel e Supabase), medição (Vercel Analytics/Speed Insights), gestão de etiquetas (Google Tag Manager), medição de marketing (Whop), pagamentos (Stripe) e comunicações por email (Brevo). Cada fornecedor recebe apenas os dados necessários à função técnica que presta, de acordo com a configuração e os contratos aplicáveis.',
         'Alguns fornecedores podem tratar dados fora do Espaço Económico Europeu. Quando tal ocorrer, o tratamento deve assentar num mecanismo de transferência permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, conforme aplicável. A localização concreta pode variar de acordo com o serviço e a configuração da conta.',
@@ -163,7 +167,8 @@ export const currentPrivacyFeatureSections = {
   ],
   en: [
     {
-      title: '16. Cookies, consent, and third-party technologies — October 25, 2026',
+      title:
+        '16. Cookies, consent, and third-party technologies — October 25, 2026',
       paragraphs: [
         'The «silentra_cookie_consent» cookie stores the consent-policy version, selected categories, and date/time of the choice for 180 days. It is used to respect and remember your preferences. If the value is invalid or from an unknown version, optional technologies remain disabled until a new choice is made.',
         'Strictly necessary cookies and mechanisms may support authentication and session management, security, language, and requested features. They are not used to enable optional marketing. Their lifetime may depend on the session, authentication mechanism, or preference they serve.',
@@ -173,7 +178,8 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '17. Bookings, automations, and birthday messages — October 25, 2026',
+      title:
+        '17. Bookings, automations, and birthday messages — October 25, 2026',
       paragraphs: [
         'The platform may process booking statuses and times to automatically confirm new bookings when that option is enabled, and to complete scheduled bookings after their recorded duration has ended when automatic completion is enabled. These operations support schedule management and may update a booking’s operational status.',
         'Birthday campaigns may process a customer’s birth date, name, email, or phone number to send a message on the matching date or a configured relative day, and may record the delivery outcome and recipient identifier. The barbershop configures the campaign and determines the purpose and lawful basis for processing its customers’ data.',
@@ -181,7 +187,8 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '18. Custom websites, public API, and published data — October 25, 2026',
+      title:
+        '18. Custom websites, public API, and published data — October 25, 2026',
       paragraphs: [
         'The custom-website service can publish selected barbershop content such as name, description, image, booking link, and other configured fields. The barbershop decides which content it supplies and must ensure it has permission to publish it, including data, photos, and testimonials that may identify other people.',
         'The public API v1 provides predefined data intended for publication, such as public profile, services, opening hours, reviews, and public links, within the documented limits. It is not designed to return credentials, session data, private contact details, or internal account content.',

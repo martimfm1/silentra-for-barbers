@@ -171,7 +171,11 @@ export default function ForgotPasswordPage() {
                         </Field>
 
                         <Button
-            aria-label={isSubmitting ? "A enviar pedido" : "Enviar instruções de recuperação"}
+                          aria-label={
+                            isSubmitting
+                              ? 'A enviar pedido'
+                              : 'Enviar instruções de recuperação'
+                          }
                           type="submit"
                           disabled={isSubmitting || !email.trim()}
                           className="h-11 w-full rounded-full bg-zinc-50 text-xs font-bold text-zinc-950 hover:bg-white active:scale-[0.98] transition-all shadow-md mt-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:opacity-30 disabled:pointer-events-none"

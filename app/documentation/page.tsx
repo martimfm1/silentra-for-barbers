@@ -243,18 +243,45 @@ export default async function DocumentationPage() {
     limites: { pt: 'Limites e erros', en: 'Rate limits and errors' },
     cors: { pt: 'CORS e browser', en: 'CORS and browsers' },
     seguranca: { pt: 'Dados e segurança', en: 'Data and security' },
-    enterprise: { pt: 'Landing page Enterprise', en: 'Enterprise landing page' },
-    versoes: { pt: 'Versões e compatibilidade', en: 'Versions and compatibility' },
+    enterprise: {
+      pt: 'Landing page Enterprise',
+      en: 'Enterprise landing page',
+    },
+    versoes: {
+      pt: 'Versões e compatibilidade',
+      en: 'Versions and compatibility',
+    },
   };
   const statusMeanings: Record<string, { pt: string; en: string }> = {
     '200': { pt: 'Dados públicos devolvidos.', en: 'Public data returned.' },
-    '304': { pt: 'O ETag corresponde; a resposta não contém corpo.', en: 'The ETag matches; the response has no body.' },
-    '400': { pt: 'O slug tem um formato inválido.', en: 'The slug has an invalid format.' },
-    '404': { pt: 'Perfil inexistente, indisponível ou não público.', en: 'The profile does not exist, is unavailable, or is not public.' },
-    '429': { pt: 'Limite de pedidos atingido; respeita Retry-After.', en: 'Rate limit reached; respect Retry-After.' },
-    '500': { pt: 'Ocorreu um erro interno inesperado.', en: 'An unexpected internal error occurred.' },
-    '503': { pt: 'Serviço temporariamente indisponível.', en: 'The service is temporarily unavailable.' },
-    '204': { pt: 'Preflight OPTIONS aceite.', en: 'OPTIONS preflight accepted.' },
+    '304': {
+      pt: 'O ETag corresponde; a resposta não contém corpo.',
+      en: 'The ETag matches; the response has no body.',
+    },
+    '400': {
+      pt: 'O slug tem um formato inválido.',
+      en: 'The slug has an invalid format.',
+    },
+    '404': {
+      pt: 'Perfil inexistente, indisponível ou não público.',
+      en: 'The profile does not exist, is unavailable, or is not public.',
+    },
+    '429': {
+      pt: 'Limite de pedidos atingido; respeita Retry-After.',
+      en: 'Rate limit reached; respect Retry-After.',
+    },
+    '500': {
+      pt: 'Ocorreu um erro interno inesperado.',
+      en: 'An unexpected internal error occurred.',
+    },
+    '503': {
+      pt: 'Serviço temporariamente indisponível.',
+      en: 'The service is temporarily unavailable.',
+    },
+    '204': {
+      pt: 'Preflight OPTIONS aceite.',
+      en: 'OPTIONS preflight accepted.',
+    },
   };
   const localizedSections = sections.map((section) => ({
     ...section,
@@ -262,7 +289,8 @@ export default async function DocumentationPage() {
   }));
   const localizedResponseStatuses = responseStatuses.map((item) => ({
     ...item,
-    meaning: statusMeanings[item.status]?.[english ? 'en' : 'pt'] ?? item.meaning,
+    meaning:
+      statusMeanings[item.status]?.[english ? 'en' : 'pt'] ?? item.meaning,
   }));
   return (
     <div className="min-h-screen overflow-x-clip bg-zinc-950 text-zinc-50 antialiased">
@@ -279,7 +307,10 @@ export default async function DocumentationPage() {
               {tr('Documentação da API pública', 'Public API documentation')}
             </h1>
             <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300 sm:text-base">
-              {tr('Integra perfis públicos, serviços, avaliações e ligações para marcações em websites e aplicações externas. Esta API é de consulta, não exige autenticação e disponibiliza apenas informação aprovada para publicação.', 'Integrate public barbershop profiles, services, reviews and booking links into external websites and apps. This read-only API requires no authentication and only returns information approved for publication.')}
+              {tr(
+                'Integra perfis públicos, serviços, avaliações e ligações para marcações em websites e aplicações externas. Esta API é de consulta, não exige autenticação e disponibiliza apenas informação aprovada para publicação.',
+                'Integrate public barbershop profiles, services, reviews and booking links into external websites and apps. This read-only API requires no authentication and only returns information approved for publication.',
+              )}
             </p>
             <div className="mt-7 grid gap-2 sm:flex sm:flex-wrap">
               <a
@@ -308,14 +339,26 @@ export default async function DocumentationPage() {
           </div>
           <div className="relative mt-9 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: tr('Método', 'Method'), value: 'GET / OPTIONS', icon: Code2 },
-              { label: tr('Autenticação', 'Authentication'), value: tr('Não necessária', 'Not required'), icon: Globe2 },
+              {
+                label: tr('Método', 'Method'),
+                value: 'GET / OPTIONS',
+                icon: Code2,
+              },
+              {
+                label: tr('Autenticação', 'Authentication'),
+                value: tr('Não necessária', 'Not required'),
+                icon: Globe2,
+              },
               {
                 label: tr('Limite inicial', 'Initial rate limit'),
                 value: tr('120 pedidos/min', '120 requests/min'),
                 icon: Timer,
               },
-              { label: tr('Contrato', 'Contract'), value: 'API v1 · JSON', icon: Layers3 },
+              {
+                label: tr('Contrato', 'Contract'),
+                value: 'API v1 · JSON',
+                icon: Layers3,
+              },
             ].map((item) => (
               <div
                 key={item.label}
@@ -385,7 +428,10 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('01 · Início rápido', '01 · Quick start')}
                 title={tr('Faz o primeiro pedido', 'Make your first request')}
-                description={tr('Usa o slug público da barbearia. Não precisas de criar uma conta técnica, enviar uma API key nem incluir credenciais na aplicação.', 'Use the barbershop’s public slug. You do not need a technical account or API key, and you must not embed credentials in your app.')}
+                description={tr(
+                  'Usa o slug público da barbearia. Não precisas de criar uma conta técnica, enviar uma API key nem incluir credenciais na aplicação.',
+                  'Use the barbershop’s public slug. You do not need a technical account or API key, and you must not embed credentials in your app.',
+                )}
               />
               <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
@@ -411,7 +457,10 @@ export default async function DocumentationPage() {
                 <code className="rounded bg-white/[0.06] px-1 py-0.5 text-zinc-300">
                   barbearia-exemplo
                 </code>
-                {tr('pelo slug real. O slug deve ter entre 3 e 60 caracteres, usando letras minúsculas, números e hífen.', 'with the actual slug. It must contain 3–60 characters, using lowercase letters, numbers and hyphens.')}
+                {tr(
+                  'pelo slug real. O slug deve ter entre 3 e 60 caracteres, usando letras minúsculas, números e hífen.',
+                  'with the actual slug. It must contain 3–60 characters, using lowercase letters, numbers and hyphens.',
+                )}
               </p>
             </section>
 
@@ -419,7 +468,10 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('02 · Contrato', '02 · Response contract')}
                 title={tr('Estrutura da resposta', 'Response structure')}
-                description={tr('A resposta de sucesso usa sempre apiVersion e data. Os identificadores do exemplo são ilustrativos; alguns campos podem ser null quando a barbearia não os preencheu.', 'A successful response always includes apiVersion and data. The identifiers are illustrative; some fields may be null when the barbershop has not provided them.')}
+                description={tr(
+                  'A resposta de sucesso usa sempre apiVersion e data. Os identificadores do exemplo são ilustrativos; alguns campos podem ser null quando a barbearia não os preencheu.',
+                  'A successful response always includes apiVersion and data. The identifiers are illustrative; some fields may be null when the barbershop has not provided them.',
+                )}
               />
               <CodePanel
                 title="Exemplo JSON"
@@ -430,19 +482,28 @@ export default async function DocumentationPage() {
                 <div className="rounded-xl border border-white/10 p-4">
                   <p className="text-sm font-semibold text-white">barbershop</p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Perfil público, contactos comerciais, imagens, etiquetas, SEO, comodidades e horário.', 'Public profile, business contact details, images, tags, SEO, amenities and opening hours.')}
+                    {tr(
+                      'Perfil público, contactos comerciais, imagens, etiquetas, SEO, comodidades e horário.',
+                      'Public profile, business contact details, images, tags, SEO, amenities and opening hours.',
+                    )}
                   </p>
                 </div>
                 <div className="rounded-xl border border-white/10 p-4">
                   <p className="text-sm font-semibold text-white">services</p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Até 100 serviços, com preço em EUR, duração e indicação de popularidade.', 'Up to 100 services, including EUR price, duration and popularity.')}
+                    {tr(
+                      'Até 100 serviços, com preço em EUR, duração e indicação de popularidade.',
+                      'Up to 100 services, including EUR price, duration and popularity.',
+                    )}
                   </p>
                 </div>
                 <div className="rounded-xl border border-white/10 p-4">
                   <p className="text-sm font-semibold text-white">reviews</p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Até 100 avaliações recentes. O total agregado pode ser superior à lista devolvida.', 'Up to 100 recent reviews. The aggregate total may exceed the returned list.')}
+                    {tr(
+                      'Até 100 avaliações recentes. O total agregado pode ser superior à lista devolvida.',
+                      'Up to 100 recent reviews. The aggregate total may exceed the returned list.',
+                    )}
                   </p>
                 </div>
                 <div className="rounded-xl border border-white/10 p-4">
@@ -450,7 +511,10 @@ export default async function DocumentationPage() {
                     bookingUrl / landingPage
                   </p>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Links absolutos para marcações e, quando elegível, para a landing page Enterprise.', 'Absolute links for bookings and, when eligible, the Enterprise landing page.')}
+                    {tr(
+                      'Links absolutos para marcações e, quando elegível, para a landing page Enterprise.',
+                      'Absolute links for bookings and, when eligible, the Enterprise landing page.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -460,15 +524,24 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('03 · Referência', '03 · Field reference')}
                 title={tr('Campos disponíveis', 'Available fields')}
-                description={tr('Consome apenas os campos de que precisas e trata os valores opcionais sem assumir que existem em todos os perfis.', 'Only use the fields you need, and handle optional values without assuming they exist in every profile.')}
+                description={tr(
+                  'Consome apenas os campos de que precisas e trata os valores opcionais sem assumir que existem em todos os perfis.',
+                  'Only use the fields you need, and handle optional values without assuming they exist in every profile.',
+                )}
               />
               <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full min-w-[560px] border-collapse text-left text-xs">
                   <thead className="bg-white/[0.04] text-zinc-300">
                     <tr>
-                      <th className="px-4 py-3 font-medium">{tr('Campo', 'Field')}</th>
-                      <th className="px-4 py-3 font-medium">{tr('Tipo', 'Type')}</th>
-                      <th className="px-4 py-3 font-medium">{tr('Descrição', 'Description')}</th>
+                      <th className="px-4 py-3 font-medium">
+                        {tr('Campo', 'Field')}
+                      </th>
+                      <th className="px-4 py-3 font-medium">
+                        {tr('Tipo', 'Type')}
+                      </th>
+                      <th className="px-4 py-3 font-medium">
+                        {tr('Descrição', 'Description')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.06] text-zinc-400">
@@ -476,58 +549,98 @@ export default async function DocumentationPage() {
                       [
                         'barbershop.id / slug / name',
                         'string',
-                        tr('Identificação pública e nome da barbearia.', 'Public identifier and barbershop name.'),
+                        tr(
+                          'Identificação pública e nome da barbearia.',
+                          'Public identifier and barbershop name.',
+                        ),
                       ],
                       [
                         'barbershop.city / address / phone',
                         'string | null',
-                        tr('Dados de contacto comercial públicos.', 'Public business contact details.'),
+                        tr(
+                          'Dados de contacto comercial públicos.',
+                          'Public business contact details.',
+                        ),
                       ],
                       [
                         'barbershop.avatarUrl / coverUrl',
                         'URL | null',
-                        tr('Imagens públicas do perfil.', 'Public profile images.'),
+                        tr(
+                          'Imagens públicas do perfil.',
+                          'Public profile images.',
+                        ),
                       ],
                       [
                         'barbershop.tags',
                         'string[]',
-                        tr('Etiquetas públicas do perfil.', 'Public profile tags.'),
+                        tr(
+                          'Etiquetas públicas do perfil.',
+                          'Public profile tags.',
+                        ),
                       ],
                       [
                         'barbershop.seo',
                         'object',
-                        tr('title, description e imageUrl, quando definidos.', 'title, description and imageUrl, when set.'),
+                        tr(
+                          'title, description e imageUrl, quando definidos.',
+                          'title, description and imageUrl, when set.',
+                        ),
                       ],
                       [
                         'barbershop.amenities',
                         'object',
-                        tr('Comodidades públicas normalizadas.', 'Normalized public amenities.'),
+                        tr(
+                          'Comodidades públicas normalizadas.',
+                          'Normalized public amenities.',
+                        ),
                       ],
                       [
                         'barbershop.openingHours',
                         'object',
-                        tr('Abertura, fecho, pausa de almoço e dias fechados.', 'Opening, closing, lunch break and closed days.'),
+                        tr(
+                          'Abertura, fecho, pausa de almoço e dias fechados.',
+                          'Opening, closing, lunch break and closed days.',
+                        ),
                       ],
                       [
                         'services[]',
                         'array',
-                        tr('Até 100 serviços, ordenados por popularidade e nome.', 'Up to 100 services, sorted by popularity and name.'),
+                        tr(
+                          'Até 100 serviços, ordenados por popularidade e nome.',
+                          'Up to 100 services, sorted by popularity and name.',
+                        ),
                       ],
-                      ['reviews[]', 'array', tr('Até 100 avaliações recentes.', 'Up to 100 recent reviews.')],
+                      [
+                        'reviews[]',
+                        'array',
+                        tr(
+                          'Até 100 avaliações recentes.',
+                          'Up to 100 recent reviews.',
+                        ),
+                      ],
                       [
                         'rating / reviewsCount',
                         'number / integer',
-                        tr('Classificação e contagem agregadas, quando disponíveis.', 'Aggregate rating and count, when available.'),
+                        tr(
+                          'Classificação e contagem agregadas, quando disponíveis.',
+                          'Aggregate rating and count, when available.',
+                        ),
                       ],
                       [
                         'bookingUrl',
                         'URL',
-                        tr('Ligação pública para consultar e marcar.', 'Public link to view details and book.'),
+                        tr(
+                          'Ligação pública para consultar e marcar.',
+                          'Public link to view details and book.',
+                        ),
                       ],
                       [
                         'landingPage.available / url',
                         'boolean / URL | null',
-                        tr('Disponibilidade da landing page Enterprise.', 'Enterprise landing page availability.'),
+                        tr(
+                          'Disponibilidade da landing page Enterprise.',
+                          'Enterprise landing page availability.',
+                        ),
                       ],
                     ].map((row) => (
                       <tr key={row[0]}>
@@ -548,25 +661,43 @@ export default async function DocumentationPage() {
             <section id="exemplos" className="scroll-mt-28 space-y-5">
               <SectionTitle
                 eyebrow={tr('04 · Integração', '04 · Integration examples')}
-                title={tr('Exemplos prontos a adaptar', 'Examples you can adapt')}
-                description={tr('Todos os exemplos verificam o status HTTP antes de usar o corpo da resposta. Os botões permitem copiar o código diretamente.', 'Every example checks the HTTP status before reading the response body. Use the buttons to copy the code.')}
+                title={tr(
+                  'Exemplos prontos a adaptar',
+                  'Examples you can adapt',
+                )}
+                description={tr(
+                  'Todos os exemplos verificam o status HTTP antes de usar o corpo da resposta. Os botões permitem copiar o código diretamente.',
+                  'Every example checks the HTTP status before reading the response body. Use the buttons to copy the code.',
+                )}
               />
               <CodePanel
-                title={tr('JavaScript — browser ou Node.js', 'JavaScript — browser or Node.js')}
+                title={tr(
+                  'JavaScript — browser ou Node.js',
+                  'JavaScript — browser or Node.js',
+                )}
                 language="javascript"
                 code={browserExample}
               />
               <CodePanel
-                title={tr('Next.js — consulta no servidor', 'Next.js — server-side request')}
+                title={tr(
+                  'Next.js — consulta no servidor',
+                  'Next.js — server-side request',
+                )}
                 language="typescript"
                 code={nextExample}
               />
               <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
                 <p className="text-sm font-semibold text-zinc-200">
-                  {tr('Dica para integrações públicas', 'Tip for public integrations')}
+                  {tr(
+                    'Dica para integrações públicas',
+                    'Tip for public integrations',
+                  )}
                 </p>
                 <p className="mt-2 text-xs leading-6 text-zinc-400">
-                  {tr('Se apresentares os dados no browser, usa textContent ou o mecanismo de escape do teu framework para mostrar conteúdo textual. Não transformes comentários de avaliações em HTML executável.', 'When displaying data in the browser, use textContent or your framework’s escaping mechanism for text. Never turn review comments into executable HTML.')}
+                  {tr(
+                    'Se apresentares os dados no browser, usa textContent ou o mecanismo de escape do teu framework para mostrar conteúdo textual. Não transformes comentários de avaliações em HTML executável.',
+                    'When displaying data in the browser, use textContent or your framework’s escaping mechanism for text. Never turn review comments into executable HTML.',
+                  )}
                 </p>
               </div>
             </section>
@@ -575,11 +706,17 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('05 · Performance', '05 · Performance')}
                 title={tr('Cache HTTP e ETag', 'HTTP caching and ETags')}
-                description={tr('A API suporta cache partilhada para reduzir latência e carga. O conteúdo é público e pode ficar temporariamente desatualizado.', 'The API supports shared caching to reduce latency and load. The content is public and may be temporarily stale.')}
+                description={tr(
+                  'A API suporta cache partilhada para reduzir latência e carga. O conteúdo é público e pode ficar temporariamente desatualizado.',
+                  'The API supports shared caching to reduce latency and load. The content is public and may be temporarily stale.',
+                )}
               />
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
-                  { value: tr('60 segundos', '60 seconds'), label: 'CDN cache (s-maxage)' },
+                  {
+                    value: tr('60 segundos', '60 seconds'),
+                    label: 'CDN cache (s-maxage)',
+                  },
                   {
                     value: tr('300 segundos', '300 seconds'),
                     label: 'stale-while-revalidate window',
@@ -587,7 +724,10 @@ export default async function DocumentationPage() {
                   { value: 'SHA-256', label: 'JSON representation ETag' },
                   {
                     value: '304',
-                    label: tr('Resposta sem corpo quando não há alterações', 'Bodyless response when nothing has changed'),
+                    label: tr(
+                      'Resposta sem corpo quando não há alterações',
+                      'Bodyless response when nothing has changed',
+                    ),
                   },
                 ].map((item) => (
                   <div
@@ -602,7 +742,10 @@ export default async function DocumentationPage() {
                 ))}
               </div>
               <p className="mt-4 text-sm leading-7 text-zinc-400">
-                {tr('Guarda o ETag recebido e envia-o no cabeçalho If-None-Match do próximo pedido. Se receberes 304, reutiliza a resposta guardada; não tentes ler JSON de uma resposta sem corpo.', 'Store the ETag and send it in the If-None-Match header on the next request. If you receive 304, reuse the cached response; do not try to parse JSON from an empty response.')}
+                {tr(
+                  'Guarda o ETag recebido e envia-o no cabeçalho If-None-Match do próximo pedido. Se receberes 304, reutiliza a resposta guardada; não tentes ler JSON de uma resposta sem corpo.',
+                  'Store the ETag and send it in the If-None-Match header on the next request. If you receive 304, reuse the cached response; do not try to parse JSON from an empty response.',
+                )}
               </p>
               <div className="mt-4">
                 <CodePanel
@@ -616,15 +759,23 @@ export default async function DocumentationPage() {
             <section id="limites" className="scroll-mt-28">
               <SectionTitle
                 eyebrow={tr('06 · Resiliência', '06 · Reliability')}
-                title={tr('Limites e erros HTTP', 'Rate limits and HTTP errors')}
-                description={tr('Usa o código HTTP para gerir os fluxos. A mensagem dentro de error é destinada a diagnóstico e pode evoluir sem alterar o contrato.', 'Use the HTTP status to control your flow. The error message is for diagnostics and may change without changing the API contract.')}
+                title={tr(
+                  'Limites e erros HTTP',
+                  'Rate limits and HTTP errors',
+                )}
+                description={tr(
+                  'Usa o código HTTP para gerir os fluxos. A mensagem dentro de error é destinada a diagnóstico e pode evoluir sem alterar o contrato.',
+                  'Use the HTTP status to control your flow. The error message is for diagnostics and may change without changing the API contract.',
+                )}
               />
               <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full min-w-[440px] border-collapse text-left text-xs">
                   <thead className="bg-white/[0.04] text-zinc-300">
                     <tr>
                       <th className="px-4 py-3 font-medium">HTTP</th>
-                      <th className="px-4 py-3 font-medium">{tr('Significado', 'Meaning')}</th>
+                      <th className="px-4 py-3 font-medium">
+                        {tr('Significado', 'Meaning')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.06] text-zinc-400">
@@ -650,7 +801,10 @@ export default async function DocumentationPage() {
                   </p>
                 </div>
                 <p className="mt-2 text-xs leading-6 text-zinc-400">
-                  {tr('O limite inicial é aplicado por IP, recurso e slug. Uma resposta 429 inclui Retry-After. Faz espera progressiva e respeita esse cabeçalho em vez de repetir imediatamente.', 'The initial limit applies per IP, resource and slug. A 429 response includes Retry-After. Use progressive backoff and respect the header instead of retrying immediately.')}
+                  {tr(
+                    'O limite inicial é aplicado por IP, recurso e slug. Uma resposta 429 inclui Retry-After. Faz espera progressiva e respeita esse cabeçalho em vez de repetir imediatamente.',
+                    'The initial limit applies per IP, resource and slug. A 429 response includes Retry-After. Use progressive backoff and respect the header instead of retrying immediately.',
+                  )}
                 </p>
               </div>
             </section>
@@ -659,7 +813,10 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('07 · Browser', '07 · Browsers')}
                 title={tr('CORS', 'CORS')}
-                description={tr('O recurso foi concebido para leitura a partir de websites externos, sem cookies nem credenciais cross-origin.', 'This resource is designed to be read by external websites without cookies or cross-origin credentials.')}
+                description={tr(
+                  'O recurso foi concebido para leitura a partir de websites externos, sem cookies nem credenciais cross-origin.',
+                  'This resource is designed to be read by external websites without cookies or cross-origin credentials.',
+                )}
               />
               <div className="overflow-hidden rounded-2xl border border-white/10">
                 {[
@@ -684,7 +841,10 @@ export default async function DocumentationPage() {
                 ))}
               </div>
               <p className="mt-3 text-xs leading-6 text-zinc-500">
-                {tr('CORS é uma política do browser; não impede chamadas feitas por servidores ou scripts fora do browser. A proteção de abuso é aplicada separadamente por rate limiting.', 'CORS is a browser policy; it does not prevent requests from servers or scripts outside the browser. Abuse prevention is handled separately through rate limiting.')}
+                {tr(
+                  'CORS é uma política do browser; não impede chamadas feitas por servidores ou scripts fora do browser. A proteção de abuso é aplicada separadamente por rate limiting.',
+                  'CORS is a browser policy; it does not prevent requests from servers or scripts outside the browser. Abuse prevention is handled separately through rate limiting.',
+                )}
               </p>
             </section>
 
@@ -692,7 +852,10 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('08 · Privacidade', '08 · Privacy')}
                 title={tr('Que dados são expostos?', 'What data is exposed?')}
-                description={tr('A resposta limita-se à informação aprovada para publicação no perfil. A API não permite consultar ou modificar dados privados da conta.', 'The response is limited to information approved for public display. The API cannot read or modify private account data.')}
+                description={tr(
+                  'A resposta limita-se à informação aprovada para publicação no perfil. A API não permite consultar ou modificar dados privados da conta.',
+                  'The response is limited to information approved for public display. The API cannot read or modify private account data.',
+                )}
               />
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.035] p-4">
@@ -706,7 +869,10 @@ export default async function DocumentationPage() {
                     </p>
                   </div>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Perfil público, contactos comerciais publicados, serviços, preços, horário, avaliações públicas e links públicos.', 'Public profile, published business contacts, services, prices, opening hours, public reviews and public links.')}
+                    {tr(
+                      'Perfil público, contactos comerciais publicados, serviços, preços, horário, avaliações públicas e links públicos.',
+                      'Public profile, published business contacts, services, prices, opening hours, public reviews and public links.',
+                    )}
                   </p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
@@ -716,11 +882,17 @@ export default async function DocumentationPage() {
                       aria-hidden="true"
                     />
                     <p className="text-sm font-semibold text-zinc-100">
-                      {tr('Nunca incluído neste contrato', 'Never included in this API contract')}
+                      {tr(
+                        'Nunca incluído neste contrato',
+                        'Never included in this API contract',
+                      )}
                     </p>
                   </div>
                   <p className="mt-2 text-xs leading-6 text-zinc-400">
-                    {tr('Email de proprietário, IDs de utilizadores, clientes, marcações, faturas, tokens, secrets, notas internas e chaves de integração.', 'Owner email, user IDs, customer records, bookings, invoices, tokens, secrets, internal notes and integration keys.')}
+                    {tr(
+                      'Email de proprietário, IDs de utilizadores, clientes, marcações, faturas, tokens, secrets, notas internas e chaves de integração.',
+                      'Owner email, user IDs, customer records, bookings, invoices, tokens, secrets, internal notes and integration keys.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -729,8 +901,14 @@ export default async function DocumentationPage() {
             <section id="enterprise" className="scroll-mt-28">
               <SectionTitle
                 eyebrow={tr('09 · Enterprise', '09 · Enterprise')}
-                title={tr('Landing page incluída no Enterprise', 'Landing page included with Enterprise')}
-                description={tr('A API devolve o endereço público da landing page apenas quando o plano efetivo e o entitlement da página estão ativos.', 'The API returns the public landing page URL only while the active plan and page entitlement are valid.')}
+                title={tr(
+                  'Landing page incluída no Enterprise',
+                  'Landing page included with Enterprise',
+                )}
+                description={tr(
+                  'A API devolve o endereço público da landing page apenas quando o plano efetivo e o entitlement da página estão ativos.',
+                  'The API returns the public landing page URL only while the active plan and page entitlement are valid.',
+                )}
               />
               <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
                 <div className="flex items-start gap-3">
@@ -740,10 +918,16 @@ export default async function DocumentationPage() {
                   />
                   <div>
                     <p className="text-sm font-semibold text-white">
-                      {tr('Ligação automática ao perfil', 'Connected to the public profile')}
+                      {tr(
+                        'Ligação automática ao perfil',
+                        'Connected to the public profile',
+                      )}
                     </p>
                     <p className="mt-2 text-sm leading-7 text-zinc-400">
-                      {tr('A página usa o perfil e o catálogo de serviços existente. Não é necessário criar uma segunda conta nem manter os serviços em duplicado. Se o acesso Enterprise terminar, a página é suspensa e a API deixa de a anunciar como disponível.', 'The page uses the existing profile and service catalogue. There is no need for a second account or duplicate service records. If Enterprise access ends, the page is suspended and the API stops reporting it as available.')}
+                      {tr(
+                        'A página usa o perfil e o catálogo de serviços existente. Não é necessário criar uma segunda conta nem manter os serviços em duplicado. Se o acesso Enterprise terminar, a página é suspensa e a API deixa de a anunciar como disponível.',
+                        'The page uses the existing profile and service catalogue. There is no need for a second account or duplicate service records. If Enterprise access ends, the page is suspended and the API stops reporting it as available.',
+                      )}
                     </p>
                     <p className="mt-3 break-all font-mono text-xs text-emerald-200">
                       https://barbers.silentra.me/site/{'{slug}'}
@@ -757,14 +941,23 @@ export default async function DocumentationPage() {
               <SectionTitle
                 eyebrow={tr('10 · Compatibilidade', '10 · Compatibility')}
                 title={tr('Versões e evolução', 'Versions and evolution')}
-                description={tr('O caminho /api/v1 identifica a versão principal do contrato. A versão 1 é de leitura e foi desenhada para ser tolerante a campos adicionais.', 'The /api/v1 path identifies the major contract version. Version 1 is read-only and designed to tolerate additional fields.')}
+                description={tr(
+                  'O caminho /api/v1 identifica a versão principal do contrato. A versão 1 é de leitura e foi desenhada para ser tolerante a campos adicionais.',
+                  'The /api/v1 path identifies the major contract version. Version 1 is read-only and designed to tolerate additional fields.',
+                )}
               />
               <div className="space-y-3 text-sm leading-7 text-zinc-400">
                 <p>
-                  {tr('Ignora campos adicionais que não utilizes e trata campos opcionais como null. Valida sempre o código HTTP antes de ler o corpo.', 'Ignore additional fields you do not use and treat optional fields as null. Always check the HTTP status before reading the body.')}
+                  {tr(
+                    'Ignora campos adicionais que não utilizes e trata campos opcionais como null. Valida sempre o código HTTP antes de ler o corpo.',
+                    'Ignore additional fields you do not use and treat optional fields as null. Always check the HTTP status before reading the body.',
+                  )}
                 </p>
                 <p>
-                  {tr('Mudanças incompatíveis serão publicadas numa nova versão principal, em vez de serem introduzidas silenciosamente na v1.', 'Breaking changes will be released in a new major version instead of being introduced silently into v1.')}
+                  {tr(
+                    'Mudanças incompatíveis serão publicadas numa nova versão principal, em vez de serem introduzidas silenciosamente na v1.',
+                    'Breaking changes will be released in a new major version instead of being introduced silently into v1.',
+                  )}
                 </p>
               </div>
               <div className="mt-5 flex flex-wrap gap-3">
@@ -794,7 +987,10 @@ export default async function DocumentationPage() {
                 {tr('Pronto para integrar?', 'Ready to integrate?')}
               </p>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                {tr('Começa com uma única barbearia, valida os estados de erro e ativa cache antes de escalar a frequência dos pedidos.', 'Start with a single barbershop, test error states and enable caching before increasing request volume.')}
+                {tr(
+                  'Começa com uma única barbearia, valida os estados de erro e ativa cache antes de escalar a frequência dos pedidos.',
+                  'Start with a single barbershop, test error states and enable caching before increasing request volume.',
+                )}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link
@@ -817,7 +1013,10 @@ export default async function DocumentationPage() {
         </div>
 
         <footer className="mt-16 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Silentra for Barbers · {tr('Documentação API v1', 'Public API documentation v1')}</p>
+          <p>
+            © 2026 Silentra for Barbers ·{' '}
+            {tr('Documentação API v1', 'Public API documentation v1')}
+          </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/privacy" className="transition hover:text-zinc-300">
               {tr('Privacidade', 'Privacy')}

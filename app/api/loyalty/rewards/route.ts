@@ -27,7 +27,15 @@ async function POST__unobserved(request: Request) {
     );
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
-      allowedKeys: ['name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active'],
+      allowedKeys: [
+        'name',
+        'description',
+        'points_cost',
+        'pointsCost',
+        'reward_type',
+        'reward_value',
+        'active',
+      ],
     });
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;
@@ -119,7 +127,16 @@ async function PATCH__unobserved(request: Request) {
     );
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
-      allowedKeys: ['id', 'name', 'description', 'points_cost', 'pointsCost', 'reward_type', 'reward_value', 'active'],
+      allowedKeys: [
+        'id',
+        'name',
+        'description',
+        'points_cost',
+        'pointsCost',
+        'reward_type',
+        'reward_value',
+        'active',
+      ],
     });
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;

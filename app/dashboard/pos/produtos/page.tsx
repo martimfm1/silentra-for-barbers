@@ -23,7 +23,13 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type Product = {
   id: string;
@@ -74,7 +80,10 @@ const EMPTY_FORM: FormState = {
   marketplaceFeatured: false,
 };
 const money = (n: number, locale: 'pt' | 'en') =>
-  new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', { style: 'currency', currency: 'EUR' }).format(Number(n) || 0);
+  new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(n) || 0);
 
 const localizedText = (locale: 'pt' | 'en', pt: string, en: string) =>
   locale === 'en' ? en : pt;
@@ -106,12 +115,22 @@ export default function MarketplaceProductsPage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(localizedText(activeLocale, 'Não foi possível carregar os produtos.', 'Could not load products.'));
+        throw new Error(
+          localizedText(
+            activeLocale,
+            'Não foi possível carregar os produtos.',
+            'Could not load products.',
+          ),
+        );
       setProducts(json.products ?? []);
       setPlan(typeof json.plan === 'string' ? json.plan : 'free');
     } catch {
       toast.error(
-        localizedText(activeLocale, 'Erro ao carregar os produtos.', 'Could not load products.'),
+        localizedText(
+          activeLocale,
+          'Erro ao carregar os produtos.',
+          'Could not load products.',
+        ),
       );
     } finally {
       setLoading(false);
@@ -126,7 +145,11 @@ export default function MarketplaceProductsPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          localizedText(activeLocale, 'Não foi possível carregar as definições.', 'Could not load settings.'),
+          localizedText(
+            activeLocale,
+            'Não foi possível carregar as definições.',
+            'Could not load settings.',
+          ),
         );
       setSalesMode(
         json.marketplaceSalesMode === 'physical_and_online'
@@ -135,7 +158,11 @@ export default function MarketplaceProductsPage() {
       );
     } catch {
       toast.error(
-        localizedText(activeLocale, 'Erro ao carregar as definições.', 'Could not load settings.'),
+        localizedText(
+          activeLocale,
+          'Erro ao carregar as definições.',
+          'Could not load settings.',
+        ),
       );
     }
   }
@@ -160,14 +187,34 @@ export default function MarketplaceProductsPage() {
     Number(form.stockQuantity) > 0;
   const boostHint =
     plan !== 'enterprise'
-      ? localizedText(activeLocale, 'O destaque está disponível exclusivamente no plano Enterprise.', 'Featured placement is only available on the Enterprise plan.')
+      ? localizedText(
+          activeLocale,
+          'O destaque está disponível exclusivamente no plano Enterprise.',
+          'Featured placement is only available on the Enterprise plan.',
+        )
       : !form.marketplaceVisible
-        ? localizedText(activeLocale, 'Ativa primeiro a publicação online.', 'Enable online publishing first.')
+        ? localizedText(
+            activeLocale,
+            'Ativa primeiro a publicação online.',
+            'Enable online publishing first.',
+          )
         : !form.active || Number(form.stockQuantity) <= 0
-          ? localizedText(activeLocale, 'O produto tem de estar ativo e ter stock disponível.', 'The product must be active and have stock available.')
+          ? localizedText(
+              activeLocale,
+              'O produto tem de estar ativo e ter stock disponível.',
+              'The product must be active and have stock available.',
+            )
           : !boostWindowOpen
-            ? localizedText(activeLocale, 'A janela de destaque deste produto já terminou.', 'The featured period for this product has ended.')
-            : localizedText(activeLocale, 'O produto fica em destaque até 3 dias após a primeira publicação.', 'The product can be featured for up to 3 days after first publication.');
+            ? localizedText(
+                activeLocale,
+                'A janela de destaque deste produto já terminou.',
+                'The featured period for this product has ended.',
+              )
+            : localizedText(
+                activeLocale,
+                'O produto fica em destaque até 3 dias após a primeira publicação.',
+                'The product can be featured for up to 3 days after first publication.',
+              );
 
   const categories = useMemo(
     () =>
@@ -181,7 +228,9 @@ export default function MarketplaceProductsPage() {
     [products],
   );
   const filtered = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase(activeLocale === 'en' ? 'en-GB' : 'pt-PT');
+    const term = search
+      .trim()
+      .toLocaleLowerCase(activeLocale === 'en' ? 'en-GB' : 'pt-PT');
     return products.filter((product) => {
       const text =
         `${product.name} ${product.description ?? ''} ${product.sku ?? ''}`.toLocaleLowerCase(
@@ -210,17 +259,33 @@ export default function MarketplaceProductsPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(
-          localizedText(activeLocale, 'Não foi possível guardar as definições.', 'Could not save settings.'),
+          localizedText(
+            activeLocale,
+            'Não foi possível guardar as definições.',
+            'Could not save settings.',
+          ),
         );
       setSalesMode(next);
       toast.success(
         next === 'physical_and_online'
-          ? localizedText(activeLocale, 'Vendas online ativadas.', 'Online sales enabled.')
-          : localizedText(activeLocale, 'Marketplace online desativado.', 'Online marketplace disabled.'),
+          ? localizedText(
+              activeLocale,
+              'Vendas online ativadas.',
+              'Online sales enabled.',
+            )
+          : localizedText(
+              activeLocale,
+              'Marketplace online desativado.',
+              'Online marketplace disabled.',
+            ),
       );
     } catch {
       toast.error(
-        localizedText(activeLocale, 'Erro ao guardar as definições.', 'Could not save settings.'),
+        localizedText(
+          activeLocale,
+          'Erro ao guardar as definições.',
+          'Could not save settings.',
+        ),
       );
     } finally {
       setSettingsSaving(false);
@@ -268,15 +333,33 @@ export default function MarketplaceProductsPage() {
       });
       const json = await response.json();
       if (!response.ok)
-        throw new Error(localizedText(activeLocale, 'Não foi possível guardar o produto.', 'Could not save the product.'));
-      toast.success(editing ? localizedText(activeLocale, 'Produto atualizado.', 'Product updated.') : localizedText(activeLocale, 'Produto criado.', 'Product created.'));
+        throw new Error(
+          localizedText(
+            activeLocale,
+            'Não foi possível guardar o produto.',
+            'Could not save the product.',
+          ),
+        );
+      toast.success(
+        editing
+          ? localizedText(
+              activeLocale,
+              'Produto atualizado.',
+              'Product updated.',
+            )
+          : localizedText(activeLocale, 'Produto criado.', 'Product created.'),
+      );
       setEditing(null);
       setForm(EMPTY_FORM);
       setFormOpen(false);
       await load();
     } catch {
       toast.error(
-        localizedText(activeLocale, 'Erro ao guardar o produto.', 'Could not save the product.'),
+        localizedText(
+          activeLocale,
+          'Erro ao guardar o produto.',
+          'Could not save the product.',
+        ),
       );
     } finally {
       setSaving(false);
@@ -285,9 +368,21 @@ export default function MarketplaceProductsPage() {
 
   async function archive(product: Product) {
     const confirmed = await confirm({
-      title: localizedText(activeLocale, 'Arquivar produto?', 'Archive product?'),
-      description: localizedText(activeLocale, `“${product.name}” deixará de estar disponível para venda. Os registos anteriores serão mantidos.`, `“${product.name}” will no longer be available for sale. Previous records will be retained.`),
-      confirmLabel: localizedText(activeLocale, 'Arquivar produto', 'Archive product'),
+      title: localizedText(
+        activeLocale,
+        'Arquivar produto?',
+        'Archive product?',
+      ),
+      description: localizedText(
+        activeLocale,
+        `“${product.name}” deixará de estar disponível para venda. Os registos anteriores serão mantidos.`,
+        `“${product.name}” will no longer be available for sale. Previous records will be retained.`,
+      ),
+      confirmLabel: localizedText(
+        activeLocale,
+        'Arquivar produto',
+        'Archive product',
+      ),
       destructive: true,
     });
     if (!confirmed) return;
@@ -298,11 +393,25 @@ export default function MarketplaceProductsPage() {
       );
       const json = await response.json();
       if (!response.ok)
-        throw new Error(localizedText(activeLocale, 'Não foi possível arquivar.', 'Could not archive the product.'));
-      toast.success(localizedText(activeLocale, 'Produto arquivado.', 'Product archived.'));
+        throw new Error(
+          localizedText(
+            activeLocale,
+            'Não foi possível arquivar.',
+            'Could not archive the product.',
+          ),
+        );
+      toast.success(
+        localizedText(activeLocale, 'Produto arquivado.', 'Product archived.'),
+      );
       await load();
     } catch {
-      toast.error(localizedText(activeLocale, 'Erro ao arquivar.', 'Could not archive the product.'));
+      toast.error(
+        localizedText(
+          activeLocale,
+          'Erro ao arquivar.',
+          'Could not archive the product.',
+        ),
+      );
     }
   }
 
@@ -325,12 +434,24 @@ export default function MarketplaceProductsPage() {
       <main className="min-h-screen bg-zinc-950 p-6 text-zinc-100">
         <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
           <Package className="mx-auto size-8 text-emerald-300" />
-          <h1 className="mt-4 text-2xl font-semibold">{localizedText(activeLocale, 'Produtos e vendas', 'Products and sales')}</h1>
+          <h1 className="mt-4 text-2xl font-semibold">
+            {localizedText(
+              activeLocale,
+              'Produtos e vendas',
+              'Products and sales',
+            )}
+          </h1>
           <p className="mt-2 text-sm text-zinc-500">
-            {localizedText(activeLocale, 'Esta área faz parte do módulo de vendas.', 'This section is part of the sales module.')}
+            {localizedText(
+              activeLocale,
+              'Esta área faz parte do módulo de vendas.',
+              'This section is part of the sales module.',
+            )}
           </p>
           <Button asChild className="mt-5">
-            <Link href="/dashboard/billing">{localizedText(activeLocale, 'Ver plano', 'View plan')}</Link>
+            <Link href="/dashboard/billing">
+              {localizedText(activeLocale, 'Ver plano', 'View plan')}
+            </Link>
           </Button>
         </div>
       </main>
@@ -357,7 +478,12 @@ export default function MarketplaceProductsPage() {
               href="/dashboard/pos"
               className="inline-flex min-h-10 items-center gap-2 text-sm text-zinc-500 hover:text-white"
             >
-              ← {localizedText(activeLocale, 'Voltar ao ponto de venda', 'Back to point of sale')}
+              ←{' '}
+              {localizedText(
+                activeLocale,
+                'Voltar ao ponto de venda',
+                'Back to point of sale',
+              )}
             </Link>
             <div className="mt-5 flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300">
@@ -367,17 +493,27 @@ export default function MarketplaceProductsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
                   Vendas
                 </p>
-                <h1 className="text-3xl font-semibold tracking-tight">{localizedText(activeLocale, 'Produtos', 'Products')}</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">
+                  {localizedText(activeLocale, 'Produtos', 'Products')}
+                </h1>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-zinc-500">
-              {localizedText(activeLocale, 'Uma única fonte de verdade para o POS, stock e catálogo online.', 'A single source of truth for the POS, stock and online catalogue.')}
+              {localizedText(
+                activeLocale,
+                'Uma única fonte de verdade para o POS, stock e catálogo online.',
+                'A single source of truth for the POS, stock and online catalogue.',
+              )}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button variant="outline" asChild className="min-h-11">
               <Link href="/marketplace" target="_blank">
-                {localizedText(activeLocale, 'Ver marketplace', 'View marketplace')}
+                {localizedText(
+                  activeLocale,
+                  'Ver marketplace',
+                  'View marketplace',
+                )}
               </Link>
             </Button>
             <Button
@@ -395,29 +531,53 @@ export default function MarketplaceProductsPage() {
             icon={Package}
             label={localizedText(activeLocale, 'Produtos', 'Products')}
             value={String(products.length)}
-            detail={localizedText(activeLocale, `${published} publicados`, `${published} published`)}
+            detail={localizedText(
+              activeLocale,
+              `${published} publicados`,
+              `${published} published`,
+            )}
           />
           <Metric
             icon={CheckCircle2}
             label="Online"
-            value={salesMode === 'physical_and_online' ? localizedText(activeLocale, 'Ativo', 'Enabled') : localizedText(activeLocale, 'Desligado', 'Disabled')}
+            value={
+              salesMode === 'physical_and_online'
+                ? localizedText(activeLocale, 'Ativo', 'Enabled')
+                : localizedText(activeLocale, 'Desligado', 'Disabled')
+            }
             detail={
               salesMode === 'physical_and_online'
-                ? localizedText(activeLocale, 'Aceita encomendas online', 'Accepts online orders')
-                 : localizedText(activeLocale, 'Só vendas físicas', 'In-person sales only')
+                ? localizedText(
+                    activeLocale,
+                    'Aceita encomendas online',
+                    'Accepts online orders',
+                  )
+                : localizedText(
+                    activeLocale,
+                    'Só vendas físicas',
+                    'In-person sales only',
+                  )
             }
           />
           <Metric
             icon={Store}
             label={localizedText(activeLocale, 'Stock', 'Stock')}
             value={String(stockUnits)}
-            detail={localizedText(activeLocale, 'unidades em inventário', 'units in inventory')}
+            detail={localizedText(
+              activeLocale,
+              'unidades em inventário',
+              'units in inventory',
+            )}
           />
           <Metric
             icon={Truck}
             label={localizedText(activeLocale, 'Stock baixo', 'Low stock')}
             value={String(lowStock)}
-            detail={localizedText(activeLocale, 'precisam de atenção', 'need attention')}
+            detail={localizedText(
+              activeLocale,
+              'precisam de atenção',
+              'need attention',
+            )}
           />
         </div>
 
@@ -455,7 +615,11 @@ export default function MarketplaceProductsPage() {
                   disabled={settingsSaving}
                   onClick={() => void saveSalesMode('physical_only')}
                   icon={Store}
-                  title={localizedText(activeLocale, 'Só físico', 'In-person only')}
+                  title={localizedText(
+                    activeLocale,
+                    'Só físico',
+                    'In-person only',
+                  )}
                   description="POS / store"
                 />
                 <ModeButton
@@ -463,7 +627,11 @@ export default function MarketplaceProductsPage() {
                   disabled={settingsSaving}
                   onClick={() => void saveSalesMode('physical_and_online')}
                   icon={Truck}
-                  title={localizedText(activeLocale, 'Físico + online', 'In-person + online')}
+                  title={localizedText(
+                    activeLocale,
+                    'Físico + online',
+                    'In-person + online',
+                  )}
                   description="Marketplace + POS"
                 />
               </div>
@@ -479,18 +647,36 @@ export default function MarketplaceProductsPage() {
                 <Input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder={localizedText(activeLocale, 'Pesquisar nome, descrição ou SKU', 'Search name, description or SKU')}
+                  placeholder={localizedText(
+                    activeLocale,
+                    'Pesquisar nome, descrição ou SKU',
+                    'Search name, description or SKU',
+                  )}
                   className="min-h-11 border-white/10 bg-white/[0.03] pl-9"
-                  aria-label={localizedText(activeLocale, 'Pesquisar produtos', 'Search products')}
+                  aria-label={localizedText(
+                    activeLocale,
+                    'Pesquisar produtos',
+                    'Search products',
+                  )}
                 />
               </div>
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                aria-label={localizedText(activeLocale, 'Filtrar por categoria', 'Filter by category')}
+                aria-label={localizedText(
+                  activeLocale,
+                  'Filtrar por categoria',
+                  'Filter by category',
+                )}
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
-                <option value="all">{localizedText(activeLocale, 'Todas as categorias', 'All categories')}</option>
+                <option value="all">
+                  {localizedText(
+                    activeLocale,
+                    'Todas as categorias',
+                    'All categories',
+                  )}
+                </option>
                 {categories.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -500,12 +686,34 @@ export default function MarketplaceProductsPage() {
               <select
                 value={visibility}
                 onChange={(event) => setVisibility(event.target.value)}
-                aria-label={localizedText(activeLocale, 'Filtrar por publicação', 'Filter by publication')}
+                aria-label={localizedText(
+                  activeLocale,
+                  'Filtrar por publicação',
+                  'Filter by publication',
+                )}
                 className="min-h-11 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm"
               >
-                <option value="all">{localizedText(activeLocale, 'Todos os produtos', 'All products')}</option>
-                <option value="published">{localizedText(activeLocale, 'Publicados online', 'Published online')}</option>
-                <option value="hidden">{localizedText(activeLocale, 'Não publicados', 'Not published')}</option>
+                <option value="all">
+                  {localizedText(
+                    activeLocale,
+                    'Todos os produtos',
+                    'All products',
+                  )}
+                </option>
+                <option value="published">
+                  {localizedText(
+                    activeLocale,
+                    'Publicados online',
+                    'Published online',
+                  )}
+                </option>
+                <option value="hidden">
+                  {localizedText(
+                    activeLocale,
+                    'Não publicados',
+                    'Not published',
+                  )}
+                </option>
               </select>
             </div>
           </CardContent>
@@ -523,210 +731,301 @@ export default function MarketplaceProductsPage() {
         >
           <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 p-3 text-zinc-100 sm:max-w-4xl sm:p-5">
             <DialogHeader className="sr-only">
-              <DialogTitle>{editing ? `${localizedText(activeLocale, 'Editar', 'Edit')} ${editing.name}` : localizedText(activeLocale, 'Novo produto', 'New product')}</DialogTitle>
+              <DialogTitle>
+                {editing
+                  ? `${localizedText(activeLocale, 'Editar', 'Edit')} ${editing.name}`
+                  : localizedText(activeLocale, 'Novo produto', 'New product')}
+              </DialogTitle>
               <DialogDescription>
-                {localizedText(activeLocale, 'Define o nome, preço, stock e as opções de publicação do produto.', 'Set the product name, price, stock and publishing options.')}
+                {localizedText(
+                  activeLocale,
+                  'Define o nome, preço, stock e as opções de publicação do produto.',
+                  'Set the product name, price, stock and publishing options.',
+                )}
               </DialogDescription>
             </DialogHeader>
             {formOpen && (
               <Card className="border-emerald-400/15 bg-emerald-400/[0.025]">
-            <CardHeader>
-              <CardTitle>
-                {editing ? `${localizedText(activeLocale, 'Editar', 'Edit')} ${editing.name}` : localizedText(activeLocale, 'Novo produto', 'New product')}
-              </CardTitle>
-              <p className="text-sm text-zinc-500">
-                {localizedText(activeLocale, 'Preenche a informação pública, preço, imagem e stock. O mesmo stock é usado no POS e no marketplace.', 'Enter public details, price, image and stock. The same stock is used by the POS and marketplace.')}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
-                <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Nome *', 'Name *')}</span>
-                  <Input
-                    required
-                    value={form.name}
-                    onChange={(event) =>
-                      setForm({ ...form, name: event.target.value })
-                    }
-                    placeholder="Pomada Matte 100ml"
-                  />
-                </label>
-                <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Descrição', 'Description')}</span>
-                  <textarea
-                    value={form.description}
-                    onChange={(event) =>
-                      setForm({ ...form, description: event.target.value })
-                    }
-                    className="min-h-24 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white outline-none focus:border-emerald-400/40"
-                    placeholder={localizedText(activeLocale, 'Descrição curta e útil para o cliente.', 'A short, helpful description for customers.')}
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Categoria', 'Category')}</span>
-                  <Input
-                    value={form.category}
-                    onChange={(event) =>
-                      setForm({ ...form, category: event.target.value })
-                    }
-                    placeholder={localizedText(activeLocale, 'Cabelo', 'Hair')}
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'SKU', 'SKU')}</span>
-                  <Input
-                    value={form.sku}
-                    onChange={(event) =>
-                      setForm({ ...form, sku: event.target.value })
-                    }
-                    placeholder="Opcional"
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Preço (€) *', 'Price (€) *')}</span>
-                  <Input
-                    required
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.unitPrice}
-                    onChange={(event) =>
-                      setForm({ ...form, unitPrice: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Preço anterior', 'Previous price')}</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.compareAtPrice}
-                    onChange={(event) =>
-                      setForm({ ...form, compareAtPrice: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Stock *', 'Stock *')}</span>
-                  <Input
-                    required
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={form.stockQuantity}
-                    onChange={(event) =>
-                      setForm({
-                        ...form,
-                        stockQuantity: event.target.value,
-                        marketplaceFeatured:
-                          Number(event.target.value) > 0 &&
-                          form.marketplaceFeatured,
-                      })
-                    }
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'Alerta de stock', 'Stock alert')}</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={form.lowStockThreshold}
-                    onChange={(event) =>
-                      setForm({
-                        ...form,
-                        lowStockThreshold: event.target.value,
-                      })
-                    }
-                  />
-                </label>
-                <label className="grid gap-1.5 md:col-span-2">
-                  <span className="text-xs font-medium text-zinc-300">{localizedText(activeLocale, 'URL da imagem', 'Image URL')}</span>
-                  <Input
-                    type="url"
-                    value={form.imageUrl}
-                    onChange={(event) =>
-                      setForm({ ...form, imageUrl: event.target.value })
-                    }
-                    placeholder="https://..."
-                  />
-                </label>
-                <fieldset className="grid gap-2 md:col-span-2">
-                  <legend className="text-xs font-semibold text-zinc-300">{localizedText(activeLocale, 'Publicação', 'Publishing')}</legend>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    <CheckBox
-                      checked={form.active}
-                      onChange={(checked) =>
-                        setForm({
-                          ...form,
-                          active: checked,
-                          marketplaceFeatured:
-                            checked && form.marketplaceFeatured,
-                        })
-                      }
-                      title={localizedText(activeLocale, 'Produto ativo', 'Active product')}
-                    />
-                    <CheckBox
-                      checked={form.marketplaceVisible}
-                      onChange={(checked) =>
-                        setForm({
-                          ...form,
-                          marketplaceVisible: checked,
-                          marketplaceFeatured:
-                            checked && form.marketplaceFeatured,
-                        })
-                      }
-                      title={localizedText(activeLocale, 'Publicar online', 'Publish online')}
-                      accent
-                    />
-                    <label className="flex items-start gap-3 rounded-xl border border-amber-300/15 bg-amber-300/[0.035] p-3 sm:col-span-3">
-                      <input
-                        type="checkbox"
-                        checked={form.marketplaceFeatured}
-                        disabled={!canToggleBoost}
+                <CardHeader>
+                  <CardTitle>
+                    {editing
+                      ? `${localizedText(activeLocale, 'Editar', 'Edit')} ${editing.name}`
+                      : localizedText(
+                          activeLocale,
+                          'Novo produto',
+                          'New product',
+                        )}
+                  </CardTitle>
+                  <p className="text-sm text-zinc-500">
+                    {localizedText(
+                      activeLocale,
+                      'Preenche a informação pública, preço, imagem e stock. O mesmo stock é usado no POS e no marketplace.',
+                      'Enter public details, price, image and stock. The same stock is used by the POS and marketplace.',
+                    )}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
+                    <label className="grid gap-1.5 md:col-span-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(activeLocale, 'Nome *', 'Name *')}
+                      </span>
+                      <Input
+                        required
+                        value={form.name}
+                        onChange={(event) =>
+                          setForm({ ...form, name: event.target.value })
+                        }
+                        placeholder="Pomada Matte 100ml"
+                      />
+                    </label>
+                    <label className="grid gap-1.5 md:col-span-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'Descrição',
+                          'Description',
+                        )}
+                      </span>
+                      <textarea
+                        value={form.description}
+                        onChange={(event) =>
+                          setForm({ ...form, description: event.target.value })
+                        }
+                        className="min-h-24 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white outline-none focus:border-emerald-400/40"
+                        placeholder={localizedText(
+                          activeLocale,
+                          'Descrição curta e útil para o cliente.',
+                          'A short, helpful description for customers.',
+                        )}
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(activeLocale, 'Categoria', 'Category')}
+                      </span>
+                      <Input
+                        value={form.category}
+                        onChange={(event) =>
+                          setForm({ ...form, category: event.target.value })
+                        }
+                        placeholder={localizedText(
+                          activeLocale,
+                          'Cabelo',
+                          'Hair',
+                        )}
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(activeLocale, 'SKU', 'SKU')}
+                      </span>
+                      <Input
+                        value={form.sku}
+                        onChange={(event) =>
+                          setForm({ ...form, sku: event.target.value })
+                        }
+                        placeholder="Opcional"
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'Preço (€) *',
+                          'Price (€) *',
+                        )}
+                      </span>
+                      <Input
+                        required
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.unitPrice}
+                        onChange={(event) =>
+                          setForm({ ...form, unitPrice: event.target.value })
+                        }
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'Preço anterior',
+                          'Previous price',
+                        )}
+                      </span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.compareAtPrice}
                         onChange={(event) =>
                           setForm({
                             ...form,
-                            marketplaceFeatured: event.target.checked,
+                            compareAtPrice: event.target.value,
                           })
                         }
-                        className="mt-0.5 size-4 accent-amber-300 disabled:opacity-40"
                       />
-                      <span>
-                        <strong className="flex items-center gap-2 text-sm text-white">
-                          <Star className="size-4 text-amber-200" />
-                          {localizedText(activeLocale, 'Destaque Enterprise · 3 dias', 'Enterprise featured · 3 days')}
-                        </strong>
-                        <span className="mt-1 block text-xs leading-5 text-zinc-500">
-                          {boostHint}
-                        </span>
-                      </span>
                     </label>
-                  </div>
-                </fieldset>
-                <div className="flex flex-col-reverse gap-2 md:col-span-2 sm:flex-row sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setFormOpen(false);
-                      setEditing(null);
-                      setForm(EMPTY_FORM);
-                    }}
-                  >
-                    {localizedText(activeLocale, 'Cancelar', 'Cancel')}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={saving}
-                    className="bg-emerald-400 text-zinc-950 hover:bg-emerald-300"
-                  >
-                    {saving ? localizedText(activeLocale, 'A guardar…', 'Saving…') : localizedText(activeLocale, 'Guardar produto', 'Save product')}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(activeLocale, 'Stock *', 'Stock *')}
+                      </span>
+                      <Input
+                        required
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={form.stockQuantity}
+                        onChange={(event) =>
+                          setForm({
+                            ...form,
+                            stockQuantity: event.target.value,
+                            marketplaceFeatured:
+                              Number(event.target.value) > 0 &&
+                              form.marketplaceFeatured,
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'Alerta de stock',
+                          'Stock alert',
+                        )}
+                      </span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={form.lowStockThreshold}
+                        onChange={(event) =>
+                          setForm({
+                            ...form,
+                            lowStockThreshold: event.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="grid gap-1.5 md:col-span-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'URL da imagem',
+                          'Image URL',
+                        )}
+                      </span>
+                      <Input
+                        type="url"
+                        value={form.imageUrl}
+                        onChange={(event) =>
+                          setForm({ ...form, imageUrl: event.target.value })
+                        }
+                        placeholder="https://..."
+                      />
+                    </label>
+                    <fieldset className="grid gap-2 md:col-span-2">
+                      <legend className="text-xs font-semibold text-zinc-300">
+                        {localizedText(
+                          activeLocale,
+                          'Publicação',
+                          'Publishing',
+                        )}
+                      </legend>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        <CheckBox
+                          checked={form.active}
+                          onChange={(checked) =>
+                            setForm({
+                              ...form,
+                              active: checked,
+                              marketplaceFeatured:
+                                checked && form.marketplaceFeatured,
+                            })
+                          }
+                          title={localizedText(
+                            activeLocale,
+                            'Produto ativo',
+                            'Active product',
+                          )}
+                        />
+                        <CheckBox
+                          checked={form.marketplaceVisible}
+                          onChange={(checked) =>
+                            setForm({
+                              ...form,
+                              marketplaceVisible: checked,
+                              marketplaceFeatured:
+                                checked && form.marketplaceFeatured,
+                            })
+                          }
+                          title={localizedText(
+                            activeLocale,
+                            'Publicar online',
+                            'Publish online',
+                          )}
+                          accent
+                        />
+                        <label className="flex items-start gap-3 rounded-xl border border-amber-300/15 bg-amber-300/[0.035] p-3 sm:col-span-3">
+                          <input
+                            type="checkbox"
+                            checked={form.marketplaceFeatured}
+                            disabled={!canToggleBoost}
+                            onChange={(event) =>
+                              setForm({
+                                ...form,
+                                marketplaceFeatured: event.target.checked,
+                              })
+                            }
+                            className="mt-0.5 size-4 accent-amber-300 disabled:opacity-40"
+                          />
+                          <span>
+                            <strong className="flex items-center gap-2 text-sm text-white">
+                              <Star className="size-4 text-amber-200" />
+                              {localizedText(
+                                activeLocale,
+                                'Destaque Enterprise · 3 dias',
+                                'Enterprise featured · 3 days',
+                              )}
+                            </strong>
+                            <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                              {boostHint}
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                    </fieldset>
+                    <div className="flex flex-col-reverse gap-2 md:col-span-2 sm:flex-row sm:justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setFormOpen(false);
+                          setEditing(null);
+                          setForm(EMPTY_FORM);
+                        }}
+                      >
+                        {localizedText(activeLocale, 'Cancelar', 'Cancel')}
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={saving}
+                        className="bg-emerald-400 text-zinc-950 hover:bg-emerald-300"
+                      >
+                        {saving
+                          ? localizedText(activeLocale, 'A guardar…', 'Saving…')
+                          : localizedText(
+                              activeLocale,
+                              'Guardar produto',
+                              'Save product',
+                            )}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
               </Card>
             )}
           </DialogContent>
@@ -735,15 +1034,32 @@ export default function MarketplaceProductsPage() {
         <section aria-live="polite">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <h2 className="text-base font-semibold">{localizedText(activeLocale, 'Catálogo', 'Catalogue')}</h2>
+              <h2 className="text-base font-semibold">
+                {localizedText(activeLocale, 'Catálogo', 'Catalogue')}
+              </h2>
               <p className="text-xs text-zinc-500">
-                {filtered.length} {localizedText(activeLocale, 'produto', 'product')}{filtered.length === 1 ? '' : (activeLocale === 'en' ? 's' : 's')} {localizedText(activeLocale, 'com estes filtros.', 'match these filters.')}
+                {filtered.length}{' '}
+                {localizedText(activeLocale, 'produto', 'product')}
+                {filtered.length === 1
+                  ? ''
+                  : activeLocale === 'en'
+                    ? 's'
+                    : 's'}{' '}
+                {localizedText(
+                  activeLocale,
+                  'com estes filtros.',
+                  'match these filters.',
+                )}
               </p>
             </div>
           </div>
           {filtered.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center text-sm text-zinc-500">
-              {localizedText(activeLocale, 'Não encontrámos produtos. Experimenta limpar os filtros ou criar um novo.', 'No products found. Try clearing the filters or creating a new product.')}
+              {localizedText(
+                activeLocale,
+                'Não encontrámos produtos. Experimenta limpar os filtros ou criar um novo.',
+                'No products found. Try clearing the filters or creating a new product.',
+              )}
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -784,7 +1100,12 @@ export default function MarketplaceProductsPage() {
                         {product.name}
                       </h3>
                       <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500">
-                        {product.description || localizedText(activeLocale, 'Sem descrição.', 'No description.')}
+                        {product.description ||
+                          localizedText(
+                            activeLocale,
+                            'Sem descrição.',
+                            'No description.',
+                          )}
                       </p>
                     </div>
                     <div className="flex items-end justify-between gap-3">
@@ -804,9 +1125,14 @@ export default function MarketplaceProductsPage() {
                           className={`mt-1 text-[11px] ${product.stock_quantity <= product.low_stock_threshold ? 'text-amber-300' : 'text-zinc-600'}`}
                         >
                           {product.stock_quantity <= product.low_stock_threshold
-                            ? localizedText(activeLocale, 'Stock baixo · ', 'Low stock · ')
+                            ? localizedText(
+                                activeLocale,
+                                'Stock baixo · ',
+                                'Low stock · ',
+                              )
                             : ''}
-                          {product.stock_quantity} {localizedText(activeLocale, 'em stock', 'in stock')}
+                          {product.stock_quantity}{' '}
+                          {localizedText(activeLocale, 'em stock', 'in stock')}
                           {product.category ? ` · ${product.category}` : ''}
                         </p>
                       </div>
@@ -815,7 +1141,11 @@ export default function MarketplaceProductsPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => startEdit(product)}
-                          aria-label={localizedText(activeLocale, `Editar ${product.name}`, `Edit ${product.name}`)}
+                          aria-label={localizedText(
+                            activeLocale,
+                            `Editar ${product.name}`,
+                            `Edit ${product.name}`,
+                          )}
                         >
                           <Pencil className="size-4" />
                         </Button>
@@ -823,7 +1153,11 @@ export default function MarketplaceProductsPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => void archive(product)}
-                          aria-label={localizedText(activeLocale, `Arquivar ${product.name}`, `Archive ${product.name}`)}
+                          aria-label={localizedText(
+                            activeLocale,
+                            `Arquivar ${product.name}`,
+                            `Archive ${product.name}`,
+                          )}
                           className="text-rose-300 hover:text-rose-200"
                         >
                           <Trash2 className="size-4" />

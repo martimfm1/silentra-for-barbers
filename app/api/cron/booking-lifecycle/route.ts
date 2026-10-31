@@ -16,7 +16,10 @@ function authorized(request: Request) {
 
 async function GET__unobserved(request: Request) {
   if (!authorized(request)) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: 'Unauthorized' },
+      { status: 401 },
+    );
   }
 
   const requestId = crypto.randomUUID();
@@ -25,7 +28,9 @@ async function GET__unobserved(request: Request) {
     const admin = createAdminClient();
     // Use the canonical SQL worker so per-shop auto-completion preferences are
     // respected. The appointment status trigger writes durable outbox events.
-    const { data, error } = await admin.rpc('process_automatic_booking_completion');
+    const { data, error } = await admin.rpc(
+      'process_automatic_booking_completion',
+    );
     if (error) throw error;
 
     const result = {
@@ -50,4 +55,7 @@ async function GET__unobserved(request: Request) {
   }
 }
 
-export const GET = withApiObservability('/api/cron/booking-lifecycle', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/cron/booking-lifecycle',
+  GET__unobserved,
+);

@@ -187,7 +187,10 @@ export function BookingDrawerCanonical({
     [shop],
   );
   const availableDays = useMemo(
-    () => days.filter((day) => !closedDays.has(new Date(`${day.dateStr}T12:00:00`).getDay())),
+    () =>
+      days.filter(
+        (day) => !closedDays.has(new Date(`${day.dateStr}T12:00:00`).getDay()),
+      ),
     [days, closedDays],
   );
   const currentDay = availableDays[dayIndex] ?? availableDays[0] ?? null;
@@ -249,7 +252,14 @@ export function BookingDrawerCanonical({
   }, [currentDay?.dateStr, isOpen, retryKey, shop]);
 
   useEffect(() => {
-    if (!isOpen || step !== 2 || !shop || !currentDay || !professional || !service) {
+    if (
+      !isOpen ||
+      step !== 2 ||
+      !shop ||
+      !currentDay ||
+      !professional ||
+      !service
+    ) {
       setSlots([]);
       return;
     }
@@ -272,9 +282,7 @@ export function BookingDrawerCanonical({
       .then(async (response) => {
         const payload = await response.json().catch(() => ({}));
         if (!response.ok)
-          throw new Error(
-            payload?.error || t('bookingDrawer.loadTimesError'),
-          );
+          throw new Error(payload?.error || t('bookingDrawer.loadTimesError'));
         return payload as MarketplaceBookingResponse;
       })
       .then((payload) => {
@@ -294,7 +302,15 @@ export function BookingDrawerCanonical({
         () => !controller.signal.aborted && setLoadingAvailability(false),
       );
     return () => controller.abort();
-  }, [currentDay?.dateStr, isOpen, professional, retryKey, service, shop, step]);
+  }, [
+    currentDay?.dateStr,
+    isOpen,
+    professional,
+    retryKey,
+    service,
+    shop,
+    step,
+  ]);
 
   useEffect(() => {
     if (!isOpen || step !== 3 || !shop) return;
@@ -330,9 +346,7 @@ export function BookingDrawerCanonical({
         })
         .then((payload) => {
           if (controller.signal.aborted) return;
-          setCustomerState(
-            payload.matched ? 'matched' : 'new',
-          );
+          setCustomerState(payload.matched ? 'matched' : 'new');
         })
         .catch((reason) => {
           if (reason?.name !== 'AbortError') setCustomerState('error');
@@ -344,31 +358,31 @@ export function BookingDrawerCanonical({
     };
   }, [email, isOpen, phone, shop, step]);
 
-  const canContinueOne = Boolean(currentDay && professional && service && !currentDayClosed);
+  const canContinueOne = Boolean(
+    currentDay && professional && service && !currentDayClosed,
+  );
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
-    if (currentDayClosed)
-      return toast.error(t('bookingDrawer.chooseOpenDay'));
+    if (currentDayClosed) return toast.error(t('bookingDrawer.chooseOpenDay'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
     setStep(2);
   }
 
   function continueTwo() {
-    if (!selectedSlot) return toast.error(t('bookingDrawer.chooseAvailableTime'));
+    if (!selectedSlot)
+      return toast.error(t('bookingDrawer.chooseAvailableTime'));
     setStep(3);
   }
 
   async function submit() {
-    if (!shop || !professional || !service || !selectedSlot || !currentDay) return;
+    if (!shop || !professional || !service || !selectedSlot || !currentDay)
+      return;
     if (!name.trim() || !phone.trim() || !email.trim())
       return toast.error(t('bookingDrawer.requiredFields'));
     const birthDateIso = birthDateToIso(birthDate);
-    if (!birthDateIso)
-      return toast.error(
-        t('bookingDrawer.validBirthDate'),
-      );
+    if (!birthDateIso) return toast.error(t('bookingDrawer.validBirthDate'));
     setSubmitting(true);
     setError('');
     try {
@@ -389,9 +403,7 @@ export function BookingDrawerCanonical({
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success)
-        throw new Error(
-          payload?.error || t('bookingDrawer.bookingError'),
-        );
+        throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
       setStep(4);
       toast.success(t('bookingDrawer.bookingSuccess'));
@@ -501,7 +513,11 @@ export function BookingDrawerCanonical({
           )}
         </header>
 
-        <div ref={scrollAreaRef} data-booking-scroll-area className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5 [-webkit-overflow-scrolling:touch] sm:px-5 sm:pb-5">
+        <div
+          ref={scrollAreaRef}
+          data-booking-scroll-area
+          className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5 [-webkit-overflow-scrolling:touch] sm:px-5 sm:pb-5"
+        >
           {error ? (
             <div
               className="flex min-h-56 flex-col items-center justify-center gap-4 text-center"
@@ -519,7 +535,9 @@ export function BookingDrawerCanonical({
                   if (step < 3) setRetryKey((value) => value + 1);
                 }}
               >
-                {step < 3 ? t('bookingDrawer.retry') : t('bookingDrawer.backToDetails')}
+                {step < 3
+                  ? t('bookingDrawer.retry')
+                  : t('bookingDrawer.backToDetails')}
               </Button>
             </div>
           ) : step === 1 ? (
@@ -573,7 +591,9 @@ export function BookingDrawerCanonical({
                     className="size-4 text-emerald-300"
                     aria-hidden="true"
                   />
-                  <h3 className="text-sm font-semibold">{t('bookingDrawer.stepTwoDay')}</h3>
+                  <h3 className="text-sm font-semibold">
+                    {t('bookingDrawer.stepTwoDay')}
+                  </h3>
                 </div>
                 {availableDays.length ? (
                   <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -589,7 +609,11 @@ export function BookingDrawerCanonical({
                         className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                       >
                         <span className="block text-[10px] font-semibold text-zinc-500">
-                          {day.isToday ? t('bookingDrawer.today').toLocaleUpperCase(locale === 'pt' ? 'pt-PT' : 'en-GB') : day.weekdayShort}
+                          {day.isToday
+                            ? t('bookingDrawer.today').toLocaleUpperCase(
+                                locale === 'pt' ? 'pt-PT' : 'en-GB',
+                              )
+                            : day.weekdayShort}
                         </span>
                         <span className="mt-1 block text-xl font-black">
                           {day.dayNumeric}
@@ -613,7 +637,9 @@ export function BookingDrawerCanonical({
                     className="size-4 text-zinc-400"
                     aria-hidden="true"
                   />
-                  <h3 className="text-sm font-semibold">{t('bookingDrawer.stepThreeService')}</h3>
+                  <h3 className="text-sm font-semibold">
+                    {t('bookingDrawer.stepThreeService')}
+                  </h3>
                 </div>
                 <select
                   value={serviceId ?? ''}
@@ -835,7 +861,9 @@ export function BookingDrawerCanonical({
                       aria-hidden="true"
                     />
                   ) : null}
-                  {submitting ? t('bookingDrawer.reserving') : t('bookingDrawer.confirmBooking')}
+                  {submitting
+                    ? t('bookingDrawer.reserving')
+                    : t('bookingDrawer.confirmBooking')}
                 </Button>
               </div>
             </section>
@@ -858,7 +886,8 @@ export function BookingDrawerCanonical({
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
-                {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
+                {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
+                {selectedSlot}.
               </p>
               <Button type="button" className="mt-6 w-full" onClick={onClose}>
                 {t('bookingDrawer.finish')}

@@ -12,7 +12,10 @@ const en = read('app/locales/en.ts');
 assert.match(loginRoute, /EMAIL_NOT_CONFIRMED/);
 assert.match(loginRoute, /INVALID_CREDENTIALS/);
 assert.match(loginRoute, /barbershopId: profile\.barbershop_id/);
-assert.match(loginRoute, /Keep unknown accounts and incorrect passwords indistinguishable/);
+assert.match(
+  loginRoute,
+  /Keep unknown accounts and incorrect passwords indistinguishable/,
+);
 assert.match(registerRoute, /auth\.signUp\(/);
 assert.match(registerRoute, /REGISTRATION_NEXT_STEPS/);
 assert.match(registerRoute, /Do not reveal whether an account already exists/);
@@ -25,4 +28,6 @@ assert.match(pt, /unconfirmedLogin:/);
 assert.match(en, /invalidCredentials:/);
 assert.match(en, /unconfirmedLogin:/);
 
-console.log('[AUTH_ACCOUNT_STATE_QA] login, registration, confirmation and enumeration protections verified');
+console.log(
+  '[AUTH_ACCOUNT_STATE_QA] login, registration, confirmation and enumeration protections verified',
+);

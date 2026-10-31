@@ -103,23 +103,36 @@ export async function sendBookingConfirmationEmail(
         subject: `Booking confirmed — ${payload.barbershopName}`,
         title: 'Booking confirmed',
         greeting: `Hello <strong style="color:#fff;">${safeClientName}</strong>, your booking has been confirmed.`,
-        service: 'Service', date: 'Date', time: 'Time', location: 'Location',
-        addCalendar: 'Add to calendar', openLocation: 'Open location',
+        service: 'Service',
+        date: 'Date',
+        time: 'Time',
+        location: 'Location',
+        addCalendar: 'Add to calendar',
+        openLocation: 'Open location',
         footer: 'Keep this email as confirmation of your booking.',
         description: `Booking for ${payload.serviceName} for ${payload.clientName}.`,
-        textTitle: 'Booking confirmed', textAt: 'at',
+        textTitle: 'Booking confirmed',
+        textAt: 'at',
       }
     : {
         subject: `Agendamento confirmado — ${payload.barbershopName}`,
         title: 'Agendamento confirmado',
         greeting: `Olá <strong style="color:#fff;">${safeClientName}</strong>, a tua marcação ficou confirmada.`,
-        service: 'Serviço', date: 'Data', time: 'Hora', location: 'Local',
-        addCalendar: 'Adicionar ao calendário', openLocation: 'Abrir localização',
+        service: 'Serviço',
+        date: 'Data',
+        time: 'Hora',
+        location: 'Local',
+        addCalendar: 'Adicionar ao calendário',
+        openLocation: 'Abrir localização',
         footer: 'Guarda este email como confirmação da tua marcação.',
         description: `Agendamento de ${payload.serviceName} para ${payload.clientName}.`,
-        textTitle: 'Agendamento confirmado', textAt: 'às',
+        textTitle: 'Agendamento confirmado',
+        textAt: 'às',
       };
-  const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'long', timeZone: 'Europe/Lisbon' }).format(new Date(`${payload.date}T12:00:00`));
+  const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', {
+    dateStyle: 'long',
+    timeZone: 'Europe/Lisbon',
+  }).format(new Date(`${payload.date}T12:00:00`));
   const avatarUrl = getBarbershopAvatarUrl(payload.barbershopId);
   const title = `${payload.serviceName} — ${payload.barbershopName}`;
   const description = copy.description;

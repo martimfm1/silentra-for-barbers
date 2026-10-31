@@ -45,17 +45,21 @@ export async function sendBookingReviewRequestEmail(
         subject: `How was your experience at ${payload.barbershopName}?`,
         title: 'How was your visit?',
         greeting: `Hi <strong style="color:#fff">${safeClientName}</strong>, thank you for choosing our barbershop. We would love to hear about your experience.`,
-        button: 'Leave a review', service: 'Service:',
+        button: 'Leave a review',
+        service: 'Service:',
         meta: 'It takes less than a minute and helps us improve.',
-        footer: 'Your feedback is optional and will only appear on the public barbershop page after you submit it.',
+        footer:
+          'Your feedback is optional and will only appear on the public barbershop page after you submit it.',
       }
     : {
         subject: `Como correu a tua experiência em ${payload.barbershopName}?`,
         title: 'Como correu o teu atendimento?',
         greeting: `Olá <strong style="color:#fff">${safeClientName}</strong>, obrigado por escolheres a nossa barbearia. Gostávamos de saber como correu a tua experiência.`,
-        button: 'Deixar uma avaliação', service: 'Serviço:',
+        button: 'Deixar uma avaliação',
+        service: 'Serviço:',
         meta: 'Leva menos de um minuto e ajuda-nos a melhorar.',
-        footer: 'A tua opinião é opcional e será publicada na página pública da barbearia apenas depois de a submeteres.',
+        footer:
+          'A tua opinião é opcional e será publicada na página pública da barbearia apenas depois de a submeteres.',
       };
 
   const htmlContent = `

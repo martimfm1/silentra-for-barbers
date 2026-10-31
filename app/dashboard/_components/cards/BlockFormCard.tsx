@@ -49,7 +49,9 @@ export function BlockScheduleForm({
         >
           {/* Who is absent */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">{t('agenda.blockProfessional')}</label>
+            <label className="text-xs text-zinc-400">
+              {t('agenda.blockProfessional')}
+            </label>
             <Select
               value={blockFormData.professional_id}
               onValueChange={(val) =>
@@ -73,7 +75,9 @@ export function BlockScheduleForm({
 
           {/* Block Date */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">{t('agenda.blockDate')}</label>
+            <label className="text-xs text-zinc-400">
+              {t('agenda.blockDate')}
+            </label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -114,7 +118,9 @@ export function BlockScheduleForm({
 
           {/* Start Time */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">{t('agenda.startTime')}</label>
+            <label className="text-xs text-zinc-400">
+              {t('agenda.startTime')}
+            </label>
             <input
               type="time"
               required
@@ -131,7 +137,9 @@ export function BlockScheduleForm({
 
           {/* End Time */}
           <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">{t('agenda.endTime')}</label>
+            <label className="text-xs text-zinc-400">
+              {t('agenda.endTime')}
+            </label>
             <input
               type="time"
               required
@@ -145,7 +153,9 @@ export function BlockScheduleForm({
 
           {/* Reason */}
           <div className="grid gap-2 md:col-span-2 lg:col-span-2">
-            <label className="text-xs text-zinc-400">{t('agenda.blockReason')}</label>
+            <label className="text-xs text-zinc-400">
+              {t('agenda.blockReason')}
+            </label>
             <input
               placeholder={t('agenda.blockReasonPlaceholder')}
               className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white"
@@ -158,7 +168,9 @@ export function BlockScheduleForm({
 
           {/* Submit */}
           <Button
-            aria-label={loading ? t('agenda.savingBlock') : t('agenda.saveBlock')}
+            aria-label={
+              loading ? t('agenda.savingBlock') : t('agenda.saveBlock')
+            }
             type="submit"
             disabled={loading}
             variant="ghost"

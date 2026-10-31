@@ -109,13 +109,13 @@ export default function AnalyticsPage() {
       );
       const json = await response.json();
       if (!response.ok)
-        throw new Error(
-          json.error ?? t('analyticsPage.loadError'),
-        );
+        throw new Error(json.error ?? t('analyticsPage.loadError'));
       setData(json as Analytics);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('analyticsPage.loadGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('analyticsPage.loadGenericError'),
       );
     } finally {
       setLoading(false);
@@ -148,22 +148,33 @@ export default function AnalyticsPage() {
     if (data.overview.revenueChangePercent !== null) {
       messages.push(
         data.overview.revenueChangePercent >= 0
-          ? t('analyticsPage.revenueUp', { percent: Math.abs(data.overview.revenueChangePercent).toFixed(1) })
-          : t('analyticsPage.revenueDown', { percent: Math.abs(data.overview.revenueChangePercent).toFixed(1) }),
+          ? t('analyticsPage.revenueUp', {
+              percent: Math.abs(data.overview.revenueChangePercent).toFixed(1),
+            })
+          : t('analyticsPage.revenueDown', {
+              percent: Math.abs(data.overview.revenueChangePercent).toFixed(1),
+            }),
       );
     }
     messages.push(
       t('analyticsPage.ticketInsight', { amount: money(avgTicket, locale) }),
     );
     messages.push(
-      t('analyticsPage.completionInsight', { percent: completionRate.toFixed(1) }),
+      t('analyticsPage.completionInsight', {
+        percent: completionRate.toFixed(1),
+      }),
     );
     if (topService)
       messages.push(
-        t('analyticsPage.topServiceInsight', { name: topService.name, amount: money(topService.revenue, locale) }),
+        t('analyticsPage.topServiceInsight', {
+          name: topService.name,
+          amount: money(topService.revenue, locale),
+        }),
       );
     messages.push(
-      t('analyticsPage.dailyAverageInsight', { count: avgDailyAppointments.toFixed(1) }),
+      t('analyticsPage.dailyAverageInsight', {
+        count: avgDailyAppointments.toFixed(1),
+      }),
     );
     return messages.slice(0, 5);
   }, [data, t, locale]);
@@ -213,12 +224,16 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">{t('analyticsPage.advancedTitle')}</h1>
+              <h1 className="text-2xl font-semibold">
+                {t('analyticsPage.advancedTitle')}
+              </h1>
               <p className="text-muted-foreground">
                 {t('analyticsPage.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">{t('analyticsPage.upgrade')}</Link>
+                <Link href="/dashboard/billing">
+                  {t('analyticsPage.upgrade')}
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -303,7 +318,9 @@ export default function AnalyticsPage() {
               <RefreshCw
                 className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
               />
-              {loading ? t('analyticsPage.updating') : t('analyticsPage.update')}
+              {loading
+                ? t('analyticsPage.updating')
+                : t('analyticsPage.update')}
             </Button>
           </div>
         </header>
@@ -324,7 +341,9 @@ export default function AnalyticsPage() {
                 detail={
                   data.overview.revenueChangePercent === null
                     ? t('analyticsPage.noComparison')
-                    : t('analyticsPage.vsPrevious', { value: `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}` })
+                    : t('analyticsPage.vsPrevious', {
+                        value: `${data.overview.revenueChangePercent >= 0 ? '+' : ''}${data.overview.revenueChangePercent.toFixed(1)}`,
+                      })
                 }
                 icon={<Wallet className="h-4 w-4" />}
                 positive={
@@ -342,13 +361,17 @@ export default function AnalyticsPage() {
               <Metric
                 title={t('analyticsPage.activeClients')}
                 value={String(data.overview.activeClientsInPeriod)}
-                detail={t('analyticsPage.newInPeriod', { count: data.overview.newClients })}
+                detail={t('analyticsPage.newInPeriod', {
+                  count: data.overview.newClients,
+                })}
                 icon={<Users className="h-4 w-4" />}
               />
               <Metric
                 title={t('analyticsPage.completionRate')}
                 value={`${(businessMetrics?.completionRate ?? 0).toFixed(1)}%`}
-                detail={t('analyticsPage.cancellations', { count: data.overview.cancelledAppointments })}
+                detail={t('analyticsPage.cancellations', {
+                  count: data.overview.cancelledAppointments,
+                })}
                 icon={<CheckCircle2 className="h-4 w-4" />}
                 positive={(businessMetrics?.completionRate ?? 0) >= 70}
               />
@@ -418,7 +441,10 @@ export default function AnalyticsPage() {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  <Stat label={t('analyticsPage.bookings')} value={data.overview.appointments} />
+                  <Stat
+                    label={t('analyticsPage.bookings')}
+                    value={data.overview.appointments}
+                  />
                   <Stat
                     label={t('analyticsPage.completed')}
                     value={data.overview.completedAppointments}
@@ -492,7 +518,9 @@ export default function AnalyticsPage() {
             <section className="grid gap-6 xl:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('analyticsPage.bestSellingServices')}</CardTitle>
+                  <CardTitle>
+                    {t('analyticsPage.bestSellingServices')}
+                  </CardTitle>
                   <p className="text-xs text-muted-foreground">
                     {t('analyticsPage.sortedByRevenue')}
                   </p>
@@ -518,7 +546,9 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {t('analyticsPage.bookingCount', { count: item.count })}
+                          {t('analyticsPage.bookingCount', {
+                            count: item.count,
+                          })}
                         </p>
                       </div>
                     ))
@@ -529,7 +559,9 @@ export default function AnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('analyticsPage.professionalPerformance')}</CardTitle>
+                  <CardTitle>
+                    {t('analyticsPage.professionalPerformance')}
+                  </CardTitle>
                   <p className="text-xs text-muted-foreground">
                     {t('analyticsPage.revenueAndBookings')}
                   </p>
@@ -555,7 +587,9 @@ export default function AnalyticsPage() {
                           />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {t('analyticsPage.completedBookings', { count: item.appointments })}
+                          {t('analyticsPage.completedBookings', {
+                            count: item.appointments,
+                          })}
                         </p>
                       </div>
                     ))
@@ -605,7 +639,9 @@ export default function AnalyticsPage() {
               {data.enterprise ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>{t('analyticsPage.enterpriseFinance')}</CardTitle>
+                    <CardTitle>
+                      {t('analyticsPage.enterpriseFinance')}
+                    </CardTitle>
                     <p className="text-xs text-muted-foreground">
                       {t('analyticsPage.posCombined')}
                     </p>
@@ -635,7 +671,9 @@ export default function AnalyticsPage() {
                       {t('analyticsPage.enableEnterprise')}
                     </div>
                     <Button asChild variant="outline" className="mt-4">
-                      <Link href="/plans">{t('analyticsPage.comparePlans')}</Link>
+                      <Link href="/plans">
+                        {t('analyticsPage.comparePlans')}
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -685,12 +723,16 @@ export default function AnalyticsPage() {
                     />
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5">
-                      <p className="font-medium">{t('analyticsPage.financialReport')}</p>
+                      <p className="font-medium">
+                        {t('analyticsPage.financialReport')}
+                      </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {t('analyticsPage.availableEnterprise')}
                       </p>
                       <Button asChild variant="outline" className="mt-4 w-full">
-                        <Link href="/plans">{t('analyticsPage.viewEnterprise')}</Link>
+                        <Link href="/plans">
+                          {t('analyticsPage.viewEnterprise')}
+                        </Link>
                       </Button>
                     </div>
                   )}

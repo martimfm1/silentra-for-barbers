@@ -5,20 +5,31 @@ import { join } from 'node:path';
 const root = process.cwd();
 const read = (path) => readFile(join(root, path), 'utf8');
 
-const [manifestSource, metadata, layout, registration, worker, topBar, siteNavbar, installPage, packageJson, installButton, dialog] =
-  await Promise.all([
-    read('public/site.webmanifest'),
-    read('lib/site-metadata.ts'),
-    read('app/layout.tsx'),
-    read('components/pwa-registration.tsx'),
-    read('public/sw.js'),
-    read('app/dashboard/_components/DashboardTopBar.tsx'),
-    read('components/site-navbar.tsx'),
-    read('app/instalar/page.tsx'),
-    read('package.json'),
-    read('components/pwa-install-button.tsx'),
-    read('components/ui/dialog.tsx'),
-  ]);
+const [
+  manifestSource,
+  metadata,
+  layout,
+  registration,
+  worker,
+  topBar,
+  siteNavbar,
+  installPage,
+  packageJson,
+  installButton,
+  dialog,
+] = await Promise.all([
+  read('public/site.webmanifest'),
+  read('lib/site-metadata.ts'),
+  read('app/layout.tsx'),
+  read('components/pwa-registration.tsx'),
+  read('public/sw.js'),
+  read('app/dashboard/_components/DashboardTopBar.tsx'),
+  read('components/site-navbar.tsx'),
+  read('app/instalar/page.tsx'),
+  read('package.json'),
+  read('components/pwa-install-button.tsx'),
+  read('components/ui/dialog.tsx'),
+]);
 
 const manifest = JSON.parse(manifestSource);
 assert.equal(manifest.name, 'Silentra for Barbers');
@@ -50,6 +61,11 @@ assert.ok(dialog.includes('z-[10000]'));
 assert.ok(dialog.includes('z-[10001]'));
 assert.match(worker, /url\.pathname\.startsWith\('\/_next\/static\/'\)/);
 assert.match(worker, /if \(!isStaticAsset && !isPwaAsset\) return/);
-assert.match(packageJson, /"qa:pwa": "node scripts\/qa\/pwa-installability\.mjs"/);
+assert.match(
+  packageJson,
+  /"qa:pwa": "node scripts\/qa\/pwa-installability\.mjs"/,
+);
 
-console.log('[PWA_INSTALLABILITY_QA] manifest, install guides, modal stacking and safe cache allowlist passed');
+console.log(
+  '[PWA_INSTALLABILITY_QA] manifest, install guides, modal stacking and safe cache allowlist passed',
+);

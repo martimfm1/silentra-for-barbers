@@ -47,7 +47,10 @@ async function POST__unobserved(req: Request, { params }: Params) {
       .maybeSingle();
 
     if (clientError) {
-      console.error('[CRM_CLIENT_NOTE_CLIENT_LOOKUP_ERROR]', clientError.code ?? 'UNKNOWN');
+      console.error(
+        '[CRM_CLIENT_NOTE_CLIENT_LOOKUP_ERROR]',
+        clientError.code ?? 'UNKNOWN',
+      );
       return NextResponse.json(
         { error: 'Não foi possível validar o cliente.' },
         { status: 503 },

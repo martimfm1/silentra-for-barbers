@@ -72,20 +72,37 @@ export const clientsService = {
         .select('id,name_complete,num_phone,email')
         .eq('barbershop_id', resolvedBarbershopId)
         .eq('role', 'client')
-        .or([
-          normalizedEmail ? `email.eq.${normalizedEmail.replace(/[,.()]/g, '')}` : '',
-          normalizedPhone.length >= 7 ? `num_phone.ilike.%${normalizedPhone.slice(-7)}%` : '',
-        ].filter(Boolean).join(','))
+        .or(
+          [
+            normalizedEmail
+              ? `email.eq.${normalizedEmail.replace(/[,.()]/g, '')}`
+              : '',
+            normalizedPhone.length >= 7
+              ? `num_phone.ilike.%${normalizedPhone.slice(-7)}%`
+              : '',
+          ]
+            .filter(Boolean)
+            .join(','),
+        )
         .limit(50);
       if (lookupError) throw lookupError;
       const sameClient = (existingClients ?? []).find((existing) => {
-        const existingEmail = String(existing.email ?? '').trim().toLowerCase();
-        const existingPhone = String(existing.num_phone ?? '').replace(/\D/g, '');
-        return (normalizedEmail && existingEmail === normalizedEmail) ||
-          (normalizedPhone.length >= 7 && existingPhone === normalizedPhone);
+        const existingEmail = String(existing.email ?? '')
+          .trim()
+          .toLowerCase();
+        const existingPhone = String(existing.num_phone ?? '').replace(
+          /\D/g,
+          '',
+        );
+        return (
+          (normalizedEmail && existingEmail === normalizedEmail) ||
+          (normalizedPhone.length >= 7 && existingPhone === normalizedPhone)
+        );
       });
       if (sameClient) {
-        throw new Error('Já existe um cliente com este email ou telemóvel nesta barbearia.');
+        throw new Error(
+          'Já existe um cliente com este email ou telemóvel nesta barbearia.',
+        );
       }
     }
 

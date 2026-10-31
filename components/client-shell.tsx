@@ -15,9 +15,9 @@ const dashboardRoutePrefixes = [
 function isDashboardRoute(pathname: string | null) {
   return Boolean(
     pathname &&
-      dashboardRoutePrefixes.some(
-        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-      ),
+    dashboardRoutePrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    ),
   );
 }
 

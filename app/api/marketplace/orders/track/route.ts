@@ -135,9 +135,10 @@ async function POST__unobserved(request: Request) {
     ) {
       return notFound();
     }
-    const token = typeof (body as Record<string, unknown>).token === 'string'
-      ? (body as Record<string, unknown>).token as string
-      : '';
+    const token =
+      typeof (body as Record<string, unknown>).token === 'string'
+        ? ((body as Record<string, unknown>).token as string)
+        : '';
     if (!isMarketplaceTrackingToken(token)) {
       return notFound();
     }

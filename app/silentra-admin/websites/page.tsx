@@ -14,7 +14,9 @@ export default async function CustomWebsitesAdminPage() {
   if (!context) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect('/login?redirect=%2Fsilentra-admin%2Fwebsites');
     notFound();
   }

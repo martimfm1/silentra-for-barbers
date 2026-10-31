@@ -45,7 +45,10 @@ async function reconcileSubscriptionWithThrottle(
   const cacheKey = `${subscription.id}:${subscription.updated_at || 'unknown'}`;
   const now = Date.now();
   const checkedAt = recentStripeReconciliations.get(cacheKey);
-  if (checkedAt !== undefined && now - checkedAt < STRIPE_RECONCILIATION_CACHE_TTL_MS) {
+  if (
+    checkedAt !== undefined &&
+    now - checkedAt < STRIPE_RECONCILIATION_CACHE_TTL_MS
+  ) {
     return subscription;
   }
 
@@ -56,7 +59,8 @@ async function reconcileSubscriptionWithThrottle(
     barbershopId,
     subscription,
     { timeoutMs: 6000 },
-  ).then((result) => {
+  )
+    .then((result) => {
       markStripeReconciliation(cacheKey);
       return result;
     })
@@ -249,7 +253,8 @@ async function GET__unobserved() {
               )
             : null;
 
-        const canceledAt = subscription.canceled_at ??
+        const canceledAt =
+          subscription.canceled_at ??
           (remote?.canceled_at
             ? new Date(remote.canceled_at * 1000).toISOString()
             : null);
@@ -285,7 +290,8 @@ async function GET__unobserved() {
           canceledByName,
           canceledByEmail,
           previousPlan,
-          requestedAt: subscription.cancellation_requested_at ??
+          requestedAt:
+            subscription.cancellation_requested_at ??
             remote?.metadata?.cancellation_requested_at ??
             null,
         };

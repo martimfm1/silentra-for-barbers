@@ -116,9 +116,7 @@ export async function handleBrevoWebhook(
     payloads.length > 100 ||
     payloads.some(
       (payload) =>
-        !payload ||
-        typeof payload !== 'object' ||
-        Array.isArray(payload),
+        !payload || typeof payload !== 'object' || Array.isArray(payload),
     )
   ) {
     return NextResponse.json(

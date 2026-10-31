@@ -19,7 +19,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import {
@@ -122,7 +129,11 @@ export function ClientsListCard({
               loading={loading}
             />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddClientForm(false)} className="border-white/10 bg-transparent">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddClientForm(false)}
+                className="border-white/10 bg-transparent"
+              >
                 {t('common.close')}
               </Button>
             </DialogFooter>
@@ -177,10 +188,7 @@ function AddClientForm({
   }
 
   return (
-    <form
-      onSubmit={(event) => void submit(event)}
-      className="grid gap-4 py-2"
-    >
+    <form onSubmit={(event) => void submit(event)} className="grid gap-4 py-2">
       <div className="mb-4 flex items-start gap-3">
         <Sparkles className="mt-0.5 size-4 shrink-0 text-blue-400" />
         <div>
@@ -264,7 +272,7 @@ function AddClientForm({
         </div>
 
         <Button
-            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
+          aria-label={loading ? 'A guardar cliente' : 'Guardar cliente'}
           type="submit"
           disabled={loading}
           className="min-h-11 rounded-lg bg-blue-600 text-white hover:bg-blue-500"
@@ -273,7 +281,8 @@ function AddClientForm({
             <Spinner className="size-4" />
           ) : (
             <>
-              {t('clientsListCard.submit')} <ArrowRight className="ml-2 size-4" />
+              {t('clientsListCard.submit')}{' '}
+              <ArrowRight className="ml-2 size-4" />
             </>
           )}
         </Button>
@@ -342,7 +351,9 @@ function ClientItemCard({
             <h3 className="truncate text-sm font-semibold text-zinc-100">
               {client.name_complete}
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">{t('clientsListCard.client')}</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {t('clientsListCard.client')}
+            </p>
           </div>
         </div>
 
@@ -387,14 +398,18 @@ function ClientItemCard({
               variant="ghost"
               size="icon"
               className="size-9 rounded-lg text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
-              aria-label={t('clientsListCard.delete', { name: client.name_complete })}
+              aria-label={t('clientsListCard.delete', {
+                name: client.name_complete,
+              })}
             >
               <Trash2 className="size-4" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>{t('clientsListCard.deleteTitle')}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t('clientsListCard.deleteTitle')}
+              </AlertDialogTitle>
               <AlertDialogDescription>
                 {t('clientsListCard.deleteDescription')}
               </AlertDialogDescription>

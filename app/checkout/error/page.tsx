@@ -17,16 +17,22 @@ export default function CheckoutErrorPage() {
           {english ? 'Checkout not completed' : 'Checkout não concluído'}
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">
-          {english ? 'Could not complete the subscription.' : 'Não foi possível concluir a subscrição.'}
+          {english
+            ? 'Could not complete the subscription.'
+            : 'Não foi possível concluir a subscrição.'}
         </h1>
         <p className="mt-4 text-sm leading-7 text-zinc-400">
-          {english ? 'The payment may have been declined, cancelled or the session may have expired. The subscription is not active until Stripe confirms the purchase.' : 'O pagamento pode ter sido recusado, cancelado ou a sessão pode ter expirado. Nenhuma nova subscrição deve ser considerada ativa até a Stripe confirmar a compra.'}
+          {english
+            ? 'The payment may have been declined, cancelled or the session may have expired. The subscription is not active until Stripe confirms the purchase.'
+            : 'O pagamento pode ter sido recusado, cancelado ou a sessão pode ter expirado. Nenhuma nova subscrição deve ser considerada ativa até a Stripe confirmar a compra.'}
         </p>
         <div className="mt-7 rounded-2xl border border-white/8 bg-black/20 p-4 text-sm text-zinc-400">
           <div className="flex gap-3">
             <CreditCard className="mt-0.5 size-4 shrink-0 text-zinc-500" />
             <p>
-              {english ? 'You can return to the plans page and start a new checkout. Previous attempts should not prevent another attempt once they expire or are cancelled.' : 'Podes voltar aos planos e iniciar um novo checkout. As tentativas anteriores não devem bloquear uma nova tentativa depois de expirarem ou serem canceladas.'}
+              {english
+                ? 'You can return to the plans page and start a new checkout. Previous attempts should not prevent another attempt once they expire or are cancelled.'
+                : 'Podes voltar aos planos e iniciar um novo checkout. As tentativas anteriores não devem bloquear uma nova tentativa depois de expirarem ou serem canceladas.'}
             </p>
           </div>
         </div>

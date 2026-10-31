@@ -47,7 +47,8 @@ async function authHeaders(contentType = false) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error('Your session expired. Please sign in again.');
+  if (!session?.access_token)
+    throw new Error('Your session expired. Please sign in again.');
   return {
     Authorization: `Bearer ${session.access_token}`,
     ...(contentType ? { 'Content-Type': 'application/json' } : {}),
@@ -91,9 +92,7 @@ export default function CRMClientPage({ params }: Props) {
       } catch (error) {
         if (!cancelled)
           toast.error(
-            error instanceof Error
-              ? error.message
-              : t('crmDetail.loadError'),
+            error instanceof Error ? error.message : t('crmDetail.loadError'),
           );
       } finally {
         if (!cancelled) setLoading(false);
@@ -209,7 +208,9 @@ export default function CRMClientPage({ params }: Props) {
                       >
                         <div>
                           <p className="font-medium">
-                            {new Date(item.date_hour).toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}
+                            {new Date(item.date_hour).toLocaleString(
+                              locale === 'en' ? 'en-GB' : 'pt-PT',
+                            )}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {item.status}
@@ -281,12 +282,20 @@ export default function CRMClientPage({ params }: Props) {
                 <p>{client.num_phone || '—'}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">{t('crmDetail.customerSince')}</p>
-                <p>{new Date(client.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT')}</p>
+                <p className="text-muted-foreground">
+                  {t('crmDetail.customerSince')}
+                </p>
+                <p>
+                  {new Date(client.created_at).toLocaleDateString(
+                    locale === 'en' ? 'en-GB' : 'pt-PT',
+                  )}
+                </p>
               </div>
               {client.style_notes ? (
                 <div>
-                  <p className="text-muted-foreground">{t('crmDetail.styleNotes')}</p>
+                  <p className="text-muted-foreground">
+                    {t('crmDetail.styleNotes')}
+                  </p>
                   <p className="whitespace-pre-wrap">{client.style_notes}</p>
                 </div>
               ) : null}

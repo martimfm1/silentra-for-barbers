@@ -77,18 +77,28 @@ export default function CommunicationPage() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </div>
-                  <CardTitle className="mt-2">{t(`communicationPage.${section.titleKey}`)}</CardTitle>
-                  <CardDescription>{t(`communicationPage.${section.descriptionKey}`)}</CardDescription>
+                  <CardTitle className="mt-2">
+                    {t(`communicationPage.${section.titleKey}`)}
+                  </CardTitle>
+                  <CardDescription>
+                    {t(`communicationPage.${section.descriptionKey}`)}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {locked ? (
                     <Button asChild variant="outline" className="w-full">
-                      <Link href="/dashboard/billing">{t('communicationPage.viewPlans')}</Link>
+                      <Link href="/dashboard/billing">
+                        {t('communicationPage.viewPlans')}
+                      </Link>
                     </Button>
                   ) : (
                     <Button asChild className="w-full">
                       <Link href={section.href}>
-                        {t('communicationPage.open', { section: t(`communicationPage.${section.titleKey}`).toLowerCase() })}{' '}
+                        {t('communicationPage.open', {
+                          section: t(
+                            `communicationPage.${section.titleKey}`,
+                          ).toLowerCase(),
+                        })}{' '}
                         <ArrowUpRight className="ml-2 size-4" />
                       </Link>
                     </Button>
@@ -104,14 +114,18 @@ export default function CommunicationPage() {
             <div className="flex items-start gap-3">
               <Bell className="mt-0.5 size-5 shrink-0 text-primary" />
               <div>
-                <p className="font-medium">{t('communicationPage.centralTitle')}</p>
+                <p className="font-medium">
+                  {t('communicationPage.centralTitle')}
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t('communicationPage.centralDescription')}
                 </p>
               </div>
             </div>
             <Button asChild variant="outline">
-              <Link href="/dashboard">{t('communicationPage.backToOverview')}</Link>
+              <Link href="/dashboard">
+                {t('communicationPage.backToOverview')}
+              </Link>
             </Button>
           </CardContent>
         </Card>

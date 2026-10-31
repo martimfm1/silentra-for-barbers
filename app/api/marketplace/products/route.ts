@@ -9,7 +9,8 @@ const MAX_QUERY_LENGTH = 80;
 const CATALOG_RATE_LIMIT = 120;
 const CATALOG_RATE_WINDOW_SECONDS = 60;
 // All response fields are public catalogue data; only cache successful responses.
-const PUBLIC_CATALOG_CACHE = 'public, max-age=0, s-maxage=15, stale-while-revalidate=45';
+const PUBLIC_CATALOG_CACHE =
+  'public, max-age=0, s-maxage=15, stale-while-revalidate=45';
 const MAX_CATEGORY_LENGTH = 80;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

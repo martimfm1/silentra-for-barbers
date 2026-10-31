@@ -101,7 +101,9 @@ export function BookingForm({
                   htmlFor="booking-client"
                 >
                   {t('bookingForm.existingCustomer')}{' '}
-                  <span className="font-normal text-zinc-600">{t('bookingForm.optional')}</span>
+                  <span className="font-normal text-zinc-600">
+                    {t('bookingForm.optional')}
+                  </span>
                 </label>
                 <Combobox
                   value={formData.clientId || ''}
@@ -126,7 +128,9 @@ export function BookingForm({
                   />
                   <ComboboxContent className="border-white/10 bg-zinc-900 text-white">
                     <ComboboxList>
-                      <ComboboxEmpty>{t('bookingForm.noCustomerFound')}</ComboboxEmpty>
+                      <ComboboxEmpty>
+                        {t('bookingForm.noCustomerFound')}
+                      </ComboboxEmpty>
                       {clients.map((c) => (
                         <ComboboxItem key={c.id} value={c.id}>
                           {c.name_complete}
@@ -268,7 +272,9 @@ export function BookingForm({
                     id="booking-barber"
                     className="min-h-11 cursor-pointer border-white/10 bg-zinc-900 text-white"
                   >
-                    <SelectValue placeholder={t('bookingForm.chooseProfessional')} />
+                    <SelectValue
+                      placeholder={t('bookingForm.chooseProfessional')}
+                    />
                   </SelectTrigger>
                   <SelectContent className="cursor-pointer border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
@@ -321,7 +327,10 @@ export function BookingForm({
                         aria-hidden="true"
                       />
                       {selectedDate
-                        ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { dateStyle: 'long' }).format(new Date(selectedDate + 'T00:00:00'))
+                        ? new Intl.DateTimeFormat(
+                            locale === 'pt' ? 'pt-PT' : 'en-GB',
+                            { dateStyle: 'long' },
+                          ).format(new Date(selectedDate + 'T00:00:00'))
                         : t('bookingForm.chooseDate')}
                     </Button>
                   </PopoverTrigger>

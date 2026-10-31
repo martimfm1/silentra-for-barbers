@@ -67,7 +67,13 @@ export async function getBarbershopConfig(
           0,
           Math.min(720, Number(barberData.time_limit_cancellation_hours ?? 24)),
         ),
-        minimum_booking_notice_minutes: Math.max(0, Math.min(43200, Number(barberData.minimum_booking_notice_minutes ?? 0))),
+        minimum_booking_notice_minutes: Math.max(
+          0,
+          Math.min(
+            43200,
+            Number(barberData.minimum_booking_notice_minutes ?? 0),
+          ),
+        ),
         popular_service_id: shopData?.popular_service_id ?? null,
       },
       error: null,
@@ -108,7 +114,9 @@ export async function updateBarbershopConfig(
     if (payload.minimum_booking_notice_minutes !== undefined) {
       const minutes = Number(payload.minimum_booking_notice_minutes);
       if (!Number.isInteger(minutes) || minutes < 0 || minutes > 43200)
-        throw new Error('A antecedência mínima tem de estar entre 0 minutos e 30 dias.');
+        throw new Error(
+          'A antecedência mínima tem de estar entre 0 minutos e 30 dias.',
+        );
     }
 
     const directoryVisibility = payload.is_public_in_directory;
@@ -117,7 +125,10 @@ export async function updateBarbershopConfig(
       payload.time_limit_cancellation_hours !== undefined
         ? Number(payload.time_limit_cancellation_hours)
         : undefined;
-    const expectedNoticeMinutes = payload.minimum_booking_notice_minutes !== undefined ? Number(payload.minimum_booking_notice_minutes) : undefined;
+    const expectedNoticeMinutes =
+      payload.minimum_booking_notice_minutes !== undefined
+        ? Number(payload.minimum_booking_notice_minutes)
+        : undefined;
 
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
@@ -198,9 +209,19 @@ export async function updateBarbershopConfig(
       );
     }
 
-    if (expectedNoticeMinutes !== undefined && result.data && result.data.minimum_booking_notice_minutes !== expectedNoticeMinutes) {
-      console.error('[Barbershop Config Persistence Mismatch]', { field: 'minimum_booking_notice_minutes', expected: expectedNoticeMinutes, actual: result.data.minimum_booking_notice_minutes });
-      throw new Error('A antecedência mínima não foi guardada. Atualiza as migrations da base de dados e tenta novamente.');
+    if (
+      expectedNoticeMinutes !== undefined &&
+      result.data &&
+      result.data.minimum_booking_notice_minutes !== expectedNoticeMinutes
+    ) {
+      console.error('[Barbershop Config Persistence Mismatch]', {
+        field: 'minimum_booking_notice_minutes',
+        expected: expectedNoticeMinutes,
+        actual: result.data.minimum_booking_notice_minutes,
+      });
+      throw new Error(
+        'A antecedência mínima não foi guardada. Atualiza as migrations da base de dados e tenta novamente.',
+      );
     }
     return result;
   } catch (error: unknown) {

@@ -47,7 +47,9 @@ export function DashboardTopBar() {
     <header className="fixed inset-x-0 top-0 z-30 border-b border-white/5 bg-zinc-950/65 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <nav
-          aria-label={locale === 'en' ? 'Page navigation' : 'Navegação da página'}
+          aria-label={
+            locale === 'en' ? 'Page navigation' : 'Navegação da página'
+          }
           className="flex min-w-0 items-center gap-2"
         >
           {pathname !== '/dashboard' ? (
@@ -59,7 +61,10 @@ export function DashboardTopBar() {
               >
                 <Home className="size-4" aria-hidden="true" />
               </Link>
-              <ChevronRight className="size-4 shrink-0 text-zinc-600" aria-hidden="true" />
+              <ChevronRight
+                className="size-4 shrink-0 text-zinc-600"
+                aria-hidden="true"
+              />
             </>
           ) : null}
           <span
@@ -78,7 +83,9 @@ export function DashboardTopBar() {
             aria-label={t('dashboard.backToSite')}
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">{t('dashboard.backToSite')}</span>
+            <span className="hidden sm:inline">
+              {t('dashboard.backToSite')}
+            </span>
             <span className="sm:hidden">Site</span>
           </Link>
         </div>

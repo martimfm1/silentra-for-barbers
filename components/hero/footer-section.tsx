@@ -19,10 +19,14 @@ export function FooterSection() {
             Silentra for barbers
           </div>
           <h2 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tighter text-zinc-50 sm:text-4xl">
-            {pt ? 'Um SaaS feito para transformar marcações em fluxo, e fluxo em receita.' : 'A SaaS that turns bookings into momentum, and momentum into revenue.'}
+            {pt
+              ? 'Um SaaS feito para transformar marcações em fluxo, e fluxo em receita.'
+              : 'A SaaS that turns bookings into momentum, and momentum into revenue.'}
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
-            {pt ? 'Agenda, confirmações, lembretes e gestão da barbearia num produto que simplifica o trabalho e deixa o cliente avançar sem fricção.' : 'Appointments, confirmations, reminders and barbershop management in one place, making every visit easier from start to finish.'}
+            {pt
+              ? 'Agenda, confirmações, lembretes e gestão da barbearia num produto que simplifica o trabalho e deixa o cliente avançar sem fricção.'
+              : 'Appointments, confirmations, reminders and barbershop management in one place, making every visit easier from start to finish.'}
           </p>
         </div>
 
@@ -36,7 +40,9 @@ export function FooterSection() {
                 href="/software-gestao-barbearia"
                 className="transition-colors hover:text-zinc-50"
               >
-                {pt ? 'Software de gestão para barbearias' : 'Barbershop management software'}
+                {pt
+                  ? 'Software de gestão para barbearias'
+                  : 'Barbershop management software'}
               </Link>
               <Link
                 href="/barbershops"
@@ -92,7 +98,9 @@ export function FooterSection() {
           >
             Silentra
           </a>
-          {pt ? '. Feito para barbearias modernas.' : '. Built for modern barbershops.'}
+          {pt
+            ? '. Feito para barbearias modernas.'
+            : '. Built for modern barbershops.'}
         </p>
         <div className="flex flex-wrap gap-4">
           <Link href="/terms" className="transition-colors hover:text-zinc-300">

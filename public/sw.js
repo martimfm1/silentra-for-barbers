@@ -19,7 +19,9 @@ self.addEventListener('activate', (event) => {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames
-          .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+          .filter(
+            (name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME,
+          )
           .map((name) => caches.delete(name)),
       );
       await self.clients.claim();
@@ -37,9 +39,11 @@ self.addEventListener('fetch', (event) => {
   // Only fingerprinted Next.js assets and public app icons are cacheable.
   // HTML documents, authenticated data, cookies, and all /api requests stay network-only.
   const isStaticAsset = url.pathname.startsWith('/_next/static/');
-  const isPwaAsset = ['/icon-2.png', '/apple-touch-icon.png', '/site.webmanifest'].includes(
-    url.pathname,
-  );
+  const isPwaAsset = [
+    '/icon-2.png',
+    '/apple-touch-icon.png',
+    '/site.webmanifest',
+  ].includes(url.pathname);
   if (!isStaticAsset && !isPwaAsset) return;
 
   event.respondWith(

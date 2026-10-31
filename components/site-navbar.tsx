@@ -192,9 +192,9 @@ export function SiteNavbar() {
     const focusableSelector =
       'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const getFocusable = () =>
-      Array.from(overlay.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-        (element) => element.getAttribute('aria-hidden') !== 'true',
-      );
+      Array.from(
+        overlay.querySelectorAll<HTMLElement>(focusableSelector),
+      ).filter((element) => element.getAttribute('aria-hidden') !== 'true');
 
     getFocusable()[0]?.focus();
 
@@ -220,7 +220,9 @@ export function SiteNavbar() {
     return () => {
       document.removeEventListener('keydown', keepFocusInside);
       document
-        .querySelector<HTMLButtonElement>('[aria-controls="site-navigation-overlay"]')
+        .querySelector<HTMLButtonElement>(
+          '[aria-controls="site-navigation-overlay"]',
+        )
         ?.focus();
     };
   }, [open]);

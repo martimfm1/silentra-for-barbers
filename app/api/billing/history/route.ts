@@ -202,8 +202,9 @@ async function GET__unobserved() {
 
     // Resolve an already-stored Stripe customer only. Reading the history must
     // never create a new customer as a side effect.
-    let stripeCustomerId: string | null =
-      billingAccountResult.error ? null : billingAccountResult.data?.stripe_customer_id ?? null;
+    let stripeCustomerId: string | null = billingAccountResult.error
+      ? null
+      : (billingAccountResult.data?.stripe_customer_id ?? null);
     try {
       if (!stripeCustomerId) {
         // Legacy mappings are independent; resolve them in parallel rather than

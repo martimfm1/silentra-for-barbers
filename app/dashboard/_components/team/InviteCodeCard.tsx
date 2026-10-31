@@ -79,9 +79,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
       toast.success(t('inviteCode.created'));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('inviteCode.generateError'),
+        error instanceof Error ? error.message : t('inviteCode.generateError'),
       );
     } finally {
       setLoading(false);
@@ -163,7 +161,8 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
                   {code}
                 </p>
                 <p className="mt-1 text-xs text-zinc-500">
-                  {t('inviteCode.expires')} {minutes}:{String(seconds).padStart(2, '0')}
+                  {t('inviteCode.expires')} {minutes}:
+                  {String(seconds).padStart(2, '0')}
                 </p>
               </div>
               <Button

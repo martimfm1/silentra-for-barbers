@@ -47,7 +47,11 @@ function formatDate(value?: string | null, locale: 'pt' | 'en' = 'pt') {
     : null;
 }
 
-function formatMoney(amountInCents: number, currency: string | null, locale: 'pt' | 'en' = 'pt') {
+function formatMoney(
+  amountInCents: number,
+  currency: string | null,
+  locale: 'pt' | 'en' = 'pt',
+) {
   if (!currency || !Number.isFinite(amountInCents)) return null;
   return new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
     style: 'currency',
@@ -196,10 +200,14 @@ export default function CheckoutSuccessPage() {
             <Loader2 className="size-5 animate-spin" />
           </div>
           <h1 className="mt-5 text-xl font-semibold">
-            {english ? 'Confirming your subscription…' : 'A confirmar a tua subscrição…'}
+            {english
+              ? 'Confirming your subscription…'
+              : 'A confirmar a tua subscrição…'}
           </h1>
           <p className="mt-2 text-sm text-zinc-500">
-            {english ? 'Syncing Stripe and Supabase.' : 'Estamos a sincronizar Stripe e Supabase.'}
+            {english
+              ? 'Syncing Stripe and Supabase.'
+              : 'Estamos a sincronizar Stripe e Supabase.'}
           </p>
         </div>
       </main>
@@ -211,35 +219,53 @@ export default function CheckoutSuccessPage() {
       <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 text-white">
         <div className="w-full max-w-lg rounded-3xl border border-red-400/20 bg-zinc-900/80 p-7 text-center">
           <h1 className="text-2xl font-semibold">
-            {english ? 'Could not confirm your subscription' : 'Não foi possível confirmar a subscrição'}
+            {english
+              ? 'Could not confirm your subscription'
+              : 'Não foi possível confirmar a subscrição'}
           </h1>
           <p className="mt-3 text-sm leading-6 text-zinc-400">
-            {english ? 'We could not confirm the subscription yet. Open billing to review its status or try again.' : payload?.error || 'Não foi possível concluir a sincronização.'}
+            {english
+              ? 'We could not confirm the subscription yet. Open billing to review its status or try again.'
+              : payload?.error || 'Não foi possível concluir a sincronização.'}
           </p>
           <Link
             href="/dashboard/billing"
             className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950"
           >
-            {english ? 'Go to billing' : 'Ir para billing'} <ArrowRight className="size-4" />
+            {english ? 'Go to billing' : 'Ir para billing'}{' '}
+            <ArrowRight className="size-4" />
           </Link>
         </div>
       </main>
     );
   }
 
-  const planName = payload.plan ? PLAN_NAMES[payload.plan] : english ? 'Your subscription' : 'A tua subscrição';
+  const planName = payload.plan
+    ? PLAN_NAMES[payload.plan]
+    : english
+      ? 'Your subscription'
+      : 'A tua subscrição';
   const trialEnd = formatDate(payload.trialEnd, locale);
   const periodEnd = formatDate(payload.currentPeriodEnd, locale);
-  const barbershopName = payload.barbershopName?.trim() || (english ? 'Barbershop' : 'Barbearia');
+  const barbershopName =
+    payload.barbershopName?.trim() || (english ? 'Barbershop' : 'Barbearia');
   const promotionAmount = payload.promotion
-    ? formatMoney(payload.promotion.discountAmount, payload.promotion.currency, locale)
+    ? formatMoney(
+        payload.promotion.discountAmount,
+        payload.promotion.currency,
+        locale,
+      )
     : null;
   const promotionLabel =
     payload.promotion?.percentOff != null
       ? `${payload.promotion.percentOff}% ${english ? 'discount' : 'de desconto'}`
       : promotionAmount
-        ? (english ? `${promotionAmount} discount` : `${promotionAmount} de desconto`)
-        : (english ? 'Discount applied' : 'Desconto aplicado');
+        ? english
+          ? `${promotionAmount} discount`
+          : `${promotionAmount} de desconto`
+        : english
+          ? 'Discount applied'
+          : 'Desconto aplicado';
 
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-12 text-white sm:px-6">
@@ -252,10 +278,14 @@ export default function CheckoutSuccessPage() {
             {english ? 'Subscription confirmed' : 'Subscrição confirmada'}
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl">
-            {english ? 'All set. Your plan is active.' : 'Tudo certo. O teu plano está ativo.'}
+            {english
+              ? 'All set. Your plan is active.'
+              : 'Tudo certo. O teu plano está ativo.'}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
-            {english ? 'Your Stripe subscription has synced and is now linked to your barbershop.' : 'A subscrição Stripe foi sincronizada e ficou associada à tua barbearia.'}
+            {english
+              ? 'Your Stripe subscription has synced and is now linked to your barbershop.'
+              : 'A subscrição Stripe foi sincronizada e ficou associada à tua barbearia.'}
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -294,7 +324,8 @@ export default function CheckoutSuccessPage() {
                     {english ? 'Active promo code' : 'Código promocional ativo'}
                   </p>
                   <p className="mt-1 text-base font-semibold text-white">
-                    {payload.promotion.code || (english ? 'Code applied' : 'Código aplicado')}
+                    {payload.promotion.code ||
+                      (english ? 'Code applied' : 'Código aplicado')}
                   </p>
                   <p className="mt-1 text-sm text-emerald-100">
                     {promotionLabel}
@@ -314,12 +345,14 @@ export default function CheckoutSuccessPage() {
 
           {trialEnd ? (
             <div className="mt-4 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.04] p-4 text-sm text-emerald-100">
-              {english ? 'Trial active until' : 'Trial ativo até'} <strong>{trialEnd}</strong>.
+              {english ? 'Trial active until' : 'Trial ativo até'}{' '}
+              <strong>{trialEnd}</strong>.
             </div>
           ) : null}
           {periodEnd && !trialEnd ? (
             <p className="mt-4 text-xs text-zinc-500">
-              {english ? 'Current period ends' : 'Período atual até'} {periodEnd}.
+              {english ? 'Current period ends' : 'Período atual até'}{' '}
+              {periodEnd}.
             </p>
           ) : null}
 
@@ -328,7 +361,8 @@ export default function CheckoutSuccessPage() {
               href="/dashboard"
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950"
             >
-              {english ? 'Go to dashboard' : 'Ir para dashboard'} <ArrowRight className="size-4" />
+              {english ? 'Go to dashboard' : 'Ir para dashboard'}{' '}
+              <ArrowRight className="size-4" />
             </Link>
             <Link
               href="/dashboard/billing"

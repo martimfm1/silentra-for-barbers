@@ -87,16 +87,30 @@ const PLAN_COPY = {
 
 const PLAN_COPY_EN = {
   pro: {
-    name: 'Barbers Pro', shortName: 'Pro', price: '€9.90 / month',
-    description: 'For barbershops ready to grow with CRM, automation, campaigns and loyalty.',
+    name: 'Barbers Pro',
+    shortName: 'Pro',
+    price: '€9.90 / month',
+    description:
+      'For barbershops ready to grow with CRM, automation, campaigns and loyalty.',
     trial: '14 days free for eligible new users.',
-    highlights: ['CRM and customers', 'Campaigns and automation', 'Loyalty and analytics'],
+    highlights: [
+      'CRM and customers',
+      'Campaigns and automation',
+      'Loyalty and analytics',
+    ],
   },
   enterprise: {
-    name: 'Barbers Enterprise', shortName: 'Enterprise', price: 'From €29.90 / month',
-    description: 'For larger teams, multiple locations, POS, inventory and advanced management.',
+    name: 'Barbers Enterprise',
+    shortName: 'Enterprise',
+    price: 'From €29.90 / month',
+    description:
+      'For larger teams, multiple locations, POS, inventory and advanced management.',
     trial: null,
-    highlights: ['Teams and locations', 'Advanced operations', 'More control and scale'],
+    highlights: [
+      'Teams and locations',
+      'Advanced operations',
+      'More control and scale',
+    ],
   },
 } as const;
 
@@ -157,7 +171,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
       setPromotionError(
         error instanceof Error
           ? error.message
-          : english ? 'Could not confirm the subscription.' : 'Não foi possível confirmar a subscrição.',
+          : english
+            ? 'Could not confirm the subscription.'
+            : 'Não foi possível confirmar a subscrição.',
       );
       setSubmitting(false);
     }
@@ -174,7 +190,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
             {english ? 'Preparing your checkout' : 'A preparar o teu checkout'}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            {english ? 'Loading your payment details securely.' : 'A carregar os dados de pagamento em segurança.'}
+            {english
+              ? 'Loading your payment details securely.'
+              : 'A carregar os dados de pagamento em segurança.'}
           </p>
         </div>
       </div>
@@ -183,13 +201,15 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
     return (
       <div className="rounded-2xl border border-red-400/20 bg-red-400/[0.05] p-5 sm:p-6">
         <p className="text-sm font-semibold text-red-100">
-          {english ? 'Could not load checkout' : 'Não foi possível carregar o checkout'}
+          {english
+            ? 'Could not load checkout'
+            : 'Não foi possível carregar o checkout'}
         </p>
         <p className="mt-1 text-sm leading-6 text-red-200/70">
           {checkoutState.error.message}
         </p>
         <button
-            aria-label="Confirmar checkout"
+          aria-label="Confirmar checkout"
           type="button"
           onClick={() => window.location.reload()}
           className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg border border-red-300/20 bg-red-300/5 px-4 text-sm font-semibold text-red-100 hover:bg-red-300/10"
@@ -213,7 +233,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         <span className="flex size-6 items-center justify-center rounded-full bg-emerald-400 text-[10px] font-bold text-zinc-950">
           1
         </span>
-        <span className="text-zinc-300">{english ? 'Billing' : 'Faturação'}</span>
+        <span className="text-zinc-300">
+          {english ? 'Billing' : 'Faturação'}
+        </span>
         <ChevronRight className="size-3.5" />
         <span>{english ? 'Payment' : 'Pagamento'}</span>
         <ChevronRight className="size-3.5" />
@@ -230,8 +252,12 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
             </p>
             <p className="mt-1 max-w-xl text-xs leading-5 text-zinc-500">
               {isZeroTotal
-                ? (english ? 'Nothing is due today. The regular price starts at the end of the trial, when applicable.' : 'Não tens nenhum valor a pagar hoje. O preço normal começa no fim do trial, quando aplicável.')
-                : (english ? 'Total automatically updated to include discounts and taxes.' : 'Total atualizado automaticamente com descontos e impostos.')}
+                ? english
+                  ? 'Nothing is due today. The regular price starts at the end of the trial, when applicable.'
+                  : 'Não tens nenhum valor a pagar hoje. O preço normal começa no fim do trial, quando aplicável.'
+                : english
+                  ? 'Total automatically updated to include discounts and taxes.'
+                  : 'Total atualizado automaticamente com descontos e impostos.'}
             </p>
           </div>
           <p className="shrink-0 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
@@ -241,7 +267,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         {isZeroTotal ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-emerald-300/15 bg-emerald-300/5 px-3 py-2 text-xs font-medium text-emerald-200">
             <Check className="size-3.5" />
-            {english ? '14 days with no initial charge' : '14 dias sem cobrança inicial'}
+            {english
+              ? '14 days with no initial charge'
+              : '14 dias sem cobrança inicial'}
           </div>
         ) : null}
       </div>
@@ -256,7 +284,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 {english ? 'Billing details' : 'Dados de faturação'}
               </h2>
               <p className="mt-0.5 text-xs text-zinc-500">
-                {english ? 'Required for subscription billing.' : 'Necessários para a faturação da subscrição.'}
+                {english
+                  ? 'Required for subscription billing.'
+                  : 'Necessários para a faturação da subscrição.'}
               </p>
             </div>
           </div>
@@ -273,14 +303,19 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 <CreditCard className="size-4" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-white">{english ? 'Payment' : 'Pagamento'}</h2>
+                <h2 className="text-sm font-semibold text-white">
+                  {english ? 'Payment' : 'Pagamento'}
+                </h2>
                 <p className="mt-0.5 text-xs text-zinc-500">
-                  {english ? 'Processed directly by Stripe.' : 'Processado diretamente pela Stripe.'}
+                  {english
+                    ? 'Processed directly by Stripe.'
+                    : 'Processado diretamente pela Stripe.'}
                 </p>
               </div>
             </div>
             <span className="hidden items-center gap-1.5 text-[11px] text-zinc-500 sm:inline-flex">
-              <LockKeyhole className="size-3.5 text-emerald-300" /> {english ? 'Secure' : 'Seguro'}
+              <LockKeyhole className="size-3.5 text-emerald-300" />{' '}
+              {english ? 'Secure' : 'Seguro'}
             </span>
           </div>
         </div>
@@ -296,7 +331,9 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
                 {english ? 'Promo code' : 'Código promocional'}
               </h2>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                {english ? 'Have a code? Apply it before confirming your subscription.' : 'Tens um código? Aplica-o antes de confirmar a subscrição.'}
+                {english
+                  ? 'Have a code? Apply it before confirming your subscription.'
+                  : 'Tens um código? Aplica-o antes de confirmar a subscrição.'}
               </p>
             </div>
             {promotionApplied ? (
@@ -350,28 +387,48 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
         <div className="flex gap-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300" />
           <p>
-            {english ? 'Payment details are processed directly by Stripe. Silentra does not store your full card number.' : 'Os dados de pagamento são processados diretamente pela Stripe. A Silentra não guarda o número completo do teu cartão.'}
+            {english
+              ? 'Payment details are processed directly by Stripe. Silentra does not store your full card number.'
+              : 'Os dados de pagamento são processados diretamente pela Stripe. A Silentra não guarda o número completo do teu cartão.'}
           </p>
         </div>
       </div>
       <div className="sticky bottom-0 z-10 -mx-4 border-t border-white/8 bg-zinc-950/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-1">
         <button
-          aria-label={submitting ? (english ? 'Confirming subscription' : 'A confirmar subscrição') : (english ? 'Subscribe' : 'Subscrever')}
+          aria-label={
+            submitting
+              ? english
+                ? 'Confirming subscription'
+                : 'A confirmar subscrição'
+              : english
+                ? 'Subscribe'
+                : 'Subscrever'
+          }
           type="submit"
           disabled={submitting}
           className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_35px_rgba(52,211,153,0.12)] transition hover:-translate-y-0.5 hover:bg-emerald-300 active:translate-y-0 disabled:cursor-wait disabled:opacity-60"
         >
           <LockKeyhole className="size-4" />
           {submitting
-            ? (english ? 'Confirming subscription…' : 'A confirmar subscrição…')
+            ? english
+              ? 'Confirming subscription…'
+              : 'A confirmar subscrição…'
             : isZeroTotal
-              ? (english ? 'Start the 14-day free trial' : 'Começar os 14 dias grátis')
+              ? english
+                ? 'Start the 14-day free trial'
+                : 'Começar os 14 dias grátis'
               : plan === 'pro'
-                ? (english ? 'Confirm and subscribe to Pro' : 'Confirmar e subscrever Pro')
-                : (english ? 'Confirm and subscribe to Enterprise' : 'Confirmar e subscrever Enterprise')}
+                ? english
+                  ? 'Confirm and subscribe to Pro'
+                  : 'Confirmar e subscrever Pro'
+                : english
+                  ? 'Confirm and subscribe to Enterprise'
+                  : 'Confirmar e subscrever Enterprise'}
         </button>
         <p className="mt-2 text-center text-[11px] leading-5 text-zinc-600">
-          {english ? 'By confirming, you agree to the recurring charges applicable to the selected plan.' : 'Ao confirmar, aceitas a cobrança recorrente aplicável ao plano selecionado.'}
+          {english
+            ? 'By confirming, you agree to the recurring charges applicable to the selected plan.'
+            : 'Ao confirmar, aceitas a cobrança recorrente aplicável ao plano selecionado.'}
         </p>
       </div>
     </form>
@@ -418,7 +475,9 @@ export function CustomCheckout({
         if (!response.ok) {
           const backendError = readBackendError(
             body,
-            englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
+            englishRef.current
+              ? 'Could not start checkout.'
+              : 'Não foi possível iniciar o checkout.',
           );
           const error = new Error(backendError.message) as Error & {
             code?: string | null;
@@ -428,7 +487,9 @@ export function CustomCheckout({
         }
         if (!body.clientSecret)
           throw new Error(
-            englishRef.current ? 'Stripe did not return a valid checkout session.' : 'O Stripe não devolveu uma sessão de checkout válida.',
+            englishRef.current
+              ? 'Stripe did not return a valid checkout session.'
+              : 'O Stripe não devolveu uma sessão de checkout válida.',
           );
         if (!cancelled) setClientSecret(body.clientSecret as string);
       } catch (error) {
@@ -438,7 +499,9 @@ export function CustomCheckout({
           setInitializationError(
             error instanceof Error
               ? error.message
-              : englishRef.current ? 'Could not start checkout.' : 'Não foi possível iniciar o checkout.',
+              : englishRef.current
+                ? 'Could not start checkout.'
+                : 'Não foi possível iniciar o checkout.',
           );
         }
       }
@@ -454,7 +517,9 @@ export function CustomCheckout({
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-red-400/20 bg-red-400/[0.04] p-6">
         <p className="text-sm font-semibold text-red-100">
-          {english ? 'Could not start checkout' : 'Não foi possível iniciar o checkout'}
+          {english
+            ? 'Could not start checkout'
+            : 'Não foi possível iniciar o checkout'}
         </p>
         <p className="mt-1 text-sm leading-6 text-red-200/70">
           {initializationError}
@@ -476,10 +541,14 @@ export function CustomCheckout({
             <Sparkles className="size-5 animate-pulse" />
           </div>
           <p className="mt-4 text-sm font-semibold text-white">
-            {english ? 'Preparing secure checkout…' : 'A preparar o checkout seguro…'}
+            {english
+              ? 'Preparing secure checkout…'
+              : 'A preparar o checkout seguro…'}
           </p>
           <p className="mt-1 text-xs text-zinc-500">
-            {english ? 'We are creating a secure session for your plan.' : 'Estamos a criar uma sessão segura para o teu plano.'}
+            {english
+              ? 'We are creating a secure session for your plan.'
+              : 'Estamos a criar uma sessão segura para o teu plano.'}
           </p>
         </div>
       </div>

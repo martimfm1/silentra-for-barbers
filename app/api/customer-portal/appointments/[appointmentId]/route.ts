@@ -64,7 +64,10 @@ function jsonError(error: string, status = 400) {
     { status, headers: { 'Cache-Control': 'no-store' } },
   );
 }
-async function getAuthorizedAppointment(request: Request, appointmentId: string) {
+async function getAuthorizedAppointment(
+  request: Request,
+  appointmentId: string,
+) {
   const session = await getPortalSession(request);
   if (!session || !UUID_PATTERN.test(appointmentId))
     return { session, appointment: null, admin: null };
@@ -194,7 +197,14 @@ async function getAvailability(
     if (occupied.some((item) => overlaps(start, end, item.start, item.end)))
       continue;
     const candidateTime = minutesToTime(start);
-    if (isBeforeMinimumBookingNotice(date, candidateTime, Number(shop?.minimum_booking_notice_minutes ?? 0))) continue;
+    if (
+      isBeforeMinimumBookingNotice(
+        date,
+        candidateTime,
+        Number(shop?.minimum_booking_notice_minutes ?? 0),
+      )
+    )
+      continue;
     slots.push(candidateTime);
   }
   const todayPortugal = new Intl.DateTimeFormat('en-CA', {
@@ -226,8 +236,10 @@ async function GET__unobserved(
 ) {
   try {
     const { appointmentId } = await params;
-    const { session, appointment, admin } =
-      await getAuthorizedAppointment(request, appointmentId);
+    const { session, appointment, admin } = await getAuthorizedAppointment(
+      request,
+      appointmentId,
+    );
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)
@@ -255,8 +267,10 @@ async function DELETE__unobserved(
 ) {
   try {
     const { appointmentId } = await params;
-    const { session, appointment, admin } =
-      await getAuthorizedAppointment(request, appointmentId);
+    const { session, appointment, admin } = await getAuthorizedAppointment(
+      request,
+      appointmentId,
+    );
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)
@@ -330,12 +344,18 @@ async function PATCH__unobserved(
       allowedKeys: ['date', 'slot'],
     });
     if (!bodyResult.ok) return bodyResult.response;
-    const date = typeof bodyResult.value.date === 'string' ? bodyResult.value.date : '';
-    const slot = typeof bodyResult.value.slot === 'string' ? bodyResult.value.slot.slice(0, 5) : '';
+    const date =
+      typeof bodyResult.value.date === 'string' ? bodyResult.value.date : '';
+    const slot =
+      typeof bodyResult.value.slot === 'string'
+        ? bodyResult.value.slot.slice(0, 5)
+        : '';
     if (!isSafePublicBookingDate(date) || !isValidTime(slot))
       return jsonError('Indica uma data e hora válidas.');
-    const { session, appointment, admin } =
-      await getAuthorizedAppointment(request, appointmentId);
+    const { session, appointment, admin } = await getAuthorizedAppointment(
+      request,
+      appointmentId,
+    );
     if (!session)
       return jsonError('Sessão expirada. Confirma novamente o teu email.', 401);
     if (!appointment || !admin)
@@ -358,7 +378,10 @@ async function PATCH__unobserved(
         409,
       );
     if (isBeforeMinimumBookingNotice(date, slot, minimumNoticeMinutes))
-      return jsonError('Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.', 409);
+      return jsonError(
+        'Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.',
+        409,
+      );
     const cancellationHours = Math.max(
       0,
       Number(shop?.time_limit_cancellation_hours ?? 24),

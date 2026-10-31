@@ -65,9 +65,7 @@ export function TeamMembersManager({
       setSeats(data.seats ?? { used: 0, limit: 1, unlimited: false });
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('teamMembers.loadError'),
+        error instanceof Error ? error.message : t('teamMembers.loadError'),
       );
     } finally {
       setLoading(false);
@@ -93,17 +91,17 @@ export function TeamMembersManager({
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(
-          data.error || t('teamMembers.saveError'),
-        );
-      toast.success(t('teamMembers.updated', { name: member.name_complete || t('teamMembers.member') }));
+        throw new Error(data.error || t('teamMembers.saveError'));
+      toast.success(
+        t('teamMembers.updated', {
+          name: member.name_complete || t('teamMembers.member'),
+        }),
+      );
       await load();
       await onMembershipChanged?.();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('teamMembers.saveError'),
+        error instanceof Error ? error.message : t('teamMembers.saveError'),
       );
     } finally {
       setSavingId(null);
@@ -114,7 +112,9 @@ export function TeamMembersManager({
     if (member.role === 'owner') return;
     const confirmed = await confirm({
       title: t('teamMembers.removeTitle'),
-      description: t('teamMembers.removeDescription', { name: member.name_complete || t('teamMembers.member') }),
+      description: t('teamMembers.removeDescription', {
+        name: member.name_complete || t('teamMembers.member'),
+      }),
       confirmLabel: t('teamMembers.removeAction'),
       destructive: true,
     });
@@ -134,9 +134,7 @@ export function TeamMembersManager({
       await onMembershipChanged?.();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('teamMembers.removeError'),
+        error instanceof Error ? error.message : t('teamMembers.removeError'),
       );
     } finally {
       setSavingId(null);
@@ -193,7 +191,9 @@ export function TeamMembersManager({
                         aria-hidden="true"
                       />
                       <h3 className="font-semibold text-zinc-100">
-                        {member.name_complete || member.email || t('teamMembers.member')}
+                        {member.name_complete ||
+                          member.email ||
+                          t('teamMembers.member')}
                       </h3>
                       <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-zinc-400">
                         {t(`teamMembers.roles.${member.role}`)}
@@ -241,11 +241,19 @@ export function TeamMembersManager({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {(['admin', 'manager', 'barber', 'receptionist', 'staff'] as Role[]).map((value) => (
-                              <SelectItem key={value} value={value}>
-                                {t(`teamMembers.roles.${value}`)}
-                              </SelectItem>
-                            ))}
+                          {(
+                            [
+                              'admin',
+                              'manager',
+                              'barber',
+                              'receptionist',
+                              'staff',
+                            ] as Role[]
+                          ).map((value) => (
+                            <SelectItem key={value} value={value}>
+                              {t(`teamMembers.roles.${value}`)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -259,34 +267,47 @@ export function TeamMembersManager({
                         {t('teamMembers.planFeaturesNote')}
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                        {(['dashboard', 'agenda', 'clients', 'services', 'team', 'messages', 'marketing', 'loyalty', 'automations', 'analytics', 'qr', 'settings', 'billing']).map((key) => (
-                            <label
-                              key={key}
-                              className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-300"
-                            >
-                              <span>{t(`teamMembers.permissions.${key}`)}</span>
-                              <Switch
-                                checked={Boolean(member.permissions?.[key])}
-                                onCheckedChange={(checked) =>
-                                  setMembers((current) =>
-                                    current.map((item) =>
-                                      item.user_id === member.user_id
-                                        ? {
-                                            ...item,
-                                            permissions: {
-                                              ...item.permissions,
-                                              [key]: checked,
-                                            },
-                                          }
-                                        : item,
-                                    ),
-                                  )
-                                }
-                                aria-label={`${t('teamMembers.permission')}: ${t(`teamMembers.permissions.${key}`)}`}
-                              />
-                            </label>
-                          ),
-                        )}
+                        {[
+                          'dashboard',
+                          'agenda',
+                          'clients',
+                          'services',
+                          'team',
+                          'messages',
+                          'marketing',
+                          'loyalty',
+                          'automations',
+                          'analytics',
+                          'qr',
+                          'settings',
+                          'billing',
+                        ].map((key) => (
+                          <label
+                            key={key}
+                            className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-300"
+                          >
+                            <span>{t(`teamMembers.permissions.${key}`)}</span>
+                            <Switch
+                              checked={Boolean(member.permissions?.[key])}
+                              onCheckedChange={(checked) =>
+                                setMembers((current) =>
+                                  current.map((item) =>
+                                    item.user_id === member.user_id
+                                      ? {
+                                          ...item,
+                                          permissions: {
+                                            ...item.permissions,
+                                            [key]: checked,
+                                          },
+                                        }
+                                      : item,
+                                  ),
+                                )
+                              }
+                              aria-label={`${t('teamMembers.permission')}: ${t(`teamMembers.permissions.${key}`)}`}
+                            />
+                          </label>
+                        ))}
                       </div>
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -296,13 +317,18 @@ export function TeamMembersManager({
                         disabled={savingId === member.user_id}
                         className="min-h-11 border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 sm:w-auto"
                       >
-                        <Trash2 className="mr-2 size-4" /> {t('teamMembers.remove')}
+                        <Trash2 className="mr-2 size-4" />{' '}
+                        {t('teamMembers.remove')}
                       </Button>
                       <Button
                         onClick={() => void save(member)}
                         disabled={savingId === member.user_id}
                         className="min-h-11 bg-purple-600 text-white hover:bg-purple-500 sm:w-auto"
-                        aria-label={savingId === member.user_id ? t('teamMembers.saving') : t('teamMembers.save')}
+                        aria-label={
+                          savingId === member.user_id
+                            ? t('teamMembers.saving')
+                            : t('teamMembers.save')
+                        }
                       >
                         {savingId === member.user_id ? (
                           <Loader2 className="size-4 animate-spin" />

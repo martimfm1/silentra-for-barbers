@@ -373,7 +373,8 @@ export const en = {
       'Your email has not been verified yet. Check your inbox to continue.',
     resendConfirmation: 'Resend confirmation email',
     confirmEmailTitle: 'Check your inbox',
-    confirmEmailSubtitle: 'If this address can create an account or needs confirmation, you will receive an email with the next steps:',
+    confirmEmailSubtitle:
+      'If this address can create an account or needs confirmation, you will receive an email with the next steps:',
     backToLogin: 'Back to sign in',
     accountSecurity: 'Account security',
     useAccountEmail:
@@ -505,17 +506,18 @@ export const en = {
     closeBooking: 'Close booking',
     newBooking: 'New booking',
     closeBlock: 'Close block',
-    blockTimeDescription: "Choose the professional, date and time range to make unavailable.",
-    blockProfessional: "Professional",
-    selectProfessional: "Select a professional",
-    blockDate: "Block date",
-    chooseDate: "Choose date",
-    startTime: "Start time",
-    endTime: "End time",
-    blockReason: "Reason",
-    blockReasonPlaceholder: "Reason for the block",
-    saveBlock: "Save block",
-    savingBlock: "Saving block…",
+    blockTimeDescription:
+      'Choose the professional, date and time range to make unavailable.',
+    blockProfessional: 'Professional',
+    selectProfessional: 'Select a professional',
+    blockDate: 'Block date',
+    chooseDate: 'Choose date',
+    startTime: 'Start time',
+    endTime: 'End time',
+    blockReason: 'Reason',
+    blockReasonPlaceholder: 'Reason for the block',
+    saveBlock: 'Save block',
+    savingBlock: 'Saving block…',
     blockTime: 'Block time',
     upcomingToday: 'Upcoming today',
     completed: 'Completed',
@@ -843,8 +845,10 @@ export const en = {
     bookingRules: 'Booking rules',
   },
   billingHub: {
-    cancelConfirm: 'Cancel this subscription at the end of the current period? Access remains available until the renewal date.',
-    cancelScheduled: 'Cancellation scheduled. Your plan remains active until the current period ends.',
+    cancelConfirm:
+      'Cancel this subscription at the end of the current period? Access remains available until the renewal date.',
+    cancelScheduled:
+      'Cancellation scheduled. Your plan remains active until the current period ends.',
     cancelFailed: 'Could not cancel the subscription.',
     resumeSuccess: 'Subscription resumed successfully.',
     resumeFailed: 'Could not resume the subscription.',
@@ -856,9 +860,12 @@ export const en = {
     trialActive: 'Trial active',
     cancelledOn: 'This subscription was cancelled on {date}{by}.',
     cancelledByName: ' by {name}',
-    adminPlanDescription: 'Plan assigned by Silentra administration to this barbershop.',
-    manualPlanDescription: 'This subscription is managed manually by Silentra and belongs to this barbershop.',
-    stripePlanDescription: 'This subscription is synced with Stripe and belongs to this barbershop.',
+    adminPlanDescription:
+      'Plan assigned by Silentra administration to this barbershop.',
+    manualPlanDescription:
+      'This subscription is managed manually by Silentra and belongs to this barbershop.',
+    stripePlanDescription:
+      'This subscription is synced with Stripe and belongs to this barbershop.',
     freePlanDescription: 'Free plan, with no active paid subscription.',
     state: 'Status',
     assigned: 'Assigned',
@@ -879,26 +886,33 @@ export const en = {
     cancelSubscription: 'Cancel subscription',
     resumeSubscription: 'Resume subscription',
     paymentStatus: 'Request status',
-    requestReceived: 'Your request was received. Our team will prepare the payment and email the instructions to the address associated with your account.',
-    paymentLinkSent: 'The payment link has been sent. You can open the payment directly here.',
+    requestReceived:
+      'Your request was received. Our team will prepare the payment and email the instructions to the address associated with your account.',
+    paymentLinkSent:
+      'The payment link has been sent. You can open the payment directly here.',
     payNow: 'Pay now',
     yearly: 'Yearly',
     monthly: 'Monthly',
-    paymentConfirmed: 'Payment confirmed. Your manual subscription is now active.',
-    expiredRequest: 'The subscription period has ended. To continue, choose a plan again at',
-    rejectedRequest: 'Your last payment request was rejected. You can create a new request from the plans page.',
+    paymentConfirmed:
+      'Payment confirmed. Your manual subscription is now active.',
+    expiredRequest:
+      'The subscription period has ended. To continue, choose a plan again at',
+    rejectedRequest:
+      'Your last payment request was rejected. You can create a new request from the plans page.',
     noPendingRequest: 'There is no manual payment request in progress.',
     receipts: 'Receipts',
     billingHistory: 'Billing history',
     receiptsDescription: 'View and download invoices and payment receipts.',
     last12: 'Latest 12',
-    noStripeReceipts: 'There are no invoices or payment receipts on this account yet.',
+    noStripeReceipts:
+      'There are no invoices or payment receipts on this account yet.',
     noReceipts: 'No receipts have been issued yet.',
     processed: 'processed',
     download: 'Download',
     manualReceipt: 'Manual receipt',
     receiptUnavailable: 'Receipt unavailable',
-    securePayments: 'Payments and receipts are processed by Stripe. Silentra does not store card details.',
+    securePayments:
+      'Payments and receipts are processed by Stripe. Silentra does not store card details.',
   },
   billingPage: {
     section: 'Subscription',
@@ -921,16 +935,19 @@ export const en = {
     tagCreateFailed: 'Could not create the tag.',
     tagCreated: 'Tag created.',
     title: 'Advanced CRM',
-    lockedDescription: 'Customers, history, notes and segmentation in one place.',
+    lockedDescription:
+      'Customers, history, notes and segmentation in one place.',
     comparePlans: 'Compare plans',
     relationship: 'Customer relationships',
     customers: 'Customers',
-    subtitle: 'See who comes back, who is drifting away and where you can build a better relationship.',
+    subtitle:
+      'See who comes back, who is drifting away and where you can build a better relationship.',
     backDashboard: 'Back to dashboard',
     newAppointment: 'New appointment',
     noExtraWork: 'Get started without extra work',
     noManualImport: 'You do not need to import customers manually.',
-    autoCreateDescription: 'When you receive your first appointment, Silentra creates the customer for you. You can then add tags and notes as you get to know them.',
+    autoCreateDescription:
+      'When you receive your first appointment, Silentra creates the customer for you. You can then add tags and notes as you get to know them.',
     firstAppointment: 'Create first appointment',
     customerBase: 'Customer base',
     customerSingular: 'customer',
@@ -941,7 +958,8 @@ export const en = {
     noCustomerFound: 'We could not find that customer.',
     baseStartsHere: 'Your customer base starts here.',
     trySearch: 'Try searching by name, email or phone.',
-    autoPopulate: 'Customers will appear here automatically as they book appointments. You can also start organising your database with tags.',
+    autoPopulate:
+      'Customers will appear here automatically as they book appointments. You can also start organising your database with tags.',
     noContact: 'No contact details recorded',
     tags: 'Tags',
     tagsDescription: 'Create useful groups without filling out extra forms.',
@@ -949,7 +967,8 @@ export const en = {
     newTagName: 'New tag name',
     creating: 'Creating...',
     add: 'Add',
-    noTags: 'You do not have any tags yet. Start with something simple, such as “Regular customer” or “New customer”.',
+    noTags:
+      'You do not have any tags yet. Start with something simple, such as “Regular customer” or “New customer”.',
   },
   crmDetail: {
     loadFailed: 'Could not load the customer.',
@@ -978,14 +997,16 @@ export const en = {
   },
   settingsLanguage: {
     title: 'Default language',
-    description: 'Set the language for the management area and emails sent by your barbershop. The change takes effect after you save the settings.',
+    description:
+      'Set the language for the management area and emails sent by your barbershop. The change takes effect after you save the settings.',
   },
   settingsPage: {
     loadFailed: 'Could not load settings.',
     publicLoadFailed: 'Could not load public information.',
     openingAfterClosing: 'Closing time must be later than opening time.',
     lunchInvalid: 'Check the start and end of the break.',
-    minimumBookingNoticeInvalid: 'Enter a whole number of minutes between 0 and 30 days.',
+    minimumBookingNoticeInvalid:
+      'Enter a whole number of minutes between 0 and 30 days.',
     locationUpdateFailed: 'Could not update the location.',
     amenitiesSaveFailed: 'Could not save venue information.',
     saved: 'All changes have been saved.',
@@ -1020,7 +1041,8 @@ export const en = {
     accountDescription: 'Session and access',
     overviewEyebrow: 'Settings centre',
     overviewTitle: 'Everything that matters, in one place.',
-    overviewDescription: 'Update several settings and save them all at once. Changes are published only after you confirm.',
+    overviewDescription:
+      'Update several settings and save them all at once. Changes are published only after you confirm.',
     publicInfo: 'Public information about your barbershop.',
     shopName: 'Barbershop name',
     phone: 'Phone',
@@ -1043,14 +1065,16 @@ export const en = {
     lunchBreak: 'Lunch break',
     daysOffInHours: 'Days off',
     minimumBookingNotice: 'Minimum booking notice',
-    minimumBookingNoticeDescription: 'Clients can book or reschedule only for slots at least this far in the future. Use 0 to disable the extra notice.',
+    minimumBookingNoticeDescription:
+      'Clients can book or reschedule only for slots at least this far in the future. Use 0 to disable the extra notice.',
     noticeUnit: 'Notice unit',
     noticeMinutes: 'Minutes',
     noticeHours: 'Hours',
     allowOnline: 'Allow online bookings',
     allowOnlineDescription: 'Accept new bookings through the public page.',
     autoConfirm: 'Automatically confirm',
-    autoConfirmDescription: 'New bookings are confirmed without manual intervention.',
+    autoConfirmDescription:
+      'New bookings are confirmed without manual intervention.',
     autoComplete: 'Automatically complete',
     autoCompleteDescription: 'Complete the booking after its scheduled time.',
     cancellationWindow: 'Cancellation window',

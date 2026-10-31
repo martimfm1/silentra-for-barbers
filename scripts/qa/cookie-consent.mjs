@@ -7,7 +7,9 @@ const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
 const layout = read('app/layout.tsx');
 const clientShell = read('components/client-shell.tsx');
 const consentManager = read('components/privacy/cookie-consent-manager.tsx');
-const cookiePreferencesLink = read('components/privacy/cookie-preferences-link.tsx');
+const cookiePreferencesLink = read(
+  'components/privacy/cookie-preferences-link.tsx',
+);
 const legalDocumentPage = read('components/legal/legal-document-page.tsx');
 const cookiePolicyPage = read('app/cookies/page.tsx');
 const consentSchema = read('lib/privacy/cookie-consent.ts');
@@ -18,8 +20,14 @@ const legalAddendum = read('lib/legal/current-legal-addendum.ts');
 const sitemap = read('app/sitemap.ts');
 const legalPage = read('components/legal/legal-document-page.tsx');
 
-assert.match(consentSchema, /COOKIE_CONSENT_COOKIE = 'silentra_cookie_consent'/);
-assert.match(consentSchema, /COOKIE_CONSENT_MAX_AGE_SECONDS = 60 \* 60 \* 24 \* 180/);
+assert.match(
+  consentSchema,
+  /COOKIE_CONSENT_COOKIE = 'silentra_cookie_consent'/,
+);
+assert.match(
+  consentSchema,
+  /COOKIE_CONSENT_MAX_AGE_SECONDS = 60 \* 60 \* 24 \* 180/,
+);
 assert.match(consentSchema, /value\.version !== COOKIE_CONSENT_VERSION/);
 assert.match(consentSchema, /typeof value\.analytics !== 'boolean'/);
 assert.match(consentSchema, /typeof value\.marketing !== 'boolean'/);
@@ -33,7 +41,11 @@ assert.match(consentManager, /aria-modal="true"/);
 assert.match(consentManager, /href="\/cookies"/);
 assert.match(consentManager, /window\.location\.reload\(\)/);
 assert.match(consentManager, /silentra:open-cookie-preferences/);
-assert.doesNotMatch(consentManager, /fixed bottom-3 left-3 z-\[110\]/, 'No persistent floating cookie banner should remain after a choice is saved.');
+assert.doesNotMatch(
+  consentManager,
+  /fixed bottom-3 left-3 z-\[110\]/,
+  'No persistent floating cookie banner should remain after a choice is saved.',
+);
 assert.match(cookiePreferencesLink, /silentra:open-cookie-preferences/);
 assert.match(cookiePreferencesLink, /Gerir preferências de cookies/);
 assert.match(cookiePreferencesLink, /Manage cookie preferences/);
@@ -42,13 +54,21 @@ assert.match(cookiePolicyPage, /headerAction=\{<CookiePreferencesLink \/>\}/);
 assert.match(clientShell, /CookieConsentManager/);
 assert.match(clientShell, /usePathname/);
 assert.match(clientShell, /const dashboardRoutePrefixes = \[/);
-for (const prefix of ['/dashboard', '/silentra-admin', '/_silentra-admin', '/silentra_admin']) {
+for (const prefix of [
+  '/dashboard',
+  '/silentra-admin',
+  '/_silentra-admin',
+  '/silentra_admin',
+]) {
   assert.ok(
     clientShell.includes(`'${prefix}'`),
     `Cookie consent must stay hidden throughout dashboard route ${prefix}.`,
   );
 }
-assert.match(clientShell, /showCookieConsent \? <CookieConsentManager \/> : null/);
+assert.match(
+  clientShell,
+  /showCookieConsent \? <CookieConsentManager \/> : null/,
+);
 assert.match(
   clientShell,
   /pathname === prefix \|\| pathname\.startsWith\(\`\$\{prefix\}\/\`\)/,
@@ -84,7 +104,10 @@ assert.match(cookiePolicy, /withdraw|retirar o consentimento/i);
 assert.match(termsPage, /currentTermsFeatureSections/);
 assert.match(privacyPage, /currentPrivacyFeatureSections/);
 assert.match(legalAddendum, /25 de outubro de 2026/);
-assert.match(legalAddendum, /automatically confirmed|confirmadas automaticamente/i);
+assert.match(
+  legalAddendum,
+  /automatically confirmed|confirmadas automaticamente/i,
+);
 assert.match(legalAddendum, /birthday messages|mensagens de aniversário/i);
 assert.match(legalAddendum, /API pública v1/);
 assert.match(legalAddendum, /silentra_cookie_consent/);

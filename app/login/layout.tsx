@@ -8,13 +8,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   openGraph: {
     title: 'Entrar na Silentra for Barbers',
-    description: 'Acede à tua conta para gerir marcações, serviços e clientes da barbearia.',
+    description:
+      'Acede à tua conta para gerir marcações, serviços e clientes da barbearia.',
     url: 'https://barbers.silentra.me/login',
     siteName: 'Silentra for Barbers',
     locale: 'pt_PT',
     type: 'website',
   },
-  twitter: { card: 'summary', title: 'Entrar | Silentra for Barbers', description: 'Acede à gestão da tua barbearia.' },
+  twitter: {
+    card: 'summary',
+    title: 'Entrar | Silentra for Barbers',
+    description: 'Acede à gestão da tua barbearia.',
+  },
 };
 
 export default function LoginLayout({

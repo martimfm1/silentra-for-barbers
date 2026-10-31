@@ -477,7 +477,11 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
                     {reward.description || 'Recompensa de fidelização.'}
                   </p>
                   <button
-            aria-label={canRedeem ? "Resgatar recompensa" : "Recompensa indisponível"}
+                    aria-label={
+                      canRedeem
+                        ? 'Resgatar recompensa'
+                        : 'Recompensa indisponível'
+                    }
                     type="button"
                     disabled={!canRedeem}
                     onClick={() => setSelectedReward(reward)}

@@ -234,7 +234,9 @@ export default function QrCodePage() {
                     </div>
                   </div>
                   <div className="silentra-form-field">
-                    <label htmlFor="qr-text">{t('qrCodePage.adjacentText')}</label>
+                    <label htmlFor="qr-text">
+                      {t('qrCodePage.adjacentText')}
+                    </label>
                     <Input
                       id="qr-text"
                       value={text}
@@ -247,7 +249,11 @@ export default function QrCodePage() {
                     </div>
                   </div>
                   <Button
-            aria-label={saving ? "A guardar texto do QR code" : "Guardar texto do QR code"}
+                    aria-label={
+                      saving
+                        ? 'A guardar texto do QR code'
+                        : 'Guardar texto do QR code'
+                    }
                     type="button"
                     onClick={() => void saveText()}
                     disabled={saving || text === savedText}

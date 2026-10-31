@@ -54,12 +54,24 @@ export function AppointmentsTable({
         <Table>
           <TableHeader className="border-white/5 bg-zinc-900">
             <TableRow>
-              <TableHead className="text-zinc-400">{t('appointmentsTable.customer')}</TableHead>
-              <TableHead className="text-zinc-400">{t('appointmentsTable.service')}</TableHead>
-              <TableHead className="text-zinc-400">{t('appointmentsTable.barber')}</TableHead>
-              <TableHead className="text-zinc-400">{t('appointmentsTable.dateTime')}</TableHead>
-              <TableHead className="text-zinc-400">{t('appointmentsTable.status')}</TableHead>
-              <TableHead className="text-right text-zinc-400">{t('appointmentsTable.actions')}</TableHead>
+              <TableHead className="text-zinc-400">
+                {t('appointmentsTable.customer')}
+              </TableHead>
+              <TableHead className="text-zinc-400">
+                {t('appointmentsTable.service')}
+              </TableHead>
+              <TableHead className="text-zinc-400">
+                {t('appointmentsTable.barber')}
+              </TableHead>
+              <TableHead className="text-zinc-400">
+                {t('appointmentsTable.dateTime')}
+              </TableHead>
+              <TableHead className="text-zinc-400">
+                {t('appointmentsTable.status')}
+              </TableHead>
+              <TableHead className="text-right text-zinc-400">
+                {t('appointmentsTable.actions')}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -139,13 +151,17 @@ export function AppointmentsTable({
 
             <dl className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <dt className="text-zinc-600">{t('appointmentsTable.dateTime')}</dt>
+                <dt className="text-zinc-600">
+                  {t('appointmentsTable.dateTime')}
+                </dt>
                 <dd className="mt-1 text-zinc-300">
                   {formatDate(apt.date_hour, locale)}
                 </dd>
               </div>
               <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <dt className="text-zinc-600">{t('appointmentsTable.barber')}</dt>
+                <dt className="text-zinc-600">
+                  {t('appointmentsTable.barber')}
+                </dt>
                 <dd className="mt-1 truncate text-zinc-300">
                   {apt.professionals?.name || t('appointmentsTable.anyBarber')}
                 </dd>

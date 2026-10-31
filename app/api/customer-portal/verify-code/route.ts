@@ -35,7 +35,10 @@ async function POST__unobserved(request: Request) {
     });
     if (!bodyResult.ok) return bodyResult.response;
     const email = normalizePortalEmail(bodyResult.value.email);
-    const code = typeof bodyResult.value.code === 'string' ? bodyResult.value.code.trim() : '';
+    const code =
+      typeof bodyResult.value.code === 'string'
+        ? bodyResult.value.code.trim()
+        : '';
     const clientPlatform = bodyResult.value.clientPlatform ?? 'web';
     if (clientPlatform !== 'web' && clientPlatform !== 'mobile') {
       return NextResponse.json(
@@ -135,7 +138,9 @@ async function POST__unobserved(request: Request) {
       {
         success: true,
         email,
-        ...(clientPlatform === 'mobile' ? { sessionToken: token, expiresAt } : {}),
+        ...(clientPlatform === 'mobile'
+          ? { sessionToken: token, expiresAt }
+          : {}),
       },
       { headers: { 'Cache-Control': 'no-store', Pragma: 'no-cache' } },
     );

@@ -234,7 +234,9 @@ const checks = [
     name: 'Marketplace has dedicated product pages and add-to-cart handoff',
     file: 'app/marketplace/[productId]/page.tsx',
     test: (source) =>
-      source.includes('/api/marketplace/products?id=${encodeURIComponent(productId)}') &&
+      source.includes(
+        '/api/marketplace/products?id=${encodeURIComponent(productId)}',
+      ) &&
       source.includes("searchParams.set('add', product.id)") &&
       source.includes('searchParams.set(') &&
       source.includes("t('storefront.addToCart')"),
@@ -365,7 +367,7 @@ const checks = [
       source.includes('RESERVED_SLUGS') &&
       source.includes('12_000') &&
       source.includes("from('custom_website_requests')") &&
-      source.includes("context.user.id"),
+      source.includes('context.user.id'),
   },
   {
     name: 'Custom website public route only renders explicitly published paths',
@@ -373,7 +375,7 @@ const checks = [
     test: (source) =>
       source.includes("eq('status', 'published')") &&
       source.includes("eq('public_slug', slug)") &&
-      source.includes("notFound()") &&
+      source.includes('notFound()') &&
       source.includes('booking_slug'),
   },
   {
@@ -382,7 +384,7 @@ const checks = [
     test: (source) =>
       source.includes('requirePlatformAdmin()') &&
       source.includes('RESERVED_SLUGS') &&
-      source.includes('nextStatus === \'published\'') &&
+      source.includes("nextStatus === 'published'") &&
       source.includes('nextSlug') &&
       source.includes('23505'),
   },
@@ -391,7 +393,9 @@ const checks = [
     file: 'lib/billing/plan-features.ts',
     test: (source) =>
       source.includes("'custom_website'") &&
-      source.includes("custom_website: 'Site próprio personalizado (por orçamento)'") &&
+      source.includes(
+        "custom_website: 'Site próprio personalizado (por orçamento)'",
+      ) &&
       source.includes("'custom_website',"),
   },
   {
@@ -409,7 +413,9 @@ const checks = [
       source.includes('custom_website_requests') &&
       source.includes('enable row level security') &&
       source.includes('revoke all') &&
-      source.includes('grant all on public.custom_website_requests to service_role') &&
+      source.includes(
+        'grant all on public.custom_website_requests to service_role',
+      ) &&
       source.includes('custom_website_requests_public_slug_unique'),
   },
   {
@@ -417,7 +423,7 @@ const checks = [
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) =>
       source.includes('scrollAreaRef') &&
-      source.includes('scrollTo({ top: 0, behavior: \'auto\' })') &&
+      source.includes("scrollTo({ top: 0, behavior: 'auto' })") &&
       source.includes('data-booking-scroll-area') &&
       source.includes('touch-pan-y') &&
       source.includes('overscroll-contain') &&
@@ -429,7 +435,9 @@ const checks = [
     file: 'app/api/stripe/webhook/route.ts',
     test: (source) => {
       const start = source.indexOf('async function markWebhookFailed');
-      const end = source.indexOf('async function hydrateBillingMappingFromMetadata');
+      const end = source.indexOf(
+        'async function hydrateBillingMappingFromMetadata',
+      );
       const block = source.slice(start, end);
       return (
         start >= 0 &&
@@ -455,20 +463,24 @@ const checks = [
     file: 'supabase/migrations/20261016120000_verified_review_submission_tokens.sql',
     test: (source) =>
       source.includes('review_submission_tokens') &&
-      source.includes('a.status = \'completed\'::public.appointment_status') &&
+      source.includes("a.status = 'completed'::public.appointment_status") &&
       source.includes('t.consumed_at is null') &&
       source.includes('t.expires_at > now()') &&
       source.includes('length(p_token_hash) <> 64') &&
-      source.includes("translate(p_token_hash, '0123456789abcdef', '') <> ''") &&
+      source.includes(
+        "translate(p_token_hash, '0123456789abcdef', '') <> ''",
+      ) &&
       source.includes('set consumed_at = now()') &&
       source.includes('submit_public_review_with_token') &&
-      source.includes('revoke all on function public.submit_public_review(uuid, text, integer, text)'),
+      source.includes(
+        'revoke all on function public.submit_public_review(uuid, text, integer, text)',
+      ),
   },
   {
     name: 'Completed booking issues a hashed, expiring review capability',
     file: 'app/api/appointments/[appointmentId]/complete/route.ts',
     test: (source) =>
-      source.includes('randomBytes(32).toString(\'base64url\')') &&
+      source.includes("randomBytes(32).toString('base64url')") &&
       source.includes("createHash('sha256')") &&
       source.includes("from('review_submission_tokens')") &&
       source.includes("searchParams.set('review_token', reviewToken)") &&
@@ -487,8 +499,12 @@ const checks = [
     name: 'Public review inserts are restricted to the validated RPC',
     file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
     test: (source) =>
-      source.includes('drop policy if exists "reviews_public_insert" on public.reviews') &&
-      source.includes('revoke insert, update, delete on public.reviews from anon, authenticated') &&
+      source.includes(
+        'drop policy if exists "reviews_public_insert" on public.reviews',
+      ) &&
+      source.includes(
+        'revoke insert, update, delete on public.reviews from anon, authenticated',
+      ) &&
       source.includes('submit_public_review'),
   },
   {
@@ -499,7 +515,7 @@ const checks = [
       source.includes("if (appointment.status === 'scheduled')") &&
       source.includes('sendBrevoEmail({') &&
       source.includes('A marcação ainda não está confirmada.') &&
-      source.includes("Aguarda a confirmação da barbearia."),
+      source.includes('Aguarda a confirmação da barbearia.'),
   },
   {
     name: 'Marketing cron schedules birthday campaigns and queued delivery',
@@ -522,8 +538,8 @@ const checks = [
     test: (source) =>
       source.includes("from('custom_website_requests')") &&
       source.includes(".eq('status', 'published')") &&
-      source.includes("customWebsiteRoutes.push") &&
-      source.includes("/site/"),
+      source.includes('customWebsiteRoutes.push') &&
+      source.includes('/site/'),
   },
   {
     name: 'Custom website publication prevents collisions with existing public profile slugs',
@@ -537,7 +553,7 @@ const checks = [
     name: 'Custom website publishing sets and clears publication timestamp',
     file: 'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
     test: (source) =>
-      source.includes("update.published_at = new Date().toISOString()") &&
+      source.includes('update.published_at = new Date().toISOString()') &&
       source.includes('update.published_at = null') &&
       source.includes("nextStatus === 'published'"),
   },
@@ -562,16 +578,17 @@ const checks = [
     file: 'next.config.ts',
     test: (source) =>
       source.includes("process.env.NODE_ENV === 'development'") &&
-      source.includes("      : [],"),
+      source.includes('      : [],'),
   },
-
 
   {
     name: 'Agenda do Victor is tenant-bound and requires an effective paid plan',
     file: 'app/agendadovictor/page.tsx',
     test: (source) =>
-      source.includes("getPublicProfileBySlug(SLUG)") &&
-      source.includes("profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d'") &&
+      source.includes('getPublicProfileBySlug(SLUG)') &&
+      source.includes(
+        "profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d'",
+      ) &&
       source.includes("!['pro', 'enterprise'].includes(profile.plan)") &&
       source.includes(".eq('barbershop_id', profile.barbershop_id)"),
   },
@@ -579,7 +596,9 @@ const checks = [
     name: 'Agenda do Victor reuses Silentra booking drawer and shop booking identity',
     file: 'app/agendadovictor/agenda-do-victor-page.tsx',
     test: (source) =>
-      source.includes("import('@/app/barbershops/components/booking-drawer')") &&
+      source.includes(
+        "import('@/app/barbershops/components/booking-drawer')",
+      ) &&
       source.includes('selectedServiceId={selectedServiceId}') &&
       source.includes('barbershop_id: profile.barbershop_id || profile.id') &&
       source.includes('AGENDA DO VICTOR') &&
@@ -590,7 +609,9 @@ const checks = [
     name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
     file: 'app/barbershops/[slug]/page.tsx',
     test: (source) =>
-      source.includes("profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID") &&
+      source.includes(
+        'profile.barbershop_id === AGENDA_DO_VICTOR_BARBERSHOP_ID',
+      ) &&
       source.includes("permanentRedirect('/agendadovictor')") &&
       source.includes("? '/agendadovictor'"),
   },
@@ -598,7 +619,7 @@ const checks = [
     name: 'Agenda do Victor replaces the old shop URL in the public sitemap',
     file: 'app/sitemap.ts',
     test: (source) =>
-      source.includes("url: `${SITE_URL}/agendadovictor`") &&
+      source.includes('url: `${SITE_URL}/agendadovictor`') &&
       source.includes('slug === AGENDA_DO_VICTOR_SHOP_SLUG'),
   },
   {

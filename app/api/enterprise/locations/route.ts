@@ -55,7 +55,10 @@ async function POST__unobserved(request: Request) {
         body.address !== null &&
         (typeof body.address !== 'string' || body.address.length > 500))
     )
-      return NextResponse.json({ error: 'Invalid location fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid location fields' },
+        { status: 400 },
+      );
     if (name.length < 1 || name.length > 120 || !/^[a-z0-9-]+$/.test(slug))
       return NextResponse.json({ error: 'Invalid location' }, { status: 400 });
     const { count, error: countError } = await admin

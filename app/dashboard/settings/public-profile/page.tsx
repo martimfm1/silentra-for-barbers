@@ -156,18 +156,48 @@ const AMENITIES_EN: Record<
     label: 'Wheelchair accessible',
     description: 'Space adapted for reduced mobility.',
   },
-  accessible_entrance: { label: 'Accessible entrance', description: 'Step-free or adapted entrance.' },
-  accessible_toilet: { label: 'Accessible restroom', description: 'Accessible restroom facilities.' },
-  kids_friendly: { label: 'Family friendly', description: 'Welcomes children and families.' },
-  waiting_area: { label: 'Waiting area', description: 'A comfortable place to wait.' },
-  restroom: { label: 'Restroom', description: 'Restroom facilities available on site.' },
-  air_conditioning: { label: 'Air conditioning', description: 'Air conditioning is available.' },
-  card_payments: { label: 'Card payments', description: 'Accepts card and contactless payments.' },
-  walk_ins: { label: 'Walk-ins welcome', description: 'Accepts customers without an appointment.' },
-  coffee: { label: 'Coffee', description: 'Coffee is available for customers.' },
+  accessible_entrance: {
+    label: 'Accessible entrance',
+    description: 'Step-free or adapted entrance.',
+  },
+  accessible_toilet: {
+    label: 'Accessible restroom',
+    description: 'Accessible restroom facilities.',
+  },
+  kids_friendly: {
+    label: 'Family friendly',
+    description: 'Welcomes children and families.',
+  },
+  waiting_area: {
+    label: 'Waiting area',
+    description: 'A comfortable place to wait.',
+  },
+  restroom: {
+    label: 'Restroom',
+    description: 'Restroom facilities available on site.',
+  },
+  air_conditioning: {
+    label: 'Air conditioning',
+    description: 'Air conditioning is available.',
+  },
+  card_payments: {
+    label: 'Card payments',
+    description: 'Accepts card and contactless payments.',
+  },
+  walk_ins: {
+    label: 'Walk-ins welcome',
+    description: 'Accepts customers without an appointment.',
+  },
+  coffee: {
+    label: 'Coffee',
+    description: 'Coffee is available for customers.',
+  },
   water: { label: 'Water', description: 'Water is available for customers.' },
   pet_friendly: { label: 'Pet friendly', description: 'Pets are welcome.' },
-  appointment_required: { label: 'Appointment required', description: 'An appointment is required before visiting.' },
+  appointment_required: {
+    label: 'Appointment required',
+    description: 'An appointment is required before visiting.',
+  },
 };
 
 const PUBLIC_PROFILE_COPY = {
@@ -178,11 +208,14 @@ const PUBLIC_PROFILE_COPY = {
     settings: 'Definições',
     onlinePresence: 'Presença online',
     pageTitle: 'Página pública da barbearia',
-    pageDescription: 'Define o que os clientes precisam de saber antes de visitar ou reservar.',
+    pageDescription:
+      'Define o que os clientes precisam de saber antes de visitar ou reservar.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Informações do estabelecimento',
-    amenitiesDescription: 'Seleciona as opções verdadeiras para a tua barbearia. Só as opções selecionadas aparecem publicamente.',
-    selectedCount: (count: number) => count === 1 ? '1 opção selecionada' : `${count} opções selecionadas`,
+    amenitiesDescription:
+      'Seleciona as opções verdadeiras para a tua barbearia. Só as opções selecionadas aparecem publicamente.',
+    selectedCount: (count: number) =>
+      count === 1 ? '1 opção selecionada' : `${count} opções selecionadas`,
     parking: 'Estacionamento',
     parkingHint: 'Indica se existe estacionamento e se é gratuito ou pago.',
     parkingAvailability: 'Disponibilidade de estacionamento',
@@ -198,7 +231,8 @@ const PUBLIC_PROFILE_COPY = {
     seoDescription: 'Descrição SEO',
     advancedSeoEnterprise: 'O SEO avançado está disponível no Enterprise.',
     ogImageUrl: 'URL da imagem OG',
-    ogImageEnterprise: 'A imagem OG personalizada está disponível no Enterprise.',
+    ogImageEnterprise:
+      'A imagem OG personalizada está disponível no Enterprise.',
     ogRecommendation: 'Recomendado: 1200×630.',
     viewPage: 'Ver página pública',
     savingProfile: 'A guardar perfil público',
@@ -212,13 +246,17 @@ const PUBLIC_PROFILE_COPY = {
     settings: 'Settings',
     onlinePresence: 'Online presence',
     pageTitle: 'Public barbershop page',
-    pageDescription: 'Set the information customers should know before visiting or booking.',
+    pageDescription:
+      'Set the information customers should know before visiting or booking.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Business information',
-    amenitiesDescription: 'Select the options that apply to your barbershop. Only selected options appear publicly.',
-    selectedCount: (count: number) => count === 1 ? '1 option selected' : `${count} options selected`,
+    amenitiesDescription:
+      'Select the options that apply to your barbershop. Only selected options appear publicly.',
+    selectedCount: (count: number) =>
+      count === 1 ? '1 option selected' : `${count} options selected`,
     parking: 'Parking',
-    parkingHint: 'Tell customers whether parking is available and if it is free or paid.',
+    parkingHint:
+      'Tell customers whether parking is available and if it is free or paid.',
     parkingAvailability: 'Parking availability',
     noParking: 'No parking',
     freeParking: 'Free parking',
@@ -266,10 +304,7 @@ export default function PublicProfileSettingsPage() {
         cache: 'no-store',
       });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok || !body.data)
-        throw new Error(
-          copy.loadError,
-        );
+      if (!response.ok || !body.data) throw new Error(copy.loadError);
       const next = body.data as Profile;
       setProfile(next);
       setSlug(next.custom_slug || next.slug || '');
@@ -304,8 +339,7 @@ export default function PublicProfileSettingsPage() {
         }),
       });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok)
-        throw new Error(copy.saveError);
+      if (!response.ok) throw new Error(copy.saveError);
       setAmenities(normalizeBarbershopAmenities(body.data?.amenities));
       toast.success(copy.saveSuccess);
       await load();
@@ -348,7 +382,8 @@ export default function PublicProfileSettingsPage() {
               href="/dashboard/settings"
               className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-zinc-500 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              <ArrowLeft className="size-4" aria-hidden="true" /> {copy.settings}
+              <ArrowLeft className="size-4" aria-hidden="true" />{' '}
+              {copy.settings}
             </Link>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
               {copy.onlinePresence}
@@ -479,10 +514,13 @@ export default function PublicProfileSettingsPage() {
               />
             </div>
             {profile.canCustomizeSlug ? (
-              <span className="text-xs text-emerald-300">{copy.includedEnterprise}</span>
+              <span className="text-xs text-emerald-300">
+                {copy.includedEnterprise}
+              </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-xs text-zinc-600">
-                <Lock className="size-3" aria-hidden="true" /> {copy.exclusiveEnterprise}
+                <Lock className="size-3" aria-hidden="true" />{' '}
+                {copy.exclusiveEnterprise}
               </span>
             )}
           </div>
@@ -533,7 +571,8 @@ export default function PublicProfileSettingsPage() {
             </div>
           ) : (
             <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
-              <Lock className="size-4" aria-hidden="true" /> {copy.advancedSeoEnterprise}
+              <Lock className="size-4" aria-hidden="true" />{' '}
+              {copy.advancedSeoEnterprise}
             </div>
           )}
         </section>
@@ -564,7 +603,8 @@ export default function PublicProfileSettingsPage() {
             </div>
           ) : (
             <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
-              <Lock className="size-4" aria-hidden="true" /> {copy.ogImageEnterprise}
+              <Lock className="size-4" aria-hidden="true" />{' '}
+              {copy.ogImageEnterprise}
             </div>
           )}
         </section>
@@ -576,7 +616,8 @@ export default function PublicProfileSettingsPage() {
             rel="noreferrer"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-medium hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
-            <ExternalLink className="size-4" aria-hidden="true" /> {copy.viewPage}
+            <ExternalLink className="size-4" aria-hidden="true" />{' '}
+            {copy.viewPage}
           </Link>
           <Button
             aria-label={saving ? copy.savingProfile : copy.saveChanges}

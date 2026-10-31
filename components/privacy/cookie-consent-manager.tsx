@@ -89,8 +89,7 @@ function persistConsent(choices: OptionalChoices) {
     updatedAt: new Date().toISOString(),
   };
   const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie =
-    `${COOKIE_CONSENT_COOKIE}=${encodeURIComponent(JSON.stringify(consent))}; Max-Age=${COOKIE_CONSENT_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${secure}`;
+  document.cookie = `${COOKIE_CONSENT_COOKIE}=${encodeURIComponent(JSON.stringify(consent))}; Max-Age=${COOKIE_CONSENT_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${secure}`;
 
   // A full navigation makes server-rendered third-party scripts follow the new
   // server-validated preference, including when consent is withdrawn.
@@ -129,9 +128,15 @@ export function CookieConsentManager() {
       setPreferencesOpen(true);
     };
 
-    window.addEventListener('silentra:open-cookie-preferences', openFromCookiePolicy);
+    window.addEventListener(
+      'silentra:open-cookie-preferences',
+      openFromCookiePolicy,
+    );
     return () =>
-      window.removeEventListener('silentra:open-cookie-preferences', openFromCookiePolicy);
+      window.removeEventListener(
+        'silentra:open-cookie-preferences',
+        openFromCookiePolicy,
+      );
   }, []);
 
   if (!ready) return null;
@@ -176,14 +181,18 @@ export function CookieConsentManager() {
               <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <button
                   type="button"
-                  onClick={() => saveChoices({ analytics: true, marketing: true })}
+                  onClick={() =>
+                    saveChoices({ analytics: true, marketing: true })
+                  }
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-semibold transition hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   {t.accept}
                 </button>
                 <button
                   type="button"
-                  onClick={() => saveChoices({ analytics: false, marketing: false })}
+                  onClick={() =>
+                    saveChoices({ analytics: false, marketing: false })
+                  }
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-semibold transition hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   {t.reject}
@@ -223,7 +232,10 @@ export function CookieConsentManager() {
                   <ShieldCheck className="size-4" aria-hidden="true" />
                   Silentra for Barbers
                 </div>
-                <h2 id="cookie-preferences-title" className="mt-3 text-2xl font-semibold tracking-tight">
+                <h2
+                  id="cookie-preferences-title"
+                  className="mt-3 text-2xl font-semibold tracking-tight"
+                >
                   {t.title}
                 </h2>
               </div>
@@ -250,10 +262,15 @@ export function CookieConsentManager() {
                     className="mt-1 size-4 accent-emerald-300"
                   />
                   <div>
-                    <label htmlFor="cookie-necessary" className="font-medium text-zinc-100">
+                    <label
+                      htmlFor="cookie-necessary"
+                      className="font-medium text-zinc-100"
+                    >
                       {t.necessary}
                     </label>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">{t.necessaryDesc}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      {t.necessaryDesc}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -264,14 +281,24 @@ export function CookieConsentManager() {
                     id="cookie-analytics"
                     type="checkbox"
                     checked={draft.analytics}
-                    onChange={(event) => setDraft((current) => ({ ...current, analytics: event.target.checked }))}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        analytics: event.target.checked,
+                      }))
+                    }
                     className="mt-1 size-4 accent-emerald-300"
                   />
                   <div className="min-w-0">
-                    <label htmlFor="cookie-analytics" className="font-medium text-zinc-100">
+                    <label
+                      htmlFor="cookie-analytics"
+                      className="font-medium text-zinc-100"
+                    >
                       {t.analytics}
                     </label>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">{t.analyticsDesc}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      {t.analyticsDesc}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -282,20 +309,32 @@ export function CookieConsentManager() {
                     id="cookie-marketing"
                     type="checkbox"
                     checked={draft.marketing}
-                    onChange={(event) => setDraft((current) => ({ ...current, marketing: event.target.checked }))}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        marketing: event.target.checked,
+                      }))
+                    }
                     className="mt-1 size-4 accent-emerald-300"
                   />
                   <div className="min-w-0">
-                    <label htmlFor="cookie-marketing" className="font-medium text-zinc-100">
+                    <label
+                      htmlFor="cookie-marketing"
+                      className="font-medium text-zinc-100"
+                    >
                       {t.marketing}
                     </label>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">{t.marketingDesc}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      {t.marketingDesc}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs leading-5 text-zinc-500">{t.settingsSaved}</p>
+            <p className="mt-4 text-xs leading-5 text-zinc-500">
+              {t.settingsSaved}
+            </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <button
                 type="button"

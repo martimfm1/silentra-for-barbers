@@ -28,7 +28,10 @@ async function GET__unobserved(request: Request) {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
-    console.error('[SUPPORT_EMAIL_RETRY_CRON_FAILED]', error instanceof Error ? error.name : 'UNKNOWN');
+    console.error(
+      '[SUPPORT_EMAIL_RETRY_CRON_FAILED]',
+      error instanceof Error ? error.name : 'UNKNOWN',
+    );
     return NextResponse.json(
       { error: 'Não foi possível processar a fila de emails de suporte.' },
       { status: 500 },

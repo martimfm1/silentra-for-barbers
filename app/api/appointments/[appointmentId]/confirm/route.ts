@@ -24,9 +24,10 @@ async function POST__unobserved(
       return NextResponse.json(
         {
           success: false,
-          error: tenant.status === 401
-            ? 'Sessão inválida.'
-            : 'Sem permissão para confirmar marcações.',
+          error:
+            tenant.status === 401
+              ? 'Sessão inválida.'
+              : 'Sem permissão para confirmar marcações.',
         },
         { status: tenant.status },
       );

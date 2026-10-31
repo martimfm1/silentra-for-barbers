@@ -89,18 +89,24 @@ export function BillingHub() {
         : 'pro';
   const currentPeriodEnd = subscription?.current_period_end ?? null;
   const nextRenewal = currentPeriodEnd
-    ? new Date(currentPeriodEnd).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
+    ? new Date(currentPeriodEnd).toLocaleDateString(
+        locale === 'en' ? 'en-GB' : 'pt-PT',
+        {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        },
+      )
     : '—';
   const cancellationDate = cancellation?.canceledAt
-    ? new Date(cancellation.canceledAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
+    ? new Date(cancellation.canceledAt).toLocaleDateString(
+        locale === 'en' ? 'en-GB' : 'pt-PT',
+        {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        },
+      )
     : '—';
 
   useEffect(() => {
@@ -111,9 +117,7 @@ export function BillingHub() {
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));
         if (!response.ok)
-          throw new Error(
-            body.error || t('billingHub.invoiceLoadFailed'),
-          );
+          throw new Error(body.error || t('billingHub.invoiceLoadFailed'));
         return body.invoices;
       })
       .then((data) => {
@@ -138,7 +142,10 @@ export function BillingHub() {
   const handleCancel = async () => {
     if (!active || isAdministrativePlan) return;
     const confirmed = await confirm({
-      title: locale === 'en' ? 'Cancel subscription renewal?' : 'Cancelar renovação da subscrição?',
+      title:
+        locale === 'en'
+          ? 'Cancel subscription renewal?'
+          : 'Cancelar renovação da subscrição?',
       description: t('billingHub.cancelConfirm'),
       confirmLabel: locale === 'en' ? 'Cancel renewal' : 'Cancelar renovação',
       destructive: true,
@@ -147,14 +154,10 @@ export function BillingHub() {
     try {
       setCancelling(true);
       await cancel();
-      toast.success(
-        t('billingHub.cancelScheduled'),
-      );
+      toast.success(t('billingHub.cancelScheduled'));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('billingHub.cancelFailed'),
+        error instanceof Error ? error.message : t('billingHub.cancelFailed'),
       );
     } finally {
       setCancelling(false);
@@ -168,9 +171,7 @@ export function BillingHub() {
       toast.success(t('billingHub.resumeSuccess'));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('billingHub.resumeFailed'),
+        error instanceof Error ? error.message : t('billingHub.resumeFailed'),
       );
     } finally {
       setResuming(false);
@@ -185,9 +186,7 @@ export function BillingHub() {
       });
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('billingHub.checkoutFailed'),
+        error instanceof Error ? error.message : t('billingHub.checkoutFailed'),
       );
     }
   };
@@ -202,16 +201,12 @@ export function BillingHub() {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok || typeof body.url !== 'string')
-        throw new Error(
-          body.error || t('billingHub.portalFailed'),
-        );
+        throw new Error(body.error || t('billingHub.portalFailed'));
       window.location.assign(body.url);
     } catch (error) {
       setOpeningPortal(false);
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('billingHub.portalFailed'),
+        error instanceof Error ? error.message : t('billingHub.portalFailed'),
       );
     }
   };
@@ -223,7 +218,8 @@ export function BillingHub() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
-                <ShieldCheck className="size-3.5" /> {t('billingHub.subscription')}
+                <ShieldCheck className="size-3.5" />{' '}
+                {t('billingHub.subscription')}
               </span>
               {isCanceled && (
                 <span className="rounded-full border border-red-400/20 bg-red-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-200">
@@ -246,7 +242,19 @@ export function BillingHub() {
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
               {isCanceled
-                ? t('billingHub.cancelledOn').replace('{date}', cancellationDate).replace('{by}', cancellation?.canceledByName ? t('billingHub.cancelledByName').replace('{name}', cancellation.canceledByName) : cancellation?.canceledByEmail ? ` ${cancellation.canceledByEmail}` : '')
+                ? t('billingHub.cancelledOn')
+                    .replace('{date}', cancellationDate)
+                    .replace(
+                      '{by}',
+                      cancellation?.canceledByName
+                        ? t('billingHub.cancelledByName').replace(
+                            '{name}',
+                            cancellation.canceledByName,
+                          )
+                        : cancellation?.canceledByEmail
+                          ? ` ${cancellation.canceledByEmail}`
+                          : '',
+                    )
                 : isAdministrativePlan
                   ? t('billingHub.adminPlanDescription')
                   : isManualSubscription
@@ -279,7 +287,9 @@ export function BillingHub() {
 
             <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">
-                {isCanceled ? t('billingHub.cancelledOnLabel') : t('billingHub.renewal')}
+                {isCanceled
+                  ? t('billingHub.cancelledOnLabel')
+                  : t('billingHub.renewal')}
               </p>
               <p className="mt-2 font-medium text-zinc-100">
                 {isCanceled
@@ -342,7 +352,10 @@ export function BillingHub() {
                 )}
                 {canceledPlan === 'pro'
                   ? t('billingHub.upgradeEnterprise')
-                  : t('billingHub.resubscribe').replace('{plan}', PLAN_NAMES[canceledPlan])}
+                  : t('billingHub.resubscribe').replace(
+                      '{plan}',
+                      PLAN_NAMES[canceledPlan],
+                    )}
               </button>
             ) : null}
 
@@ -384,8 +397,8 @@ export function BillingHub() {
             !isCanceled ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 text-sm font-medium text-amber-200">
-                  <CalendarDays className="size-4" /> {t('billingHub.scheduledCancellation')} (
-                  {nextRenewal})
+                  <CalendarDays className="size-4" />{' '}
+                  {t('billingHub.scheduledCancellation')} ({nextRenewal})
                 </span>
                 <button
                   type="button"
@@ -448,7 +461,11 @@ export function BillingHub() {
                       ? t('billingHub.yearly')
                       : t('billingHub.monthly')}{' '}
                     ·{' '}
-                    {formatAmount(manualRequest.price, manualRequest.currency, locale)}
+                    {formatAmount(
+                      manualRequest.price,
+                      manualRequest.currency,
+                      locale,
+                    )}
                   </span>
                 </div>
               </div>
@@ -494,7 +511,9 @@ export function BillingHub() {
             </p>
           </div>
           {hasSubscription && !isAdministrativePlan && (
-            <span className="text-xs text-zinc-600">{t('billingHub.last12')}</span>
+            <span className="text-xs text-zinc-600">
+              {t('billingHub.last12')}
+            </span>
           )}
         </div>
         <div className="mt-5 space-y-2">
@@ -533,7 +552,9 @@ export function BillingHub() {
                 </div>
                 {invoice.invoice_pdf || invoice.download_url ? (
                   <a
-                    href={invoice.invoice_pdf ?? invoice.download_url ?? undefined}
+                    href={
+                      invoice.invoice_pdf ?? invoice.download_url ?? undefined
+                    }
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
@@ -552,7 +573,8 @@ export function BillingHub() {
       </section>
 
       <div className="flex items-center gap-2 text-xs text-zinc-600">
-        <Check className="size-3.5 text-emerald-400" /> {t('billingHub.securePayments')}
+        <Check className="size-3.5 text-emerald-400" />{' '}
+        {t('billingHub.securePayments')}
       </div>
     </div>
   );

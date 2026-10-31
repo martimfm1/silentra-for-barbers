@@ -20,7 +20,9 @@ export function useClients(
     email: '',
   });
 
-  const handleCreateClient = async (e?: React.SyntheticEvent): Promise<boolean> => {
+  const handleCreateClient = async (
+    e?: React.SyntheticEvent,
+  ): Promise<boolean> => {
     e?.preventDefault();
     const formattedPhone = newClientData.num_phone.trim();
     if (!newClientData.name_complete.trim() || !formattedPhone) {

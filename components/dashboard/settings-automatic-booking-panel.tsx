@@ -34,8 +34,7 @@ export function SettingsAutomaticBookingPanel({
       if (!active) return;
       if (result.error) {
         toast.error(
-          result.error.message ||
-            t('automaticBookingSettings.loadError'),
+          result.error.message || t('automaticBookingSettings.loadError'),
         );
       } else if (result.data) {
         const next = {
@@ -59,9 +58,7 @@ export function SettingsAutomaticBookingPanel({
 
   async function save() {
     if (!eligible) {
-      toast.error(
-        t('automaticBookingSettings.planError'),
-      );
+      toast.error(t('automaticBookingSettings.planError'));
       return;
     }
     if (!dirty) return;
@@ -144,7 +141,9 @@ export function SettingsAutomaticBookingPanel({
           className="min-h-11 rounded-xl"
         >
           {saving ? <Spinner className="mr-2 size-4" /> : null}
-          {saving ? t('automaticBookingSettings.saving') : t('automaticBookingSettings.save')}
+          {saving
+            ? t('automaticBookingSettings.saving')
+            : t('automaticBookingSettings.save')}
         </Button>
       </div>
     </div>

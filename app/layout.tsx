@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import { GoogleTagManager } from '@next/third-parties/google';
 import Script from 'next/script';
 import { cookies } from 'next/headers';
-import {
-  Geist_Mono,
-  Source_Sans_3,
-  JetBrains_Mono,
-} from 'next/font/google';
+import { Geist_Mono, Source_Sans_3, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import './silentra-responsive.css';
 import { cn } from '@/lib/utils';

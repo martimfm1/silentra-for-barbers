@@ -16,7 +16,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import {
   AlertDialog,
@@ -89,7 +96,11 @@ export function ServicesListCard({
               loading={loading}
             />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddServiceForm(false)} className="border-white/10 bg-transparent">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddServiceForm(false)}
+                className="border-white/10 bg-transparent"
+              >
                 {t('common.close')}
               </Button>
             </DialogFooter>
@@ -146,10 +157,7 @@ function AddServiceForm({
   }
 
   return (
-    <form
-      onSubmit={(event) => void submit(event)}
-      className="grid gap-4 py-2"
-    >
+    <form onSubmit={(event) => void submit(event)} className="grid gap-4 py-2">
       <div className="mb-4 flex items-start gap-3">
         <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" />
         <div>
@@ -245,7 +253,7 @@ function AddServiceForm({
         </div>
 
         <Button
-            aria-label={loading ? "A guardar serviço" : "Guardar serviço"}
+          aria-label={loading ? 'A guardar serviço' : 'Guardar serviço'}
           type="submit"
           disabled={loading}
           className="min-h-11 bg-amber-600 text-white hover:bg-amber-500"
@@ -254,7 +262,8 @@ function AddServiceForm({
             <Spinner className="size-4" />
           ) : (
             <>
-              {t('servicesListCard.submit')} <ArrowRight className="ml-2 size-4" />
+              {t('servicesListCard.submit')}{' '}
+              <ArrowRight className="ml-2 size-4" />
             </>
           )}
         </Button>
@@ -316,7 +325,9 @@ function ServiceItemCard({
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>{t('servicesListCard.deleteTitle')}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t('servicesListCard.deleteTitle')}
+              </AlertDialogTitle>
               <AlertDialogDescription>
                 {t('servicesListCard.deleteDescription')}
               </AlertDialogDescription>

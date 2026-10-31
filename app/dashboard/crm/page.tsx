@@ -64,8 +64,7 @@ export default function CRMPage() {
           ),
           fetch('/api/crm/tags', { headers, cache: 'no-store' }),
         ]);
-        if (!clientsRes.ok || !tagsRes.ok)
-          throw new Error(t('crm.loadFailed'));
+        if (!clientsRes.ok || !tagsRes.ok) throw new Error(t('crm.loadFailed'));
         const clientsJson = await clientsRes.json();
         const tagsJson = await tagsRes.json();
         if (!cancelled) {
@@ -75,9 +74,7 @@ export default function CRMPage() {
       } catch (error) {
         if (!cancelled)
           toast.error(
-            error instanceof Error
-              ? error.message
-              : t('crm.loadClientsFailed'),
+            error instanceof Error ? error.message : t('crm.loadClientsFailed'),
           );
       } finally {
         if (!cancelled) setLoading(false);
@@ -105,8 +102,7 @@ export default function CRMPage() {
         body: JSON.stringify({ name: newTag.trim() }),
       });
       const json = await response.json();
-      if (!response.ok)
-        throw new Error(json.error ?? t('crm.tagCreateFailed'));
+      if (!response.ok) throw new Error(json.error ?? t('crm.tagCreateFailed'));
       setTags((current) =>
         [...current, json.tag].sort((a, b) => a.name.localeCompare(b.name)),
       );
@@ -114,9 +110,7 @@ export default function CRMPage() {
       toast.success(t('crm.tagCreated'));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t('crm.tagCreateFailed'),
+        error instanceof Error ? error.message : t('crm.tagCreateFailed'),
       );
     } finally {
       setCreatingTag(false);
@@ -131,7 +125,8 @@ export default function CRMPage() {
     ? t('crm.trySearch')
     : t('crm.autoPopulate');
   const clientCountLabel = useMemo(
-    () => `${clients.length} ${t(clients.length === 1 ? 'crm.customerSingular' : 'crm.customerPlural')}`,
+    () =>
+      `${clients.length} ${t(clients.length === 1 ? 'crm.customerSingular' : 'crm.customerPlural')}`,
     [clients.length],
   );
 

@@ -165,7 +165,11 @@ function automationLabel(campaign: Campaign) {
   return 'Manual';
 }
 
-export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?: View }) {
+export function MarketingWorkspace({
+  initialView = 'campaigns',
+}: {
+  initialView?: View;
+}) {
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('marketing_campaigns');
   const [view, setView] = useState<View>(initialView);
@@ -195,12 +199,13 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
 
   const selected =
     campaigns.find((campaign) => campaign.id === selectedId) ?? null;
-  const birthdayCampaign = campaigns.find(
-    (campaign) =>
-      campaign.trigger_type === 'birthday' &&
-      campaign.active !== false &&
-      campaign.status !== 'cancelled',
-  ) ?? null;
+  const birthdayCampaign =
+    campaigns.find(
+      (campaign) =>
+        campaign.trigger_type === 'birthday' &&
+        campaign.active !== false &&
+        campaign.status !== 'cancelled',
+    ) ?? null;
   const canManage = (campaign: Campaign) =>
     EDITABLE_STATUSES.includes(
       campaign.status as (typeof EDITABLE_STATUSES)[number],
@@ -448,7 +453,9 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
     if (birthdayCampaign) {
       setSelectedId(birthdayCampaign.id);
       setView('automation');
-      toast.info('A automação de aniversário já existe. Abri a configuração atual.');
+      toast.info(
+        'A automação de aniversário já existe. Abri a configuração atual.',
+      );
       return;
     }
 
@@ -467,26 +474,35 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
       });
       const createData = await createResponse.json().catch(() => ({}));
       if (!createResponse.ok || !createData.campaign?.id) {
-        throw new Error(createData.error ?? 'Não foi possível criar a campanha de aniversário.');
+        throw new Error(
+          createData.error ??
+            'Não foi possível criar a campanha de aniversário.',
+        );
       }
 
       const campaign = createData.campaign as Campaign;
       createdCampaignId = campaign.id;
 
-      const automationResponse = await fetch('/api/marketing/campaigns/automation', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: campaign.id,
-          triggerType: 'birthday',
-          birthdayOffsetDays: 0,
-          birthdayRewardType: 'none',
-          birthdayRewardServiceId: null,
-        }),
-      });
+      const automationResponse = await fetch(
+        '/api/marketing/campaigns/automation',
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: campaign.id,
+            triggerType: 'birthday',
+            birthdayOffsetDays: 0,
+            birthdayRewardType: 'none',
+            birthdayRewardServiceId: null,
+          }),
+        },
+      );
       const automationData = await automationResponse.json().catch(() => ({}));
       if (!automationResponse.ok || !automationData.campaign) {
-        throw new Error(automationData.error ?? 'A campanha foi criada, mas não foi possível ativar o gatilho de aniversário.');
+        throw new Error(
+          automationData.error ??
+            'A campanha foi criada, mas não foi possível ativar o gatilho de aniversário.',
+        );
       }
 
       setCampaigns((current) => [
@@ -890,9 +906,13 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
                     <Cake className="size-5" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
-                    <h2 className="font-semibold text-zinc-100">Automação de aniversário</h2>
+                    <h2 className="font-semibold text-zinc-100">
+                      Automação de aniversário
+                    </h2>
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
-                      Cria automaticamente uma mensagem de aniversário por email, configurada para ser enviada no próprio dia. Podes editar o texto e escolher uma recompensa depois.
+                      Cria automaticamente uma mensagem de aniversário por
+                      email, configurada para ser enviada no próprio dia. Podes
+                      editar o texto e escolher uma recompensa depois.
                     </p>
                     {birthdayCampaign && (
                       <p className="mt-2 text-xs font-medium text-emerald-300">
@@ -907,7 +927,10 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
                   className="min-h-11 shrink-0"
                 >
                   {creatingBirthday ? (
-                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="mr-2 size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <Plus className="mr-2 size-4" aria-hidden="true" />
                   )}
@@ -920,292 +943,294 @@ export function MarketingWorkspace({ initialView = 'campaigns' }: { initialView?
               </CardContent>
             </Card>
             <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-            {!selected ? (
-              <Card className="border-white/10 bg-white/[0.02]">
-                <CardContent className="py-16 text-center">
-                  <p className="font-medium">Seleciona uma campanha</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Volta a Campanhas e escolhe “Gerir”.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
+              {!selected ? (
                 <Card className="border-white/10 bg-white/[0.02]">
-                  <CardHeader>
-                    <CardTitle>Automação da campanha</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {selected.name} ·{' '}
-                      {STATUS_LABELS[selected.status] ?? selected.status}
+                  <CardContent className="py-16 text-center">
+                    <p className="font-medium">Seleciona uma campanha</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Volta a Campanhas e escolhe “Gerir”.
                     </p>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="automation-mode"
-                          className="text-sm font-medium"
-                        >
-                          Gatilho
-                        </label>
-                        <select
-                          id="automation-mode"
-                          value={automation.mode}
-                          onChange={(event) =>
-                            setAutomation((current) => ({
-                              ...current,
-                              mode: event.target
-                                .value as AutomationState['mode'],
-                            }))
-                          }
-                          className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                          disabled={!canManage(selected)}
-                        >
-                          <option value="manual">Manual</option>
-                          <option value="interval">Intervalo</option>
-                          <option value="event">Evento</option>
-                          <option value="birthday">Aniversário</option>
-                        </select>
-                      </div>
-                      {automation.mode === 'interval' && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label
-                              htmlFor="interval-value"
-                              className="text-sm font-medium"
-                            >
-                              Valor
-                            </label>
-                            <Input
-                              id="interval-value"
-                              type="number"
-                              min={1}
-                              max={3650}
-                              value={automation.intervalValue}
-                              onChange={(event) =>
-                                setAutomation((current) => ({
-                                  ...current,
-                                  intervalValue: event.target.value,
-                                }))
-                              }
-                              disabled={!canManage(selected)}
-                            />
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <Card className="border-white/10 bg-white/[0.02]">
+                    <CardHeader>
+                      <CardTitle>Automação da campanha</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {selected.name} ·{' '}
+                        {STATUS_LABELS[selected.status] ?? selected.status}
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="automation-mode"
+                            className="text-sm font-medium"
+                          >
+                            Gatilho
+                          </label>
+                          <select
+                            id="automation-mode"
+                            value={automation.mode}
+                            onChange={(event) =>
+                              setAutomation((current) => ({
+                                ...current,
+                                mode: event.target
+                                  .value as AutomationState['mode'],
+                              }))
+                            }
+                            className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            disabled={!canManage(selected)}
+                          >
+                            <option value="manual">Manual</option>
+                            <option value="interval">Intervalo</option>
+                            <option value="event">Evento</option>
+                            <option value="birthday">Aniversário</option>
+                          </select>
+                        </div>
+                        {automation.mode === 'interval' && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label
+                                htmlFor="interval-value"
+                                className="text-sm font-medium"
+                              >
+                                Valor
+                              </label>
+                              <Input
+                                id="interval-value"
+                                type="number"
+                                min={1}
+                                max={3650}
+                                value={automation.intervalValue}
+                                onChange={(event) =>
+                                  setAutomation((current) => ({
+                                    ...current,
+                                    intervalValue: event.target.value,
+                                  }))
+                                }
+                                disabled={!canManage(selected)}
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="interval-unit"
+                                className="text-sm font-medium"
+                              >
+                                Unidade
+                              </label>
+                              <select
+                                id="interval-unit"
+                                value={automation.intervalUnit}
+                                onChange={(event) =>
+                                  setAutomation((current) => ({
+                                    ...current,
+                                    intervalUnit: event.target
+                                      .value as AutomationState['intervalUnit'],
+                                  }))
+                                }
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                disabled={!canManage(selected)}
+                              >
+                                <option value="hours">Horas</option>
+                                <option value="days">Dias</option>
+                              </select>
+                            </div>
                           </div>
+                        )}
+                        {automation.mode === 'event' && (
                           <div>
                             <label
-                              htmlFor="interval-unit"
+                              htmlFor="event-name"
                               className="text-sm font-medium"
                             >
-                              Unidade
+                              Evento
                             </label>
                             <select
-                              id="interval-unit"
-                              value={automation.intervalUnit}
+                              id="event-name"
+                              value={automation.eventName}
                               onChange={(event) =>
                                 setAutomation((current) => ({
                                   ...current,
-                                  intervalUnit: event.target
-                                    .value as AutomationState['intervalUnit'],
-                                }))
-                              }
-                              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                              disabled={!canManage(selected)}
-                            >
-                              <option value="hours">Horas</option>
-                              <option value="days">Dias</option>
-                            </select>
-                          </div>
-                        </div>
-                      )}
-                      {automation.mode === 'event' && (
-                        <div>
-                          <label
-                            htmlFor="event-name"
-                            className="text-sm font-medium"
-                          >
-                            Evento
-                          </label>
-                          <select
-                            id="event-name"
-                            value={automation.eventName}
-                            onChange={(event) =>
-                              setAutomation((current) => ({
-                                ...current,
-                                eventName: event.target.value as EventKey,
-                              }))
-                            }
-                            className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                            disabled={!canManage(selected)}
-                          >
-                            {events.map((event) => (
-                              <option key={event} value={event}>
-                                {EVENT_LABELS[event] ?? event}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                    {automation.mode === 'birthday' && (
-                      <div className="grid gap-3 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:grid-cols-3">
-                        <div>
-                          <label
-                            htmlFor="birthday-offset"
-                            className="text-sm font-medium"
-                          >
-                            <Cake
-                              className="mr-1 inline size-4"
-                              aria-hidden="true"
-                            />
-                            Momento
-                          </label>
-                          <select
-                            id="birthday-offset"
-                            value={automation.birthdayOffset}
-                            onChange={(event) =>
-                              setAutomation((current) => ({
-                                ...current,
-                                birthdayOffset: event.target.value,
-                              }))
-                            }
-                            className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                            disabled={!canManage(selected)}
-                          >
-                            <option value="-1">1 dia antes</option>
-                            <option value="0">No próprio dia</option>
-                            <option value="1">1 dia depois</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="birthday-reward"
-                            className="text-sm font-medium"
-                          >
-                            <Gift
-                              className="mr-1 inline size-4"
-                              aria-hidden="true"
-                            />
-                            Recompensa
-                          </label>
-                          <select
-                            id="birthday-reward"
-                            value={automation.birthdayRewardType}
-                            onChange={(event) =>
-                              setAutomation((current) => ({
-                                ...current,
-                                birthdayRewardType: event.target
-                                  .value as AutomationState['birthdayRewardType'],
-                              }))
-                            }
-                            className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                            disabled={!canManage(selected)}
-                          >
-                            <option value="none">Mensagem apenas</option>
-                            <option value="free_service">
-                              Serviço gratuito
-                            </option>
-                          </select>
-                        </div>
-                        {automation.birthdayRewardType === 'free_service' && (
-                          <div>
-                            <label
-                              htmlFor="birthday-service"
-                              className="text-sm font-medium"
-                            >
-                              Serviço
-                            </label>
-                            <select
-                              id="birthday-service"
-                              value={automation.birthdayRewardServiceId}
-                              onChange={(event) =>
-                                setAutomation((current) => ({
-                                  ...current,
-                                  birthdayRewardServiceId: event.target.value,
+                                  eventName: event.target.value as EventKey,
                                 }))
                               }
                               className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                               disabled={!canManage(selected)}
                             >
-                              <option value="">Selecionar serviço</option>
-                              {services.map((service) => (
-                                <option key={service.id} value={service.id}>
-                                  {service.name} ·{' '}
-                                  {Number(service.price).toFixed(2)} €
+                              {events.map((event) => (
+                                <option key={event} value={event}>
+                                  {EVENT_LABELS[event] ?? event}
                                 </option>
                               ))}
                             </select>
                           </div>
                         )}
                       </div>
-                    )}
-                    <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        Próxima execução:{' '}
-                        <span className="font-medium text-zinc-200">
-                          {selected.next_run_at
-                            ? formatDate(selected.next_run_at)
-                            : automation.mode === 'manual'
-                              ? 'Manual'
-                              : 'Calculada ao guardar'}
-                        </span>
-                      </p>
+                      {automation.mode === 'birthday' && (
+                        <div className="grid gap-3 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:grid-cols-3">
+                          <div>
+                            <label
+                              htmlFor="birthday-offset"
+                              className="text-sm font-medium"
+                            >
+                              <Cake
+                                className="mr-1 inline size-4"
+                                aria-hidden="true"
+                              />
+                              Momento
+                            </label>
+                            <select
+                              id="birthday-offset"
+                              value={automation.birthdayOffset}
+                              onChange={(event) =>
+                                setAutomation((current) => ({
+                                  ...current,
+                                  birthdayOffset: event.target.value,
+                                }))
+                              }
+                              className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                              disabled={!canManage(selected)}
+                            >
+                              <option value="-1">1 dia antes</option>
+                              <option value="0">No próprio dia</option>
+                              <option value="1">1 dia depois</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="birthday-reward"
+                              className="text-sm font-medium"
+                            >
+                              <Gift
+                                className="mr-1 inline size-4"
+                                aria-hidden="true"
+                              />
+                              Recompensa
+                            </label>
+                            <select
+                              id="birthday-reward"
+                              value={automation.birthdayRewardType}
+                              onChange={(event) =>
+                                setAutomation((current) => ({
+                                  ...current,
+                                  birthdayRewardType: event.target
+                                    .value as AutomationState['birthdayRewardType'],
+                                }))
+                              }
+                              className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                              disabled={!canManage(selected)}
+                            >
+                              <option value="none">Mensagem apenas</option>
+                              <option value="free_service">
+                                Serviço gratuito
+                              </option>
+                            </select>
+                          </div>
+                          {automation.birthdayRewardType === 'free_service' && (
+                            <div>
+                              <label
+                                htmlFor="birthday-service"
+                                className="text-sm font-medium"
+                              >
+                                Serviço
+                              </label>
+                              <select
+                                id="birthday-service"
+                                value={automation.birthdayRewardServiceId}
+                                onChange={(event) =>
+                                  setAutomation((current) => ({
+                                    ...current,
+                                    birthdayRewardServiceId: event.target.value,
+                                  }))
+                                }
+                                className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                disabled={!canManage(selected)}
+                              >
+                                <option value="">Selecionar serviço</option>
+                                {services.map((service) => (
+                                  <option key={service.id} value={service.id}>
+                                    {service.name} ·{' '}
+                                    {Number(service.price).toFixed(2)} €
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm text-muted-foreground">
+                          Próxima execução:{' '}
+                          <span className="font-medium text-zinc-200">
+                            {selected.next_run_at
+                              ? formatDate(selected.next_run_at)
+                              : automation.mode === 'manual'
+                                ? 'Manual'
+                                : 'Calculada ao guardar'}
+                          </span>
+                        </p>
+                        <Button
+                          onClick={() => void saveAutomation()}
+                          disabled={automationSaving || !canManage(selected)}
+                        >
+                          {automationSaving
+                            ? 'A guardar…'
+                            : 'Guardar automação'}
+                        </Button>
+                      </div>
+                      {!canManage(selected) && (
+                        <p className="text-xs text-zinc-500">
+                          A automação desta campanha está bloqueada porque o
+                          envio já começou.
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                  <Card className="border-white/10 bg-white/[0.02]">
+                    <CardHeader>
+                      <CardTitle>Ações rápidas</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
                       <Button
-                        onClick={() => void saveAutomation()}
-                        disabled={automationSaving || !canManage(selected)}
+                        variant="outline"
+                        onClick={() => setDetails(selected)}
                       >
-                        {automationSaving ? 'A guardar…' : 'Guardar automação'}
+                        <Eye className="mr-2 size-4" aria-hidden="true" />
+                        Detalhes
                       </Button>
-                    </div>
-                    {!canManage(selected) && (
-                      <p className="text-xs text-zinc-500">
-                        A automação desta campanha está bloqueada porque o envio
-                        já começou.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-                <Card className="border-white/10 bg-white/[0.02]">
-                  <CardHeader>
-                    <CardTitle>Ações rápidas</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setDetails(selected)}
-                    >
-                      <Eye className="mr-2 size-4" aria-hidden="true" />
-                      Detalhes
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => openEdit(selected)}
-                      disabled={!canManage(selected)}
-                    >
-                      <Pencil className="mr-2 size-4" aria-hidden="true" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setConfirmDelete(selected)}
-                      disabled={!canManage(selected)}
-                      className="text-red-300"
-                    >
-                      <Trash2 className="mr-2 size-4" aria-hidden="true" />
-                      Apagar
-                    </Button>
-                    <Button
-                      onClick={() => void sendCampaign(selected)}
-                      disabled={
-                        !canManage(selected) || sendingId === selected.id
-                      }
-                    >
-                      <Send className="mr-2 size-4" aria-hidden="true" />
-                      Enviar agora
-                    </Button>
-                  </CardContent>
-                </Card>
-              </>
-            )}
+                      <Button
+                        variant="outline"
+                        onClick={() => openEdit(selected)}
+                        disabled={!canManage(selected)}
+                      >
+                        <Pencil className="mr-2 size-4" aria-hidden="true" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setConfirmDelete(selected)}
+                        disabled={!canManage(selected)}
+                        className="text-red-300"
+                      >
+                        <Trash2 className="mr-2 size-4" aria-hidden="true" />
+                        Apagar
+                      </Button>
+                      <Button
+                        onClick={() => void sendCampaign(selected)}
+                        disabled={
+                          !canManage(selected) || sendingId === selected.id
+                        }
+                      >
+                        <Send className="mr-2 size-4" aria-hidden="true" />
+                        Enviar agora
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </section>
           </>
         )}

@@ -89,13 +89,13 @@ export default function MarketingPage() {
       });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(
-          data.error ?? t('marketingPage.loadError'),
-        );
+        throw new Error(data.error ?? t('marketingPage.loadError'));
       setCampaigns(data.campaigns ?? []);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('marketingPage.loadGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('marketingPage.loadGenericError'),
       );
     } finally {
       setLoading(false);
@@ -107,10 +107,11 @@ export default function MarketingPage() {
   }, [load]);
 
   const preview = useMemo(() => {
-    const fallbackName = form.name.trim() || t('marketingPage.fallbackCampaignName');
-    const fallbackSubject = form.subject.trim() || t('marketingPage.fallbackSubject');
-    const fallbackBody =
-      form.body.trim() || t('marketingPage.fallbackBody');
+    const fallbackName =
+      form.name.trim() || t('marketingPage.fallbackCampaignName');
+    const fallbackSubject =
+      form.subject.trim() || t('marketingPage.fallbackSubject');
+    const fallbackBody = form.body.trim() || t('marketingPage.fallbackBody');
     return {
       name: fallbackName,
       subject: fallbackSubject,
@@ -147,7 +148,9 @@ export default function MarketingPage() {
       setOpen(false);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('marketingPage.createGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('marketingPage.createGenericError'),
       );
     } finally {
       setCreating(false);
@@ -163,12 +166,16 @@ export default function MarketingPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">{t('marketingPage.marketingCampaigns')}</h1>
+              <h1 className="text-2xl font-semibold">
+                {t('marketingPage.marketingCampaigns')}
+              </h1>
               <p className="text-muted-foreground">
                 {t('marketingPage.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">{t('marketingPage.upgrade')}</Link>
+                <Link href="/dashboard/billing">
+                  {t('marketingPage.upgrade')}
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -213,22 +220,19 @@ export default function MarketingPage() {
             {
               step: '01',
               title: t('marketingPage.defineCampaign'),
-              description:
-                t('marketingPage.defineCampaignDescription'),
+              description: t('marketingPage.defineCampaignDescription'),
               icon: Sparkles,
             },
             {
               step: '02',
               title: t('marketingPage.chooseChannel'),
-              description:
-                t('marketingPage.chooseChannelDescription'),
+              description: t('marketingPage.chooseChannelDescription'),
               icon: Send,
             },
             {
               step: '03',
               title: t('marketingPage.reviewBeforeSave'),
-              description:
-                t('marketingPage.reviewBeforeSaveDescription'),
+              description: t('marketingPage.reviewBeforeSaveDescription'),
               icon: Eye,
             },
           ].map(({ step, title, description, icon: Icon }) => (
@@ -260,7 +264,9 @@ export default function MarketingPage() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl">{t('marketingPage.newCampaign')}</CardTitle>
+                    <CardTitle className="text-xl">
+                      {t('marketingPage.newCampaign')}
+                    </CardTitle>
                     <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
                       {t('marketingPage.draft')}
                     </span>
@@ -316,7 +322,9 @@ export default function MarketingPage() {
                           onChange={(e) =>
                             setForm({ ...form, name: e.target.value })
                           }
-                          placeholder={t('marketingPage.campaignNamePlaceholder')}
+                          placeholder={t(
+                            'marketingPage.campaignNamePlaceholder',
+                          )}
                           required
                         />
                         <p className="mt-1.5 text-[11px] text-muted-foreground">
@@ -490,14 +498,16 @@ export default function MarketingPage() {
                           onClick={() => setPreviewMode('desktop')}
                           className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${previewMode === 'desktop' ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
                         >
-                          <Monitor className="size-3.5" /> {t('marketingPage.desktop')}
+                          <Monitor className="size-3.5" />{' '}
+                          {t('marketingPage.desktop')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setPreviewMode('mobile')}
                           className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${previewMode === 'mobile' ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
                         >
-                          <Smartphone className="size-3.5" /> {t('marketingPage.mobile')}
+                          <Smartphone className="size-3.5" />{' '}
+                          {t('marketingPage.mobile')}
                         </button>
                       </div>
                     </div>
@@ -607,7 +617,8 @@ export default function MarketingPage() {
           <CardContent>
             {loading && !campaigns.length ? (
               <div className="flex h-40 items-center justify-center text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('marketingPage.loading')}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t('marketingPage.loading')}
               </div>
             ) : campaigns.length ? (
               <div className="space-y-2">
@@ -660,7 +671,9 @@ export default function MarketingPage() {
                 <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
                   <Send className="size-5 text-muted-foreground" />
                 </div>
-                <p className="mt-4 font-medium">{t('marketingPage.noCampaigns')}</p>
+                <p className="mt-4 font-medium">
+                  {t('marketingPage.noCampaigns')}
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t('marketingPage.noCampaignsDescription')}
                 </p>

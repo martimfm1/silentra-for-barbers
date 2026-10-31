@@ -124,7 +124,10 @@ const normalize = (v: Partial<Config>): Config => ({
   lunch_start: v.lunch_start ?? '',
   lunch_end: v.lunch_end ?? '',
   closed_days: v.closed_days ?? 'None',
-  minimum_booking_notice_minutes: Math.max(0, Math.min(43200, Math.round(Number(v.minimum_booking_notice_minutes ?? 0)))),
+  minimum_booking_notice_minutes: Math.max(
+    0,
+    Math.min(43200, Math.round(Number(v.minimum_booking_notice_minutes ?? 0))),
+  ),
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
   time_limit_cancellation_hours: Math.max(
@@ -182,15 +185,17 @@ export default function SettingsPageOrganized() {
         headers: { Accept: 'application/json' },
       }),
     ]);
-    if (c.error)
-      toast.error(
-        t('settingsPage.loadFailed'),
-      );
+    if (c.error) toast.error(t('settingsPage.loadFailed'));
     if (c.data) {
       const n = normalize(c.data);
       setConfig(n);
       setInitial(n);
-      setNoticeUnit(n.minimum_booking_notice_minutes > 0 && n.minimum_booking_notice_minutes % 60 === 0 ? 'hours' : 'minutes');
+      setNoticeUnit(
+        n.minimum_booking_notice_minutes > 0 &&
+          n.minimum_booking_notice_minutes % 60 === 0
+          ? 'hours'
+          : 'minutes',
+      );
     }
     try {
       const body = await p.json();
@@ -256,9 +261,7 @@ export default function SettingsPageOrganized() {
   async function saveAll() {
     if (!barbershopId || !dirty || saving) return;
     if (config.opening_time >= config.closing_time)
-      return toast.error(
-        t('settingsPage.openingAfterClosing'),
-      );
+      return toast.error(t('settingsPage.openingAfterClosing'));
     if (
       (config.lunch_start && !config.lunch_end) ||
       (!config.lunch_start && config.lunch_end) ||
@@ -267,7 +270,11 @@ export default function SettingsPageOrganized() {
         config.lunch_start >= config.lunch_end)
     )
       return toast.error(t('settingsPage.lunchInvalid'));
-    if (!Number.isInteger(config.minimum_booking_notice_minutes) || config.minimum_booking_notice_minutes < 0 || config.minimum_booking_notice_minutes > 43200)
+    if (
+      !Number.isInteger(config.minimum_booking_notice_minutes) ||
+      config.minimum_booking_notice_minutes < 0 ||
+      config.minimum_booking_notice_minutes > 43200
+    )
       return toast.error(t('settingsPage.minimumBookingNoticeInvalid'));
     setSaving(true);
     try {
@@ -292,10 +299,7 @@ export default function SettingsPageOrganized() {
           }),
         });
         const b = await r.json().catch(() => ({}));
-        if (!r.ok)
-          throw new Error(
-            t('settingsPage.locationUpdateFailed'),
-          );
+        if (!r.ok) throw new Error(t('settingsPage.locationUpdateFailed'));
       }
       if (JSON.stringify(amenities) !== JSON.stringify(initialAmenities)) {
         const r = await fetch('/api/barbershops/public-profile', {
@@ -307,10 +311,7 @@ export default function SettingsPageOrganized() {
           body: JSON.stringify({ amenities }),
         });
         const b = await r.json().catch(() => ({}));
-        if (!r.ok)
-          throw new Error(
-            t('settingsPage.amenitiesSaveFailed'),
-          );
+        if (!r.ok) throw new Error(t('settingsPage.amenitiesSaveFailed'));
       }
       const n = normalize(c.data ?? config);
       setConfig(n);
@@ -320,9 +321,7 @@ export default function SettingsPageOrganized() {
       setSuggestion(null);
       toast.success(t('settingsPage.saved'));
     } catch (e) {
-      toast.error(
-        t('settingsPage.saveFailed'),
-      );
+      toast.error(t('settingsPage.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -343,10 +342,7 @@ export default function SettingsPageOrganized() {
       quality: 0.85,
     });
     setUploading(null);
-    if (r.error)
-      return toast.error(
-        t('settingsPage.imageUpdateFailed'),
-      );
+    if (r.error) return toast.error(t('settingsPage.imageUpdateFailed'));
     if (type === 'avatar') {
       setAvatarPreviewError(false);
       setAvatarTick(Date.now());
@@ -355,7 +351,9 @@ export default function SettingsPageOrganized() {
       setBannerTick(Date.now());
     }
     toast.success(
-      type === 'avatar' ? t('settingsPage.logoUpdated') : t('settingsPage.coverUpdated'),
+      type === 'avatar'
+        ? t('settingsPage.logoUpdated')
+        : t('settingsPage.coverUpdated'),
     );
   }
   async function logout() {
@@ -456,9 +454,15 @@ export default function SettingsPageOrganized() {
                       <Icon className="size-4" />
                     </span>
                     <span>
-                      <span className="block text-sm font-medium">{t(`settingsPage.${id}`)}</span>
+                      <span className="block text-sm font-medium">
+                        {t(`settingsPage.${id}`)}
+                      </span>
                       <span className="block truncate text-[11px] text-zinc-600">
-                        {t(id === 'overview' ? 'settingsPage.overviewStatus' : `settingsPage.${id}Description`)}
+                        {t(
+                          id === 'overview'
+                            ? 'settingsPage.overviewStatus'
+                            : `settingsPage.${id}Description`,
+                        )}
                       </span>
                     </span>
                   </button>
@@ -547,12 +551,24 @@ export default function SettingsPageOrganized() {
                     />
                   </div>
                   <div className="sm:col-span-2 grid gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.03] p-4">
-                    <label htmlFor="settings-default-language" className="text-sm font-medium">{t('settingsLanguage.title')}</label>
-                    <p className="text-xs text-zinc-500">{t('settingsLanguage.description')}</p>
+                    <label
+                      htmlFor="settings-default-language"
+                      className="text-sm font-medium"
+                    >
+                      {t('settingsLanguage.title')}
+                    </label>
+                    <p className="text-xs text-zinc-500">
+                      {t('settingsLanguage.description')}
+                    </p>
                     <select
                       id="settings-default-language"
                       value={config.default_language}
-                      onChange={(event) => set({ default_language: event.target.value === 'en' ? 'en' : 'pt' })}
+                      onChange={(event) =>
+                        set({
+                          default_language:
+                            event.target.value === 'en' ? 'en' : 'pt',
+                        })
+                      }
                       className={INPUT_CLASS}
                     >
                       <option value="pt">Português (Portugal)</option>
@@ -607,7 +623,9 @@ export default function SettingsPageOrganized() {
                   />
                   {suggestion && (
                     <p className="text-xs text-emerald-300">
-                      {t('settingsPage.selectedAddress', { address: suggestion.fullAddress })}
+                      {t('settingsPage.selectedAddress', {
+                        address: suggestion.fullAddress,
+                      })}
                     </p>
                   )}
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -632,7 +650,9 @@ export default function SettingsPageOrganized() {
                     ))}
                   </div>
                   <div className="grid gap-2 sm:max-w-md">
-                    <p className="text-sm font-medium">{t('settingsPage.parking')}</p>
+                    <p className="text-sm font-medium">
+                      {t('settingsPage.parking')}
+                    </p>
                     <div className="grid grid-cols-3 gap-2">
                       {(
                         [
@@ -678,40 +698,104 @@ export default function SettingsPageOrganized() {
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="grid gap-2">
-                      <label htmlFor="settings-opening-time" className="text-sm font-medium text-zinc-200">{t('settingsPage.openingTime')}</label>
-                      <Input id="settings-opening-time" type="time" aria-label={t('settingsPage.openingTime')} value={config.opening_time} onChange={(e) => set({ opening_time: e.target.value })} className={INPUT_CLASS} />
+                      <label
+                        htmlFor="settings-opening-time"
+                        className="text-sm font-medium text-zinc-200"
+                      >
+                        {t('settingsPage.openingTime')}
+                      </label>
+                      <Input
+                        id="settings-opening-time"
+                        type="time"
+                        aria-label={t('settingsPage.openingTime')}
+                        value={config.opening_time}
+                        onChange={(e) => set({ opening_time: e.target.value })}
+                        className={INPUT_CLASS}
+                      />
                     </div>
                     <div className="grid gap-2">
-                      <label htmlFor="settings-closing-time" className="text-sm font-medium text-zinc-200">{t('settingsPage.closingTime')}</label>
-                      <Input id="settings-closing-time" type="time" aria-label={t('settingsPage.closingTime')} value={config.closing_time} onChange={(e) => set({ closing_time: e.target.value })} className={INPUT_CLASS} />
+                      <label
+                        htmlFor="settings-closing-time"
+                        className="text-sm font-medium text-zinc-200"
+                      >
+                        {t('settingsPage.closingTime')}
+                      </label>
+                      <Input
+                        id="settings-closing-time"
+                        type="time"
+                        aria-label={t('settingsPage.closingTime')}
+                        value={config.closing_time}
+                        onChange={(e) => set({ closing_time: e.target.value })}
+                        className={INPUT_CLASS}
+                      />
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h3 className="text-sm font-medium text-zinc-200">{t('settingsPage.lunchBreak')}</h3>
+                    <h3 className="text-sm font-medium text-zinc-200">
+                      {t('settingsPage.lunchBreak')}
+                    </h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="grid gap-2">
-                        <label htmlFor="settings-lunch-start" className="text-sm font-medium text-zinc-300">{t('settingsPage.lunchStart')}</label>
-                        <Input id="settings-lunch-start" type="time" aria-label={t('settingsPage.lunchStart')} value={config.lunch_start} onChange={(e) => set({ lunch_start: e.target.value })} className={INPUT_CLASS} />
+                        <label
+                          htmlFor="settings-lunch-start"
+                          className="text-sm font-medium text-zinc-300"
+                        >
+                          {t('settingsPage.lunchStart')}
+                        </label>
+                        <Input
+                          id="settings-lunch-start"
+                          type="time"
+                          aria-label={t('settingsPage.lunchStart')}
+                          value={config.lunch_start}
+                          onChange={(e) => set({ lunch_start: e.target.value })}
+                          className={INPUT_CLASS}
+                        />
                       </div>
                       <div className="grid gap-2">
-                        <label htmlFor="settings-lunch-end" className="text-sm font-medium text-zinc-300">{t('settingsPage.lunchEnd')}</label>
-                        <Input id="settings-lunch-end" type="time" aria-label={t('settingsPage.lunchEnd')} value={config.lunch_end} onChange={(e) => set({ lunch_end: e.target.value })} className={INPUT_CLASS} />
+                        <label
+                          htmlFor="settings-lunch-end"
+                          className="text-sm font-medium text-zinc-300"
+                        >
+                          {t('settingsPage.lunchEnd')}
+                        </label>
+                        <Input
+                          id="settings-lunch-end"
+                          type="time"
+                          aria-label={t('settingsPage.lunchEnd')}
+                          value={config.lunch_end}
+                          onChange={(e) => set({ lunch_end: e.target.value })}
+                          className={INPUT_CLASS}
+                        />
                       </div>
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h3 className="text-sm font-medium text-zinc-200">{t('settingsPage.daysOffInHours')}</h3>
+                    <h3 className="text-sm font-medium text-zinc-200">
+                      {t('settingsPage.daysOffInHours')}
+                    </h3>
                     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       {days.map(([v, enLabel, ptLabel]) => {
                         const active = closed.includes(v);
                         return (
-                          <button key={v} type="button" aria-pressed={active}
+                          <button
+                            key={v}
+                            type="button"
+                            aria-pressed={active}
                             onClick={() => {
-                              const n = active ? closed.filter((x) => x !== v) : [...closed, v];
-                              set({ closed_days: n.length ? n.join(',') : 'None' });
+                              const n = active
+                                ? closed.filter((x) => x !== v)
+                                : [...closed, v];
+                              set({
+                                closed_days: n.length ? n.join(',') : 'None',
+                              });
                             }}
-                            className={cn('min-h-12 rounded-xl border px-3 text-left text-sm',
-                              active ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200' : 'border-white/10 bg-white/[.02] text-zinc-400')}>
+                            className={cn(
+                              'min-h-12 rounded-xl border px-3 text-left text-sm',
+                              active
+                                ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
+                                : 'border-white/10 bg-white/[.02] text-zinc-400',
+                            )}
+                          >
                             {locale === 'pt' ? ptLabel : enLabel}
                           </button>
                         );
@@ -719,54 +803,124 @@ export default function SettingsPageOrganized() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <label htmlFor="settings-minimum-booking-notice" className="text-sm font-medium text-zinc-200">{t('settingsPage.minimumBookingNotice')}</label>
-                    <p className="text-xs leading-5 text-zinc-500">{t('settingsPage.minimumBookingNoticeDescription')}</p>
+                    <label
+                      htmlFor="settings-minimum-booking-notice"
+                      className="text-sm font-medium text-zinc-200"
+                    >
+                      {t('settingsPage.minimumBookingNotice')}
+                    </label>
+                    <p className="text-xs leading-5 text-zinc-500">
+                      {t('settingsPage.minimumBookingNoticeDescription')}
+                    </p>
                     <div className="grid max-w-lg grid-cols-[minmax(0,1fr)_auto] gap-2">
-                      <Input id="settings-minimum-booking-notice" type="number" inputMode="decimal" min={0}
-                        max={noticeUnit === 'hours' ? 720 : 43200} step={noticeUnit === 'hours' ? 0.25 : 1}
-                        value={noticeUnit === 'hours' ? config.minimum_booking_notice_minutes / 60 : config.minimum_booking_notice_minutes}
+                      <Input
+                        id="settings-minimum-booking-notice"
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        max={noticeUnit === 'hours' ? 720 : 43200}
+                        step={noticeUnit === 'hours' ? 0.25 : 1}
+                        value={
+                          noticeUnit === 'hours'
+                            ? config.minimum_booking_notice_minutes / 60
+                            : config.minimum_booking_notice_minutes
+                        }
                         onChange={(e) => {
                           const amount = Number(e.target.value);
                           if (!Number.isFinite(amount)) return;
-                          const minutes = Math.round(amount * (noticeUnit === 'hours' ? 60 : 1));
-                          set({ minimum_booking_notice_minutes: Math.max(0, Math.min(43200, minutes)) });
+                          const minutes = Math.round(
+                            amount * (noticeUnit === 'hours' ? 60 : 1),
+                          );
+                          set({
+                            minimum_booking_notice_minutes: Math.max(
+                              0,
+                              Math.min(43200, minutes),
+                            ),
+                          });
                         }}
-                        aria-label={t('settingsPage.minimumBookingNotice')} className={INPUT_CLASS} />
-                      <select aria-label={t('settingsPage.noticeUnit')} value={noticeUnit}
-                        onChange={(e) => setNoticeUnit(e.target.value as 'minutes' | 'hours')}
-                        className="min-h-11 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200">
-                        <option value="minutes">{t('settingsPage.noticeMinutes')}</option>
-                        <option value="hours">{t('settingsPage.noticeHours')}</option>
+                        aria-label={t('settingsPage.minimumBookingNotice')}
+                        className={INPUT_CLASS}
+                      />
+                      <select
+                        aria-label={t('settingsPage.noticeUnit')}
+                        value={noticeUnit}
+                        onChange={(e) =>
+                          setNoticeUnit(e.target.value as 'minutes' | 'hours')
+                        }
+                        className="min-h-11 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                      >
+                        <option value="minutes">
+                          {t('settingsPage.noticeMinutes')}
+                        </option>
+                        <option value="hours">
+                          {t('settingsPage.noticeHours')}
+                        </option>
                       </select>
                     </div>
                   </div>
                   <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <p className="text-sm font-medium">{t('settingsPage.allowOnline')}</p>
-                        <p className="text-xs text-zinc-600">{t('settingsPage.allowOnlineDescription')}</p>
+                        <p className="text-sm font-medium">
+                          {t('settingsPage.allowOnline')}
+                        </p>
+                        <p className="text-xs text-zinc-600">
+                          {t('settingsPage.allowOnlineDescription')}
+                        </p>
                       </div>
-                      <Switch checked={config.allow_online_bookings} onCheckedChange={(v) => set({ allow_online_bookings: v })} />
+                      <Switch
+                        checked={config.allow_online_bookings}
+                        onCheckedChange={(v) =>
+                          set({ allow_online_bookings: v })
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
-                        <p className="text-sm font-medium">{t('settingsPage.autoConfirm')}</p>
-                        <p className="text-xs text-zinc-600">{t('settingsPage.autoConfirmDescription')}</p>
+                        <p className="text-sm font-medium">
+                          {t('settingsPage.autoConfirm')}
+                        </p>
+                        <p className="text-xs text-zinc-600">
+                          {t('settingsPage.autoConfirmDescription')}
+                        </p>
                       </div>
-                      <Switch disabled={!automationAllowed} checked={automationAllowed && config.auto_confirm_bookings} onCheckedChange={(v) => automationAllowed && set({ auto_confirm_bookings: v })} />
+                      <Switch
+                        disabled={!automationAllowed}
+                        checked={
+                          automationAllowed && config.auto_confirm_bookings
+                        }
+                        onCheckedChange={(v) =>
+                          automationAllowed && set({ auto_confirm_bookings: v })
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
-                        <p className="text-sm font-medium">{t('settingsPage.autoComplete')}</p>
-                        <p className="text-xs text-zinc-600">{t('settingsPage.autoCompleteDescription')}</p>
+                        <p className="text-sm font-medium">
+                          {t('settingsPage.autoComplete')}
+                        </p>
+                        <p className="text-xs text-zinc-600">
+                          {t('settingsPage.autoCompleteDescription')}
+                        </p>
                       </div>
-                      <Switch disabled={!automationAllowed} checked={automationAllowed && config.auto_complete_bookings} onCheckedChange={(v) => automationAllowed && set({ auto_complete_bookings: v })} />
+                      <Switch
+                        disabled={!automationAllowed}
+                        checked={
+                          automationAllowed && config.auto_complete_bookings
+                        }
+                        onCheckedChange={(v) =>
+                          automationAllowed &&
+                          set({ auto_complete_bookings: v })
+                        }
+                      />
                     </div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div className="flex items-center gap-2">
                       <CalendarCheck2 className="size-4 text-amber-300" />
-                      <p className="text-sm font-medium">{t('settingsPage.cancellationWindow')}</p>
+                      <p className="text-sm font-medium">
+                        {t('settingsPage.cancellationWindow')}
+                      </p>
                     </div>
                     <Input
                       type="number"
@@ -775,7 +929,11 @@ export default function SettingsPageOrganized() {
                       step={1}
                       value={config.time_limit_cancellation_hours}
                       aria-label={t('settingsPage.cancellationWindow')}
-                      onChange={(e) => set({ time_limit_cancellation_hours: Number(e.target.value) })}
+                      onChange={(e) =>
+                        set({
+                          time_limit_cancellation_hours: Number(e.target.value),
+                        })
+                      }
                       className={`${INPUT_CLASS} mt-4 sm:max-w-xs`}
                     />
                   </div>
@@ -881,7 +1039,9 @@ export default function SettingsPageOrganized() {
                     </h2>
                   </div>
                   <Button asChild>
-                    <Link href="/dashboard/billing">{t('settingsPage.openBilling')}</Link>
+                    <Link href="/dashboard/billing">
+                      {t('settingsPage.openBilling')}
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -902,7 +1062,9 @@ export default function SettingsPageOrganized() {
                     disabled={logoutLoading}
                   >
                     <LogOut className="mr-2 size-4" />
-                    {logoutLoading ? t('settingsPage.logoutLoading') : t('settingsPage.logout')}
+                    {logoutLoading
+                      ? t('settingsPage.logoutLoading')
+                      : t('settingsPage.logout')}
                   </Button>
                 </CardContent>
               </Card>
@@ -921,7 +1083,9 @@ export default function SettingsPageOrganized() {
               disabled={saving}
               className="min-h-11 flex-1 bg-white text-zinc-950"
             >
-              {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
+              {saving
+                ? t('settingsPage.saving')
+                : t('settingsPage.saveChanges')}
             </Button>
           </div>
         </div>

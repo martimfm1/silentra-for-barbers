@@ -32,7 +32,13 @@ async function POST__unobserved(request: Request) {
   try {
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
-      allowedKeys: ['barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'],
+      allowedKeys: [
+        'barbershopId',
+        'clientName',
+        'rating',
+        'comment',
+        'reviewToken',
+      ],
     });
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;
@@ -51,7 +57,10 @@ async function POST__unobserved(request: Request) {
       !reviewToken ||
       !/^[A-Za-z0-9_-]{43}$/.test(reviewToken)
     )
-      return jsonError('Utiliza o link de avaliação recebido após o atendimento.', 400);
+      return jsonError(
+        'Utiliza o link de avaliação recebido após o atendimento.',
+        400,
+      );
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return jsonError('A classificação deve estar entre 1 e 5.', 400);
     }
@@ -65,7 +74,10 @@ async function POST__unobserved(request: Request) {
     );
     if (!allowed) {
       return NextResponse.json(
-        { error: 'Atingiste o limite de avaliações. Tenta novamente mais tarde.' },
+        {
+          error:
+            'Atingiste o limite de avaliações. Tenta novamente mais tarde.',
+        },
         {
           status: 429,
           headers: {
@@ -103,7 +115,10 @@ async function POST__unobserved(request: Request) {
     if (error || !data) {
       console.error('[PUBLIC_REVIEW_SUBMIT_FAILED]', error?.code ?? 'UNKNOWN');
       if (error?.code === '42501')
-        return jsonError('O link de avaliação é inválido, expirou ou já foi utilizado.', 403);
+        return jsonError(
+          'O link de avaliação é inválido, expirou ou já foi utilizado.',
+          403,
+        );
       if (error?.code === '22023')
         return jsonError('Os dados da avaliação são inválidos.', 400);
       return jsonError('Não foi possível guardar a avaliação.', 500);
@@ -119,7 +134,10 @@ async function POST__unobserved(request: Request) {
       error instanceof Error &&
       error.message === 'Public rate limiter unavailable.'
     ) {
-      return jsonError('O serviço de avaliações está temporariamente indisponível.', 503);
+      return jsonError(
+        'O serviço de avaliações está temporariamente indisponível.',
+        503,
+      );
     }
     console.error(
       '[PUBLIC_REVIEW_REQUEST_FAILED]',

@@ -116,48 +116,97 @@ type PurchasedCustomWebsite = {
   primary_cta_label: string | null;
 };
 
-const getPurchasedCustomWebsite = cache(async (slug: string): Promise<PurchasedCustomWebsite | null> => {
-  const normalizedSlug = slug.trim().toLowerCase();
-  if (!isValidPublicProfileSlug(normalizedSlug)) return null;
-  const database = createAdminClient();
-  const { data, error } = await database
-    .from('custom_website_requests')
-    .select('shop_name, booking_slug, public_slug, site_title, site_description, hero_image_url, primary_cta_label')
-    .eq('public_slug', normalizedSlug)
-    .eq('status', 'published')
-    .maybeSingle();
-  if (error) {
-    console.error('[CUSTOM_WEBSITE_PUBLIC_LOOKUP_FAILED]', { code: error.code ?? 'UNKNOWN' });
-    return null;
-  }
-  return data as PurchasedCustomWebsite | null;
-});
+const getPurchasedCustomWebsite = cache(
+  async (slug: string): Promise<PurchasedCustomWebsite | null> => {
+    const normalizedSlug = slug.trim().toLowerCase();
+    if (!isValidPublicProfileSlug(normalizedSlug)) return null;
+    const database = createAdminClient();
+    const { data, error } = await database
+      .from('custom_website_requests')
+      .select(
+        'shop_name, booking_slug, public_slug, site_title, site_description, hero_image_url, primary_cta_label',
+      )
+      .eq('public_slug', normalizedSlug)
+      .eq('status', 'published')
+      .maybeSingle();
+    if (error) {
+      console.error('[CUSTOM_WEBSITE_PUBLIC_LOOKUP_FAILED]', {
+        code: error.code ?? 'UNKNOWN',
+      });
+      return null;
+    }
+    return data as PurchasedCustomWebsite | null;
+  },
+);
 
-function PurchasedCustomWebsitePage({ website }: { website: PurchasedCustomWebsite }) {
+function PurchasedCustomWebsitePage({
+  website,
+}: {
+  website: PurchasedCustomWebsite;
+}) {
   const title = website.site_title?.trim() || website.shop_name;
-  const description = website.site_description?.trim() || 'Conhece os nossos serviços e marca o teu próximo horário online.';
+  const description =
+    website.site_description?.trim() ||
+    'Conhece os nossos serviços e marca o teu próximo horário online.';
   const bookingUrl = '/barbershops/' + encodeURIComponent(website.booking_slug);
   return (
     <main className="min-h-screen overflow-x-clip bg-[#090b0e] text-zinc-50">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-        <Link href={bookingUrl} className="truncate text-sm font-semibold tracking-wide">{website.shop_name}</Link>
-        <Link href={bookingUrl} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-emerald-300 px-4 text-xs font-bold text-zinc-950 hover:bg-emerald-200 sm:text-sm">{website.primary_cta_label || 'Marcar horário'}</Link>
+        <Link
+          href={bookingUrl}
+          className="truncate text-sm font-semibold tracking-wide"
+        >
+          {website.shop_name}
+        </Link>
+        <Link
+          href={bookingUrl}
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-emerald-300 px-4 text-xs font-bold text-zinc-950 hover:bg-emerald-200 sm:text-sm"
+        >
+          {website.primary_cta_label || 'Marcar horário'}
+        </Link>
       </header>
       <section className="mx-auto grid min-h-[72dvh] w-full max-w-7xl items-center gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-12">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">Site oficial</p>
-          <h1 className="mt-5 break-words text-4xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-6xl">{title}</h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg">{description}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+            Site oficial
+          </p>
+          <h1 className="mt-5 break-words text-4xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-6xl">
+            {title}
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg">
+            {description}
+          </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={bookingUrl} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-300 px-5 text-sm font-bold text-zinc-950 hover:bg-emerald-200">{website.primary_cta_label || 'Marcar horário'}</Link>
-            <Link href={bookingUrl} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/10 px-5 text-sm font-semibold text-white hover:bg-white/[0.06]">Ver serviços</Link>
+            <Link
+              href={bookingUrl}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-300 px-5 text-sm font-bold text-zinc-950 hover:bg-emerald-200"
+            >
+              {website.primary_cta_label || 'Marcar horário'}
+            </Link>
+            <Link
+              href={bookingUrl}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/10 px-5 text-sm font-semibold text-white hover:bg-white/[0.06]"
+            >
+              Ver serviços
+            </Link>
           </div>
         </div>
         <div className="relative aspect-[4/5] max-h-[620px] overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/70">
-          {website.hero_image_url ? <img src={website.hero_image_url} alt={title} className="absolute inset-0 size-full object-cover" referrerPolicy="no-referrer" /> : <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_25%,rgba(16,185,129,0.22),transparent_35%),linear-gradient(145deg,#171a1f,#090b0e_65%)]" />}
+          {website.hero_image_url ? (
+            <img
+              src={website.hero_image_url}
+              alt={title}
+              className="absolute inset-0 size-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_25%,rgba(16,185,129,0.22),transparent_35%),linear-gradient(145deg,#171a1f,#090b0e_65%)]" />
+          )}
         </div>
       </section>
-      <footer className="border-t border-white/10 px-5 py-7 text-center text-xs text-zinc-600">Site criado com Silentra for Barbers.</footer>
+      <footer className="border-t border-white/10 px-5 py-7 text-center text-xs text-zinc-600">
+        Site criado com Silentra for Barbers.
+      </footer>
     </main>
   );
 }
@@ -171,13 +220,28 @@ export async function generateMetadata({
   const customWebsite = await getPurchasedCustomWebsite(slug);
   if (customWebsite) {
     const title = customWebsite.site_title?.trim() || customWebsite.shop_name;
-    const description = customWebsite.site_description?.trim() || 'Conhece os serviços e marca o teu próximo horário online.';
+    const description =
+      customWebsite.site_description?.trim() ||
+      'Conhece os serviços e marca o teu próximo horário online.';
     return {
       title,
       description,
-      alternates: { canonical: SITE_ORIGIN + '/site/' + encodeURIComponent(customWebsite.public_slug) },
+      alternates: {
+        canonical:
+          SITE_ORIGIN +
+          '/site/' +
+          encodeURIComponent(customWebsite.public_slug),
+      },
       robots: { index: true, follow: true },
-      openGraph: { type: 'website', title, description, siteName: customWebsite.shop_name, ...(customWebsite.hero_image_url ? { images: [customWebsite.hero_image_url] } : {}) },
+      openGraph: {
+        type: 'website',
+        title,
+        description,
+        siteName: customWebsite.shop_name,
+        ...(customWebsite.hero_image_url
+          ? { images: [customWebsite.hero_image_url] }
+          : {}),
+      },
     };
   }
   const data = await getLandingPageData(slug);
@@ -292,7 +356,10 @@ export default async function EnterpriseBarbershopLandingPage({
   const { slug } = await params;
   const customWebsite = await getPurchasedCustomWebsite(slug);
   if (customWebsite) {
-    if (slug !== customWebsite.public_slug) permanentRedirect('/site/' + encodeURIComponent(customWebsite.public_slug));
+    if (slug !== customWebsite.public_slug)
+      permanentRedirect(
+        '/site/' + encodeURIComponent(customWebsite.public_slug),
+      );
     return <PurchasedCustomWebsitePage website={customWebsite} />;
   }
   const data = await getLandingPageData(slug);

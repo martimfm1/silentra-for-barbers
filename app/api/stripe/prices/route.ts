@@ -23,7 +23,10 @@ async function GET__unobserved() {
         },
         {
           status: 200,
-          headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' },
+          headers: {
+            'Cache-Control':
+              'public, max-age=0, s-maxage=60, stale-while-revalidate=120',
+          },
         },
       );
     }
@@ -31,7 +34,13 @@ async function GET__unobserved() {
     const prices = await StripePriceService.getAvailablePrices();
     return NextResponse.json(
       { mode: paymentMode, data: prices },
-      { status: 200, headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' } },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control':
+            'public, max-age=0, s-maxage=60, stale-while-revalidate=120',
+        },
+      },
     );
   } catch (error) {
     console.error('[STRIPE_PRICES_ERROR]', {

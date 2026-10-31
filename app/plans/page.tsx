@@ -53,11 +53,26 @@ const faqs = [
 ] as const;
 
 const englishFaqs = [
-  ['Can I change plans whenever I want?', 'Yes. Choose your plan and check out on this page. You can manage cancellation later in billing.'],
-  ['How does the Pro offer work?', 'Eligible new users receive the applicable offer during checkout. The first charge only takes place under the terms shown at purchase.'],
-  ['How are payments handled?', 'Payments, payment methods and invoices are securely processed by Stripe through Silentra checkout.'],
-  ['Does Enterprise include a landing page?', 'Yes. Enterprise includes a public landing page linked to the barbershop profile and services. A bespoke website with a custom design and /your-barbershop address is a separately quoted service, agreed directly with Silentra.'],
-  ['What happens if I cancel?', 'You keep access to your current plan until the end of the active billing period, subject to your subscription terms.'],
+  [
+    'Can I change plans whenever I want?',
+    'Yes. Choose your plan and check out on this page. You can manage cancellation later in billing.',
+  ],
+  [
+    'How does the Pro offer work?',
+    'Eligible new users receive the applicable offer during checkout. The first charge only takes place under the terms shown at purchase.',
+  ],
+  [
+    'How are payments handled?',
+    'Payments, payment methods and invoices are securely processed by Stripe through Silentra checkout.',
+  ],
+  [
+    'Does Enterprise include a landing page?',
+    'Yes. Enterprise includes a public landing page linked to the barbershop profile and services. A bespoke website with a custom design and /your-barbershop address is a separately quoted service, agreed directly with Silentra.',
+  ],
+  [
+    'What happens if I cancel?',
+    'You keep access to your current plan until the end of the active billing period, subject to your subscription terms.',
+  ],
 ] as const;
 
 export default async function PlansPage() {
@@ -76,23 +91,33 @@ export default async function PlansPage() {
               {english ? 'Silentra plans' : 'Planos Silentra'}
             </span>
             <h1 className="mt-5 text-[2.45rem] font-semibold leading-[1] tracking-[-0.055em] sm:text-5xl">
-              {english ? 'Choose a plan. Compare. Check out.' : 'Escolhe o plano. Compara. Faz o checkout.'}
+              {english
+                ? 'Choose a plan. Compare. Check out.'
+                : 'Escolhe o plano. Compara. Faz o checkout.'}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-              {english ? 'Compare all Silentra for Barbers plans here and start checkout whenever you are ready.' : 'Esta é a página de decisão da Silentra for Barbers. Aqui encontras a comparação completa e, quando estiveres pronto, inicias o checkout.'}
+              {english
+                ? 'Compare all Silentra for Barbers plans here and start checkout whenever you are ready.'
+                : 'Esta é a página de decisão da Silentra for Barbers. Aqui encontras a comparação completa e, quando estiveres pronto, inicias o checkout.'}
             </p>
             <div className="mt-6 grid gap-2 text-xs text-zinc-500 sm:flex sm:flex-wrap sm:gap-x-5">
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-emerald-300" />
-                {english ? 'Free plan available with no card' : 'Free disponível sem cartão'}
+                {english
+                  ? 'Free plan available with no card'
+                  : 'Free disponível sem cartão'}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-emerald-300" />
-                {english ? 'Pro offer for eligible new users' : 'Oferta Pro para novos utilizadores elegíveis'}
+                {english
+                  ? 'Pro offer for eligible new users'
+                  : 'Oferta Pro para novos utilizadores elegíveis'}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-emerald-300" />
-                {english ? 'The plan belongs to the barbershop' : 'Plano pertence à barbearia'}
+                {english
+                  ? 'The plan belongs to the barbershop'
+                  : 'Plano pertence à barbearia'}
               </span>
             </div>
           </div>
@@ -112,17 +137,22 @@ export default async function PlansPage() {
                 {english ? 'Full comparison' : 'Comparação completa'}
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-white sm:text-3xl">
-                {english ? 'Review your choice before you buy.' : 'Confirma a decisão antes de comprar.'}
+                {english
+                  ? 'Review your choice before you buy.'
+                  : 'Confirma a decisão antes de comprar.'}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                {english ? 'Compare features and limits in one view, then return to the cards above to check out.' : 'Compara funcionalidades e limites numa única vista. Depois volta aos cartões acima para iniciar o checkout.'}
+                {english
+                  ? 'Compare features and limits in one view, then return to the cards above to check out.'
+                  : 'Compara funcionalidades e limites numa única vista. Depois volta aos cartões acima para iniciar o checkout.'}
               </p>
             </div>
             <Link
               href="#precos"
               className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.07]"
             >
-              {english ? 'Back to plans' : 'Voltar aos planos'} <ArrowRight className="size-4" />
+              {english ? 'Back to plans' : 'Voltar aos planos'}{' '}
+              <ArrowRight className="size-4" />
             </Link>
           </div>
           <div className="mt-7 overflow-x-auto">
@@ -136,7 +166,9 @@ export default async function PlansPage() {
               {english ? 'Frequently asked questions' : 'Perguntas frequentes'}
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white sm:text-4xl">
-              {english ? 'Get your main questions answered before choosing.' : 'Antes de escolher, tira as dúvidas principais.'}
+              {english
+                ? 'Get your main questions answered before choosing.'
+                : 'Antes de escolher, tira as dúvidas principais.'}
             </h2>
           </div>
           <div className="mt-7 grid gap-3 md:grid-cols-2">
@@ -162,17 +194,22 @@ export default async function PlansPage() {
                 {english ? 'Next step' : 'Próximo passo'}
               </p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
-                {english ? 'Choose a plan above and continue to checkout.' : 'Escolhe um plano acima e continua para o checkout.'}
+                {english
+                  ? 'Choose a plan above and continue to checkout.'
+                  : 'Escolhe um plano acima e continua para o checkout.'}
               </p>
               <p className="mt-2 text-sm leading-6 text-zinc-500">
-                {english ? 'Checkout is the only payment step. Your subscription is then linked to the barbershop.' : 'O checkout é a única etapa de pagamento; depois a subscrição fica associada à barbearia.'}
+                {english
+                  ? 'Checkout is the only payment step. Your subscription is then linked to the barbershop.'
+                  : 'O checkout é a única etapa de pagamento; depois a subscrição fica associada à barbearia.'}
               </p>
             </div>
             <Link
               href="#precos"
               className="inline-flex min-h-12 items-center justify-center gap-2 bg-white px-5 text-sm font-semibold text-zinc-950"
             >
-              {english ? 'Choose a plan' : 'Escolher plano'} <ArrowRight className="size-4" />
+              {english ? 'Choose a plan' : 'Escolher plano'}{' '}
+              <ArrowRight className="size-4" />
             </Link>
           </div>
         </section>

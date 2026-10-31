@@ -11,7 +11,9 @@ const BATCH_SIZE = 100;
 const MAX_ATTEMPTS = 10;
 
 function authorized(request: Request) {
-  const secret = (process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET)?.trim();
+  const secret = (
+    process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET
+  )?.trim();
   if (!secret) return false;
 
   // Bearer auth remains available for controlled manual invocation. Supabase
@@ -19,24 +21,35 @@ function authorized(request: Request) {
   if (
     request.headers.get('authorization') === `Bearer ${secret}` ||
     request.headers.get('x-cron-secret') === secret
-  ) return true;
+  )
+    return true;
 
   const timestamp = request.headers.get('x-booking-timestamp') ?? '';
   const signature = request.headers.get('x-booking-signature') ?? '';
-  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) return false;
+  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
+    return false;
   const seconds = Number(timestamp);
-  if (!Number.isSafeInteger(seconds) || Math.abs(Date.now() / 1000 - seconds) > 300) return false;
+  if (
+    !Number.isSafeInteger(seconds) ||
+    Math.abs(Date.now() / 1000 - seconds) > 300
+  )
+    return false;
 
   const expected = createHmac('sha256', secret)
     .update(`${timestamp}:booking-outbox`)
     .digest();
   const supplied = Buffer.from(signature, 'hex');
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+  return (
+    supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  );
 }
 
 async function GET__unobserved(request: Request) {
   if (!authorized(request)) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: 'Unauthorized' },
+      { status: 401 },
+    );
   }
 
   const startedAt = Date.now();
@@ -84,12 +97,16 @@ async function GET__unobserved(request: Request) {
           continue;
         }
 
-        const dispatched = await dispatchAppointmentAutomations('booking_completed', {
-          appointmentId: appointment.id,
-          barbershopId: appointment.barbershop_id,
-          clientId: appointment.client_id,
-        });
-        if (!dispatched) throw new Error('One or more booking automations failed');
+        const dispatched = await dispatchAppointmentAutomations(
+          'booking_completed',
+          {
+            appointmentId: appointment.id,
+            barbershopId: appointment.barbershop_id,
+            clientId: appointment.client_id,
+          },
+        );
+        if (!dispatched)
+          throw new Error('One or more booking automations failed');
 
         const { error: completeError } = await admin
           .from('booking_automation_outbox')
@@ -110,12 +127,16 @@ async function GET__unobserved(request: Request) {
         const exhausted = attempts >= MAX_ATTEMPTS;
         const delayMinutes = Math.min(6 * 60, 2 ** Math.min(attempts, 8));
         const message =
-          error instanceof Error ? error.message.slice(0, 500) : 'Unknown worker error';
+          error instanceof Error
+            ? error.message.slice(0, 500)
+            : 'Unknown worker error';
         const { error: updateError } = await admin
           .from('booking_automation_outbox')
           .update({
             status: exhausted ? 'failed' : 'pending',
-            available_at: new Date(Date.now() + delayMinutes * 60_000).toISOString(),
+            available_at: new Date(
+              Date.now() + delayMinutes * 60_000,
+            ).toISOString(),
             last_error: message,
             locked_at: null,
             updated_at: new Date().toISOString(),

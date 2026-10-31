@@ -55,23 +55,47 @@ function buildOrderReceiptEmail(input: {
   language?: 'pt' | 'en';
 }) {
   const isEnglish = input.language === 'en';
-  const copy = isEnglish ? {
-    fulfillment: input.fulfillmentMethod === 'delivery' ? 'Delivery' : 'Collection at the barbershop',
-    delivery: 'Delivery', collection: 'Collection', shippingHandled: 'Shipping is handled directly by the barbershop.',
-    collectionReady: `${escapeHtml(input.shopName)} will contact you when the order is ready.`,
-    title: 'Order received', greeting: `Hello ${escapeHtml(input.customerName)}, we received your order at`,
-    order: 'Order', method: 'Method', total: 'Total', track: 'Track order',
-    trackHelp: 'Keep this link to check the status without creating an account.',
-    receiptNote: 'This email is an order receipt, not an invoice. Questions about payment, delivery or returns should be handled directly with the barbershop.',
-  } : {
-    fulfillment: input.fulfillmentMethod === 'delivery' ? 'Entrega' : 'Levantamento na barbearia',
-    delivery: 'Entrega', collection: 'Levantamento', shippingHandled: 'O envio é tratado diretamente pela barbearia.',
-    collectionReady: `A ${escapeHtml(input.shopName)} vai contactar-te quando a encomenda estiver pronta.`,
-    title: 'Encomenda recebida', greeting: `Olá ${escapeHtml(input.customerName)}, recebemos a tua encomenda na`,
-    order: 'Pedido', method: 'Forma', total: 'Total', track: 'Acompanhar encomenda',
-    trackHelp: 'Guarda este link. Permite consultar o estado sem criar conta.',
-    receiptNote: 'Este email é um comprovativo da encomenda, não uma fatura. Qualquer questão sobre pagamento, entrega ou devolução deve ser tratada diretamente com a barbearia.',
-  };
+  const copy = isEnglish
+    ? {
+        fulfillment:
+          input.fulfillmentMethod === 'delivery'
+            ? 'Delivery'
+            : 'Collection at the barbershop',
+        delivery: 'Delivery',
+        collection: 'Collection',
+        shippingHandled: 'Shipping is handled directly by the barbershop.',
+        collectionReady: `${escapeHtml(input.shopName)} will contact you when the order is ready.`,
+        title: 'Order received',
+        greeting: `Hello ${escapeHtml(input.customerName)}, we received your order at`,
+        order: 'Order',
+        method: 'Method',
+        total: 'Total',
+        track: 'Track order',
+        trackHelp:
+          'Keep this link to check the status without creating an account.',
+        receiptNote:
+          'This email is an order receipt, not an invoice. Questions about payment, delivery or returns should be handled directly with the barbershop.',
+      }
+    : {
+        fulfillment:
+          input.fulfillmentMethod === 'delivery'
+            ? 'Entrega'
+            : 'Levantamento na barbearia',
+        delivery: 'Entrega',
+        collection: 'Levantamento',
+        shippingHandled: 'O envio é tratado diretamente pela barbearia.',
+        collectionReady: `A ${escapeHtml(input.shopName)} vai contactar-te quando a encomenda estiver pronta.`,
+        title: 'Encomenda recebida',
+        greeting: `Olá ${escapeHtml(input.customerName)}, recebemos a tua encomenda na`,
+        order: 'Pedido',
+        method: 'Forma',
+        total: 'Total',
+        track: 'Acompanhar encomenda',
+        trackHelp:
+          'Guarda este link. Permite consultar o estado sem criar conta.',
+        receiptNote:
+          'Este email é um comprovativo da encomenda, não uma fatura. Qualquer questão sobre pagamento, entrega ou devolução deve ser tratada diretamente com a barbearia.',
+      };
   const fulfillmentLabel = copy.fulfillment;
   const itemsHtml = input.items
     .map(
@@ -325,7 +349,9 @@ async function POST__unobserved(request: Request) {
     }
     const { data: details } = await db
       .from('marketplace_orders')
-      .select('*, marketplace_order_items(*), barbershops(name,default_language)')
+      .select(
+        '*, marketplace_order_items(*), barbershops(name,default_language)',
+      )
       .eq('id', order.id)
       .maybeSingle();
     const itemsForEmail = details?.marketplace_order_items ?? [];

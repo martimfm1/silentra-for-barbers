@@ -131,7 +131,11 @@ export default function ConfirmEmailPage() {
 
               <div className="mt-8 flex flex-col gap-3">
                 <Button
-            aria-label={isResending ? "A reenviar email de confirmação" : "Reenviar email de confirmação"}
+                  aria-label={
+                    isResending
+                      ? 'A reenviar email de confirmação'
+                      : 'Reenviar email de confirmação'
+                  }
                   onClick={handleResendEmail}
                   disabled={isResending || !email}
                   variant="outline"

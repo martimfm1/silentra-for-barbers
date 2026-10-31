@@ -7,7 +7,12 @@ export type JsonObjectReadResult =
   | {
       ok: false;
       response: NextResponse;
-      reason: 'unsupported_media_type' | 'body_too_large' | 'invalid_json' | 'invalid_shape' | 'unexpected_fields';
+      reason:
+        | 'unsupported_media_type'
+        | 'body_too_large'
+        | 'invalid_json'
+        | 'invalid_shape'
+        | 'unexpected_fields';
     };
 
 const DEFAULT_MAX_BODY_BYTES = 32 * 1024;
@@ -171,5 +176,9 @@ export function isSafeIntegerInRange(
   min: number,
   max: number,
 ): value is number {
-  return Number.isSafeInteger(value) && (value as number) >= min && (value as number) <= max;
+  return (
+    Number.isSafeInteger(value) &&
+    (value as number) >= min &&
+    (value as number) <= max
+  );
 }

@@ -17,7 +17,9 @@ export default function LoyaltyPointsPage() {
           >
             <ArrowLeft className="size-4" /> {t('loyaltyPointsPage.loyalty')}
           </Link>
-          <p className="mt-6 text-sm font-medium text-primary">{t('loyaltyPointsPage.kicker')}</p>
+          <p className="mt-6 text-sm font-medium text-primary">
+            {t('loyaltyPointsPage.kicker')}
+          </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">
             {t('loyaltyPointsPage.title')}
           </h1>

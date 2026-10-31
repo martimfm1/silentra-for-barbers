@@ -333,9 +333,14 @@ export default function BarbershopPublicPageFinal({
             </div>
           )}
           <div className="silentra-section-block rounded-2xl p-4 glassmorphism">
-            <p className="text-xs text-zinc-500">{locale === 'en' ? 'Closed days' : 'Dias de fecho'}</p>
+            <p className="text-xs text-zinc-500">
+              {locale === 'en' ? 'Closed days' : 'Dias de fecho'}
+            </p>
             <p className="mt-1 text-sm font-semibold">
-              {formatClosedDays(shop.closed_days, locale === 'en' ? 'en' : 'pt') || (locale === 'en' ? 'None' : 'Nenhum')}
+              {formatClosedDays(
+                shop.closed_days,
+                locale === 'en' ? 'en' : 'pt',
+              ) || (locale === 'en' ? 'None' : 'Nenhum')}
             </p>
           </div>
         </section>
@@ -456,63 +461,64 @@ export default function BarbershopPublicPageFinal({
               onSubmit={submitReview}
               className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.018] p-4 sm:grid-cols-2"
             >
-            <label className="grid gap-1 text-xs text-zinc-500">
-              Nome
-              <input
-                value={reviewName}
-                onChange={(e) => setReviewName(e.target.value)}
-                autoComplete="name"
-                required
-                className="min-h-11 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
-              />
-            </label>
-            <div>
-              <span className="text-xs text-zinc-500">Classificação</span>
-              <div
-                className="mt-1 flex"
-                aria-label="Classificação de 1 a 5 estrelas"
-              >
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-label={`${value} estrelas`}
-                    aria-pressed={reviewRating === value}
-                    onClick={() => setReviewRating(value)}
-                    className="flex size-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                  >
-                    <Star
-                      className={`size-5 ${value <= reviewRating ? 'fill-amber-300 text-amber-300' : 'text-zinc-600'}`}
-                      aria-hidden="true"
-                    />
-                  </button>
-                ))}
+              <label className="grid gap-1 text-xs text-zinc-500">
+                Nome
+                <input
+                  value={reviewName}
+                  onChange={(e) => setReviewName(e.target.value)}
+                  autoComplete="name"
+                  required
+                  className="min-h-11 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
+                />
+              </label>
+              <div>
+                <span className="text-xs text-zinc-500">Classificação</span>
+                <div
+                  className="mt-1 flex"
+                  aria-label="Classificação de 1 a 5 estrelas"
+                >
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-label={`${value} estrelas`}
+                      aria-pressed={reviewRating === value}
+                      onClick={() => setReviewRating(value)}
+                      className="flex size-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    >
+                      <Star
+                        className={`size-5 ${value <= reviewRating ? 'fill-amber-300 text-amber-300' : 'text-zinc-600'}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <label className="grid gap-1 text-xs text-zinc-500 sm:col-span-2">
-              Comentário
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                className="min-h-24 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
-              />
-            </label>
-            {reviewError && (
-              <p className="text-xs text-red-300 sm:col-span-2" role="alert">
-                {reviewError}
-              </p>
-            )}
-            <Button
-              type="submit"
-              disabled={reviewLoading}
-              className="min-h-11 sm:col-span-2 sm:w-fit"
-            >
-              {reviewLoading ? 'A enviar…' : 'Enviar avaliação'}
-            </Button>
+              <label className="grid gap-1 text-xs text-zinc-500 sm:col-span-2">
+                Comentário
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  className="min-h-24 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
+                />
+              </label>
+              {reviewError && (
+                <p className="text-xs text-red-300 sm:col-span-2" role="alert">
+                  {reviewError}
+                </p>
+              )}
+              <Button
+                type="submit"
+                disabled={reviewLoading}
+                className="min-h-11 sm:col-span-2 sm:w-fit"
+              >
+                {reviewLoading ? 'A enviar…' : 'Enviar avaliação'}
+              </Button>
             </form>
           ) : (
             <p className="mt-4 text-sm leading-6 text-zinc-500">
-              Só é possível enviar uma avaliação através do link recebido por email após um atendimento concluído.
+              Só é possível enviar uma avaliação através do link recebido por
+              email após um atendimento concluído.
             </p>
           )}
           <div className="mt-5 grid gap-3">

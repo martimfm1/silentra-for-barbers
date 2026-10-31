@@ -74,15 +74,15 @@ async function authHeaders(t: (key: string) => string) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token)
-    throw new Error(t('posPage.sessionExpired'));
+  if (!session?.access_token) throw new Error(t('posPage.sessionExpired'));
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
 const money = (value: number, locale: 'pt' | 'en' = 'pt') =>
-  new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-IE', { style: 'currency', currency: 'EUR' }).format(
-    Number(value) || 0,
-  );
+  new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-IE', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(value) || 0);
 
 export default function POSPage() {
   const { t, locale } = useLanguage();
@@ -337,14 +337,20 @@ export default function POSPage() {
       const json = await response.json();
       if (!response.ok)
         throw new Error(json.error ?? t('posPage.checkoutError'));
-      toast.success(t('posPage.saleCompleted', { total: money(json.transaction.total, locale) }));
+      toast.success(
+        t('posPage.saleCompleted', {
+          total: money(json.transaction.total, locale),
+        }),
+      );
       setCart([]);
       setDiscount(0);
       setClientId('');
       await loadData();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('posPage.checkoutGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('posPage.checkoutGenericError'),
       );
     } finally {
       setSubmitting(false);
@@ -355,11 +361,21 @@ export default function POSPage() {
     transaction: Transaction,
     mode: 'refund' | 'void',
   ) {
-    const label = mode === 'refund' ? t('posPage.refund').toLowerCase() : t('posPage.voidAction').toLowerCase();
+    const label =
+      mode === 'refund'
+        ? t('posPage.refund').toLowerCase()
+        : t('posPage.voidAction').toLowerCase();
     const confirmed = await confirm({
-      title: mode === 'refund' ? t('posPage.confirmRefund') : t('posPage.confirmVoid'),
-      description: t('posPage.confirmActionDescription', { action: label, total: money(transaction.total, locale) }),
-      confirmLabel: mode === 'refund' ? t('posPage.refund') : t('posPage.voidTransaction'),
+      title:
+        mode === 'refund'
+          ? t('posPage.confirmRefund')
+          : t('posPage.confirmVoid'),
+      description: t('posPage.confirmActionDescription', {
+        action: label,
+        total: money(transaction.total, locale),
+      }),
+      confirmLabel:
+        mode === 'refund' ? t('posPage.refund') : t('posPage.voidTransaction'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -409,7 +425,9 @@ export default function POSPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
               <Lock className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">{t('posPage.enterpriseTitle')}</h1>
+              <h1 className="text-2xl font-semibold">
+                {t('posPage.enterpriseTitle')}
+              </h1>
               <p className="text-muted-foreground">
                 {t('posPage.enterpriseDescription')}
               </p>
@@ -427,7 +445,9 @@ export default function POSPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-sm font-medium text-primary">{t('posPage.kicker')}</p>
+            <p className="text-sm font-medium text-primary">
+              {t('posPage.kicker')}
+            </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('posPage.title')}
             </h1>
@@ -479,7 +499,9 @@ export default function POSPage() {
                     >
                       <p className="font-medium">{p.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {t('posPage.productAndStock', { count: p.stock_quantity })}
+                        {t('posPage.productAndStock', {
+                          count: p.stock_quantity,
+                        })}
                       </p>
                       <p className="mt-2 font-semibold">
                         {money(p.unit_price, locale)}
@@ -497,7 +519,9 @@ export default function POSPage() {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {t('posPage.serviceDuration', { minutes: s.duration })}
                       </p>
-                      <p className="mt-2 font-semibold">{money(s.price, locale)}</p>
+                      <p className="mt-2 font-semibold">
+                        {money(s.price, locale)}
+                      </p>
                     </button>
                   ))}
                   {!filteredProducts.length && !filteredServices.length && (
@@ -542,7 +566,9 @@ export default function POSPage() {
                               current.filter((x) => x.key !== item.key),
                             )
                           }
-                          aria-label={t('posPage.removeItem', { item: item.description })}
+                          aria-label={t('posPage.removeItem', {
+                            item: item.description,
+                          })}
                           className="rounded-lg p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -560,7 +586,9 @@ export default function POSPage() {
                           </Button>
                           <span
                             className="w-6 text-center"
-                            aria-label={t('posPage.quantity', { count: item.quantity })}
+                            aria-label={t('posPage.quantity', {
+                              count: item.quantity,
+                            })}
                           >
                             {item.quantity}
                           </span>
@@ -652,7 +680,9 @@ export default function POSPage() {
                   disabled={!cart.length || submitting}
                   onClick={() => void checkout()}
                 >
-                  {submitting ? t('posPage.processing') : t('posPage.completeSale')}
+                  {submitting
+                    ? t('posPage.processing')
+                    : t('posPage.completeSale')}
                 </Button>
               </div>
             </CardContent>
@@ -680,7 +710,9 @@ export default function POSPage() {
                       <th className="px-3 py-3">{t('posPage.payment')}</th>
                       <th className="px-3 py-3">{t('posPage.total')}</th>
                       <th className="px-3 py-3">{t('posPage.state')}</th>
-                      <th className="px-3 py-3 text-right">{t('posPage.actions')}</th>
+                      <th className="px-3 py-3 text-right">
+                        {t('posPage.actions')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10">
@@ -700,14 +732,26 @@ export default function POSPage() {
                             .join(', ') || '—'}
                         </td>
                         <td className="px-3 py-4 capitalize">
-                          {transaction.payment_method === 'cash' ? t('posPage.cash') : transaction.payment_method === 'card' ? t('posPage.card') : transaction.payment_method === 'transfer' ? t('posPage.transfer') : t('posPage.other')}
+                          {transaction.payment_method === 'cash'
+                            ? t('posPage.cash')
+                            : transaction.payment_method === 'card'
+                              ? t('posPage.card')
+                              : transaction.payment_method === 'transfer'
+                                ? t('posPage.transfer')
+                                : t('posPage.other')}
                         </td>
                         <td className="px-3 py-4 font-medium">
                           {money(transaction.total, locale)}
                         </td>
                         <td className="px-3 py-4">
                           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs capitalize">
-                            {transaction.status === 'completed' ? t('posPage.transactionStatus.completed') : transaction.status === 'refunded' ? t('posPage.transactionStatus.refunded') : transaction.status === 'voided' ? t('posPage.transactionStatus.voided') : transaction.status}
+                            {transaction.status === 'completed'
+                              ? t('posPage.transactionStatus.completed')
+                              : transaction.status === 'refunded'
+                                ? t('posPage.transactionStatus.refunded')
+                                : transaction.status === 'voided'
+                                  ? t('posPage.transactionStatus.voided')
+                                  : transaction.status}
                           </span>
                         </td>
                         <td className="px-3 py-4">

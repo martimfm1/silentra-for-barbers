@@ -6,18 +6,18 @@ Esta auditoria abrange as rotas de navegação partilhadas, a barra principal, o
 
 ## Problemas identificados e correções
 
-| Área | Problema | Correção aplicada |
-| --- | --- | --- |
-| Navegação da navbar | Os links ingleses para Clientes e Equipa apontavam para `/dashboard/clients` e `/dashboard/team`, que não correspondem às rotas existentes. | Redirecionar para `/dashboard/clientes` e `/dashboard/equipa`. |
-| Densidade do menu | A sidebar apresentava muitas áreas ao mesmo nível visual. | Deixar as tarefas frequentes visíveis; agrupar Comunicação e Ferramentas/Análise em secções recolhíveis. |
-| Acesso à página Comunicação | O botão funcionava apenas como expansor e a rota-pai ficava fora da lista. | Mostrar também a entrada Comunicação dentro do grupo expansível. |
-| Navegação móvel | O acesso rápido dava prioridade ao QR Code em vez de Serviços. | Priorizar Início, Agenda, Clientes e Serviços; as áreas menos frequentes ficam em “Mais”. |
-| Barra fixa do dashboard | Um relógio atualizado a cada segundo ocupava espaço sem ajudar a localizar a página; o conteúdo podia começar atrás da barra. | Substituir o relógio por um rótulo/breadcrumb contextual e reservar espaço para a navegação fixa. |
-| Consistência linguística | Vários rótulos da sidebar ficavam em português quando a interface estava em inglês. | Localizar rótulos, secções e controlos da navegação móvel. |
-| Teclado nos menus móveis | A navegação móvel global e a drawer do dashboard não mantinham o foco no diálogo nem o devolviam ao botão quando fechavam. | Implementar ciclo de foco por Tab/Shift+Tab, Escape, foco inicial e devolução do foco ao controlo de abertura nos dois menus. |
-| Movimento | Algumas animações CSS decorativas ignoravam a preferência do sistema. | Aplicar `prefers-reduced-motion` globalmente e desativar a animação beam. |
-| Ecrãs pequenos | Cabeçalhos e conteúdos densos podiam causar quebra de layout/overflow. | Adaptar cabeçalhos, ações, tabelas e conteúdo do dashboard a larguras pequenas. |
-| Feedback de email de suporte | A lógica agrupava mensagens não lidas e podia suprimir um email por mensagem. | Criar um registo outbox por cada mensagem e não cancelar a notificação se a conversa for aberta antes do envio. |
+| Área                         | Problema                                                                                                                                    | Correção aplicada                                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Navegação da navbar          | Os links ingleses para Clientes e Equipa apontavam para `/dashboard/clients` e `/dashboard/team`, que não correspondem às rotas existentes. | Redirecionar para `/dashboard/clientes` e `/dashboard/equipa`.                                                                |
+| Densidade do menu            | A sidebar apresentava muitas áreas ao mesmo nível visual.                                                                                   | Deixar as tarefas frequentes visíveis; agrupar Comunicação e Ferramentas/Análise em secções recolhíveis.                      |
+| Acesso à página Comunicação  | O botão funcionava apenas como expansor e a rota-pai ficava fora da lista.                                                                  | Mostrar também a entrada Comunicação dentro do grupo expansível.                                                              |
+| Navegação móvel              | O acesso rápido dava prioridade ao QR Code em vez de Serviços.                                                                              | Priorizar Início, Agenda, Clientes e Serviços; as áreas menos frequentes ficam em “Mais”.                                     |
+| Barra fixa do dashboard      | Um relógio atualizado a cada segundo ocupava espaço sem ajudar a localizar a página; o conteúdo podia começar atrás da barra.               | Substituir o relógio por um rótulo/breadcrumb contextual e reservar espaço para a navegação fixa.                             |
+| Consistência linguística     | Vários rótulos da sidebar ficavam em português quando a interface estava em inglês.                                                         | Localizar rótulos, secções e controlos da navegação móvel.                                                                    |
+| Teclado nos menus móveis     | A navegação móvel global e a drawer do dashboard não mantinham o foco no diálogo nem o devolviam ao botão quando fechavam.                  | Implementar ciclo de foco por Tab/Shift+Tab, Escape, foco inicial e devolução do foco ao controlo de abertura nos dois menus. |
+| Movimento                    | Algumas animações CSS decorativas ignoravam a preferência do sistema.                                                                       | Aplicar `prefers-reduced-motion` globalmente e desativar a animação beam.                                                     |
+| Ecrãs pequenos               | Cabeçalhos e conteúdos densos podiam causar quebra de layout/overflow.                                                                      | Adaptar cabeçalhos, ações, tabelas e conteúdo do dashboard a larguras pequenas.                                               |
+| Feedback de email de suporte | A lógica agrupava mensagens não lidas e podia suprimir um email por mensagem.                                                               | Criar um registo outbox por cada mensagem e não cancelar a notificação se a conversa for aberta antes do envio.               |
 
 ## Regras de UX aplicadas
 

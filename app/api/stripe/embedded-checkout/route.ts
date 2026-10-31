@@ -194,7 +194,8 @@ async function POST__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
     const cookieStore = await cookies();
-    const checkoutLocale = cookieStore.get('locale')?.value === 'en' ? 'en' : 'pt';
+    const checkoutLocale =
+      cookieStore.get('locale')?.value === 'en' ? 'en' : 'pt';
 
     const supabase = await createClient();
     const {

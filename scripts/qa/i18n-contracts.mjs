@@ -33,28 +33,38 @@ const explicitlyLocalizedSources = [
 ];
 
 function discoverTsxFiles(directory) {
-  return readdirSync(join(root, directory), { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name).replaceAll('\\', '/');
-    if (entry.isDirectory()) {
-      if (entry.name.startsWith('.') || entry.name === 'node_modules') return [];
-      return discoverTsxFiles(path);
-    }
-    return entry.isFile() && entry.name.endsWith('.tsx') ? [path] : [];
-  });
+  return readdirSync(join(root, directory), { withFileTypes: true }).flatMap(
+    (entry) => {
+      const path = join(directory, entry.name).replaceAll('\\', '/');
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith('.') || entry.name === 'node_modules')
+          return [];
+        return discoverTsxFiles(path);
+      }
+      return entry.isFile() && entry.name.endsWith('.tsx') ? [path] : [];
+    },
+  );
 }
 
 // Discover all application and shared component TSX files so no route or
 // reusable UI can silently fall outside the translation contract.
-const localizedSources = [...new Set([
-  ...explicitlyLocalizedSources,
-  ...discoverTsxFiles('app'),
-  ...discoverTsxFiles('components'),
-])].sort();
+const localizedSources = [
+  ...new Set([
+    ...explicitlyLocalizedSources,
+    ...discoverTsxFiles('app'),
+    ...discoverTsxFiles('components'),
+  ]),
+].sort();
 
 const read = (path) => readFileSync(join(root, path), 'utf8');
 
 function objectTreeFromFile(path, exportName) {
-  const source = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true);
+  const source = ts.createSourceFile(
+    path,
+    read(path),
+    ts.ScriptTarget.Latest,
+    true,
+  );
   let result;
 
   function visit(node) {
@@ -81,7 +91,10 @@ function objectTreeFromFile(path, exportName) {
   }
 
   visit(source);
-  if (!result) throw new Error('Could not read locale export "' + exportName + '" from ' + path);
+  if (!result)
+    throw new Error(
+      'Could not read locale export "' + exportName + '" from ' + path,
+    );
   return result;
 }
 
@@ -90,9 +103,12 @@ function objectTree(node) {
   for (const property of node.properties) {
     if (!ts.isPropertyAssignment(property)) continue;
     const name = property.name;
-    const key = ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)
-      ? name.text
-      : undefined;
+    const key =
+      ts.isIdentifier(name) ||
+      ts.isStringLiteral(name) ||
+      ts.isNumericLiteral(name)
+        ? name.text
+        : undefined;
     if (!key) continue;
 
     if (ts.isObjectLiteralExpression(property.initializer)) {
@@ -108,8 +124,10 @@ function mergeTrees(base, overrides) {
   const merged = { ...base };
   for (const [key, value] of Object.entries(overrides)) {
     if (
-      value && typeof value === 'object' &&
-      merged[key] && typeof merged[key] === 'object'
+      value &&
+      typeof value === 'object' &&
+      merged[key] &&
+      typeof merged[key] === 'object'
     ) {
       merged[key] = mergeTrees(merged[key], value);
     } else {
@@ -121,7 +139,11 @@ function mergeTrees(base, overrides) {
 
 function hasPath(tree, path) {
   return path.split('.').every((segment, index, parts) => {
-    if (!tree || typeof tree !== 'object' || !Object.prototype.hasOwnProperty.call(tree, segment)) {
+    if (
+      !tree ||
+      typeof tree !== 'object' ||
+      !Object.prototype.hasOwnProperty.call(tree, segment)
+    ) {
       return false;
     }
     tree = tree[segment];
@@ -143,19 +165,31 @@ const failures = [];
 
 const languageContext = read('context/LanguageContext.tsx');
 if (!languageContext.includes('resolveTranslation(fallbackLocale, path)')) {
-  failures.push('LanguageContext: missing fallback to the other supported locale');
+  failures.push(
+    'LanguageContext: missing fallback to the other supported locale',
+  );
 }
 if (languageContext.includes('if (translated === undefined) return path;')) {
-  failures.push('LanguageContext: missing translation keys must never be rendered to users');
+  failures.push(
+    'LanguageContext: missing translation keys must never be rendered to users',
+  );
 }
 if (!languageContext.includes('if (hasSavedPreference) return;')) {
-  failures.push('LanguageContext: saved browser language must take precedence over the barbershop default');
+  failures.push(
+    'LanguageContext: saved browser language must take precedence over the barbershop default',
+  );
 }
-if (!languageContext.includes("window.localStorage.setItem('locale', newLocale)")) {
-  failures.push('LanguageContext: changing locale must persist the browser preference');
+if (
+  !languageContext.includes("window.localStorage.setItem('locale', newLocale)")
+) {
+  failures.push(
+    'LanguageContext: changing locale must persist the browser preference',
+  );
 }
 if (!languageContext.includes('document.documentElement.lang = locale ===')) {
-  failures.push('LanguageContext: document language must track the selected locale');
+  failures.push(
+    'LanguageContext: document language must track the selected locale',
+  );
 }
 
 const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
@@ -164,10 +198,15 @@ const dashboardRouteFiles = discoverTsxFiles('app/dashboard').filter((path) =>
 const delegatedDashboardRoutes = ['SettingsPage', 'MarketingWorkspace'];
 for (const path of dashboardRouteFiles) {
   const source = read(path);
-  const isLocalized = source.includes('useLanguage(') || source.includes('redirect(') ||
+  const isLocalized =
+    source.includes('useLanguage(') ||
+    source.includes('redirect(') ||
     delegatedDashboardRoutes.some((component) => source.includes(component));
   if (!isLocalized) {
-    failures.push(path + ': dashboard route must use LanguageContext, redirect, or delegate to an audited localized workspace');
+    failures.push(
+      path +
+        ': dashboard route must use LanguageContext, redirect, or delegate to an audited localized workspace',
+    );
   }
 }
 
@@ -179,7 +218,9 @@ for (const path of localizedSources) {
   for (const key of keys) {
     for (const locale of ['pt', 'en']) {
       if (!hasPath(localeTrees[locale], key)) {
-        failures.push(path + ': missing ' + locale + ' translation for "' + key + '"');
+        failures.push(
+          path + ': missing ' + locale + ' translation for "' + key + '"',
+        );
       }
     }
   }
@@ -208,12 +249,19 @@ for (const section of [
   }
 }
 
-
-for (const status of ['all', 'pending', 'confirmed', 'completed', 'cancelled']) {
+for (const status of [
+  'all',
+  'pending',
+  'confirmed',
+  'completed',
+  'cancelled',
+]) {
   for (const locale of ['pt', 'en']) {
     const key = 'agenda.' + status;
     if (!hasPath(localeTrees[locale], key)) {
-      failures.push(locale + ': missing agenda filter translation "' + key + '"');
+      failures.push(
+        locale + ': missing agenda filter translation "' + key + '"',
+      );
     }
   }
 }
@@ -231,7 +279,9 @@ for (const status of [
   for (const locale of ['pt', 'en']) {
     const key = 'orderManagement.status.' + status;
     if (!hasPath(localeTrees[locale], key)) {
-      failures.push(locale + ': missing translation for dynamic status "' + key + '"');
+      failures.push(
+        locale + ': missing translation for dynamic status "' + key + '"',
+      );
     }
   }
 }
@@ -242,37 +292,108 @@ for (const fragment of [
   "t('loyaltyValidation.successToast')",
 ]) {
   if (!loyaltyValidation.includes(fragment)) {
-    failures.push('app/dashboard/loyalty/validate/page.tsx: missing localized success copy marker "' + fragment + '"');
+    failures.push(
+      'app/dashboard/loyalty/validate/page.tsx: missing localized success copy marker "' +
+        fragment +
+        '"',
+    );
   }
 }
-if (loyaltyValidation.includes("toast.success('Recompensa validada.')") || loyaltyValidation.includes('Recompensa ${data.redemption')) {
-  failures.push('app/dashboard/loyalty/validate/page.tsx: hardcoded Portuguese success copy must use translations');
+if (
+  loyaltyValidation.includes("toast.success('Recompensa validada.')") ||
+  loyaltyValidation.includes('Recompensa ${data.redemption')
+) {
+  failures.push(
+    'app/dashboard/loyalty/validate/page.tsx: hardcoded Portuguese success copy must use translations',
+  );
 }
 
 const localeAwareSources = {
-  'app/dashboard/settings/public-profile/page.tsx': ["useLanguage()", 'PUBLIC_PROFILE_COPY', 'AMENITIES_EN', 'copy.saveSuccess'],
-  'app/dashboard/pos/loja/page.tsx': ["useLanguage()", 'orderStatusLabels', 'Could not load products.', 'Could not load orders.'],
-  'app/dashboard/pos/produtos/page.tsx': ["useLanguage()", 'Could not load products.', 'Could not load settings.', 'Publish online'],
-  'app/dashboard/mensagens/page.tsx': ["useLanguage()", 'Appointment reminder', 'copy.loadClientsFailed', 'copy.emailSent'],
-  'app/documentation/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedSections', 'localizedResponseStatuses'],
-  'app/plans/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'localizedFaqs'],
-  'app/checkout/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
-  'app/checkout/manual/page.tsx': ["cookieStore.get('locale')?.value === 'en'", 'Checkout unavailable'],
-  'app/checkout/success/page.tsx': ["useLanguage()", "locale === 'en'", 'Confirming your subscription…', 'formatMoney(payload.promotion.discountAmount, payload.promotion.currency, locale)'],
-  'app/checkout/error/page.tsx': ["useLanguage()", "Checkout not completed"],
-  'app/api/stripe/embedded-checkout/route.ts': ["cookies()", 'locale: checkoutLocale'],
-  'components/hero/pricing-section.tsx': ["useLanguage()", 'HERO_FEATURES_EN', 'const descriptions ='],
-  'components/billing/PricingCard.tsx': ["useLanguage()", "english ? 'Current plan'"],
-  'components/billing/plan-comparison.tsx': ["useLanguage()", 'FEATURE_LABELS_EN', 'GROUP_LABELS_EN'],
-  'components/billing/manual-checkout.tsx': ["useLanguage()", 'COPY_EN', 'english ? \'Annual billing\''],
-  'components/billing/custom-checkout.tsx': ["useLanguage()", 'PLAN_COPY_EN', 'englishRef.current'],
+  'app/dashboard/settings/public-profile/page.tsx': [
+    'useLanguage()',
+    'PUBLIC_PROFILE_COPY',
+    'AMENITIES_EN',
+    'copy.saveSuccess',
+  ],
+  'app/dashboard/pos/loja/page.tsx': [
+    'useLanguage()',
+    'orderStatusLabels',
+    'Could not load products.',
+    'Could not load orders.',
+  ],
+  'app/dashboard/pos/produtos/page.tsx': [
+    'useLanguage()',
+    'Could not load products.',
+    'Could not load settings.',
+    'Publish online',
+  ],
+  'app/dashboard/mensagens/page.tsx': [
+    'useLanguage()',
+    'Appointment reminder',
+    'copy.loadClientsFailed',
+    'copy.emailSent',
+  ],
+  'app/documentation/page.tsx': [
+    "cookieStore.get('locale')?.value === 'en'",
+    'localizedSections',
+    'localizedResponseStatuses',
+  ],
+  'app/plans/page.tsx': [
+    "cookieStore.get('locale')?.value === 'en'",
+    'localizedFaqs',
+  ],
+  'app/checkout/page.tsx': [
+    "cookieStore.get('locale')?.value === 'en'",
+    'Checkout unavailable',
+  ],
+  'app/checkout/manual/page.tsx': [
+    "cookieStore.get('locale')?.value === 'en'",
+    'Checkout unavailable',
+  ],
+  'app/checkout/success/page.tsx': [
+    'useLanguage()',
+    "locale === 'en'",
+    'Confirming your subscription…',
+    'formatMoney(payload.promotion.discountAmount, payload.promotion.currency, locale)',
+  ],
+  'app/checkout/error/page.tsx': ['useLanguage()', 'Checkout not completed'],
+  'app/api/stripe/embedded-checkout/route.ts': [
+    'cookies()',
+    'locale: checkoutLocale',
+  ],
+  'components/hero/pricing-section.tsx': [
+    'useLanguage()',
+    'HERO_FEATURES_EN',
+    'const descriptions =',
+  ],
+  'components/billing/PricingCard.tsx': [
+    'useLanguage()',
+    "english ? 'Current plan'",
+  ],
+  'components/billing/plan-comparison.tsx': [
+    'useLanguage()',
+    'FEATURE_LABELS_EN',
+    'GROUP_LABELS_EN',
+  ],
+  'components/billing/manual-checkout.tsx': [
+    'useLanguage()',
+    'COPY_EN',
+    "english ? 'Annual billing'",
+  ],
+  'components/billing/custom-checkout.tsx': [
+    'useLanguage()',
+    'PLAN_COPY_EN',
+    'englishRef.current',
+  ],
 };
 
 for (const [path, expectedFragments] of Object.entries(localeAwareSources)) {
   const source = read(path);
   for (const fragment of expectedFragments) {
     if (!source.includes(fragment)) {
-      failures.push(path + ': missing locale-aware UI marker "' + fragment + '"');
+      failures.push(
+        path + ': missing locale-aware UI marker "' + fragment + '"',
+      );
     }
   }
 }

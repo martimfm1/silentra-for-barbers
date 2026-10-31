@@ -131,7 +131,10 @@ async function GET__unobserved(
 
     const openTime = relation.opening_time || '09:00:00';
     const closeTime = relation.closing_time || '19:00:00';
-    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(relation.minimum_booking_notice_minutes ?? 0)));
+    const minimumNoticeMinutes = Math.max(
+      0,
+      Math.min(43200, Number(relation.minimum_booking_notice_minutes ?? 0)),
+    );
     const lunchStart = relation.lunch_start || null;
     const lunchEnd = relation.lunch_end || null;
     const closedDays = normalizeClosedDays(relation.closed_days);
@@ -352,7 +355,11 @@ async function GET__unobserved(
         slotEnd > closeTotalMinutes ||
         (isToday && slotStart <= currentMinutesNow) ||
         isClosedDay ||
-        isBeforeMinimumBookingNotice(date, minutesToTime(slotStart), minimumNoticeMinutes)
+        isBeforeMinimumBookingNotice(
+          date,
+          minutesToTime(slotStart),
+          minimumNoticeMinutes,
+        )
       )
         continue;
       if (

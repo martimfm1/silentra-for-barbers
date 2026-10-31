@@ -49,7 +49,9 @@ export function EarningRulesCard() {
       if (!serviceId && data.services?.[0]) setServiceId(data.services[0].id);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('earningRules.loadGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('earningRules.loadGenericError'),
       );
     } finally {
       setLoading(false);
@@ -64,9 +66,7 @@ export function EarningRulesCard() {
     const selected = services.find((service) => service.id === serviceId);
     const value = Number(points);
     if (!selected || !Number.isInteger(value) || value <= 0)
-      return toast.error(
-        t('earningRules.invalidSelection'),
-      );
+      return toast.error(t('earningRules.invalidSelection'));
     setSaving(true);
     try {
       const response = await fetch('/api/loyalty/earning-rules', {
@@ -87,7 +87,9 @@ export function EarningRulesCard() {
       toast.success(t('earningRules.ruleCreated'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('earningRules.createGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('earningRules.createGenericError'),
       );
     } finally {
       setSaving(false);
@@ -109,7 +111,9 @@ export function EarningRulesCard() {
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('earningRules.updateGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('earningRules.updateGenericError'),
       );
     }
   }
@@ -134,7 +138,9 @@ export function EarningRulesCard() {
       toast.success(t('earningRules.ruleRemoved'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('earningRules.removeGenericError'),
+        error instanceof Error
+          ? error.message
+          : t('earningRules.removeGenericError'),
       );
     }
   }
@@ -187,7 +193,8 @@ export function EarningRulesCard() {
 
         {loading ? (
           <div className="flex min-h-24 items-center justify-center text-sm text-muted-foreground">
-            <Loader2 className="mr-2 size-4 animate-spin" />{t('common.loading')}
+            <Loader2 className="mr-2 size-4 animate-spin" />
+            {t('common.loading')}
           </div>
         ) : rules.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
@@ -213,7 +220,9 @@ export function EarningRulesCard() {
                         {service?.name ?? rule.name}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {t('earningRules.pointsPerBooking', { points: rule.points })}
+                        {t('earningRules.pointsPerBooking', {
+                          points: rule.points,
+                        })}
                       </p>
                     </div>
                     <span
@@ -223,7 +232,9 @@ export function EarningRulesCard() {
                           : 'rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-500'
                       }
                     >
-                      {rule.active ? t('earningRules.active') : t('earningRules.paused')}
+                      {rule.active
+                        ? t('earningRules.active')
+                        : t('earningRules.paused')}
                     </span>
                   </div>
                   <div className="mt-4 flex gap-2">
@@ -233,7 +244,9 @@ export function EarningRulesCard() {
                       onClick={() => void toggleRule(rule)}
                     >
                       <Check className="mr-2 size-4" />
-                      {rule.active ? t('earningRules.pause') : t('earningRules.activate')}
+                      {rule.active
+                        ? t('earningRules.pause')
+                        : t('earningRules.activate')}
                     </Button>
                     <Button
                       variant="ghost"

@@ -53,7 +53,9 @@ export default async function CheckoutPage({
             ✓
           </div>
           <h1 className="mt-5 text-2xl font-semibold text-white">
-            {english ? 'Subscription request received' : 'Pedido de subscrição recebido'}
+            {english
+              ? 'Subscription request received'
+              : 'Pedido de subscrição recebido'}
           </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             {english
@@ -129,10 +131,23 @@ export default async function CheckoutPage({
       {intent.plan === 'enterprise' && (
         <section className="mx-auto mb-5 flex max-w-6xl flex-col gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
-            <p className="text-sm font-semibold text-zinc-100">{english ? "Would you also like a custom website?" : "Queres também um site próprio?"}</p>
-            <p className="mt-1 text-xs leading-5 text-zinc-400">{english ? "A custom website is a separate service arranged directly with Silentra and priced separately." : "A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento."}</p>
+            <p className="text-sm font-semibold text-zinc-100">
+              {english
+                ? 'Would you also like a custom website?'
+                : 'Queres também um site próprio?'}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">
+              {english
+                ? 'A custom website is a separate service arranged directly with Silentra and priced separately.'
+                : 'A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento.'}
+            </p>
           </div>
-          <a href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Custom website Enterprise' : 'Site próprio Enterprise')}`} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200">{english ? 'Contact Silentra' : 'Contactar a Silentra'}</a>
+          <a
+            href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Custom website Enterprise' : 'Site próprio Enterprise')}`}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200"
+          >
+            {english ? 'Contact Silentra' : 'Contactar a Silentra'}
+          </a>
         </section>
       )}
       <CustomCheckout checkoutToken={token} plan={intent.plan} />

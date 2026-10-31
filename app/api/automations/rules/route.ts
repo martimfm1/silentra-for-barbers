@@ -90,9 +90,7 @@ async function POST__unobserved(request: Request) {
       actions.length > 10 ||
       actions.some(
         (action) =>
-          !action ||
-          typeof action !== 'object' ||
-          Array.isArray(action),
+          !action || typeof action !== 'object' || Array.isArray(action),
       )
     ) {
       return NextResponse.json(

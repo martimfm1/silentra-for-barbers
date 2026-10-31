@@ -267,9 +267,22 @@ async function POST__unobserved(request: Request) {
       : shop.barbershops;
     const barbershopName = shopRelation?.name || 'Barbearia';
     const barbershopAddress = shopRelation?.address || 'Endereço sob consulta';
-    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(shopRelation?.minimum_booking_notice_minutes ?? 0)));
+    const minimumNoticeMinutes = Math.max(
+      0,
+      Math.min(
+        43200,
+        Number(shopRelation?.minimum_booking_notice_minutes ?? 0),
+      ),
+    );
     if (isBeforeMinimumBookingNotice(bookingDate, bookingTime, minimumNoticeMinutes))
-      return NextResponse.json({ success: false, error: 'Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.' }, { status: 409 });
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Este horário não respeita a antecedência mínima da barbearia. Escolhe um horário mais distante.',
+        },
+        { status: 409 },
+      );
     const selectedWeekday = new Date(`${bookingDate}T12:00:00`).getDay();
     const closedDays = parseClosedDays(shopRelation?.closed_days);
     if (closedDays.has(selectedWeekday))
@@ -464,7 +477,10 @@ async function POST__unobserved(request: Request) {
         status: appointment.status === 'scheduled' ? 'confirmed' : 'pending',
       });
     } catch (error) {
-      console.error('[BARBER_BOOKING_NOTIFICATION_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
+      console.error(
+        '[BARBER_BOOKING_NOTIFICATION_ERROR]',
+        error instanceof Error ? error.name : 'UNKNOWN',
+      );
     }
 
     if (appointment.status === 'scheduled') {
@@ -487,13 +503,17 @@ async function POST__unobserved(request: Request) {
       );
     } else {
       const escapeEmailHtml = (value: string) =>
-        value.replace(/[&<>"']/g, (character) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;',
-        })[character] ?? character);
+        value.replace(
+          /[&<>"']/g,
+          (character) =>
+            ({
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;',
+            })[character] ?? character,
+        );
       void sendBrevoEmail({
         to: email,
         toName: name,
@@ -518,9 +538,10 @@ async function POST__unobserved(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: appointment.status === 'scheduled'
-          ? 'Marcação confirmada com sucesso!'
-          : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
+        message:
+          appointment.status === 'scheduled'
+            ? 'Marcação confirmada com sucesso!'
+            : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
         booking: {
           id: appointment.id,
           barbershopId: appointment.barbershop_id,

@@ -158,14 +158,21 @@ function getAllowedOrigins(request: Request): Set<string> {
 
 function isLoopbackHostname(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
-  return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '[::1]';
+  return (
+    normalized === 'localhost' ||
+    normalized === '127.0.0.1' ||
+    normalized === '[::1]'
+  );
 }
 
 /**
  * Permit a scheme mismatch only for the same loopback hostname and port.
  * This handles local reverse proxies without weakening checks for public hosts.
  */
-function isSameLoopbackHostWithPort(receivedOrigin: string | null, requestUrl: string): boolean {
+function isSameLoopbackHostWithPort(
+  receivedOrigin: string | null,
+  requestUrl: string,
+): boolean {
   if (!receivedOrigin) return false;
   try {
     const origin = new URL(receivedOrigin);
@@ -191,7 +198,12 @@ export function assertSameOrigin(request: Request): void {
   // Prefer the browser Origin header. If it is present but unexpected, never
   // fall back to Referer or Fetch Metadata because that would weaken CSRF.
   if (originHeader?.trim()) {
-    if (receivedOrigin && (allowedOrigins.has(receivedOrigin) || isSameLoopbackHostWithPort(receivedOrigin, request.url))) return;
+    if (
+      receivedOrigin &&
+      (allowedOrigins.has(receivedOrigin) ||
+        isSameLoopbackHostWithPort(receivedOrigin, request.url))
+    )
+      return;
 
     console.warn('[CSRF_ORIGIN_REJECTED]', {
       receivedOrigin: receivedOrigin ?? 'invalid',

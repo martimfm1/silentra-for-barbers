@@ -81,8 +81,14 @@ async function GET__unobserved(
       ? barbershop.closing_time.substring(0, 5)
       : '19:00';
 
-    const minimumNoticeMinutes = Math.max(0, Math.min(43200, Number(barbershop?.minimum_booking_notice_minutes ?? 0)));
-    const slots = generateTimeSlots(openTime, closeTime, 30).filter((slot) => !isBeforeMinimumBookingNotice(dateParam, slot, minimumNoticeMinutes));
+    const minimumNoticeMinutes = Math.max(
+      0,
+      Math.min(43200, Number(barbershop?.minimum_booking_notice_minutes ?? 0)),
+    );
+    const slots = generateTimeSlots(openTime, closeTime, 30).filter(
+      (slot) =>
+        !isBeforeMinimumBookingNotice(dateParam, slot, minimumNoticeMinutes),
+    );
 
     return NextResponse.json(
       {

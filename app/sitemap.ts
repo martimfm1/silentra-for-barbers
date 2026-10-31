@@ -84,7 +84,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (!shop.slug || shop.public_profile_enabled === false) continue;
 
         const slug = String(shop.slug).trim();
-        if (!slug || seen.has(slug) || slug === AGENDA_DO_VICTOR_SHOP_SLUG) continue;
+        if (!slug || seen.has(slug) || slug === AGENDA_DO_VICTOR_SHOP_SLUG)
+          continue;
         seen.add(slug);
 
         const parsedLastModified = shop.updated_at
@@ -178,7 +179,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (!websitesError && websites?.length) {
       const seen = new Set<string>();
       for (const website of websites) {
-        const slug = String(website.public_slug ?? '').trim().toLowerCase();
+        const slug = String(website.public_slug ?? '')
+          .trim()
+          .toLowerCase();
         if (!slug || seen.has(slug)) continue;
         seen.add(slug);
         const lastModifiedValue = website.published_at ?? website.updated_at;

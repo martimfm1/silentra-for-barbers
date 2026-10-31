@@ -3,7 +3,14 @@ import { access, readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
 
-const [dashboardConfirmProvider, overviewPage, clientsListCard, servicesListCard, automationPage, marketingWorkspace] = await Promise.all([
+const [
+  dashboardConfirmProvider,
+  overviewPage,
+  clientsListCard,
+  servicesListCard,
+  automationPage,
+  marketingWorkspace,
+] = await Promise.all([
   read('components/dashboard/dashboard-confirm-provider.tsx'),
   read('app/dashboard/page.tsx'),
   read('app/dashboard/_components/cards/ClientsListCard.tsx'),
@@ -11,17 +18,19 @@ const [dashboardConfirmProvider, overviewPage, clientsListCard, servicesListCard
   read('app/dashboard/automations/page.tsx'),
   read('app/dashboard/marketing/marketing-workspace.tsx'),
 ]);
-const confirmationTargets = await Promise.all([
-  'app/dashboard/pos/page.tsx',
-  'app/dashboard/pos/loja/page.tsx',
-  'app/dashboard/loyalty/page.tsx',
-  'app/dashboard/pos/pedidos/page.tsx',
-  'app/dashboard/pos/produtos/page.tsx',
-  'app/dashboard/_components/team/TeamMembersManager.tsx',
-  'app/dashboard/marketing/campaign-lifecycle-actions.tsx',
-  'components/dashboard/loyalty/earning-rules-card.tsx',
-  'components/billing/BillingHub.tsx',
-].map((file) => read(file)));
+const confirmationTargets = await Promise.all(
+  [
+    'app/dashboard/pos/page.tsx',
+    'app/dashboard/pos/loja/page.tsx',
+    'app/dashboard/loyalty/page.tsx',
+    'app/dashboard/pos/pedidos/page.tsx',
+    'app/dashboard/pos/produtos/page.tsx',
+    'app/dashboard/_components/team/TeamMembersManager.tsx',
+    'app/dashboard/marketing/campaign-lifecycle-actions.tsx',
+    'components/dashboard/loyalty/earning-rules-card.tsx',
+    'components/billing/BillingHub.tsx',
+  ].map((file) => read(file)),
+);
 
 const [
   navbar,
@@ -61,7 +70,10 @@ for (const route of [
 }
 
 // Navigation density, fixed bottom placement and the More sheet must stay consistent.
-assert.match(sidebar, /const primaryItems:[\s\S]*?\/dashboard\/agenda[\s\S]*?\/dashboard\/clientes[\s\S]*?\/dashboard\/servicos/);
+assert.match(
+  sidebar,
+  /const primaryItems:[\s\S]*?\/dashboard\/agenda[\s\S]*?\/dashboard\/clientes[\s\S]*?\/dashboard\/servicos/,
+);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
 assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
@@ -123,8 +135,14 @@ assert.match(button, /min-h-11/);
 
 // Every new support message gets a queue entry and read state cannot suppress email.
 assert.match(emailMigration, /Every message has a unique outbox entry/i);
-assert.match(emailMigration, /insert into public\.support_email_notifications/i);
-assert.doesNotMatch(emailMigration, /v_unread_count|if\s+v_unread_count\s*=\s*0/i);
+assert.match(
+  emailMigration,
+  /insert into public\.support_email_notifications/i,
+);
+assert.doesNotMatch(
+  emailMigration,
+  /v_unread_count|if\s+v_unread_count\s*=\s*0/i,
+);
 assert.doesNotMatch(supportService, /if \(messageResult\.data\.read_at\)/);
 
 console.log('UI/UX and accessibility contract audit passed.');

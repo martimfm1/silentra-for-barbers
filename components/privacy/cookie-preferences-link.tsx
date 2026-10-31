@@ -6,7 +6,9 @@ import { useLanguage } from '@/context/LanguageContext';
 export function CookiePreferencesLink() {
   const { locale } = useLanguage();
   const label =
-    locale === 'en' ? 'Manage cookie preferences' : 'Gerir preferências de cookies';
+    locale === 'en'
+      ? 'Manage cookie preferences'
+      : 'Gerir preferências de cookies';
 
   return (
     <button

@@ -26,7 +26,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { useLanguage } from '@/context/LanguageContext';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type LoyaltySettings = {
   enabled: boolean;
@@ -78,9 +84,7 @@ export default function LoyaltyPage() {
       const response = await fetch('/api/loyalty', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(
-          data.error ?? t('loyaltyPage.loadError'),
-        );
+        throw new Error(data.error ?? t('loyaltyPage.loadError'));
       setSettings({
         enabled: data.settings?.enabled === true,
         points_per_euro: Number(data.settings?.points_per_euro ?? 1),
@@ -130,7 +134,9 @@ export default function LoyaltyPage() {
       toast.success(message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : t('loyaltyPage.saveGenericError');
+        error instanceof Error
+          ? error.message
+          : t('loyaltyPage.saveGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -140,7 +146,9 @@ export default function LoyaltyPage() {
 
   const saveReward = async () => {
     setSaving(true);
-    setStatus(editing ? t('loyaltyPage.updatingReward') : t('loyaltyPage.savingReward'));
+    setStatus(
+      editing ? t('loyaltyPage.updatingReward') : t('loyaltyPage.savingReward'),
+    );
     try {
       const payload = {
         id: editing ?? undefined,
@@ -170,11 +178,17 @@ export default function LoyaltyPage() {
       setEditing(null);
       setCreating(false);
       setRewardForm(emptyReward);
-      setStatus(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
-      toast.success(editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'));
+      setStatus(
+        editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'),
+      );
+      toast.success(
+        editing ? t('loyalty.rewardUpdated') : t('loyalty.rewardCreated'),
+      );
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : t('loyaltyPage.saveRewardGenericError');
+        error instanceof Error
+          ? error.message
+          : t('loyaltyPage.saveRewardGenericError');
       setStatus(message);
       toast.error(message);
     } finally {
@@ -252,7 +266,9 @@ export default function LoyaltyPage() {
                 {t('loyalty.upgradeDescription')}
               </p>
               <Button asChild>
-                <Link href="/dashboard/billing">{t('loyaltyPage.upgrade')}</Link>
+                <Link href="/dashboard/billing">
+                  {t('loyaltyPage.upgrade')}
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -275,7 +291,9 @@ export default function LoyaltyPage() {
       >
         <header className="flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-medium text-primary">{t('loyalty.kicker')}</p>
+            <p className="text-sm font-medium text-primary">
+              {t('loyalty.kicker')}
+            </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('loyaltyPage.pointsAndRewards')}
             </h1>
@@ -339,7 +357,9 @@ export default function LoyaltyPage() {
                 </legend>
                 <label className="mt-2 flex min-h-11 cursor-pointer items-center justify-between gap-4">
                   <span>
-                    <span className="block font-medium">{t('loyaltyPage.active')}</span>
+                    <span className="block font-medium">
+                      {t('loyaltyPage.active')}
+                    </span>
                     <span
                       id="loyalty-enabled-help"
                       className="mt-1 block text-xs text-muted-foreground"
@@ -364,7 +384,9 @@ export default function LoyaltyPage() {
               </fieldset>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="silentra-form-field">
-                  <Label htmlFor="points-per-euro">{t('loyaltyPage.pointsPerEuroLabel')}</Label>
+                  <Label htmlFor="points-per-euro">
+                    {t('loyaltyPage.pointsPerEuroLabel')}
+                  </Label>
                   <Input
                     id="points-per-euro"
                     className="mt-1"
@@ -399,7 +421,9 @@ export default function LoyaltyPage() {
                   />
                 </div>
                 <div className="silentra-form-field">
-                  <Label htmlFor="referral-points">{t('loyaltyPage.referralPointsLabel')}</Label>
+                  <Label htmlFor="referral-points">
+                    {t('loyaltyPage.referralPointsLabel')}
+                  </Label>
                   <Input
                     id="referral-points"
                     className="mt-1"
@@ -437,9 +461,13 @@ export default function LoyaltyPage() {
             <CardContent className="space-y-4">
               <dl>
                 <div className="rounded-xl border p-4">
-                  <dt className="text-xs text-muted-foreground">{t('loyalty.state')}</dt>
+                  <dt className="text-xs text-muted-foreground">
+                    {t('loyalty.state')}
+                  </dt>
                   <dd className="mt-1 text-2xl font-semibold">
-                    {settings.enabled ? t('loyaltyPage.enabledState') : t('loyaltyPage.disabledState')}
+                    {settings.enabled
+                      ? t('loyaltyPage.enabledState')
+                      : t('loyaltyPage.disabledState')}
                   </dd>
                 </div>
                 <div className="mt-4 rounded-xl border p-4">
@@ -493,130 +521,158 @@ export default function LoyaltyPage() {
           >
             <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
               <DialogHeader className="sr-only">
-                <DialogTitle>{editing ? t('loyalty.editReward') : t('loyaltyPage.newReward')}</DialogTitle>
+                <DialogTitle>
+                  {editing
+                    ? t('loyalty.editReward')
+                    : t('loyaltyPage.newReward')}
+                </DialogTitle>
                 <DialogDescription>
                   {t('loyaltyPage.rewardFormDescription')}
                 </DialogDescription>
               </DialogHeader>
               {creating && (
-            <Card className="mb-0 border-white/10 bg-white/[0.02]">
-              <CardHeader>
-                <CardTitle>
-                  {editing ? t('loyalty.editReward') : t('loyaltyPage.newReward')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form
-                  className="grid gap-4 sm:grid-cols-2"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void saveReward();
-                  }}
-                >
-                <div className="silentra-form-field">
-                  <Label htmlFor="reward-name">{t('loyaltyPage.rewardName')}</Label>
-                  <Input
-                    id="reward-name"
-                    className="mt-1"
-                    value={rewardForm.name}
-                    onChange={(e) =>
-                      setRewardForm((v) => ({ ...v, name: e.target.value }))
-                    }
-                    maxLength={120}
-                    placeholder={t('loyaltyPage.rewardNamePlaceholder')}
-                  />
-                </div>
-                <div className="silentra-form-field">
-                  <Label htmlFor="reward-points">{t('loyaltyPage.requiredPoints')}</Label>
-                  <Input
-                    id="reward-points"
-                    className="mt-1"
-                    type="number"
-                    min="1"
-                    value={rewardForm.points_cost}
-                    onChange={(e) =>
-                      setRewardForm((v) => ({
-                        ...v,
-                        points_cost: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div className="sm:col-span-2 silentra-form-field">
-                  <Label htmlFor="reward-description">{t('loyaltyPage.rewardDescription')}</Label>
-                  <Textarea
-                    id="reward-description"
-                    className="mt-1"
-                    value={rewardForm.description}
-                    onChange={(e) =>
-                      setRewardForm((v) => ({
-                        ...v,
-                        description: e.target.value,
-                      }))
-                    }
-                    maxLength={1000}
-                    placeholder={t('loyaltyPage.rewardDescriptionPlaceholder')}
-                  />
-                </div>
-                <div className="silentra-form-field">
-                  <Label htmlFor="reward-type">{t('loyaltyPage.rewardType')}</Label>
-                  <select
-                    id="reward-type"
-                    className="mt-1"
-                    value={rewardForm.reward_type}
-                    onChange={(e) =>
-                      setRewardForm((v) => ({
-                        ...v,
-                        reward_type: e.target.value as Reward['reward_type'],
-                      }))
-                    }
-                  >
-                    <option value="discount">{t('loyaltyPage.discount')}</option>
-                    <option value="free_service">{t('loyaltyPage.freeService')}</option>
-                    <option value="custom">{t('loyaltyPage.custom')}</option>
-                  </select>
-                </div>
-                <div className="silentra-form-field">
-                  <Label htmlFor="reward-value">{t('loyaltyPage.rewardValue')}</Label>
-                  <Input
-                    id="reward-value"
-                    className="mt-1"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={rewardForm.reward_value}
-                    onChange={(e) =>
-                      setRewardForm((v) => ({
-                        ...v,
-                        reward_value: e.target.value,
-                      }))
-                    }
-                    placeholder="Ex.: 5"
-                  />
-                </div>
-                <div className="flex gap-2 sm:col-span-2">
-                  <Button
-                    type="submit"
-                    disabled={saving || !rewardForm.name.trim()}
-                    aria-busy={saving}
-                  >
-                    <Save className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {t('loyaltyPage.save')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setCreating(false);
-                      setEditing(null);
-                    }}
-                  >
-                    {t('loyaltyPage.cancel')}
-                  </Button>
-                </div>
-                </form>
-              </CardContent>
-            </Card>
+                <Card className="mb-0 border-white/10 bg-white/[0.02]">
+                  <CardHeader>
+                    <CardTitle>
+                      {editing
+                        ? t('loyalty.editReward')
+                        : t('loyaltyPage.newReward')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      className="grid gap-4 sm:grid-cols-2"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        void saveReward();
+                      }}
+                    >
+                      <div className="silentra-form-field">
+                        <Label htmlFor="reward-name">
+                          {t('loyaltyPage.rewardName')}
+                        </Label>
+                        <Input
+                          id="reward-name"
+                          className="mt-1"
+                          value={rewardForm.name}
+                          onChange={(e) =>
+                            setRewardForm((v) => ({
+                              ...v,
+                              name: e.target.value,
+                            }))
+                          }
+                          maxLength={120}
+                          placeholder={t('loyaltyPage.rewardNamePlaceholder')}
+                        />
+                      </div>
+                      <div className="silentra-form-field">
+                        <Label htmlFor="reward-points">
+                          {t('loyaltyPage.requiredPoints')}
+                        </Label>
+                        <Input
+                          id="reward-points"
+                          className="mt-1"
+                          type="number"
+                          min="1"
+                          value={rewardForm.points_cost}
+                          onChange={(e) =>
+                            setRewardForm((v) => ({
+                              ...v,
+                              points_cost: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2 silentra-form-field">
+                        <Label htmlFor="reward-description">
+                          {t('loyaltyPage.rewardDescription')}
+                        </Label>
+                        <Textarea
+                          id="reward-description"
+                          className="mt-1"
+                          value={rewardForm.description}
+                          onChange={(e) =>
+                            setRewardForm((v) => ({
+                              ...v,
+                              description: e.target.value,
+                            }))
+                          }
+                          maxLength={1000}
+                          placeholder={t(
+                            'loyaltyPage.rewardDescriptionPlaceholder',
+                          )}
+                        />
+                      </div>
+                      <div className="silentra-form-field">
+                        <Label htmlFor="reward-type">
+                          {t('loyaltyPage.rewardType')}
+                        </Label>
+                        <select
+                          id="reward-type"
+                          className="mt-1"
+                          value={rewardForm.reward_type}
+                          onChange={(e) =>
+                            setRewardForm((v) => ({
+                              ...v,
+                              reward_type: e.target
+                                .value as Reward['reward_type'],
+                            }))
+                          }
+                        >
+                          <option value="discount">
+                            {t('loyaltyPage.discount')}
+                          </option>
+                          <option value="free_service">
+                            {t('loyaltyPage.freeService')}
+                          </option>
+                          <option value="custom">
+                            {t('loyaltyPage.custom')}
+                          </option>
+                        </select>
+                      </div>
+                      <div className="silentra-form-field">
+                        <Label htmlFor="reward-value">
+                          {t('loyaltyPage.rewardValue')}
+                        </Label>
+                        <Input
+                          id="reward-value"
+                          className="mt-1"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={rewardForm.reward_value}
+                          onChange={(e) =>
+                            setRewardForm((v) => ({
+                              ...v,
+                              reward_value: e.target.value,
+                            }))
+                          }
+                          placeholder="Ex.: 5"
+                        />
+                      </div>
+                      <div className="flex gap-2 sm:col-span-2">
+                        <Button
+                          type="submit"
+                          disabled={saving || !rewardForm.name.trim()}
+                          aria-busy={saving}
+                        >
+                          <Save className="mr-2 h-4 w-4" aria-hidden="true" />
+                          {t('loyaltyPage.save')}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setCreating(false);
+                            setEditing(null);
+                          }}
+                        >
+                          {t('loyaltyPage.cancel')}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
               )}
             </DialogContent>
           </Dialog>
@@ -649,11 +705,19 @@ export default function LoyaltyPage() {
                     </div>
                     <h3 className="mt-5 font-semibold">{reward.name}</h3>
                     <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
-                      {reward.description || t('loyaltyPage.defaultRewardDescription')}
+                      {reward.description ||
+                        t('loyaltyPage.defaultRewardDescription')}
                     </p>
                     <p className="mt-4 text-xs text-muted-foreground">
-                      {reward.active ? t('loyaltyPage.available') : t('loyaltyPage.deactivated')} ·{' '}
-                      {reward.reward_type === 'discount' ? t('loyaltyPage.discount') : reward.reward_type === 'free_service' ? t('loyaltyPage.freeService') : t('loyaltyPage.custom')}
+                      {reward.active
+                        ? t('loyaltyPage.available')
+                        : t('loyaltyPage.deactivated')}{' '}
+                      ·{' '}
+                      {reward.reward_type === 'discount'
+                        ? t('loyaltyPage.discount')
+                        : reward.reward_type === 'free_service'
+                          ? t('loyaltyPage.freeService')
+                          : t('loyaltyPage.custom')}
                       {reward.reward_value !== null
                         ? ` · ${reward.reward_value}`
                         : ''}
@@ -663,7 +727,9 @@ export default function LoyaltyPage() {
                         size="icon"
                         variant="ghost"
                         onClick={() => editReward(reward)}
-                        aria-label={t('loyaltyPage.editRewardAria', { name: reward.name })}
+                        aria-label={t('loyaltyPage.editRewardAria', {
+                          name: reward.name,
+                        })}
                       >
                         <Pencil className="h-4 w-4" aria-hidden="true" />
                       </Button>
@@ -672,7 +738,9 @@ export default function LoyaltyPage() {
                           size="icon"
                           variant="ghost"
                           onClick={() => void deleteReward(reward.id)}
-                          aria-label={t('loyaltyPage.disableRewardAria', { name: reward.name })}
+                          aria-label={t('loyaltyPage.disableRewardAria', {
+                            name: reward.name,
+                          })}
                         >
                           <Trash2
                             className="h-4 w-4 text-red-300"

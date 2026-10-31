@@ -39,24 +39,31 @@ export default async function AgendaDoVictorRoute() {
     { data: shop, error: shopError },
     { data: hours, error: hoursError },
   ] = await Promise.all([
-      database
-        .from('services')
-        .select('id,name,price,duration')
-        .eq('barbershop_id', profile.barbershop_id)
-        .order('name', { ascending: true }),
-      database
-        .from('shops')
-        .select('id,slug,city,address,lat,lng')
-        .eq('barbershop_id', profile.barbershop_id)
-        .maybeSingle(),
-      database
-        .from('barbershops')
-        .select('opening_time,closing_time,closed_days')
-        .eq('id', profile.barbershop_id)
-        .maybeSingle(),
-    ]);
+    database
+      .from('services')
+      .select('id,name,price,duration')
+      .eq('barbershop_id', profile.barbershop_id)
+      .order('name', { ascending: true }),
+    database
+      .from('shops')
+      .select('id,slug,city,address,lat,lng')
+      .eq('barbershop_id', profile.barbershop_id)
+      .maybeSingle(),
+    database
+      .from('barbershops')
+      .select('opening_time,closing_time,closed_days')
+      .eq('id', profile.barbershop_id)
+      .maybeSingle(),
+  ]);
 
-  if (servicesError || shopError || hoursError || !shop || !services || !hours) {
+  if (
+    servicesError ||
+    shopError ||
+    hoursError ||
+    !shop ||
+    !services ||
+    !hours
+  ) {
     console.error('[AGENDA_DO_VICTOR]', {
       services: servicesError?.code ?? null,
       shop: shopError?.code ?? null,
@@ -69,7 +76,12 @@ export default async function AgendaDoVictorRoute() {
   return (
     <AgendaDoVictorPage
       profile={publicProfile}
-      shop={{ ...shop, opening_time: hours.opening_time, closing_time: hours.closing_time, closed_days: hours.closed_days }}
+      shop={{
+        ...shop,
+        opening_time: hours.opening_time,
+        closing_time: hours.closing_time,
+        closed_days: hours.closed_days,
+      }}
       services={services.map((service) => ({
         id: service.id,
         name: service.name,

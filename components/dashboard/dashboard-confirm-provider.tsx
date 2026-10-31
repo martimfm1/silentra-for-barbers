@@ -71,7 +71,10 @@ export function DashboardConfirmProvider({
         }}
       >
         {pending && (
-          <AlertDialogContent key={pending.id} className="border-white/10 bg-zinc-950 text-zinc-100">
+          <AlertDialogContent
+            key={pending.id}
+            className="border-white/10 bg-zinc-950 text-zinc-100"
+          >
             <AlertDialogHeader>
               <AlertDialogTitle>{pending.title}</AlertDialogTitle>
               <AlertDialogDescription className="text-zinc-400">

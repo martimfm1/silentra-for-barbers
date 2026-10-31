@@ -195,12 +195,18 @@ export default function LoginPage() {
                             event,
                             router,
                             setIsSubmitting,
-                            invalidCredentialsMessage: t('auth.invalidCredentials'),
+                            invalidCredentialsMessage: t(
+                              'auth.invalidCredentials',
+                            ),
                             unconfirmedEmailMessage: t('auth.unconfirmedLogin'),
                             setErrorMsg: (message) => {
                               setErrorMsg(message);
-                              setIsUnconfirmed(message === t('auth.unconfirmedLogin'));
-                              setIsInvalidCredentials(message === t('auth.invalidCredentials'));
+                              setIsUnconfirmed(
+                                message === t('auth.unconfirmedLogin'),
+                              );
+                              setIsInvalidCredentials(
+                                message === t('auth.invalidCredentials'),
+                              );
                             },
                           })
                         }
@@ -297,7 +303,9 @@ export default function LoginPage() {
                         </div>
 
                         <Button
-            aria-label={isSubmitting ? "A iniciar sessão" : "Iniciar sessão"}
+                          aria-label={
+                            isSubmitting ? 'A iniciar sessão' : 'Iniciar sessão'
+                          }
                           type="submit"
                           disabled={isSubmitting}
                           className="min-h-11 w-full rounded-full font-semibold"
@@ -457,7 +465,9 @@ export default function LoginPage() {
                         </label>
 
                         <Button
-            aria-label={isSubmitting ? "A iniciar sessão" : "Continuar"}
+                          aria-label={
+                            isSubmitting ? 'A iniciar sessão' : 'Continuar'
+                          }
                           type="submit"
                           disabled={isSubmitting}
                           className="min-h-11 w-full rounded-full font-semibold"

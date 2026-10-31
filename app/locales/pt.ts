@@ -374,7 +374,8 @@ export const pt = {
       'O teu email ainda não foi verificado. Confirma a tua caixa de entrada para continuar.',
     resendConfirmation: 'Reenviar email de confirmação',
     confirmEmailTitle: 'Verifica a tua caixa de entrada',
-    confirmEmailSubtitle: 'Se este endereço puder criar uma conta ou precisar de confirmação, receberás um email com os próximos passos:',
+    confirmEmailSubtitle:
+      'Se este endereço puder criar uma conta ou precisar de confirmação, receberás um email com os próximos passos:',
     backToLogin: 'Voltar ao início de sessão',
     accountSecurity: 'Segurança da conta',
     useAccountEmail: 'Usa o email associado à tua conta Silentra.',
@@ -505,17 +506,18 @@ export const pt = {
     closeBooking: 'Fechar marcação',
     newBooking: 'Nova marcação',
     closeBlock: 'Fechar bloqueio',
-    blockTimeDescription: "Define o profissional, a data e o intervalo que deve ficar indisponível.",
-    blockProfessional: "Profissional",
-    selectProfessional: "Selecionar profissional",
-    blockDate: "Data do bloqueio",
-    chooseDate: "Escolher data",
-    startTime: "Hora de início",
-    endTime: "Hora de fim",
-    blockReason: "Motivo",
-    blockReasonPlaceholder: "Motivo do bloqueio",
-    saveBlock: "Guardar bloqueio",
-    savingBlock: "A guardar bloqueio…",
+    blockTimeDescription:
+      'Define o profissional, a data e o intervalo que deve ficar indisponível.',
+    blockProfessional: 'Profissional',
+    selectProfessional: 'Selecionar profissional',
+    blockDate: 'Data do bloqueio',
+    chooseDate: 'Escolher data',
+    startTime: 'Hora de início',
+    endTime: 'Hora de fim',
+    blockReason: 'Motivo',
+    blockReasonPlaceholder: 'Motivo do bloqueio',
+    saveBlock: 'Guardar bloqueio',
+    savingBlock: 'A guardar bloqueio…',
     blockTime: 'Bloquear horário',
     upcomingToday: 'Próximas hoje',
     completed: 'Concluídas',
@@ -846,8 +848,10 @@ export const pt = {
     bookingRules: 'Regras de reserva',
   },
   billingHub: {
-    cancelConfirm: 'Cancelar a subscrição no final do período atual? O acesso mantém-se até à data de renovação.',
-    cancelScheduled: 'Cancelamento agendado. O plano continua ativo até ao fim do período atual.',
+    cancelConfirm:
+      'Cancelar a subscrição no final do período atual? O acesso mantém-se até à data de renovação.',
+    cancelScheduled:
+      'Cancelamento agendado. O plano continua ativo até ao fim do período atual.',
     cancelFailed: 'Não foi possível cancelar a subscrição.',
     resumeSuccess: 'Subscrição retomada com sucesso.',
     resumeFailed: 'Não foi possível retomar a subscrição.',
@@ -859,9 +863,12 @@ export const pt = {
     trialActive: 'Trial ativo',
     cancelledOn: 'Esta subscrição foi cancelada em {date}{by}.',
     cancelledByName: ' por {name}',
-    adminPlanDescription: 'Plano atribuído pela administração da Silentra e aplicado à barbearia.',
-    manualPlanDescription: 'A subscrição é gerida manualmente pela Silentra e pertence à barbearia.',
-    stripePlanDescription: 'A subscrição é sincronizada com a Stripe e pertence à barbearia.',
+    adminPlanDescription:
+      'Plano atribuído pela administração da Silentra e aplicado à barbearia.',
+    manualPlanDescription:
+      'A subscrição é gerida manualmente pela Silentra e pertence à barbearia.',
+    stripePlanDescription:
+      'A subscrição é sincronizada com a Stripe e pertence à barbearia.',
     freePlanDescription: 'Plano gratuito, sem subscrição paga ativa.',
     state: 'Estado',
     assigned: 'Atribuído',
@@ -882,26 +889,34 @@ export const pt = {
     cancelSubscription: 'Cancelar subscrição',
     resumeSubscription: 'Retomar subscrição',
     paymentStatus: 'Estado do pedido',
-    requestReceived: 'O pedido foi recebido. A equipa irá preparar o pagamento e enviar-te as instruções para o email associado à tua conta.',
-    paymentLinkSent: 'O link de pagamento já foi enviado. Podes abrir o pagamento diretamente aqui.',
+    requestReceived:
+      'O pedido foi recebido. A equipa irá preparar o pagamento e enviar-te as instruções para o email associado à tua conta.',
+    paymentLinkSent:
+      'O link de pagamento já foi enviado. Podes abrir o pagamento diretamente aqui.',
     payNow: 'Pagar agora',
     yearly: 'Anual',
     monthly: 'Mensal',
-    paymentConfirmed: 'O pagamento foi confirmado e a tua subscrição manual está ativa.',
-    expiredRequest: 'O período da subscrição terminou. Para continuar, escolhe novamente um plano em',
-    rejectedRequest: 'O último pedido de pagamento foi rejeitado. Podes criar um novo pedido através da página de planos.',
+    paymentConfirmed:
+      'O pagamento foi confirmado e a tua subscrição manual está ativa.',
+    expiredRequest:
+      'O período da subscrição terminou. Para continuar, escolhe novamente um plano em',
+    rejectedRequest:
+      'O último pedido de pagamento foi rejeitado. Podes criar um novo pedido através da página de planos.',
     noPendingRequest: 'Não existe nenhum pedido de pagamento manual em curso.',
     receipts: 'Recibos',
     billingHistory: 'Histórico de faturação',
-    receiptsDescription: 'Consulta e descarrega os recibos e comprovativos de pagamento.',
+    receiptsDescription:
+      'Consulta e descarrega os recibos e comprovativos de pagamento.',
     last12: 'Últimos 12',
-    noStripeReceipts: 'Ainda não existem recibos ou comprovativos de pagamento nesta conta.',
+    noStripeReceipts:
+      'Ainda não existem recibos ou comprovativos de pagamento nesta conta.',
     noReceipts: 'Ainda não existem recibos emitidos.',
     processed: 'processado',
     download: 'Descarregar',
     manualReceipt: 'Comprovativo manual',
     receiptUnavailable: 'Recibo indisponível',
-    securePayments: 'Pagamentos e recibos processados pela Stripe. A Silentra não guarda dados do cartão.',
+    securePayments:
+      'Pagamentos e recibos processados pela Stripe. A Silentra não guarda dados do cartão.',
   },
   billingPage: {
     section: 'Subscrição',
@@ -928,12 +943,14 @@ export const pt = {
     comparePlans: 'Comparar planos',
     relationship: 'Relacionamento',
     customers: 'Clientes',
-    subtitle: 'Percebe quem volta, quem está a desaparecer e onde podes criar uma relação melhor.',
+    subtitle:
+      'Percebe quem volta, quem está a desaparecer e onde podes criar uma relação melhor.',
     backDashboard: 'Voltar ao dashboard',
     newAppointment: 'Nova marcação',
     noExtraWork: 'Começa sem trabalho extra',
     noManualImport: 'Não precisas de importar clientes manualmente.',
-    autoCreateDescription: 'Quando receberes a primeira marcação, a Silentra cria o cliente por ti. Depois podes adicionar etiquetas e notas conforme fores conhecendo a pessoa.',
+    autoCreateDescription:
+      'Quando receberes a primeira marcação, a Silentra cria o cliente por ti. Depois podes adicionar etiquetas e notas conforme fores conhecendo a pessoa.',
     firstAppointment: 'Criar primeira marcação',
     customerBase: 'Base de clientes',
     customerSingular: 'cliente',
@@ -944,7 +961,8 @@ export const pt = {
     noCustomerFound: 'Não encontrámos esse cliente.',
     baseStartsHere: 'A tua base de clientes começa aqui.',
     trySearch: 'Experimenta pesquisar pelo nome, email ou telefone.',
-    autoPopulate: 'Assim que os clientes fizerem marcações, aparecem aqui automaticamente. Também podes começar a organizar a base com etiquetas.',
+    autoPopulate:
+      'Assim que os clientes fizerem marcações, aparecem aqui automaticamente. Também podes começar a organizar a base com etiquetas.',
     noContact: 'Sem contacto registado',
     tags: 'Etiquetas',
     tagsDescription: 'Cria grupos úteis sem preencher formulários extra.',
@@ -952,7 +970,8 @@ export const pt = {
     newTagName: 'Nome da nova etiqueta',
     creating: 'A criar...',
     add: 'Adicionar',
-    noTags: 'Ainda não tens etiquetas. Começa com algo simples, como “Cliente frequente” ou “Novo cliente”.',
+    noTags:
+      'Ainda não tens etiquetas. Começa com algo simples, como “Cliente frequente” ou “Novo cliente”.',
   },
   crmDetail: {
     loadFailed: 'Não foi possível carregar o cliente.',
@@ -981,14 +1000,17 @@ export const pt = {
   },
   settingsLanguage: {
     title: 'Idioma predefinido',
-    description: 'Define o idioma da área de gestão e dos emails enviados pela tua barbearia. A alteração é aplicada depois de guardares as definições.',
+    description:
+      'Define o idioma da área de gestão e dos emails enviados pela tua barbearia. A alteração é aplicada depois de guardares as definições.',
   },
   settingsPage: {
     loadFailed: 'Não foi possível carregar as definições.',
     publicLoadFailed: 'Não foi possível carregar as informações públicas.',
-    openingAfterClosing: 'O horário de fecho tem de ser posterior ao horário de abertura.',
+    openingAfterClosing:
+      'O horário de fecho tem de ser posterior ao horário de abertura.',
     lunchInvalid: 'Verifica o início e o fim da pausa.',
-    minimumBookingNoticeInvalid: 'Introduz uma antecedência entre 0 minutos e 30 dias.',
+    minimumBookingNoticeInvalid:
+      'Introduz uma antecedência entre 0 minutos e 30 dias.',
     locationUpdateFailed: 'Não foi possível atualizar a localização.',
     amenitiesSaveFailed: 'Não foi possível guardar as informações do espaço.',
     saved: 'Todas as alterações foram guardadas.',
@@ -1023,12 +1045,14 @@ export const pt = {
     accountDescription: 'Sessão e acesso',
     overviewEyebrow: 'Centro de definições',
     overviewTitle: 'Tudo o que importa, num só lugar.',
-    overviewDescription: 'Altera várias definições e guarda tudo de uma vez. As alterações só ficam publicadas quando confirmares.',
+    overviewDescription:
+      'Altera várias definições e guarda tudo de uma vez. As alterações só ficam publicadas quando confirmares.',
     publicInfo: 'Informações públicas da tua barbearia.',
     shopName: 'Nome da barbearia',
     phone: 'Telefone',
     directoryVisibility: 'Visibilidade no diretório',
-    directoryDescription: 'Mostra ou esconde a barbearia na descoberta pública.',
+    directoryDescription:
+      'Mostra ou esconde a barbearia na descoberta pública.',
     locationInfo: 'Localização e informações',
     locationDescriptionLong: 'Morada, mapa e características do espaço.',
     searchAddress: 'Pesquise a rua, número ou código postal…',
@@ -1046,14 +1070,16 @@ export const pt = {
     lunchBreak: 'Pausa de almoço',
     daysOffInHours: 'Dias de folga',
     minimumBookingNotice: 'Antecedência mínima da marcação',
-    minimumBookingNoticeDescription: 'O cliente só pode marcar ou reagendar para um horário que esteja pelo menos este tempo no futuro. Usa 0 para não exigir antecedência adicional.',
+    minimumBookingNoticeDescription:
+      'O cliente só pode marcar ou reagendar para um horário que esteja pelo menos este tempo no futuro. Usa 0 para não exigir antecedência adicional.',
     noticeUnit: 'Unidade da antecedência',
     noticeMinutes: 'Minutos',
     noticeHours: 'Horas',
     allowOnline: 'Permitir marcações online',
     allowOnlineDescription: 'Aceita novas reservas através da página pública.',
     autoConfirm: 'Confirmar automaticamente',
-    autoConfirmDescription: 'As novas reservas ficam confirmadas sem intervenção manual.',
+    autoConfirmDescription:
+      'As novas reservas ficam confirmadas sem intervenção manual.',
     autoComplete: 'Concluir automaticamente',
     autoCompleteDescription: 'Conclui a reserva depois da hora prevista.',
     cancellationWindow: 'Prazo de cancelamento',

@@ -225,7 +225,10 @@ export async function handleRegister({
       email_confirmation_required: data.requiresEmailConfirmation ?? true,
     });
 
-    toast.success(successMessage || 'Verifica a tua caixa de entrada para os próximos passos.');
+    toast.success(
+      successMessage ||
+        'Verifica a tua caixa de entrada para os próximos passos.',
+    );
 
     if (onSuccess) {
       onSuccess();

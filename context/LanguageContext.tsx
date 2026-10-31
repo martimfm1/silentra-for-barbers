@@ -103,7 +103,9 @@ export function LanguageProvider({
       if (hasSavedPreference) return;
       try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user || !active) return;
         const { data: profile } = await supabase
           .from('users')
@@ -112,16 +114,30 @@ export function LanguageProvider({
           .maybeSingle();
         if (
           !profile?.barbershop_id ||
-          !['owner', 'admin', 'manager', 'receptionist', 'staff', 'barber', 'professional'].includes(profile.role) ||
+          ![
+            'owner',
+            'admin',
+            'manager',
+            'receptionist',
+            'staff',
+            'barber',
+            'professional',
+          ].includes(profile.role) ||
           !active
-        ) return;
+        )
+          return;
         const { data: shop } = await supabase
           .from('barbershops')
           .select('default_language')
           .eq('id', profile.barbershop_id)
           .maybeSingle();
         if (!active) return;
-        const preferred = shop?.default_language === 'en' ? 'en' : shop?.default_language === 'pt' ? 'pt' : null;
+        const preferred =
+          shop?.default_language === 'en'
+            ? 'en'
+            : shop?.default_language === 'pt'
+              ? 'pt'
+              : null;
         if (preferred) {
           setLocaleState(preferred);
           window.localStorage.setItem('locale', preferred);
@@ -132,7 +148,9 @@ export function LanguageProvider({
       }
     };
     void syncBarbershopLanguage();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {

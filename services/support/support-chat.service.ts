@@ -3,7 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type SupportPlan = 'free' | 'pro' | 'enterprise';
 export type SupportSenderType = 'customer' | 'admin';
-export type SupportStatus = 'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
+export type SupportStatus =
+  'pending' | 'open' | 'waiting_customer' | 'closed' | 'closed_unresolved';
 
 export function supportPriority(plan: SupportPlan) {
   return plan === 'enterprise' ? 3 : plan === 'pro' ? 2 : 1;
@@ -35,7 +36,10 @@ export async function getEffectiveSupportPlan(
   if (assignmentResult.error && assignmentResult.error.code !== 'PGRST116') {
     throw new Error('SUPPORT_PLAN_LOOKUP_FAILED');
   }
-  if (subscriptionResult.error && subscriptionResult.error.code !== 'PGRST116') {
+  if (
+    subscriptionResult.error &&
+    subscriptionResult.error.code !== 'PGRST116'
+  ) {
     throw new Error('SUPPORT_SUBSCRIPTION_LOOKUP_FAILED');
   }
 
@@ -48,7 +52,8 @@ export async function getEffectiveSupportPlan(
     return normalizeSupportPlan(subscription.plan_override);
   }
   if (
-    (subscription?.status === 'active' || subscription?.status === 'trialing') &&
+    (subscription?.status === 'active' ||
+      subscription?.status === 'trialing') &&
     (subscription?.plan === 'pro' || subscription?.plan === 'enterprise')
   ) {
     return subscription.plan;
@@ -96,14 +101,16 @@ export async function getPlatformSupportEmail(admin: SupabaseClient) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) =>
-    ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    })[character] ?? character,
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[character] ?? character,
   );
 }
 
@@ -114,7 +121,8 @@ function getBaseUrl() {
     'https://barbers.silentra.me';
   try {
     const url = new URL(configured);
-    if (url.protocol === 'https:' || url.protocol === 'http:') return url.origin;
+    if (url.protocol === 'https:' || url.protocol === 'http:')
+      return url.origin;
   } catch {
     // Fall through to the canonical production URL.
   }
@@ -146,13 +154,17 @@ export async function deliverSupportEmailNotification(
     .maybeSingle();
 
   if (notificationError || !notification) {
-    console.error('[SUPPORT_EMAIL_OUTBOX_LOOKUP_FAILED]', notificationError?.code ?? 'NOT_FOUND');
+    console.error(
+      '[SUPPORT_EMAIL_OUTBOX_LOOKUP_FAILED]',
+      notificationError?.code ?? 'NOT_FOUND',
+    );
     return { sent: false, error: 'OUTBOX_ENTRY_NOT_FOUND' } as const;
   }
 
   const row = notification as SupportNotification;
   if (row.status === 'sent') return { sent: true } as const;
-  if (row.attempts >= 5) return { sent: false, error: 'RETRY_LIMIT_REACHED' } as const;
+  if (row.attempts >= 5)
+    return { sent: false, error: 'RETRY_LIMIT_REACHED' } as const;
   const now = new Date();
   if (Date.parse(row.next_attempt_at) > now.getTime()) {
     return { sent: false, error: 'RETRY_NOT_DUE' } as const;
@@ -176,7 +188,10 @@ export async function deliverSupportEmailNotification(
     .maybeSingle();
 
   if (claimError) {
-    console.error('[SUPPORT_EMAIL_OUTBOX_CLAIM_FAILED]', claimError.code ?? 'UNKNOWN');
+    console.error(
+      '[SUPPORT_EMAIL_OUTBOX_CLAIM_FAILED]',
+      claimError.code ?? 'UNKNOWN',
+    );
     return { sent: false, error: 'OUTBOX_CLAIM_FAILED' } as const;
   }
   if (!claim) return { sent: false, error: 'OUTBOX_ALREADY_CLAIMED' } as const;
@@ -194,7 +209,12 @@ export async function deliverSupportEmailNotification(
       .maybeSingle(),
   ]);
 
-  if (conversationResult.error || !conversationResult.data || messageResult.error || !messageResult.data) {
+  if (
+    conversationResult.error ||
+    !conversationResult.data ||
+    messageResult.error ||
+    !messageResult.data
+  ) {
     const errorCode = 'SUPPORT_EMAIL_CONTEXT_LOOKUP_FAILED';
     await admin
       .from('support_email_notifications')
@@ -217,19 +237,27 @@ export async function deliverSupportEmailNotification(
     .eq('id', conversationResult.data.barbershop_id)
     .maybeSingle();
   if (shopError) {
-    console.error('[SUPPORT_EMAIL_SHOP_LOOKUP_FAILED]', shopError.code ?? 'UNKNOWN');
+    console.error(
+      '[SUPPORT_EMAIL_SHOP_LOOKUP_FAILED]',
+      shopError.code ?? 'UNKNOWN',
+    );
   }
 
   const plan = normalizeSupportPlan(conversationResult.data.plan);
   const english = shop?.default_language === 'en';
-  const shopName = shop?.name || (english ? 'your barbershop' : 'a tua barbearia');
+  const shopName =
+    shop?.name || (english ? 'your barbershop' : 'a tua barbearia');
   const isAdminRecipient = row.recipient_type === 'admin';
   const target = isAdminRecipient
     ? `/silentra-admin?tab=support&conversationId=${encodeURIComponent(row.conversation_id)}`
     : `/dashboard/suporte?ticketId=${encodeURIComponent(row.conversation_id)}`;
   const title = isAdminRecipient
-    ? english ? 'New support message' : 'Nova mensagem de suporte'
-    : english ? 'Silentra has replied to your support conversation' : 'Tens uma nova mensagem da equipa Silentra';
+    ? english
+      ? 'New support message'
+      : 'Nova mensagem de suporte'
+    : english
+      ? 'Silentra has replied to your support conversation'
+      : 'Tens uma nova mensagem da equipa Silentra';
   const description = isAdminRecipient
     ? english
       ? `${shopName} (${plan.toUpperCase()}) sent a message in the support chat.`
@@ -245,7 +273,7 @@ export async function deliverSupportEmailNotification(
         <h1 style="font-size:22px;line-height:1.3;margin:14px 0;color:#18181b">${escapeHtml(title)}</h1>
         <p style="font-size:14px;line-height:1.7;color:#52525b">${escapeHtml(description)}</p>
         <div style="margin:22px 0;padding:16px;border-radius:10px;background:#f4f4f5;font-size:14px;line-height:1.7;color:#3f3f46;white-space:pre-wrap">${escapeHtml(excerpt)}${String(messageResult.data.body).length > 600 ? '…' : ''}</div>
-        <a href="${getBaseUrl()}${target}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-size:14px;font-weight:700">${isAdminRecipient ? (english ? 'Open Silentra Admin' : 'Abrir Silentra Admin') : (english ? 'Open conversation' : 'Abrir conversa')}</a>
+        <a href="${getBaseUrl()}${target}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-size:14px;font-weight:700">${isAdminRecipient ? (english ? 'Open Silentra Admin' : 'Abrir Silentra Admin') : english ? 'Open conversation' : 'Abrir conversa'}</a>
         <p style="margin-top:24px;font-size:11px;line-height:1.6;color:#a1a1aa">${english ? 'You received this email because a new message was sent in your Silentra support conversation. Reply directly in the platform.' : 'Recebeste este email porque foi enviada uma nova mensagem na tua conversa de suporte Silentra. Responde diretamente na plataforma.'}</p>
       </div>
     </div>`;
@@ -268,7 +296,11 @@ export async function deliverSupportEmailNotification(
         last_error: null,
       })
       .eq('id', row.id);
-    if (error) console.error('[SUPPORT_EMAIL_OUTBOX_MARK_SENT_FAILED]', error.code ?? 'UNKNOWN');
+    if (error)
+      console.error(
+        '[SUPPORT_EMAIL_OUTBOX_MARK_SENT_FAILED]',
+        error.code ?? 'UNKNOWN',
+      );
     return { sent: true } as const;
   }
 
@@ -281,10 +313,16 @@ export async function deliverSupportEmailNotification(
       status: 'failed',
       attempts: nextAttemptNumber,
       last_error: safeError,
-      next_attempt_at: new Date(Date.now() + backoffMinutes * 60_000).toISOString(),
+      next_attempt_at: new Date(
+        Date.now() + backoffMinutes * 60_000,
+      ).toISOString(),
     })
     .eq('id', row.id);
-  if (error) console.error('[SUPPORT_EMAIL_OUTBOX_MARK_FAILED]', error.code ?? 'UNKNOWN');
+  if (error)
+    console.error(
+      '[SUPPORT_EMAIL_OUTBOX_MARK_FAILED]',
+      error.code ?? 'UNKNOWN',
+    );
   console.error('[SUPPORT_EMAIL_DELIVERY_FAILED]', {
     notificationId: row.id,
     attempts: nextAttemptNumber,

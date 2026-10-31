@@ -15,29 +15,50 @@ function collect(directory) {
       if (!ignoredDirectories.has(entry.name)) collect(childPath);
       continue;
     }
-    if (entry.isFile() && entry.name.endsWith('.tsx')) files.push(join(directory, entry.name));
+    if (entry.isFile() && entry.name.endsWith('.tsx'))
+      files.push(join(directory, entry.name));
   }
 }
 
 for (const directory of roots) collect(join(root, directory));
 
 function hasAttribute(opening, names) {
-  return opening.attributes.properties.some((attribute) =>
-    ts.isJsxAttribute(attribute) && names.includes(attribute.name.getText()),
+  return opening.attributes.properties.some(
+    (attribute) =>
+      ts.isJsxAttribute(attribute) && names.includes(attribute.name.getText()),
   );
 }
 
 function expressionHasName(expression) {
   if (!expression) return false;
-  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression) || ts.isNumericLiteral(expression)) return true;
+  if (
+    ts.isStringLiteral(expression) ||
+    ts.isNoSubstitutionTemplateLiteral(expression) ||
+    ts.isNumericLiteral(expression)
+  )
+    return true;
   if (ts.isCallExpression(expression)) return true;
-  if (ts.isJsxElement(expression) || ts.isJsxFragment(expression)) return expression.children.some(jsxHasName);
-  if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression) || ts.isIdentifier(expression)) return true;
+  if (ts.isJsxElement(expression) || ts.isJsxFragment(expression))
+    return expression.children.some(jsxHasName);
+  if (
+    ts.isPropertyAccessExpression(expression) ||
+    ts.isElementAccessExpression(expression) ||
+    ts.isIdentifier(expression)
+  )
+    return true;
   if (ts.isConditionalExpression(expression)) {
-    return expressionHasName(expression.whenTrue) && expressionHasName(expression.whenFalse);
+    return (
+      expressionHasName(expression.whenTrue) &&
+      expressionHasName(expression.whenFalse)
+    );
   }
-  if (ts.isBinaryExpression(expression) && expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken) {
-    return expressionHasName(expression.left) && expressionHasName(expression.right);
+  if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken
+  ) {
+    return (
+      expressionHasName(expression.left) && expressionHasName(expression.right)
+    );
   }
   return false;
 }
@@ -56,17 +77,37 @@ function jsxHasName(node) {
 const violations = [];
 for (const file of files) {
   const sourceText = readFileSync(file, 'utf8');
-  const source = ts.createSourceFile(file, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const source = ts.createSourceFile(
+    file,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   function visit(node) {
     if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
       const opening = ts.isJsxElement(node) ? node.openingElement : node;
       const tag = opening.tagName.getText(source);
       if (tag === 'button' || tag === 'Button') {
-        const hasExplicitName = hasAttribute(opening, ['aria-label', 'aria-labelledby', 'title']);
-        const hasTextName = ts.isJsxElement(node) && node.children.some(jsxHasName);
+        const hasExplicitName = hasAttribute(opening, [
+          'aria-label',
+          'aria-labelledby',
+          'title',
+        ]);
+        const hasTextName =
+          ts.isJsxElement(node) && node.children.some(jsxHasName);
         if (!hasExplicitName && !hasTextName) {
-          const { line } = source.getLineAndCharacterOfPosition(opening.getStart(source));
-          violations.push(relative(root, file) + ':' + (line + 1) + ' <' + tag + '> has no accessible name');
+          const { line } = source.getLineAndCharacterOfPosition(
+            opening.getStart(source),
+          );
+          violations.push(
+            relative(root, file) +
+              ':' +
+              (line + 1) +
+              ' <' +
+              tag +
+              '> has no accessible name',
+          );
         }
       }
     }
@@ -78,8 +119,12 @@ for (const file of files) {
 if (violations.length) {
   console.error('Button accessibility audit failed:');
   for (const violation of violations) console.error('- ' + violation);
-  console.error('Add visible text, aria-label, aria-labelledby, or a meaningful title.');
+  console.error(
+    'Add visible text, aria-label, aria-labelledby, or a meaningful title.',
+  );
   process.exitCode = 1;
 } else {
-  console.log('Button accessibility audit passed for ' + files.length + ' TSX modules.');
+  console.log(
+    'Button accessibility audit passed for ' + files.length + ' TSX modules.',
+  );
 }

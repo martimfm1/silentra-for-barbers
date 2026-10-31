@@ -273,16 +273,31 @@ export function LegalDocumentPage({
         </div>
 
         <nav
-          aria-label={activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'}
+          aria-label={
+            activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'
+          }
           className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-white/10 pt-6 text-sm text-zinc-400"
         >
-          <Link href="/terms" className="underline decoration-white/20 underline-offset-4 hover:text-white">
-            {activeLocale === 'pt' ? 'Termos e Condições' : 'Terms and Conditions'}
+          <Link
+            href="/terms"
+            className="underline decoration-white/20 underline-offset-4 hover:text-white"
+          >
+            {activeLocale === 'pt'
+              ? 'Termos e Condições'
+              : 'Terms and Conditions'}
           </Link>
-          <Link href="/privacy" className="underline decoration-white/20 underline-offset-4 hover:text-white">
-            {activeLocale === 'pt' ? 'Política de Privacidade' : 'Privacy Policy'}
+          <Link
+            href="/privacy"
+            className="underline decoration-white/20 underline-offset-4 hover:text-white"
+          >
+            {activeLocale === 'pt'
+              ? 'Política de Privacidade'
+              : 'Privacy Policy'}
           </Link>
-          <Link href="/cookies" className="underline decoration-white/20 underline-offset-4 hover:text-white">
+          <Link
+            href="/cookies"
+            className="underline decoration-white/20 underline-offset-4 hover:text-white"
+          >
             {activeLocale === 'pt' ? 'Política de Cookies' : 'Cookie Policy'}
           </Link>
         </nav>

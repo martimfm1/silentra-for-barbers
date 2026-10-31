@@ -636,9 +636,7 @@ export default function MarketplaceOrderTrackingClient() {
                               .join(' ')}
                           </p>
                           {countryLabel(order.shipping.country) && (
-                            <p>
-                              {countryLabel(order.shipping.country)}
-                            </p>
+                            <p>{countryLabel(order.shipping.country)}</p>
                           )}
                         </div>
                       </div>

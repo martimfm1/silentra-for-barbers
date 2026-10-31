@@ -39,10 +39,8 @@ async function POST__unobserved(
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;
 
-    const subject =
-      typeof body.subject === 'string' ? body.subject.trim() : '';
-    const message =
-      typeof body.message === 'string' ? body.message.trim() : '';
+    const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
+    const message = typeof body.message === 'string' ? body.message.trim() : '';
 
     if (
       subject.length < 3 ||

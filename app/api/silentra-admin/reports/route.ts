@@ -10,7 +10,9 @@ async function GET__unobserved(request: Request) {
     const { admin } = await requirePlatformAdmin();
     const url = new URL(request.url);
     const rawDays = Number(url.searchParams.get('days') ?? 30);
-    const days = Number.isInteger(rawDays) ? Math.max(7, Math.min(rawDays, 90)) : 30;
+    const days = Number.isInteger(rawDays)
+      ? Math.max(7, Math.min(rawDays, 90))
+      : 30;
     const { data, error } = await admin.rpc('get_platform_admin_reports', {
       p_days: days,
     });
@@ -21,7 +23,10 @@ async function GET__unobserved(request: Request) {
         message: error.message,
       });
       return NextResponse.json(
-        { ok: false, error: 'Não foi possível gerar os relatórios da plataforma.' },
+        {
+          ok: false,
+          error: 'Não foi possível gerar os relatórios da plataforma.',
+        },
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
@@ -41,10 +46,16 @@ async function GET__unobserved(request: Request) {
       error: error instanceof Error ? error.message : 'UNKNOWN',
     });
     return NextResponse.json(
-      { ok: false, error: 'Não foi possível gerar os relatórios da plataforma.' },
+      {
+        ok: false,
+        error: 'Não foi possível gerar os relatórios da plataforma.',
+      },
       { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }
 
-export const GET = withApiObservability('/api/silentra-admin/reports', GET__unobserved);
+export const GET = withApiObservability(
+  '/api/silentra-admin/reports',
+  GET__unobserved,
+);

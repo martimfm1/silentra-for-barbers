@@ -144,9 +144,7 @@ async function GET_unobserved(_request: Request) {
       emailCheck,
     ] = await Promise.all([
       timedCheck('database', 'Base de dados Supabase', true, async () => {
-        const { error } = await admin
-          .from('barbershops')
-          .select('id').limit(1);
+        const { error } = await admin.from('barbershops').select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -157,7 +155,8 @@ async function GET_unobserved(_request: Request) {
       timedCheck('telemetry', 'Registo de pedidos API', false, async () => {
         const { error } = await admin
           .from('platform_api_logs')
-          .select('id').limit(1);
+          .select('id')
+          .limit(1);
         return {
           ok: !error,
           detail: error
@@ -166,9 +165,7 @@ async function GET_unobserved(_request: Request) {
         };
       }),
       timedCheck('barbershops', 'Dados de barbearias', true, async () => {
-        const { error } = await admin
-          .from('barbershops')
-          .select('id').limit(1);
+        const { error } = await admin.from('barbershops').select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -177,9 +174,7 @@ async function GET_unobserved(_request: Request) {
         };
       }),
       timedCheck('users', 'Utilizadores e permissões', true, async () => {
-        const { error } = await admin
-          .from('users')
-          .select('id').limit(1);
+        const { error } = await admin.from('users').select('id').limit(1);
         return {
           ok: !error,
           detail: error
@@ -190,7 +185,8 @@ async function GET_unobserved(_request: Request) {
       timedCheck('appointments', 'Marcações', true, async () => {
         const { error } = await admin
           .from('appointments')
-          .select('id').limit(1);
+          .select('id')
+          .limit(1);
         return {
           ok: !error,
           detail: error
@@ -201,7 +197,8 @@ async function GET_unobserved(_request: Request) {
       timedCheck('subscriptions', 'Subscrições e planos', true, async () => {
         const { error } = await admin
           .from('subscriptions')
-          .select('id').limit(1);
+          .select('id')
+          .limit(1);
         return {
           ok: !error,
           detail: error
@@ -210,9 +207,7 @@ async function GET_unobserved(_request: Request) {
         };
       }),
       timedCheck('audit_logs', 'Auditoria administrativa', true, async () => {
-        const { error } = await admin
-          .from('audit_logs')
-          .select('id').limit(1);
+        const { error } = await admin.from('audit_logs').select('id').limit(1);
         return {
           ok: !error,
           detail: error

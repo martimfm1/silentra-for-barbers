@@ -84,28 +84,47 @@ type TemplateKey = keyof typeof templatesByLocale.pt;
 
 const pageCopy = {
   pt: {
-    communication: 'Comunicação', title: 'Mensagens',
-    intro: 'Envia emails personalizados aos teus clientes sem complicar o processo.',
-    birthdays: 'Aniversários', secureEmail: 'Email seguro',
+    communication: 'Comunicação',
+    title: 'Mensagens',
+    intro:
+      'Envia emails personalizados aos teus clientes sem complicar o processo.',
+    birthdays: 'Aniversários',
+    secureEmail: 'Email seguro',
     birthdayAutomation: 'Automação de aniversários',
-    birthdayDescription: 'Transforma uma data importante numa oportunidade de voltar a contactar o cliente.',
-    manageAutomation: 'Gerir automação', newMessage: 'Nova mensagem',
-    newMessageDescription: 'Escolhe um cliente, usa um modelo e ajusta apenas o necessário.',
-    recipient: 'Destinatário', loadingClients: 'A carregar clientes…',
-    chooseClient: 'Selecionar cliente', customer: 'Cliente',
-    subject: 'Assunto', subjectHint: 'Um assunto curto torna a mensagem mais fácil de compreender.',
-    message: 'Mensagem', availableVariables: 'Variáveis disponíveis:',
-    clientMissingEmail: 'Este cliente não tem email registado. Escolhe outro cliente ou atualiza o contacto primeiro.',
-    sending: 'A enviar…', sendEmail: 'Enviar email',
-    previewAria: 'Pré-visualização da mensagem', preview: 'Pré-visualização',
-    previewDescription: 'Vê o resultado final antes de enviar.', to: 'para',
-    sampleEmail: 'cliente@exemplo.pt', noSubject: 'Sem assunto',
-    messagePlaceholder: 'A tua mensagem aparecerá aqui.', phone: 'Telemóvel',
+    birthdayDescription:
+      'Transforma uma data importante numa oportunidade de voltar a contactar o cliente.',
+    manageAutomation: 'Gerir automação',
+    newMessage: 'Nova mensagem',
+    newMessageDescription:
+      'Escolhe um cliente, usa um modelo e ajusta apenas o necessário.',
+    recipient: 'Destinatário',
+    loadingClients: 'A carregar clientes…',
+    chooseClient: 'Selecionar cliente',
+    customer: 'Cliente',
+    subject: 'Assunto',
+    subjectHint: 'Um assunto curto torna a mensagem mais fácil de compreender.',
+    message: 'Mensagem',
+    availableVariables: 'Variáveis disponíveis:',
+    clientMissingEmail:
+      'Este cliente não tem email registado. Escolhe outro cliente ou atualiza o contacto primeiro.',
+    sending: 'A enviar…',
+    sendEmail: 'Enviar email',
+    previewAria: 'Pré-visualização da mensagem',
+    preview: 'Pré-visualização',
+    previewDescription: 'Vê o resultado final antes de enviar.',
+    to: 'para',
+    sampleEmail: 'cliente@exemplo.pt',
+    noSubject: 'Sem assunto',
+    messagePlaceholder: 'A tua mensagem aparecerá aqui.',
+    phone: 'Telemóvel',
     smsDescription: 'O envio manual por SMS está temporariamente desativado.',
     disabled: 'Desativado',
-    smsEnableDescription: 'Quando o serviço SMS for ativado, esta área poderá ser disponibilizada sem alterar o compositor de email.',
-    sendSms: 'Enviar SMS', fallbackShop: 'a tua barbearia',
-    customerName: 'Nome do cliente', selectClient: 'Seleciona um cliente.',
+    smsEnableDescription:
+      'Quando o serviço SMS for ativado, esta área poderá ser disponibilizada sem alterar o compositor de email.',
+    sendSms: 'Enviar SMS',
+    fallbackShop: 'a tua barbearia',
+    customerName: 'Nome do cliente',
+    selectClient: 'Seleciona um cliente.',
     noEmail: 'O cliente selecionado não tem email.',
     requiredMessage: 'Preenche o assunto e a mensagem.',
     loadClientsFailed: 'Não foi possível carregar os clientes.',
@@ -116,28 +135,47 @@ const pageCopy = {
     template: 'Modelo',
   },
   en: {
-    communication: 'Communication', title: 'Messages',
-    intro: 'Send personalised emails to your clients without making the process complicated.',
-    birthdays: 'Birthdays', secureEmail: 'Secure email',
+    communication: 'Communication',
+    title: 'Messages',
+    intro:
+      'Send personalised emails to your clients without making the process complicated.',
+    birthdays: 'Birthdays',
+    secureEmail: 'Secure email',
     birthdayAutomation: 'Birthday automation',
-    birthdayDescription: 'Turn an important date into an opportunity to reconnect with a client.',
-    manageAutomation: 'Manage automation', newMessage: 'New message',
-    newMessageDescription: 'Choose a client, use a template and adjust only what you need.',
-    recipient: 'Recipient', loadingClients: 'Loading clients…',
-    chooseClient: 'Select a client', customer: 'Client',
-    subject: 'Subject', subjectHint: 'A short subject makes your message easier to understand.',
-    message: 'Message', availableVariables: 'Available variables:',
-    clientMissingEmail: 'This client has no email address on record. Choose another client or update the contact first.',
-    sending: 'Sending…', sendEmail: 'Send email',
-    previewAria: 'Message preview', preview: 'Preview',
-    previewDescription: 'Review the final result before sending.', to: 'to',
-    sampleEmail: 'client@example.com', noSubject: 'No subject',
-    messagePlaceholder: 'Your message will appear here.', phone: 'Mobile phone',
+    birthdayDescription:
+      'Turn an important date into an opportunity to reconnect with a client.',
+    manageAutomation: 'Manage automation',
+    newMessage: 'New message',
+    newMessageDescription:
+      'Choose a client, use a template and adjust only what you need.',
+    recipient: 'Recipient',
+    loadingClients: 'Loading clients…',
+    chooseClient: 'Select a client',
+    customer: 'Client',
+    subject: 'Subject',
+    subjectHint: 'A short subject makes your message easier to understand.',
+    message: 'Message',
+    availableVariables: 'Available variables:',
+    clientMissingEmail:
+      'This client has no email address on record. Choose another client or update the contact first.',
+    sending: 'Sending…',
+    sendEmail: 'Send email',
+    previewAria: 'Message preview',
+    preview: 'Preview',
+    previewDescription: 'Review the final result before sending.',
+    to: 'to',
+    sampleEmail: 'client@example.com',
+    noSubject: 'No subject',
+    messagePlaceholder: 'Your message will appear here.',
+    phone: 'Mobile phone',
     smsDescription: 'Manual SMS sending is temporarily disabled.',
     disabled: 'Disabled',
-    smsEnableDescription: 'When SMS service is enabled, this area can be made available without changing the email composer.',
-    sendSms: 'Send SMS', fallbackShop: 'your barbershop',
-    customerName: 'Client name', selectClient: 'Select a client.',
+    smsEnableDescription:
+      'When SMS service is enabled, this area can be made available without changing the email composer.',
+    sendSms: 'Send SMS',
+    fallbackShop: 'your barbershop',
+    customerName: 'Client name',
+    selectClient: 'Select a client.',
     noEmail: 'The selected client does not have an email address.',
     requiredMessage: 'Enter both a subject and a message.',
     loadClientsFailed: 'Could not load clients.',
@@ -171,10 +209,7 @@ export default function MensagensPage() {
           cache: 'no-store',
         });
         const clientsData = await clientsResponse.json();
-        if (!clientsResponse.ok)
-          throw new Error(
-            copy.loadClientsFailed,
-          );
+        if (!clientsResponse.ok) throw new Error(copy.loadClientsFailed);
         setClients(clientsData.clients ?? []);
 
         if (barbershopId) {
@@ -217,8 +252,7 @@ export default function MensagensPage() {
 
   const sendEmail = async () => {
     if (!clientId) return toast.error(copy.selectClient);
-    if (!selectedClient?.email)
-      return toast.error(copy.noEmail);
+    if (!selectedClient?.email) return toast.error(copy.noEmail);
     if (!subject.trim() || !body.trim())
       return toast.error(copy.requiredMessage);
 
@@ -252,7 +286,8 @@ export default function MensagensPage() {
         <header className="dashboard-page-header border-b border-white/10 pb-6">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-              <Mail className="size-4" aria-hidden="true" /> {copy.communication}
+              <Mail className="size-4" aria-hidden="true" />{' '}
+              {copy.communication}
             </div>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">
               {copy.title}
@@ -318,9 +353,7 @@ export default function MensagensPage() {
                 <Mail className="size-5 text-emerald-400" aria-hidden="true" />
                 {copy.newMessage}
               </CardTitle>
-              <CardDescription>
-                {copy.newMessageDescription}
-              </CardDescription>
+              <CardDescription>{copy.newMessageDescription}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 pt-6">
               <div className="space-y-2">
@@ -345,8 +378,8 @@ export default function MensagensPage() {
                       .filter((client) => client.email)
                       .map((client) => (
                         <SelectItem key={client.id} value={client.id}>
-                          {client.name_complete || client.name || copy.customer} —{' '}
-                          {client.email}
+                          {client.name_complete || client.name || copy.customer}{' '}
+                          — {client.email}
                         </SelectItem>
                       ))}
                   </SelectContent>
@@ -390,9 +423,7 @@ export default function MensagensPage() {
                     maxLength={180}
                     className="min-h-11 bg-black/20"
                   />
-                  <p className="text-xs text-zinc-500">
-                    {copy.subjectHint}
-                  </p>
+                  <p className="text-xs text-zinc-500">{copy.subjectHint}</p>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <div className="flex items-center justify-between gap-3">
@@ -439,19 +470,14 @@ export default function MensagensPage() {
             </CardContent>
           </Card>
 
-          <aside
-            className="space-y-5"
-            aria-label={copy.previewAria}
-          >
+          <aside className="space-y-5" aria-label={copy.previewAria}>
             <Card className="dashboard-card overflow-hidden border-white/10 bg-white/[0.03]">
               <CardHeader className="border-b border-white/10 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Eye className="size-4 text-emerald-400" aria-hidden="true" />
                   {copy.preview}
                 </CardTitle>
-                <CardDescription>
-                  {copy.previewDescription}
-                </CardDescription>
+                <CardDescription>{copy.previewDescription}</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-5">
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-xl">
@@ -487,9 +513,7 @@ export default function MensagensPage() {
                   <Smartphone className="size-4" aria-hidden="true" />
                   {copy.phone}
                 </CardTitle>
-                <CardDescription>
-                  {copy.smsDescription}
-                </CardDescription>
+                <CardDescription>{copy.smsDescription}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-lg border border-dashed border-white/10 bg-zinc-950/60 p-4">

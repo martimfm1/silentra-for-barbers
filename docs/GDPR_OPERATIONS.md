@@ -7,6 +7,7 @@
 A política pública em `/privacy` descreve o modelo pretendido: a Silentra atua como responsável pelo tratamento de dados de conta, segurança, faturação e suporte; a barbearia é normalmente responsável pelos dados dos seus clientes finais e a Silentra atua como subcontratante quando os processa em seu nome. Confirmar cada fluxo e os papéis reais antes de assinar contratos.
 
 Categorias conhecidas a rever:
+
 - Conta e autenticação: nome, email, telefone, função e identificadores de sessão.
 - Operação da barbearia: perfil, horários, serviços, equipa e configurações.
 - Marcações/CRM: contacto do cliente, serviço, profissional, data/hora, estado e notas.
@@ -34,6 +35,7 @@ Canal publicado: `contact@silentra.me`. Até existir um portal automatizado, os 
 ## 3. Retenção e eliminação
 
 Definir e aprovar uma tabela de retenção por categoria antes de lançamento:
+
 - Contas e perfis.
 - Marcações e CRM.
 - Faturação e documentos financeiros.
@@ -49,6 +51,7 @@ Para cada categoria, especificar finalidade, base legal, período, evento de in�
 Manter uma lista verificável que inclua, no mínimo, alojamento/runtime (Vercel), base de dados/auth (Supabase), pagamentos (Stripe), email transacional (Brevo), analytics/pixels efetivamente ativos e storage opcional (AWS/S3, se ativado).
 
 Para cada fornecedor, registar:
+
 - Serviço e finalidade.
 - Categorias de dados transmitidos.
 - Localização/regiões e transferências internacionais.

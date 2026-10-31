@@ -137,7 +137,6 @@ body:has([data-slot='drawer-content'].max-w-lg.rounded-none)
   }
 }
 
-
 /* Mobile UX consistency: fit common surfaces to the viewport instead of introducing X scrolling. */
 @media (max-width: 639px) {
   html,
@@ -277,24 +276,25 @@ body > * {
 
 /* Long names, URLs, codes and customer-provided values must wrap inside
    the container instead of increasing the page's intrinsic width. */
-body :where(
-  p,
-  a,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  label,
-  strong,
-  em,
-  b,
-  li,
-  td,
-  th,
-  [data-slot='card-title']
-) {
+body
+  :where(
+    p,
+    a,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    label,
+    strong,
+    em,
+    b,
+    li,
+    td,
+    th,
+    [data-slot='card-title']
+  ) {
   overflow-wrap: anywhere;
 }
 
@@ -425,11 +425,11 @@ body :where(
     max-inline-size: 100%;
   }
 
-  .silentra-dashboard-main :is(input, select, textarea, table, canvas, svg, video, img) {
+  .silentra-dashboard-main
+    :is(input, select, textarea, table, canvas, svg, video, img) {
     max-inline-size: 100%;
   }
 }
-
 
 /* Mobile dashboard must behave like the public landing page: fixed viewport width,
    no horizontal panning, and no transformed page layer expanding its visual bounds. */

@@ -140,7 +140,11 @@ export default function ResetPasswordPage() {
                 </Field>
 
                 <Button
-            aria-label={isSubmitting ? "A atualizar palavra-passe" : "Guardar nova palavra-passe"}
+                  aria-label={
+                    isSubmitting
+                      ? 'A atualizar palavra-passe'
+                      : 'Guardar nova palavra-passe'
+                  }
                   type="submit"
                   disabled={isSubmitting || password.length < 12}
                   className="h-12 w-full rounded-full bg-zinc-50 text-xs font-bold text-zinc-950 hover:bg-white transition-all shadow-md mt-1"

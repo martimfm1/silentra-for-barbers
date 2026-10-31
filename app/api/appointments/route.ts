@@ -15,7 +15,6 @@ const APPOINTMENT_WRITE_ROLES = [
   'staff',
 ] as const;
 
-
 const APPOINTMENT_READ_STATUSES = new Set([
   'pending',
   'scheduled',
@@ -31,11 +30,12 @@ function getLisbonDate(): string {
     day: '2-digit',
   }).formatToParts(new Date());
   const values = Object.fromEntries(
-    parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]),
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]),
   );
   return `${values.year}-${values.month}-${values.day}`;
 }
-
 
 function getLisbonOffsetMinutes(utcInstant: Date): number {
   const value = new Intl.DateTimeFormat('en-GB', {
@@ -44,14 +44,19 @@ function getLisbonOffsetMinutes(utcInstant: Date): number {
     hour: '2-digit',
     minute: '2-digit',
     hourCycle: 'h23',
-  }).formatToParts(utcInstant).find((part) => part.type === 'timeZoneName')?.value;
+  })
+    .formatToParts(utcInstant)
+    .find((part) => part.type === 'timeZoneName')?.value;
   const match = /^GMT(?:([+-])(\d{1,2})(?::(\d{2}))?)?$/.exec(value ?? 'GMT');
   if (!match) return 0;
   const sign = match[1] === '-' ? -1 : 1;
   return sign * (Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0));
 }
 
-function getLisbonDayBounds(date: string): { start: string; endExclusive: string } {
+function getLisbonDayBounds(date: string): {
+  start: string;
+  endExclusive: string;
+} {
   const [year, month, day] = date.split('-').map(Number);
   const startUtc = Date.UTC(year, month - 1, day);
   const nextDayUtc = Date.UTC(year, month - 1, day + 1);
@@ -78,9 +83,10 @@ async function GET__unobserved(request: Request) {
     if (!tenant.ok) {
       return NextResponse.json(
         {
-          error: tenant.status === 401
-            ? 'Não autenticado.'
-            : 'Sem permissão para consultar a agenda.',
+          error:
+            tenant.status === 401
+              ? 'Não autenticado.'
+              : 'Sem permissão para consultar a agenda.',
         },
         { status: tenant.status },
       );
@@ -95,7 +101,10 @@ async function GET__unobserved(request: Request) {
         .maybeSingle();
 
       if (grantError) {
-        console.error('[API_APPOINTMENTS_LIST_PERMISSION_ERROR]', grantError.code ?? 'UNKNOWN');
+        console.error(
+          '[API_APPOINTMENTS_LIST_PERMISSION_ERROR]',
+          grantError.code ?? 'UNKNOWN',
+        );
         return NextResponse.json(
           { error: 'Não foi possível validar as permissões da agenda.' },
           { status: 503 },
@@ -116,7 +125,10 @@ async function GET__unobserved(request: Request) {
           .limit(1)
           .maybeSingle();
         if (legacyError) {
-          console.error('[API_APPOINTMENTS_LIST_LEGACY_PERMISSION_ERROR]', legacyError.code ?? 'UNKNOWN');
+          console.error(
+            '[API_APPOINTMENTS_LIST_LEGACY_PERMISSION_ERROR]',
+            legacyError.code ?? 'UNKNOWN',
+          );
           return NextResponse.json(
             { error: 'Não foi possível validar as permissões da agenda.' },
             { status: 503 },
@@ -214,9 +226,7 @@ async function GET__unobserved(request: Request) {
           client?.name_complete?.trim() ||
           'Cliente',
         clientPhone:
-          appointment.manual_phone?.trim() ||
-          client?.num_phone?.trim() ||
-          null,
+          appointment.manual_phone?.trim() || client?.num_phone?.trim() || null,
         clientEmail:
           appointment.manual_email?.trim().toLowerCase() ||
           client?.email?.trim().toLowerCase() ||
@@ -273,7 +283,10 @@ async function POST__unobserved(request: Request) {
         .maybeSingle();
 
       if (grantError) {
-        return NextResponse.json({ error: 'Não foi possível validar as permissões da agenda.' }, { status: 503 });
+        return NextResponse.json(
+          { error: 'Não foi possível validar as permissões da agenda.' },
+          { status: 503 },
+        );
       }
 
       let allowed = grant ? hasAgendaGrant(grant.permissions) : false;
@@ -288,19 +301,28 @@ async function POST__unobserved(request: Request) {
           .limit(1)
           .maybeSingle();
         if (legacyError) {
-          return NextResponse.json({ error: 'Não foi possível validar as permissões da agenda.' }, { status: 503 });
+          return NextResponse.json(
+            { error: 'Não foi possível validar as permissões da agenda.' },
+            { status: 503 },
+          );
         }
         allowed = legacyGrant?.allowed === true;
       }
 
       if (!allowed) {
-        return NextResponse.json({ error: 'Sem permissão para criar marcações.' }, { status: 403 });
+        return NextResponse.json(
+          { error: 'Sem permissão para criar marcações.' },
+          { status: 403 },
+        );
       }
     }
 
     const plan = await resolveAccessPlanForUser(tenant.userId);
     if (!hasPlanFeature(plan, 'appointments')) {
-      return NextResponse.json({ error: 'A agenda não está incluída no plano desta barbearia.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'A agenda não está incluída no plano desta barbearia.' },
+        { status: 403 },
+      );
     }
 
     const bodyResult = await readJsonObject(request, {

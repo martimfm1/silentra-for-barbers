@@ -228,7 +228,9 @@ function EditServiceDialog({
 
           <DialogFooter className="mt-2">
             <Button
-            aria-label={loadingService ? "A guardar serviço" : "Guardar alterações"}
+              aria-label={
+                loadingService ? 'A guardar serviço' : 'Guardar alterações'
+              }
               type="submit"
               disabled={loadingService}
               className="min-h-11 w-full bg-amber-600 text-white hover:bg-amber-500"

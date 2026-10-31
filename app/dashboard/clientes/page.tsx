@@ -214,7 +214,9 @@ function EditClientDialog({
                 className="text-xs text-zinc-400"
               >
                 {t('clientsPage.birthDate')}{' '}
-                <span className="text-zinc-600">{t('clientsPage.optional')}</span>
+                <span className="text-zinc-600">
+                  {t('clientsPage.optional')}
+                </span>
               </label>
               <input
                 id="edit-client-birth-date"
@@ -232,7 +234,7 @@ function EditClientDialog({
 
             <DialogFooter>
               <Button
-            aria-label={loading ? "A guardar cliente" : "Guardar cliente"}
+                aria-label={loading ? 'A guardar cliente' : 'Guardar cliente'}
                 type="submit"
                 disabled={loading}
                 className="min-h-11 w-full bg-emerald-600 text-white hover:bg-emerald-500"

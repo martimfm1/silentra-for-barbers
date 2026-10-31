@@ -13,11 +13,11 @@ O chat de suporte da plataforma é um canal privado entre o proprietário da bar
 
 ## Prioridade por plano
 
-| Plano efetivo | Prioridade | Comportamento |
-| --- | ---: | --- |
-| Enterprise | 3 | Ordem de tratamento superior |
-| Pro | 2 | Tratamento prioritário |
-| Free | 1 | Fila standard |
+| Plano efetivo | Prioridade | Comportamento                |
+| ------------- | ---------: | ---------------------------- |
+| Enterprise    |          3 | Ordem de tratamento superior |
+| Pro           |          2 | Tratamento prioritário       |
+| Free          |          1 | Fila standard                |
 
 O plano é resolvido no backend a partir de atribuições de plano válidas e subscrições elegíveis. Nunca é aceite um valor de plano ou prioridade enviado pelo browser.
 

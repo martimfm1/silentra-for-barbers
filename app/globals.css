@@ -642,7 +642,6 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   }
 }
 
-
 /* Mobile-first dashboard overflow contract: wrap content instead of creating an x-axis. */
 .dashboard-page,
 .dashboard-content,
@@ -711,7 +710,6 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   }
 }
 
-
 /* Mobile-first customer journeys and dashboard surfaces. */
 .silentra-page-shell,
 .silentra-page-content,
@@ -778,7 +776,6 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
     overflow-wrap: anywhere;
   }
 }
-
 
 /* Accessibility and navigation polish shared by every route. */
 :where(h1, h2, h3, h4, [id]) {

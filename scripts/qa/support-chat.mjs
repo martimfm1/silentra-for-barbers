@@ -23,14 +23,29 @@ for (const path of requiredFiles) {
 const migration = await readFile(requiredFiles[0], 'utf8');
 const ticketMigration = await readFile(requiredFiles[1], 'utf8');
 const ticketQuotaMigration = await readFile(requiredFiles[2], 'utf8');
-assert.match(migration, /alter table public\.support_conversations enable row level security/i);
-assert.match(migration, /revoke all on public\.support_messages from anon, authenticated/i);
+assert.match(
+  migration,
+  /alter table public\.support_conversations enable row level security/i,
+);
+assert.match(
+  migration,
+  /revoke all on public\.support_messages from anon, authenticated/i,
+);
 assert.match(migration, /support_send_message/i);
-assert.match(migration, /grant execute on function public\.support_send_message[\s\S]*to service_role/i);
+assert.match(
+  migration,
+  /grant execute on function public\.support_send_message[\s\S]*to service_role/i,
+);
 assert.match(migration, /support_email_notifications/i);
 assert.match(migration, /unique \(barbershop_id\)/i);
-assert.match(ticketMigration, /drop constraint if exists support_conversations_barbershop_id_key/i);
-assert.match(ticketMigration, /status in \('pending', 'open', 'waiting_customer', 'closed'\)/i);
+assert.match(
+  ticketMigration,
+  /drop constraint if exists support_conversations_barbershop_id_key/i,
+);
+assert.match(
+  ticketMigration,
+  /status in \('pending', 'open', 'waiting_customer', 'closed'\)/i,
+);
 assert.match(ticketMigration, /accepted_at timestamptz/i);
 assert.match(ticketMigration, /SUPPORT_TICKET_NOT_ACCEPTED/i);
 assert.match(ticketMigration, /SUPPORT_TICKET_CLOSED/i);
@@ -44,23 +59,41 @@ const supportUnreadCountsMigration = await readFile(
   'supabase/migrations/20261020221127_support_unread_counts_rpc.sql',
   'utf8',
 );
-assert.match(supportUnreadCountsMigration, /function public\.support_unread_counts/i);
-assert.match(supportUnreadCountsMigration, /group by message\.conversation_id/i);
-assert.match(supportUnreadCountsMigration, /grant execute on function public\.support_unread_counts[\s\S]*to service_role/i);
+assert.match(
+  supportUnreadCountsMigration,
+  /function public\.support_unread_counts/i,
+);
+assert.match(
+  supportUnreadCountsMigration,
+  /group by message\.conversation_id/i,
+);
+assert.match(
+  supportUnreadCountsMigration,
+  /grant execute on function public\.support_unread_counts[\s\S]*to service_role/i,
+);
 
 const everyMessageMigration = await readFile(
   'supabase/migrations/20261017130000_support_notify_every_message.sql',
   'utf8',
 );
 assert.match(everyMessageMigration, /Every message has a unique outbox entry/i);
-assert.match(everyMessageMigration, /insert into public\.support_email_notifications/i);
-assert.doesNotMatch(everyMessageMigration, /v_unread_count|if\s+v_unread_count\s*=\s*0/i);
+assert.match(
+  everyMessageMigration,
+  /insert into public\.support_email_notifications/i,
+);
+assert.doesNotMatch(
+  everyMessageMigration,
+  /v_unread_count|if\s+v_unread_count\s*=\s*0/i,
+);
 
 const service = await readFile(requiredFiles[3], 'utf8');
 assert.match(service, /getEffectiveSupportPlan/i);
 assert.match(service, /supportPriority/i);
 assert.match(service, /sendBrevoEmail/i);
-assert.match(service, /new message was sent in your Silentra support conversation/i);
+assert.match(
+  service,
+  /new message was sent in your Silentra support conversation/i,
+);
 assert.doesNotMatch(service, /if \(messageResult\.data\.read_at\)/);
 assert.match(service, /retryDueSupportEmailNotifications/i);
 
@@ -78,7 +111,10 @@ assert.match(adminApi, /support_send_message/i);
 assert.match(adminApi, /action === 'read'/);
 assert.match(adminApi, /action === 'accept'/);
 assert.match(adminApi, /SUPPORT_TICKET_LIMIT_REACHED/);
-assert.match(adminApi, /SUPPORT_TICKET_NOT_ACCEPTED|Aceita o ticket antes de responder/);
+assert.match(
+  adminApi,
+  /SUPPORT_TICKET_NOT_ACCEPTED|Aceita o ticket antes de responder/,
+);
 assert.match(adminApi, /support_unread_counts/i);
 assert.doesNotMatch(adminApi, /normalizedConversations = await Promise\.all/);
 
@@ -90,7 +126,10 @@ const customerUi = await readFile(requiredFiles[7], 'utf8');
 assert.match(customerUi, /\/api\/support\/conversations/);
 assert.match(customerUi, /Enviar mensagem/);
 assert.match(customerUi, /create_ticket/);
-assert.match(customerUi, /type FeedbackCategory = 'problem' \| 'suggestion' \| 'feedback'/);
+assert.match(
+  customerUi,
+  /type FeedbackCategory = 'problem' \| 'suggestion' \| 'feedback'/,
+);
 assert.match(customerUi, /support-ticket-category/);
 assert.match(customerUi, /Reportar um problema/);
 assert.match(customerUi, /Sugerir uma melhoria/);
@@ -107,7 +146,7 @@ assert.doesNotMatch(customerUi, /setInterval\(/);
 
 const adminUi = await readFile(requiredFiles[8], 'utf8');
 assert.match(adminUi, /planRank\[b\.plan\] - planRank\[a\.plan\]/);
-assert.ok(adminUi.includes("/api/silentra-admin/support"));
+assert.ok(adminUi.includes('/api/silentra-admin/support'));
 assert.match(adminUi, /statusFilter === 'unread'/);
 assert.match(adminUi, /acceptTicket/);
 assert.match(adminUi, /selected.status === 'pending'/);
@@ -120,11 +159,16 @@ assert.match(adminConsole, /id: 'support', label: 'Suporte'/);
 assert.match(adminConsole, /<SupportInbox \/>/);
 
 const sidebar = await readFile(requiredFiles[10], 'utf8');
-assert.match(sidebar, /href: '\/dashboard\/suporte', label: 'Suporte Silentra'/);
+assert.match(
+  sidebar,
+  /href: '\/dashboard\/suporte', label: 'Suporte Silentra'/,
+);
 
 const vercel = JSON.parse(await readFile(requiredFiles[11], 'utf8'));
 assert.ok(
-  vercel.crons.some((cron) => cron.path === '/api/cron/support-email-notifications'),
+  vercel.crons.some(
+    (cron) => cron.path === '/api/cron/support-email-notifications',
+  ),
   'Support notification retry worker must be scheduled',
 );
 

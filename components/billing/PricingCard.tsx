@@ -102,7 +102,9 @@ export function PricingCard({
       if (isCurrentPlan) return;
       if (!isBillingOwner) {
         toast.error(
-          english ? 'Only the barbershop owner can change the subscription.' : 'Apenas o proprietário da barbearia pode alterar a subscrição.',
+          english
+            ? 'Only the barbershop owner can change the subscription.'
+            : 'Apenas o proprietário da barbearia pode alterar a subscrição.',
         );
         return;
       }
@@ -128,7 +130,9 @@ export function PricingCard({
       toast.error(
         error instanceof Error
           ? error.message
-          : english ? 'Could not complete the plan change.' : 'Não foi possível concluir a alteração do plano.',
+          : english
+            ? 'Could not complete the plan change.'
+            : 'Não foi possível concluir a alteração do plano.',
       );
     }
   };
@@ -136,7 +140,9 @@ export function PricingCard({
   const confirmPlanChange = async () => {
     if (isDowngradeToFree) {
       toast.error(
-        english ? 'Switching to Free does not use checkout because there is no paid subscription to change.' : 'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
+        english
+          ? 'Switching to Free does not use checkout because there is no paid subscription to change.'
+          : 'A mudança para o plano Free não utiliza o checkout porque não existe uma subscrição paga para iniciar.',
       );
       return;
     }
@@ -152,7 +158,9 @@ export function PricingCard({
       toast.error(
         error instanceof Error
           ? error.message
-          : english ? 'Could not start the subscription change.' : 'Não foi possível iniciar a alteração da subscrição.',
+          : english
+            ? 'Could not start the subscription change.'
+            : 'Não foi possível iniciar a alteração da subscrição.',
       );
     }
   };
@@ -166,7 +174,13 @@ export function PricingCard({
       };
     if (!isAuthenticated) {
       const label =
-        tier === 'free' ? (english ? 'Start for free' : 'Começar gratuitamente') : (english ? 'Create an account to get started' : 'Criar conta para começar');
+        tier === 'free'
+          ? english
+            ? 'Start for free'
+            : 'Começar gratuitamente'
+          : english
+            ? 'Create an account to get started'
+            : 'Criar conta para começar';
       return {
         label,
         disabled: false,
@@ -204,7 +218,13 @@ export function PricingCard({
         variant: 'outline' as const,
       };
     return {
-      label: isUpgrade ? (english ? 'Upgrade plan' : 'Fazer upgrade') : (english ? 'Switch to this plan' : 'Mudar para este plano'),
+      label: isUpgrade
+        ? english
+          ? 'Upgrade plan'
+          : 'Fazer upgrade'
+        : english
+          ? 'Switch to this plan'
+          : 'Mudar para este plano',
       disabled: false,
       variant: popular ? ('primary' as const) : ('outline' as const),
     };
@@ -227,12 +247,19 @@ export function PricingCard({
     isCurrentPlan && (tier === 'pro' || tier === 'enterprise');
   const currentPlanLabel = currentPlan
     ? PLAN_NAMES[currentPlan as PlanTier]
-    : (english ? 'Current plan' : 'Plano atual');
+    : english
+      ? 'Current plan'
+      : 'Plano atual';
   const confirmationTitle = isDowngrade
-    ? (english ? 'Confirm switching to a lower plan' : 'Confirmar mudança para um plano inferior')
-    : (english ? 'Confirm upgrade' : 'Confirmar upgrade');
-  const confirmationDescription =
-    english ? 'After confirmation, you will continue to the applicable payment flow. Your current subscription will only change after the new payment is complete.' : 'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
+    ? english
+      ? 'Confirm switching to a lower plan'
+      : 'Confirmar mudança para um plano inferior'
+    : english
+      ? 'Confirm upgrade'
+      : 'Confirmar upgrade';
+  const confirmationDescription = english
+    ? 'After confirmation, you will continue to the applicable payment flow. Your current subscription will only change after the new payment is complete.'
+    : 'Depois da confirmação vais para o processo de pagamento aplicável. A subscrição atual só será alterada depois de o novo pagamento ficar concluído.';
 
   return (
     <>
@@ -254,12 +281,14 @@ export function PricingCard({
                 </h3>
                 {popular && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
-                    <Sparkles className="size-3" /> {english ? 'Recommended' : 'Recomendado'}
+                    <Sparkles className="size-3" />{' '}
+                    {english ? 'Recommended' : 'Recomendado'}
                   </span>
                 )}
                 {tier === 'pro' && trialDays ? (
                   <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
-                    <Gift className="size-3" /> {english ? '1 month free' : '1 mês grátis'}
+                    <Gift className="size-3" />{' '}
+                    {english ? '1 month free' : '1 mês grátis'}
                   </span>
                 ) : null}
               </div>
@@ -280,28 +309,42 @@ export function PricingCard({
             </span>
             {tier !== 'free' && (
               <span className="text-xs text-zinc-500">
-                {billingInterval === 'year' ? (english ? '/year' : '/ano') : (english ? '/month' : '/mês')}
+                {billingInterval === 'year'
+                  ? english
+                    ? '/year'
+                    : '/ano'
+                  : english
+                    ? '/month'
+                    : '/mês'}
               </span>
             )}
           </div>
           {tier === 'pro' && trialDays ? (
             <p className="mt-2 text-xs font-semibold text-emerald-300/90">
-              {english ? '1 month of Pro free for eligible new users with code TRIALPRO.' : '1 mês de Pro grátis para novos utilizadores elegíveis com o código TRIALPRO.'}
+              {english
+                ? '1 month of Pro free for eligible new users with code TRIALPRO.'
+                : '1 mês de Pro grátis para novos utilizadores elegíveis com o código TRIALPRO.'}
             </p>
           ) : null}
           {tier === 'pro' && !trialDays ? (
             <p className="mt-2 text-xs font-medium text-emerald-300/90">
-              {english ? 'Grow without adding complexity.' : 'Para crescer sem aumentar a complexidade.'}
+              {english
+                ? 'Grow without adding complexity.'
+                : 'Para crescer sem aumentar a complexidade.'}
             </p>
           ) : null}
           {tier === 'free' && (
             <p className="mt-2 text-xs text-zinc-500">
-              {english ? 'No card required. Start today and upgrade when you need to.' : 'Sem cartão. Começa hoje e atualiza quando precisares.'}
+              {english
+                ? 'No card required. Start today and upgrade when you need to.'
+                : 'Sem cartão. Começa hoje e atualiza quando precisares.'}
             </p>
           )}
           {tier === 'enterprise' && (
             <p className="mt-2 text-xs text-zinc-500">
-              {english ? 'For teams and multi-location operations.' : 'Para equipas e operações com várias localizações.'}
+              {english
+                ? 'For teams and multi-location operations.'
+                : 'Para equipas e operações com várias localizações.'}
             </p>
           )}
 
@@ -349,8 +392,12 @@ export function PricingCard({
           {tier === 'pro' && !isCurrentPlan ? (
             <p className="mt-2 text-center text-[11px] text-zinc-600">
               {trialDays
-                ? (english ? '1 month free for eligible new users. The regular price applies after that.' : '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.')
-                : (english ? 'Payment instructions and terms are shown during subscription.' : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.')}
+                ? english
+                  ? '1 month free for eligible new users. The regular price applies after that.'
+                  : '1 mês grátis para novos utilizadores elegíveis. Depois aplica-se o preço normal.'
+                : english
+                  ? 'Payment instructions and terms are shown during subscription.'
+                  : 'As instruções e condições de pagamento são apresentadas no processo de subscrição.'}
             </p>
           ) : null}
         </div>

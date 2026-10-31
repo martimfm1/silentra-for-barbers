@@ -49,20 +49,50 @@ const primaryItems: SidebarItem[] = [
 ];
 
 const teamItems: SidebarItem[] = [
-  { href: '/dashboard/equipa', label: 'Equipa', icon: Briefcase, feature: 'team_management' },
+  {
+    href: '/dashboard/equipa',
+    label: 'Equipa',
+    icon: Briefcase,
+    feature: 'team_management',
+  },
 ];
 
 const communicationItems: SidebarItem[] = [
   { href: '/dashboard/comunicacao', label: 'Comunicação', icon: Megaphone },
-  { href: '/dashboard/mensagens', label: 'Mensagens', icon: MessageCircle, feature: 'messaging' },
-  { href: '/dashboard/marketing', label: 'Campanhas', icon: Megaphone, feature: 'marketing_campaigns' },
-  { href: '/dashboard/automations', label: 'Automações', icon: Zap, feature: 'marketing_campaigns' },
+  {
+    href: '/dashboard/mensagens',
+    label: 'Mensagens',
+    icon: MessageCircle,
+    feature: 'messaging',
+  },
+  {
+    href: '/dashboard/marketing',
+    label: 'Campanhas',
+    icon: Megaphone,
+    feature: 'marketing_campaigns',
+  },
+  {
+    href: '/dashboard/automations',
+    label: 'Automações',
+    icon: Zap,
+    feature: 'marketing_campaigns',
+  },
 ];
 
 const toolsItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
-  { href: '/dashboard/analytics', label: 'Relatórios', icon: BarChart3, feature: 'advanced_analytics' },
-  { href: '/dashboard/loyalty', label: 'Fidelização', icon: Heart, feature: 'loyalty' },
+  {
+    href: '/dashboard/analytics',
+    label: 'Relatórios',
+    icon: BarChart3,
+    feature: 'advanced_analytics',
+  },
+  {
+    href: '/dashboard/loyalty',
+    label: 'Fidelização',
+    icon: Heart,
+    feature: 'loyalty',
+  },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
 ];
@@ -74,23 +104,23 @@ const secondaryItems: SidebarItem[] = [
 ];
 
 const englishLabels: Record<string, string> = {
-  'Início': 'Overview',
-  'Agenda': 'Appointments',
-  'Clientes': 'Clients',
-  'Serviços': 'Services',
-  'Equipa': 'Team',
-  'Comunicação': 'Communication',
-  'Mensagens': 'Messages',
-  'Campanhas': 'Campaigns',
-  'Automações': 'Automations',
+  Início: 'Overview',
+  Agenda: 'Appointments',
+  Clientes: 'Clients',
+  Serviços: 'Services',
+  Equipa: 'Team',
+  Comunicação: 'Communication',
+  Mensagens: 'Messages',
+  Campanhas: 'Campaigns',
+  Automações: 'Automations',
   'QR Code': 'QR code',
-  'Relatórios': 'Reports',
-  'Fidelização': 'Loyalty',
-  'Vendas': 'Sales',
+  Relatórios: 'Reports',
+  Fidelização: 'Loyalty',
+  Vendas: 'Sales',
   'Site próprio': 'Website',
   'Suporte Silentra': 'Silentra Support',
   'Plano e pagamentos': 'Plan and billing',
-  'Definições': 'Settings',
+  Definições: 'Settings',
 };
 
 function localizeNavLabel(label: string, locale: string) {
@@ -100,7 +130,9 @@ function localizeNavLabel(label: string, locale: string) {
 function BrandAvatar({ avatarUrl }: { avatarUrl: string | null }) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const displayedAvatarUrl =
-    avatarUrl && failedImageUrl !== avatarUrl ? avatarUrl : DEFAULT_BARBERSHOP_AVATAR;
+    avatarUrl && failedImageUrl !== avatarUrl
+      ? avatarUrl
+      : DEFAULT_BARBERSHOP_AVATAR;
 
   return (
     <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] text-zinc-100">
@@ -111,7 +143,9 @@ function BrandAvatar({ avatarUrl }: { avatarUrl: string | null }) {
         sizes="32px"
         className="object-cover"
         unoptimized
-        onError={() => setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)}
+        onError={() =>
+          setFailedImageUrl(avatarUrl || DEFAULT_BARBERSHOP_AVATAR)
+        }
       />
     </span>
   );
@@ -203,7 +237,12 @@ export function DashboardSidebar() {
   const isActive = (item: SidebarItem) =>
     pathname === item.href ||
     (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
-  const moreItems = [...teamItems, ...communicationItems, ...toolsItems, ...secondaryItems];
+  const moreItems = [
+    ...teamItems,
+    ...communicationItems,
+    ...toolsItems,
+    ...secondaryItems,
+  ];
   const moreActive = moreItems.some(isActive);
 
   const renderItem = (item: SidebarItem) => {
@@ -226,11 +265,18 @@ export function DashboardSidebar() {
           type="button"
           onClick={() => handleLocked(item)}
           className={className}
-          aria-label={locale === 'en' ? `${label}, available on a higher plan` : `${label}, disponível num plano superior`}
+          aria-label={
+            locale === 'en'
+              ? `${label}, available on a higher plan`
+              : `${label}, disponível num plano superior`
+          }
         >
           <Icon className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
           <span className="min-w-0 flex-1 truncate">{label}</span>
-          <Lock className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />
+          <Lock
+            className="size-3.5 shrink-0 text-zinc-600"
+            aria-hidden="true"
+          />
         </button>
       );
     }
@@ -243,9 +289,20 @@ export function DashboardSidebar() {
         className={className}
         aria-current={active ? 'page' : undefined}
       >
-        <Icon className={cn('size-4 shrink-0', active ? 'text-emerald-400' : 'text-zinc-500')} aria-hidden="true" />
+        <Icon
+          className={cn(
+            'size-4 shrink-0',
+            active ? 'text-emerald-400' : 'text-zinc-500',
+          )}
+          aria-hidden="true"
+        />
         <span className="min-w-0 flex-1 truncate">{label}</span>
-        {active ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-400" aria-hidden="true" /> : null}
+        {active ? (
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-emerald-400"
+            aria-hidden="true"
+          />
+        ) : null}
       </Link>
     );
   };
@@ -259,7 +316,11 @@ export function DashboardSidebar() {
   return (
     <>
       <nav
-        aria-label={locale === 'en' ? 'Dashboard quick navigation' : 'Navegação rápida do painel'}
+        aria-label={
+          locale === 'en'
+            ? 'Dashboard quick navigation'
+            : 'Navegação rápida do painel'
+        }
         className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.28)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:w-[min(94vw,760px)] lg:-translate-x-1/2 lg:rounded-2xl lg:border lg:px-3 lg:pb-2"
       >
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:max-w-none lg:gap-2">
@@ -273,12 +334,28 @@ export function DashboardSidebar() {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'group relative flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
-                  active ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+                  active
+                    ? 'bg-white/[0.09] text-white'
+                    : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
                 )}
               >
-                <Icon className={cn('size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-[18px]', active && 'text-emerald-400')} aria-hidden="true" />
-                <span className="max-w-full truncate">{localizeNavLabel(item.label, locale)}</span>
-                <span aria-hidden="true" className={cn('absolute inset-x-3 bottom-0.5 h-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-150 motion-reduce:transition-none lg:inset-y-3 lg:inset-x-auto lg:left-0 lg:h-auto lg:w-0.5', active ? 'scale-100' : 'scale-0')} />
+                <Icon
+                  className={cn(
+                    'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-[18px]',
+                    active && 'text-emerald-400',
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="max-w-full truncate">
+                  {localizeNavLabel(item.label, locale)}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute inset-x-3 bottom-0.5 h-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-150 motion-reduce:transition-none lg:inset-y-3 lg:inset-x-auto lg:left-0 lg:h-auto lg:w-0.5',
+                    active ? 'scale-100' : 'scale-0',
+                  )}
+                />
               </Link>
             );
           })}
@@ -286,15 +363,24 @@ export function DashboardSidebar() {
             ref={moreTriggerRef}
             type="button"
             onClick={() => setMoreOpen(true)}
-            aria-label={locale === 'en' ? 'Open more dashboard sections' : 'Abrir mais secções da dashboard'}
+            aria-label={
+              locale === 'en'
+                ? 'Open more dashboard sections'
+                : 'Abrir mais secções da dashboard'
+            }
             aria-expanded={moreOpen}
             aria-controls="dashboard-more-panel"
             className={cn(
               'flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
-              moreOpen || moreActive ? 'bg-white/[0.09] text-white' : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+              moreOpen || moreActive
+                ? 'bg-white/[0.09] text-white'
+                : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
             )}
           >
-            <MoreHorizontal className="size-4 lg:size-[18px]" aria-hidden="true" />
+            <MoreHorizontal
+              className="size-4 lg:size-[18px]"
+              aria-hidden="true"
+            />
             <span>{locale === 'en' ? 'More' : 'Mais'}</span>
           </button>
         </div>
@@ -313,7 +399,9 @@ export function DashboardSidebar() {
               type="button"
               className="absolute inset-0 bg-black/65 backdrop-blur-[2px]"
               onClick={closeMore}
-              aria-label={locale === 'en' ? 'Close more menu' : 'Fechar menu Mais'}
+              aria-label={
+                locale === 'en' ? 'Close more menu' : 'Fechar menu Mais'
+              }
             />
             <motion.aside
               id="dashboard-more-panel"
@@ -321,21 +409,34 @@ export function DashboardSidebar() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="dashboard-more-title"
-              initial={motionEnabled ? { opacity: 0, y: 24, scale: 0.985 } : false}
+              initial={
+                motionEnabled ? { opacity: 0, y: 24, scale: 0.985 } : false
+              }
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={motionEnabled ? { opacity: 0, y: 16, scale: 0.99 } : undefined}
-              transition={motionEnabled ? { type: 'spring', stiffness: 420, damping: 36, mass: 0.75 } : { duration: 0 }}
+              exit={
+                motionEnabled ? { opacity: 0, y: 16, scale: 0.99 } : undefined
+              }
+              transition={
+                motionEnabled
+                  ? { type: 'spring', stiffness: 420, damping: 36, mass: 0.75 }
+                  : { duration: 0 }
+              }
               className="absolute inset-x-2 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] mx-auto flex max-h-[min(72vh,42rem)] max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/98 shadow-2xl shadow-black/50 sm:inset-x-4 lg:bottom-[5.75rem]"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-3 sm:px-5">
                 <div className="flex min-w-0 items-center gap-3">
                   <BrandAvatar avatarUrl={barbershopAvatarUrl} />
                   <div className="min-w-0">
-                    <h2 id="dashboard-more-title" className="text-sm font-semibold text-white">
+                    <h2
+                      id="dashboard-more-title"
+                      className="text-sm font-semibold text-white"
+                    >
                       {locale === 'en' ? 'More sections' : 'Mais secções'}
                     </h2>
                     <p className="text-xs text-zinc-500">
-                      {locale === 'en' ? 'Everything else, organised by task' : 'O resto da plataforma, organizado por área'}
+                      {locale === 'en'
+                        ? 'Everything else, organised by task'
+                        : 'O resto da plataforma, organizado por área'}
                     </p>
                   </div>
                 </div>
@@ -353,34 +454,53 @@ export function DashboardSidebar() {
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   <section>
                     {sectionTitle('Equipa', 'Team')}
-                    <div className="grid gap-1.5">{teamItems.map(renderItem)}</div>
+                    <div className="grid gap-1.5">
+                      {teamItems.map(renderItem)}
+                    </div>
                     <div className="mt-5">
                       {sectionTitle('Comunicação', 'Communication')}
-                      <div className="grid gap-1.5">{communicationItems.map(renderItem)}</div>
+                      <div className="grid gap-1.5">
+                        {communicationItems.map(renderItem)}
+                      </div>
                     </div>
                   </section>
                   <section>
-                    {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
-                    <div className="grid gap-1.5">{toolsItems.map(renderItem)}</div>
+                    {sectionTitle(
+                      'Ferramentas e crescimento',
+                      'Tools & growth',
+                    )}
+                    <div className="grid gap-1.5">
+                      {toolsItems.map(renderItem)}
+                    </div>
                   </section>
                   <section>
                     {sectionTitle('Conta e ajuda', 'Account & support')}
-                    <div className="grid gap-1.5">{secondaryItems.map(renderItem)}</div>
+                    <div className="grid gap-1.5">
+                      {secondaryItems.map(renderItem)}
+                    </div>
                     <Link
                       href="/documentation"
                       onClick={closeMore}
                       className="mt-1 flex min-h-11 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     >
-                      <Globe2 className="size-4 text-zinc-500" aria-hidden="true" />
+                      <Globe2
+                        className="size-4 text-zinc-500"
+                        aria-hidden="true"
+                      />
                       {locale === 'en' ? 'Documentation' : 'Documentação'}
                     </Link>
                   </section>
                 </div>
               </div>
               <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/8 px-4 py-2.5 text-xs text-zinc-500 sm:px-5">
-                <span>{locale === 'en' ? 'Quick access' : 'Acesso rápido'}</span>
+                <span>
+                  {locale === 'en' ? 'Quick access' : 'Acesso rápido'}
+                </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                  <span
+                    className="size-1.5 rounded-full bg-emerald-400"
+                    aria-hidden="true"
+                  />
                   Silentra
                 </span>
               </div>

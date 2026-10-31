@@ -46,7 +46,10 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
-import { DashboardCustomizationDialog, useDashboardCustomization } from '@/app/dashboard/_components/DashboardCustomization';
+import {
+  DashboardCustomizationDialog,
+  useDashboardCustomization,
+} from '@/app/dashboard/_components/DashboardCustomization';
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
@@ -67,13 +70,17 @@ export default function DashboardPage() {
     }
     setLoadingInitial(true);
     try {
-      const [appointmentsResult, servicesResult, professionalsResult, clientsResult] =
-        await Promise.allSettled([
-          appointmentService.getAll(barbershopId),
-          servicesService.getAll(barbershopId),
-          professionalService.getAll(barbershopId),
-          appointmentService.getClients(barbershopId),
-        ]);
+      const [
+        appointmentsResult,
+        servicesResult,
+        professionalsResult,
+        clientsResult,
+      ] = await Promise.allSettled([
+        appointmentService.getAll(barbershopId),
+        servicesService.getAll(barbershopId),
+        professionalService.getAll(barbershopId),
+        appointmentService.getClients(barbershopId),
+      ]);
 
       if (appointmentsResult.status === 'rejected') {
         throw appointmentsResult.reason;
@@ -84,14 +91,20 @@ export default function DashboardPage() {
       setAppointments(appointmentsResult.value.data ?? []);
 
       let secondaryDataFailed = false;
-      if (servicesResult.status === 'fulfilled' && !servicesResult.value.error) {
+      if (
+        servicesResult.status === 'fulfilled' &&
+        !servicesResult.value.error
+      ) {
         setServices(servicesResult.value.data ?? []);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Services Sync Error]');
       }
 
-      if (professionalsResult.status === 'fulfilled' && !professionalsResult.value.error) {
+      if (
+        professionalsResult.status === 'fulfilled' &&
+        !professionalsResult.value.error
+      ) {
         setProfessionals(professionalsResult.value.data ?? []);
       } else {
         secondaryDataFailed = true;
@@ -167,8 +180,14 @@ export default function DashboardPage() {
     (point) => point.bookings > 0 || point.revenue > 0,
   );
 
-  const maxRevenue = Math.max(1, ...dynamicChartData.map((point) => point.revenue));
-  const maxBookings = Math.max(1, ...dynamicChartData.map((point) => point.bookings));
+  const maxRevenue = Math.max(
+    1,
+    ...dynamicChartData.map((point) => point.revenue),
+  );
+  const maxBookings = Math.max(
+    1,
+    ...dynamicChartData.map((point) => point.bookings),
+  );
 
   const metrics = useMemo(() => {
     const totalRevenue = appointments
@@ -239,27 +258,101 @@ export default function DashboardPage() {
     default: 'hover:border-zinc-500/40 hover:bg-zinc-500/10',
   } as const;
   const quickActionCatalog = [
-    { id: 'new-booking', href: '/dashboard/agenda', label: t('dashboard.newBooking'), icon: CalendarPlus },
-    { id: 'clients', href: '/dashboard/clientes', label: t('dashboard.clients'), icon: Users },
-    { id: 'services', href: '/dashboard/servicos', label: t('dashboard.services'), icon: Scissors },
-    { id: 'team', href: '/dashboard/equipa', label: t('dashboard.team'), icon: Briefcase },
-    { id: 'analytics', href: '/dashboard/stats', label: t('dashboard.stats'), icon: Clock },
-    { id: 'loyalty', href: '/dashboard/loyalty', label: t('dashboard.loyalty'), icon: Gift },
-    { id: 'qr-code', href: '/dashboard/qr-code', label: t('dashboard.qrCode'), icon: QrCode },
-    { id: 'automations', href: '/dashboard/automations', label: t('dashboard.automations'), icon: Zap },
-    { id: 'messages', href: '/dashboard/mensagens', label: t('dashboard.messages'), icon: MessageSquare },
-    { id: 'marketing', href: '/dashboard/marketing', label: t('dashboard.marketing'), icon: Megaphone },
-    { id: 'sales', href: '/dashboard/pos', label: t('dashboard.sales'), icon: ShoppingBag },
-    { id: 'website', href: '/dashboard/website', label: t('dashboard.website'), icon: Globe },
-    { id: 'support', href: '/dashboard/suporte', label: t('dashboard.support'), icon: Headset },
+    {
+      id: 'new-booking',
+      href: '/dashboard/agenda',
+      label: t('dashboard.newBooking'),
+      icon: CalendarPlus,
+    },
+    {
+      id: 'clients',
+      href: '/dashboard/clientes',
+      label: t('dashboard.clients'),
+      icon: Users,
+    },
+    {
+      id: 'services',
+      href: '/dashboard/servicos',
+      label: t('dashboard.services'),
+      icon: Scissors,
+    },
+    {
+      id: 'team',
+      href: '/dashboard/equipa',
+      label: t('dashboard.team'),
+      icon: Briefcase,
+    },
+    {
+      id: 'analytics',
+      href: '/dashboard/stats',
+      label: t('dashboard.stats'),
+      icon: Clock,
+    },
+    {
+      id: 'loyalty',
+      href: '/dashboard/loyalty',
+      label: t('dashboard.loyalty'),
+      icon: Gift,
+    },
+    {
+      id: 'qr-code',
+      href: '/dashboard/qr-code',
+      label: t('dashboard.qrCode'),
+      icon: QrCode,
+    },
+    {
+      id: 'automations',
+      href: '/dashboard/automations',
+      label: t('dashboard.automations'),
+      icon: Zap,
+    },
+    {
+      id: 'messages',
+      href: '/dashboard/mensagens',
+      label: t('dashboard.messages'),
+      icon: MessageSquare,
+    },
+    {
+      id: 'marketing',
+      href: '/dashboard/marketing',
+      label: t('dashboard.marketing'),
+      icon: Megaphone,
+    },
+    {
+      id: 'sales',
+      href: '/dashboard/pos',
+      label: t('dashboard.sales'),
+      icon: ShoppingBag,
+    },
+    {
+      id: 'website',
+      href: '/dashboard/website',
+      label: t('dashboard.website'),
+      icon: Globe,
+    },
+    {
+      id: 'support',
+      href: '/dashboard/suporte',
+      label: t('dashboard.support'),
+      icon: Headset,
+    },
   ];
   const quickActions = customization.config.shortcuts
     .map((id) => quickActionCatalog.find((action) => action.id === id))
-    .filter((action): action is (typeof quickActionCatalog)[number] => Boolean(action));
+    .filter((action): action is (typeof quickActionCatalog)[number] =>
+      Boolean(action),
+    );
 
   return (
     <TooltipProvider>
-      <main className="relative min-h-screen overflow-hidden pb-5 pt-16 text-foreground" style={{ "--dashboard-accent": customization.config.accentColor } as React.CSSProperties}>
+      <main
+        className="relative min-h-screen overflow-hidden pb-5 pt-16 text-foreground"
+        style={
+          {
+            '--dashboard-accent': customization.config.accentColor,
+          } as React.CSSProperties
+        }
+      >
         <div className="relative px-3 pb-5 pt-8 sm:px-5 md:px-8 md:pb-12">
           <section
             className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
@@ -278,22 +371,35 @@ export default function DashboardPage() {
                 {userName ? `, ${userName}` : ''} 👋
               </h1>
               <p className="mt-1 text-sm capitalize text-zinc-400">
-                {new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                })}
+                {new Date().toLocaleDateString(
+                  locale === 'en' ? 'en-GB' : 'pt-PT',
+                  {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                  },
+                )}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <DashboardCustomizationDialog customization={customization} locale={locale} />
+              <DashboardCustomizationDialog
+                customization={customization}
+                locale={locale}
+              />
               <Link
                 href="/dashboard/billing"
                 className="glassmorphism inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dashboard-accent)]"
               >
-                <Crown className="size-4" style={{ color: 'var(--dashboard-accent)' }} aria-hidden="true" />
+                <Crown
+                  className="size-4"
+                  style={{ color: 'var(--dashboard-accent)' }}
+                  aria-hidden="true"
+                />
                 {t('dashboard.currentPlan')} {PLAN_NAMES[plan]}
-                <ChevronRight className="size-4 text-zinc-500" aria-hidden="true" />
+                <ChevronRight
+                  className="size-4 text-zinc-500"
+                  aria-hidden="true"
+                />
               </Link>
             </div>
           </section>
@@ -354,333 +460,434 @@ export default function DashboardPage() {
             </section>
           )}
 
-          {customization.config.sections.quickActions && <section aria-label={t('dashboard.quickActions')} className="pb-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                {t('dashboard.whatToDo')}
-              </h2>
-              <Link
-                href="/dashboard/agenda"
-                className="text-xs font-medium text-zinc-500 transition hover:text-zinc-200"
-              >
-                {t('dashboard.openAgenda')} <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Link
-                    key={action.id}
-                    href={action.href}
-                    className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4"
-                  >
-                    <span
-                      className={cn(
-                        'flex size-8 shrink-0 items-center justify-center rounded-full border',
-                        iconVariants.default,
-                      )}
-                      style={{ backgroundColor: 'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)', color: 'var(--dashboard-accent)', borderColor: 'color-mix(in srgb, var(--dashboard-accent) 34%, transparent)' }}
-                    >
-                      <Icon className="size-4" aria-hidden="true" />
-                    </span>
-                    <span className="block font-heading text-sm font-semibold tracking-tight text-zinc-50">
-                      {action.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>}
-
-          {customization.config.sections.nextAppointment && nextAppointment && !loadingInitial && (
-            <section
-              className="glassmorphism mb-5 rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur-xl sm:p-5"
-              aria-labelledby="next-appointment-title"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
-                    <span className="text-sm font-bold">
-                      {new Date(nextAppointment.date_hour).toLocaleTimeString(
-                        locale === 'en' ? 'en-GB' : 'pt-PT',
-                        { hour: '2-digit', minute: '2-digit' },
-                      )}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
-                      {t('dashboard.nextAppointment')}
-                    </p>
-                    <h2
-                      id="next-appointment-title"
-                      className="mt-1 truncate text-base font-semibold text-zinc-50"
-                    >
-                      {nextAppointment.users?.name_complete ||
-                        nextAppointment.manual_name ||
-                        t('dashboard.client')}
-                    </h2>
-                    <p className="mt-1 truncate text-sm text-zinc-400">
-                      {nextAppointment.services?.name || t('dashboard.service')}{' '}
-                      ·{' '}
-                      {nextAppointment.professionals?.name ||
-                        t('dashboard.noBarberAssigned')}
-                    </p>
-                  </div>
-                </div>
+          {customization.config.sections.quickActions && (
+            <section aria-label={t('dashboard.quickActions')} className="pb-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                  {t('dashboard.whatToDo')}
+                </h2>
                 <Link
                   href="/dashboard/agenda"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10"
+                  className="text-xs font-medium text-zinc-500 transition hover:text-zinc-200"
                 >
-                  {t('dashboard.viewAgenda')}{' '}
-                  <ChevronRight className="size-4" aria-hidden="true" />
+                  {t('dashboard.openAgenda')} <span aria-hidden="true">→</span>
                 </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-4">
+                {quickActions.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <Link
+                      key={action.id}
+                      href={action.href}
+                      className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4"
+                    >
+                      <span
+                        className={cn(
+                          'flex size-8 shrink-0 items-center justify-center rounded-full border',
+                          iconVariants.default,
+                        )}
+                        style={{
+                          backgroundColor:
+                            'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)',
+                          color: 'var(--dashboard-accent)',
+                          borderColor:
+                            'color-mix(in srgb, var(--dashboard-accent) 34%, transparent)',
+                        }}
+                      >
+                        <Icon className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="block font-heading text-sm font-semibold tracking-tight text-zinc-50">
+                        {action.label}
+                      </span>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           )}
 
-          {customization.config.sections.metrics && <section className="pt-1" aria-labelledby="business-overview">
-            <div className="mb-3 flex items-center justify-between">
-              <h2
-                id="business-overview"
-                className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400"
+          {customization.config.sections.nextAppointment &&
+            nextAppointment &&
+            !loadingInitial && (
+              <section
+                className="glassmorphism mb-5 rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur-xl sm:p-5"
+                aria-labelledby="next-appointment-title"
               >
-                {t('dashboard.businessSummary')}
-              </h2>
-              {!loadingInitial && (
-                <span className="text-xs text-zinc-500">
-                  {services.length} {t('dashboard.services')} · {professionals.length}{' '}
-                  {t('dashboard.professionals')}
-                </span>
-              )}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {loadingInitial
-                ? [...Array(4)].map((_, i) => (
-                    <Card
-                      key={i}
-                      className="border border-white/10 bg-white/[0.04]"
-                    >
-                      <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0">
-                        <div className="space-y-2">
-                          <Skeleton className="h-3 w-24 bg-white/10" />
-                          <Skeleton className="h-7 w-16 bg-white/10" />
-                        </div>
-                        <Skeleton className="size-10 rounded-full bg-white/10" />
-                      </CardHeader>
-                    </Card>
-                  ))
-                : metrics.map((metric) => (
-                    <Link
-                      key={metric.key}
-                      href="/dashboard/stats"
-                      className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                    >
-                      <Card
-                        className={cn(
-                          'glassmorphism cursor-pointer border border-white/10 bg-white/[0.04] transition-all duration-200',
-                          cardHoverVariants[metric.variant],
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+                      <span className="text-sm font-bold">
+                        {new Date(nextAppointment.date_hour).toLocaleTimeString(
+                          locale === 'en' ? 'en-GB' : 'pt-PT',
+                          { hour: '2-digit', minute: '2-digit' },
                         )}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                        {t('dashboard.nextAppointment')}
+                      </p>
+                      <h2
+                        id="next-appointment-title"
+                        className="mt-1 truncate text-base font-semibold text-zinc-50"
                       >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                          <div className="min-w-0 space-y-1">
-                            <CardDescription className="truncate text-xs font-medium text-zinc-400">
-                              {metric.label}
-                            </CardDescription>
-                            <CardTitle className="truncate text-2xl font-bold tracking-tight text-zinc-50">
-                              {metric.value}
-                            </CardTitle>
-                          </div>
-                          <span
-                            className={cn(
-                              'flex size-10 shrink-0 items-center justify-center rounded-full',
-                              iconVariants.default,
-                            )}
-                            style={{ backgroundColor: 'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)', color: 'var(--dashboard-accent)' }}
-                          >
-                            <metric.icon className="size-5" />
-                          </span>
-                        </CardHeader>
-                      </Card>
-                    </Link>
-                  ))}
-            </div>
-          </section>}
-
-          {(customization.config.sections.activityChart || customization.config.sections.upcomingAppointments) && <section className="grid gap-3 pt-5 md:gap-4 lg:grid-cols-[1fr_360px]">
-            {customization.config.sections.activityChart && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-lg font-medium text-zinc-100">
-                      {t('dashboard.weeklyActivity')}
-                    </CardTitle>
-                    <CardDescription className="mt-1 text-zinc-500">
-                      {t('dashboard.compareDaily')}
-                    </CardDescription>
+                        {nextAppointment.users?.name_complete ||
+                          nextAppointment.manual_name ||
+                          t('dashboard.client')}
+                      </h2>
+                      <p className="mt-1 truncate text-sm text-zinc-400">
+                        {nextAppointment.services?.name ||
+                          t('dashboard.service')}{' '}
+                        ·{' '}
+                        {nextAppointment.professionals?.name ||
+                          t('dashboard.noBarberAssigned')}
+                      </p>
+                    </div>
                   </div>
                   <Link
-                    href="/dashboard/stats"
-                    className="text-xs font-medium text-zinc-500 hover:text-zinc-200"
+                    href="/dashboard/agenda"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10"
                   >
-                    {t('dashboard.viewAnalytics')}
+                    {t('dashboard.viewAgenda')}{' '}
+                    <ChevronRight className="size-4" aria-hidden="true" />
                   </Link>
                 </div>
-              </CardHeader>
-              <CardContent className="h-[310px] min-w-0 w-full pt-4">
-                {!loadingInitial && !hasChartActivity ? (
-                  <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
-                    <CalendarDays className="size-6 text-zinc-500" aria-hidden="true" />
-                    <p className="mt-3 text-sm font-medium text-zinc-200">
-                      {t('dashboard.noBookingsToChart')}
-                    </p>
-                    <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
-                      {locale === 'en' ? 'Bookings and completed service revenue will appear here when the barbershop has appointments.' : 'As marcações e a receita dos serviços concluídos aparecerão aqui quando existirem marcações.'}
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    className="flex h-full min-h-[250px] min-w-0 flex-col"
-                    role="img"
-                    aria-label={locale === 'en' ? 'Bar chart comparing completed revenue and bookings by weekday' : 'Gráfico de barras que compara a receita concluída e as marcações por dia da semana'}
-                  >
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
-                      <span>{t('dashboard.relativeMetricScale')}</span>
-                      <span>{t('dashboard.chartInteractionHint')}</span>
-                    </div>
-                    <div className="relative min-h-0 flex-1">
-                      <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex flex-col justify-between">
-                        {[0, 1, 2, 3].map((line) => (
-                          <div key={line} className="border-t border-dashed border-white/[0.08]" />
-                        ))}
-                      </div>
-                      <div className="relative grid h-full min-w-0 grid-cols-7 gap-1 sm:gap-3">
-                        {dynamicChartData.map((point) => {
-                          const revenueHeight = point.revenue > 0 ? Math.max(8, (point.revenue / maxRevenue) * 100) : 2;
-                          const bookingsHeight = point.bookings > 0 ? Math.max(8, (point.bookings / maxBookings) * 100) : 2;
-                          return (
-                            <div key={point.day} className="flex min-w-0 flex-col items-center justify-end gap-2">
-                              <div className="flex h-full w-full items-end justify-center gap-1.5">
-                                <div
-                                  title={locale === 'en' ? `${point.day}: ${point.revenue.toFixed(2)} EUR in completed service revenue` : `${point.day}: ${point.revenue.toFixed(2).replace('.', ',')} € de receita de serviços concluídos`}
-                                  aria-label={locale === 'en' ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros` : `${point.day}, receita ${point.revenue.toFixed(2)} euros`}
-                                  className="w-1/2 max-w-7 rounded-t-md shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
-                                  style={{ backgroundColor: 'var(--dashboard-accent)', height: `${revenueHeight}%`, minHeight: point.revenue > 0 ? '8px' : '2px' }}
-                                />
-                                <div
-                                  title={locale === 'en' ? `${point.day}: ${point.bookings} bookings` : `${point.day}: ${point.bookings} marcações`}
-                                  aria-label={locale === 'en' ? `${point.day}, ${point.bookings} bookings` : `${point.day}, ${point.bookings} marcações`}
-                                  className="w-1/2 max-w-7 rounded-t-md bg-sky-400 shadow-[0_0_18px_rgba(96,165,250,0.15)] transition-[height,filter] hover:brightness-125"
-                                  style={{ height: `${bookingsHeight}%`, minHeight: point.bookings > 0 ? '8px' : '2px' }}
-                                />
-                              </div>
-                              <span className="w-full truncate text-center text-[10px] text-zinc-400 sm:text-xs">{point.day}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-zinc-500 sm:text-xs">
-                      <span>{t('dashboard.peakRevenue', { value: maxRevenue.toFixed(2).replace('.', locale === 'en' ? '.' : ',') })}</span>
-                      <span className="text-right">{t('dashboard.peakBookings', { count: maxBookings })}</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-              <div
-                className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
-                aria-label={t('dashboard.chartLegend')}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
-                    aria-hidden="true"
-                  />
-                  <span className="text-zinc-300">{t('dashboard.revenueLabel')}</span>
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.4)]"
-                    aria-hidden="true"
-                  />
-                  <span className="text-zinc-300">
-                    {t('dashboard.appointmentsLabel')}
-                  </span>
-                </span>
-              </div>
-            </Card>}
+              </section>
+            )}
 
-            {customization.config.sections.upcomingAppointments && <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg font-medium text-zinc-100">
-                  <CalendarDays
-                    className="size-4 text-emerald-400"
-                    aria-hidden="true"
-                  />
-                  {t('dashboard.upcomingAppointments')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                {loadingInitial ? (
-                  <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-16 w-full bg-white/10" />
-                    ))}
-                  </div>
-                ) : upcomingAppointments.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center">
-                    <CheckCircle2
-                      className="mx-auto size-6 text-zinc-600"
-                      aria-hidden="true"
-                    />
-                    <p className="mt-3 text-sm font-medium text-zinc-300">
-                      {t('dashboard.allQuiet')}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      {t('dashboard.upcomingAppointmentsEmpty')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {upcomingAppointments.map((appointment) => (
-                      <Link
-                        key={appointment.id}
-                        href="/dashboard/agenda"
-                        className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.025] p-3 transition hover:border-white/10 hover:bg-white/[0.05]"
+          {customization.config.sections.metrics && (
+            <section className="pt-1" aria-labelledby="business-overview">
+              <div className="mb-3 flex items-center justify-between">
+                <h2
+                  id="business-overview"
+                  className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400"
+                >
+                  {t('dashboard.businessSummary')}
+                </h2>
+                {!loadingInitial && (
+                  <span className="text-xs text-zinc-500">
+                    {services.length} {t('dashboard.services')} ·{' '}
+                    {professionals.length} {t('dashboard.professionals')}
+                  </span>
+                )}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {loadingInitial
+                  ? [...Array(4)].map((_, i) => (
+                      <Card
+                        key={i}
+                        className="border border-white/10 bg-white/[0.04]"
                       >
-                        <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]">
-                          <span className="text-xs font-semibold text-zinc-200">
-                            {new Date(appointment.date_hour).toLocaleTimeString(
-                              locale === 'en' ? 'en-GB' : 'pt-PT',
-                              { hour: '2-digit', minute: '2-digit' },
-                            )}
-                          </span>
-                          <span className="text-[10px] text-zinc-500">
-                            {new Date(appointment.date_hour).toLocaleDateString(
-                              locale === 'en' ? 'en-GB' : 'pt-PT',
-                              { day: '2-digit', month: '2-digit' },
-                            )}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-zinc-200">
-                            {appointment.users?.name_complete ||
-                              appointment.manual_name ||
-                              t('dashboard.client')}
-                          </p>
-                          <p className="mt-0.5 truncate text-xs text-zinc-500">
-                            {appointment.services?.name ||
-                              t('dashboard.service')}
-                          </p>
-                        </div>
-                        <ChevronRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />
+                        <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0">
+                          <div className="space-y-2">
+                            <Skeleton className="h-3 w-24 bg-white/10" />
+                            <Skeleton className="h-7 w-16 bg-white/10" />
+                          </div>
+                          <Skeleton className="size-10 rounded-full bg-white/10" />
+                        </CardHeader>
+                      </Card>
+                    ))
+                  : metrics.map((metric) => (
+                      <Link
+                        key={metric.key}
+                        href="/dashboard/stats"
+                        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                      >
+                        <Card
+                          className={cn(
+                            'glassmorphism cursor-pointer border border-white/10 bg-white/[0.04] transition-all duration-200',
+                            cardHoverVariants[metric.variant],
+                          )}
+                        >
+                          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                            <div className="min-w-0 space-y-1">
+                              <CardDescription className="truncate text-xs font-medium text-zinc-400">
+                                {metric.label}
+                              </CardDescription>
+                              <CardTitle className="truncate text-2xl font-bold tracking-tight text-zinc-50">
+                                {metric.value}
+                              </CardTitle>
+                            </div>
+                            <span
+                              className={cn(
+                                'flex size-10 shrink-0 items-center justify-center rounded-full',
+                                iconVariants.default,
+                              )}
+                              style={{
+                                backgroundColor:
+                                  'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)',
+                                color: 'var(--dashboard-accent)',
+                              }}
+                            >
+                              <metric.icon className="size-5" />
+                            </span>
+                          </CardHeader>
+                        </Card>
                       </Link>
                     ))}
+              </div>
+            </section>
+          )}
+
+          {(customization.config.sections.activityChart ||
+            customization.config.sections.upcomingAppointments) && (
+            <section className="grid gap-3 pt-5 md:gap-4 lg:grid-cols-[1fr_360px]">
+              {customization.config.sections.activityChart && (
+                <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-lg font-medium text-zinc-100">
+                          {t('dashboard.weeklyActivity')}
+                        </CardTitle>
+                        <CardDescription className="mt-1 text-zinc-500">
+                          {t('dashboard.compareDaily')}
+                        </CardDescription>
+                      </div>
+                      <Link
+                        href="/dashboard/stats"
+                        className="text-xs font-medium text-zinc-500 hover:text-zinc-200"
+                      >
+                        {t('dashboard.viewAnalytics')}
+                      </Link>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="h-[310px] min-w-0 w-full pt-4">
+                    {!loadingInitial && !hasChartActivity ? (
+                      <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
+                        <CalendarDays
+                          className="size-6 text-zinc-500"
+                          aria-hidden="true"
+                        />
+                        <p className="mt-3 text-sm font-medium text-zinc-200">
+                          {t('dashboard.noBookingsToChart')}
+                        </p>
+                        <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
+                          {locale === 'en'
+                            ? 'Bookings and completed service revenue will appear here when the barbershop has appointments.'
+                            : 'As marcações e a receita dos serviços concluídos aparecerão aqui quando existirem marcações.'}
+                        </p>
+                      </div>
+                    ) : (
+                      <div
+                        className="flex h-full min-h-[250px] min-w-0 flex-col"
+                        role="img"
+                        aria-label={
+                          locale === 'en'
+                            ? 'Bar chart comparing completed revenue and bookings by weekday'
+                            : 'Gráfico de barras que compara a receita concluída e as marcações por dia da semana'
+                        }
+                      >
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+                          <span>{t('dashboard.relativeMetricScale')}</span>
+                          <span>{t('dashboard.chartInteractionHint')}</span>
+                        </div>
+                        <div className="relative min-h-0 flex-1">
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 flex flex-col justify-between"
+                          >
+                            {[0, 1, 2, 3].map((line) => (
+                              <div
+                                key={line}
+                                className="border-t border-dashed border-white/[0.08]"
+                              />
+                            ))}
+                          </div>
+                          <div className="relative grid h-full min-w-0 grid-cols-7 gap-1 sm:gap-3">
+                            {dynamicChartData.map((point) => {
+                              const revenueHeight =
+                                point.revenue > 0
+                                  ? Math.max(
+                                      8,
+                                      (point.revenue / maxRevenue) * 100,
+                                    )
+                                  : 2;
+                              const bookingsHeight =
+                                point.bookings > 0
+                                  ? Math.max(
+                                      8,
+                                      (point.bookings / maxBookings) * 100,
+                                    )
+                                  : 2;
+                              return (
+                                <div
+                                  key={point.day}
+                                  className="flex min-w-0 flex-col items-center justify-end gap-2"
+                                >
+                                  <div className="flex h-full w-full items-end justify-center gap-1.5">
+                                    <div
+                                      title={
+                                        locale === 'en'
+                                          ? `${point.day}: ${point.revenue.toFixed(2)} EUR in completed service revenue`
+                                          : `${point.day}: ${point.revenue.toFixed(2).replace('.', ',')} € de receita de serviços concluídos`
+                                      }
+                                      aria-label={
+                                        locale === 'en'
+                                          ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros`
+                                          : `${point.day}, receita ${point.revenue.toFixed(2)} euros`
+                                      }
+                                      className="w-1/2 max-w-7 rounded-t-md shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
+                                      style={{
+                                        backgroundColor:
+                                          'var(--dashboard-accent)',
+                                        height: `${revenueHeight}%`,
+                                        minHeight:
+                                          point.revenue > 0 ? '8px' : '2px',
+                                      }}
+                                    />
+                                    <div
+                                      title={
+                                        locale === 'en'
+                                          ? `${point.day}: ${point.bookings} bookings`
+                                          : `${point.day}: ${point.bookings} marcações`
+                                      }
+                                      aria-label={
+                                        locale === 'en'
+                                          ? `${point.day}, ${point.bookings} bookings`
+                                          : `${point.day}, ${point.bookings} marcações`
+                                      }
+                                      className="w-1/2 max-w-7 rounded-t-md bg-sky-400 shadow-[0_0_18px_rgba(96,165,250,0.15)] transition-[height,filter] hover:brightness-125"
+                                      style={{
+                                        height: `${bookingsHeight}%`,
+                                        minHeight:
+                                          point.bookings > 0 ? '8px' : '2px',
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="w-full truncate text-center text-[10px] text-zinc-400 sm:text-xs">
+                                    {point.day}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-zinc-500 sm:text-xs">
+                          <span>
+                            {t('dashboard.peakRevenue', {
+                              value: maxRevenue
+                                .toFixed(2)
+                                .replace('.', locale === 'en' ? '.' : ','),
+                            })}
+                          </span>
+                          <span className="text-right">
+                            {t('dashboard.peakBookings', {
+                              count: maxBookings,
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                  <div
+                    className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
+                    aria-label={t('dashboard.chartLegend')}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
+                        aria-hidden="true"
+                      />
+                      <span className="text-zinc-300">
+                        {t('dashboard.revenueLabel')}
+                      </span>
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="size-2.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.4)]"
+                        aria-hidden="true"
+                      />
+                      <span className="text-zinc-300">
+                        {t('dashboard.appointmentsLabel')}
+                      </span>
+                    </span>
                   </div>
-                )}
-              </CardContent>
-            </Card>}
-          </section>}
+                </Card>
+              )}
+
+              {customization.config.sections.upcomingAppointments && (
+                <Card className="glassmorphism border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-lg font-medium text-zinc-100">
+                      <CalendarDays
+                        className="size-4 text-emerald-400"
+                        aria-hidden="true"
+                      />
+                      {t('dashboard.upcomingAppointments')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    {loadingInitial ? (
+                      <div className="space-y-3">
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton
+                            key={i}
+                            className="h-16 w-full bg-white/10"
+                          />
+                        ))}
+                      </div>
+                    ) : upcomingAppointments.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center">
+                        <CheckCircle2
+                          className="mx-auto size-6 text-zinc-600"
+                          aria-hidden="true"
+                        />
+                        <p className="mt-3 text-sm font-medium text-zinc-300">
+                          {t('dashboard.allQuiet')}
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          {t('dashboard.upcomingAppointmentsEmpty')}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {upcomingAppointments.map((appointment) => (
+                          <Link
+                            key={appointment.id}
+                            href="/dashboard/agenda"
+                            className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.025] p-3 transition hover:border-white/10 hover:bg-white/[0.05]"
+                          >
+                            <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]">
+                              <span className="text-xs font-semibold text-zinc-200">
+                                {new Date(
+                                  appointment.date_hour,
+                                ).toLocaleTimeString(
+                                  locale === 'en' ? 'en-GB' : 'pt-PT',
+                                  { hour: '2-digit', minute: '2-digit' },
+                                )}
+                              </span>
+                              <span className="text-[10px] text-zinc-500">
+                                {new Date(
+                                  appointment.date_hour,
+                                ).toLocaleDateString(
+                                  locale === 'en' ? 'en-GB' : 'pt-PT',
+                                  { day: '2-digit', month: '2-digit' },
+                                )}
+                              </span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-zinc-200">
+                                {appointment.users?.name_complete ||
+                                  appointment.manual_name ||
+                                  t('dashboard.client')}
+                              </p>
+                              <p className="mt-0.5 truncate text-xs text-zinc-500">
+                                {appointment.services?.name ||
+                                  t('dashboard.service')}
+                              </p>
+                            </div>
+                            <ChevronRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </section>
+          )}
         </div>
       </main>
     </TooltipProvider>

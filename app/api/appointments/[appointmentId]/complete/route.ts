@@ -24,7 +24,6 @@ function hasAgendaGrant(value: unknown): boolean {
   return permissions.agenda === true || permissions.appointments === true;
 }
 
-
 async function POST__unobserved(
   request: Request,
   { params }: { params: Promise<{ appointmentId: string }> },
@@ -65,14 +64,24 @@ async function POST__unobserved(
     }
     const descriptionProducts = rawDescription.trim().slice(0, 500);
 
-    const rawValue = body.valueProducts === undefined || body.valueProducts === ''
-      ? 0
-      : typeof body.valueProducts === 'number' || typeof body.valueProducts === 'string'
-        ? Number(body.valueProducts)
-        : Number.NaN;
-    if (!Number.isFinite(rawValue) || rawValue < 0 || !Number.isSafeInteger(Math.round(rawValue * 100))) {
+    const rawValue =
+      body.valueProducts === undefined || body.valueProducts === ''
+        ? 0
+        : typeof body.valueProducts === 'number' ||
+            typeof body.valueProducts === 'string'
+          ? Number(body.valueProducts)
+          : Number.NaN;
+    if (
+      !Number.isFinite(rawValue) ||
+      rawValue < 0 ||
+      !Number.isSafeInteger(Math.round(rawValue * 100))
+    ) {
       return NextResponse.json(
-        { success: false, error: 'O valor adicional tem de ser um número válido e não negativo.' },
+        {
+          success: false,
+          error:
+            'O valor adicional tem de ser um número válido e não negativo.',
+        },
         { status: 400 },
       );
     }
@@ -83,9 +92,10 @@ async function POST__unobserved(
       return NextResponse.json(
         {
           success: false,
-          error: tenant.status === 401
-            ? 'Não autorizado.'
-            : 'Sem permissão para concluir esta marcação.',
+          error:
+            tenant.status === 401
+              ? 'Não autorizado.'
+              : 'Sem permissão para concluir esta marcação.',
         },
         { status: tenant.status },
       );
@@ -101,9 +111,15 @@ async function POST__unobserved(
         .maybeSingle();
 
       if (grantError) {
-        console.error('[APPOINTMENT_COMPLETE_PERMISSION_ERROR]', grantError.code ?? 'UNKNOWN');
+        console.error(
+          '[APPOINTMENT_COMPLETE_PERMISSION_ERROR]',
+          grantError.code ?? 'UNKNOWN',
+        );
         return NextResponse.json(
-          { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+          {
+            success: false,
+            error: 'Não foi possível validar as permissões do atendimento.',
+          },
           { status: 503 },
         );
       }
@@ -123,9 +139,15 @@ async function POST__unobserved(
           .maybeSingle();
 
         if (legacyError) {
-          console.error('[APPOINTMENT_COMPLETE_LEGACY_PERMISSION_ERROR]', legacyError.code ?? 'UNKNOWN');
+          console.error(
+            '[APPOINTMENT_COMPLETE_LEGACY_PERMISSION_ERROR]',
+            legacyError.code ?? 'UNKNOWN',
+          );
           return NextResponse.json(
-            { success: false, error: 'Não foi possível validar as permissões do atendimento.' },
+            {
+              success: false,
+              error: 'Não foi possível validar as permissões do atendimento.',
+            },
             { status: 503 },
           );
         }
@@ -134,7 +156,10 @@ async function POST__unobserved(
 
       if (!allowed) {
         return NextResponse.json(
-          { success: false, error: 'Sem permissão para concluir atendimentos.' },
+          {
+            success: false,
+            error: 'Sem permissão para concluir atendimentos.',
+          },
           { status: 403 },
         );
       }
@@ -143,7 +168,10 @@ async function POST__unobserved(
     const plan = await resolveAccessPlanForUser(tenant.userId);
     if (!hasPlanFeature(plan, 'appointments')) {
       return NextResponse.json(
-        { success: false, error: 'A agenda não está incluída no plano desta barbearia.' },
+        {
+          success: false,
+          error: 'A agenda não está incluída no plano desta barbearia.',
+        },
         { status: 403 },
       );
     }
@@ -199,7 +227,11 @@ async function POST__unobserved(
     }
     if (!updated) {
       return NextResponse.json(
-        { success: false, error: 'A marcação já foi alterada. Atualiza a agenda e tenta novamente.' },
+        {
+          success: false,
+          error:
+            'A marcação já foi alterada. Atualiza a agenda e tenta novamente.',
+        },
         { status: 409 },
       );
     }

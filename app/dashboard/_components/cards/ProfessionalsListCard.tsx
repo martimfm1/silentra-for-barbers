@@ -172,7 +172,9 @@ export function ProfessionalsListCard({
                 )}
               </div>
               <Button
-            aria-label={loading ? "A guardar profissional" : "Guardar profissional"}
+                aria-label={
+                  loading ? 'A guardar profissional' : 'Guardar profissional'
+                }
                 type="submit"
                 disabled={loading}
                 className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
@@ -181,7 +183,8 @@ export function ProfessionalsListCard({
                   <Spinner className="size-4" />
                 ) : (
                   <>
-                    {t('professionalsListCard.add')} <ArrowRight className="ml-2 size-4" />
+                    {t('professionalsListCard.add')}{' '}
+                    <ArrowRight className="ml-2 size-4" />
                   </>
                 )}
               </Button>
@@ -232,7 +235,9 @@ export function ProfessionalsListCard({
                       <h3 className="truncate text-sm font-semibold text-zinc-100">
                         {professional.name}
                       </h3>
-                      <p className="mt-1 text-xs text-zinc-500">{t('professionalsListCard.barber')}</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {t('professionalsListCard.barber')}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4 rounded-lg border border-white/5 bg-black/20 px-3 py-2">
@@ -250,7 +255,9 @@ export function ProfessionalsListCard({
                     size="icon"
                     onClick={() => setEditingProfessional(professional)}
                     className={iconButton}
-                    aria-label={t('professionalsListCard.edit', { name: professional.name })}
+                    aria-label={t('professionalsListCard.edit', {
+                      name: professional.name,
+                    })}
                   >
                     <Pencil className="size-4" />
                   </Button>
@@ -260,7 +267,9 @@ export function ProfessionalsListCard({
                         variant="ghost"
                         size="icon"
                         className={`${iconButton} text-zinc-500 hover:bg-red-500/10 hover:text-red-400`}
-                        aria-label={t('professionalsListCard.delete', { name: professional.name })}
+                        aria-label={t('professionalsListCard.delete', {
+                          name: professional.name,
+                        })}
                       >
                         <Trash2 className="size-4" />
                       </Button>

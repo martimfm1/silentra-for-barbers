@@ -103,7 +103,10 @@ export function withApiObservability<T extends ApiHandler>(
     try {
       const response = await handler(...args);
       statusCode = response instanceof Response ? response.status : 500;
-      if (response instanceof Response && !isSharedCacheableResponse(response)) {
+      if (
+        response instanceof Response &&
+        !isSharedCacheableResponse(response)
+      ) {
         // A CDN-cached response cannot carry a unique ID per visitor. Keep
         // per-request IDs on private/no-store responses, never on shared cache entries.
         try {
