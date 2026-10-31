@@ -354,6 +354,15 @@ async function POST__unobserved(request: Request) {
         { success: false, error: 'Serviço indisponível para esta barbearia.' },
         { status: 400 },
       );
+    if (
+      isPrepayment &&
+      (!Number.isFinite(Number(selectedService.price)) ||
+        Number(selectedService.price) <= 0)
+    )
+      return NextResponse.json(
+        { success: false, error: 'Este serviço não tem um valor válido para pré-pagamento.' },
+        { status: 409 },
+      );
     const durationMinutes = Math.min(
       Math.max(Number(selectedService.duration ?? 30), 1),
       1440,
