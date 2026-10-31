@@ -697,7 +697,7 @@ export default function PlatformAdminConsole() {
             <nav aria-label="Navegação de administração" className="mt-2 flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:overflow-visible">
               {navigationGroups.map((group) => (
                 <div key={group.label} className="min-w-max lg:min-w-0">
-                  <p className="mb-1 hidden px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600 lg:block">{group.label}</p>
+                  <p className="mb-1 px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">{group.label}</p>
                   <div className="flex gap-1 lg:flex-col">
                     {group.items.map((id) => {
                       const item = tabs.find((candidate) => candidate.id === id);
