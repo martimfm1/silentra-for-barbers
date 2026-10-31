@@ -36,7 +36,7 @@ type ManualPrepaymentInstructions = { bookingId: string; amount: number; mbwayPh
 function normalizeWhatsAppNumber(value: string): string {
   let digits = value.replace(/\D/g, '');
   if (digits.startsWith('00')) digits = digits.slice(2);
-  if (digits.length === 9 && digits.startsWith('9')) digits = `351${digits}`;
+  if (digits.length === 9) digits = `351${digits}`;
   return digits;
 }
 
