@@ -534,6 +534,41 @@ export const pt = {
     clientsAvailable: 'clientes disponíveis',
     servicesAvailable: 'serviços',
     barbersAvailable: 'barbeiros',
+    calendarSyncTitle: 'Sincronizar com o iPhone',
+    calendarSyncDescription:
+      'Adiciona a agenda da barbearia à app Calendário. O link é privado e só mostra o serviço, o profissional, o horário e a morada — nunca os dados dos clientes.',
+    calendarSyncLoading: 'A carregar a sincronização…',
+    calendarSyncLoadFailed: 'Não foi possível carregar a sincronização.',
+    calendarSyncRetry: 'Tentar novamente',
+    calendarSyncDisabledDescription:
+      'Cria um link privado para veres as marcações da Silentra no Calendário do iPhone.',
+    calendarSyncEnable: 'Ativar sincronização',
+    calendarSyncActivating: 'A ativar…',
+    calendarSyncEnabled: 'Sincronização ativada.',
+    calendarSyncActive: 'Sincronização ativa · apenas leitura',
+    calendarSyncUrlLabel: 'Link privado do calendário',
+    calendarSyncCopy: 'Copiar link',
+    calendarSyncCopied: 'Link copiado.',
+    calendarSyncCopyFailed: 'Não foi possível copiar o link.',
+    calendarSyncInstructions: 'Como adicionar no iPhone',
+    calendarSyncHideInstructions: 'Ocultar instruções',
+    calendarSyncHowTo: 'Adicionar a agenda no iPhone',
+    calendarSyncStepOne:
+      'Abre a app Calendário no iPhone e toca em “Calendários”.',
+    calendarSyncStepTwo:
+      'Escolhe “Adicionar calendário” e depois “Adicionar calendário assinado”.',
+    calendarSyncStepThree:
+      'Cola o link acima, toca em “Procurar” e confirma a subscrição.',
+    calendarSyncRefreshNotice:
+      'A subscrição é apenas de leitura. O iPhone atualiza-a periodicamente, por isso as alterações podem demorar algum tempo a aparecer.',
+    calendarSyncRotate: 'Gerar novo link',
+    calendarSyncRotateConfirm:
+      'Gerar um novo link invalida o atual. Terás de atualizar a subscrição no iPhone. Queres continuar?',
+    calendarSyncDisable: 'Desativar',
+    calendarSyncDisableConfirm:
+      'Desativar a sincronização invalida o link e remove o acesso dos dispositivos subscritos. Queres continuar?',
+    calendarSyncDisabled: 'Sincronização desativada.',
+    calendarSyncSaveFailed: 'Não foi possível atualizar a sincronização.',
   },
   orderManagement: {
     title: 'Encomendas',
