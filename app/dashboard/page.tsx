@@ -732,10 +732,12 @@ export default function DashboardPage() {
                                           ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros`
                                           : `${point.day}, receita ${point.revenue.toFixed(2)} euros`
                                       }
-                                      className="w-1/2 max-w-7 rounded-t-md shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
+                                      className="w-1/2 max-w-7 rounded-t-md transition-[height,filter] hover:brightness-125"
                                       style={{
                                         backgroundColor:
                                           'var(--dashboard-accent)',
+                                        boxShadow:
+                                          '0 0 18px color-mix(in srgb, var(--dashboard-accent) 16%, transparent)',
                                         height: `${revenueHeight}%`,
                                         minHeight:
                                           point.revenue > 0 ? '8px' : '2px',
