@@ -987,6 +987,7 @@ export const enCopy = {
     bookingError: 'Could not complete the booking.',
     bookingSuccess: 'Booking completed successfully!',
     prepaymentOption: 'Prepay with MB WAY',
+    requestPrepayment: 'Request prepayment',
     prepaymentOptionDescription: 'Get priority for your time slot. The booking is confirmed only after the barbershop verifies the payment.',
     prepaymentAmount: 'Amount to pay',
     prepaymentNumber: 'MB WAY number',
