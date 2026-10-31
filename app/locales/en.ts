@@ -84,6 +84,8 @@ export const en = {
     chartLegend: 'Chart legend',
     upcomingAppointments: 'Upcoming bookings',
     upcomingAppointmentsEmpty: 'Your upcoming bookings will appear here.',
+    upcomingAppointmentProfessional: 'Barber',
+    upcomingAppointmentNotes: 'Customer notes',
     today: 'Today',
     appointmentSingular: 'booking today',
     appointmentPlural: 'bookings today',
