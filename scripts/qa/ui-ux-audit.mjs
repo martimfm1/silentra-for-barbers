@@ -10,6 +10,7 @@ const [
   servicesListCard,
   automationPage,
   marketingWorkspace,
+  settingsPage,
 ] = await Promise.all([
   read('components/dashboard/dashboard-confirm-provider.tsx'),
   read('app/dashboard/page.tsx'),
@@ -17,6 +18,7 @@ const [
   read('app/dashboard/_components/cards/ServicesListCard.tsx'),
   read('app/dashboard/automations/page.tsx'),
   read('app/dashboard/marketing/marketing-workspace.tsx'),
+  read('app/dashboard/settings/settings-page.tsx'),
 ]);
 const confirmationTargets = await Promise.all(
   [
@@ -88,12 +90,24 @@ assert.match(sidebar, /aria-controls="dashboard-more-panel"/);
 assert.match(sidebar, /aria-modal="true"/);
 assert.match(sidebar, /AnimatePresence/);
 assert.match(sidebar, /motion\.aside/);
+assert.match(sidebar, /TooltipProvider/);
+assert.match(sidebar, /TooltipTrigger asChild/);
+assert.match(sidebar, /TooltipContent/);
+assert.match(sidebar, /side="top"/);
+assert.match(sidebar, /rotateX: -5/);
+assert.match(sidebar, /transformOrigin: 'bottom center'/);
+assert.doesNotMatch(sidebar, /lg:absolute lg:bottom-\[calc\(100%\+0\.85rem\)\]/);
 assert.match(sidebar, /prefersReducedMotion/);
 assert.match(sidebar, /env\(safe-area-inset-bottom\)/);
 assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /moreTriggerRef\.current\?\.focus\(\)/);
 assert.match(sidebar, /moreItems\.some\(isActive\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
+assert.match(settingsPage, /const sectionGroups/);
+assert.match(settingsPage, /navigationGroups\.map/);
+assert.match(settingsPage, /<optgroup/);
+assert.match(settingsPage, /aria-current=\{section === id \? 'location'/);
+assert.doesNotMatch(settingsPage, /<CardDescription>/);
 
 // Public navigation stays compact at desktop widths and uses a reduced mobile menu.
 assert.match(navbar, /className="hidden min-w-0 items-center gap-1 lg:flex"/);
