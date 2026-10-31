@@ -52,8 +52,23 @@ assert.match(responsiveCss, /table-layout:\s*fixed/);
 assert.match(responsiveCss, /overflow-x:\s*clip/);
 assert.match(
   responsiveCss,
-  /body:has\(\.silentra-dashboard-shell\)[\s\S]*?overflow-x:\s*hidden/,
+  /body:has\(\.silentra-dashboard-shell\)[\s\S]*?overflow-x:\s*clip/,
 );
+assert.doesNotMatch(
+  responsiveCss,
+  /body:has\(\.silentra-dashboard-shell\)[\s\S]*?overflow-x:\s*hidden/,
+  'Dashboard body must clip horizontal overflow without creating a hidden scroll container',
+);
+assert.match(
+  responsiveCss,
+  /html:has\(\.silentra-dashboard-shell\)[\s\S]*?overflow-x:\s*clip !important/,
+);
+assert.match(
+  responsiveCss,
+  /nav\[aria-label='Navegação rápida do painel'\][\s\S]*?position:\s*fixed !important/,
+  'Dashboard quick navigation must remain viewport-fixed',
+);
+assert.match(responsiveCss, /\.silentra-dashboard-shell \[class~='w-screen'\]/);
 assert.match(
   responsiveCss,
   /\.dashboard-transition-panel[\s\S]*?transform:\s*none !important/,
