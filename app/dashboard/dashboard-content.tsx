@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import { BarbershopProvider } from '@/context/BarbershopContext';
 import { DashboardTopBar } from '@/app/dashboard/_components/DashboardTopBar';
 import { DashboardSidebar } from '@/app/dashboard/_components/DashboardSidebar';
@@ -9,6 +10,10 @@ import { DashboardTabMotionEnhancer } from '@/components/dashboard/dashboard-tab
 import { DashboardConfirmProvider } from '@/components/dashboard/dashboard-confirm-provider';
 import { useLanguage } from '@/context/LanguageContext';
 import { DashboardPageTransition } from '@/components/dashboard/dashboard-page-transition';
+import {
+  DashboardCustomizationProvider,
+  useDashboardCustomization,
+} from '@/app/dashboard/_components/DashboardCustomization';
 
 const dashboardSurfaceStyles = `
   .silentra-dashboard-shell .dashboard-page {
@@ -72,10 +77,35 @@ const dashboardSurfaceStyles = `
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { config: dashboardConfig } = useDashboardCustomization();
+  const accentColor = dashboardConfig.accentColor;
   const isSettingsPage = pathname.startsWith('/dashboard/settings');
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const previousAccent = root.style.getPropertyValue('--dashboard-accent');
+    const previousTheme = body.getAttribute('data-dashboard-theme');
+
+    root.style.setProperty('--dashboard-accent', accentColor);
+    body.setAttribute('data-dashboard-theme', 'true');
+
+    return () => {
+      if (previousAccent) {
+        root.style.setProperty('--dashboard-accent', previousAccent);
+      } else {
+        root.style.removeProperty('--dashboard-accent');
+      }
+      if (previousTheme === null) {
+        body.removeAttribute('data-dashboard-theme');
+      } else {
+        body.setAttribute('data-dashboard-theme', previousTheme);
+      }
+    };
+  }, [accentColor]);
+
   return (
-    <div className="silentra-dashboard-shell">
+    <div className="silentra-dashboard-shell" style={{ "--dashboard-accent": accentColor } as React.CSSProperties}>
       <style dangerouslySetInnerHTML={{ __html: dashboardSurfaceStyles }} />
       <a
         href="#dashboard-main-content"
@@ -111,11 +141,13 @@ export default function DashboardContentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <BarbershopProvider>
-      <DashboardConfirmProvider>
-        <Spotlight className="opacity-80" />
-        <DashboardContent>{children}</DashboardContent>
-      </DashboardConfirmProvider>
-    </BarbershopProvider>
+    <DashboardCustomizationProvider>
+      <BarbershopProvider>
+        <DashboardConfirmProvider>
+          <Spotlight className="opacity-80" />
+          <DashboardContent>{children}</DashboardContent>
+        </DashboardConfirmProvider>
+      </BarbershopProvider>
+    </DashboardCustomizationProvider>
   );
 }
