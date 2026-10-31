@@ -376,6 +376,7 @@ export const enCopy = {
     backToDashboard: 'Back to dashboard',
     openAgenda: 'Open calendar',
     otherService: 'Other',
+    generalProfessional: 'Shop / General',
   },
   posOverviewPage: {
     cash: 'Cash',
