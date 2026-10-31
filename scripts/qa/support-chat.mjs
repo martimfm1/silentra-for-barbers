@@ -73,7 +73,7 @@ assert.match(
 );
 
 const everyMessageMigration = await readFile(
-  'supabase/migrations/20261017130000_support_notify_every_message.sql',
+  'supabase/migrations/20261017122241_support_notify_every_message.sql',
   'utf8',
 );
 assert.match(everyMessageMigration, /Every message has a unique outbox entry/i);
