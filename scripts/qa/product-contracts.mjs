@@ -642,7 +642,7 @@ const checks = [
     name: 'Booking drawer excludes configured closed weekdays from date choices',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
-      const normalized = source.replace(/\\s+/g, ' ').trim();
+      const normalized = source.replace(/\s+/g, ' ').trim();
       return (
         normalized.includes('const availableDays = useMemo(') &&
         normalized.includes('days.filter( (day) => !closedDays.has(') &&
