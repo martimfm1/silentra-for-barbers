@@ -786,8 +786,20 @@ export default function PlatformAdminConsole() {
         {tab === 'support' ? <SupportInbox /> : null}
 
         {tab === 'overview' && data ? (
-          <section className="space-y-5">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="min-w-0 space-y-5">
+            <div className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-emerald-400/[0.07] via-white/[0.025] to-transparent p-4 sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Resumo executivo</p>
+              <h2 className="mt-1 text-base font-semibold tracking-tight text-white sm:text-lg">A tua plataforma, num só lugar</h2>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                Acompanha a utilização, o desempenho comercial e os pontos que precisam da tua atenção.
+              </p>
+            </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Utilização da plataforma</h2>
+                <span className="text-[10px] text-zinc-600">Totais atuais</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Barbearias"
                 value={data.stats.barbershops}
@@ -810,7 +822,12 @@ export default function PlatformAdminConsole() {
                 tone={data.stats.upcomingAppointments > 0 ? 'good' : 'default'}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Distribuição de planos</h2>
+                <span className="text-[10px] text-zinc-600">Plano efetivo</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Free"
                 value={data.plans.free}
@@ -834,7 +851,13 @@ export default function PlatformAdminConsole() {
                 meta={`${data.stats.planAssignments} overrides`}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Desempenho financeiro</h2>
+                <span className="text-[10px] text-zinc-600">Últimos 30 dias</span>
+              </div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <StatCard
                 label="Receita manual · 30d"
                 value={formatMoney(data.operations.manualRevenue30d)}
@@ -875,7 +898,9 @@ export default function PlatformAdminConsole() {
               />
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+            </div>
+
+            <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
               <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="size-4 text-emerald-300" />
@@ -884,7 +909,7 @@ export default function PlatformAdminConsole() {
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
-                      Novos tenants
+                      Novas barbearias
                     </p>
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.newShops7d}
@@ -902,7 +927,7 @@ export default function PlatformAdminConsole() {
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
-                      Bookings próximos
+                      Marcações próximas
                     </p>
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.appointmentsNext7d}
@@ -1042,7 +1067,7 @@ export default function PlatformAdminConsole() {
                   <div>
                     <h2 className="font-semibold">Barbearias recentes</h2>
                     <p className="mt-1 text-xs text-zinc-500">
-                      Pesquisa por nome, slug ou ID.
+                      Pesquisa por nome, endereço público ou ID.
                     </p>
                   </div>
                   <button
