@@ -49,6 +49,11 @@ export interface MarketplaceBookingResponse {
   blockedIntervals?: BookingBlockedInterval[];
   professionals?: MarketplaceProfessional[];
   professionalAvailability?: Record<string, string[]>;
+  manualPrepayment?: {
+    enabled: boolean;
+    mbwayPhone: string;
+    whatsappPhone: string;
+  };
 }
 
 export interface UseBookingSlotsReturn {
