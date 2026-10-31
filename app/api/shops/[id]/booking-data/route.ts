@@ -10,6 +10,8 @@ type AppointmentRow = {
   duration_minutes: number | null;
   professional_id: string | null;
   status: string | null;
+  payment_status?: string | null;
+  payment_expires_at?: string | null;
 };
 type ScheduleBlockRow = {
   id: string;
@@ -107,7 +109,7 @@ async function GET__unobserved(
     const { data: shopRecord, error: shopError } = await admin
       .from('shops')
       .select(
-        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days, minimum_booking_notice_minutes)`,
+        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days, minimum_booking_notice_minutes, phone, mbway_enabled, mbway_phone)`,
       )
       .eq('id', shopId)
       .single();
@@ -120,6 +122,21 @@ async function GET__unobserved(
     }
 
     const barbershopId = shopRecord.barbershop_id;
+    const { data: effectivePlan } = await admin.rpc(
+      'get_effective_billing_plan_for_barbershop',
+      { p_barbershop_id: barbershopId },
+    );
+    const mbwayPhone = String(relation.mbway_phone ?? '').trim();
+    const whatsappPhone = String(relation.phone ?? '').trim();
+    const manualPrepayment = {
+      enabled:
+        relation.mbway_enabled === true &&
+        ['pro', 'enterprise'].includes(String(effectivePlan ?? '').toLowerCase()) &&
+        mbwayPhone.replace(/\\D/g, '').length >= 9 &&
+        whatsappPhone.replace(/\\D/g, '').length >= 9,
+      mbwayPhone,
+      whatsappPhone,
+    };
     const relation = Array.isArray(shopRecord.barbershops)
       ? shopRecord.barbershops[0]
       : shopRecord.barbershops;
@@ -242,7 +259,7 @@ async function GET__unobserved(
     const dayEnd = `${date}T23:59:59`;
     const { data: appointments, error: appointmentsError } = await admin
       .from('appointments')
-      .select('date_hour, duration_minutes, professional_id, status')
+      .select('date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at')
       .eq('barbershop_id', barbershopId)
       .gte('date_hour', dayStart)
       .lte('date_hour', dayEnd)
@@ -279,7 +296,15 @@ async function GET__unobserved(
       Math.max(Number(selectedService?.durationMinutes ?? 30), 1),
       1440,
     );
-    const appointmentIntervals = ((appointments ?? []) as AppointmentRow[])
+    const activeAppointments = ((appointments ?? []) as AppointmentRow[]).filter(
+      (appointment) =>
+        !(
+          appointment.payment_status === 'awaiting_review' &&
+          appointment.payment_expires_at &&
+          new Date(appointment.payment_expires_at).getTime() <= Date.now()
+        ),
+    );
+    const appointmentIntervals = activeAppointments
       .map((appointment) => {
         const parsed = parseDateHour(appointment.date_hour);
         if (!parsed || parsed.date !== date) return null;
@@ -406,6 +431,7 @@ async function GET__unobserved(
         closedDay: isClosedDay,
         blockedIntervals: visibleBlockedIntervals,
         selectedProfessionalId: requestedProfessionalId,
+        manualPrepayment,
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
