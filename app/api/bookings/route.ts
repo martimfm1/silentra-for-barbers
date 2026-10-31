@@ -500,6 +500,14 @@ async function POST__unobserved(request: Request) {
           },
           { status: 409 },
         );
+      if (createError?.message === 'BOOKING_PREPAYMENT_AMOUNT_INVALID')
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Este serviço já não tem um valor válido para pré-pagamento.',
+          },
+          { status: 409 },
+        );
       console.error(
         '[API_BOOKING_ATOMIC_CREATE_ERROR]',
         createError?.code ?? 'UNKNOWN',
