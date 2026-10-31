@@ -435,13 +435,15 @@ export function BookingDrawerCanonical({
         toast.success(t('bookingDrawer.bookingSuccess'));
       }
       setStep(4);
-      onSuccess?.({
-        shopName: shop.name,
-        serviceName: service.name,
-        date: currentDay.dateStr,
-        time: selectedSlot,
-        customerEmail: email.trim(),
-      });
+      if (payload.payment?.method !== 'mbway') {
+        onSuccess?.({
+          shopName: shop.name,
+          serviceName: service.name,
+          date: currentDay.dateStr,
+          time: selectedSlot,
+          customerEmail: email.trim(),
+        });
+      }
     } catch (reason) {
       const message =
         reason instanceof Error
@@ -943,7 +945,9 @@ export function BookingDrawerCanonical({
                   ) : null}
                   {submitting
                     ? t('bookingDrawer.reserving')
-                    : t('bookingDrawer.confirmBooking')}
+                    : prepaymentSelected
+                      ? t('bookingDrawer.requestPrepayment')
+                      : t('bookingDrawer.confirmBooking')}
                 </Button>
               </div>
             </section>
@@ -979,7 +983,7 @@ export function BookingDrawerCanonical({
                     <span className="text-zinc-400">{t('bookingDrawer.prepaymentNumber')}</span>
                     <strong className="text-zinc-100">{paymentInstructions.mbwayPhone}</strong>
                   </div>
-                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })}</p>
+                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' }) })}</p>
                   {whatsappProofUrl ? (
                     <a href={whatsappProofUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-300">
                       <MessageCircle className="size-4" aria-hidden="true" />
@@ -989,7 +993,22 @@ export function BookingDrawerCanonical({
                   <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentEmailNotice')}</p>
                 </div>
               )}
-              <Button type="button" className="mt-6 w-full" onClick={onClose}>
+              <Button
+                type="button"
+                className="mt-6 w-full"
+                onClick={() => {
+                  if (paymentInstructions) {
+                    onSuccess?.({
+                      shopName: shop.name,
+                      serviceName: service?.name || 'Serviço',
+                      date: currentDay?.dateStr || '',
+                      time: selectedSlot || '',
+                      customerEmail: email.trim(),
+                    });
+                  }
+                  onClose();
+                }}
+              >
                 {t('bookingDrawer.finish')}
               </Button>
             </section>
