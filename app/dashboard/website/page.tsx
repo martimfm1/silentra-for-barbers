@@ -339,33 +339,41 @@ export default function CustomWebsiteDashboardPage() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             {pt
-              ? 'A Silentra cria um site personalizado para a tua barbearia. A criação custa'
-              : 'Silentra builds a custom website for your barbershop. Setup costs'}{' '}
-            <span className="font-medium text-zinc-200">
+              ? 'A ativação do site custa'
+              : 'Website activation costs'}{' '}
+            <span className="font-medium text-zinc-100">
               {access.setupFee.toLocaleString(
                 locale === 'en' ? 'en-GB' : 'pt-PT',
                 { style: 'currency', currency: 'EUR' },
               )}
-            </span>
-            {plan === 'enterprise' ? (
-              <span className="ml-2 text-xs text-emerald-300">
+            </span>{' '}
+            {pt ? '(pagamento único).' : '(one-time payment).'}{' '}
+            {access.monthlyFee > 0 ? (
+              <>
+                {pt ? 'A manutenção mensal custa' : 'Monthly maintenance costs'}{' '}
+                <span className="font-medium text-zinc-200">
+                  {access.monthlyFee.toLocaleString(
+                    locale === 'en' ? 'en-GB' : 'pt-PT',
+                    { style: 'currency', currency: 'EUR' },
+                  )}
+                  {pt ? '/mês' : '/month'}
+                </span>
+                .
+              </>
+            ) : (
+              <span className="font-medium text-emerald-300">
                 {pt
-                  ? 'desconto Enterprise de 100 € aplicado'
-                  : '€100 Enterprise setup discount applied'}
+                  ? 'Sem mensalidade adicional.'
+                  : 'No additional monthly fee.'}
               </span>
-            ) : null}{' '}
-            {pt ? 'e a mensalidade é' : 'and the monthly fee is'}{' '}
-            <span className="font-medium text-zinc-200">
-              {access.monthlyFee.toLocaleString(
-                locale === 'en' ? 'en-GB' : 'pt-PT',
-                { style: 'currency', currency: 'EUR' },
-              )}
-              {pt ? '/mês' : '/month'}
-            </span>
-            .{' '}
-            {pt
-              ? 'O site é publicado após aprovação do projeto e confirmação das condições comerciais.'
-              : 'The website is published after the project and commercial terms are approved.'}
+            )}{' '}
+            {access.source === 'enterprise'
+              ? pt
+                ? 'O endereço barbers.silentra.me está incluído no plano Enterprise.'
+                : 'The barbers.silentra.me address is included with the Enterprise plan.'
+              : pt
+                ? 'A publicação acontece após a aprovação do projeto e confirmação das condições comerciais.'
+                : 'Publication takes place after project approval and confirmation of the commercial terms.'}
           </p>
         </div>
         <a
@@ -399,7 +407,7 @@ export default function CustomWebsiteDashboardPage() {
           </div>
           {latest.status === 'published' && latest.public_slug && (
             <a
-              href={`/site/${encodeURIComponent(latest.public_slug)}`}
+              href={`/${encodeURIComponent(latest.public_slug)}`}
               className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200"
             >
               {pt ? 'Abrir site publicado' : 'Open published website'}{' '}
@@ -429,7 +437,9 @@ export default function CustomWebsiteDashboardPage() {
               ? 'Nome pretendido para o endereço'
               : 'Preferred website address'}
             <div className="flex min-w-0 items-center rounded-xl border border-white/10 bg-black/20 focus-within:border-emerald-400/40">
-              <span className="shrink-0 pl-3 text-xs text-zinc-500">/</span>
+              <span className="shrink-0 pl-3 text-xs text-zinc-500">
+                barbers.silentra.me/
+              </span>
               <input
                 value={desiredSlug}
                 onChange={(event) => setDesiredSlug(event.target.value)}
@@ -443,8 +453,8 @@ export default function CustomWebsiteDashboardPage() {
             </div>
             <span className="text-xs text-zinc-500">
               {pt
-                ? 'O endereço final será confirmado pela Silentra e pode diferir se já estiver ocupado.'
-                : 'Silentra will confirm the final address; it may differ if your preferred name is taken.'}
+                ? 'O endereço fica em barbers.silentra.me. A equipa confirma a disponibilidade do nome antes da publicação.'
+                : 'Your address will use barbers.silentra.me. The team confirms the name is available before publication.'}
             </span>
           </label>
           <label className="grid gap-2 text-sm text-zinc-300">
@@ -471,8 +481,8 @@ export default function CustomWebsiteDashboardPage() {
           </label>
           <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-xs leading-5 text-zinc-400">
             {pt
-              ? 'Depois do envio, a Silentra contacta-te para discutir o âmbito, o prazo e o orçamento. O site só será publicado depois de acordado e aprovado.'
-              : 'After submission, Silentra will contact you to discuss scope, timing and budget. The website is published only after terms are agreed and approved.'}
+              ? 'Depois do pedido, a Silentra confirma o nome e envia as instruções para a ativação única de 50 €. O site é publicado após a confirmação do pagamento e aprovação final.'
+              : 'After your request, Silentra confirms the name and sends the one-time €50 activation instructions. The site is published after payment confirmation and final approval.'}
           </div>
           <Button
             type="submit"
