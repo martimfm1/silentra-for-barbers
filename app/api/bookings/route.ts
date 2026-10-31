@@ -602,13 +602,15 @@ async function POST__unobserved(request: Request) {
         ),
       );
     }
-    void dispatchAppointmentAutomations('booking_created', {
-      appointmentId: appointment.id,
-      barbershopId,
-      manualEmail: email,
-      manualName: name,
-      serviceName: selectedService.name || 'Serviço',
-    });
+    if (!isPrepayment) {
+      void dispatchAppointmentAutomations('booking_created', {
+        appointmentId: appointment.id,
+        barbershopId,
+        manualEmail: email,
+        manualName: name,
+        serviceName: selectedService.name || 'Serviço',
+      });
+    }
     console.info('[API_BOOKING_SUCCESS]');
     return NextResponse.json(
       {
