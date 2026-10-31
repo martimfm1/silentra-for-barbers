@@ -383,38 +383,38 @@ export function DashboardSidebar() {
           />
           <Tooltip>
             <TooltipTrigger asChild>
-            <button
-            ref={moreTriggerRef}
-            type="button"
-            onClick={() => setMoreOpen(true)}
-            aria-label={
-              locale === 'en'
-                ? 'Open more dashboard sections'
-                : 'Abrir mais secções da dashboard'
-            }
-            aria-expanded={moreOpen}
-            aria-controls="dashboard-more-panel"
-            className={cn(
-              'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
-              moreOpen || moreActive
-                ? 'bg-white/[0.09] text-white'
-                : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-            )}
-          >
-            <MoreHorizontal
-              className="size-4 lg:size-5"
-              aria-hidden="true"
-            />
-            <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-              {locale === 'en' ? 'More' : 'Mais'}
-            </span>
-            {moreActive ? (
-              <span
-                aria-hidden="true"
-                className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
-              />
-            ) : null}
-            </button>
+              <button
+                ref={moreTriggerRef}
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                aria-label={
+                  locale === 'en'
+                    ? 'Open more dashboard sections'
+                    : 'Abrir mais secções da dashboard'
+                }
+                aria-expanded={moreOpen}
+                aria-controls="dashboard-more-panel"
+                className={cn(
+                  'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
+                  moreOpen || moreActive
+                    ? 'bg-white/[0.09] text-white'
+                    : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
+                )}
+              >
+                <MoreHorizontal
+                  className="size-4 lg:size-5"
+                  aria-hidden="true"
+                />
+                <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
+                  {locale === 'en' ? 'More' : 'Mais'}
+                </span>
+                {moreActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
+                  />
+                ) : null}
+              </button>
             </TooltipTrigger>
             <TooltipContent
               side="top"
