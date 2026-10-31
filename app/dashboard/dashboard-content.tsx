@@ -95,7 +95,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       const directives = new Map(
         viewport.content
           .split(',')
-          .map((part) => part.trim().split('=').map((value) => value.trim()))
+          .map((part): [string, string] => {
+            const [key, value = ''] = part
+              .trim()
+              .split('=')
+              .map((entry) => entry.trim());
+            return [key, value];
+          })
           .filter(([key]) => Boolean(key)),
       );
       directives.set('width', 'device-width');
