@@ -144,7 +144,7 @@ export default function StatsPage() {
       const serviceName = app.services?.name || t('statsPage.otherService');
       const serviceId = app.service_id || null;
       const paymentMethod = app.payment_method || t('statsPage.unspecified');
-      const barberName = app.professionals?.name || 'Casa / Geral';
+      const barberName = app.professionals?.name || t('statsPage.generalProfessional');
 
       totalRevenue += price;
 
@@ -495,7 +495,7 @@ export default function StatsPage() {
                             dataKey="value"
                             name={t('statsPage.revenue')}
                             fill="#38bdf8"
-                            radius={[6, 6, 0, 0]}
+                            radius={[0, 6, 6, 0]}
                             maxBarSize={48}
                           />
                         </BarChart>
