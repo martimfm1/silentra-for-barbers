@@ -107,7 +107,7 @@ export async function notifyBarbersOfNewBooking(
       .from('users')
       .select('email,name_complete')
       .eq('barbershop_id', input.barbershopId)
-      .eq('role', 'barber')
+      .in('role', ['barber', 'owner', 'admin'])
       .not('email', 'is', null);
     if (error) {
       console.error(
