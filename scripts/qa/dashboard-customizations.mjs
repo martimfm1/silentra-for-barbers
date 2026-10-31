@@ -16,6 +16,8 @@ assert.match(dashboard, /useDashboardCustomization/);
 assert.match(dashboard, /customization\.config\.shortcuts/);
 assert.match(dashboard, /customization\.config\.sections\.quickActions/);
 assert.match(dashboard, /customization\.config\.sections\.metrics/);
+assert.match(dashboard, /customization\.config\.visibleMetrics\.includes\(metric\.key\)/);
+assert.match(dashboard, /visibleMetrics\.length > 0/);
 assert.match(dashboard, /customization\.config\.sections\.activityChart/);
 assert.match(
   dashboard,
@@ -71,6 +73,8 @@ assert.match(api, /assertSameOrigin\(request\)/);
 assert.match(api, /SHORTCUT_IDS/);
 assert.match(api, /SECTION_IDS/);
 assert.match(api, /COLOR_PATTERN/);
+assert.match(api, /METRIC_IDS/);
+assert.match(api, /visibleMetrics/);
 assert.match(api, /\.eq\('barbershop_id', context\.barbershopId\)/);
 assert.match(api, /\.eq\('user_id', context\.user\.id\)/);
 assert.match(api, /Podes guardar até 10 personalizações/);
@@ -78,8 +82,23 @@ assert.match(api, /Mantém pelo menos uma personalização/);
 assert.match(editor, /useDashboardCustomization/);
 assert.match(editor, /Guardar alterações/);
 assert.match(editor, /Cor dos detalhes/);
+assert.match(editor, /Estatísticas da overview/);
+assert.match(editor, /visibleMetrics/);
+assert.match(editor, /DashboardCustomizationProvider/);
 assert.match(editor, /Move up/);
 assert.match(editor, /Move down/);
 assert.match(editor, /__new__/);
+
+const dashboardLayout = await readFile('app/dashboard/dashboard-content.tsx', 'utf8');
+const sidebar = await readFile('app/dashboard/_components/DashboardSidebar.tsx', 'utf8');
+const globalStyles = await readFile('app/globals.css', 'utf8');
+
+assert.match(dashboardLayout, /DashboardCustomizationProvider/);
+assert.match(dashboardLayout, /data-dashboard-theme/);
+assert.match(dashboardLayout, /--dashboard-accent/);
+assert.match(globalStyles, /body\[data-dashboard-theme='true'\]/);
+assert.match(globalStyles, /dashboard-dock-item/);
+assert.match(sidebar, /dashboard-dock-item/);
+assert.match(sidebar, /MoreHorizontal/);
 
 console.log('Dashboard customization contracts passed.');

@@ -209,6 +209,10 @@ export default function DashboardPage() {
     }));
   }, [appointments, clients, services, t]);
 
+  const visibleMetrics = metrics.filter((metric) =>
+    customization.config.visibleMetrics.includes(metric.key),
+  );
+
   const upcomingAppointments = useMemo(
     () =>
       appointments
@@ -556,7 +560,7 @@ export default function DashboardPage() {
               </section>
             )}
 
-          {customization.config.sections.metrics && (
+          {customization.config.sections.metrics && visibleMetrics.length > 0 && (
             <section className="pt-1" aria-labelledby="business-overview">
               <div className="mb-3 flex items-center justify-between">
                 <h2
@@ -574,7 +578,7 @@ export default function DashboardPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {loadingInitial
-                  ? [...Array(4)].map((_, i) => (
+                  ? [...Array(visibleMetrics.length)].map((_, i) => (
                       <Card
                         key={i}
                         className="border border-white/10 bg-white/[0.04]"
@@ -588,7 +592,7 @@ export default function DashboardPage() {
                         </CardHeader>
                       </Card>
                     ))
-                  : metrics.map((metric) => (
+                  : visibleMetrics.map((metric) => (
                       <Link
                         key={metric.key}
                         href="/dashboard/stats"
@@ -728,10 +732,12 @@ export default function DashboardPage() {
                                           ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros`
                                           : `${point.day}, receita ${point.revenue.toFixed(2)} euros`
                                       }
-                                      className="w-1/2 max-w-7 rounded-t-md shadow-[0_0_18px_rgba(52,211,153,0.16)] transition-[height,filter] hover:brightness-125"
+                                      className="w-1/2 max-w-7 rounded-t-md transition-[height,filter] hover:brightness-125"
                                       style={{
                                         backgroundColor:
                                           'var(--dashboard-accent)',
+                                        boxShadow:
+                                          '0 0 18px color-mix(in srgb, var(--dashboard-accent) 16%, transparent)',
                                         height: `${revenueHeight}%`,
                                         minHeight:
                                           point.revenue > 0 ? '8px' : '2px',
@@ -787,7 +793,11 @@ export default function DashboardPage() {
                   >
                     <span className="inline-flex items-center gap-2">
                       <span
-                        className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
+                        className="size-2.5 rounded-full bg-emerald-400"
+                        style={{
+                          boxShadow:
+                            '0 0 10px color-mix(in srgb, var(--dashboard-accent) 45%, transparent)',
+                        }}
                         aria-hidden="true"
                       />
                       <span className="text-zinc-300">

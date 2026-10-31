@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 
 const DEFAULT_CONFIG = {
   shortcuts: ['new-booking', 'clients', 'services', 'team', 'analytics'],
+  visibleMetrics: ['revenue', 'appointments', 'clients', 'services'],
   sections: {
     quickActions: true,
     metrics: true,
@@ -42,9 +43,11 @@ const SECTION_IDS = new Set([
   'upcomingAppointments',
 ]);
 const COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
+const METRIC_IDS = new Set(['revenue', 'appointments', 'clients', 'services']);
 
 type DashboardConfig = {
   shortcuts: string[];
+  visibleMetrics: string[];
   sections: Record<string, boolean>;
   accentColor: string;
 };
@@ -104,7 +107,7 @@ function parseConfig(value: unknown): DashboardConfig | null {
   const input = value as Record<string, unknown>;
   if (
     Object.keys(input).some(
-      (key) => !['shortcuts', 'sections', 'accentColor'].includes(key),
+      (key) => !['shortcuts', 'visibleMetrics', 'sections', 'accentColor'].includes(key),
     )
   )
     return null;
@@ -116,6 +119,23 @@ function parseConfig(value: unknown): DashboardConfig | null {
     return null;
   const shortcuts = [...new Set(input.shortcuts)];
   if (shortcuts.some((id) => typeof id !== 'string' || !SHORTCUT_IDS.has(id)))
+    return null;
+
+  const visibleMetricsInput =
+    input.visibleMetrics === undefined
+      ? ['revenue', 'appointments', 'clients', 'services']
+      : input.visibleMetrics;
+  if (
+    !Array.isArray(visibleMetricsInput) ||
+    visibleMetricsInput.length > METRIC_IDS.size
+  )
+    return null;
+  const visibleMetrics = [...new Set(visibleMetricsInput)];
+  if (
+    visibleMetrics.some(
+      (id) => typeof id !== 'string' || !METRIC_IDS.has(id),
+    )
+  )
     return null;
 
   if (
@@ -141,6 +161,7 @@ function parseConfig(value: unknown): DashboardConfig | null {
     return null;
   return {
     shortcuts: shortcuts as string[],
+    visibleMetrics: visibleMetrics as string[],
     sections,
     accentColor: input.accentColor.toLowerCase(),
   };

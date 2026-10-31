@@ -321,44 +321,49 @@ export function DashboardSidebar() {
             ? 'Dashboard quick navigation'
             : 'Navegação rápida do painel'
         }
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.28)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:w-[min(94vw,760px)] lg:-translate-x-1/2 lg:rounded-2xl lg:border lg:px-3 lg:pb-2"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.28)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:rounded-[1.35rem] lg:border lg:bg-zinc-950/85 lg:px-2.5 lg:py-2 lg:shadow-[0_18px_60px_rgba(0,0,0,0.48)]"
       >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:max-w-none lg:gap-2">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
           {primaryItems.map((item) => {
             const active = isActive(item);
             const Icon = item.icon;
+            const label = localizeNavLabel(item.label, locale);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-label={label}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'group relative flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
+                  'dashboard-dock-item group relative flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
                   active
                     ? 'bg-white/[0.09] text-white'
-                    : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+                    : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
                 )}
               >
                 <Icon
                   className={cn(
-                    'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-[18px]',
+                    'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
                     active && 'text-emerald-400',
                   )}
                   aria-hidden="true"
                 />
-                <span className="max-w-full truncate">
-                  {localizeNavLabel(item.label, locale)}
+                <span className="max-w-full truncate lg:pointer-events-none lg:absolute lg:bottom-[calc(100%+0.85rem)] lg:left-1/2 lg:z-20 lg:-translate-x-1/2 lg:rounded-lg lg:border lg:border-white/10 lg:bg-zinc-900/95 lg:px-2.5 lg:py-1.5 lg:text-[11px] lg:shadow-lg lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
+                  {label}
                 </span>
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute inset-x-3 bottom-0.5 h-0.5 origin-center rounded-full bg-emerald-400 transition-transform duration-150 motion-reduce:transition-none lg:inset-y-3 lg:inset-x-auto lg:left-0 lg:h-auto lg:w-0.5',
-                    active ? 'scale-100' : 'scale-0',
-                  )}
-                />
+                {active ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
+                  />
+                ) : null}
               </Link>
             );
           })}
+          <span
+            aria-hidden="true"
+            className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
+          />
           <button
             ref={moreTriggerRef}
             type="button"
@@ -371,17 +376,25 @@ export function DashboardSidebar() {
             aria-expanded={moreOpen}
             aria-controls="dashboard-more-panel"
             className={cn(
-              'flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:min-h-14 lg:flex-row lg:gap-2 lg:px-3',
+              'dashboard-dock-item group relative flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
               moreOpen || moreActive
                 ? 'bg-white/[0.09] text-white'
-                : 'text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-100',
+                : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
             )}
           >
             <MoreHorizontal
-              className="size-4 lg:size-[18px]"
+              className="size-4 lg:size-5"
               aria-hidden="true"
             />
-            <span>{locale === 'en' ? 'More' : 'Mais'}</span>
+            <span className="max-w-full truncate lg:pointer-events-none lg:absolute lg:bottom-[calc(100%+0.85rem)] lg:left-1/2 lg:z-20 lg:-translate-x-1/2 lg:rounded-lg lg:border lg:border-white/10 lg:bg-zinc-900/95 lg:px-2.5 lg:py-1.5 lg:text-[11px] lg:shadow-lg lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
+              {locale === 'en' ? 'More' : 'Mais'}
+            </span>
+            {moreActive ? (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
+              />
+            ) : null}
           </button>
         </div>
       </nav>
