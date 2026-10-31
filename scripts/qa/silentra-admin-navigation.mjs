@@ -46,6 +46,11 @@ assert.match(consoleSource, /aria-current=\{selected \? 'page' : undefined\}/);
 assert.match(consoleSource, /tabDescriptions\[tab\]/);
 assert.match(consoleSource, /Atualizar dados/);
 
+// The overview must group its metrics so the mobile layout is easy to scan.
+for (const heading of ['Resumo executivo', 'Utilização da plataforma', 'Distribuição de planos', 'Desempenho financeiro']) {
+  assert.ok(consoleSource.includes(heading), `Missing overview group: ${heading}`);
+}
+
 // Core business and system signals remain visible in the overview.
 for (const metric of [
   'manualRevenue30d',
