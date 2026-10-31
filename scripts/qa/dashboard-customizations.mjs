@@ -23,6 +23,10 @@ assert.match(
   dashboard,
   /customization\.config\.sections\.upcomingAppointments/,
 );
+assert.match(dashboard, /StatusBadge status=\{appointment\.status\}/);
+assert.match(dashboard, /appointment\.professionals\?\.name/);
+assert.match(dashboard, /appointment\.users\?\.style_notes\?\.trim\(\)/);
+assert.match(dashboard, /dashboard\.upcomingAppointmentNotes/);
 assert.match(dashboard, /--dashboard-accent/);
 assert.match(dashboard, /DashboardCustomizationDialog/);
 for (const id of [
