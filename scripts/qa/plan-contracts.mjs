@@ -34,5 +34,9 @@ expect(
   /directory_visibility/,
   'Visibilidade no diretório deve permanecer identificada como feature Pro.',
 );
+expect(
+  /manual_mbway_prepayment/,
+  'Pré-pagamento MB WAY deve permanecer como feature Pro.',
+);
 
 console.log('✓ Plan limits e feature contracts OK');
