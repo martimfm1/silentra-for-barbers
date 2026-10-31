@@ -734,6 +734,9 @@ const checks = [
       source.includes('verifyBarbershopCalendarFeedToken') &&
       source.includes("from('schedule_blocks')") &&
       source.includes('lisbonLocalDateTime') &&
+      source.includes('.range(offset, offset + appointmentPageSize - 1)') &&
+      source.includes("'Referrer-Policy': 'no-referrer'") &&
+      source.includes("'X-Robots-Tag': 'noindex, nofollow'") &&
       !source.includes('manual_name') &&
       !source.includes('manual_phone') &&
       !source.includes('manual_email'),
