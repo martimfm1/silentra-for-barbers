@@ -81,6 +81,79 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const accentColor = dashboardConfig.accentColor;
   const isSettingsPage = pathname.startsWith('/dashboard/settings');
 
+  // Keep the dashboard from being pinched smaller while preserving zoom-in.
+  // Avoid a restrictive viewport meta tag so users can still enlarge content.
+  useEffect(() => {
+    if (!pathname.startsWith('/dashboard')) return;
+
+    let previousPinchDistance = 0;
+    const getPinchDistance = (touches: TouchList) => {
+      const first = touches.item(0);
+      const second = touches.item(1);
+      if (!first || !second) return 0;
+      return Math.hypot(
+        second.clientX - first.clientX,
+        second.clientY - first.clientY,
+      );
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      previousPinchDistance =
+        event.touches.length === 2 ? getPinchDistance(event.touches) : 0;
+    };
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 2) {
+        previousPinchDistance = 0;
+        return;
+      }
+      const nextDistance = getPinchDistance(event.touches);
+      if (
+        previousPinchDistance > 0 &&
+        nextDistance > 0 &&
+        nextDistance < previousPinchDistance - 0.5 &&
+        event.cancelable
+      ) {
+        event.preventDefault();
+      }
+      previousPinchDistance = nextDistance;
+    };
+    const resetPinch = (event: TouchEvent) => {
+      if (event.touches.length < 2) previousPinchDistance = 0;
+    };
+    const handleWheel = (event: WheelEvent) => {
+      if (event.ctrlKey && event.deltaY > 0) event.preventDefault();
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        ['-', '_', 'Subtract'].includes(event.key)
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener('touchmove', handleTouchMove, {
+      passive: false,
+    });
+    document.addEventListener('touchend', resetPinch, { passive: true });
+    document.addEventListener('touchcancel', resetPinch, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', resetPinch);
+      document.removeEventListener('touchcancel', resetPinch);
+      window.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
