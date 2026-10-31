@@ -414,14 +414,26 @@ export function BookingDrawerCanonical({
           customerPhone: phone.trim(),
           customerEmail: email.trim(),
           customerBirthDate: birthDateIso,
+          prepayment: prepaymentSelected,
         }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success)
         throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
+      if (payload.payment?.method === 'mbway') {
+        setPaymentInstructions({
+          amount: Number(payload.payment.amount),
+          mbwayPhone: String(payload.payment.mbwayPhone),
+          whatsappPhone: String(payload.payment.whatsappPhone),
+          expiresAt: String(payload.payment.expiresAt),
+        });
+        toast.success(t('bookingDrawer.prepaymentSubmitted'));
+      } else {
+        setPaymentInstructions(null);
+        toast.success(t('bookingDrawer.bookingSuccess'));
+      }
       setStep(4);
-      toast.success(t('bookingDrawer.bookingSuccess'));
       onSuccess?.({
         shopName: shop.name,
         serviceName: service.name,
