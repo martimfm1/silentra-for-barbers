@@ -405,9 +405,10 @@ const checks = [
     test: (source) =>
       source.includes("intent.plan === 'enterprise'") &&
       source.includes('mailto:silentra.contact@gmail.com') &&
-      source.includes('pagamento único de 50 €') &&
+      source.includes('pagamento único)') &&
+      source.includes('one-time €50 fee') &&
       source.includes('domínio Silentra') &&
-      source.includes('Sem mensalidade adicional.'),
+      source.includes('no extra monthly charge'),
   },
   {
     name: 'Custom website requests are protected by a service-role-only database table',
