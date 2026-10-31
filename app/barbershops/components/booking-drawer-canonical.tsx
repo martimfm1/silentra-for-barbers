@@ -519,7 +519,7 @@ export function BookingDrawerCanonical({
                 {t('bookingDrawer.bookingTitle')}
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
-                {step === 4 ? t('bookingDrawer.bookingConfirmed') : shop.name}
+                {step === 4 ? (paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')) : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
@@ -528,7 +528,9 @@ export function BookingDrawerCanonical({
                     ? t('bookingDrawer.nextChooseTime')
                     : step === 3
                       ? t('bookingDrawer.confirmYourDetails')
-                      : t('bookingDrawer.slotReserved')}
+                      : paymentInstructions
+                        ? t('bookingDrawer.prepaymentPendingDescription')
+                        : t('bookingDrawer.slotReserved')}
               </p>
             </div>
             <button
