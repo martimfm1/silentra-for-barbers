@@ -726,7 +726,7 @@ const checks = [
       source.includes('silentra:barbershop-calendar-feed:'),
   },
   {
-    name: 'Private iCalendar feed is tenant-scoped and excludes customer personal data',
+    name: 'Private iCalendar feed shows customer and service labels without contact details',
     file: 'app/api/calendar/feed/route.ts',
     test: (source) =>
       source.includes(".eq('barbershop_id', payload.barbershopId)") &&
@@ -737,9 +737,12 @@ const checks = [
       source.includes('.range(offset, offset + appointmentPageSize - 1)') &&
       source.includes("'Referrer-Policy': 'no-referrer'") &&
       source.includes("'X-Robots-Tag': 'noindex, nofollow'") &&
-      !source.includes('manual_name') &&
+      source.includes("manual_name,users(name_complete,style_notes),services(name)") &&
+      source.includes("const summary = `${clientName} - ${serviceName}`;") &&
+      source.includes('notes:${clientNotes}') &&
       !source.includes('manual_phone') &&
-      !source.includes('manual_email'),
+      !source.includes('manual_email') &&
+      !source.includes('num_phone'),
   },
   {
     name: 'Calendar subscription management checks agenda access and supports revocation',

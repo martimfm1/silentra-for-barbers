@@ -6,15 +6,20 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type NamedRelation = { name?: string | null };
+type NamedRelation = {
+  name?: string | null;
+  name_complete?: string | null;
+  style_notes?: string | null;
+};
 type Relation = NamedRelation | NamedRelation[] | null;
 type CalendarAppointmentRow = {
   id: string;
   date_hour: string;
   duration_minutes: number | null;
   status: string;
+  manual_name: string | null;
+  users: Relation;
   services: Relation;
-  professionals: Relation;
 };
 type CalendarBlockRow = {
   id: string;
@@ -164,7 +169,7 @@ async function GET__unobserved(request: Request) {
     const { data, error } = await admin
       .from('appointments')
       .select(
-        'id,date_hour,duration_minutes,status,services(name),professionals(name)',
+        'id,date_hour,duration_minutes,status,manual_name,users(name_complete,style_notes),services(name)',
       )
       .eq('barbershop_id', payload.barbershopId)
       .in('status', ['pending', 'scheduled'])
@@ -253,8 +258,8 @@ async function GET__unobserved(request: Request) {
   ];
 
   for (const appointment of appointments ?? []) {
+    const client = relation(appointment.users as Relation);
     const service = relation(appointment.services as Relation);
-    const professional = relation(appointment.professionals as Relation);
     const start = new Date(appointment.date_hour);
     if (Number.isNaN(start.getTime())) continue;
 
@@ -263,31 +268,34 @@ async function GET__unobserved(request: Request) {
       Math.min(1440, Number(appointment.duration_minutes ?? 45)),
     );
     const end = new Date(start.getTime() + duration * 60_000);
+    const clientName =
+      appointment.manual_name?.trim() ||
+      client?.name_complete?.trim() ||
+      'Cliente';
     const serviceName = service?.name?.trim() || 'Marcação';
-    const professionalName = professional?.name?.trim();
-    const summary = professionalName
-      ? `${serviceName} — ${professionalName}`
-      : serviceName;
+    const clientNotes = client?.style_notes?.trim();
+    const summary = `${clientName} - ${serviceName}`;
     const status = appointment.status === 'pending' ? 'TENTATIVE' : 'CONFIRMED';
-    const description =
-      appointment.status === 'pending'
-        ? 'Marcação por confirmar na Silentra.'
-        : 'Marcação confirmada na Silentra.';
     const location = [shop.name, shop.address].filter(Boolean).join(', ');
 
-    lines.push(
+    const eventLines = [
       'BEGIN:VEVENT',
       `UID:${appointment.id}@calendar.silentra.me`,
       `DTSTAMP:${formatUtc(now)}`,
       `DTSTART:${formatUtc(start)}`,
       `DTEND:${formatUtc(end)}`,
       `SUMMARY:${escapeIcs(summary)}`,
-      `DESCRIPTION:${escapeIcs(description)}`,
+    ];
+    if (clientNotes) {
+      eventLines.push(`DESCRIPTION:${escapeIcs(`notes:${clientNotes}`)}`);
+    }
+    eventLines.push(
       `LOCATION:${escapeIcs(location)}`,
       `STATUS:${status}`,
       'TRANSP:OPAQUE',
       'END:VEVENT',
     );
+    lines.push(...eventLines);
   }
 
   for (const block of blocks ?? []) {
