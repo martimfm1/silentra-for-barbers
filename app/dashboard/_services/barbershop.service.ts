@@ -171,26 +171,6 @@ export async function updateBarbershopConfig(
       }
     }
 
-    if (mbwayEnabled !== undefined || mbwayPhone !== undefined) {
-      const { error } = await supabase.rpc('update_barbershop_mbway_settings', {
-        p_barbershop_id: barbershopId,
-        p_enabled: mbwayEnabled ?? false,
-        p_phone: mbwayPhone ?? '',
-      });
-      if (error) {
-        const message = error.message || '';
-        throw new Error(
-          message.includes('MBWAY_PREPAYMENT_PRO_REQUIRED')
-            ? 'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.'
-            : message.includes('MBWAY_WHATSAPP_PHONE_REQUIRED')
-              ? 'Define primeiro o telefone/WhatsApp da barbearia.'
-              : message.includes('MBWAY_PHONE_INVALID')
-                ? 'Introduz um número MB WAY válido.'
-                : message,
-        );
-      }
-    }
-
     if (Object.keys(barbershopPayload).length > 0) {
       const { error } = await supabase.rpc('update_barbershop_config', {
         p_barbershop_id: barbershopId,
@@ -212,6 +192,25 @@ export async function updateBarbershopConfig(
       }
     }
 
+    if (mbwayEnabled !== undefined || mbwayPhone !== undefined) {
+      const { error } = await supabase.rpc('update_barbershop_mbway_settings', {
+        p_barbershop_id: barbershopId,
+        p_enabled: mbwayEnabled ?? false,
+        p_phone: mbwayPhone ?? '',
+      });
+      if (error) {
+        const message = error.message || '';
+        throw new Error(
+          message.includes('MBWAY_PREPAYMENT_PRO_REQUIRED')
+            ? 'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.'
+            : message.includes('MBWAY_WHATSAPP_PHONE_REQUIRED')
+              ? 'Define primeiro o telefone/WhatsApp da barbearia.'
+              : message.includes('MBWAY_PHONE_INVALID')
+                ? 'Introduz um número MB WAY válido.'
+                : message,
+        );
+      }
+    }
     if (popularServiceId !== undefined) {
       const { error } = await supabase
         .from('shops')
