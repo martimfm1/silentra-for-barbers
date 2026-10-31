@@ -52,12 +52,14 @@ const checks = [
       source.includes('href={`/${encodeURIComponent(latest.public_slug)}`}'),
   },
   {
-    name: 'Silveira Salon reuses the shared Pro booking layout and redirects Enterprise to its landing page',
+    name: 'Silveira Salon reuses the shared Pro booking layout',
     file: 'app/agendadovictor/agenda-do-victor-page.tsx',
     test: (source) =>
       source.includes('ProBookingPage') &&
-      source.includes("if (profile.plan === 'enterprise')") ,
-
+      source.includes('<ProBookingPage') &&
+      source.includes('profile={profile}') &&
+      source.includes('services={services}') &&
+      source.includes('closedDays={shop.closed_days}'),
   },
   {
     name: 'Final booking migration uses appointment_status',
@@ -647,20 +649,18 @@ const checks = [
         "profile.barbershop_id !== 'f9cf1bca-22ec-4782-87ca-c338d51fc30d'",
       ) &&
       source.includes("!['pro', 'enterprise'].includes(profile.plan)") &&
+      source.includes("if (profile.plan === 'enterprise')") &&
+      source.includes("permanentRedirect('/site/'") &&
       source.includes(".eq('barbershop_id', profile.barbershop_id)"),
   },
   {
-    name: 'Agenda do Victor reuses Silentra booking drawer and shop booking identity',
+    name: 'Agenda do Victor delegates to the shared Pro booking template',
     file: 'app/agendadovictor/agenda-do-victor-page.tsx',
     test: (source) =>
-      source.includes(
-        "import('@/app/barbershops/components/booking-drawer')",
-      ) &&
-      source.includes('selectedServiceId={selectedServiceId}') &&
-      source.includes('barbershop_id: profile.barbershop_id || profile.id') &&
-      source.includes('AGENDA DO VICTOR') &&
-      source.includes('Nova marcação') &&
-      source.includes('Selecionar um serviço'),
+      source.includes('ProBookingPage') &&
+      source.includes('<ProBookingPage') &&
+      source.includes('openingTime={shop.opening_time}') &&
+      source.includes('closedDays={shop.closed_days}'),
   },
   {
     name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
@@ -687,11 +687,12 @@ const checks = [
       source.includes('closed_days: hours.closed_days'),
   },
   {
-    name: 'Agenda do Victor booking drawer uses the page light theme',
-    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    name: 'Shared Pro booking drawer uses the light theme and preserves closed days',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
     test: (source) =>
       source.includes('appearance="agenda"') &&
-      source.includes('closed_days: shop.closed_days'),
+      source.includes('closed_days: closedDays ?? null') &&
+      source.includes('closedDays={closedDays}'),
   },
   {
     name: 'Booking drawer excludes configured closed weekdays from date choices',
