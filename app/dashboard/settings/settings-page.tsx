@@ -41,7 +41,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -91,6 +90,14 @@ const sections: [Section, string, string, typeof Settings][] = [
   ['appearance', 'Aparência', 'Logótipo e imagem de capa', ImageIcon],
   ['billing', 'Plano e faturação', 'Subscrição e faturas', CreditCard],
   ['account', 'Conta e segurança', 'Sessão e acesso', ShieldCheck],
+];
+const sectionGroups: {
+  id: 'barbershopGroup' | 'bookingGroup' | 'accountGroup';
+  sections: Section[];
+}[] = [
+  { id: 'barbershopGroup', sections: ['business', 'location', 'appearance'] },
+  { id: 'bookingGroup', sections: ['hours'] },
+  { id: 'accountGroup', sections: ['billing', 'account'] },
 ];
 const days = [
   ['Monday', 'Monday', 'Segunda-feira'],
@@ -244,15 +251,27 @@ export default function SettingsPageOrganized() {
     [config],
   );
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = search.trim().toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
     return q
       ? sections.filter(([id]) => {
-          const label = t(`settingsPage.${id}`).toLowerCase();
-          const description = t(`settingsPage.${id}Description`).toLowerCase();
-          return `${label} ${description}`.includes(q);
+          const label = t(`settingsPage.${id}`).toLocaleLowerCase();
+          const description = t(`settingsPage.${id}Description`).toLocaleLowerCase();
+          const group = sectionGroups.find((item) => item.sections.includes(id));
+          const groupLabel = group ? t(`settingsPage.${group.id}`).toLocaleLowerCase() : '';
+          return `${label} ${description} ${groupLabel}`.includes(q);
         })
       : sections;
-  }, [search, t]);
+  }, [search, t, locale]);
+  const navigationGroups = useMemo(
+    () =>
+      sectionGroups
+        .map((group) => ({
+          ...group,
+          entries: filtered.filter(([id]) => group.sections.includes(id)),
+        }))
+        .filter((group) => group.entries.length > 0),
+    [filtered],
+  );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
   function go(s: Section) {
@@ -447,48 +466,63 @@ export default function SettingsPageOrganized() {
         <div className="mt-5 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
           <aside className="hidden lg:block">
             <div className="sticky top-24 space-y-3">
-              <nav className="rounded-2xl border border-white/10 bg-white/[.02] p-2">
-                {filtered.map(([id, label, desc, Icon]) => (
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={t('settingsPage.search')}
+                  aria-label={t('settingsPage.search')}
+                  className={`${INPUT_CLASS} pl-9`}
+                />
+              </div>
+              <nav
+                aria-label={t('settingsPage.navigation')}
+                className="rounded-2xl border border-white/10 bg-white/[.02] p-2"
+              >
+                {filtered.some(([id]) => id === 'overview') && (
                   <button
-                    key={id}
-                    onClick={() => go(id)}
+                    type="button"
+                    onClick={() => go('overview')}
+                    aria-current={section === 'overview' ? 'location' : undefined}
                     className={cn(
-                      'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left',
-                      section === id
+                      'mb-3 flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium',
+                      section === 'overview'
                         ? 'bg-white/[.07] text-zinc-100'
-                        : 'text-zinc-500 hover:bg-white/[.04]',
+                        : 'text-zinc-400 hover:bg-white/[.04] hover:text-white',
                     )}
                   >
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-white/[.03]">
-                      <Icon className="size-4" />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-medium">
-                        {t(`settingsPage.${id}`)}
-                      </span>
-                      <span className="block truncate text-[11px] text-zinc-600">
-                        {t(
-                          id === 'overview'
-                            ? 'settingsPage.overviewStatus'
-                            : `settingsPage.${id}Description`,
-                        )}
-                      </span>
-                    </span>
+                    <Settings className="size-4" aria-hidden="true" />
+                    {t('settingsPage.overview')}
                   </button>
+                )}
+                {navigationGroups.map((group) => (
+                  <section key={group.id} className="mt-3 first:mt-0">
+                    <h2 className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[.16em] text-zinc-500">
+                      {t(`settingsPage.${group.id}`)}
+                    </h2>
+                    <div className="grid gap-1">
+                      {group.entries.map(([id, , , Icon]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => go(id)}
+                          aria-current={section === id ? 'location' : undefined}
+                          className={cn(
+                            'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors',
+                            section === id
+                              ? 'bg-white/[.07] text-zinc-100'
+                              : 'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-100',
+                          )}
+                        >
+                          <Icon className="size-4 shrink-0" aria-hidden="true" />
+                          <span>{t(`settingsPage.${id}`)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </nav>
-              <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[.04] p-4">
-                <p className="text-xs font-semibold text-emerald-300">
-                  {t('settingsPage.configuration')}
-                </p>
-                <p className="mt-2 text-2xl font-semibold">{completion}%</p>
-                <div className="mt-2 h-1.5 rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-emerald-400"
-                    style={{ width: `${completion}%` }}
-                  />
-                </div>
-              </div>
             </div>
           </aside>
           <div className="min-w-0 space-y-6">
@@ -508,25 +542,26 @@ export default function SettingsPageOrganized() {
                 onChange={(e) => go(e.target.value as Section)}
                 className="min-h-11 max-w-[48%] rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
               >
-                {sections.map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {t(`settingsPage.${id}`)}
-                  </option>
+                {filtered.some(([id]) => id === 'overview') && (
+                  <option value="overview">{t('settingsPage.overview')}</option>
+                )}
+                {navigationGroups.map((group) => (
+                  <optgroup key={group.id} label={t(`settingsPage.${group.id}`)}>
+                    {group.entries.map(([id]) => (
+                      <option key={id} value={id}>
+                        {t(`settingsPage.${id}`)}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
             <section id="settings-overview">
               <Card className={CARD_CLASS}>
                 <CardContent className="p-6 sm:p-8">
-                  <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-400">
-                    {t('settingsPage.overviewEyebrow')}
-                  </p>
-                  <h2 className="mt-2 text-3xl font-semibold">
+                  <h2 className="text-xl font-semibold">
                     {t('settingsPage.overviewTitle')}
                   </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">
-                    {t('settingsPage.overviewDescription')}
-                  </p>
                 </CardContent>
               </Card>
             </section>
@@ -537,9 +572,7 @@ export default function SettingsPageOrganized() {
                     <Store className="size-4 text-emerald-400" />
                     {t('settingsPage.business')}
                   </CardTitle>
-                  <CardDescription>
-                    {t('settingsPage.publicInfo')}
-                  </CardDescription>
+
                 </CardHeader>
                 <CardContent className="grid gap-5 sm:grid-cols-2">
                   <div className="grid gap-2">
@@ -649,9 +682,7 @@ export default function SettingsPageOrganized() {
                     <MapPin className="size-4 text-emerald-400" />
                     {t('settingsPage.locationInfo')}
                   </CardTitle>
-                  <CardDescription>
-                    {t('settingsPage.locationDescriptionLong')}
-                  </CardDescription>
+
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <AddressAutocomplete
@@ -738,9 +769,7 @@ export default function SettingsPageOrganized() {
                     <Clock3 className="size-4 text-blue-400" />
                     {t('settingsPage.hoursRules')}
                   </CardTitle>
-                  <CardDescription>
-                    {t('settingsPage.hoursRulesDescription')}
-                  </CardDescription>
+
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -856,9 +885,6 @@ export default function SettingsPageOrganized() {
                     >
                       {t('settingsPage.minimumBookingNotice')}
                     </label>
-                    <p className="text-xs leading-5 text-zinc-500">
-                      {t('settingsPage.minimumBookingNoticeDescription')}
-                    </p>
                     <div className="grid max-w-lg grid-cols-[minmax(0,1fr)_auto] gap-2">
                       <Input
                         id="settings-minimum-booking-notice"
@@ -906,13 +932,15 @@ export default function SettingsPageOrganized() {
                     </div>
                   </div>
                   <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                    {!automationAllowed && (
+                      <p className="text-xs text-amber-300">
+                        {t('settingsPage.automationPlanRequired')}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-medium">
                           {t('settingsPage.allowOnline')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.allowOnlineDescription')}
                         </p>
                       </div>
                       <Switch
@@ -926,9 +954,6 @@ export default function SettingsPageOrganized() {
                       <div>
                         <p className="text-sm font-medium">
                           {t('settingsPage.autoConfirm')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.autoConfirmDescription')}
                         </p>
                       </div>
                       <Switch
@@ -945,9 +970,6 @@ export default function SettingsPageOrganized() {
                       <div>
                         <p className="text-sm font-medium">
                           {t('settingsPage.autoComplete')}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {t('settingsPage.autoCompleteDescription')}
                         </p>
                       </div>
                       <Switch
@@ -991,9 +1013,7 @@ export default function SettingsPageOrganized() {
               <Card className={CARD_CLASS}>
                 <CardHeader>
                   <CardTitle>{t('settingsPage.appearance')}</CardTitle>
-                  <CardDescription>
-                    {t('settingsPage.appearanceDescriptionLong')}
-                  </CardDescription>
+
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
