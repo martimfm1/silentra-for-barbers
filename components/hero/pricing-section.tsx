@@ -41,8 +41,8 @@ const HERO_FEATURES = {
     'POS, stock e comissões',
     'Permissões e gestão global',
     'Relatórios empresariais avançados',
-    'Landing page profissional incluída',
-    'Site próprio personalizado disponível por orçamento',
+    'Landing page profissional e domínio Silentra incluídos',
+    'Site próprio com ativação única de 50 €',
   ],
 } as const;
 
@@ -64,8 +64,8 @@ const HERO_FEATURES_EN = {
     'POS, inventory and commissions',
     'Global permissions and management',
     'Advanced business reports',
-    'Professional landing page included',
-    'Custom website available at a separate quote',
+    'Professional landing page and Silentra domain included',
+    'Custom website with a one-time €50 setup fee',
   ],
 } as const;
 
@@ -84,13 +84,13 @@ export function PricingSection({
         free: 'The essentials to start taking bookings and keep your barbershop organised.',
         pro: 'For barbershops ready to grow, retain customers and automate daily operations.',
         enterprise:
-          'For larger teams, multiple locations and advanced operational control.',
+          'For larger teams, with a landing page and public address on the Silentra domain included.',
       }
     : {
         free: 'O essencial para começar a receber marcações e organizar a barbearia.',
         pro: 'Para barbearias que querem crescer, fidelizar clientes e automatizar o dia a dia.',
         enterprise:
-          'Para equipas maiores, várias localizações e controlo operacional avançado.',
+          'Para equipas maiores, landing page e endereço público no domínio Silentra incluídos.',
       };
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
