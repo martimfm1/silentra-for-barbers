@@ -996,6 +996,7 @@ export const ptCopy = {
     bookingError: 'Não foi possível concluir a marcação.',
     bookingSuccess: 'Marcação efetuada com sucesso!',
     prepaymentOption: 'Pré-pagar por MB WAY',
+    requestPrepayment: 'Pedir pré-pagamento',
     prepaymentOptionDescription: 'Dá prioridade ao teu horário. O pedido só fica confirmado depois de a barbearia validar o pagamento.',
     prepaymentAmount: 'Valor a pagar',
     prepaymentNumber: 'Número MB WAY',
