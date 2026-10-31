@@ -394,4 +394,6 @@ comment on function public.create_booking_atomic(uuid, uuid, uuid, timestamptz, 
   'Final atomic public booking contract with enum-safe status, Pro MB WAY prepayment hold handling, tenant-scoped conflict protection, closed-day enforcement and exact email+normalized-phone client linking.';
 
 
+notify pgrst, 'reload schema';
+
 commit;
