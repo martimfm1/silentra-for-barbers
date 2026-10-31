@@ -87,7 +87,7 @@ export const guestMetadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico' },
-      { url: '/icon-2.png', sizes: '500x500', type: 'image/png' },
+      { url: '/logo.png', sizes: '500x500', type: 'image/png' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
     other: [

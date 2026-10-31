@@ -2,7 +2,7 @@
 
 const CACHE_PREFIX = 'silentra-static-';
 const CACHE_NAME = 'silentra-static-v1';
-const PRECACHE_URLS = ['/icon-2.png', '/apple-touch-icon.png'];
+const PRECACHE_URLS = ['/logo.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
   // HTML documents, authenticated data, cookies, and all /api requests stay network-only.
   const isStaticAsset = url.pathname.startsWith('/_next/static/');
   const isPwaAsset = [
-    '/icon-2.png',
+    '/logo.png',
     '/apple-touch-icon.png',
     '/site.webmanifest',
   ].includes(url.pathname);

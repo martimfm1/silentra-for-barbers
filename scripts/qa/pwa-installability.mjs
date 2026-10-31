@@ -36,7 +36,7 @@ assert.equal(manifest.name, 'Silentra for Barbers');
 assert.equal(manifest.start_url, '/dashboard');
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.scope, '/');
-assert.ok(manifest.icons.some((icon) => icon.src === '/icon-2.png'));
+assert.ok(manifest.icons.some((icon) => icon.src === '/logo.png'));
 
 for (const icon of manifest.icons) {
   const publicPath = join(root, 'public', icon.src.replace(/^\//, ''));

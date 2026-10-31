@@ -55,7 +55,7 @@ function HomeStructuredData() {
       url: 'https://barbers.silentra.me/',
       name: 'Silentra for Barbers',
       alternateName: 'Silentra for Barbers',
-      logo: 'https://barbers.silentra.me/icon-2.png',
+      logo: 'https://barbers.silentra.me/logo.png',
     },
     {
       '@type': 'SoftwareApplication',
