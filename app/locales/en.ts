@@ -1089,6 +1089,7 @@ export const en = {
     overviewDescription:
       'Set up your barbershop in four simple steps. Open each card, make your changes and save when you are ready.',
     openSection: 'Edit step',
+    setupProgress: 'Setup progress',
     notConfigured: 'Not set yet',
     closeDialog: 'Close',
     saveAllHint: 'You can save each step individually. Changes take effect as soon as you confirm.',
