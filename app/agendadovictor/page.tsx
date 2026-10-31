@@ -51,7 +51,7 @@ export default async function AgendaDoVictorRoute() {
         .maybeSingle(),
       database
         .from('barbershops')
-        .select('opening_time,closing_time')
+        .select('opening_time,closing_time,closed_days')
         .eq('id', profile.barbershop_id)
         .maybeSingle(),
     ]);
@@ -69,7 +69,7 @@ export default async function AgendaDoVictorRoute() {
   return (
     <AgendaDoVictorPage
       profile={publicProfile}
-      shop={{ ...shop, opening_time: hours.opening_time, closing_time: hours.closing_time }}
+      shop={{ ...shop, opening_time: hours.opening_time, closing_time: hours.closing_time, closed_days: hours.closed_days }}
       services={services.map((service) => ({
         id: service.id,
         name: service.name,

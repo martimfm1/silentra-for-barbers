@@ -13,7 +13,7 @@ const BookingDrawer = dynamic(
 );
 
 type AgendaService = { id: string; name: string; price: number; duration: number };
-type AgendaShop = { id: string; slug: string; city: string | null; address: string | null; lat: number | null; lng: number | null; opening_time: string | null; closing_time: string | null };
+type AgendaShop = { id: string; slug: string; city: string | null; address: string | null; lat: number | null; lng: number | null; opening_time: string | null; closing_time: string | null; closed_days: string | null };
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
 
@@ -46,8 +46,9 @@ export default function AgendaDoVictorPage({
     id: shop.id,
     barbershop_id: profile.barbershop_id || profile.id,
     reviewsCount: 0,
-    closing_time: '',
-    opening_time: '',
+    closing_time: shop.closing_time || '',
+    opening_time: shop.opening_time || '',
+    closed_days: shop.closed_days,
     name: profile.name,
     slug: shop.slug,
     address: shop.address || undefined,
@@ -138,6 +139,7 @@ export default function AgendaDoVictorPage({
         isOpen={bookingOpen}
         onClose={() => setBookingOpen(false)}
         selectedServiceId={selectedServiceId}
+        appearance="agenda"
         onSuccess={() => setBookingOpen(false)}
       />
     </main>

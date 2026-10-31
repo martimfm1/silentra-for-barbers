@@ -101,6 +101,7 @@ function parseClosedDays(value: MarketplaceShopValue) {
     values.flatMap((entry) => {
       if (typeof entry === 'number' && entry >= 0 && entry <= 6) return [entry];
       const key = String(entry).trim().toLowerCase();
+      if (/^[0-6]$/.test(key)) return [Number(key)];
       return DAY_INDEX[key] === undefined ? [] : [DAY_INDEX[key]];
     }),
   );
@@ -142,6 +143,7 @@ export function BookingDrawerCanonical({
   onClose,
   onSuccess,
   selectedServiceId = null,
+  appearance = 'default',
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
   const days = useMemo(() => buildDays(locale), [locale]);
@@ -178,16 +180,18 @@ export function BookingDrawerCanonical({
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
   }, [isOpen, step]);
 
-  const currentDay = days[dayIndex];
   const service = services.find((item) => item.id === serviceId) ?? null;
   const closedDays = useMemo(
     () =>
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  const currentDayClosed = closedDays.has(
-    new Date(`${currentDay.dateStr}T12:00:00`).getDay(),
+  const availableDays = useMemo(
+    () => days.filter((day) => !closedDays.has(new Date(`${day.dateStr}T12:00:00`).getDay())),
+    [days, closedDays],
   );
+  const currentDay = availableDays[dayIndex] ?? availableDays[0] ?? null;
+  const currentDayClosed = !currentDay;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -214,7 +218,7 @@ export function BookingDrawerCanonical({
   }, [isOpen, selectedServiceId]);
 
   useEffect(() => {
-    if (!isOpen || !shop) return;
+    if (!isOpen || !shop || !currentDay) return;
     const controller = new AbortController();
     void fetch(
       `/api/shops/${shop.id}/booking-data?date=${encodeURIComponent(currentDay.dateStr)}`,
@@ -242,10 +246,10 @@ export function BookingDrawerCanonical({
           );
       });
     return () => controller.abort();
-  }, [currentDay.dateStr, isOpen, retryKey, shop]);
+  }, [currentDay?.dateStr, isOpen, retryKey, shop]);
 
   useEffect(() => {
-    if (!isOpen || step !== 2 || !shop || !professional || !service) {
+    if (!isOpen || step !== 2 || !shop || !currentDay || !professional || !service) {
       setSlots([]);
       return;
     }
@@ -290,7 +294,7 @@ export function BookingDrawerCanonical({
         () => !controller.signal.aborted && setLoadingAvailability(false),
       );
     return () => controller.abort();
-  }, [currentDay.dateStr, isOpen, professional, retryKey, service, shop, step]);
+  }, [currentDay?.dateStr, isOpen, professional, retryKey, service, shop, step]);
 
   useEffect(() => {
     if (!isOpen || step !== 3 || !shop) return;
@@ -340,7 +344,7 @@ export function BookingDrawerCanonical({
     };
   }, [email, isOpen, phone, shop, step]);
 
-  const canContinueOne = Boolean(professional && service && !currentDayClosed);
+  const canContinueOne = Boolean(currentDay && professional && service && !currentDayClosed);
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
@@ -357,7 +361,7 @@ export function BookingDrawerCanonical({
   }
 
   async function submit() {
-    if (!shop || !professional || !service || !selectedSlot) return;
+    if (!shop || !professional || !service || !selectedSlot || !currentDay) return;
     if (!name.trim() || !phone.trim() || !email.trim())
       return toast.error(t('bookingDrawer.requiredFields'));
     const birthDateIso = birthDateToIso(birthDate);
@@ -414,7 +418,46 @@ export function BookingDrawerCanonical({
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="mx-auto flex h-[min(90dvh,48rem)] max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border-white/10 bg-zinc-950 text-zinc-100 sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl">
+      <DrawerContent
+        data-booking-theme={appearance}
+        className={`mx-auto flex h-[min(90dvh,48rem)] max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl ${appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#171717]' : 'border-white/10 bg-zinc-950 text-zinc-100'}`}
+      >
+        {appearance === 'agenda' && (
+          <style>{`
+            [data-booking-theme="agenda"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; border-radius: 1rem 1rem 0 0 !important; box-shadow: 0 -18px 60px rgba(0,0,0,.10) !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="default"] { background: #171717 !important; color: #fff !important; box-shadow: none !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="default"]:hover { background: #3b3b38 !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="outline"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="ghost"] { color: #55554f !important; }
+            [data-booking-theme="agenda"] .text-zinc-100 { color: #171717 !important; }
+            [data-booking-theme="agenda"] .text-zinc-200 { color: #292929 !important; }
+            [data-booking-theme="agenda"] .text-zinc-400,
+            [data-booking-theme="agenda"] .text-zinc-500 { color: #777770 !important; }
+            [data-booking-theme="agenda"] .text-zinc-600 { color: #92928a !important; }
+            [data-booking-theme="agenda"] [data-slot="input"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [data-slot="input"]::placeholder { color: #92928a !important; }
+            [data-booking-theme="agenda"] [data-slot="input"]:focus-visible { border-color: #999 !important; --tw-ring-color: rgba(23,23,23,.12) !important; }
+            [data-booking-theme="agenda"] [class~="bg-white/10"] { background-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [class~="bg-white/[0.035]"],
+            [data-booking-theme="agenda"] [class~="bg-white/[0.055]"] { background-color: #f8f8f6 !important; }
+            [data-booking-theme="agenda"] .text-emerald-300,
+            [data-booking-theme="agenda"] .text-emerald-100 { color: #33332f !important; }
+            [data-booking-theme="agenda"] [class~="bg-zinc-950"] { background-color: #fff !important; }
+            [data-booking-theme="agenda"] [class~="bg-white/[0.025]"],
+            [data-booking-theme="agenda"] [class~="bg-white/[0.02]"],
+            [data-booking-theme="agenda"] [class~="bg-white/[0.03]"] { background-color: #f8f8f6 !important; }
+            [data-booking-theme="agenda"] [class~="border-white/10"],
+            [data-booking-theme="agenda"] [class~="border-white/20"] { border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [class~="border-emerald-400/40"] { border-color: #b8b8b0 !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400/[0.08]"] { background-color: #f1f1ed !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-300"] { background-color: #171717 !important; color: #fff !important; }
+            [data-booking-theme="agenda"] [class~="text-zinc-950"] { color: #fff !important; }
+            [data-booking-theme="agenda"] [class~="focus-visible:ring-emerald-400"]:focus-visible { --tw-ring-color: #777 !important; }
+            [data-booking-theme="agenda"] [class~="border-amber-400/20"] { border-color: #eadcc7 !important; }
+            [data-booking-theme="agenda"] [class~="bg-amber-400/[0.05]"] { background-color: #faf7f1 !important; }
+            [data-booking-theme="agenda"] .text-amber-100 { color: #76572d !important; }
+          `}</style>
+        )}
         <header className="shrink-0 border-b border-white/10 px-4 py-4 sm:px-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -532,22 +575,18 @@ export function BookingDrawerCanonical({
                   />
                   <h3 className="text-sm font-semibold">{t('bookingDrawer.stepTwoDay')}</h3>
                 </div>
-                <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {days.map((day, index) => {
-                    const isClosed = closedDays.has(
-                      new Date(`${day.dateStr}T12:00:00`).getDay(),
-                    );
-                    return (
+                {availableDays.length ? (
+                  <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {availableDays.map((day, index) => (
                       <button
                         key={day.dateStr}
                         type="button"
                         aria-pressed={dayIndex === index}
-                        disabled={isClosed}
                         onClick={() => {
                           setDayIndex(index);
                           setSelectedSlot(null);
                         }}
-                        className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40 ${dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                        className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                       >
                         <span className="block text-[10px] font-semibold text-zinc-500">
                           {day.isToday ? t('bookingDrawer.today').toLocaleUpperCase(locale === 'pt' ? 'pt-PT' : 'en-GB') : day.weekdayShort}
@@ -559,12 +598,11 @@ export function BookingDrawerCanonical({
                           {day.fullDateFormatted.split(' ')[2] ?? ''}
                         </span>
                       </button>
-                    );
-                  })}
-                </div>
-                {currentDayClosed && (
-                  <p className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.05] p-3 text-xs text-amber-100">
-                    {t('bookingDrawer.barbershopClosed')}
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
+                    {t('bookingDrawer.noOpenDays')}
                   </p>
                 )}
               </div>
@@ -617,7 +655,7 @@ export function BookingDrawerCanonical({
                     </h3>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {professional?.name} · {currentDay.fullDateFormatted}
+                    {professional?.name} · {currentDay?.fullDateFormatted}
                   </p>
                 </div>
                 <Button
@@ -677,7 +715,7 @@ export function BookingDrawerCanonical({
                     {t('bookingDrawer.stepThreeDetails')}
                   </h3>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {service?.name} · {currentDay.fullDateFormatted} ·{' '}
+                    {service?.name} · {currentDay?.fullDateFormatted} ·{' '}
                     {selectedSlot}
                   </p>
                 </div>
@@ -820,7 +858,7 @@ export function BookingDrawerCanonical({
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
-                {currentDay.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
+                {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')} {selectedSlot}.
               </p>
               <Button type="button" className="mt-6 w-full" onClick={onClose}>
                 {t('bookingDrawer.finish')}

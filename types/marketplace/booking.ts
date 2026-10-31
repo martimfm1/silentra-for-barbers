@@ -30,6 +30,7 @@ export interface BookingDrawerProps {
   onClose: () => void;
   onSuccess?: (data: BookingSuccessData) => void;
   selectedServiceId?: string | null;
+  appearance?: 'default' | 'agenda';
 }
 
 export interface BookingSuccessData {
