@@ -32,7 +32,7 @@ import type { MarketplaceService } from '@/types/marketplace/shops';
 
 type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
-type ManualPrepaymentInstructions = { amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
+type ManualPrepaymentInstructions = { bookingId: string; amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
 function normalizeWhatsAppNumber(value: string): string {
   let digits = value.replace(/\D/g, '');
   if (digits.startsWith('00')) digits = digits.slice(2);
@@ -423,6 +423,7 @@ export function BookingDrawerCanonical({
       cacheRef.current.clear();
       if (payload.payment?.method === 'mbway') {
         setPaymentInstructions({
+          bookingId: String(payload.booking?.id ?? ''),
           amount: Number(payload.payment.amount),
           mbwayPhone: String(payload.payment.mbwayPhone),
           whatsappPhone: String(payload.payment.whatsappPhone),
@@ -463,7 +464,10 @@ export function BookingDrawerCanonical({
         `${shop.name} — ${service?.name || 'Serviço'}`,
         `${currentDay?.dateStr || ''} ${selectedSlot || ''}`,
         `MB WAY: ${paymentInstructions.amount.toFixed(2)} €`,
-        `Ref.: ${email.trim()}`,
+        `Cliente: ${name.trim()}`,
+        `Email: ${email.trim()}`,
+        `Ref.: ${paymentInstructions.bookingId}`,
+
       ].join('\n')
     : '';
   const whatsappProofUrl = whatsappDigits
