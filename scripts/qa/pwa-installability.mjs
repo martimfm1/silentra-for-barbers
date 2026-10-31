@@ -47,7 +47,7 @@ for (const icon of manifest.icons) {
 assert.match(metadata, /manifest:\s*'\/site\.webmanifest'/);
 assert.match(metadata, /appleWebApp:\s*\{[\s\S]*?capable:\s*true/);
 assert.match(layout, /<PwaRegistration\s*\/>/);
-assert.match(registration, /serviceWorker\.register\('\/sw\.js'/);
+assert.match(registration, /serviceWorker\s*\.register\('\/sw\.js'/);
 assert.match(topBar, /PwaInstallButton/);
 assert.match(topBar, /PwaInstallButton locale=/);
 assert.match(siteNavbar, /PwaInstallButton locale=/);
