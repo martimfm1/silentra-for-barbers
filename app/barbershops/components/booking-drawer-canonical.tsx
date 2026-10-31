@@ -857,6 +857,38 @@ export function BookingDrawerCanonical({
                   />
                 </label>
 
+                {manualPrepayment?.enabled && (
+                  <div className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035]">
+                    <button
+                      type="button"
+                      aria-pressed={prepaymentSelected}
+                      onClick={() => setPrepaymentSelected((value) => !value)}
+                      className={`flex min-h-14 w-full items-start gap-3 p-4 text-left transition-colors ${prepaymentSelected ? 'bg-emerald-400/[.08]' : 'hover:bg-white/[.025]'}`}
+                    >
+                      <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border ${prepaymentSelected ? 'border-emerald-300 bg-emerald-300 text-zinc-950' : 'border-white/20 bg-white/[.03]'}`}>
+                        {prepaymentSelected && <Check className="size-3.5" aria-hidden="true" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-zinc-100">{t('bookingDrawer.prepaymentOption')}</span>
+                        <span className="mt-1 block text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentOptionDescription')}</span>
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">{Number(service?.price ?? 0).toFixed(2)} €</span>
+                    </button>
+                    {prepaymentSelected && (
+                      <div className="grid gap-2 border-t border-emerald-400/15 px-4 py-3 text-xs">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentAmount')}</span>
+                          <strong className="text-zinc-100">{Number(service?.price ?? 0).toFixed(2)} €</strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentNumber')}</span>
+                          <strong className="text-zinc-100">{manualPrepayment.mbwayPhone}</strong>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div
                   className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
                   aria-live="polite"
