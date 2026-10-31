@@ -33,6 +33,12 @@ import type { FeatureKey } from '@/lib/billing/plan-features';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { DEFAULT_BARBERSHOP_AVATAR } from '@/lib/barbershops/default-media';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface SidebarItem {
   href: string;
@@ -315,6 +321,7 @@ export function DashboardSidebar() {
 
   return (
     <>
+      <TooltipProvider delayDuration={120}>
       <nav
         aria-label={
           locale === 'en'
@@ -329,8 +336,9 @@ export function DashboardSidebar() {
             const Icon = item.icon;
             const label = localizeNavLabel(item.label, locale);
             return (
-              <Link
-                key={item.href}
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                <Link
                 href={item.href}
                 aria-label={label}
                 aria-current={active ? 'page' : undefined}
@@ -348,7 +356,7 @@ export function DashboardSidebar() {
                   )}
                   aria-hidden="true"
                 />
-                <span className="max-w-full truncate lg:pointer-events-none lg:absolute lg:bottom-[calc(100%+0.85rem)] lg:left-1/2 lg:z-20 lg:-translate-x-1/2 lg:rounded-lg lg:border lg:border-white/10 lg:bg-zinc-900/95 lg:px-2.5 lg:py-1.5 lg:text-[11px] lg:shadow-lg lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
+                <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
                   {label}
                 </span>
                 {active ? (
@@ -357,14 +365,25 @@ export function DashboardSidebar() {
                     className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
                   />
                 ) : null}
-              </Link>
+                </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  sideOffset={12}
+                  className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
+                >
+                  {label}
+                </TooltipContent>
+              </Tooltip>
             );
           })}
           <span
             aria-hidden="true"
             className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
           />
-          <button
+          <Tooltip>
+            <TooltipTrigger asChild>
+            <button
             ref={moreTriggerRef}
             type="button"
             onClick={() => setMoreOpen(true)}
@@ -386,7 +405,7 @@ export function DashboardSidebar() {
               className="size-4 lg:size-5"
               aria-hidden="true"
             />
-            <span className="max-w-full truncate lg:pointer-events-none lg:absolute lg:bottom-[calc(100%+0.85rem)] lg:left-1/2 lg:z-20 lg:-translate-x-1/2 lg:rounded-lg lg:border lg:border-white/10 lg:bg-zinc-900/95 lg:px-2.5 lg:py-1.5 lg:text-[11px] lg:shadow-lg lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
+            <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
               {locale === 'en' ? 'More' : 'Mais'}
             </span>
             {moreActive ? (
@@ -395,9 +414,19 @@ export function DashboardSidebar() {
                 className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
               />
             ) : null}
-          </button>
+            </button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              sideOffset={12}
+              className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
+            >
+              {locale === 'en' ? 'More' : 'Mais'}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </nav>
+      </TooltipProvider>
 
       <AnimatePresence>
         {moreOpen ? (
@@ -423,18 +452,23 @@ export function DashboardSidebar() {
               aria-modal="true"
               aria-labelledby="dashboard-more-title"
               initial={
-                motionEnabled ? { opacity: 0, y: 24, scale: 0.985 } : false
+                motionEnabled
+                  ? { opacity: 0, y: 40, scale: 0.94, rotateX: -5, filter: 'blur(8px)' }
+                  : false
               }
-              animate={{ opacity: 1, y: 0, scale: 1 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0, filter: 'blur(0px)' }}
               exit={
-                motionEnabled ? { opacity: 0, y: 16, scale: 0.99 } : undefined
+                motionEnabled
+                  ? { opacity: 0, y: 18, scale: 0.97, filter: 'blur(3px)' }
+                  : undefined
               }
               transition={
                 motionEnabled
-                  ? { type: 'spring', stiffness: 420, damping: 36, mass: 0.75 }
+                  ? { type: 'spring', stiffness: 360, damping: 30, mass: 0.8 }
                   : { duration: 0 }
               }
               className="absolute inset-x-2 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] mx-auto flex max-h-[min(72vh,42rem)] max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/98 shadow-2xl shadow-black/50 sm:inset-x-4 lg:bottom-[5.75rem]"
+              style={{ transformOrigin: 'bottom center', perspective: 1200 }}
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-3 sm:px-5">
                 <div className="flex min-w-0 items-center gap-3">
