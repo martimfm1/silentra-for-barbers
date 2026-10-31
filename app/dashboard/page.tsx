@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
 import {
   Users,
   Scissors,
@@ -853,44 +854,67 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {upcomingAppointments.map((appointment) => (
-                          <Link
-                            key={appointment.id}
-                            href="/dashboard/agenda"
-                            className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.025] p-3 transition hover:border-white/10 hover:bg-white/[0.05]"
-                          >
-                            <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]">
-                              <span className="text-xs font-semibold text-zinc-200">
-                                {new Date(
-                                  appointment.date_hour,
-                                ).toLocaleTimeString(
-                                  locale === 'en' ? 'en-GB' : 'pt-PT',
-                                  { hour: '2-digit', minute: '2-digit' },
-                                )}
-                              </span>
-                              <span className="text-[10px] text-zinc-500">
-                                {new Date(
-                                  appointment.date_hour,
-                                ).toLocaleDateString(
-                                  locale === 'en' ? 'en-GB' : 'pt-PT',
-                                  { day: '2-digit', month: '2-digit' },
-                                )}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-zinc-200">
-                                {appointment.users?.name_complete ||
-                                  appointment.manual_name ||
-                                  t('dashboard.client')}
-                              </p>
-                              <p className="mt-0.5 truncate text-xs text-zinc-500">
-                                {appointment.services?.name ||
-                                  t('dashboard.service')}
-                              </p>
-                            </div>
-                            <ChevronRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />
-                          </Link>
-                        ))}
+                        {upcomingAppointments.map((appointment) => {
+                          const clientNotes =
+                            appointment.users?.style_notes?.trim();
+
+                          return (
+                            <Link
+                              key={appointment.id}
+                              href="/dashboard/agenda"
+                              className="glassmorphism group flex min-w-0 items-start gap-3 rounded-2xl border border-white/5 bg-white/[0.025] p-3 transition hover:border-white/10 hover:bg-white/[0.05]"
+                            >
+                              <div className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]">
+                                <span className="text-xs font-semibold text-zinc-200">
+                                  {new Date(
+                                    appointment.date_hour,
+                                  ).toLocaleTimeString(
+                                    locale === 'en' ? 'en-GB' : 'pt-PT',
+                                    { hour: '2-digit', minute: '2-digit' },
+                                  )}
+                                </span>
+                                <span className="text-[10px] text-zinc-500">
+                                  {new Date(
+                                    appointment.date_hour,
+                                  ).toLocaleDateString(
+                                    locale === 'en' ? 'en-GB' : 'pt-PT',
+                                    { day: '2-digit', month: '2-digit' },
+                                  )}
+                                </span>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-200">
+                                    {appointment.users?.name_complete ||
+                                      appointment.manual_name ||
+                                      t('dashboard.client')}
+                                  </p>
+                                  <StatusBadge status={appointment.status} />
+                                </div>
+                                <p className="mt-1 truncate text-xs text-zinc-400">
+                                  {appointment.services?.name ||
+                                    t('dashboard.service')}
+                                </p>
+                                <p className="mt-1 truncate text-xs text-zinc-500">
+                                  {t('dashboard.upcomingAppointmentProfessional')}:{' '}
+                                  {appointment.professionals?.name ||
+                                    t('dashboard.noBarberAssigned')}
+                                </p>
+                                {clientNotes ? (
+                                  <div className="mt-2 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2">
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                                      {t('dashboard.upcomingAppointmentNotes')}
+                                    </p>
+                                    <p className="mt-1 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-zinc-300">
+                                      {clientNotes}
+                                    </p>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <ChevronRight className="mt-3 size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-300" />
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
