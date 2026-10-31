@@ -10,6 +10,7 @@ import {
   Clock3,
   Loader2,
   Mail,
+  MessageCircle,
   Phone,
   Scissors,
   UserRound,
@@ -31,6 +32,13 @@ import type { MarketplaceService } from '@/types/marketplace/shops';
 
 type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
+type ManualPrepaymentInstructions = { amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
+function normalizeWhatsAppNumber(value: string): string {
+  let digits = value.replace(/\\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.length === 9 && digits.startsWith('9')) digits = `351${digits}`;
+  return digits;
+}
 
 const DAY_INDEX: Record<string, number> = {
   sunday: 0,
@@ -167,6 +175,9 @@ export function BookingDrawerCanonical({
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
+  const [manualPrepayment, setManualPrepayment] = useState<MarketplaceBookingResponse['manualPrepayment'] | null>(null);
+  const [prepaymentSelected, setPrepaymentSelected] = useState(false);
+  const [paymentInstructions, setPaymentInstructions] = useState<ManualPrepaymentInstructions | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const customerControllerRef = useRef<AbortController | null>(null);
   const cacheRef = useRef(
@@ -215,6 +226,9 @@ export function BookingDrawerCanonical({
     setEmail('');
     setBirthDate('');
     setCustomerState('idle');
+    setManualPrepayment(null);
+    setPrepaymentSelected(false);
+    setPaymentInstructions(null);
     controllerRef.current?.abort();
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
@@ -239,6 +253,7 @@ export function BookingDrawerCanonical({
         if (controller.signal.aborted) return;
         setProfessionals(payload.professionals ?? []);
         setServices(payload.services ?? []);
+        setManualPrepayment(payload.manualPrepayment?.enabled ? payload.manualPrepayment : null);
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError')
