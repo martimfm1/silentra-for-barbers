@@ -692,7 +692,7 @@ const checks = [
     test: (source) =>
       source.includes('appearance="agenda"') &&
       source.includes('closed_days: closedDays ?? null') &&
-      source.includes('closedDays={closedDays}'),
+      source.includes('shop={bookingShop}'),
   },
   {
     name: 'Booking drawer excludes configured closed weekdays from date choices',
