@@ -179,6 +179,9 @@ export function CalendarSyncCard() {
               <Check className="size-4" aria-hidden="true" />
               {t('agenda.calendarSyncActive')}
             </div>
+            <p className="text-xs leading-5 text-amber-200/80">
+              {t('agenda.calendarSyncPrivacyNotice')}
+            </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 readOnly
