@@ -166,8 +166,7 @@ export default function DashboardPage() {
 
       const dayIndex = (date.getDay() + 6) % 7;
       const point = values[dayIndex];
-      point.bookings += 1;
-
+      if (appointment.status !== 'cancelled') point.bookings += 1;
       if (appointment.status === 'completed') {
         const price = Number(appointment.services?.price ?? 0);
         if (Number.isFinite(price)) point.revenue += price;
@@ -181,10 +180,6 @@ export default function DashboardPage() {
     (point) => point.bookings > 0 || point.revenue > 0,
   );
 
-  const maxRevenue = Math.max(
-    1,
-    ...dynamicChartData.map((point) => point.revenue),
-  );
   const maxBookings = Math.max(
     1,
     ...dynamicChartData.map((point) => point.bookings),
@@ -646,9 +641,6 @@ export default function DashboardPage() {
                         <CardTitle className="text-lg font-medium text-zinc-100">
                           {t('dashboard.weeklyActivity')}
                         </CardTitle>
-                        <CardDescription className="mt-1 text-zinc-500">
-                          {t('dashboard.compareDaily')}
-                        </CardDescription>
                       </div>
                       <Link
                         href="/dashboard/stats"
@@ -680,14 +672,10 @@ export default function DashboardPage() {
                         role="img"
                         aria-label={
                           locale === 'en'
-                            ? 'Bar chart comparing completed revenue and bookings by weekday'
-                            : 'Gráfico de barras que compara a receita concluída e as marcações por dia da semana'
+                            ? 'Bookings by weekday'
+                            : 'Marcações por dia da semana'
                         }
                       >
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
-                          <span>{t('dashboard.relativeMetricScale')}</span>
-                          <span>{t('dashboard.chartInteractionHint')}</span>
-                        </div>
                         <div className="relative min-h-0 flex-1">
                           <div
                             aria-hidden="true"
@@ -702,62 +690,42 @@ export default function DashboardPage() {
                           </div>
                           <div className="relative grid h-full min-w-0 grid-cols-7 gap-1 sm:gap-3">
                             {dynamicChartData.map((point) => {
-                              const revenueHeight =
-                                point.revenue > 0
-                                  ? Math.max(
-                                      8,
-                                      (point.revenue / maxRevenue) * 100,
-                                    )
-                                  : 2;
-                              const bookingsHeight =
+                              const barHeight =
                                 point.bookings > 0
                                   ? Math.max(
-                                      8,
+                                      6,
                                       (point.bookings / maxBookings) * 100,
                                     )
                                   : 2;
+                              const revenueLabel = point.revenue
+                                .toFixed(2)
+                                .replace('.', locale === 'en' ? '.' : ',');
                               return (
                                 <div
                                   key={point.day}
                                   className="flex min-w-0 flex-col items-center justify-end gap-2"
                                 >
-                                  <div className="flex h-full w-full items-end justify-center gap-1.5">
+                                  <div className="flex h-full w-full flex-col items-center justify-end gap-1.5">
+                                    <span className="text-[10px] font-medium tabular-nums text-zinc-300">
+                                      {point.bookings}
+                                    </span>
                                     <div
                                       title={
                                         locale === 'en'
-                                          ? `${point.day}: ${point.revenue.toFixed(2)} EUR in completed service revenue`
-                                          : `${point.day}: ${point.revenue.toFixed(2).replace('.', ',')} € de receita de serviços concluídos`
+                                          ? `${point.day}: ${point.bookings} bookings · ${revenueLabel} € completed revenue`
+                                          : `${point.day}: ${point.bookings} marcações · ${revenueLabel} € de faturação concluída`
                                       }
                                       aria-label={
                                         locale === 'en'
-                                          ? `${point.day}, revenue ${point.revenue.toFixed(2)} euros`
-                                          : `${point.day}, receita ${point.revenue.toFixed(2)} euros`
+                                          ? `${point.day}: ${point.bookings} bookings, ${revenueLabel} euros completed revenue`
+                                          : `${point.day}: ${point.bookings} marcações, ${revenueLabel} euros de faturação concluída`
                                       }
-                                      className="w-1/2 max-w-7 rounded-t-md transition-[height,filter] hover:brightness-125"
+                                      className="w-full max-w-10 rounded-t-md transition-[height,filter] hover:brightness-125"
                                       style={{
-                                        backgroundColor:
-                                          'var(--dashboard-accent)',
+                                        backgroundColor: 'var(--dashboard-accent)',
                                         boxShadow:
-                                          '0 0 18px color-mix(in srgb, var(--dashboard-accent) 16%, transparent)',
-                                        height: `${revenueHeight}%`,
-                                        minHeight:
-                                          point.revenue > 0 ? '8px' : '2px',
-                                      }}
-                                    />
-                                    <div
-                                      title={
-                                        locale === 'en'
-                                          ? `${point.day}: ${point.bookings} bookings`
-                                          : `${point.day}: ${point.bookings} marcações`
-                                      }
-                                      aria-label={
-                                        locale === 'en'
-                                          ? `${point.day}, ${point.bookings} bookings`
-                                          : `${point.day}, ${point.bookings} marcações`
-                                      }
-                                      className="w-1/2 max-w-7 rounded-t-md bg-sky-400 shadow-[0_0_18px_rgba(96,165,250,0.15)] transition-[height,filter] hover:brightness-125"
-                                      style={{
-                                        height: `${bookingsHeight}%`,
+                                          '0 0 18px color-mix(in srgb, var(--dashboard-accent) 20%, transparent)',
+                                        height: `${barHeight}%`,
                                         minHeight:
                                           point.bookings > 0 ? '8px' : '2px',
                                       }}
@@ -771,50 +739,9 @@ export default function DashboardPage() {
                             })}
                           </div>
                         </div>
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-zinc-500 sm:text-xs">
-                          <span>
-                            {t('dashboard.peakRevenue', {
-                              value: maxRevenue
-                                .toFixed(2)
-                                .replace('.', locale === 'en' ? '.' : ','),
-                            })}
-                          </span>
-                          <span className="text-right">
-                            {t('dashboard.peakBookings', {
-                              count: maxBookings,
-                            })}
-                          </span>
-                        </div>
                       </div>
                     )}
                   </CardContent>
-                  <div
-                    className="flex flex-wrap items-center justify-center gap-4 px-5 pb-5 pt-1 text-xs text-zinc-500"
-                    aria-label={t('dashboard.chartLegend')}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <span
-                        className="size-2.5 rounded-full bg-emerald-400"
-                        style={{
-                          boxShadow:
-                            '0 0 10px color-mix(in srgb, var(--dashboard-accent) 45%, transparent)',
-                        }}
-                        aria-hidden="true"
-                      />
-                      <span className="text-zinc-300">
-                        {t('dashboard.revenueLabel')}
-                      </span>
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <span
-                        className="size-2.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.4)]"
-                        aria-hidden="true"
-                      />
-                      <span className="text-zinc-300">
-                        {t('dashboard.appointmentsLabel')}
-                      </span>
-                    </span>
-                  </div>
                 </Card>
               )}
 
