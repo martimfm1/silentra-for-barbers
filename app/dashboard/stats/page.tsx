@@ -62,9 +62,15 @@ interface ChartTooltipProps {
   active?: boolean;
   payload?: TooltipEntry[];
   label?: string | number;
+  locale?: string;
 }
 
-function CustomChartTooltip({ active, payload, label }: ChartTooltipProps) {
+function CustomChartTooltip({
+  active,
+  payload,
+  label,
+  locale = 'pt',
+}: ChartTooltipProps) {
   if (active && payload && payload.length) {
     const item = payload[0];
     const displayLabel =
@@ -79,7 +85,10 @@ function CustomChartTooltip({ active, payload, label }: ChartTooltipProps) {
         <p className="text-xs font-medium text-zinc-400">{displayLabel}</p>
         <p className="mt-0.5 text-sm font-bold text-zinc-100">
           {typeof item.value === 'number'
-            ? `${item.value.toFixed(2)}€`
+            ? new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+                style: 'currency',
+                currency: 'EUR',
+              }).format(item.value)
             : item.value}
         </p>
       </div>
@@ -89,21 +98,25 @@ function CustomChartTooltip({ active, payload, label }: ChartTooltipProps) {
 }
 
 export default function StatsPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { barbershopId } = useBarbershop();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchStatsData = useCallback(async () => {
-    if (!barbershopId) return;
+    if (!barbershopId) {
+      setAppointments([]);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const res = await appointmentService.getAll(barbershopId);
       if (res.error) throw res.error;
-      setAppointments(res.data || []);
+      setAppointments(res.data ?? []);
     } catch (error) {
-      console.error('❌ [Stats Fetch Error]:', error);
+      console.error('[Stats Fetch Error]:', error);
       toast.error(t('statsPage.loadError'));
     } finally {
       setLoading(false);
@@ -111,10 +124,8 @@ export default function StatsPage() {
   }, [barbershopId, t]);
 
   useEffect(() => {
-    if (barbershopId) {
-      queueMicrotask(() => void fetchStatsData());
-    }
-  }, [barbershopId, fetchStatsData]);
+    void fetchStatsData();
+  }, [fetchStatsData]);
 
   const analytics = useMemo(() => {
     const completedApps = appointments.filter((a) => a.status === 'completed');
@@ -128,8 +139,9 @@ export default function StatsPage() {
     const professionalGroups: Record<string, number> = {};
 
     completedApps.forEach((app) => {
-      const price = Number(app.services?.price || 0);
-      const serviceName = app.services?.name || 'Outros';
+      const rawPrice = Number(app.services?.price ?? 0);
+      const price = Number.isFinite(rawPrice) ? rawPrice : 0;
+      const serviceName = app.services?.name || t('statsPage.otherService');
       const serviceId = app.service_id || null;
       const paymentMethod = app.payment_method || t('statsPage.unspecified');
       const barberName = app.professionals?.name || 'Casa / Geral';
@@ -197,9 +209,12 @@ export default function StatsPage() {
         .sort((a, b) => b.value - a.value)
         .slice(0, 8),
     };
-  }, [appointments]);
+  }, [appointments, t]);
 
-  const hasCompleted = analytics.insights.completedCount > 0;
+  const currencyFormatter = new Intl.NumberFormat(
+    locale === 'en' ? 'en-GB' : 'pt-PT',
+    { style: 'currency', currency: 'EUR' },
+  );
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -231,15 +246,14 @@ export default function StatsPage() {
               className={`size-4 ${loading ? 'animate-spin' : ''}`}
               aria-hidden="true"
             />
-            <span className="sr-only sm:not-sr-only sm:ml-2">Atualizar</span>
+            <span className="sr-only sm:not-sr-only sm:ml-2">{t('statsPage.refresh')}</span>
           </Button>
           <Link href="/dashboard" className="flex-1 sm:flex-none">
             <Button
               variant="ghost"
               className="w-full sm:w-auto min-h-[44px] bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-200 border border-white/10 text-xs sm:text-sm gap-2 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
             >
-              <ArrowLeft className="size-4" aria-hidden="true" /> Voltar ao
-              Painel
+              <ArrowLeft className="size-4" aria-hidden="true" /> {t('statsPage.backToDashboard')}
             </Button>
           </Link>
         </div>
@@ -290,7 +304,7 @@ export default function StatsPage() {
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <dd className="text-2xl font-bold text-emerald-400">
-                    {analytics.insights.totalRevenue.toFixed(2)}€
+                    {currencyFormatter.format(analytics.insights.totalRevenue)}
                   </dd>
                 </CardContent>
               </Card>
@@ -307,7 +321,7 @@ export default function StatsPage() {
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <dd className="text-2xl font-bold text-white">
-                    {analytics.insights.avgTicket.toFixed(2)}€
+                    {currencyFormatter.format(analytics.insights.avgTicket)}
                   </dd>
                 </CardContent>
               </Card>
@@ -315,7 +329,7 @@ export default function StatsPage() {
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg">
                 <CardHeader className="pb-1 p-4">
                   <dt className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Mais Solicitado</span>
+                    <span>{t('statsPage.mostPopularService')}</span>
                     <Scissors
                       className="size-4 text-purple-400"
                       aria-hidden="true"
@@ -346,7 +360,7 @@ export default function StatsPage() {
                   <dd className="text-2xl font-bold text-sky-400">
                     {analytics.insights.completedCount}{' '}
                     <span className="text-xs font-normal text-zinc-500">
-                      cortes
+                      {t('statsPage.completedUnit')}
                     </span>
                   </dd>
                 </CardContent>
@@ -354,31 +368,9 @@ export default function StatsPage() {
             </dl>
           </section>
 
-          {!hasCompleted ? (
-            <section
-              aria-label={t('statsPage.noCompletedBookings')}
-              className="rounded-2xl border border-dashed border-white/10 bg-zinc-900/40 p-10 text-center"
-            >
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-400">
-                <Store className="size-6" aria-hidden="true" />
-              </div>
-              <h2 className="mt-4 text-sm font-semibold text-zinc-200">
-                {t('statsPage.noCompletedBookings')}
-              </h2>
-              <p className="mt-1 text-sm text-zinc-500">
-                {t('statsPage.noCompletedBookingsHint')}
-              </p>
-              <Link
-                href="/dashboard"
-                className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
-              >
-                Ir para a agenda
-              </Link>
-            </section>
-          ) : (
-            <section
+                      <section
               aria-label={t('statsPage.charts')}
-              className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2"
             >
               {/* GRÁFICO 1: MÉTODOS DE PAGAMENTO */}
               <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between">
@@ -391,7 +383,7 @@ export default function StatsPage() {
                     {t('statsPage.paymentFlow')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
+                <CardContent className="h-[260px] min-w-0 p-2 pt-4 sm:h-[300px]">
                   {analytics.paymentStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
                       {t('statsPage.noHistory')}
@@ -426,7 +418,7 @@ export default function StatsPage() {
                               />
                             ))}
                           </Pie>
-                          <RechartsTooltip content={<CustomChartTooltip />} />
+                          <RechartsTooltip content={<CustomChartTooltip locale={locale} />} />
                           <Legend
                             verticalAlign="bottom"
                             height={28}
@@ -452,7 +444,7 @@ export default function StatsPage() {
                     {t('statsPage.revenueByBarber')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
+                <CardContent className="h-[260px] min-w-0 p-2 pt-4 sm:h-[300px]">
                   {analytics.professionalStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
                       {t('statsPage.noOperationalData')}
@@ -468,35 +460,35 @@ export default function StatsPage() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={analytics.professionalStats}
-                          margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                          layout="vertical"
+                          margin={{ top: 8, right: 14, left: 8, bottom: 8 }}
                         >
                           <CartesianGrid
-                            vertical={false}
+                            horizontal={false}
                             strokeDasharray="3 3"
                             stroke="rgba(255,255,255,0.06)"
                           />
                           <XAxis
-                            dataKey="name"
+                            type="number"
                             tickLine={false}
                             axisLine={false}
                             tick={{ fill: '#a1a1aa', fontSize: 10 }}
-                            dy={6}
-                            angle={-20}
-                            textAnchor="end"
-                            height={48}
-                            interval="preserveStartEnd"
-                            minTickGap={4}
-                            tickFormatter={(value: string) =>
-                              value.length > 10
-                                ? `${value.slice(0, 10)}…`
-                                : value
+                            tickFormatter={(value: number) =>
+                              currencyFormatter.format(value)
                             }
                           />
                           <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={104}
                             tickLine={false}
                             axisLine={false}
-                            tick={{ fill: '#a1a1aa', fontSize: 11 }}
-                            tickFormatter={(value: number) => `${value}€`}
+                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
+                            tickFormatter={(value: string) =>
+                              value.length > 14
+                                ? `${value.slice(0, 14)}…`
+                                : value
+                            }
                           />
                           <RechartsTooltip content={<CustomChartTooltip />} />
                           <Bar
@@ -514,13 +506,13 @@ export default function StatsPage() {
               </Card>
 
               {/* GRÁFICO 3: TOP SERVIÇOS EM FATURAÇÃO */}
-              <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex flex-col justify-between md:col-span-2 lg:col-span-1">
+              <Card className="border border-white/10 bg-zinc-900/60 shadow-lg flex min-w-0 flex-col justify-between md:col-span-2">
                 <CardHeader className="p-4 border-b border-white/5">
                   <CardTitle className="text-sm font-semibold text-zinc-200">
                     {t('statsPage.topServices')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="h-[220px] sm:h-[260px] p-2 pt-4">
+                <CardContent className="h-[260px] min-w-0 p-2 pt-4 sm:h-[300px]">
                   {analytics.serviceStats.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
                       {t('statsPage.noRecords')}
@@ -576,7 +568,6 @@ export default function StatsPage() {
                 </CardContent>
               </Card>
             </section>
-          )}
         </>
       )}
     </main>
