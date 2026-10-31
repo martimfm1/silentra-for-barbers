@@ -51,7 +51,7 @@ export default async function AgendaDoVictorRoute() {
         .maybeSingle(),
       database
         .from('barbershops')
-        .select('opening_time,closing_time')
+        .select('opening_time,closing_time,closed_days')
         .eq('id', profile.barbershop_id)
         .maybeSingle(),
     ]);
