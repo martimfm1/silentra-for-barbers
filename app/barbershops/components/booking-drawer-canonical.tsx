@@ -424,7 +424,11 @@ export function BookingDrawerCanonical({
       >
         {appearance === 'agenda' && (
           <style>{`
-            [data-booking-theme="agenda"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; box-shadow: 0 -18px 60px rgba(0,0,0,.10) !important; }
+            [data-booking-theme="agenda"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; border-radius: 1rem 1rem 0 0 !important; box-shadow: 0 -18px 60px rgba(0,0,0,.10) !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="default"] { background: #171717 !important; color: #fff !important; box-shadow: none !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="default"]:hover { background: #3b3b38 !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="outline"] { background: #fff !important; color: #171717 !important; border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [data-slot="button"][data-variant="ghost"] { color: #55554f !important; }
             [data-booking-theme="agenda"] .text-zinc-100 { color: #171717 !important; }
             [data-booking-theme="agenda"] .text-zinc-200 { color: #292929 !important; }
             [data-booking-theme="agenda"] .text-zinc-400,
