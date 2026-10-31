@@ -10,7 +10,7 @@ alter table public.appointments
   add column if not exists payment_expires_at timestamptz,
   add column if not exists payment_reviewed_at timestamptz;
 
-do $
+do $mbway$
 begin
   if not exists (
     select 1 from pg_constraint
@@ -31,7 +31,7 @@ begin
       check (payment_amount is null or payment_amount >= 0);
   end if;
 end;
-$;
+$mbway$;
 
 create index if not exists appointments_mbway_expiry_idx
   on public.appointments (payment_expires_at)
