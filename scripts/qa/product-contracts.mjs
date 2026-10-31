@@ -395,7 +395,7 @@ const checks = [
     test: (source) =>
       source.includes("'custom_website'") &&
       source.includes(
-        "custom_website: 'Site próprio personalizado (por orçamento)'",
+        "custom_website: 'Site próprio no domínio Silentra (ativação única de 50 €)'",
       ) &&
       source.includes("'custom_website',"),
   },
@@ -405,7 +405,9 @@ const checks = [
     test: (source) =>
       source.includes("intent.plan === 'enterprise'") &&
       source.includes('mailto:silentra.contact@gmail.com') &&
-      source.includes('sujeito a orçamento'),
+      source.includes('pagamento único de 50 €') &&
+      source.includes('domínio Silentra') &&
+      source.includes('Sem mensalidade adicional.'),
   },
   {
     name: 'Custom website requests are protected by a service-role-only database table',
