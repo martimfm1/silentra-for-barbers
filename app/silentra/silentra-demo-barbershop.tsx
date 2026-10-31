@@ -66,6 +66,7 @@ const PT = {
   serviceKicker: 'O menu',
   serviceTitle: 'Escolhe o teu próximo ritual.',
   serviceText: 'Serviços de barbearia com tempo, técnica e intenção. Estes valores são meramente ilustrativos.',
+  from: 'A partir de',
   minutes: 'min',
   selectService: 'Escolher serviço',
   signature: 'Favorito da casa',
@@ -162,6 +163,7 @@ const EN = {
   serviceKicker: 'The menu',
   serviceTitle: 'Choose your next ritual.',
   serviceText: 'Barbering with time, technique and intention. Prices are illustrative only.',
+  from: 'From',
   minutes: 'min',
   selectService: 'Choose service',
   signature: 'House favourite',
@@ -235,7 +237,7 @@ const EN = {
 };
 
 export default function SilentraDemoBarbershop() {
-  const { locale } = useLanguage();
+  const { locale, setLocale } = useLanguage();
   const copy = locale === 'en' ? EN : PT;
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState('signature');
@@ -327,6 +329,11 @@ export default function SilentraDemoBarbershop() {
             <a href="#contactos" className="text-xs font-medium text-[#c8bfb3] transition hover:text-[#e4b783]">{copy.navContact}</a>
           </nav>
 
+          <div className="hidden items-center gap-1 sm:flex">
+            <button type="button" onClick={() => setLocale('pt')} aria-label="Mudar para português" aria-pressed={locale === 'pt'} className={['min-h-10 border px-3 text-[10px] font-semibold', locale === 'pt' ? 'border-[#b88450] text-[#e5bd91]' : 'border-white/10 text-[#9f8e7a] hover:text-white'].join(' ')}>PT</button>
+            <button type="button" onClick={() => setLocale('en')} aria-label="Switch to English" aria-pressed={locale === 'en'} className={['min-h-10 border px-3 text-[10px] font-semibold', locale === 'en' ? 'border-[#b88450] text-[#e5bd91]' : 'border-white/10 text-[#9f8e7a] hover:text-white'].join(' ')}>EN</button>
+          </div>
+
           <div className="flex shrink-0 items-center gap-3">
             <a href="#marcacao" onClick={scrollToBooking} className="hidden min-h-11 items-center justify-center gap-2 bg-[#c99560] px-5 text-xs font-bold text-[#17120e] transition hover:bg-[#ddb17f] sm:inline-flex">
               {copy.book}
@@ -358,6 +365,11 @@ export default function SilentraDemoBarbershop() {
                 <ArrowUpRight className="size-4 text-[#bb8a5b]" aria-hidden="true" />
               </a>
             ))}
+            <div className="flex items-center gap-2 pt-3">
+              <span className="mr-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#9f8e7a]">Idioma / Language</span>
+              <button type="button" onClick={() => setLocale('pt')} aria-pressed={locale === 'pt'} className={['min-h-10 border px-4 text-xs font-semibold', locale === 'pt' ? 'border-[#b88450] bg-[#b88450]/15 text-[#e5bd91]' : 'border-white/10 text-[#bdb2a5]'].join(' ')}>PT</button>
+              <button type="button" onClick={() => setLocale('en')} aria-pressed={locale === 'en'} className={['min-h-10 border px-4 text-xs font-semibold', locale === 'en' ? 'border-[#b88450] bg-[#b88450]/15 text-[#e5bd91]' : 'border-white/10 text-[#bdb2a5]'].join(' ')}>EN</button>
+            </div>
           </nav>
         ) : null}
       </header>
