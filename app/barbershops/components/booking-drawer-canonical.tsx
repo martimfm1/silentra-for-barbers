@@ -508,6 +508,14 @@ export function BookingDrawerCanonical({
             [data-booking-theme="agenda"] [class~="bg-white/[0.03]"] { background-color: #f8f8f6 !important; }
             [data-booking-theme="agenda"] [class~="border-white/10"],
             [data-booking-theme="agenda"] [class~="border-white/20"] { border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400/[.035]"] { background-color: #f8f8f6 !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400/[.08]"] { background-color: #f1f1ed !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400"] { background-color: #171717 !important; color: #fff !important; }
+            [data-booking-theme="agenda"] [class~="border-emerald-400/20"],
+            [data-booking-theme="agenda"] [class~="border-emerald-400/15"] { border-color: #d8e3da !important; }
+            [data-booking-theme="agenda"] .text-emerald-200 { color: #315a44 !important; }
+            [data-booking-theme="agenda"] .text-amber-200,
+            [data-booking-theme="agenda"] .text-amber-300 { color: #76572d !important; }
             [data-booking-theme="agenda"] [class~="border-emerald-400/40"] { border-color: #b8b8b0 !important; }
             [data-booking-theme="agenda"] [class~="bg-emerald-400/[0.08]"] { background-color: #f1f1ed !important; }
             [data-booking-theme="agenda"] [class~="bg-emerald-300"] { background-color: #171717 !important; color: #fff !important; }
