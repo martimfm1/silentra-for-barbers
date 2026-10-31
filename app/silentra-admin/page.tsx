@@ -5,7 +5,7 @@ import PlatformAdminConsole from '@/app/_silentra-admin/platform-admin-console';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'Silentra Internal',
+  title: 'Silentra | Centro de controlo',
   robots: { index: false, follow: false },
 };
 
