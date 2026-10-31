@@ -225,7 +225,7 @@ async function POST__unobserved(request: Request) {
       const mbwayPhone = String(shopRelation?.mbway_phone ?? '').trim();
       const whatsappPhone = String(shopRelation?.phone ?? '').trim();
       const validPhone = (value: string) => {
-        const digits = value.replace(/\\D/g, '');
+        const digits = value.replace(/\D/g, '');
         return digits.length >= 9 && digits.length <= 15;
       };
       if (
