@@ -690,7 +690,7 @@ export default function PlatformAdminConsole() {
                   <p className="text-sm font-semibold tracking-tight text-white">Silentra</p>
                   <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-600">Centro de controlo</p>
                 </div>
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Admin</span>
+                <span className="ml-auto rounded-full border border-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Administração</span>
               </div>
             </div>
 
@@ -801,7 +801,7 @@ export default function PlatformAdminConsole() {
               <StatCard
                 label="Clientes"
                 value={data.stats.clients}
-                meta="CRM por tenant"
+                meta="CRM por barbearia"
               />
               <StatCard
                 label="Marcações"
@@ -889,7 +889,7 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.newShops7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
@@ -898,7 +898,7 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.newUsers7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
@@ -907,7 +907,7 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.appointmentsNext7d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">próximos 7d</p>
+                    <p className="text-[11px] text-zinc-600">próximos 7 dias</p>
                   </div>
                   <div className="rounded-xl border border-white/8 bg-black/15 p-3">
                     <p className="text-[10px] uppercase text-zinc-600">
@@ -916,7 +916,7 @@ export default function PlatformAdminConsole() {
                     <p className="mt-1 text-lg font-semibold">
                       {data.operations.canceledSubscriptions30d}
                     </p>
-                    <p className="text-[11px] text-zinc-600">últimos 30d</p>
+                    <p className="text-[11px] text-zinc-600">últimos 30 dias</p>
                   </div>
                 </div>
               </section>
@@ -1138,7 +1138,7 @@ export default function PlatformAdminConsole() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') void load(query);
                     }}
-                    placeholder="Nome, slug ou ID…"
+                    placeholder="Nome, endereço público ou ID…"
                     className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-emerald-400/30"
                   />
                 </div>
@@ -2444,19 +2444,19 @@ export default function PlatformAdminConsole() {
               </p>
               <div className="mt-4 space-y-2 text-xs text-zinc-500">
                 <p>
-                  <span className="text-zinc-300">Auth:</span> sessão Supabase
+                  <span className="text-zinc-300">Autenticação:</span> sessão Supabase
                   obrigatória
                 </p>
                 <p>
-                  <span className="text-zinc-300">Allowlist:</span>{' '}
+                  <span className="text-zinc-300">Lista de permissões:</span>{' '}
                   SILENTRA_PLATFORM_ADMIN_USER_ID / EMAIL
                 </p>
                 <p>
-                  <span className="text-zinc-300">Secrets:</span> nunca expostos
+                  <span className="text-zinc-300">Segredos:</span> nunca expostos
                   ao browser
                 </p>
                 <p>
-                  <span className="text-zinc-300">Mutations:</span> apenas via
+                  <span className="text-zinc-300">Alterações:</span> apenas via
                   API interna autenticada
                 </p>
               </div>
