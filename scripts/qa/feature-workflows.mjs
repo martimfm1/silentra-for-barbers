@@ -25,7 +25,7 @@ const websiteAdminApi = read(
   'app/api/silentra-admin/custom-websites/[requestId]/route.ts',
 );
 const websiteMigration = read(
-  'supabase/migrations/20261016180000_enterprise_custom_website_requests.sql',
+  'supabase/migrations/20261017103519_enterprise_custom_website_requests.sql',
 );
 const sitemap = read('app/sitemap.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');

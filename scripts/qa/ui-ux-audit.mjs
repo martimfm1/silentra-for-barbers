@@ -53,7 +53,7 @@ const [
   read('app/dashboard/_components/DashboardTopBar.tsx'),
   read('components/ui/button.tsx'),
   read('services/support/support-chat.service.ts'),
-  read('supabase/migrations/20261017130000_support_notify_every_message.sql'),
+  read('supabase/migrations/20261017122241_support_notify_every_message.sql'),
 ]);
 
 // Navigation correctness: catch the old English slugs that silently led to 404s.
@@ -170,12 +170,14 @@ assert.doesNotMatch(settingsPage, /<select\b/);
 assert.match(settingsPage, /<SelectTrigger/);
 assert.match(settingsPage, /<SelectContent/);
 
-// Dashboard zoom-out is blocked in-page while pinch/keyboard zoom-in remains available.
-assert.match(dashboardShell, /previousPinchDistance/);
-assert.match(dashboardShell, /nextDistance < previousPinchDistance/);
-assert.match(dashboardShell, /event\.ctrlKey && event\.deltaY > 0/);
-assert.match(dashboardShell, /\['-', '_', 'Subtract'\]/);
-assert.doesNotMatch(dashboardShell, /userScalable:\s*false|maxScale:\s*1/);
+// Dashboard zoom is fully disabled while preserving the site's viewport elsewhere.
+assert.match(dashboardShell, /maximum-scale', '1'/);
+assert.match(dashboardShell, /user-scalable', 'no'/);
+assert.match(dashboardShell, /event\.touches\.length > 1/);
+assert.match(dashboardShell, /event\.ctrlKey \|\| event\.metaKey/);
+assert.match(dashboardShell, /\['\+', '=', '-', '_', '0', 'Add', 'Subtract'\]/);
+assert.match(dashboardShell, /previousViewportContent/);
+assert.match(dashboardShell, /viewport\.content = previousViewportContent/);
 
 // Core accessibility regressions: keyboard focus, landmarks, target sizes and motion.
 assert.match(navbar, /keepFocusInside/);

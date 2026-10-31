@@ -234,7 +234,7 @@ const checks = [
   },
   {
     name: 'Marketplace product publication migration caps boost at three days',
-    file: 'supabase/migrations/20261013160000_marketplace_product_publication_boost.sql',
+    file: 'supabase/migrations/20261013173924_marketplace_product_publication_boost.sql',
     test: (source) =>
       source.includes('marketplace_published_at') &&
       source.includes('marketplace_featured_until') &&
@@ -314,7 +314,7 @@ const checks = [
   },
   {
     name: 'Marketplace tracking capability migration hashes links, preserves legacy links, and expires tokens',
-    file: 'supabase/migrations/20261013180000_marketplace_order_tracking_capabilities.sql',
+    file: 'supabase/migrations/20261017104155_marketplace_order_tracking_capabilities.sql',
     test: (source) =>
       source.includes('marketplace_order_tracking_tokens') &&
       source.includes('token_hash text not null unique') &&
@@ -474,7 +474,7 @@ const checks = [
   },
   {
     name: 'Custom website requests are protected by a service-role-only database table',
-    file: 'supabase/migrations/20261016180000_enterprise_custom_website_requests.sql',
+    file: 'supabase/migrations/20261017103519_enterprise_custom_website_requests.sql',
     test: (source) =>
       source.includes('custom_website_requests') &&
       source.includes('enable row level security') &&
@@ -526,7 +526,7 @@ const checks = [
   },
   {
     name: 'Public reviews require a single-use token tied to a completed appointment',
-    file: 'supabase/migrations/20261016120000_verified_review_submission_tokens.sql',
+    file: 'supabase/migrations/20261017103513_verified_review_submission_tokens.sql',
     test: (source) =>
       source.includes('review_submission_tokens') &&
       source.includes("a.status = 'completed'::public.appointment_status") &&
@@ -563,7 +563,7 @@ const checks = [
   },
   {
     name: 'Public review inserts are restricted to the validated RPC',
-    file: 'supabase/migrations/20261016100000_harden_public_reviews_insert.sql',
+    file: 'supabase/migrations/20261017103432_harden_public_reviews_insert.sql',
     test: (source) =>
       source.includes(
         'drop policy if exists "reviews_public_insert" on public.reviews',

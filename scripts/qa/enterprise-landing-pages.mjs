@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
 const migration = read(
-  'supabase/migrations/20261014230000_enterprise_landing_pages_public_api.sql',
+  'supabase/migrations/20261017103425_enterprise_landing_pages_public_api.sql',
 );
 const features = read('lib/billing/plan-features.ts');
 const landingPage = read('app/site/[slug]/page.tsx');
