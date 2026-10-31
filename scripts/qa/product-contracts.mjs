@@ -117,13 +117,14 @@ const checks = [
       source.includes('max-h-[90dvh]'),
   },
   {
-    name: 'Professional revenue chart keeps a compact X axis on mobile',
+    name: 'Professional revenue chart uses readable horizontal labels and currency ticks',
     file: 'app/dashboard/stats/page.tsx',
     test: (source) =>
       source.includes('className="stats-professional-chart border') &&
-      source.includes('angle={-20}') &&
-      source.includes('height={48}') &&
-      source.includes('interval="preserveStartEnd"'),
+      source.includes('layout="vertical"') &&
+      source.includes('type="category"') &&
+      source.includes('width={104}') &&
+      source.includes('currencyFormatter.format(value)'),
   },
   {
     name: 'Mobile responsive layer prevents horizontal viewport scrolling and fits tables',
