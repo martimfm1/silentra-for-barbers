@@ -78,8 +78,8 @@ export default async function ManualCheckoutPage({
             </p>
             <p className="mt-1 text-xs leading-5 text-zinc-400">
               {english
-                ? 'A custom website is a separate service arranged directly with Silentra and priced separately.'
-                : 'A criação de um site personalizado é um serviço separado, combinado diretamente com a Silentra e sujeito a orçamento.'}
+                ? 'Enterprise includes a landing page and a public address on the Silentra domain. A custom website has a one-time €50 activation fee, with no additional monthly charge.'
+                : 'O Enterprise inclui a landing page e um endereço público no domínio Silentra. O site próprio tem uma ativação única de 50 €, sem mensalidade adicional.'}
             </p>
           </div>
           <a
