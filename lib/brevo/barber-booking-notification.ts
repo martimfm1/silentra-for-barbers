@@ -138,8 +138,11 @@ export async function notifyBarbersOfNewBooking(
 
   const isEnglish = language === 'en';
   const date = formatBookingDate(input.date, language);
-  const statusLabel =
-    input.status === 'confirmed'
+  const statusLabel = input.prepaymentReview
+    ? isEnglish
+      ? 'MB WAY payment awaiting review'
+      : 'Pré-pagamento MB WAY por validar'
+    : input.status === 'confirmed'
       ? isEnglish
         ? 'Confirmed'
         : 'Confirmada'
