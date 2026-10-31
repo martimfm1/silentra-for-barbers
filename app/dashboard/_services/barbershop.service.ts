@@ -18,6 +18,8 @@ export interface BarbershopConfigPayload {
   time_limit_cancellation_hours?: number;
   minimum_booking_notice_minutes?: number;
   default_language: 'pt' | 'en';
+  mbway_enabled?: boolean;
+  mbway_phone?: string;
 }
 
 export type ServiceResponse<T> = { data: T | null; error: Error | null };
@@ -30,7 +32,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language, mbway_enabled, mbway_phone',
       )
       .eq('id', barbershopId)
       .single();
@@ -51,6 +53,8 @@ export async function getBarbershopConfig(
       data: {
         ...barberData,
         phone: barberData.phone ?? undefined,
+        mbway_enabled: barberData.mbway_enabled === true,
+        mbway_phone: barberData.mbway_phone ?? '',
         address: barberData.address ?? undefined,
         opening_time: barberData.opening_time ?? undefined,
         closing_time: barberData.closing_time ?? undefined,
@@ -120,6 +124,8 @@ export async function updateBarbershopConfig(
     }
 
     const directoryVisibility = payload.is_public_in_directory;
+    const mbwayEnabled = payload.mbway_enabled;
+    const mbwayPhone = payload.mbway_phone;
     const popularServiceId = payload.popular_service_id;
     const expectedCancellationHours =
       payload.time_limit_cancellation_hours !== undefined
@@ -133,6 +139,8 @@ export async function updateBarbershopConfig(
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
     delete barbershopPayload.is_public_in_directory;
+    delete barbershopPayload.mbway_enabled;
+    delete barbershopPayload.mbway_phone;
 
     if (directoryVisibility !== undefined) {
       const {
@@ -160,6 +168,26 @@ export async function updateBarbershopConfig(
           );
         }
         throw error;
+      }
+    }
+
+    if (mbwayEnabled !== undefined || mbwayPhone !== undefined) {
+      const { error } = await supabase.rpc('update_barbershop_mbway_settings', {
+        p_barbershop_id: barbershopId,
+        p_enabled: mbwayEnabled ?? false,
+        p_phone: mbwayPhone ?? '',
+      });
+      if (error) {
+        const message = error.message || '';
+        throw new Error(
+          message.includes('MBWAY_PREPAYMENT_PRO_REQUIRED')
+            ? 'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.'
+            : message.includes('MBWAY_WHATSAPP_PHONE_REQUIRED')
+              ? 'Define primeiro o telefone/WhatsApp da barbearia.'
+              : message.includes('MBWAY_PHONE_INVALID')
+                ? 'Introduz um número MB WAY válido.'
+                : message,
+        );
       }
     }
 
@@ -209,6 +237,20 @@ export async function updateBarbershopConfig(
       );
     }
 
+    if (
+      mbwayEnabled !== undefined &&
+      result.data &&
+      result.data.mbway_enabled !== mbwayEnabled
+    ) {
+      throw new Error('A configuração MB WAY não foi guardada. Atualiza as migrations e tenta novamente.');
+    }
+    if (
+      mbwayPhone !== undefined &&
+      result.data &&
+      (result.data.mbway_phone ?? '') !== mbwayPhone
+    ) {
+      throw new Error('O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.');
+    }
     if (
       expectedNoticeMinutes !== undefined &&
       result.data &&
