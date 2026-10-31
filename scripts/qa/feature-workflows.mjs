@@ -129,7 +129,7 @@ assert.ok(vercel.crons.some((job) => job.path === '/api/cron/marketing'));
 assert.match(bookingApi, /'create_booking_atomic'/);
 assert.match(bookingApi, /p_status: isPrepayment \? 'prepayment_pending' : 'pending'/);
 assert.match(bookingApi, /appointment\.status === 'scheduled'/);
-assert.match(bookingApi, /payment_status: 'awaiting_review'/);
+assert.match(mbwayMigration, /payment_status[\s\S]*payment_amount[\s\S]*payment_expires_at/);
 assert.match(bookingApi, /prepaymentReview/);
 assert.match(mbwayBookingDrawer, /prepaymentSelected/);
 assert.match(mbwayBookingDrawer, /whatsappProofUrl/);
