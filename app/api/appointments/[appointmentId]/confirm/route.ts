@@ -37,7 +37,7 @@ async function POST__unobserved(
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
-        'id,status,barbershop_id,date_hour,duration_minutes,manual_name,manual_email,client_id,service_id',
+        'id,status,barbershop_id,date_hour,duration_minutes,manual_name,manual_email,client_id,service_id,payment_status,payment_expires_at',
       )
       .eq('id', appointmentId)
       .eq('barbershop_id', barbershopId)
@@ -52,6 +52,23 @@ async function POST__unobserved(
         { success: false, error: 'Marcação não encontrada.' },
         { status: 404 },
       );
+    const isPrepaymentReview = appointment.payment_status === 'awaiting_review';
+    if (
+      isPrepaymentReview &&
+      appointment.payment_expires_at &&
+      new Date(appointment.payment_expires_at).getTime() <= Date.now()
+    ) {
+      await admin
+        .from('appointments')
+        .update({ status: 'cancelled', payment_status: 'expired', cancelled_at: new Date().toISOString(), cancellation_reason: 'Pré-pagamento MB WAY não validado dentro do prazo.' })
+        .eq('id', appointmentId)
+        .eq('barbershop_id', barbershopId)
+        .eq('status', 'pending');
+      return NextResponse.json(
+        { success: false, error: 'O prazo para validar este pré-pagamento terminou. O horário foi libertado.' },
+        { status: 409 },
+      );
+    }
     if (appointment.status !== 'pending')
       return NextResponse.json(
         {
@@ -124,7 +141,12 @@ async function POST__unobserved(
 
     const { data: confirmedAppointment, error: updateError } = await admin
       .from('appointments')
-      .update({ status: 'scheduled' })
+      .update({
+        status: 'scheduled',
+        ...(isPrepaymentReview
+          ? { payment_status: 'confirmed', payment_reviewed_at: new Date().toISOString() }
+          : {}),
+      })
       .eq('id', appointmentId)
       .eq('barbershop_id', barbershopId)
       .eq('status', 'pending')

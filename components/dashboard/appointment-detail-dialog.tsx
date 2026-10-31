@@ -120,6 +120,25 @@ function PaymentSummary({
         <p className="mt-1.5 text-sm font-medium text-zinc-200">
           {paymentLabel}
         </p>
+        {appointment.payment_status && (
+          <div className="mt-3 rounded-xl border border-amber-400/15 bg-amber-400/[.04] p-3">
+            <p className="text-xs font-semibold text-amber-200">
+              {appointment.payment_status === 'awaiting_review'
+                ? 'Pré-pagamento MB WAY por validar'
+                : appointment.payment_status === 'confirmed'
+                  ? 'Pré-pagamento MB WAY confirmado'
+                  : appointment.payment_status === 'expired'
+                    ? 'Pré-pagamento expirado'
+                    : 'Pré-pagamento rejeitado'}
+            </p>
+            {appointment.payment_amount !== null && appointment.payment_amount !== undefined && (
+              <p className="mt-1 text-sm font-semibold tabular-nums text-zinc-100">{Number(appointment.payment_amount).toFixed(2)} €</p>
+            )}
+            {appointment.payment_status === 'awaiting_review' && (
+              <p className="mt-2 text-xs leading-5 text-zinc-400">Confirma a marcação apenas depois de verificares a entrada do pagamento na tua conta MB WAY. O horário é libertado quando termina o prazo de 15 minutos.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

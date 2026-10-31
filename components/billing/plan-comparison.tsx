@@ -42,6 +42,10 @@ const FEATURE_GROUPS: ReadonlyArray<{
     ],
   },
   {
+    title: 'Pagamentos e reservas',
+    features: ['manual_mbway_prepayment'],
+  },
+  {
     title: 'Comunicação e automação',
     features: [
       'messaging',
@@ -106,6 +110,7 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
   team_management: 'Team management',
   messaging: 'Email messaging',
   directory_visibility: 'Directory visibility',
+  manual_mbway_prepayment: 'Manual MB WAY prepayment',
   advanced_crm: 'Advanced CRM',
   advanced_analytics: 'Advanced analytics',
   automated_reminders: 'Automated reminders',
@@ -133,6 +138,7 @@ const GROUP_LABELS_EN: Record<string, string> = {
   'Analytics e relatórios': 'Analytics and reporting',
   'Equipa e operação': 'Team and operations',
   'Presença online': 'Online presence',
+  'Pagamentos e reservas': 'Payments and booking',
 };
 
 function PlanBadge({

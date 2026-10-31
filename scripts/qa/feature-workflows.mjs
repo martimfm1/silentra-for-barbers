@@ -38,6 +38,9 @@ const birthdayReconciliation = read(
 );
 const marketingCron = read('app/api/cron/marketing/route.ts');
 const bookingApi = read('app/api/bookings/route.ts');
+const mbwayBookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
+const mbwayConfirmationApi = read('app/api/appointments/[appointmentId]/confirm/route.ts');
+const mbwayMigration = read('supabase/migrations/20261031114500_manual_mbway_prepayment.sql');
 const bookingSettings = read(
   'components/dashboard/settings-automatic-booking-panel.tsx',
 );
@@ -124,8 +127,19 @@ assert.match(marketingCron, /CRON_SECRET/);
 assert.ok(vercel.crons.some((job) => job.path === '/api/cron/marketing'));
 
 assert.match(bookingApi, /'create_booking_atomic'/);
-assert.match(bookingApi, /p_status: 'pending'/);
+assert.match(bookingApi, /p_status: isPrepayment \? 'prepayment_pending' : 'pending'/);
 assert.match(bookingApi, /appointment\.status === 'scheduled'/);
+assert.match(mbwayMigration, /payment_status[\s\S]*payment_amount[\s\S]*payment_expires_at/);
+assert.match(bookingApi, /prepaymentReview/);
+assert.match(mbwayBookingDrawer, /prepaymentSelected/);
+assert.match(mbwayBookingDrawer, /whatsappProofUrl/);
+assert.match(mbwayBookingDrawer, /prepaymentEmailNotice/);
+assert.match(mbwayConfirmationApi, /payment_status: 'confirmed'/);
+assert.match(mbwayMigration, /MBWAY_PREPAYMENT_PRO_REQUIRED/);
+assert.match(mbwayMigration, /expire_manual_mbway_prepayments/);
+assert.match(mbwayMigration, /silentra-mbway-prepayment-expiry/);
+assert.match(mbwayMigration, /<> 'prepayment_pending'/);
+assert.match(mbwayMigration, /notify pgrst, 'reload schema'/);
 assert.match(bookingSettings, /auto_confirm_bookings/);
 assert.match(bookingSettings, /auto_complete_bookings/);
 assert.match(bookingSettings, /barbershopService\.updateConfig/);

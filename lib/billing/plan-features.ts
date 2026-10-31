@@ -25,7 +25,8 @@ export type ProFeatureKey =
   | 'loyalty'
   | 'advanced_reports'
   | 'advanced_notifications'
-  | 'directory_visibility';
+  | 'directory_visibility'
+  | 'manual_mbway_prepayment';
 
 export type EnterpriseFeatureKey =
   | 'multi_location'
@@ -74,6 +75,7 @@ const PRO_FEATURES: readonly (
   'advanced_reports',
   'advanced_notifications',
   'directory_visibility',
+  'manual_mbway_prepayment',
 ];
 
 const ENTERPRISE_FEATURES: readonly (
@@ -173,6 +175,7 @@ export const FEATURE_LABELS: Record<
   team_management: 'Gestão de equipa',
   messaging: 'Mensagens por email',
   directory_visibility: 'Visibilidade no diretório',
+  manual_mbway_prepayment: 'Pré-pagamento MB WAY',
   advanced_crm: 'CRM avançado',
   advanced_analytics: 'Analytics avançado',
   automated_reminders: 'Lembretes automáticos',

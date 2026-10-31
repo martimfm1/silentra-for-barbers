@@ -511,8 +511,10 @@ const checks = [
     name: 'Public booking creation respects automatic confirmation instead of confirming every booking',
     file: 'app/api/bookings/route.ts',
     test: (source) =>
-      source.includes("p_status: 'pending'") &&
+      source.includes("p_status: isPrepayment ? 'prepayment_pending' : 'pending'") &&
       source.includes("if (appointment.status === 'scheduled')") &&
+      source.includes('else if (!isPrepayment)') &&
+      source.includes('prepaymentReview') &&
       source.includes('sendBrevoEmail({') &&
       source.includes('A marcação ainda não está confirmada.') &&
       source.includes('Aguarda a confirmação da barbearia.'),

@@ -101,6 +101,9 @@ export function AppointmentsTable({
                       <User className="size-3 shrink-0" aria-hidden="true" />
                       {professional}
                     </p>
+                    {appointment.payment_status === 'awaiting_review' && (
+                      <span className="mt-1 inline-flex rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-200">MB WAY por validar</span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="py-4">

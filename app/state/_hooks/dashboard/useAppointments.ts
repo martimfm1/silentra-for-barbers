@@ -270,12 +270,23 @@ export function useAppointments(
     [onRefreshData],
   );
   const handleDeleteBooking = useCallback(
-    async (id: string) => {
+    async (id: string, rejectPrepayment = false) => {
       setLoading(true);
       try {
-        const { error } = await appointmentService.delete(id);
-        if (error) throw error;
-        toast.success('Marcação eliminada permanentemente.');
+        if (rejectPrepayment) {
+          const response = await fetch(
+            `/api/appointments/${encodeURIComponent(id)}/cancel`,
+            { method: 'DELETE' },
+          );
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || payload.success !== true)
+            throw new Error(payload.error || 'Não foi possível rejeitar o pré-pagamento.');
+          toast.success('Pré-pagamento rejeitado e marcação cancelada.');
+        } else {
+          const { error } = await appointmentService.delete(id);
+          if (error) throw error;
+          toast.success('Marcação eliminada permanentemente.');
+        }
         await onRefreshData();
       } catch (error) {
         console.error('[Delete Booking Hook Error]:', error);

@@ -57,6 +57,9 @@ export function AppointmentMobileCard({
               {name}
             </h3>
             <StatusBadge status={appointment.status} />
+            {appointment.payment_status === 'awaiting_review' && (
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-semibold text-amber-200">MB WAY por validar</span>
+            )}
           </div>
           {phone ? (
             <a

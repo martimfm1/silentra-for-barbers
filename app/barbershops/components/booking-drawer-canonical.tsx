@@ -10,6 +10,7 @@ import {
   Clock3,
   Loader2,
   Mail,
+  MessageCircle,
   Phone,
   Scissors,
   UserRound,
@@ -31,6 +32,13 @@ import type { MarketplaceService } from '@/types/marketplace/shops';
 
 type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
+type ManualPrepaymentInstructions = { bookingId: string; amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
+function normalizeWhatsAppNumber(value: string): string {
+  let digits = value.replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.length === 9) digits = `351${digits}`;
+  return digits;
+}
 
 const DAY_INDEX: Record<string, number> = {
   sunday: 0,
@@ -167,6 +175,9 @@ export function BookingDrawerCanonical({
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
+  const [manualPrepayment, setManualPrepayment] = useState<MarketplaceBookingResponse['manualPrepayment'] | null>(null);
+  const [prepaymentSelected, setPrepaymentSelected] = useState(false);
+  const [paymentInstructions, setPaymentInstructions] = useState<ManualPrepaymentInstructions | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const customerControllerRef = useRef<AbortController | null>(null);
   const cacheRef = useRef(
@@ -215,6 +226,9 @@ export function BookingDrawerCanonical({
     setEmail('');
     setBirthDate('');
     setCustomerState('idle');
+    setManualPrepayment(null);
+    setPrepaymentSelected(false);
+    setPaymentInstructions(null);
     controllerRef.current?.abort();
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
@@ -239,6 +253,7 @@ export function BookingDrawerCanonical({
         if (controller.signal.aborted) return;
         setProfessionals(payload.professionals ?? []);
         setServices(payload.services ?? []);
+        setManualPrepayment(payload.manualPrepayment?.enabled ? payload.manualPrepayment : null);
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError')
@@ -399,21 +414,36 @@ export function BookingDrawerCanonical({
           customerPhone: phone.trim(),
           customerEmail: email.trim(),
           customerBirthDate: birthDateIso,
+          prepayment: prepaymentSelected,
         }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success)
         throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
+      if (payload.payment?.method === 'mbway') {
+        setPaymentInstructions({
+          bookingId: String(payload.booking?.id ?? ''),
+          amount: Number(payload.payment.amount),
+          mbwayPhone: String(payload.payment.mbwayPhone),
+          whatsappPhone: String(payload.payment.whatsappPhone),
+          expiresAt: String(payload.payment.expiresAt),
+        });
+        toast.success(t('bookingDrawer.prepaymentSubmitted'));
+      } else {
+        setPaymentInstructions(null);
+        toast.success(t('bookingDrawer.bookingSuccess'));
+      }
       setStep(4);
-      toast.success(t('bookingDrawer.bookingSuccess'));
-      onSuccess?.({
-        shopName: shop.name,
-        serviceName: service.name,
-        date: currentDay.dateStr,
-        time: selectedSlot,
-        customerEmail: email.trim(),
-      });
+      if (payload.payment?.method !== 'mbway') {
+        onSuccess?.({
+          shopName: shop.name,
+          serviceName: service.name,
+          date: currentDay.dateStr,
+          time: selectedSlot,
+          customerEmail: email.trim(),
+        });
+      }
     } catch (reason) {
       const message =
         reason instanceof Error
@@ -427,6 +457,24 @@ export function BookingDrawerCanonical({
   }
 
   if (!shop) return null;
+  const whatsappDigits = paymentInstructions
+    ? normalizeWhatsAppNumber(paymentInstructions.whatsappPhone)
+    : '';
+  const whatsappMessage = paymentInstructions
+    ? [
+        t('bookingDrawer.whatsappProofMessage'),
+        `${shop.name} — ${service?.name || 'Serviço'}`,
+        `${currentDay?.dateStr || ''} ${selectedSlot || ''}`,
+        `MB WAY: ${paymentInstructions.amount.toFixed(2)} €`,
+        `Cliente: ${name.trim()}`,
+        `Email: ${email.trim()}`,
+        `Ref.: ${paymentInstructions.bookingId}`,
+
+      ].join('\n')
+    : '';
+  const whatsappProofUrl = whatsappDigits
+    ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(whatsappMessage)}`
+    : '';
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -460,6 +508,14 @@ export function BookingDrawerCanonical({
             [data-booking-theme="agenda"] [class~="bg-white/[0.03]"] { background-color: #f8f8f6 !important; }
             [data-booking-theme="agenda"] [class~="border-white/10"],
             [data-booking-theme="agenda"] [class~="border-white/20"] { border-color: #e8e7e2 !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400/[.035]"] { background-color: #f8f8f6 !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400/[.08]"] { background-color: #f1f1ed !important; }
+            [data-booking-theme="agenda"] [class~="bg-emerald-400"] { background-color: #171717 !important; color: #fff !important; }
+            [data-booking-theme="agenda"] [class~="border-emerald-400/20"],
+            [data-booking-theme="agenda"] [class~="border-emerald-400/15"] { border-color: #d8e3da !important; }
+            [data-booking-theme="agenda"] .text-emerald-200 { color: #315a44 !important; }
+            [data-booking-theme="agenda"] .text-amber-200,
+            [data-booking-theme="agenda"] .text-amber-300 { color: #76572d !important; }
             [data-booking-theme="agenda"] [class~="border-emerald-400/40"] { border-color: #b8b8b0 !important; }
             [data-booking-theme="agenda"] [class~="bg-emerald-400/[0.08]"] { background-color: #f1f1ed !important; }
             [data-booking-theme="agenda"] [class~="bg-emerald-300"] { background-color: #171717 !important; color: #fff !important; }
@@ -477,7 +533,7 @@ export function BookingDrawerCanonical({
                 {t('bookingDrawer.bookingTitle')}
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
-                {step === 4 ? t('bookingDrawer.bookingConfirmed') : shop.name}
+                {step === 4 ? (paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')) : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
@@ -486,7 +542,9 @@ export function BookingDrawerCanonical({
                     ? t('bookingDrawer.nextChooseTime')
                     : step === 3
                       ? t('bookingDrawer.confirmYourDetails')
-                      : t('bookingDrawer.slotReserved')}
+                      : paymentInstructions
+                        ? t('bookingDrawer.prepaymentPendingDescription')
+                        : t('bookingDrawer.slotReserved')}
               </p>
             </div>
             <button
@@ -813,6 +871,38 @@ export function BookingDrawerCanonical({
                   />
                 </label>
 
+                {manualPrepayment?.enabled && (
+                  <div className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035]">
+                    <button
+                      type="button"
+                      aria-pressed={prepaymentSelected}
+                      onClick={() => setPrepaymentSelected((value) => !value)}
+                      className={`flex min-h-14 w-full items-start gap-3 p-4 text-left transition-colors ${prepaymentSelected ? 'bg-emerald-400/[.08]' : 'hover:bg-white/[.025]'}`}
+                    >
+                      <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border ${prepaymentSelected ? 'border-emerald-300 bg-emerald-300 text-zinc-950' : 'border-white/20 bg-white/[.03]'}`}>
+                        {prepaymentSelected && <Check className="size-3.5" aria-hidden="true" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-zinc-100">{t('bookingDrawer.prepaymentOption')}</span>
+                        <span className="mt-1 block text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentOptionDescription')}</span>
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">{Number(service?.price ?? 0).toFixed(2)} €</span>
+                    </button>
+                    {prepaymentSelected && (
+                      <div className="grid gap-2 border-t border-emerald-400/15 px-4 py-3 text-xs">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentAmount')}</span>
+                          <strong className="text-zinc-100">{Number(service?.price ?? 0).toFixed(2)} €</strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentNumber')}</span>
+                          <strong className="text-zinc-100">{manualPrepayment.mbwayPhone}</strong>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div
                   className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
                   aria-live="polite"
@@ -863,7 +953,9 @@ export function BookingDrawerCanonical({
                   ) : null}
                   {submitting
                     ? t('bookingDrawer.reserving')
-                    : t('bookingDrawer.confirmBooking')}
+                    : prepaymentSelected
+                      ? t('bookingDrawer.requestPrepayment')
+                      : t('bookingDrawer.confirmBooking')}
                 </Button>
               </div>
             </section>
@@ -872,9 +964,9 @@ export function BookingDrawerCanonical({
               className="flex min-h-80 flex-col items-center justify-center text-center"
               aria-labelledby="booking-success-title"
             >
-              <div className="flex size-16 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10">
+              <div className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}>
                 <CheckCircle2
-                  className="size-8 text-emerald-300"
+                  className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
                   aria-hidden="true"
                 />
               </div>
@@ -882,14 +974,49 @@ export function BookingDrawerCanonical({
                 id="booking-success-title"
                 className="mt-5 text-xl font-semibold"
               >
-                {t('bookingDrawer.bookingConfirmed')}
+                {paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
                 {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
                 {selectedSlot}.
               </p>
-              <Button type="button" className="mt-6 w-full" onClick={onClose}>
+              {paymentInstructions && (
+                <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentAmount')}</span>
+                    <strong className="text-lg tabular-nums text-zinc-100">{paymentInstructions.amount.toFixed(2)} €</strong>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentNumber')}</span>
+                    <strong className="text-zinc-100">{paymentInstructions.mbwayPhone}</strong>
+                  </div>
+                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' }) })}</p>
+                  {whatsappProofUrl ? (
+                    <a href={whatsappProofUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-300">
+                      <MessageCircle className="size-4" aria-hidden="true" />
+                      {t('bookingDrawer.sendProofWhatsApp')}
+                    </a>
+                  ) : null}
+                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentEmailNotice')}</p>
+                </div>
+              )}
+              <Button
+                type="button"
+                className="mt-6 w-full"
+                onClick={() => {
+                  if (paymentInstructions) {
+                    onSuccess?.({
+                      shopName: shop.name,
+                      serviceName: service?.name || 'Serviço',
+                      date: currentDay?.dateStr || '',
+                      time: selectedSlot || '',
+                      customerEmail: email.trim(),
+                    });
+                  }
+                  onClose();
+                }}
+              >
                 {t('bookingDrawer.finish')}
               </Button>
             </section>

@@ -34,7 +34,7 @@ type Props = {
   finalizeBooking: (id: string, paymentMethod: string) => void | Promise<void>;
   addCompletedAppointmentClient: (id: string) => void | Promise<void>;
   addingClientAppointmentId: string | null;
-  handleDeleteBooking: (id: string) => void | Promise<void>;
+  handleDeleteBooking: (id: string, rejectPrepayment?: boolean) => void | Promise<void>;
   compact?: boolean;
   onDetails?: () => void;
 };
@@ -83,7 +83,7 @@ export function AppointmentActions({
           className={`${buttonSize} border border-blue-500/20 bg-blue-500/10 text-xs font-medium text-blue-400 hover:bg-blue-500/20`}
         >
           <Check className="mr-1.5 size-4" aria-hidden="true" />
-          Confirmar
+          {appointment.payment_status === 'awaiting_review' ? 'Validar MB WAY' : 'Confirmar'}
         </Button>
       )}
 
@@ -225,7 +225,7 @@ export function AppointmentActions({
             <Button
               variant="ghost"
               size="icon"
-              aria-label={`Eliminar agendamento de ${name}`}
+              aria-label={appointment.payment_status === 'awaiting_review' ? `Rejeitar pré-pagamento de ${name}` : `Eliminar agendamento de ${name}`}
               className={`${compact ? 'h-8 w-8' : 'min-h-[44px] min-w-[44px]'} rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20`}
             >
               <Trash2 className="size-4" aria-hidden="true" />
@@ -233,17 +233,17 @@ export function AppointmentActions({
           </AlertDialogTrigger>
           <AlertDialogContent className="w-[92vw] max-w-[400px] rounded-xl border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>Eliminar esta marcação?</AlertDialogTitle>
+              <AlertDialogTitle>{appointment.payment_status === 'awaiting_review' ? 'Rejeitar este pré-pagamento?' : 'Eliminar esta marcação?'}</AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-row justify-end gap-2">
               <AlertDialogCancel className="m-0 min-h-[44px] flex-1 border-white/10 bg-transparent text-white">
                 Manter
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => handleDeleteBooking(appointment.id)}
+                onClick={() => handleDeleteBooking(appointment.id, appointment.payment_status === 'awaiting_review')}
                 className="m-0 min-h-[44px] flex-1 bg-red-600 text-white hover:bg-red-500"
               >
-                Eliminar
+                {appointment.payment_status === 'awaiting_review' ? 'Rejeitar pedido' : 'Eliminar'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
