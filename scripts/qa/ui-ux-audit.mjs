@@ -117,7 +117,8 @@ assert.match(sidebar, /moreItems\.some\(isActive\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
 assert.match(settingsPage, /const sectionGroups/);
 assert.match(settingsPage, /navigationGroups\.map/);
-assert.match(settingsPage, /<optgroup/);
+assert.match(settingsPage, /<SelectGroup/);
+assert.match(settingsPage, /<SelectLabel/);
 assert.match(settingsPage, /aria-current=\{section === id \? 'location'/);
 assert.doesNotMatch(settingsPage, /<CardDescription>/);
 
