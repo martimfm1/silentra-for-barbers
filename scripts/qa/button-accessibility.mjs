@@ -31,6 +31,8 @@ function hasAttribute(opening, names) {
 
 function expressionHasName(expression) {
   if (!expression) return false;
+  if (ts.isParenthesizedExpression(expression))
+    return expressionHasName(expression.expression);
   if (
     ts.isStringLiteral(expression) ||
     ts.isNoSubstitutionTemplateLiteral(expression) ||
