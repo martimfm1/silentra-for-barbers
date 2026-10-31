@@ -128,7 +128,7 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
   pos: 'Point of sale (POS)',
   enterprise_reports: 'Business reports',
   landing_page: 'Professional landing page included',
-  custom_website: 'Custom website (quoted separately)',
+  custom_website: 'Custom website on the Silentra domain (one-time €50 setup)',
 };
 
 const GROUP_LABELS_EN: Record<string, string> = {
