@@ -382,6 +382,7 @@ export const ptCopy = {
     backToDashboard: 'Voltar ao painel',
     openAgenda: 'Abrir agenda',
     otherService: 'Outros',
+    generalProfessional: 'Casa / Geral',
   },
   posOverviewPage: {
     cash: 'Dinheiro',
