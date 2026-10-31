@@ -9,6 +9,54 @@ async function read(path) {
 
 const checks = [
   {
+    name: 'Public booking page layout is selected from the effective subscription plan',
+    file: 'app/barbershops/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("profile.plan === 'pro'") &&
+      source.includes("profile.plan === 'enterprise' && bookingMode") &&
+      source.includes('initialData.landing_page_url') &&
+      source.includes('<ProBookingPage') &&
+      source.includes('<BarbershopPublicPage'),
+  },
+  {
+    name: 'Pro booking layout reuses the secure booking drawer and supports closed days',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
+    test: (source) =>
+      source.includes('BookingDrawer') &&
+      source.includes('appearance="agenda"') &&
+      source.includes('selectedServiceId={selectedServiceId}') &&
+      source.includes('closed_days: closedDays ?? null') &&
+      source.includes("t('proBookingPage.services')"),
+  },
+  {
+    name: 'Enterprise landing-page booking CTA opens the direct booking variant',
+    file: 'app/site/[slug]/page.tsx',
+    test: (source) =>
+      source.includes("?booking=1") &&
+      source.includes("'/barbershops/' + encodeURIComponent(website.booking_slug)"),
+  },
+  {
+    name: 'Enterprise custom website includes Silentra domain and a one-time €50 fee',
+    file: 'app/api/dashboard/custom-website/route.ts',
+    test: (source) =>
+      source.includes('setupFee: 50') &&
+      source.includes('monthlyFee: 0'),
+  },
+  {
+    name: 'Enterprise website request displays the included Silentra domain and one-time activation',
+    file: 'app/dashboard/website/page.tsx',
+    test: (source) =>
+      source.includes('barbers.silentra.me/') &&
+      source.includes('pagamento único') &&
+      source.includes('Sem mensalidade adicional.') &&
+      source.includes('href={`/${encodeURIComponent(latest.public_slug)}`}'),
+  },
+  {
+    name: 'Silveira Salon reuses the shared Pro booking layout and redirects Enterprise to its landing page',
+    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    test: (source) => source.includes('ProBookingPage'),
+  },
+  {
     name: 'Final booking migration uses appointment_status',
     file: 'supabase/migrations/20260905150000_finalize_atomic_booking_contract.sql',
     test: (source) =>
