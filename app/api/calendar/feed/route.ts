@@ -6,9 +6,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type Relation = { name?: string | null } | Relation[] | null;
+type NamedRelation = { name?: string | null };
+type Relation = NamedRelation | NamedRelation[] | null;
 
-function relation(value: Relation): { name?: string | null } | null {
+function relation(value: Relation): NamedRelation | null {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
