@@ -53,7 +53,7 @@ const [
   read('app/dashboard/_components/DashboardTopBar.tsx'),
   read('components/ui/button.tsx'),
   read('services/support/support-chat.service.ts'),
-  read('supabase/migrations/20261017130000_support_notify_every_message.sql'),
+  read('supabase/migrations/20261017122241_support_notify_every_message.sql'),
 ]);
 
 // Navigation correctness: catch the old English slugs that silently led to 404s.
