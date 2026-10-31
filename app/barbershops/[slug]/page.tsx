@@ -257,7 +257,7 @@ export default async function BarbershopPage({
 }: BarbershopPageProps) {
   const [{ slug }, query] = await Promise.all([
     params,
-    searchParams ?? Promise.resolve({}),
+    searchParams ?? Promise.resolve({ booking: undefined }),
   ]);
   const bookingMode = query.booking === '1';
   logPublicProfile('info', 'request', slug, {
@@ -311,6 +311,13 @@ export default async function BarbershopPage({
   }
 
   const initialData = await getInitialPublicDetails(profile);
+  if (profile.plan === 'enterprise' && !initialData.landing_page_url && !bookingMode) {
+    console.error('[PUBLIC_BARBERSHOP]', {
+      event: 'enterprise_landing_page_not_active',
+      slug: profile.slug,
+    });
+    notFound();
+  }
   if (
     profile.plan === 'enterprise' &&
     initialData.landing_page_url &&
