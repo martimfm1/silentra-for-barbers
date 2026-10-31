@@ -33,6 +33,7 @@ import { AppointmentDetailDialog } from '@/components/dashboard/appointment-deta
 import { AppointmentMobileCard } from '@/components/dashboard/appointment-mobile-card';
 import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
+import { CalendarSyncCard } from '@/components/dashboard/calendar-sync-card';
 
 const STATUS_FILTERS = [
   { id: 'all', label: 'agenda.all' },
@@ -273,6 +274,8 @@ export default function AgendaPage() {
             </Button>
           </div>
         </header>
+
+        <CalendarSyncCard />
 
         {loadingInitial ? (
           <div className="mt-5">
