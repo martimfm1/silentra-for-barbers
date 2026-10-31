@@ -286,9 +286,9 @@ export default function SettingsPageOrganized() {
       const payload = { ...config };
       if (!canDirectory)
         delete (payload as Partial<Config>).is_public_in_directory;
-      if (!canManualMbway && initial) {
-        payload.mbway_enabled = initial.mbway_enabled;
-        payload.mbway_phone = initial.mbway_phone;
+      if (!canManualMbway) {
+        delete (payload as Partial<Config>).mbway_enabled;
+        delete (payload as Partial<Config>).mbway_phone;
       }
       if (!automationAllowed) {
         payload.auto_confirm_bookings = initial?.auto_confirm_bookings ?? false;
