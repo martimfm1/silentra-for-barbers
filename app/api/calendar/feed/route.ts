@@ -48,6 +48,53 @@ function foldLine(line: string): string {
   return lines.join('\r\n');
 }
 
+function getLisbonOffsetMinutes(instant: Date): number {
+  const value = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon',
+    timeZoneName: 'shortOffset',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+    .formatToParts(instant)
+    .find((part) => part.type === 'timeZoneName')?.value;
+  const match = /^GMT(?:([+-])(\d{1,2})(?::(\d{2}))?)?$/.exec(value ?? 'GMT');
+  if (!match) return 0;
+  const sign = match[1] === '-' ? -1 : 1;
+  return sign * (Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0));
+}
+
+function lisbonLocalDateTime(date: string, time: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+    return null;
+  }
+
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute, second = 0] = time.split(':').map(Number);
+  const wallClockUtc = Date.UTC(year, month - 1, day, hour, minute, second);
+  const firstGuess = new Date(
+    wallClockUtc - getLisbonOffsetMinutes(new Date(wallClockUtc)) * 60_000,
+  );
+  return new Date(
+    wallClockUtc - getLisbonOffsetMinutes(firstGuess) * 60_000,
+  );
+}
+
+function lisbonDate(value: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Lisbon',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(value);
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]),
+  );
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 function textCalendar(lines: string[]): string {
   return lines.map(foldLine).join('\r\n') + '\r\n';
 }
@@ -107,6 +154,28 @@ async function GET__unobserved(request: Request) {
     });
   }
 
+  const fromDate = lisbonDate(from);
+  const untilDate = lisbonDate(until);
+  const { data: blocks, error: blocksError } = await admin
+    .from('schedule_blocks')
+    .select('id,date,start_time,end_time,reason,professionals(name)')
+    .eq('barbershop_id', payload.barbershopId)
+    .gte('date', fromDate)
+    .lte('date', untilDate)
+    .order('date', { ascending: true })
+    .limit(2000);
+
+  if (blocksError) {
+    console.error(
+      '[CALENDAR_FEED_BLOCKS_READ_ERROR]',
+      blocksError.code ?? 'UNKNOWN',
+    );
+    return new NextResponse('Calendar temporarily unavailable.', {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -152,6 +221,36 @@ async function GET__unobserved(request: Request) {
       `DESCRIPTION:${escapeIcs(description)}`,
       `LOCATION:${escapeIcs(location)}`,
       `STATUS:${status}`,
+      'TRANSP:OPAQUE',
+      'END:VEVENT',
+    );
+  }
+
+  for (const block of blocks ?? []) {
+    const start = lisbonLocalDateTime(block.date, block.start_time);
+    const end = lisbonLocalDateTime(block.date, block.end_time);
+    if (!start || !end || end.getTime() <= start.getTime()) continue;
+
+    const professional = relation(block.professionals as Relation);
+    const professionalName = professional?.name?.trim();
+    const title = professionalName
+      ? `Bloqueio de agenda — ${professionalName}`
+      : 'Bloqueio de agenda';
+    const description = block.reason?.trim()
+      ? `Indisponível: ${block.reason.trim()}`
+      : 'Horário indisponível na Silentra.';
+    const location = [shop.name, shop.address].filter(Boolean).join(', ');
+
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:bloqueio-${block.id}@calendar.silentra.me`,
+      `DTSTAMP:${formatUtc(now)}`,
+      `DTSTART:${formatUtc(start)}`,
+      `DTEND:${formatUtc(end)}`,
+      `SUMMARY:${escapeIcs(title)}`,
+      `DESCRIPTION:${escapeIcs(description)}`,
+      `LOCATION:${escapeIcs(location)}`,
+      'STATUS:CONFIRMED',
       'TRANSP:OPAQUE',
       'END:VEVENT',
     );
