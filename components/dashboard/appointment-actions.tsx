@@ -83,7 +83,7 @@ export function AppointmentActions({
           className={`${buttonSize} border border-blue-500/20 bg-blue-500/10 text-xs font-medium text-blue-400 hover:bg-blue-500/20`}
         >
           <Check className="mr-1.5 size-4" aria-hidden="true" />
-          Confirmar
+          {appointment.payment_status === 'awaiting_review' ? 'Validar MB WAY' : 'Confirmar'}
         </Button>
       )}
 
