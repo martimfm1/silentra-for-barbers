@@ -330,7 +330,7 @@ export default function SettingsPageOrganized() {
       setSuggestion(null);
       toast.success(t('settingsPage.saved'));
     } catch (e) {
-      toast.error(t('settingsPage.saveFailed'));
+      toast.error(e instanceof Error && e.message ? e.message : t('settingsPage.saveFailed'));
     } finally {
       setSaving(false);
     }
