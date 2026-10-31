@@ -80,6 +80,8 @@ type Config = {
   auto_confirm_bookings: boolean;
   auto_complete_bookings: boolean;
   default_language: 'pt' | 'en';
+  mbway_enabled: boolean;
+  mbway_phone: string;
 };
 const sections: [Section, string, string, typeof Settings][] = [
   ['overview', 'Visão geral', 'Estado da configuração', Settings],
@@ -137,6 +139,8 @@ const normalize = (v: Partial<Config>): Config => ({
   auto_confirm_bookings: v.auto_confirm_bookings === true,
   auto_complete_bookings: v.auto_complete_bookings === true,
   default_language: v.default_language === 'en' ? 'en' : 'pt',
+  mbway_enabled: v.mbway_enabled === true,
+  mbway_phone: v.mbway_phone ?? '',
 });
 const closedList = (v: string) =>
   !v || v === 'None'
@@ -152,6 +156,7 @@ export default function SettingsPageOrganized() {
   const { barbershopId } = useBarbershop();
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
+  const canManualMbway = hasFeature('manual_mbway_prepayment');
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
   const [section, setSection] = useState<Section>('overview');
   const [search, setSearch] = useState('');
@@ -281,6 +286,10 @@ export default function SettingsPageOrganized() {
       const payload = { ...config };
       if (!canDirectory)
         delete (payload as Partial<Config>).is_public_in_directory;
+      if (!canManualMbway && initial) {
+        payload.mbway_enabled = initial.mbway_enabled;
+        payload.mbway_phone = initial.mbway_phone;
+      }
       if (!automationAllowed) {
         payload.auto_confirm_bookings = initial?.auto_confirm_bookings ?? false;
         payload.auto_complete_bookings =
@@ -574,6 +583,44 @@ export default function SettingsPageOrganized() {
                       <option value="pt">Português (Portugal)</option>
                       <option value="en">English</option>
                     </select>
+                  </div>
+                  <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">{t('settingsPage.mbwayTitle')}</p>
+                          {!canManualMbway && <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-semibold text-amber-200">PRO</span>}
+                        </div>
+                        <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">{t('settingsPage.mbwayDescription')}</p>
+                      </div>
+                      <Switch
+                        disabled={!canManualMbway}
+                        checked={canManualMbway && config.mbway_enabled}
+                        onCheckedChange={(value) => canManualMbway && set({ mbway_enabled: value })}
+                        aria-label={t('settingsPage.mbwayEnabled')}
+                      />
+                    </div>
+                    <div className="mt-4 grid gap-2 sm:max-w-md">
+                      <label htmlFor="settings-mbway-phone" className="text-xs font-medium text-zinc-300">{t('settingsPage.mbwayPhone')}</label>
+                      <Input
+                        id="settings-mbway-phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        placeholder={t('settingsPage.mbwayPhonePlaceholder')}
+                        value={config.mbway_phone}
+                        disabled={!canManualMbway || !config.mbway_enabled}
+                        onChange={(event) => set({ mbway_phone: event.target.value })}
+                        className={INPUT_CLASS}
+                      />
+                      <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.mbwayWhatsappNotice')}</p>
+                    </div>
+                    {!canManualMbway && (
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/15 bg-amber-400/[.04] p-3">
+                        <p className="text-xs text-zinc-400">{t('settingsPage.mbwayProRequired')}</p>
+                        <Button asChild size="sm" variant="outline"><Link href="/dashboard/billing">{t('settingsPage.upgradePlan')}</Link></Button>
+                      </div>
+                    )}
                   </div>
                   <div className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     <div>
