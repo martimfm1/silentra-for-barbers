@@ -60,7 +60,7 @@ export function SilentraLoading({
         className="relative isolate flex h-[112px] w-full min-w-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#08090b] text-center"
       >
         <LightTunnel
-          className="absolute inset-0"
+          className="!absolute inset-0"
           style={tunnelStyle}
           cableColor={accent}
           pulseColor={accent}
@@ -99,7 +99,7 @@ export function SilentraLoading({
       className="fixed inset-0 z-[9999] isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#08090b] px-6 text-foreground"
     >
       <LightTunnel
-        className="absolute inset-0"
+        className="!absolute inset-0"
         style={tunnelStyle}
         cableColor={accent}
         pulseColor={accent}
