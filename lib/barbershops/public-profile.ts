@@ -11,7 +11,7 @@ export function isValidPublicProfileSlug(value: string): boolean {
 }
 
 export function planSupportsCustomSlug(plan: BillingPlan): boolean {
-  return plan === 'enterprise';
+  return plan === 'pro' || plan === 'enterprise';
 }
 
 export function planSupportsEnterpriseCustomization(
