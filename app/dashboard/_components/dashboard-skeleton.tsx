@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { DepthLoading } from '@/components/ui/depth-loading';
 
 export type DashboardSkeletonVariant =
   | 'overview'
@@ -213,6 +214,12 @@ export function DashboardSkeleton({
       aria-label="A carregar a dashboard"
     >
       <div className="mx-auto max-w-7xl space-y-6">
+        <div className="flex justify-center sm:justify-start">
+          <DepthLoading
+            variant="compact"
+            message="A preparar a tua dashboard"
+          />
+        </div>
         <HeaderSkeleton />
         <MetricsSkeleton />
         <ContentSkeleton variant={variant} />
