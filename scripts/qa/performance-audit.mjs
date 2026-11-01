@@ -45,7 +45,7 @@ const [
   read('services/modules/authorization.ts'),
   read('services/billing/plan-access.guard.ts'),
   read('services/billing/subscription.service.ts'),
-  read('supabase/migrations/20261101190000_api_hot_path_optimizations.sql'),
+  read('supabase/migrations/20261101181241_api_hot_path_optimizations.sql'),
 ]);
 
 assert.match(
