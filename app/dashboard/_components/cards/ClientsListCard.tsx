@@ -418,27 +418,27 @@ function ClientItemCard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
+      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/5 pt-3">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => onViewClient(client)}
-          className="min-h-11 flex-1 rounded-xl border-blue-500/20 bg-blue-500/[0.06] px-3 text-blue-200 hover:bg-blue-500/10 hover:text-white"
+          className="col-span-2 min-h-11 w-full min-w-0 justify-center whitespace-nowrap rounded-xl border-blue-500/20 bg-blue-500/[0.06] px-3 text-blue-200 hover:bg-blue-500/10 hover:text-white"
         >
           <Eye className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
-          <span>{t('clientsListCard.viewProfile')}</span>
+          <span className="whitespace-nowrap">{t('clientsListCard.viewProfile')}</span>
         </Button>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => setEditingClient(client)}
-          className="min-h-11 rounded-xl border-white/10 bg-white/[0.03] px-3 text-zinc-200 hover:bg-white/[0.08] hover:text-white"
+          className="min-h-11 w-full min-w-0 justify-center rounded-xl border-white/10 bg-white/[0.03] px-2 text-zinc-200 hover:bg-white/[0.08] hover:text-white sm:px-3"
           aria-label={t('clientsListCard.edit', { name: client.name_complete })}
         >
           <Pencil className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
-          <span>{t('common.edit')}</span>
+          <span className="truncate">{t('common.edit')}</span>
         </Button>
 
         <AlertDialog>
@@ -447,13 +447,13 @@ function ClientItemCard({
               type="button"
               variant="outline"
               size="sm"
-              className="min-h-11 rounded-xl border-red-500/20 bg-red-500/[0.04] px-3 text-red-300 hover:bg-red-500/10 hover:text-red-200"
+              className="min-h-11 w-full min-w-0 justify-center rounded-xl border-red-500/20 bg-red-500/[0.04] px-2 text-red-300 hover:bg-red-500/10 hover:text-red-200 sm:px-3"
               aria-label={t('clientsListCard.delete', {
                 name: client.name_complete,
               })}
             >
               <Trash2 className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
-              <span>{t('common.delete')}</span>
+              <span className="truncate">{t('common.delete')}</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
