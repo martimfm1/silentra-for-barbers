@@ -73,6 +73,10 @@ export interface ClientsListCardProps {
   handleCreateClient: (event: FormEvent) => Promise<boolean> | boolean;
   setEditingClient: (client: Client | null) => void;
   handleDeleteClient: (clientId: string) => Promise<void> | void;
+  onViewClient: (client: Client) => void;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   loading: boolean;
 }
 export interface ServicesListCardProps {
