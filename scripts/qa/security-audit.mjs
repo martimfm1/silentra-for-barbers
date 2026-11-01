@@ -584,7 +584,7 @@ const routeSecurityChecks = [
     markers: [
       'getAccessPlanForRequest(',
       'getCurrentUser(request)',
-      'SubscriptionService.getAccessPlan(userId)',
+      'SubscriptionService.getAccessContextForUser(userId, permissionKeys)',
     ],
     label:
       'Request-aware plan guard supports mobile Bearer tokens without changing cookie callers',
@@ -593,7 +593,7 @@ const routeSecurityChecks = [
     file: 'services/modules/authorization.ts',
     markers: [
       'request?: Request',
-      'getAccessPlanForRequest(request)',
+      'getAccessPlanForRequest(request, acceptedPermissions)',
       'PERMISSION_ALIASES:',
       "clients: ['clients']",
     ],
