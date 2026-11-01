@@ -282,7 +282,7 @@ export default function MarketingPage() {
                   aria-label={t('marketingPage.closeEditor')}
                   disabled={creating}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-5" aria-hidden="true" />
                 </Button>
               </div>
             </CardHeader>
