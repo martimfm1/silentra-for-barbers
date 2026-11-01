@@ -193,6 +193,12 @@ assert.match(
 
 assert.doesNotMatch(
   appointmentReferenceIndexes,
+  /drop index if exists public\\.idx_appointments_management_token_expires_at/i,
+  'The independent appointment expiry index must be preserved.',
+);
+
+assert.doesNotMatch(
+  appointmentReferenceIndexes,
   /where (client_id|professional_id|service_id) is not null/i,
   'Foreign-key coverage indexes must not be partial.',
 );
