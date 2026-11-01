@@ -40,18 +40,32 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ## Progresso desta implementação
 
-### 1. Grants e RLS (migration aplicada; validação funcional em curso)
+### 1. Grants e RLS (migration aplicada; testes de isolamento aprovados)
 - [x] Migration criada e revista.
 - [x] Migration aplicada à produção — versão registada `20261101225911`.
 - [x] Grants verificados: anon não tem SELECT/INSERT/UPDATE/DELETE em `appointments` nem acesso à tabela `users`.
 - [x] Grants verificados: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; pode atualizar campos de perfil permitidos.
 - [x] Helper de permissões: EXECUTE negado a anon e autorizado a authenticated.
 - [x] Política pública permissiva de UPDATE em `barbershops` removida.
-- [ ] Testes RLS comportamentais com owner/staff/tenant diferente.
-- [ ] Testar reserva pública e agenda autenticada de ponta a ponta.
-- [ ] Reexecutar QA estático/CI e rever advisors após os restantes testes.
+- [x] Teste RLS comportamental com owner: consulta 11 marcações e 2 clientes da própria barbearia; 0 marcações e 0 clientes do outro tenant.
+- [x] Testes de UPDATE dentro de transação com rollback: owner atualiza registo próprio de barbearia, cliente e marcação; não atualiza barbearia nem marcação do outro tenant.
+- [x] Migration complementar `20261101230500_harden_appointment_update_rls` aplicada: permite updates a registos legados válidos e valida serviço/profissional/cliente apenas quando a referência muda.
+- [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
+- [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
+- [ ] Executar QA estático/CI e rever advisors após os restantes testes.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
+
+## Evidência de hardening aplicado e verificado
+
+- Migration `20261101225911_harden_production_tenant_rls` aplicada à produção.
+- Migration `20261101230500_harden_appointment_update_rls` aplicada à produção.
+- Grants: anon não tem privilégios de SELECT/INSERT/UPDATE/DELETE em `appointments`, nem SELECT/INSERT em `users`.
+- Grants por coluna: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; campos de perfil permitidos mantêm UPDATE.
+- Função `has_barbershop_permission`: execução negada a anon; permitida a authenticated para uso nas políticas RLS.
+- Teste read-only com role authenticated (owner): own tenant permission=true; other tenant permission=false; own appointments=11, other appointments=0; own clients=2, other clients=0.
+- Teste de escrita dentro de transação com rollback: own shop=1, other shop=0, own client=1, own appointment=1, other appointment=0. Nenhuma alteração ficou persistida.
+- A verificação inicial de UPDATE encontrou incompatibilidade potencial com referências históricas em appointments. Foi corrigida com validação no trigger apenas quando service/professional/client são alterados.
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
