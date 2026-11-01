@@ -187,8 +187,8 @@ assert.match(
 );
 assert.match(
   appointmentReferenceIndexes,
-  /drop index if exists public\.idx_appointments_management_token/i,
-  'The redundant non-unique management-token index must be removed in favour of the existing unique index.',
+  /drop index if exists public\.idx_appointments_management_token[\s\S]*drop index if exists public\.locations_parent_barbershop_slug_idx[\s\S]*drop index if exists public\.loyalty_rewards_shop_idx[\s\S]*drop index if exists public\.marketing_campaigns_birthday_repair_idx/i,
+  'Only the redundant indexes must be removed; canonical unique/constraint indexes must remain.',
 );
 
 assert.doesNotMatch(
