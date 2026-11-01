@@ -11,8 +11,17 @@ import type { BillingPlan } from '@/types/stripe';
  */
 export async function getAccessPlanForRequest(
   request?: Request,
+  permissionKeys: readonly string[] = [],
 ): Promise<
-  { ok: true; userId: string; plan: BillingPlan } | { ok: false; status: 401 }
+  | {
+      ok: true;
+      userId: string;
+      plan: BillingPlan;
+      barbershopId: string | null;
+      role: string;
+      permissionGranted: boolean;
+    }
+  | { ok: false; status: 401 }
 > {
   let userId: string | null = null;
 
@@ -29,11 +38,20 @@ export async function getAccessPlanForRequest(
 
   if (!userId) return { ok: false, status: 401 };
 
-  // Free is implicit and never requires Stripe. The authenticated user is
-  // resolved from the request for API callers, preserving cookie auth when
-  // existing dashboard routes omit the Request argument.
-  const plan = await SubscriptionService.getAccessPlan(userId);
-  return { ok: true, userId, plan };
+  // Read plan, tenant and module permissions together. Stripe is reconciled
+  // asynchronously by the billing/webhook flows, never during normal auth.
+  const context = await SubscriptionService.getAccessContextForUser(
+    userId,
+    permissionKeys,
+  );
+  return {
+    ok: true,
+    userId,
+    plan: context.plan,
+    barbershopId: context.barbershopId,
+    role: context.role,
+    permissionGranted: context.permissionGranted,
+  };
 }
 
 /** Returns the plan for a given user without requiring a request context. */
