@@ -6,7 +6,7 @@ const root = process.cwd();
 const read = (file) => readFile(join(root, file), 'utf8');
 
 const migration = await read(
-  'supabase/migrations/20261101225500_harden_production_tenant_rls.sql',
+  'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
