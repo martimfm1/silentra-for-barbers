@@ -18,10 +18,10 @@ const loyaltyRedemptionHardening = await read(
   'supabase/migrations/20261101230417_fix_loyalty_redemption_api.sql',
 );
 const teamMemberHardening = await read(
-  'supabase/migrations/20261101233000_harden_team_member_management_rpc.sql',
+  'supabase/migrations/20261101233345_harden_team_member_management_rpc.sql',
 );
 const internalTableHardening = await read(
-  'supabase/migrations/20261101233100_revoke_internal_table_client_grants.sql',
+  'supabase/migrations/20261101233354_revoke_internal_table_client_grants.sql',
 );
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
