@@ -23,7 +23,7 @@ const checks = [
     file: 'app/api/loyalty/rewards/route.ts',
     markers: [
       'moduleErrorResponse',
-      'typeof body.active !== \'boolean\'',
+      'typeof activeValue !== \'boolean\'',
       'Invalid reward value',
     ],
   },
