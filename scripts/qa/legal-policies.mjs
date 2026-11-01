@@ -40,11 +40,9 @@ assert.match(currentTerms, /currentTermsFeatureSections/);
 assert.match(drawer, /currentTerms/);
 assert.doesNotMatch(drawer, /August 16, 2026/);
 
-for (const locale of ['pt', 'en']) {
-  assert.match(privacy, new RegExp(`\b${locale}: \\\{`));
-  assert.match(cookies, new RegExp(`\b${locale}: \\\{`));
-  assert.match(extraPolicies, new RegExp(`\b${locale}: \\\{`));
-  assert.match(acceptableUse, new RegExp(`\b${locale}: \\\{`));
+for (const source of [privacy, cookies, extraPolicies, acceptableUse]) {
+  assert.ok(source.includes('pt: {'), 'Every policy must include Portuguese copy.');
+  assert.ok(source.includes('en: {'), 'Every policy must include English copy.');
 }
 assert.match(privacy, /pedidos de direitos|data-subject requests/i);
 assert.match(privacy, /um mês|one-month period/i);
