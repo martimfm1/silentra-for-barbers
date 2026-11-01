@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   ArrowRight,
   Check,
@@ -41,11 +42,15 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
   const [guide, setGuide] = useState<InstallGuide>('desktop');
   const [desktopBrowser, setDesktopBrowser] = useState<DesktopBrowser>('other');
   const [isInstalled, setIsInstalled] = useState(false);
+  const [installFeedback, setInstallFeedback] = useState<string | null>(null);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(
     null,
   );
 
   const isEnglish = locale === 'en';
+  const pathname = usePathname();
+  const isDashboardPage =
+    pathname === '/dashboard' || pathname.startsWith('/dashboard/');
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -76,6 +81,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
     const onAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
+      setInstallFeedback(null);
       setOpen(false);
     };
 
@@ -88,9 +94,24 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
     };
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = async (fromDialog = false) => {
     if (!installPrompt) {
-      setOpen(true);
+      if (fromDialog) {
+        setInstallFeedback(
+          guide === 'apple'
+            ? isEnglish
+              ? 'On iPhone and iPad, Safari does not allow a website to open the install prompt automatically. Use Share, choose “Add to Home Screen” and confirm.'
+              : 'No iPhone e iPad, o Safari não permite abrir a instalação automaticamente. Usa Partilhar, escolhe «Adicionar ao ecrã principal» e confirma.'
+            : isEnglish
+              ? 'This browser has not made a direct install prompt available. Follow the steps beside this card and use your browser menu.'
+              : 'Este navegador não disponibilizou a instalação direta. Segue os passos ao lado e utiliza o menu do navegador.',
+        );
+        document
+          .getElementById('install-guide-panel')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        setOpen(true);
+      }
       return;
     }
 
@@ -102,6 +123,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === 'accepted') {
         setIsInstalled(true);
+        setInstallFeedback(null);
         setOpen(false);
       } else {
         setOpen(true);
@@ -266,8 +288,8 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-5xl gap-0 overflow-y-auto rounded-[1.75rem] border-white/10 bg-zinc-950/95 p-0 text-zinc-50 shadow-[0_32px_120px_rgba(0,0,0,0.7)] sm:w-[calc(100%-2rem)] sm:max-w-5xl">
-          <div className="relative isolate">
+        <DialogContent className="flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-5xl flex-col gap-0 overflow-hidden overscroll-contain rounded-[1.75rem] border-white/10 bg-zinc-950/95 p-0 text-zinc-50 shadow-[0_32px_120px_rgba(0,0,0,0.7)] sm:max-h-[min(88dvh,52rem)] sm:w-[calc(100%-2rem)] sm:max-w-5xl">
+          <div className="relative isolate flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-20 -top-28 -z-10 size-72 rounded-full bg-emerald-300/[0.12] blur-[90px]"
@@ -277,7 +299,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
               className="pointer-events-none absolute -left-20 top-20 -z-10 size-56 rounded-full bg-sky-300/[0.06] blur-[90px]"
             />
 
-            <DialogHeader className="relative px-5 pb-5 pr-14 pt-6 sm:px-8 sm:pb-6 sm:pt-8">
+            <DialogHeader className="relative shrink-0 px-5 pb-5 pr-14 pt-6 sm:px-8 sm:pb-6 sm:pt-8">
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/[0.08] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-100 sm:text-[11px]">
                   <Sparkles className="size-3.5" aria-hidden="true" />
@@ -305,7 +327,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="relative px-5 pb-5 sm:px-8 sm:pb-8">
+            <div className="relative min-w-0 px-5 pb-5 sm:px-8 sm:pb-8">
               <div
                 role="tablist"
                 aria-label={
@@ -323,7 +345,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                       role="tab"
                       aria-selected={selected}
                       aria-controls="install-guide-panel"
-                      onClick={() => setGuide(id)}
+                      onClick={() => {
+                        setGuide(id);
+                        setInstallFeedback(null);
+                      }}
                       className={
                         selected
                           ? 'flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-emerald-200/20 bg-emerald-300/[0.12] px-1.5 text-[11px] font-semibold text-emerald-50 shadow-[0_4px_20px_rgba(16,185,129,0.07)] transition-colors sm:gap-2 sm:px-3 sm:text-sm'
@@ -416,14 +441,34 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                     </div>
                   </div>
 
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:border-white/20 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:mt-auto lg:translate-y-0"
-                  >
-                    {isEnglish ? 'Open dashboard' : 'Abrir dashboard'}
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </Link>
+                  {isDashboardPage ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleInstallClick(true)}
+                      className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/[0.1] px-4 py-2.5 text-sm font-semibold text-emerald-50 transition-colors hover:border-emerald-200/35 hover:bg-emerald-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:mt-auto"
+                    >
+                      <Download className="size-4" aria-hidden="true" />
+                      {isEnglish ? 'Install app' : 'Instalar aplicação'}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setOpen(false)}
+                      className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:border-white/20 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:mt-auto"
+                    >
+                      {isEnglish ? 'Open dashboard' : 'Abrir dashboard'}
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                  {installFeedback ? (
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="mt-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.045] px-3 py-2.5 text-xs leading-5 text-amber-100/85"
+                    >
+                      {installFeedback}
+                    </p>
+                  ) : null}
                 </section>
 
                 <section className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
