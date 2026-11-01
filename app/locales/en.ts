@@ -1035,6 +1035,8 @@ export const en = {
     styleNotes: 'Style notes',
     birthDate: 'Date of birth',
     noNotes: 'There are no notes for this customer yet.',
+    completedBookings: 'Completed bookings',
+    totalSpent: 'Total spent',
   },
   settingsLanguage: {
     title: 'Default language',
