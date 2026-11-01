@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { DepthLoading } from '@/components/ui/depth-loading';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 
 export type DashboardSkeletonVariant =
   | 'overview'
@@ -215,7 +215,7 @@ export function DashboardSkeleton({
     >
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex justify-center sm:justify-start">
-          <DepthLoading variant="compact" />
+          <SilentraLoading variant="compact" />
         </div>
         <HeaderSkeleton />
         <MetricsSkeleton />
