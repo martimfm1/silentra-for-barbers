@@ -37,18 +37,20 @@ const currentPrivacyPolicy = {
     ...privacyPolicy.pt,
     lastUpdated: CURRENT_LEGAL_UPDATE,
     sections: [
-      ...privacyPolicy.pt.sections,
+      ...privacyPolicy.pt.sections.slice(0, -1),
       currentPrivacyAddendum.pt,
       ...currentPrivacyFeatureSections.pt,
+      ...privacyPolicy.pt.sections.slice(-1),
     ],
   },
   en: {
     ...privacyPolicy.en,
     lastUpdated: 'November 1, 2026',
     sections: [
-      ...privacyPolicy.en.sections,
+      ...privacyPolicy.en.sections.slice(0, -1),
       currentPrivacyAddendum.en,
       ...currentPrivacyFeatureSections.en,
+      ...privacyPolicy.en.sections.slice(-1),
     ],
   },
 };
