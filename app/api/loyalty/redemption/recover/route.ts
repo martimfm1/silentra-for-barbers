@@ -93,11 +93,18 @@ async function GET__unobserved(request: Request) {
       .eq('status', 'active')
       .maybeSingle();
 
-    if (
-      memberError ||
-      !member ||
-      member.email.toLowerCase() !== session.email.toLowerCase()
-    ) {
+    if (memberError) {
+      console.error('[LOYALTY_REDEMPTION_RECOVER_MEMBER_ERROR]', {
+        requestId,
+        code: memberError.code ?? 'UNKNOWN',
+      });
+      return response(
+        { error: 'Não foi possível validar o acesso ao resgate.', requestId },
+        503,
+      );
+    }
+
+    if (!member || member.email.toLowerCase() !== session.email.toLowerCase()) {
       console.warn('[LOYALTY_REDEMPTION_RECOVER_UNAUTHORIZED]', {
         requestId,
         redemptionId,
