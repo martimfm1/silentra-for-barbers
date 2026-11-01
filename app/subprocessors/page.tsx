@@ -33,7 +33,7 @@ export default function SubprocessorsPage() {
       highlights={[
         {
           label: { pt: 'Serviços essenciais', en: 'Core providers' },
-          value: { pt: 'Vercel e Supabase suportam alojamento, base de dados, autenticação e ficheiros.', en: 'Vercel and Supabase support hosting, database, authentication, and files.' },
+          value: { pt: 'Vercel e Supabase suportam a plataforma; Mapbox pesquisa moradas e CARTO apresenta os mapas.', en: 'Vercel and Supabase run the platform; Mapbox searches addresses and CARTO displays maps.' },
           icon: <Cloud className="size-4" />,
         },
         {
