@@ -47,6 +47,7 @@ type Appointment = {
   id: string;
   date_hour: string;
   status: string;
+  service_price?: number | string | null;
   value_products?: number | string | null;
   payment_method?: string | null;
   services?: Relation<{ name?: string | null; price?: number | string | null }>;
@@ -244,7 +245,8 @@ export function ClientDetailsDialog({
   );
   const appointmentTotal = (appointment: Appointment) => {
     const service = firstRelation(appointment.services);
-    const servicePrice = Number(service?.price) || 0;
+    const servicePrice =
+      Number(appointment.service_price ?? service?.price) || 0;
     const productsPrice = Number(appointment.value_products) || 0;
     return servicePrice + productsPrice;
   };
@@ -427,7 +429,7 @@ export function ClientDetailsDialog({
                                 <p className="mt-1 text-[11px] text-zinc-500">
                                   {t('clientsPage.serviceAndProducts', {
                                     service: formatCurrency(
-                                      Number(service?.price) || 0,
+                                      Number(appointment.service_price ?? service?.price) || 0,
                                       locale,
                                     ),
                                     products: formatCurrency(
