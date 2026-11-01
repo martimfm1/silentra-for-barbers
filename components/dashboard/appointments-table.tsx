@@ -22,6 +22,7 @@ type ActionProps = Omit<
 type Props = ActionProps & {
   appointments: Appointment[];
   onDetails: (appointment: Appointment) => void;
+  locale?: string;
 };
 
 const statusAccent: Record<Appointment['status'], string> = {
@@ -34,19 +35,31 @@ const statusAccent: Record<Appointment['status'], string> = {
 export function AppointmentsTable({
   appointments,
   onDetails,
+  locale = 'pt',
   ...actionProps
 }: Props) {
+  const isEnglish = locale === 'en';
+  const languageTag = isEnglish ? 'en-GB' : 'pt-PT';
+
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full overflow-x-auto">
       <Table className="min-w-[900px]">
         <TableHeader>
           <TableRow className="border-white/10 hover:bg-transparent">
-            <TableHead className="w-[28%] text-zinc-500">Cliente</TableHead>
-            <TableHead className="w-[24%] text-zinc-500">Serviço</TableHead>
-            <TableHead className="w-[20%] text-zinc-500">Quando</TableHead>
-            <TableHead className="w-[14%] text-zinc-500">Estado</TableHead>
+            <TableHead className="w-[28%] text-zinc-500">
+              {isEnglish ? 'Customer' : 'Cliente'}
+            </TableHead>
+            <TableHead className="w-[24%] text-zinc-500">
+              {isEnglish ? 'Service' : 'Serviço'}
+            </TableHead>
+            <TableHead className="w-[20%] text-zinc-500">
+              {isEnglish ? 'When' : 'Quando'}
+            </TableHead>
+            <TableHead className="w-[14%] text-zinc-500">
+              {isEnglish ? 'Status' : 'Estado'}
+            </TableHead>
             <TableHead className="w-[14%] text-right text-zinc-500">
-              Ações
+              {isEnglish ? 'Actions' : 'Ações'}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -58,10 +71,13 @@ export function AppointmentsTable({
             const name =
               appointment.users?.name_complete ||
               appointment.manual_name ||
-              'Cliente';
-            const service = appointment.services?.name || 'Serviço';
+              (isEnglish ? 'Customer' : 'Cliente');
+            const service =
+              appointment.services?.name ||
+              (isEnglish ? 'Service' : 'Serviço');
             const professional =
-              appointment.professionals?.name || 'Sem barbeiro';
+              appointment.professionals?.name ||
+              (isEnglish ? 'No barber assigned' : 'Sem barbeiro');
 
             return (
               <TableRow
@@ -76,7 +92,11 @@ export function AppointmentsTable({
                     onDetails(appointment);
                   }
                 }}
-                aria-label={`Ver detalhes da marcação de ${name}`}
+                aria-label={
+                  isEnglish
+                    ? `View booking details for ${name}`
+                    : `Ver detalhes da marcação de ${name}`
+                }
               >
                 <TableCell className="relative py-4 pl-5">
                   <span
@@ -88,7 +108,7 @@ export function AppointmentsTable({
                       {name}
                     </p>
                     <p className="mt-1 truncate text-[11px] text-zinc-500">
-                      {phone || 'Sem telefone'}
+                      {phone || (isEnglish ? 'No phone' : 'Sem telefone')}
                     </p>
                   </div>
                 </TableCell>
@@ -102,7 +122,9 @@ export function AppointmentsTable({
                       {professional}
                     </p>
                     {appointment.payment_status === 'awaiting_review' && (
-                      <span className="mt-1 inline-flex rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-200">MB WAY por validar</span>
+                      <span className="mt-1 inline-flex rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-200">
+                        {isEnglish ? 'MB WAY review' : 'MB WAY por validar'}
+                      </span>
                     )}
                   </div>
                 </TableCell>
@@ -113,11 +135,11 @@ export function AppointmentsTable({
                     </span>
                     <div>
                       <p className="text-sm font-medium tabular-nums text-zinc-200">
-                        {date.toLocaleDateString('pt-PT')}
+                        {date.toLocaleDateString(languageTag)}
                       </p>
                       <p className="mt-0.5 flex items-center gap-1 text-[11px] tabular-nums text-zinc-500">
                         <Clock3 className="size-3" aria-hidden="true" />
-                        {date.toLocaleTimeString('pt-PT', {
+                        {date.toLocaleTimeString(languageTag, {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
