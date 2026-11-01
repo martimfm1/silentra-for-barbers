@@ -206,7 +206,11 @@ export function DepthLoading({
       <div className="relative flex flex-col items-center">
         <motion.div
           aria-hidden="true"
-          className="absolute -inset-x-10 -inset-y-8 rounded-full bg-[var(--dashboard-accent,var(--primary))]/[0.07] blur-3xl"
+          className="absolute -inset-x-10 -inset-y-8 rounded-full blur-3xl"
+          style={{
+            backgroundColor:
+              'color-mix(in srgb, var(--dashboard-accent, var(--primary)) 7%, transparent)',
+          }}
           animate={
             prefersReducedMotion
               ? { opacity: 0.35, scale: 1 }
