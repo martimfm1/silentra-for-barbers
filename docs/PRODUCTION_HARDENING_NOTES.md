@@ -25,8 +25,8 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Corrigir chamadas de Auth em políticas com initplan.
 
 ### P1 — Performance
-- [ ] Rever as 61 foreign keys sem índices de cobertura.
-- [ ] Rever 4 pares de índices duplicados.
+- [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration com índices B-tree completos preparada, pendente de CI e aplicação.
+- [ ] Rever 4 pares de índices duplicados. Um par exato em `appointments.management_token` foi identificado; manter a decisão de remoção pendente até confirmar o snapshot `supabase/schema.sql` e a utilização.
 - [ ] Investigar índices sem uso antes de remover.
 - [ ] Fazer profiling dos endpoints mais lentos e criar testes de carga multi-tenant.
 
@@ -53,7 +53,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Migration `20261101230225_move_tenant_permission_helper_private` aplicada: a função auxiliar foi movida para o schema `private`, não exposto à Data API. O advisor voltou de 15 para 14 funções `SECURITY DEFINER` executáveis por authenticated.
 - [x] Migration `20261101230417_fix_loyalty_redemption_api` aplicada; a assinatura antiga de 5 argumentos foi removida. Teste com membro/recompensa reais em transação com ROLLBACK não descontou pontos nem criou resgate pendente.
 - [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
-- [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
+- [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado; contagem atual: 0).
 - [x] Executar CI/QA completo no GitHub: run `41362234658` concluído com sucesso, incluindo TypeScript, lint, contratos, build, servidor de produção e smoke QA.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
@@ -73,16 +73,6 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - A verificação inicial de UPDATE encontrou incompatibilidade potencial com referências históricas em appointments. Foi corrigida com validação no trigger apenas quando service/professional/client são alterados.
 
 
-### 2. Auditoria P1 — funções privilegiadas e tabelas internas (em revisão)
-- [x] Rever as 14 funções SECURITY DEFINER expostas a authenticated: todas têm validação de auth.uid() e search_path fixo.
-- [x] Identificar problema em update_barbershop_member: admins/managers com permissão team podiam alterar roles/permissões, incluindo potencial autoelevação. A intenção da API e das mensagens é owner-only.
-- [x] Identificar problema em remove_barbershop_member: admins/managers com permissão team podiam remover membros; a limpeza de permissões não estava limitada ao tenant e a função não confirmava que o alvo era membro da equipa.
-- [ ] Migration 20261101233000_harden_team_member_management_rpc: owner-only nas mutações da equipa, validação de objeto/booleanos nas permissões, validação do membro no mesmo tenant, bloqueio da remoção de clientes CRM e limpeza de permissões tenant-scoped. Preparada no PR; ainda não aplicada à produção.
-- [ ] Migration 20261101233100_revoke_internal_table_client_grants: revoga grants herdados de PUBLIC em audit_logs, email_queue, notification_queue, notification_subscriptions, platform_settings, rate_limits e verification_tokens; mantém acesso explícito de service_role. Preparada no PR; ainda não aplicada à produção.
-- [x] Confirmar que as 33 tabelas RLS sem policies não permitem leitura/escrita por causa do RLS deny-by-default; 7 delas ainda tinham grants de cliente herdados, agora cobertos pela migration preparada.
-- [x] Validar migrations/contratos na CI e aplicar as duas migrations à produção. [ ] Testar comportamento com utilizadores staff reais quando existirem.
-
-
 ### 3. Resultado da fase P1 — funções e grants internos
 - [x] `update_barbershop_member`: apenas o owner pode alterar role/permissões; valida role, JSON object e valores booleanos; rejeita clientes CRM e owner como alvo.
 - [x] `remove_barbershop_member`: apenas o owner pode remover; exige alvo da mesma barbearia e role de equipa; bloqueia owner/client; limpa permissões apenas para o tenant correspondente.
@@ -91,6 +81,14 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Registo Supabase sincronizado com os ficheiros de migration: `20261101233345` e `20261101233354`.
 - [x] CI `41362234658` concluída com sucesso antes da aplicação; migrations compiladas numa transação de validação com rollback antes de aplicar.
 - [ ] Teste funcional com contas staff reais: não há contas staff ativas no conjunto de produção disponível.
+
+### 4. Performance — índices de foreign keys (em curso)
+- [x] Consultar advisor e confirmar que as três FKs de `appointments` sem cobertura são `client_id`, `professional_id` e `service_id`.
+- [x] Rever índices existentes: `appointments_client_timeline_idx` começa por `barbershop_id` e não cobre `client_id` isoladamente; o índice GiST de sobreposição e o índice de slot não substituem índices B-tree nas FKs.
+- [x] Criar migration `20261101234500_add_appointment_reference_indexes` com três índices B-tree completos (não parciais).
+- [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência.
+- [ ] Aguardar CI; aplicar migration à produção; verificar advisor e `EXPLAIN` nos padrões de agenda/CRM.
+- [ ] Rever restantes FKs por impacto e volume antes de indexar em massa. A base de produção tem poucos registos em várias tabelas; evitar criar dezenas de índices sem benefício medido.
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
