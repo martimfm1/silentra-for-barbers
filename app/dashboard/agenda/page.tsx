@@ -202,7 +202,7 @@ export default function AgendaPage() {
             return false;
           if (statusFilter !== 'all' && appointment.status !== statusFilter)
             return false;
-          const term = search.trim().toLocaleLowerCase('pt-PT');
+          const term = search.trim().toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
           if (!term) return true;
           const values = [
             appointment.manual_name,
@@ -220,7 +220,7 @@ export default function AgendaPage() {
           (a, b) =>
             new Date(a.date_hour).getTime() - new Date(b.date_hour).getTime(),
         ),
-    [appointments, now, search, statusFilter, todayOnly],
+    [appointments, locale, now, search, statusFilter, todayOnly],
   );
 
   const actionProps = {
@@ -240,35 +240,43 @@ export default function AgendaPage() {
   return (
     <main className="silentra-page-shell dashboard-page">
       <div className="silentra-page-grid" aria-hidden="true" />
-      <div className="relative z-10 mx-auto w-full max-w-[100rem] px-0 py-6 sm:py-8 lg:py-10">
-        <header className="silentra-page-header">
+      <div className="relative z-10 mx-auto w-full max-w-[100rem] px-3 py-5 sm:px-5 sm:py-8 lg:px-8 lg:py-10">
+        <header className="mb-5 flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:p-6">
           <div className="min-w-0">
+            <p className="silentra-eyebrow mb-1">
+              {locale === 'en' ? 'SCHEDULE' : 'AGENDA'}
+            </p>
+            <h1 className="text-2xl font-semibold tracking-[-0.04em] text-zinc-50 sm:text-3xl">
+              {locale === 'en' ? 'Manage bookings' : 'Gerir marcações'}
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-500">
+              {locale === 'en'
+                ? 'Review upcoming visits, confirm requests and keep the day organised.'
+                : 'Consulta as próximas visitas, confirma pedidos e mantém o dia organizado.'}
+            </p>
             {!loadingInitial && (
-              <p className="mt-3 text-xs text-zinc-500">
-                <span className="font-semibold text-zinc-200">
-                  {metrics.today}
-                </span>{' '}
-                {metrics.today === 1
-                  ? t('agenda.bookingTodayOne')
-                  : t('agenda.bookingTodayMany')}{' '}
-                ·{' '}
-                <span className="font-semibold text-amber-200">
-                  {metrics.pending}
-                </span>{' '}
-                por confirmar
+              <p className="mt-2 text-xs text-zinc-500">
+                <span className="font-semibold text-zinc-200">{metrics.today}</span>{' '}
+                {locale === 'en' ? 'bookings today' : 'marcações hoje'} ·{' '}
+                <span className="font-semibold text-amber-200">{metrics.pending}</span>{' '}
+                {locale === 'en' ? 'to confirm' : 'por confirmar'}
               </p>
             )}
           </div>
-          <div className="silentra-page-actions w-full sm:w-auto">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <Button
               variant="outline"
               onClick={() => setBookingDialogOpen(true)}
-              className="border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200 hover:border-emerald-400/30 hover:bg-emerald-400/[0.1]"
+              className="min-h-11 w-full border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200 hover:border-emerald-400/30 hover:bg-emerald-400/[0.1] sm:w-auto"
             >
               <Plus className="size-4" aria-hidden="true" />
               {t('agenda.newBooking')}
             </Button>
-            <Button variant="outline" onClick={() => setBlockDialogOpen(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setBlockDialogOpen(true)}
+              className="min-h-11 w-full sm:w-auto"
+            >
               <CalendarOff className="size-4" aria-hidden="true" />
               {t('agenda.blockTime')}
             </Button>
@@ -283,29 +291,32 @@ export default function AgendaPage() {
           </div>
         ) : (
           <>
-            <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <section
+              className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-5"
+              aria-label={locale === 'en' ? 'Booking overview' : 'Resumo das marcações'}
+            >
               {[
-                ['Hoje', metrics.today, CalendarDays, 'text-emerald-300'],
+                [locale === 'en' ? 'Today' : 'Hoje', metrics.today, CalendarDays, 'text-emerald-300'],
                 [
                   t('agenda.upcomingToday'),
                   metrics.upcomingToday,
                   Clock3,
                   'text-sky-300',
                 ],
-                ['Por confirmar', metrics.pending, Clock3, 'text-amber-300'],
+                [locale === 'en' ? 'To confirm' : 'Por confirmar', metrics.pending, Clock3, 'text-amber-300'],
                 [
-                  'Concluídas',
+                  locale === 'en' ? 'Completed' : 'Concluídas',
                   metrics.completed,
                   CheckCircle2,
                   'text-violet-300',
                 ],
-                ['Canceladas', metrics.cancelled, XCircle, 'text-rose-300'],
+                [locale === 'en' ? 'Cancelled' : 'Canceladas', metrics.cancelled, XCircle, 'text-rose-300'],
               ].map(([label, value, Icon, iconClass]) => {
                 const MetricIcon = Icon as typeof CalendarDays;
                 return (
                   <div
                     key={label as string}
-                    className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 backdrop-blur-md"
+                    className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.025] p-3.5 backdrop-blur-md sm:p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span
@@ -335,11 +346,11 @@ export default function AgendaPage() {
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={t('agenda.searchPlaceholder')}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 text-sm text-zinc-100 outline-none focus:border-emerald-400/30"
-                  aria-label="Pesquisar na agenda"
+                  aria-label={locale === 'en' ? 'Search bookings' : 'Pesquisar marcações'}
                 />
               </div>
               <div
-                className="flex gap-2 overflow-x-auto pb-0.5"
+                className="flex min-w-0 gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="tablist"
                 aria-label={t('agenda.filterStatus')}
               >
@@ -362,7 +373,7 @@ export default function AgendaPage() {
                 aria-pressed={todayOnly}
                 className={`min-h-10 shrink-0 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${todayOnly ? 'border-sky-400/30 bg-sky-400/[0.08] text-sky-200' : 'border-white/10 bg-white/[0.02] text-zinc-500 hover:bg-white/[0.05]'}`}
               >
-                Apenas hoje
+                {locale === 'en' ? 'Today only' : 'Apenas hoje'}
               </button>
             </div>
             <div className="mt-4 space-y-4">
@@ -382,13 +393,16 @@ export default function AgendaPage() {
                       {t('agenda.title')}
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-zinc-500">
-                      Pesquisa, filtra e abre rapidamente a marcação que precisa
-                      da tua atenção.
+                      {locale === 'en'
+                        ? 'Search, filter and open the booking that needs your attention.'
+                        : 'Pesquisa, filtra e abre rapidamente a marcação que precisa da tua atenção.'}
                     </p>
                   </div>
                   <span className="silentra-pill w-fit border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-medium text-zinc-400">
-                    {orderedAppointments.length} resultado
-                    {orderedAppointments.length === 1 ? '' : 's'}
+                    {orderedAppointments.length}{' '}
+                    {locale === 'en'
+                      ? orderedAppointments.length === 1 ? 'result' : 'results'
+                      : orderedAppointments.length === 1 ? 'resultado' : 'resultados'}
                   </span>
                 </div>
                 {orderedAppointments.length === 0 ? (
@@ -403,7 +417,9 @@ export default function AgendaPage() {
                     </h2>
                     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">
                       {search || statusFilter !== 'all' || todayOnly
-                        ? 'Experimenta limpar a pesquisa ou escolher outro estado.'
+                        ? locale === 'en'
+                          ? 'Try clearing your search or choosing another status.'
+                          : 'Experimenta limpar a pesquisa ou escolher outro estado.'
                         : t('agenda.emptySubtitle')}
                     </p>
                     {search || statusFilter !== 'all' || todayOnly ? (
@@ -416,7 +432,7 @@ export default function AgendaPage() {
                           setTodayOnly(false);
                         }}
                       >
-                        Limpar filtros
+                        {locale === 'en' ? 'Clear filters' : 'Limpar filtros'}
                       </Button>
                     ) : (
                       <Button
@@ -430,19 +446,21 @@ export default function AgendaPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="divide-y divide-white/[0.055] px-4 pb-4 md:hidden">
+                    <div className="grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 lg:hidden">
                       {orderedAppointments.map((appointment) => (
                         <AppointmentMobileCard
                           key={appointment.id}
                           appointment={appointment}
+                          locale={locale}
                           onDetails={() => setSelectedAppointment(appointment)}
                           {...actionProps}
                         />
                       ))}
                     </div>
-                    <div className="hidden md:block">
+                    <div className="hidden lg:block">
                       <AppointmentsTable
                         appointments={orderedAppointments}
+                        locale={locale}
                         onDetails={setSelectedAppointment}
                         {...actionProps}
                       />
