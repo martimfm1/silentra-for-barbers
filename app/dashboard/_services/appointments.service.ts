@@ -147,6 +147,20 @@ export const appointmentService = {
     return { data: data as Client[], error };
   },
 
+  async getClientHistory(barbershopId: string, clientId: string) {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select(
+        'id, date_hour, status, payment_method, payment_status, services(name, price), professionals(name)',
+      )
+      .eq('barbershop_id', barbershopId)
+      .eq('client_id', clientId)
+      .order('date_hour', { ascending: false })
+      .limit(100);
+
+    return { data: data ?? [], error };
+  },
+
   async createClient(payload: {
     barbershop_id: string;
     name_complete: string;
