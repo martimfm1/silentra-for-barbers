@@ -159,7 +159,7 @@ export const currentPrivacyFeatureSections = {
       title:
         '19. Fornecedores, conservação e transferências — 1 de novembro de 2026',
       paragraphs: [
-        'Consoante a funcionalidade utilizada e o consentimento dado, podem intervir fornecedores de alojamento e infraestrutura (incluindo Vercel e Supabase), medição (Vercel Analytics/Speed Insights), gestão de etiquetas (Google Tag Manager), medição de marketing (Whop), pagamentos (Stripe) e comunicações por email (Brevo). Cada fornecedor recebe apenas os dados necessários à função técnica que presta, de acordo com a configuração e os contratos aplicáveis.',
+        'Consoante a funcionalidade utilizada e o consentimento dado, podem intervir fornecedores de alojamento e infraestrutura (incluindo Vercel e Supabase), armazenamento de objetos (AWS S3, quando configurado), medição (Vercel Analytics/Speed Insights), gestão de etiquetas (Google Tag Manager), medição de marketing (Whop), pagamentos (Stripe) e comunicações por email (Brevo). Cada fornecedor recebe apenas os dados necessários à função técnica que presta, de acordo com a configuração e os contratos aplicáveis.',
         'Alguns fornecedores podem tratar dados fora do Espaço Económico Europeu. Quando tal ocorrer, o tratamento deve assentar num mecanismo de transferência permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, conforme aplicável. A localização concreta pode variar de acordo com o serviço e a configuração da conta.',
         'Os dados são conservados durante o tempo necessário à finalidade, à prestação do serviço, à segurança, à resolução de litígios e ao cumprimento de obrigações legais. Os registos de consentimento e faturação podem ser mantidos pelo período necessário para demonstrar escolhas, cumprir obrigações e responder a pedidos ou reclamações.',
       ],
@@ -198,7 +198,7 @@ export const currentPrivacyFeatureSections = {
     {
       title: '19. Providers, retention, and transfers — November 1, 2026',
       paragraphs: [
-        'Depending on the feature used and consent granted, providers may include hosting and infrastructure (including Vercel and Supabase), measurement (Vercel Analytics/Speed Insights), tag management (Google Tag Manager), marketing measurement (Whop), payments (Stripe), and email communications (Brevo). Each provider receives only the data needed for its technical function, according to configuration and applicable agreements.',
+        'Depending on the feature used and consent granted, providers may include hosting and infrastructure (including Vercel and Supabase), object storage (AWS S3, when configured), measurement (Vercel Analytics/Speed Insights), tag management (Google Tag Manager), marketing measurement (Whop), payments (Stripe), and email communications (Brevo). Each provider receives only the data needed for its technical function, according to configuration and applicable agreements.',
         'Some providers may process data outside the European Economic Area. Where this occurs, processing must rely on a transfer mechanism permitted under the GDPR, such as an adequacy decision or appropriate safeguards, as applicable. The actual location may vary by service and account configuration.',
         'Data is retained for as long as necessary for its purpose, service delivery, security, dispute resolution, and legal obligations. Consent and billing records may be retained for as long as necessary to demonstrate choices, meet obligations, and respond to requests or complaints.',
       ],
