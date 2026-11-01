@@ -24,6 +24,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
     const [
       { data: client, error: clientError },
       { data: appointments, error: appointmentError },
+      { data: upcomingAppointments, error: upcomingAppointmentError },
       { data: notes },
       { data: tags },
     ] = await Promise.all([
@@ -43,8 +44,20 @@ async function GET__unobserved(req: Request, { params }: Params) {
         )
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId)
+        .lte('date_hour', new Date().toISOString())
         .order('date_hour', { ascending: false })
         .limit(100),
+      t.admin
+        .from('appointments')
+        .select(
+          'id, date_hour, status, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name,price), professionals(name)',
+        )
+        .eq('barbershop_id', t.barbershopId)
+        .eq('client_id', clientId)
+        .in('status', ['pending', 'scheduled'])
+        .gte('date_hour', new Date().toISOString())
+        .order('date_hour', { ascending: true })
+        .limit(20),
       t.admin
         .from('client_notes')
         .select('id, content, author_id, created_at, updated_at')
@@ -65,15 +78,16 @@ async function GET__unobserved(req: Request, { params }: Params) {
       );
     if (!client)
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
-    if (appointmentError)
+    if (appointmentError || upcomingAppointmentError)
       return NextResponse.json(
-        { error: 'Failed to load client history' },
+        { error: 'Failed to load client bookings' },
         { status: 500 },
       );
     return NextResponse.json(
       {
         client,
         appointments: appointments ?? [],
+        upcomingAppointments: upcomingAppointments ?? [],
         notes: notes ?? [],
         tags: tags ?? [],
       },
