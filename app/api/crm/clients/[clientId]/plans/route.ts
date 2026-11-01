@@ -10,6 +10,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ clientId: string }> };
+type AdminClient = Awaited<ReturnType<typeof requireModuleContext>>['admin'];
 type PlanStatus = 'active' | 'paused' | 'cancelled';
 type PaymentMethod = 'cash' | 'mbway' | 'transfer' | 'card' | 'other';
 
@@ -99,7 +100,7 @@ function validPaymentMethod(value: unknown): PaymentMethod | null {
     : null;
 }
 
-async function validateClient(admin: any, clientId: string, barbershopId: string) {
+async function validateClient(admin: AdminClient, clientId: string, barbershopId: string) {
   const { data, error } = await admin
     .from('users')
     .select('id')
@@ -212,28 +213,32 @@ async function GET__unobserved(req: Request, { params }: Params) {
       const period = currentBillingPeriod(activePlan.start_date, new Date());
       const periodStart = toDateOnly(period.start);
       const periodEnd = toDateOnly(period.end);
-      const [usageResult, paymentResult, paymentHistoryResult] = await Promise.all([
-        period.started
-          ? tenant.admin
-              .from('appointments')
-              .select('id, service_id')
-              .eq('barbershop_id', tenant.barbershopId)
-              .eq('client_id', clientId)
-              .eq('status', 'completed')
-              .gte('date_hour', `${periodStart}T00:00:00.000Z`)
-              .lt('date_hour', `${periodEnd}T00:00:00.000Z`)
-              .then((result: any) => result)
-          : Promise.resolve({ data: [], error: null }),
-        period.started
-          ? tenant.admin
-              .from('client_plan_payments')
-              .select('id, period_start, period_end, amount, status, payment_method, paid_at')
-              .eq('barbershop_id', tenant.barbershopId)
-              .eq('client_id', clientId)
-              .eq('plan_id', activePlan.id)
-              .eq('period_start', periodStart)
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null }),
+      let usageData: Array<{ service_id: string | null }> = [];
+      if (period.started) {
+        const usageResult = await tenant.admin
+          .from('appointments')
+          .select('id, service_id')
+          .eq('barbershop_id', tenant.barbershopId)
+          .eq('client_id', clientId)
+          .eq('status', 'completed')
+          .gte('date_hour', `${periodStart}T00:00:00.000Z`)
+          .lt('date_hour', `${periodEnd}T00:00:00.000Z`);
+        if (usageResult.error) {
+          console.error('[CRM_CLIENT_PLANS_USAGE_ERROR]', usageResult.error.code ?? 'UNKNOWN');
+          return NextResponse.json({ error: 'Não foi possível carregar a utilização do plano.' }, { status: 503 });
+        }
+        usageData = (usageResult.data ?? []) as Array<{ service_id: string | null }>;
+      }
+
+      const [paymentResult, paymentHistoryResult] = await Promise.all([
+        tenant.admin
+          .from('client_plan_payments')
+          .select('id, period_start, period_end, amount, status, payment_method, paid_at')
+          .eq('barbershop_id', tenant.barbershopId)
+          .eq('client_id', clientId)
+          .eq('plan_id', activePlan.id)
+          .eq('period_start', periodStart)
+          .maybeSingle(),
         tenant.admin
           .from('client_plan_payments')
           .select('id, period_start, period_end, amount, status, payment_method, paid_at')
@@ -244,16 +249,17 @@ async function GET__unobserved(req: Request, { params }: Params) {
           .limit(6),
       ]);
 
-      if (usageResult.error || paymentResult.error || paymentHistoryResult.error) {
-        console.error('[CRM_CLIENT_PLANS_USAGE_ERROR]', usageResult.error?.code ?? paymentResult.error?.code ?? paymentHistoryResult.error?.code ?? 'UNKNOWN');
-        return NextResponse.json({ error: 'Não foi possível carregar a utilização do plano.' }, { status: 503 });
+      if (paymentResult.error || paymentHistoryResult.error) {
+        console.error('[CRM_CLIENT_PLANS_PAYMENT_ERROR]', paymentResult.error?.code ?? paymentHistoryResult.error?.code ?? 'UNKNOWN');
+        return NextResponse.json({ error: 'Não foi possível carregar os pagamentos do plano.' }, { status: 503 });
       }
 
       const allowedServices = Array.isArray(activePlan.service_ids)
         ? new Set(activePlan.service_ids as string[])
         : new Set<string>();
-      const used = (usageResult.data ?? []).filter((appointment: { service_id?: string | null }) =>
-        allowedServices.size === 0 || (appointment.service_id && allowedServices.has(appointment.service_id)),
+      const used = usageData.filter((appointment) =>
+        allowedServices.size === 0 ||
+        (appointment.service_id && allowedServices.has(appointment.service_id)),
       ).length;
       enrichedPlans = enrichedPlans.map((plan) =>
         plan.id === activePlan.id
@@ -263,7 +269,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
               remaining_appointments: Math.max(0, Number(plan.included_appointments) - used),
               period_start: periodStart,
               period_end: periodEnd,
-              current_payment: paymentResult.data ?? null,
+              current_payment: period.started ? paymentResult.data ?? null : null,
               payment_history: paymentHistoryResult.data ?? [],
             }
           : plan,
