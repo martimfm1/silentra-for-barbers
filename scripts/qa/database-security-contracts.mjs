@@ -17,6 +17,9 @@ const privateHelperHardening = await read(
 const loyaltyRedemptionHardening = await read(
   'supabase/migrations/20261101230417_fix_loyalty_redemption_api.sql',
 );
+const teamMemberHardening = await read(
+  'supabase/migrations/20261101233000_harden_team_member_management_rpc.sql',
+);
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
@@ -119,6 +122,32 @@ assert.doesNotMatch(
   loyaltyRedemptionHardening,
   /to authenticated/i,
   'The redemption RPC must not be executable by authenticated users.',
+);
+
+assert.match(
+  teamMemberHardening,
+  /v_actor_role <> 'owner'[\s\S]*team_permission_required/i,
+  'Only the tenant owner may change team roles and permissions.',
+);
+assert.match(
+  teamMemberHardening,
+  /p_permissions is not null and jsonb_typeof\(p_permissions\) <> 'object'/i,
+  'Team permissions must be a JSON object.',
+);
+assert.match(
+  teamMemberHardening,
+  /jsonb_each\(v_permissions\)[\s\S]*jsonb_typeof\(permission_entry\.value\) <> 'boolean'/i,
+  'Team permission values must be booleans.',
+);
+assert.match(
+  teamMemberHardening,
+  /permissions\.user_id = p_user_id[\s\S]*permissions\.barbershop_id = v_shop/i,
+  'Removing a team member must scope permission cleanup to the same tenant.',
+);
+assert.match(
+  teamMemberHardening,
+  /v_target_role = 'client'[\s\S]*clients_are_not_team_members/i,
+  'The team removal RPC must not detach CRM clients.',
 );
 
 assert.match(
