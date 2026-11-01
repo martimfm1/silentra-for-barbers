@@ -9,10 +9,13 @@ const initialHardening = await read(
   'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
 const appointmentUpdateHardening = await read(
-  'supabase/migrations/20261101230500_harden_appointment_update_rls.sql',
+  'supabase/migrations/20261101230103_harden_appointment_update_rls.sql',
 );
 const privateHelperHardening = await read(
-  'supabase/migrations/20261101231000_move_tenant_permission_helper_private.sql',
+  'supabase/migrations/20261101230225_move_tenant_permission_helper_private.sql',
+);
+const loyaltyRedemptionHardening = await read(
+  'supabase/migrations/20261101230417_fix_loyalty_redemption_api.sql',
 );
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
@@ -98,6 +101,27 @@ assert.match(
 );
 
 assert.match(
+  loyaltyRedemptionHardening,
+  /drop function if exists public\.redeem_loyalty_reward\([\s\S]*timestamptz\s*\)/i,
+  'The obsolete five-argument redemption RPC must be removed.',
+);
+assert.match(
+  loyaltyRedemptionHardening,
+  /p_token_encrypted text[\s\S]*p_code_encrypted text/i,
+  'The current redemption RPC must persist encrypted voucher recovery material.',
+);
+assert.match(
+  loyaltyRedemptionHardening,
+  /grant execute on function public\.redeem_loyalty_reward\([\s\S]*to service_role/i,
+  'Only the server-side service role may execute the redemption RPC.',
+);
+assert.doesNotMatch(
+  loyaltyRedemptionHardening,
+  /to authenticated/i,
+  'The redemption RPC must not be executable by authenticated users.',
+);
+
+assert.match(
   bookingApi,
   /create_booking_atomic/,
   'Public booking must keep using the server-side atomic booking RPC.',
@@ -109,5 +133,5 @@ assert.match(
 );
 
 console.log(
-  '[DATABASE_SECURITY_QA] tenant-scoped appointments, protected users and private permission helper passed',
+  '[DATABASE_SECURITY_QA] tenant RLS, protected account fields, private permission helper and loyalty redemption contracts passed',
 );
