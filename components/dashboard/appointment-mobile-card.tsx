@@ -141,6 +141,7 @@ export function AppointmentMobileCard({
         <AppointmentActions
           appointment={appointment}
           onDetails={onDetails}
+          locale={locale}
           {...actionProps}
         />
       </div>
