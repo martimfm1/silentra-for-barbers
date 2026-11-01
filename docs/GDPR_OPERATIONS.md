@@ -89,7 +89,7 @@ Documentação pública criada:
 - `/subprocessors`: lista pública de fornecedores conhecidos, a confirmar contra os contratos e a configuração efetivamente ativa.
 
 Limitações que permanecem:
-- A identificação jurídica completa da entidade exploradora (denominação, morada e NIF) tem de ser configurada em `NEXT_PUBLIC_LEGAL_ENTITY_NAME`, `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS` e `NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID`. Não inventar estes dados.
+- A identificação pública da entidade exploradora tem de ser configurada com a denominação legal, morada geográfica e NIF em `NEXT_PUBLIC_LEGAL_ENTITY_NAME`, `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS` e `NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID`. Quando aplicável, configurar também o número de registo em `NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION` e o telefone em `NEXT_PUBLIC_LEGAL_ENTITY_PHONE`. Não inventar estes dados.
 - O DPA publicado é um modelo de trabalho; deve ser revisto, completado com a identificação das partes e aceite antes de servir como acordo contratual.
 - A lista de subprocessadores deve ser reconciliada com todos os fornecedores e etiquetas realmente ativos, contratos, localizações e mecanismos de transferência.
 - Os pedidos de exportação e eliminação continuam a ser tratados manualmente. Não anunciar uma função automática até estar implementada, testada e documentada.
