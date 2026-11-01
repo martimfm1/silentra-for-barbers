@@ -37,6 +37,7 @@ type Props = {
   handleDeleteBooking: (id: string, rejectPrepayment?: boolean) => void | Promise<void>;
   compact?: boolean;
   onDetails?: () => void;
+  locale?: string;
 };
 
 export function AppointmentActions({
@@ -54,9 +55,13 @@ export function AppointmentActions({
   handleDeleteBooking,
   compact = false,
   onDetails,
+  locale = 'pt',
 }: Props) {
+  const isEnglish = locale === 'en';
   const name =
-    appointment.users?.name_complete || appointment.manual_name || 'Cliente';
+    appointment.users?.name_complete ||
+    appointment.manual_name ||
+    (isEnglish ? 'Customer' : 'Cliente');
   const isAddingClient = addingClientAppointmentId === appointment.id;
   const buttonSize = compact ? 'h-8 px-3' : 'min-h-[44px] w-full';
 
@@ -72,7 +77,7 @@ export function AppointmentActions({
           onClick={onDetails}
           className={`${compact ? 'h-8 px-3' : 'min-h-[44px] w-full'} border border-white/10 bg-white/[0.03] text-xs font-medium text-zinc-300 hover:bg-white/[0.08]`}
         >
-          Ver detalhes
+          {isEnglish ? 'View details' : 'Ver detalhes'}
         </Button>
       )}
 
@@ -83,7 +88,9 @@ export function AppointmentActions({
           className={`${buttonSize} border border-blue-500/20 bg-blue-500/10 text-xs font-medium text-blue-400 hover:bg-blue-500/20`}
         >
           <Check className="mr-1.5 size-4" aria-hidden="true" />
-          {appointment.payment_status === 'awaiting_review' ? 'Validar MB WAY' : 'Confirmar'}
+          {appointment.payment_status === 'awaiting_review'
+            ? isEnglish ? 'Review MB WAY' : 'Validar MB WAY'
+            : isEnglish ? 'Confirm' : 'Confirmar'}
         </Button>
       )}
 
@@ -99,16 +106,16 @@ export function AppointmentActions({
               className={`${buttonSize} border border-emerald-500/20 bg-emerald-500/10 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20`}
             >
               <Check className="mr-1.5 size-4" aria-hidden="true" />
-              Concluir
+              {isEnglish ? 'Complete' : 'Concluir'}
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[92vw] max-w-[420px] rounded-xl border-white/10 bg-zinc-950 p-5 text-white">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold text-zinc-100">
-                Concluir atendimento
+                {isEnglish ? 'Complete appointment' : 'Concluir atendimento'}
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-400">
-                Finaliza o atendimento de{' '}
+                {isEnglish ? 'Complete the appointment for ' : 'Finaliza o atendimento de '}{' '}
                 <strong className="text-zinc-200">{name}</strong> e escolhe como
                 foi recebido o pagamento.
               </DialogDescription>
@@ -119,14 +126,14 @@ export function AppointmentActions({
                   htmlFor={`prod-desc-${appointment.id}`}
                   className="text-xs font-medium text-zinc-300"
                 >
-                  Produto extra{' '}
-                  <span className="text-zinc-500">(opcional)</span>
+                  {isEnglish ? 'Extra product ' : 'Produto extra '}{' '}
+                  <span className="text-zinc-500">({isEnglish ? 'optional' : 'opcional'})</span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     id={`prod-desc-${appointment.id}`}
                     type="text"
-                    placeholder="Ex.: Pomada"
+                    placeholder={isEnglish ? 'E.g. Styling clay' : 'Ex.: Pomada'}
                     className="min-h-[44px] flex-1 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={descriptionProducts}
                     onChange={(event) =>
@@ -139,7 +146,7 @@ export function AppointmentActions({
                     min="0"
                     step="0.01"
                     placeholder="0,00 €"
-                    aria-label="Valor do produto em euros"
+                    aria-label={isEnglish ? 'Product price in euros' : 'Valor do produto em euros'}
                     className="min-h-[44px] w-24 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={valueProducts}
                     onChange={(event) =>
@@ -155,15 +162,17 @@ export function AppointmentActions({
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold text-zinc-200">
-                      Cliente
+                      {isEnglish ? 'Customer' : 'Cliente'}
                     </p>
                     <p className="text-[11px] text-zinc-500">
-                      Guarda os dados desta marcação na tua lista.
+                      {isEnglish
+                        ? 'Save this booking contact to your client list.'
+                        : 'Guarda os dados desta marcação na tua lista.'}
                     </p>
                   </div>
                   {appointment.client_id ? (
                     <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
-                      Já é cliente
+                      {isEnglish ? 'Already a client' : 'Já é cliente'}
                     </span>
                   ) : null}
                 </div>
@@ -180,14 +189,14 @@ export function AppointmentActions({
                     <UserPlus className="mr-2 size-4" />
                   )}
                   {appointment.client_id
-                    ? 'Cliente já está na lista'
-                    : 'Adicionar à lista de clientes'}
+                    ? isEnglish ? 'Already in client list' : 'Cliente já está na lista'
+                    : isEnglish ? 'Add to client list' : 'Adicionar à lista de clientes'}
                 </Button>
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-zinc-300">
-                  Como foi pago?
+                  {isEnglish ? 'How was it paid?' : 'Como foi pago?'}
                 </span>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
@@ -195,7 +204,7 @@ export function AppointmentActions({
                     onClick={() => finalizeBooking(appointment.id, 'cash')}
                     className="min-h-[44px] border border-white/10 bg-white/5 text-xs text-zinc-100 hover:bg-white/10"
                   >
-                    Dinheiro
+                    {isEnglish ? 'Cash' : 'Dinheiro'}
                   </Button>
                   <Button
                     variant="ghost"
@@ -209,7 +218,7 @@ export function AppointmentActions({
                     onClick={() => finalizeBooking(appointment.id, 'card')}
                     className="min-h-[44px] border border-white/10 bg-white/5 text-xs text-zinc-100 hover:bg-white/10"
                   >
-                    Cartão
+                    {isEnglish ? 'Card' : 'Cartão'}
                   </Button>
                 </div>
               </div>
@@ -225,7 +234,11 @@ export function AppointmentActions({
             <Button
               variant="ghost"
               size="icon"
-              aria-label={appointment.payment_status === 'awaiting_review' ? `Rejeitar pré-pagamento de ${name}` : `Eliminar agendamento de ${name}`}
+              aria-label={
+                appointment.payment_status === 'awaiting_review'
+                  ? isEnglish ? `Reject prepayment from ${name}` : `Rejeitar pré-pagamento de ${name}`
+                  : isEnglish ? `Delete booking for ${name}` : `Eliminar agendamento de ${name}`
+              }
               className={`${compact ? 'h-8 w-8' : 'min-h-[44px] min-w-[44px]'} rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20`}
             >
               <Trash2 className="size-4" aria-hidden="true" />
@@ -233,17 +246,21 @@ export function AppointmentActions({
           </AlertDialogTrigger>
           <AlertDialogContent className="w-[92vw] max-w-[400px] rounded-xl border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>{appointment.payment_status === 'awaiting_review' ? 'Rejeitar este pré-pagamento?' : 'Eliminar esta marcação?'}</AlertDialogTitle>
+              <AlertDialogTitle>{appointment.payment_status === 'awaiting_review'
+                ? isEnglish ? 'Reject this prepayment?' : 'Rejeitar este pré-pagamento?'
+                : isEnglish ? 'Delete this booking?' : 'Eliminar esta marcação?'}</AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-row justify-end gap-2">
               <AlertDialogCancel className="m-0 min-h-[44px] flex-1 border-white/10 bg-transparent text-white">
-                Manter
+                {isEnglish ? 'Keep booking' : 'Manter'}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => handleDeleteBooking(appointment.id, appointment.payment_status === 'awaiting_review')}
                 className="m-0 min-h-[44px] flex-1 bg-red-600 text-white hover:bg-red-500"
               >
-                {appointment.payment_status === 'awaiting_review' ? 'Rejeitar pedido' : 'Eliminar'}
+                {appointment.payment_status === 'awaiting_review'
+                  ? isEnglish ? 'Reject request' : 'Rejeitar pedido'
+                  : isEnglish ? 'Delete' : 'Eliminar'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
