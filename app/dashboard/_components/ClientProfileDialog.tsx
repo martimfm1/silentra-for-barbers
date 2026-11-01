@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   CalendarDays,
-  CheckCircle2,
   Pencil,
   Clock3,
   Mail,
