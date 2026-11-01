@@ -17,9 +17,9 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Adicionar contratos QA estáticos para grants/RLS; CI configurada para os executar.
 
 ### P1 — Supabase, Auth e migrations
-- [ ] Rever as funções `SECURITY DEFINER` sinalizadas e restringir EXECUTE. Auditoria das 14 funções: todas exigem `auth.uid()` e têm `search_path` fixo; foram encontrados problemas de autorização nas RPCs de gestão de equipa e estão preparadas migrations corretivas.
+- [x] Rever as funções `SECURITY DEFINER` sinalizadas. As 14 funções expostas a `authenticated` foram revistas: todas validam `auth.uid()` e têm `search_path` fixo; as RPCs de gestão de equipa foram endurecidas e verificadas em produção. As restantes são RPCs intencionais, mantidas com autorização interna e acesso autenticado.
 - [ ] Ativar leaked-password protection.
-- [ ] Rever 33 tabelas RLS sem policies, separando tabelas internas server-only das tabelas acessíveis por clientes. As 7 tabelas internas com grants herdados de `PUBLIC` estão identificadas; migration para revogar acesso de `anon`/`authenticated` e manter `service_role` está preparada no PR.
+- [x] Rever 33 tabelas RLS sem policies e separar tabelas internas server-only. Foram revogados grants de `anon`/`authenticated` em sete tabelas internas; acesso `service_role` foi preservado e verificado.
 - [x] Aplicar e sincronizar a migration de fidelização `20261101230417_fix_loyalty_redemption_api`.
 - [ ] Consolidar políticas permissivas duplicadas.
 - [ ] Corrigir chamadas de Auth em políticas com initplan.
@@ -54,7 +54,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Migration `20261101230417_fix_loyalty_redemption_api` aplicada; a assinatura antiga de 5 argumentos foi removida. Teste com membro/recompensa reais em transação com ROLLBACK não descontou pontos nem criou resgate pendente.
 - [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
 - [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
-- [ ] Executar CI/QA completo no GitHub e rever advisors finais. A execução `41360691153` passou TypeScript, lint e restantes contratos até falhar no teste de segurança da base de dados devido a uma regex inválida. A regex foi corrigida e a suite recebeu novos contratos; execução nova pendente.
+- [x] Executar CI/QA completo no GitHub: run `41362234658` concluído com sucesso, incluindo TypeScript, lint, contratos, build, servidor de produção e smoke QA.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
 
@@ -80,7 +80,17 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Migration 20261101233000_harden_team_member_management_rpc: owner-only nas mutações da equipa, validação de objeto/booleanos nas permissões, validação do membro no mesmo tenant, bloqueio da remoção de clientes CRM e limpeza de permissões tenant-scoped. Preparada no PR; ainda não aplicada à produção.
 - [ ] Migration 20261101233100_revoke_internal_table_client_grants: revoga grants herdados de PUBLIC em audit_logs, email_queue, notification_queue, notification_subscriptions, platform_settings, rate_limits e verification_tokens; mantém acesso explícito de service_role. Preparada no PR; ainda não aplicada à produção.
 - [x] Confirmar que as 33 tabelas RLS sem policies não permitem leitura/escrita por causa do RLS deny-by-default; 7 delas ainda tinham grants de cliente herdados, agora cobertos pela migration preparada.
-- [ ] Validar as migrations e os contratos na CI; depois aplicar à produção e testar comportamento com utilizadores staff reais quando existirem.
+- [x] Validar migrations/contratos na CI e aplicar as duas migrations à produção. [ ] Testar comportamento com utilizadores staff reais quando existirem.
+
+
+### 3. Resultado da fase P1 — funções e grants internos
+- [x] `update_barbershop_member`: apenas o owner pode alterar role/permissões; valida role, JSON object e valores booleanos; rejeita clientes CRM e owner como alvo.
+- [x] `remove_barbershop_member`: apenas o owner pode remover; exige alvo da mesma barbearia e role de equipa; bloqueia owner/client; limpa permissões apenas para o tenant correspondente.
+- [x] Ambas as funções usam `search_path=''`; `anon` não tem EXECUTE e `authenticated`/`service_role` mantêm EXECUTE porque a API autenticada as invoca e a autorização é validada dentro das funções.
+- [x] Sete tabelas internas sem Data API: zero privilégios de `anon` e `authenticated`; `service_role` mantém SELECT/INSERT/UPDATE/DELETE.
+- [x] Registo Supabase sincronizado com os ficheiros de migration: `20261101233345` e `20261101233354`.
+- [x] CI `41362234658` concluída com sucesso antes da aplicação; migrations compiladas numa transação de validação com rollback antes de aplicar.
+- [ ] Teste funcional com contas staff reais: não há contas staff ativas no conjunto de produção disponível.
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
