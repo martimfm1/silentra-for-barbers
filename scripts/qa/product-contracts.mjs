@@ -780,7 +780,10 @@ const checks = [
       source.includes('bookingDemo') &&
       source.includes("setLocale('pt')") &&
       source.includes("setLocale('en')") &&
-      source.includes('fixed inset-x-4 bottom-4') &&
+      source.includes('fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))]') &&
+      source.includes('grid-cols-[1.02fr_0.98fr]') &&
+      source.includes('aspect-[4/4.7]') &&
+      source.includes('group-hover:scale-[1.04]') &&
       !source.includes('fetch(') &&
       !source.includes('/api/appointments'),
   },

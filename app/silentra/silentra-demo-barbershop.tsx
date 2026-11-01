@@ -374,48 +374,90 @@ export default function SilentraDemoBarbershop() {
         ) : null}
       </header>
 
-      <section className="relative isolate min-h-[680px] overflow-hidden border-b border-white/[0.06] sm:min-h-[760px] lg:min-h-[790px]">
+      <section className="relative isolate overflow-hidden border-b border-white/[0.06] bg-[#11100e]">
         <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{ backgroundImage: 'url("' + PHOTO.hero + '")', backgroundPosition: 'center 48%' }}
-          role="img"
-          aria-label={locale === 'en' ? 'Warm, intimate barbershop interior' : 'Interior acolhedor de uma barbearia'}
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-40 -top-36 size-[620px] rounded-full bg-[#a66c3f]/[0.09] blur-[110px]"
         />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(13,12,10,0.98)_0%,rgba(13,12,10,0.91)_38%,rgba(13,12,10,0.43)_72%,rgba(13,12,10,0.2)_100%)]" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,#11100e_0%,transparent_34%)]" />
-        <div className="mx-auto flex min-h-[680px] w-full max-w-[1440px] items-center px-5 py-20 sm:min-h-[760px] sm:px-8 lg:min-h-[790px] lg:px-14">
-          <div className="max-w-[760px]">
-            <div className="mb-7 inline-flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d9b58f]">
-              <span className="h-px w-9 bg-[#c99560]" />
+        <div className="mx-auto grid min-h-[760px] w-full max-w-[1440px] items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 lg:px-14 lg:py-24">
+          <div className="relative z-10 max-w-[720px]">
+            <div className="mb-7 inline-flex items-center gap-3 border border-[#c99560]/25 bg-[#c99560]/[0.06] px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#d9b58f] sm:text-[10px]">
+              <span className="size-1.5 rounded-full bg-[#d5a46f]" />
               {copy.eyebrow}
             </div>
-            <h1 className="font-serif text-[clamp(3.5rem,8.4vw,7.6rem)] leading-[0.91] tracking-[-0.055em] text-[#f4eee4]">
+            <h1 className="max-w-[760px] font-serif text-[clamp(3.35rem,8vw,7.2rem)] leading-[0.9] tracking-[-0.06em] text-[#f4eee4]">
               <span className="block">{copy.heroTitleA}</span>
               <span className="mt-2 block italic text-[#d2a475]">{copy.heroTitleB}</span>
             </h1>
-            <p className="mt-8 max-w-[520px] text-base leading-8 text-[#d1c7bb] sm:text-lg">
+            <p className="mt-8 max-w-[520px] text-base leading-8 text-[#c5b9aa] sm:text-lg sm:leading-9">
               {copy.heroDescription}
             </p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="#marcacao" onClick={scrollToBooking} className="inline-flex min-h-14 items-center justify-center gap-3 bg-[#c99560] px-7 text-sm font-bold text-[#17120e] transition hover:bg-[#ddb17f]">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="#marcacao"
+                onClick={scrollToBooking}
+                className="group inline-flex min-h-14 items-center justify-center gap-3 bg-[#c99560] px-7 text-xs font-bold uppercase tracking-[0.12em] text-[#17120e] transition hover:bg-[#ddb17f]"
+              >
                 <CalendarDays className="size-4" aria-hidden="true" />
                 {copy.book}
-                <ArrowUpRight className="size-4" aria-hidden="true" />
+                <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
               </a>
-              <a href="#servicos" className="inline-flex min-h-14 items-center justify-center gap-3 border border-white/20 bg-black/15 px-7 text-sm font-semibold text-[#f0e8dd] backdrop-blur-sm transition hover:border-[#d2a475]/60 hover:bg-white/[0.06]">
+              <a
+                href="#servicos"
+                className="inline-flex min-h-14 items-center justify-center gap-3 border border-white/15 bg-white/[0.025] px-7 text-xs font-semibold uppercase tracking-[0.1em] text-[#eee5da] transition hover:border-[#d2a475]/55 hover:bg-white/[0.06]"
+              >
                 {copy.explore}
-                <ArrowDown className="size-4" aria-hidden="true" />
+                <ArrowDown className="size-4 text-[#d2a475]" aria-hidden="true" />
               </a>
             </div>
-            <p className="mt-8 text-[10px] uppercase tracking-[0.18em] text-[#aa9b89]">{copy.heroFoot}</p>
+            <div className="mt-11 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-white/[0.09] pt-6 text-[9px] font-semibold uppercase tracking-[0.17em] text-[#a99a88] sm:text-[10px]">
+              <span className="inline-flex items-center gap-2">
+                <Scissors className="size-3.5 text-[#c99560]" aria-hidden="true" />
+                {copy.heroFoot}
+              </span>
+              <span className="hidden h-4 w-px bg-white/15 sm:block" />
+              <span className="inline-flex items-center gap-2">
+                <Clock3 className="size-3.5 text-[#c99560]" aria-hidden="true" />
+                {locale === 'en' ? 'Time well spent' : 'Tempo bem aproveitado'}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-[570px] pb-7 pl-3 sm:pl-6 lg:pb-10">
+            <div className="relative aspect-[4/4.7] overflow-hidden border border-white/10 bg-[#28211a] shadow-[0_35px_100px_rgba(0,0,0,0.42)]">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition duration-700 hover:scale-[1.025]"
+                style={{ backgroundImage: 'url("' + PHOTO.hero + '")', backgroundPosition: 'center 48%' }}
+                role="img"
+                aria-label={locale === 'en' ? 'Warm, intimate barbershop interior' : 'Interior acolhedor de uma barbearia'}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#11100e]/75 via-transparent to-black/10" />
+              <div className="absolute left-5 top-5 border border-white/25 bg-black/25 px-3 py-2 text-[8px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md sm:left-7 sm:top-7">
+                SILENTRA / BARBERSHOP
+              </div>
+              <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 sm:bottom-7 sm:left-7 sm:right-7">
+                <span className="font-serif text-2xl italic text-[#f5e9d9] sm:text-3xl">The art of the detail.</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/70">01 — 03</span>
+              </div>
+            </div>
+            <div
+              className="absolute -bottom-1 right-0 aspect-[1.55/1] w-[45%] border-[5px] border-[#11100e] bg-cover bg-center shadow-2xl sm:-right-3 sm:w-[42%]"
+              style={{ backgroundImage: 'url("' + PHOTO.detail + '")' }}
+              role="img"
+              aria-label={locale === 'en' ? 'Barber carefully finishing a client haircut' : 'Barbeiro a finalizar cuidadosamente o corte de um cliente'}
+            />
+            <div className="absolute -left-1 bottom-12 hidden max-w-[185px] border border-[#c99560]/35 bg-[#201a14]/95 p-4 shadow-xl backdrop-blur-md sm:block lg:-left-7">
+              <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#c99560]">{copy.featuredLabel}</p>
+              <p className="mt-2 font-serif text-xl leading-tight text-[#f1e5d7]">{locale === 'en' ? 'A ritual, not a routine.' : 'Um ritual, não uma rotina.'}</p>
+            </div>
           </div>
         </div>
       </section>
 
       <div className="border-b border-white/[0.06] bg-[#171511]">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-1 divide-y divide-white/[0.07] px-5 py-1 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-14">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-1 divide-y divide-white/[0.07] px-5 py-2 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-14">
           {[copy.statOne, copy.statTwo, copy.statThree].map((item, index) => (
-            <div key={item} className="flex min-h-[66px] items-center justify-center gap-3 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-[#c9b9a7] sm:py-3">
+            <div key={item} className="flex min-h-[70px] items-center justify-center gap-3 px-2 text-center text-[9px] font-semibold uppercase tracking-[0.14em] text-[#c9b9a7] sm:min-h-[78px] sm:text-[10px] sm:tracking-[0.2em]">
               <span className="font-serif text-lg italic text-[#b78352]">0{index + 1}</span>
               {item}
             </div>
@@ -556,18 +598,25 @@ export default function SilentraDemoBarbershop() {
           <h2 className="font-serif text-4xl sm:text-6xl">{copy.teamTitle}</h2>
           <p className="mt-6 text-sm leading-7 text-[#bdb2a5]">{copy.teamText}</p>
         </div>
-        <div className="mt-12 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {[
-            { initials: 'RM', name: copy.barberOne, specialty: copy.barberOneText, number: '01' },
-            { initials: 'AC', name: copy.barberTwo, specialty: copy.barberTwoText, number: '02' },
-            { initials: 'MS', name: copy.barberThree, specialty: copy.barberThreeText, number: '03' },
+            { initials: 'RM', name: copy.barberOne, specialty: copy.barberOneText, number: '01', image: PHOTO.detail },
+            { initials: 'AC', name: copy.barberTwo, specialty: copy.barberTwoText, number: '02', image: PHOTO.craft },
+            { initials: 'MS', name: copy.barberThree, specialty: copy.barberThreeText, number: '03', image: PHOTO.hero },
           ].map((barber) => (
-            <article key={barber.initials} className="flex min-h-[260px] flex-col justify-between bg-[#171511] p-7 sm:min-h-[310px] sm:p-9">
-              <div className="flex items-start justify-between">
-                <span className="font-serif text-sm italic text-[#ae8157]">{barber.number}</span>
-                <span className="flex size-14 items-center justify-center border border-[#b88450]/40 bg-[#b88450]/10 font-serif text-lg italic text-[#e0b487]">{barber.initials}</span>
+            <article key={barber.initials} className="group min-w-0 border border-white/10 bg-[#171511] transition-colors hover:border-[#c99560]/35">
+              <div className="relative aspect-[4/4.2] overflow-hidden bg-[#28211a]">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.04]"
+                  style={{ backgroundImage: 'url("' + barber.image + '")' }}
+                  role="img"
+                  aria-label={locale === 'en' ? 'Barber at work' : 'Barbeiro no seu trabalho'}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#171511] via-transparent to-black/10" />
+                <span className="absolute left-5 top-5 border border-white/25 bg-black/25 px-3 py-2 font-serif text-xs italic text-white backdrop-blur-sm">{barber.number}</span>
+                <span className="absolute bottom-4 right-4 flex size-11 items-center justify-center border border-[#d2a475]/45 bg-[#201a14]/75 font-serif text-sm italic text-[#e0b487] backdrop-blur-sm">{barber.initials}</span>
               </div>
-              <div>
+              <div className="p-6 sm:p-7">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#b88450]">{copy.barberRole}</p>
                 <h3 className="mt-2 font-serif text-2xl text-[#f2e9de]">{barber.name}</h3>
                 <p className="mt-3 text-sm leading-6 text-[#a99e92]">{barber.specialty}</p>
@@ -737,7 +786,7 @@ export default function SilentraDemoBarbershop() {
         </div>
       </footer>
 
-      <a href="#marcacao" onClick={scrollToBooking} className="fixed inset-x-4 bottom-4 z-30 inline-flex min-h-12 items-center justify-center gap-2 border border-[#e3bb8b]/30 bg-[#c99560] px-5 text-xs font-bold text-[#17120e] shadow-2xl shadow-black/30 sm:hidden">
+      <a href="#marcacao" onClick={scrollToBooking} className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30 inline-flex min-h-12 items-center justify-center gap-2 border border-[#e3bb8b]/40 bg-[#c99560] px-5 text-xs font-bold text-[#17120e] shadow-2xl shadow-black/40 transition hover:bg-[#ddb17f] sm:hidden">
         <CalendarDays className="size-4" aria-hidden="true" />
         {copy.book}
       </a>
