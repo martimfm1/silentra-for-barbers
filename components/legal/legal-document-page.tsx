@@ -145,7 +145,7 @@ export function LegalDocumentPage({
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-16 pt-5 sm:px-6 sm:pt-8 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/"
+            href="/legal"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-300 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
