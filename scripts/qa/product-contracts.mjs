@@ -852,6 +852,31 @@ const checks = [
       source.includes('permanentRedirect') &&
       source.includes("'/site/barbearia-silentra-ecf1da6c'"),
   },
+  {
+    name: 'Shared loading motion uses layered depth text, pointer spring and reduced-motion support',
+    file: 'components/ui/depth-loading.tsx',
+    test: (source) =>
+      source.includes('DEPTH_LAYERS') &&
+      source.includes('useSpring') &&
+      source.includes('useReducedMotion') &&
+      source.includes("event.pointerType !== 'mouse'") &&
+      source.includes('aria-busy="true"'),
+  },
+  {
+    name: 'Global route loading uses the shared Silentra depth-text animation',
+    file: 'app/loading.tsx',
+    test: (source) =>
+      source.includes("import { DepthLoading } from '@/components/ui/depth-loading'") &&
+      source.includes('<DepthLoading message='),
+  },
+  {
+    name: 'Dashboard loading skeletons reuse the compact Silentra depth-text animation',
+    file: 'app/dashboard/_components/dashboard-skeleton.tsx',
+    test: (source) =>
+      source.includes("import { DepthLoading } from '@/components/ui/depth-loading'") &&
+      source.includes('variant="compact"') &&
+      source.includes('<HeaderSkeleton />'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {
