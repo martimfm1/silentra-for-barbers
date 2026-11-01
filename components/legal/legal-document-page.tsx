@@ -1,18 +1,18 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  BadgeCheck,
   FileText,
   Mail,
-  Sparkles,
+  Printer,
+  Search,
   ShieldCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 type Locale = 'pt' | 'en';
-
 type LocalizedText = Record<Locale, string>;
 
 type LegalSection = {
@@ -44,33 +44,68 @@ type LegalDocumentPageProps = {
   backLabel: LocalizedText;
 };
 
-const SILENTRA_CONTACT_EMAIL = 'silentra.contact@gmail.com';
-
-const normalizeContactText = (value: string) =>
-  value.replace(/contact@silentra\.me/gi, SILENTRA_CONTACT_EMAIL);
+const legalLinks = [
+  { href: '/legal', pt: 'Centro legal', en: 'Legal centre' },
+  { href: '/acceptable-use', pt: 'Utilização aceitável', en: 'Acceptable use' },
+  { href: '/terms', pt: 'Termos e Condições', en: 'Terms and Conditions' },
+  { href: '/privacy', pt: 'Privacidade', en: 'Privacy' },
+  { href: '/cookies', pt: 'Cookies', en: 'Cookies' },
+  { href: '/booking-terms', pt: 'Reservas', en: 'Bookings' },
+  { href: '/billing-policy', pt: 'Faturação', en: 'Billing' },
+  { href: '/dpa', pt: 'Adenda de tratamento (DPA)', en: 'Data Processing Addendum' },
+  { href: '/subprocessors', pt: 'Subprocessadores', en: 'Subprocessors' },
+] as const;
 
 const ui = {
   pt: {
     updated: 'Última atualização',
-    quickFacts: 'Factos rápidos',
+    summary: 'Em resumo',
     contents: 'Nesta página',
     contact: 'Contacto',
-    introBadge: 'Documento legal',
-    goHome: 'Voltar à home',
-    supportHint:
-      'Se precisas de um DPA, revisão jurídica ou clarificação contratual, responde diretamente por email.',
+    introBadge: 'Documentação legal',
+    print: 'Imprimir / guardar PDF',
+    search: 'Pesquisar nesta política',
+    searchPlaceholder: 'Ex.: pagamentos, dados, cancelamento…',
+    sections: 'secções',
+    noResults: 'Não foram encontradas secções com esse termo.',
+    entity: 'Entidade responsável pela plataforma',
+    entityName: 'Denominação legal',
+    entityAddress: 'Morada',
+    entityTaxId: 'NIF',
+    entityRegistration: 'N.º de registo (se aplicável)',
+    entityPhone: 'Telefone',
+    entityMissing: 'A identificação da entidade exploradora ainda não está configurada. Antes da publicação, adiciona a denominação legal, a morada geográfica e o NIF oficiais.',
+    supportHint: 'Para pedidos, esclarecimentos ou exercício de direitos, utiliza o contacto indicado. Não envies palavras-passe, códigos de autenticação ou dados de cartão por email.',
+    allDocuments: 'Todos os documentos',
+    goHome: 'Voltar ao site',
   },
   en: {
     updated: 'Last updated',
-    quickFacts: 'Quick facts',
+    summary: 'At a glance',
     contents: 'On this page',
     contact: 'Contact',
-    introBadge: 'Legal document',
-    goHome: 'Back home',
-    supportHint:
-      'If you need a DPA, legal review, or contractual clarification, reply directly by email.',
+    introBadge: 'Legal documentation',
+    print: 'Print / save PDF',
+    search: 'Search this policy',
+    searchPlaceholder: 'E.g. payments, data, cancellation…',
+    sections: 'sections',
+    noResults: 'No sections match that search.',
+    entity: 'Platform operator',
+    entityName: 'Legal name',
+    entityAddress: 'Address',
+    entityTaxId: 'Tax number',
+    entityRegistration: 'Registration no. (if applicable)',
+    entityPhone: 'Phone',
+    entityMissing: 'The platform operator’s legal identity is not configured yet. Add the official legal name, geographic address, and tax number before making the platform public.',
+    supportHint: 'For requests, questions, or to exercise your rights, use the contact below. Do not email passwords, authentication codes, or card details.',
+    allDocuments: 'All documents',
+    goHome: 'Back to website',
   },
 } satisfies Record<Locale, Record<string, string>>;
+
+function sectionId(index: number) {
+  return `legal-section-${index + 1}`;
+}
 
 export function LegalDocumentPage({
   pageLabel,
@@ -84,224 +119,267 @@ export function LegalDocumentPage({
   backLabel,
 }: LegalDocumentPageProps) {
   const { locale } = useLanguage();
-  const activeLocale = locale === 'en' ? 'en' : 'pt';
+  const activeLocale: Locale = locale === 'en' ? 'en' : 'pt';
   const document = documentByLocale[activeLocale];
   const copy = ui[activeLocale];
-  const contactEmail = SILENTRA_CONTACT_EMAIL;
+  const [search, setSearch] = useState('');
+  const query = search.trim().toLocaleLowerCase(activeLocale);
+  const visibleSections = useMemo(
+    () =>
+      document.sections
+        .map((section, index) => ({ section, index }))
+        .filter(({ section }) => {
+          if (!query) return true;
+          return `${section.title} ${section.paragraphs.join(' ')}`
+            .toLocaleLowerCase(activeLocale)
+            .includes(query);
+        }),
+    [activeLocale, document.sections, query],
+  );
+
+  const entityName = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME || '').trim();
+  const entityAddress =
+    (process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS || '').trim();
+  const entityTaxId = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID || '').trim();
+  const entityRegistration = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION || '').trim();
+  const entityPhone = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_PHONE || '').trim();
+  const hasLegalIdentity = Boolean(entityName && entityAddress && entityTaxId);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-zinc-50 antialiased">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.12),transparent_26%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.09),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_20%)]" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            'linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)',
-          backgroundSize: '72px 72px',
-          maskImage: 'linear-gradient(to_bottom,black,transparent 88%)',
-        }}
-      />
-
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <main className="min-h-screen bg-[#09090b] text-zinc-100 antialiased">
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.13),transparent_65%)]" />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-16 pt-5 sm:px-6 sm:pt-8 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 backdrop-blur-xl transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            href="/legal"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-300 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-4" aria-hidden="true" />
             {backLabel[activeLocale]}
           </Link>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.32em] text-zinc-300 backdrop-blur-xl">
-            <Sparkles className="size-3.5 text-emerald-300" />
+          <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/[0.07] px-3 text-xs font-medium text-violet-200">
+            <ShieldCheck className="size-3.5" aria-hidden="true" />
             {pageLabel[activeLocale]}
-          </div>
+          </span>
         </div>
 
-        <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-[0_24px_100px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <div className="grid gap-0 lg:grid-cols-[1.12fr_0.88fr]">
-            <div className="relative p-6 sm:p-8 lg:p-10">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.34em] text-emerald-200">
-                <ShieldCheck className="size-3.5" />
+        <header className="rounded-3xl border border-white/10 bg-zinc-900/75 p-5 shadow-2xl shadow-black/20 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
                 {copy.introBadge}
-              </div>
-              <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-[-0.06em] text-zinc-50 sm:text-5xl lg:text-7xl lg:leading-[0.94]">
+              </p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
                 {title[activeLocale]}
               </h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-400 sm:text-lg">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
                 {subtitle[activeLocale]}
               </p>
-              {headerAction ? <div className="mt-6">{headerAction}</div> : null}
-              <div className="mt-8 flex flex-wrap gap-3 text-sm text-zinc-300">
-                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
+              <div className="mt-5 flex flex-wrap gap-2 text-xs text-zinc-300">
+                <span className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
                   {copy.updated}: {document.lastUpdated}
                 </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
+                <span className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
                   Silentra for Barbers
                 </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
-                  {contactEmail}
-                </span>
               </div>
+              {headerAction ? <div className="mt-5">{headerAction}</div> : null}
             </div>
-
-            <aside className="border-t border-white/10 bg-black/30 p-6 sm:p-8 lg:border-l lg:border-t-0">
-              <div className="space-y-4">
-                {highlights.map((highlight) => (
-                  <div
-                    key={highlight.label.pt}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"
-                  >
-                    <div className="flex items-start gap-3">
-                      {highlight.icon && (
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-emerald-200 [&>svg]:size-4">
-                          {highlight.icon}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
-                          {highlight.label[activeLocale]}
-                        </p>
-                        <p className="mt-2 text-sm font-medium leading-6 text-zinc-100">
-                          {highlight.value[activeLocale]}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/10 p-5 text-sm leading-6 text-emerald-50/90">
-                <div className="flex items-center gap-2 text-emerald-200">
-                  <Mail className="size-4" />
-                  {supportLabel[activeLocale]}
-                </div>
-                <p className="mt-3 text-zinc-200">{contactEmail}</p>
-                <p className="mt-3 text-zinc-400">{copy.supportHint}</p>
-              </div>
-            </aside>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 print:hidden"
+            >
+              <Printer className="size-4" aria-hidden="true" />
+              {copy.print}
+            </button>
           </div>
+        </header>
+
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label={copy.summary}>
+          {highlights.map((highlight) => (
+            <div
+              key={highlight.label.pt}
+              className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                {highlight.icon ? (
+                  <span className="text-violet-300 [&>svg]:size-4">
+                    {highlight.icon}
+                  </span>
+                ) : null}
+                {highlight.label[activeLocale]}
+              </div>
+              <p className="mt-2 text-sm leading-6 text-zinc-200">
+                {highlight.value[activeLocale]}
+              </p>
+            </div>
+          ))}
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-          <article className="rounded-3xl border border-white/10 bg-zinc-900/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:p-8">
-            <div className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.34em] text-zinc-500">
-                  {copy.contents}
-                </p>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-                  {normalizeContactText(document.intro)}
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                <BadgeCheck className="size-3.5 text-emerald-300" />
-                {document.sections.length}{' '}
-                {activeLocale === 'pt' ? 'secções' : 'sections'}
-              </div>
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
+          <article className="min-w-0 rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7">
+            <div className="border-b border-white/10 pb-5">
+              <p className="text-sm leading-7 text-zinc-300">
+                {document.intro}
+              </p>
+              <label className="mt-5 flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 focus-within:border-violet-400/60 focus-within:ring-2 focus-within:ring-violet-400/20">
+                <Search className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+                <span className="sr-only">{copy.search}</span>
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={copy.searchPlaceholder}
+                  className="min-w-0 flex-1 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-600"
+                />
+                {search ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearch('')}
+                    className="rounded-md px-2 py-1 text-xs text-zinc-400 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                  >
+                    {activeLocale === 'pt' ? 'Limpar' : 'Clear'}
+                  </button>
+                ) : null}
+              </label>
+              <p className="mt-2 text-xs text-zinc-500">
+                {visibleSections.length} {copy.sections}
+              </p>
             </div>
-            <div className="mt-8 space-y-5">
-              {document.sections.map((section, index) => (
-                <section
-                  key={section.title}
-                  id={`section-${index + 1}`}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-5 scroll-mt-24"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xs font-medium text-zinc-200">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <h2 className="text-lg font-semibold tracking-[-0.03em] text-zinc-50 sm:text-xl">
+
+            <div className="mt-5 space-y-4">
+              {visibleSections.length ? (
+                visibleSections.map(({ section, index }) => (
+                  <section
+                    key={section.title}
+                    id={sectionId(index)}
+                    className="scroll-mt-24 rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5"
+                  >
+                    <h2 className="text-base font-semibold leading-6 text-white sm:text-lg">
                       {section.title}
                     </h2>
-                  </div>
-                  <div className="mt-4 space-y-4 text-sm leading-7 text-zinc-400 sm:text-[15px]">
-                    {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph}>{normalizeContactText(paragraph)}</p>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                    <div className="mt-3 space-y-3 text-sm leading-7 text-zinc-300">
+                      {section.paragraphs.map((paragraph, paragraphIndex) => (
+                        <p key={paragraphIndex}>{paragraph}</p>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <p className="rounded-2xl border border-dashed border-white/15 p-6 text-sm text-zinc-400">
+                  {copy.noResults}
+                </p>
+              )}
             </div>
           </article>
 
-          <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/55 p-5 backdrop-blur-xl">
-              <div className="flex items-center gap-2 text-sm font-medium text-zinc-100">
-                <FileText className="size-4 text-emerald-300" />
-                {copy.quickFacts}
-              </div>
-              <dl className="mt-5 space-y-4 text-sm">
-                {highlights.map((highlight) => (
-                  <div
-                    key={highlight.value.pt}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                  >
-                    <dt className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-zinc-500 [&>svg]:size-3.5 [&>svg]:text-zinc-300">
-                      {highlight.icon}
-                      {highlight.label[activeLocale]}
-                    </dt>
-                    <dd className="mt-2 text-sm leading-6 text-zinc-100">
-                      {highlight.value[activeLocale]}
-                    </dd>
-                  </div>
+          <aside className="space-y-4 lg:sticky lg:top-5 print:hidden">
+            <nav
+              aria-label={copy.contents}
+              className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+            >
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
+                <FileText className="size-4 text-violet-300" aria-hidden="true" />
+                {copy.contents}
+              </h2>
+              <details className="mt-3 lg:hidden">
+                <summary className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-zinc-300">
+                  {activeLocale === 'pt' ? 'Ver índice' : 'Show contents'}
+                </summary>
+                <ol className="mt-2 max-h-64 space-y-1 overflow-y-auto">
+                  {document.sections.map((section, index) => (
+                    <li key={section.title}>
+                      <a
+                        href={`#${sectionId(index)}`}
+                        className="block rounded-lg px-2 py-2 text-xs leading-5 text-zinc-400 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                      >
+                        {section.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+              <ol className="mt-3 hidden max-h-[65vh] space-y-1 overflow-y-auto lg:block">
+                {document.sections.map((section, index) => (
+                  <li key={section.title}>
+                    <a
+                      href={`#${sectionId(index)}`}
+                      className="block rounded-lg px-2 py-2 text-xs leading-5 text-zinc-400 transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                    >
+                      {section.title}
+                    </a>
+                  </li>
                 ))}
-              </dl>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/55 p-5 backdrop-blur-xl">
-              <div className="flex items-center gap-2 text-sm font-medium text-zinc-100">
-                <Mail className="size-4 text-emerald-300" />
-                {copy.contact}
-              </div>
-              <p className="mt-4 text-sm leading-6 text-zinc-400">
+              </ol>
+            </nav>
+
+            <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
+              <h2 className="text-sm font-semibold text-white">{copy.contact}</h2>
+              <p className="mt-2 text-xs leading-5 text-zinc-400">
                 {supportLabel[activeLocale]}
               </p>
               <a
-                href={`mailto:${contactEmail}`}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-zinc-100 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                href={`mailto:${supportValue}`}
+                className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 text-sm text-zinc-100 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
               >
-                {contactEmail}
+                <Mail className="size-4" aria-hidden="true" />
+                {supportValue}
               </a>
+              <p className="mt-3 text-xs leading-5 text-zinc-500">{copy.supportHint}</p>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-emerald-500/10 via-white/5 to-transparent p-5 backdrop-blur-xl">
-              <p className="text-xs uppercase tracking-[0.32em] text-emerald-200">
-                Silentra
-              </p>
-              <p className="mt-3 text-sm leading-6 text-zinc-300">
-                {copy.supportHint}
-              </p>
+
+            <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
+              <h2 className="text-sm font-semibold text-white">{copy.entity}</h2>
+              {hasLegalIdentity ? (
+                <dl className="mt-3 space-y-3 text-xs">
+                  <div>
+                    <dt className="text-zinc-500">{copy.entityName}</dt>
+                    <dd className="mt-1 text-zinc-200">{entityName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-zinc-500">{copy.entityAddress}</dt>
+                    <dd className="mt-1 text-zinc-200">{entityAddress}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-zinc-500">{copy.entityTaxId}</dt>
+                    <dd className="mt-1 text-zinc-200">{entityTaxId}</dd>
+                  </div>
+                  {entityRegistration ? (
+                    <div>
+                      <dt className="text-zinc-500">{copy.entityRegistration}</dt>
+                      <dd className="mt-1 text-zinc-200">{entityRegistration}</dd>
+                    </div>
+                  ) : null}
+                  {entityPhone ? (
+                    <div>
+                      <dt className="text-zinc-500">{copy.entityPhone}</dt>
+                      <dd className="mt-1 text-zinc-200">{entityPhone}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              ) : (
+                <p className="mt-2 text-xs leading-5 text-amber-200/90">{copy.entityMissing}</p>
+              )}
             </div>
           </aside>
         </div>
 
         <nav
-          aria-label={
-            activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'
-          }
-          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-white/10 pt-6 text-sm text-zinc-400"
+          aria-label={activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'}
+          className="flex flex-wrap gap-2 border-t border-white/10 pt-5 text-xs text-zinc-400 print:hidden"
         >
-          <Link
-            href="/terms"
-            className="underline decoration-white/20 underline-offset-4 hover:text-white"
-          >
-            {activeLocale === 'pt'
-              ? 'Termos e Condições'
-              : 'Terms and Conditions'}
-          </Link>
-          <Link
-            href="/privacy"
-            className="underline decoration-white/20 underline-offset-4 hover:text-white"
-          >
-            {activeLocale === 'pt'
-              ? 'Política de Privacidade'
-              : 'Privacy Policy'}
-          </Link>
-          <Link
-            href="/cookies"
-            className="underline decoration-white/20 underline-offset-4 hover:text-white"
-          >
-            {activeLocale === 'pt' ? 'Política de Cookies' : 'Cookie Policy'}
-          </Link>
+          {legalLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-lg border border-white/10 px-3 py-2 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+            >
+              {link[activeLocale]}
+            </Link>
+          ))}
         </nav>
       </div>
-    </div>
+    </main>
   );
 }

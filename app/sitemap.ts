@@ -65,6 +65,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.2,
     },
+    ...[
+      '/legal',
+      '/booking-terms',
+      '/billing-policy',
+      '/acceptable-use',
+      '/dpa',
+      '/subprocessors',
+    ].map((path) => ({
+      url: `${SITE_URL}${path}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.2,
+    })),
   ];
 
   let dynamicShopRoutes: MetadataRoute.Sitemap = [];

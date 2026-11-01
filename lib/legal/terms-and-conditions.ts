@@ -9,13 +9,13 @@ export type TermsDocument = {
   sections: LegalSection[];
 };
 
-export const TERMS_LAST_UPDATED = '25 de outubro de 2026';
+export const TERMS_LAST_UPDATED = '1 de novembro de 2026';
 
 export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
   pt: {
     lastUpdated: TERMS_LAST_UPDATED,
     intro:
-      'Estes Termos e Condições regulam o acesso e a utilização da plataforma Silentra for Barbers («Silentra» ou «Plataforma»), um serviço SaaS para gestão de barbearias, reservas, clientes, comunicações, analytics e faturação. Ao criar uma conta, iniciar sessão ou utilizar a Plataforma, confirmas que leste e aceitas estes termos.',
+      'Estes Termos e Condições regulam o acesso e a utilização da plataforma Silentra for Barbers («Silentra» ou «Plataforma»), um serviço SaaS para gestão de barbearias, reservas, clientes, comunicações, analytics e faturação. Ao criares uma conta, assinalares a aceitação expressa destes termos ou celebrares uma subscrição, aceitas o contrato aplicável. A navegação em páginas públicas, por si só, não constitui aceitação de um contrato de subscrição.',
     sections: [
       {
         title: '1. Serviço',
@@ -46,7 +46,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'As reservas podem ser criadas por clientes finais ou pela própria barbearia. A Plataforma tenta manter a agenda consistente, mas não garante disponibilidade ininterrupta, ausência absoluta de conflitos ou funcionamento sem erros.',
           'A barbearia deve verificar e gerir as marcações e contactar diretamente o cliente quando seja necessário corrigir uma marcação, indisponibilidade ou erro.',
-          'A Silentra não é parte do contrato entre a barbearia e o cliente final e não é responsável pela execução do serviço reservado.',
+          'O contrato relativo ao serviço de barbearia é celebrado diretamente entre o cliente e a barbearia identificada na página de reserva. A Silentra disponibiliza a infraestrutura tecnológica e não presta nem recebe o preço do serviço de barbearia. As condições concretas de cancelamento, atrasos, faltas e pré-pagamentos são definidas pela barbearia e devem ser apresentadas antes da confirmação, sem prejuízo dos direitos imperativos do consumidor. Consulta também a Política de Reservas.',
         ],
       },
       {
@@ -63,7 +63,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'A utilização da Plataforma está sujeita à Política de Privacidade da Silentra. A barbearia permanece responsável pelos dados pessoais de clientes e profissionais que introduz e pelas obrigações legais que lhe sejam aplicáveis.',
           'A barbearia deve disponibilizar aos seus clientes informação adequada sobre o tratamento dos seus dados e obter consentimentos quando estes sejam legalmente necessários.',
-          'A Silentra pode atuar como responsável pelo tratamento ou como subcontratante, dependendo da natureza da operação e das responsabilidades concretas das partes.',
+          'A Silentra pode atuar como responsável pelo tratamento ou como subcontratante, consoante a finalidade e a operação. Quando a barbearia determina as finalidades e a Silentra trata dados de clientes por sua conta, as partes devem formalizar e aceitar a Adenda de Tratamento de Dados (DPA), disponível em /dpa, antes de esse tratamento começar.',
         ],
       },
       {
@@ -85,8 +85,8 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '9. Faturação e pagamentos',
         paragraphs: [
           'Os planos pagos podem ser faturados através da Stripe. A subscrição free existente numa conta pode ser substituída por um plano pago quando o utilizador faz upgrade, de acordo com o fluxo de faturação apresentado pela Plataforma.',
-          'Preços, periodicidade, impostos aplicáveis, período de faturação, cancelamento e eventuais condições de reembolso serão apresentados antes da contratação ou alteração de um plano pago.',
-          'A falta de pagamento, chargeback ou estado de subscrição incompatível pode resultar na limitação ou suspensão de funcionalidades pagas, respeitando as regras e prazos legalmente aplicáveis.',
+          'O preço, periodicidade, impostos aplicáveis, eventual desconto, renovação e método de pagamento são apresentados antes da confirmação. As subscrições podem ser cobradas através da Stripe ou, quando o modo manual estiver ativo, por um processo de pagamento manual. Os pagamentos manuais só são considerados concluídos quando a Silentra confirma o respetivo recebimento.',
+          'O cancelamento, a renovação, a data de fim de acesso e o tratamento de pedidos de reembolso seguem a informação mostrada na área de faturação e a Política de Faturação. O cancelamento não elimina direitos legais imperativos nem transforma automaticamente pagamentos de períodos já utilizados em valores reembolsáveis. A falta de pagamento, chargeback ou estado de subscrição incompatível pode resultar na limitação ou suspensão de funcionalidades pagas, após as notificações aplicáveis.',
         ],
       },
       {
@@ -124,15 +124,15 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '14. Lei aplicável e contacto',
         paragraphs: [
           'Estes termos regem-se pela lei portuguesa, sem prejuízo das normas imperativas de proteção do consumidor ou outras regras que tenham aplicação obrigatória.',
-          'Para questões sobre estes termos, faturação ou utilização da Plataforma, contacta contact@silentra.me.',
+          'Para questões sobre estes termos, faturação ou utilização da Plataforma, contacta contact@silentra.me. A identificação jurídica completa da entidade exploradora (denominação legal, morada e NIF) deve ser confirmada através deste contacto antes da contratação, caso não esteja apresentada no checkout ou na informação comercial.',
         ],
       },
     ],
   },
   en: {
-    lastUpdated: 'August 10, 2026',
+    lastUpdated: 'November 1, 2026',
     intro:
-      'These Terms and Conditions govern access to and use of the Silentra for Barbers platform ("Silentra" or the "Platform"), a SaaS service for barbershop management, bookings, customers, communications, analytics, and billing. By creating an account, signing in, or using the Platform, you confirm that you have read and accept these terms.',
+      'These Terms and Conditions govern access to and use of the Silentra for Barbers platform ("Silentra" or the "Platform"), a SaaS service for barbershop management, bookings, customers, communications, analytics, and billing. By creating an account, expressly accepting these terms, or entering into a subscription, you accept the applicable agreement. Merely browsing public pages does not constitute acceptance of a subscription agreement.',
     sections: [
       {
         title: '1. Service',
@@ -163,7 +163,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'Bookings may be created by end customers or by the barbershop. The Platform attempts to keep schedules consistent but does not guarantee uninterrupted availability, complete absence of conflicts, or error-free operation.',
           'The barbershop must review and manage bookings and contact the customer directly when a booking, availability issue, or technical error needs correction.',
-          'Silentra is not a party to the contract between the barbershop and end customer and is not responsible for delivery of the booked service.',
+          'The contract for the barbershop service is made directly between the customer and the barbershop identified on the booking page. Silentra provides the technology infrastructure and does not provide the haircut or receive its service price. The specific rules for cancellation, lateness, no-shows, and prepayments are set by the barbershop and must be presented before the booking is confirmed, without prejudice to mandatory consumer rights. See also the Booking Policy.',
         ],
       },
       {
@@ -180,7 +180,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           "Use of the Platform is subject to Silentra's Privacy Policy. The barbershop remains responsible for personal data relating to customers and professionals that it enters and for its applicable legal obligations.",
           'The barbershop must provide appropriate privacy information to customers and obtain consent where legally required.',
-          "Silentra may act as controller or processor depending on the nature of the operation and the parties' specific responsibilities.",
+          "Silentra may act as controller or processor depending on the purpose and operation. Where the barbershop determines the purposes and Silentra processes customer data on its behalf, the parties must formalize and accept the Data Processing Addendum (DPA), available at /dpa, before that processing begins.",
         ],
       },
       {
@@ -202,8 +202,8 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '9. Billing and payments',
         paragraphs: [
           'Paid plans may be billed through Stripe. An existing free subscription may be replaced by a paid plan when a user upgrades, according to the billing flow presented by the Platform.',
-          'Pricing, billing period, applicable taxes, cancellation, and any refund conditions will be presented before purchasing or changing a paid plan.',
-          'Non-payment, chargebacks, or an incompatible subscription state may result in limitations or suspension of paid features, subject to applicable rules and legal notice requirements.',
+          'The price, billing interval, applicable taxes, any discount, renewal, and payment method are shown before confirmation. Subscriptions may be charged through Stripe or, when manual mode is enabled, through a manual payment process. Manual payments are only treated as completed when Silentra confirms receipt.',
+          'Cancellation, renewal, the date paid access ends, and refund requests follow the information shown in the billing area and the Billing Policy. Cancellation does not remove mandatory legal rights or automatically make amounts for periods already used refundable. Non-payment, chargebacks, or an incompatible subscription state may result in limitations or suspension of paid features, subject to applicable notice requirements.',
         ],
       },
       {
@@ -241,7 +241,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '14. Governing law and contact',
         paragraphs: [
           'These terms are governed by Portuguese law, without prejudice to mandatory consumer-protection rules or other provisions that must apply.',
-          'For questions about these terms, billing, or use of the Platform, contact contact@silentra.me.',
+          'For questions about these terms, billing, or use of the Platform, contact contact@silentra.me. The full legal identification of the operating entity (legal name, address, and tax number) should be confirmed through this contact before contracting if it is not already shown at checkout or in the commercial information.',
         ],
       },
     ],

@@ -28,6 +28,7 @@ assert.match(
   consentSchema,
   /COOKIE_CONSENT_MAX_AGE_SECONDS = 60 \* 60 \* 24 \* 180/,
 );
+assert.match(consentSchema, /COOKIE_CONSENT_VERSION = 2/);
 assert.match(consentSchema, /value\.version !== COOKIE_CONSENT_VERSION/);
 assert.match(consentSchema, /typeof value\.analytics !== 'boolean'/);
 assert.match(consentSchema, /typeof value\.marketing !== 'boolean'/);
@@ -101,9 +102,11 @@ assert.match(cookiePolicy, /Vercel Analytics/);
 assert.match(cookiePolicy, /Google Tag Manager/);
 assert.match(cookiePolicy, /Whop/);
 assert.match(cookiePolicy, /withdraw|retirar o consentimento/i);
-assert.match(termsPage, /currentTermsFeatureSections/);
+assert.match(termsPage, /currentTerms/);
+assert.match(read('lib/legal/current-terms.ts'), /currentTermsFeatureSections/);
 assert.match(privacyPage, /currentPrivacyFeatureSections/);
-assert.match(legalAddendum, /25 de outubro de 2026/);
+assert.match(legalAddendum, /1 de novembro de 2026/);
+assert.match(legalAddendum, /November 1, 2026/);
 assert.match(
   legalAddendum,
   /automatically confirmed|confirmadas automaticamente/i,
@@ -111,7 +114,8 @@ assert.match(
 assert.match(legalAddendum, /birthday messages|mensagens de aniversário/i);
 assert.match(legalAddendum, /API pública v1/);
 assert.match(legalAddendum, /silentra_cookie_consent/);
-assert.match(legalPage, /href="\/cookies"/);
+assert.match(legalPage, /href: '\/cookies'/);
+assert.match(legalPage, /href: '\/legal'/);
 assert.match(sitemap, /\$\{SITE_URL\}\/cookies/);
 
 console.log('Cookie consent and legal-document contracts passed.');

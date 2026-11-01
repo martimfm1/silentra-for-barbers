@@ -136,6 +136,9 @@ jobs:
       - name: Cookie consent and legal-document contracts
         run: pnpm qa:cookies
 
+      - name: Legal policy and privacy contracts
+        run: pnpm qa:legal
+
       - name: Build
         run: pnpm build
 

@@ -48,7 +48,7 @@ Para cada categoria, especificar finalidade, base legal, período, evento de in�
 
 ## 4. Subprocessadores
 
-Manter uma lista verificável que inclua, no mínimo, alojamento/runtime (Vercel), base de dados/auth (Supabase), pagamentos (Stripe), email transacional (Brevo), analytics/pixels efetivamente ativos e storage opcional (AWS/S3, se ativado).
+Manter uma lista verificável que inclua, no mínimo, alojamento/runtime (Vercel), base de dados/auth (Supabase), pesquisa de moradas (Mapbox), mapas/base tiles (CARTO), pagamentos (Stripe), email transacional (Brevo), analytics/pixels efetivamente ativos e storage opcional (AWS/S3, se ativado).
 
 Para cada fornecedor, registar:
 
@@ -80,4 +80,20 @@ Inventariar cookies, local storage, pixels e scripts externos por rota. Distingu
 
 ## 8. Estado de lançamento
 
-Não marcar o RGPD como concluído até haver: revisão jurídica das políticas e termos, DPA, lista de subprocessadores validada, retenção aprovada, fluxos de exportação/eliminação testados, avaliação de consentimento e um exercício documentado de resposta a incidente.
+Documentação pública criada:
+- `/legal`: índice dos documentos.
+- `/terms` e `/acceptable-use`: condições gerais e utilização permitida.
+- `/privacy` e `/cookies`: informação de privacidade e consentimento.
+- `/booking-terms` e `/billing-policy`: regras para reservas e subscrições.
+- `/dpa`: modelo de adenda de tratamento de dados, ainda sujeito a revisão jurídica e aceitação pelas partes.
+- `/subprocessors`: lista pública de fornecedores conhecidos, a confirmar contra os contratos e a configuração efetivamente ativa.
+
+Limitações que permanecem:
+- A identificação pública da entidade exploradora tem de ser configurada com a denominação legal, morada geográfica e NIF em `NEXT_PUBLIC_LEGAL_ENTITY_NAME`, `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS` e `NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID`. Quando aplicável, configurar também o número de registo em `NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION` e o telefone em `NEXT_PUBLIC_LEGAL_ENTITY_PHONE`. Não inventar estes dados.
+- O DPA publicado é um modelo de trabalho; deve ser revisto, completado com a identificação das partes e aceite antes de servir como acordo contratual.
+- A lista de subprocessadores deve ser reconciliada com todos os fornecedores e etiquetas realmente ativos, contratos, localizações e mecanismos de transferência.
+- Os pedidos de exportação e eliminação continuam a ser tratados manualmente. Não anunciar uma função automática até estar implementada, testada e documentada.
+- Definir e aprovar uma tabela de retenção por categoria, incluindo logs, cópias de segurança e documentos fiscais.
+- A configuração do contentor Google Tag Manager deve ser auditada antes de publicar novas etiquetas e depois de qualquer alteração.
+
+Não marcar o RGPD como concluído até haver revisão jurídica das políticas e termos, DPA efetivamente aceite, subprocessadores e transferências verificados, retenção aprovada, fluxos de exportação/eliminação testados, avaliação de consentimento e um exercício documentado de resposta a incidente.

@@ -1,10 +1,10 @@
 export type LegalLocale = 'pt' | 'en';
 
-export const CURRENT_LEGAL_UPDATE = '25 de outubro de 2026';
+export const CURRENT_LEGAL_UPDATE = '1 de novembro de 2026';
 
 export const currentTermsAddendum = {
   pt: {
-    title: '15. Oferta promocional, dados e faturação — 25 de outubro de 2026',
+    title: '15. Oferta promocional, dados e faturação — 1 de novembro de 2026',
     paragraphs: [
       'A Silentra disponibiliza, para novos membros elegíveis que subscrevam o plano Barbers Pro através do checkout aplicável, uma oferta promocional de um mês associada ao código promocional TRIALPRO. A oferta está sujeita à elegibilidade verificada pela Plataforma e às condições configuradas na Stripe.',
       'A oferta TRIALPRO não constitui um período experimental universal nem é garantida para contas que já tenham tido uma subscrição, uma oferta promocional ou outro histórico de faturação que as torne inelegíveis. A Silentra pode impedir a aplicação da oferta quando a conta ou a utilização anterior indicar que as condições de novos membros não são cumpridas.',
@@ -17,7 +17,7 @@ export const currentTermsAddendum = {
     ],
   },
   en: {
-    title: '15. Promotional offer, data, and billing — October 25, 2026',
+    title: '15. Promotional offer, data, and billing — November 1, 2026',
     paragraphs: [
       'Silentra provides eligible new members who subscribe to the Barbers Pro plan through the applicable checkout with a one-month promotional offer associated with the TRIALPRO promotion code. The offer is subject to eligibility verified by the Platform and the conditions configured in Stripe.',
       'The TRIALPRO offer is not a universal trial and is not guaranteed for accounts that have previously had a subscription, promotional offer, or other billing history that makes them ineligible. Silentra may prevent the offer from being applied when account or prior-use information indicates that the new-member conditions are not met.',
@@ -33,7 +33,7 @@ export const currentTermsAddendum = {
 
 export const currentPrivacyAddendum = {
   pt: {
-    title: '15. Atualização do tratamento — 25 de outubro de 2026',
+    title: '15. Atualização do tratamento — 1 de novembro de 2026',
     paragraphs: [
       'Data de nascimento: o campo pode ser recolhido no processo de reserva e armazenado na marcação até existir uma necessidade operacional de o associar ao perfil de cliente da barbearia. A barbearia deve limitar a utilização deste dado ao necessário e assegurar uma base legal adequada.',
       'Localização: quando o cliente autoriza a localização do dispositivo, a Silentra pode utilizar latitude, longitude e informação de precisão para apresentar o mapa, ordenar resultados por distância e melhorar a pesquisa. A localização do cliente não é necessária para navegar no marketplace e, por defeito, é utilizada apenas no contexto da experiência em que foi autorizada.',
@@ -48,7 +48,7 @@ export const currentPrivacyAddendum = {
     ],
   },
   en: {
-    title: '15. Processing update — October 25, 2026',
+    title: '15. Processing update — November 1, 2026',
     paragraphs: [
       "Date of birth: the field may be collected during booking and stored on the appointment until there is an operational need to associate it with the barbershop's customer profile. The barbershop should limit use of this data to what is necessary and maintain an appropriate lawful basis.",
       'Location: when a customer authorizes device location, Silentra may use latitude, longitude, and accuracy information to display maps, sort results by distance, and improve search. Customer location is not required to browse the marketplace and, by default, is used only in the experience for which it was authorized.',
@@ -67,7 +67,7 @@ export const currentPrivacyAddendum = {
 export const currentTermsFeatureSections = {
   pt: [
     {
-      title: '16. Sites próprios e API pública — 25 de outubro de 2026',
+      title: '16. Sites próprios e API pública — 1 de novembro de 2026',
       paragraphs: [
         'A Plataforma pode disponibilizar páginas públicas para barbearias e um serviço de site próprio, sujeito ao plano, elegibilidade, aprovação do pedido, configuração e condições comerciais apresentadas. A publicação pode depender de revisão e atribuição de um endereço público.',
         'A barbearia é responsável por garantir que tem direitos para usar textos, imagens, marcas, testemunhos, preços e outros conteúdos que fornece, e por manter os seus dados públicos corretos e atualizados. Deve incluir no seu site as informações legais, comerciais e de contacto que lhe sejam aplicáveis.',
@@ -77,7 +77,7 @@ export const currentTermsFeatureSections = {
     },
     {
       title:
-        '17. Reservas automáticas e mensagens de aniversário — 25 de outubro de 2026',
+        '17. Reservas automáticas e mensagens de aniversário — 1 de novembro de 2026',
       paragraphs: [
         'Quando a funcionalidade estiver disponível no plano e for ativada por uma pessoa autorizada da barbearia, novas marcações podem ser confirmadas automaticamente em vez de aguardarem confirmação manual. A conclusão automática pode alterar para «concluída» uma marcação agendada depois de terminar a duração registada, através de processamento periódico.',
         'A barbearia deve configurar estas opções de forma adequada à sua operação, monitorizar a agenda e informar os clientes sobre o processo de marcação. Continua responsável por resolver conflitos, corrigir dados incorretos e prestar o serviço reservado. A execução automática depende da configuração, da disponibilidade técnica e da informação registada.',
@@ -86,7 +86,7 @@ export const currentTermsFeatureSections = {
       ],
     },
     {
-      title: '18. Cookies e tecnologias de medição — 25 de outubro de 2026',
+      title: '18. Cookies e tecnologias de medição — 1 de novembro de 2026',
       paragraphs: [
         'A Plataforma utiliza tecnologias estritamente necessárias para autenticação, segurança, idioma e memorização da escolha de cookies. As tecnologias opcionais de estatísticas e marketing só são carregadas conforme as categorias escolhidas no painel de preferências.',
         'A escolha fica registada no cookie «silentra_cookie_consent» durante 180 dias. O Google Tag Manager só é carregado quando as categorias de estatísticas e marketing estão ambas autorizadas; o pixel Whop depende da autorização de marketing e Vercel Analytics/Speed Insights dependem da autorização de estatísticas.',
@@ -96,7 +96,7 @@ export const currentTermsFeatureSections = {
   ],
   en: [
     {
-      title: '16. Custom websites and public API — October 25, 2026',
+      title: '16. Custom websites and public API — November 1, 2026',
       paragraphs: [
         'The Platform may provide public barbershop pages and a custom-website service, subject to plan, eligibility, request approval, configuration, and the commercial terms presented. Publication may require review and assignment of a public address.',
         'The barbershop is responsible for ensuring it has the rights to use the text, images, trademarks, testimonials, prices, and other content it supplies, and for keeping public information accurate and current. It must include the legal, commercial, and contact information applicable to its own website.',
@@ -105,7 +105,7 @@ export const currentTermsFeatureSections = {
       ],
     },
     {
-      title: '17. Automated bookings and birthday messages — October 25, 2026',
+      title: '17. Automated bookings and birthday messages — November 1, 2026',
       paragraphs: [
         'When available under the plan and enabled by an authorized barbershop user, new bookings may be confirmed automatically instead of waiting for manual confirmation. Automatic completion may change a scheduled booking to «completed» after its recorded duration has ended, through periodic processing.',
         'The barbershop must configure these options appropriately, monitor its schedule, and inform customers about the booking process. It remains responsible for resolving conflicts, correcting inaccurate details, and delivering the booked service. Automated processing depends on configuration, technical availability, and stored data.',
@@ -114,7 +114,7 @@ export const currentTermsFeatureSections = {
       ],
     },
     {
-      title: '18. Cookies and measurement technologies — October 25, 2026',
+      title: '18. Cookies and measurement technologies — November 1, 2026',
       paragraphs: [
         'The Platform uses strictly necessary technologies for authentication, security, language, and remembering the cookie choice. Optional analytics and marketing technologies are loaded only according to the categories selected in the preference panel.',
         'The choice is stored in the «silentra_cookie_consent» cookie for 180 days. Google Tag Manager loads only when both analytics and marketing are authorized; the Whop pixel depends on marketing consent and Vercel Analytics/Speed Insights depend on analytics consent.',
@@ -128,7 +128,7 @@ export const currentPrivacyFeatureSections = {
   pt: [
     {
       title:
-        '16. Cookies, consentimento e tecnologias de terceiros — 25 de outubro de 2026',
+        '16. Cookies, consentimento e tecnologias de terceiros — 1 de novembro de 2026',
       paragraphs: [
         'O cookie «silentra_cookie_consent» guarda a versão da política de consentimento, as categorias escolhidas e a data/hora da escolha durante 180 dias. É utilizado para respeitar e recordar as tuas preferências. Se o valor for inválido ou corresponder a uma versão desconhecida, as tecnologias opcionais ficam desativadas até ser feita uma nova escolha.',
         'Os cookies e mecanismos estritamente necessários podem suportar autenticação e sessão, segurança, idioma e funcionalidades solicitadas. Não são usados para ativar marketing opcional. A sua duração pode depender da sessão, do mecanismo de autenticação ou da preferência que servem.',
@@ -139,7 +139,7 @@ export const currentPrivacyFeatureSections = {
     },
     {
       title:
-        '17. Reservas, automações e mensagens de aniversário — 25 de outubro de 2026',
+        '17. Reservas, automações e mensagens de aniversário — 1 de novembro de 2026',
       paragraphs: [
         'A plataforma pode tratar estados e horários de marcações para confirmar automaticamente novas reservas, quando a opção se encontra ativa, e para concluir marcações agendadas depois de terminar a duração registada, quando a conclusão automática está ativada. Estas operações servem a gestão da agenda e podem atualizar o estado operacional da marcação.',
         'As campanhas de aniversário podem tratar a data de nascimento, nome, email ou telefone do cliente para enviar uma mensagem no dia correspondente ou num dia relativo configurado, e podem registar o resultado de envio e um identificador de destinatário. A barbearia configura a campanha e determina a finalidade e a base legal do tratamento dos dados dos seus clientes.',
@@ -148,7 +148,7 @@ export const currentPrivacyFeatureSections = {
     },
     {
       title:
-        '18. Sites próprios, API pública e dados publicados — 25 de outubro de 2026',
+        '18. Sites próprios, API pública e dados publicados — 1 de novembro de 2026',
       paragraphs: [
         'O serviço de sites próprios permite publicar determinados conteúdos de uma barbearia, como nome, texto descritivo, imagem, ligação para marcação e outros campos configurados. A barbearia decide que conteúdo fornece e deve assegurar que tem autorização para o publicar, incluindo dados, fotografias e testemunhos que possam identificar terceiros.',
         'A API pública v1 fornece dados previamente definidos e destinados à publicação, como perfil público, serviços, horários, avaliações e ligações públicas, dentro dos limites documentados. Não foi concebida para devolver credenciais, dados de sessão, contactos privados ou o conteúdo interno de contas.',
@@ -157,9 +157,9 @@ export const currentPrivacyFeatureSections = {
     },
     {
       title:
-        '19. Fornecedores, conservação e transferências — 25 de outubro de 2026',
+        '19. Fornecedores, conservação e transferências — 1 de novembro de 2026',
       paragraphs: [
-        'Consoante a funcionalidade utilizada e o consentimento dado, podem intervir fornecedores de alojamento e infraestrutura (incluindo Vercel e Supabase), medição (Vercel Analytics/Speed Insights), gestão de etiquetas (Google Tag Manager), medição de marketing (Whop), pagamentos (Stripe) e comunicações por email (Brevo). Cada fornecedor recebe apenas os dados necessários à função técnica que presta, de acordo com a configuração e os contratos aplicáveis.',
+        'Consoante a funcionalidade utilizada e o consentimento dado, podem intervir fornecedores de alojamento e infraestrutura (incluindo Vercel e Supabase), armazenamento de objetos (AWS S3, quando configurado), medição (Vercel Analytics/Speed Insights), gestão de etiquetas (Google Tag Manager), medição de marketing (Whop), pagamentos (Stripe) e comunicações por email (Brevo). Cada fornecedor recebe apenas os dados necessários à função técnica que presta, de acordo com a configuração e os contratos aplicáveis.',
         'Alguns fornecedores podem tratar dados fora do Espaço Económico Europeu. Quando tal ocorrer, o tratamento deve assentar num mecanismo de transferência permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, conforme aplicável. A localização concreta pode variar de acordo com o serviço e a configuração da conta.',
         'Os dados são conservados durante o tempo necessário à finalidade, à prestação do serviço, à segurança, à resolução de litígios e ao cumprimento de obrigações legais. Os registos de consentimento e faturação podem ser mantidos pelo período necessário para demonstrar escolhas, cumprir obrigações e responder a pedidos ou reclamações.',
       ],
@@ -168,7 +168,7 @@ export const currentPrivacyFeatureSections = {
   en: [
     {
       title:
-        '16. Cookies, consent, and third-party technologies — October 25, 2026',
+        '16. Cookies, consent, and third-party technologies — November 1, 2026',
       paragraphs: [
         'The «silentra_cookie_consent» cookie stores the consent-policy version, selected categories, and date/time of the choice for 180 days. It is used to respect and remember your preferences. If the value is invalid or from an unknown version, optional technologies remain disabled until a new choice is made.',
         'Strictly necessary cookies and mechanisms may support authentication and session management, security, language, and requested features. They are not used to enable optional marketing. Their lifetime may depend on the session, authentication mechanism, or preference they serve.',
@@ -179,7 +179,7 @@ export const currentPrivacyFeatureSections = {
     },
     {
       title:
-        '17. Bookings, automations, and birthday messages — October 25, 2026',
+        '17. Bookings, automations, and birthday messages — November 1, 2026',
       paragraphs: [
         'The platform may process booking statuses and times to automatically confirm new bookings when that option is enabled, and to complete scheduled bookings after their recorded duration has ended when automatic completion is enabled. These operations support schedule management and may update a booking’s operational status.',
         'Birthday campaigns may process a customer’s birth date, name, email, or phone number to send a message on the matching date or a configured relative day, and may record the delivery outcome and recipient identifier. The barbershop configures the campaign and determines the purpose and lawful basis for processing its customers’ data.',
@@ -188,7 +188,7 @@ export const currentPrivacyFeatureSections = {
     },
     {
       title:
-        '18. Custom websites, public API, and published data — October 25, 2026',
+        '18. Custom websites, public API, and published data — November 1, 2026',
       paragraphs: [
         'The custom-website service can publish selected barbershop content such as name, description, image, booking link, and other configured fields. The barbershop decides which content it supplies and must ensure it has permission to publish it, including data, photos, and testimonials that may identify other people.',
         'The public API v1 provides predefined data intended for publication, such as public profile, services, opening hours, reviews, and public links, within the documented limits. It is not designed to return credentials, session data, private contact details, or internal account content.',
@@ -196,9 +196,9 @@ export const currentPrivacyFeatureSections = {
       ],
     },
     {
-      title: '19. Providers, retention, and transfers — October 25, 2026',
+      title: '19. Providers, retention, and transfers — November 1, 2026',
       paragraphs: [
-        'Depending on the feature used and consent granted, providers may include hosting and infrastructure (including Vercel and Supabase), measurement (Vercel Analytics/Speed Insights), tag management (Google Tag Manager), marketing measurement (Whop), payments (Stripe), and email communications (Brevo). Each provider receives only the data needed for its technical function, according to configuration and applicable agreements.',
+        'Depending on the feature used and consent granted, providers may include hosting and infrastructure (including Vercel and Supabase), object storage (AWS S3, when configured), measurement (Vercel Analytics/Speed Insights), tag management (Google Tag Manager), marketing measurement (Whop), payments (Stripe), and email communications (Brevo). Each provider receives only the data needed for its technical function, according to configuration and applicable agreements.',
         'Some providers may process data outside the European Economic Area. Where this occurs, processing must rely on a transfer mechanism permitted under the GDPR, such as an adequacy decision or appropriate safeguards, as applicable. The actual location may vary by service and account configuration.',
         'Data is retained for as long as necessary for its purpose, service delivery, security, dispute resolution, and legal obligations. Consent and billing records may be retained for as long as necessary to demonstrate choices, meet obligations, and respond to requests or complaints.',
       ],

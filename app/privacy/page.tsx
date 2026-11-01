@@ -37,18 +37,20 @@ const currentPrivacyPolicy = {
     ...privacyPolicy.pt,
     lastUpdated: CURRENT_LEGAL_UPDATE,
     sections: [
-      ...privacyPolicy.pt.sections,
+      ...privacyPolicy.pt.sections.slice(0, -1),
       currentPrivacyAddendum.pt,
       ...currentPrivacyFeatureSections.pt,
+      ...privacyPolicy.pt.sections.slice(-1),
     ],
   },
   en: {
     ...privacyPolicy.en,
-    lastUpdated: 'October 25, 2026',
+    lastUpdated: 'November 1, 2026',
     sections: [
-      ...privacyPolicy.en.sections,
+      ...privacyPolicy.en.sections.slice(0, -1),
       currentPrivacyAddendum.en,
       ...currentPrivacyFeatureSections.en,
+      ...privacyPolicy.en.sections.slice(-1),
     ],
   },
 };
@@ -103,7 +105,7 @@ export default function PrivacyPage() {
       ]}
       supportLabel={{ pt: 'Pedidos de privacidade', en: 'Privacy requests' }}
       supportValue="contact@silentra.me"
-      backLabel={{ pt: 'Voltar à home', en: 'Back home' }}
+      backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );
 }

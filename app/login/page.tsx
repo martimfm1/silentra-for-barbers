@@ -41,7 +41,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { handleLogin, handleRegister } from './services/auth-handles';
 
 export default function LoginPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -440,7 +440,7 @@ export default function LoginPage() {
                           </div>
                         </div>
 
-                        <label className="flex items-start gap-3 text-sm leading-relaxed text-zinc-300">
+                        <div className="flex items-start gap-3 text-sm leading-relaxed text-zinc-300">
                           <Checkbox
                             id="terms"
                             checked={acceptedTerms}
@@ -449,8 +449,10 @@ export default function LoginPage() {
                             }
                             className="mt-0.5"
                           />
-                          <span>
-                            {t('legal.agreePrefix')}{' '}
+                          <div className="min-w-0">
+                            <label htmlFor="terms" className="cursor-pointer">
+                              {t('legal.agreePrefix')}{' '}
+                            </label>
                             <TermsDrawer
                               trigger={
                                 <button
@@ -461,8 +463,17 @@ export default function LoginPage() {
                                 </button>
                               }
                             />
-                          </span>
-                        </label>
+                            <span className="mx-1.5 text-zinc-600">·</span>
+                            <Link
+                              href="/privacy"
+                              className="font-semibold text-zinc-100 underline underline-offset-4 hover:text-white"
+                            >
+                              {locale === 'en'
+                                ? 'Privacy Policy'
+                                : 'Política de Privacidade'}
+                            </Link>
+                          </div>
+                        </div>
 
                         <Button
                           aria-label={

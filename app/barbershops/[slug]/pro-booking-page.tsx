@@ -193,12 +193,20 @@ export default function ProBookingPage({
           </div>
 
           <footer className="px-5 py-6 text-center text-xs text-[#969690] sm:px-9">
-            <Link
-              href="/terms"
-              className="underline underline-offset-4 hover:text-[#333]"
-            >
-              {t('proBookingPage.terms')}
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link
+                href="/booking-terms"
+                className="underline underline-offset-4 hover:text-[#333]"
+              >
+                {locale === 'en' ? 'Booking policy' : 'Política de reservas'}
+              </Link>
+              <Link
+                href="/privacy"
+                className="underline underline-offset-4 hover:text-[#333]"
+              >
+                {locale === 'en' ? 'Privacy policy' : 'Política de privacidade'}
+              </Link>
+            </div>
             <p className="mt-3">
               {t('proBookingPage.poweredBy')}{' '}
               <span className="font-semibold tracking-wide text-[#555]">
