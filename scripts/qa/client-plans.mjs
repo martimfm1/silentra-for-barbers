@@ -23,7 +23,10 @@ const [
 
 // Customer lifetime spend is the sum of service price and product total,
 // and only completed appointments contribute.
-assert.match(profile, /const servicePrice = Number\(service\?\.price\) \|\| 0/);
+assert.match(
+  profile,
+  /const servicePrice =\s*Number\(appointment\.service_price \?\? service\?\.price\) \|\| 0/,
+);
 assert.match(profile, /const productsPrice = Number\(appointment\.value_products\) \|\| 0/);
 assert.match(profile, /return servicePrice \+ productsPrice/);
 assert.match(profile, /appointment\.service_price \?\? service\?\.price/);
