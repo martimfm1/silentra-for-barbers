@@ -21,7 +21,7 @@ export interface UpdateClientPayload {
   num_phone: string;
   email?: string;
   birth_date?: string | null;
-  style_notes?: string;
+  style_notes?: string | null;
 }
 
 export const clientsService = {
@@ -121,5 +121,38 @@ export const clientsService = {
   async deleteClient(id: string) {
     const supabase = createClient();
     return await supabase.from('users').delete().eq('id', id);
+  },
+
+  async getClientNotes(barbershopId: string, clientId: string) {
+    const supabase = createClient();
+    return await supabase
+      .from('client_notes')
+      .select('id, content, author_id, created_at, updated_at')
+      .eq('barbershop_id', barbershopId)
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+      .limit(100);
+  },
+
+  async addClientNote(barbershopId: string, clientId: string, content: string) {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw authError ?? new Error('Utilizador não autenticado.');
+    }
+
+    return await supabase
+      .from('client_notes')
+      .insert({
+        barbershop_id: barbershopId,
+        client_id: clientId,
+        author_id: user.id,
+        content: content.trim(),
+      })
+      .select('id, content, author_id, created_at, updated_at')
+      .single();
   },
 } as const;
