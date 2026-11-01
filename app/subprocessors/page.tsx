@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cloud, Mail, CreditCard, ShieldCheck } from 'lucide-react';
+import { Cloud, CreditCard, ShieldCheck } from 'lucide-react';
 import { LegalDocumentPage } from '@/components/legal/legal-document-page';
 import { subprocessorsPolicy } from '@/lib/legal/additional-policies';
 
@@ -32,7 +32,7 @@ export default function SubprocessorsPage() {
       documentByLocale={subprocessorsPolicy}
       highlights={[
         {
-          label: { pt: 'Infraestrutura', en: 'Infrastructure' },
+          label: { pt: 'Serviços essenciais', en: 'Core providers' },
           value: { pt: 'Vercel e Supabase suportam alojamento, base de dados, autenticação e ficheiros.', en: 'Vercel and Supabase support hosting, database, authentication, and files.' },
           icon: <Cloud className="size-4" />,
         },
