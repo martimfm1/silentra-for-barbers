@@ -8,7 +8,7 @@ const read = (file) => readFile(join(root, file), 'utf8');
 const migration = await read(
   'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
-const bookingApi = await read('app/api/bookings/route.ts');
+const appointmentUpdateMigration = await read(\n  'supabase/migrations/20261101230500_harden_appointment_update_rls.sql',\n);\nconst bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
 );
