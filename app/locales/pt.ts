@@ -552,17 +552,33 @@ export const pt = {
     calendarSyncCopy: 'Copiar link',
     calendarSyncCopied: 'Link copiado.',
     calendarSyncCopyFailed: 'Não foi possível copiar o link.',
-    calendarSyncInstructions: 'Como adicionar no iPhone',
-    calendarSyncHideInstructions: 'Ocultar instruções',
-    calendarSyncHowTo: 'Adicionar a agenda no iPhone',
-    calendarSyncStepOne:
-      'Abre a app Calendário no iPhone e toca em “Calendários”.',
-    calendarSyncStepTwo:
-      'Escolhe “Adicionar calendário” e depois “Adicionar calendário assinado”.',
-    calendarSyncStepThree:
-      'Cola o link acima, toca em “Procurar” e confirma a subscrição.',
-    calendarSyncRefreshNotice:
-      'A subscrição é apenas de leitura. O iPhone atualiza-a periodicamente, por isso as alterações podem demorar algum tempo a aparecer.',
+    calendarSyncInstructions: 'Ver tutorial de configuração',
+    calendarSyncHowTo: 'Adicionar a agenda ao Calendário',
+    calendarSyncGuideLabel: 'GUIA PARA IPHONE',
+    calendarSyncDialogDescription:
+      'Faz esta configuração uma única vez para consultares a agenda da barbearia na app Calendário do iPhone.',
+    calendarSyncCopyBeforeStart: 'Antes de começar, copia o link privado',
+    calendarSyncCopyBeforeStartDescription:
+      'Vais precisar deste endereço para criar a subscrição no iPhone.',
+    calendarSyncStepsLabel: 'Passos no iPhone',
+    calendarSyncStepOneTitle: 'Abre a app Calendário',
+    calendarSyncStepOneDescription:
+      'No iPhone, abre a app Calendário e toca em «Calendários», na parte inferior do ecrã.',
+    calendarSyncStepTwoTitle: 'Adiciona uma agenda assinada',
+    calendarSyncStepTwoDescription:
+      'Toca em «Adicionar calendário» e escolhe «Adicionar calendário assinado».',
+    calendarSyncStepThreeTitle: 'Cola o link da Silentra',
+    calendarSyncStepThreeDescription:
+      'Cola o link privado no campo do endereço. No iOS 26 ou posterior, toca em «Encontrar»; no iOS 18 ou anterior, toca em «Subscrever».',
+    calendarSyncStepFourTitle: 'Escolhe o iCloud e guarda',
+    calendarSyncStepFourDescription:
+      'Define um nome e uma cor para identificares a agenda. Em «Conta», escolhe «iCloud» e termina em «Concluído» (iOS 26 ou posterior) ou «Adicionar» (iOS 18 ou anterior).',
+    calendarSyncICloudNote:
+      'Ao escolheres iCloud, a agenda também fica disponível nos outros dispositivos Apple com a mesma Conta Apple.',
+    calendarSyncVerifyNotice:
+      'No fim, volta à lista «Calendários» e confirma que a nova agenda está selecionada para veres as marcações.',
+    calendarSyncReadOnlyNotice:
+      'A subscrição é apenas de leitura. As alterações são feitas na Silentra e aparecem no iPhone quando o Calendário atualizar a agenda.',
     calendarSyncRotate: 'Gerar novo link',
     calendarSyncRotateConfirm:
       'Gerar um novo link invalida o atual. Terás de atualizar a subscrição no iPhone. Queres continuar?',
