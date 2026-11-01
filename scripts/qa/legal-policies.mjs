@@ -62,6 +62,10 @@ assert.match(extraPolicies, /Google Tag Manager/);
 assert.match(extraPolicies, /Brevo/);
 assert.match(extraPolicies, /Supabase/);
 assert.match(extraPolicies, /Vercel/);
+assert.match(extraPolicies, /Mapbox/);
+assert.match(extraPolicies, /CARTO/);
+assert.match(privacy, /Mapbox/);
+assert.match(privacy, /CARTO/);
 assert.match(acceptableUse, /scraping abusivo|abusive scraping/i);
 
 assert.match(consent, /COOKIE_CONSENT_VERSION = 2/);
