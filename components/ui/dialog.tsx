@@ -77,10 +77,10 @@ function DialogContent({
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
               variant="ghost"
-              className="absolute top-3 right-3 z-10 size-9 rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.09] hover:text-white"
-              size="icon-sm"
+              className="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.09] hover:text-white focus-visible:ring-2 focus-visible:ring-primary/60"
+              size="icon"
             >
-              <IconX />
+              <IconX className="size-5" aria-hidden="true" />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
