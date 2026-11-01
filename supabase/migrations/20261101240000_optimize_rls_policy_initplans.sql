@@ -47,6 +47,43 @@ with check (
   )
 );
 
+drop policy if exists "Permitir delete de serviços da barbearia" on public.services;
+create policy "Permitir delete de serviços da barbearia"
+on public.services
+for delete
+to authenticated
+using ((select public.get_my_barbershop_id()) = (barbershop_id)::text);
+
+drop policy if exists "Permitir escrita de serviços da barbearia" on public.services;
+create policy "Permitir escrita de serviços da barbearia"
+on public.services
+for insert
+to authenticated
+with check ((select public.get_my_barbershop_id()) = (barbershop_id)::text);
+
+drop policy if exists "Permitir update de serviços da barbearia" on public.services;
+create policy "Permitir update de serviços da barbearia"
+on public.services
+for update
+to authenticated
+using ((select public.get_my_barbershop_id()) = (barbershop_id)::text)
+with check ((select public.get_my_barbershop_id()) = (barbershop_id)::text);
+
+drop policy if exists marketing_campaigns_staff_read on public.marketing_campaigns;
+create policy marketing_campaigns_staff_read
+on public.marketing_campaigns
+for select
+to authenticated
+using (barbershop_id = (select public.get_my_barbershop_id())::uuid);
+
+drop policy if exists marketing_campaigns_staff_update on public.marketing_campaigns;
+create policy marketing_campaigns_staff_update
+on public.marketing_campaigns
+for update
+to authenticated
+using (barbershop_id = (select public.get_my_barbershop_id())::uuid)
+with check (barbershop_id = (select public.get_my_barbershop_id())::uuid);
+
 drop policy if exists marketing_campaigns_staff_insert on public.marketing_campaigns;
 create policy marketing_campaigns_staff_insert
 on public.marketing_campaigns
