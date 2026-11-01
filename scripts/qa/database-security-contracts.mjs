@@ -17,7 +17,7 @@ const privateHelperHardening = await read(
 const loyaltyRedemptionHardening = await read(
   'supabase/migrations/20261101230417_fix_loyalty_redemption_api.sql',
 );
-const loyaltyRedemptionHardening = await read(\n  'supabase/migrations/20261101230417_fix_loyalty_redemption_api.sql',\n);\nconst bookingApi = await read('app/api/bookings/route.ts');
+const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
 );
@@ -113,27 +113,6 @@ assert.match(
 assert.match(
   loyaltyRedemptionHardening,
   /grant execute on function public\.redeem_loyalty_reward\([\s\S]*to service_role/i,
-  'Only the server-side service role may execute the redemption RPC.',
-);
-assert.doesNotMatch(
-  loyaltyRedemptionHardening,
-  /to authenticated/i,
-  'The redemption RPC must not be executable by authenticated users.',
-);
-
-assert.match(
-  loyaltyRedemptionHardening,
-  /drop function if exists public\\.redeem_loyalty_reward\\([\\s\\S]*timestamptz\\s*\\)/i,
-  'The obsolete five-argument redemption RPC must be removed.',
-);
-assert.match(
-  loyaltyRedemptionHardening,
-  /p_token_encrypted text[\\s\\S]*p_code_encrypted text/i,
-  'The current redemption RPC must persist encrypted voucher recovery material.',
-);
-assert.match(
-  loyaltyRedemptionHardening,
-  /grant execute on function public\\.redeem_loyalty_reward\\([\\s\\S]*to service_role/i,
   'Only the server-side service role may execute the redemption RPC.',
 );
 assert.doesNotMatch(
