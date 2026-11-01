@@ -1308,7 +1308,7 @@ export function MarketingWorkspace({
                 onClick={() => setDetails(null)}
                 aria-label="Fechar"
               >
-                <X className="size-4" />
+                <X className="size-5" aria-hidden="true" />
               </Button>
             </div>
             <div className="grid gap-6 p-5 sm:grid-cols-2">
