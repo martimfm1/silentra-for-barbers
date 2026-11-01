@@ -21,11 +21,11 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Ativar leaked-password protection.
 - [x] Rever 33 tabelas RLS sem policies e separar tabelas internas server-only. Foram revogados grants de `anon`/`authenticated` em sete tabelas internas; acesso `service_role` foi preservado e verificado.
 - [x] Aplicar e sincronizar a migration de fidelização `20261101230417_fix_loyalty_redemption_api`.
-- [ ] Consolidar políticas permissivas duplicadas.
-- [ ] Corrigir chamadas de Auth em políticas com initplan.
+- [ ] Aplicar e validar a migration `20261101240000_optimize_rls_policy_initplans`: cache de `auth.uid()`/helper por statement e consolidação de políticas duplicadas em `shops`, `services`, `marketing_campaigns`, `barbershop_dashboard_customizations`, `subscriptions` e `reviews`. A revisão confirmou que as condições de acesso existentes são preservadas.
+
 
 ### P1 — Performance
-- [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration com índices B-tree completos preparada, pendente de CI e aplicação.
+- [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration `20261101234500_add_appointment_reference_indexes` com índices B-tree completos preparada, pendente de CI e aplicação.
 - [ ] Rever 4 pares de índices duplicados. Um par exato em `appointments.management_token` foi identificado; manter a decisão de remoção pendente até confirmar o snapshot `supabase/schema.sql` e a utilização.
 - [ ] Investigar índices sem uso antes de remover.
 - [ ] Fazer profiling dos endpoints mais lentos e criar testes de carga multi-tenant.
@@ -103,6 +103,13 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Rever os 72 índices sem uso; não remover com base apenas em estatísticas de uma base de dados com poucas linhas e tráfego limitado.
 - [x] Consultar p95 dos últimos 7 dias. Maiores valores com pelo menos 5 pedidos: `/api/analytics` 3.0s (9 pedidos), `/api/cron/marketing` 2.9s (8), `/api/loyalty/me` 2.4s (7), `/api/marketing/campaigns/automation` 2.1s (6), `/api/barbershops/public-profile` 2.1s (27), `/api/shops/[id]/booking-data` 1.8s (55). Sem respostas 5xx nesses grupos; amostras pequenas em vários endpoints.
 - [x] Confirmar que as tabelas de negócio consultadas continuam pequenas no ambiente atual (ex.: appointments 11 linhas estimadas; services 4). Isto limita conclusões de EXPLAIN e impede afirmar ganhos de latência antes de um teste de carga real.
+
+
+### 5. RLS — otimização de initplans e consolidação (em validação)
+- [x] Rever as policies atuais de `shops`, `services`, `marketing_campaigns`, `barbershop_dashboard_customizations`, `subscriptions` e `reviews` antes de alterar.
+- [x] Confirmar que a migration `20261101240000_optimize_rls_policy_initplans` preserva as condições de acesso e combina políticas permissivas equivalentes com `OR`.
+- [x] Adicionar contratos QA para chamadas Auth/helper em initplan e para consolidação das policies.
+- [ ] Executar CI na ponta atual da branch; aplicar migration à produção; confirmar descida do advisor sem alterar visibilidade pública/tenant.
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
