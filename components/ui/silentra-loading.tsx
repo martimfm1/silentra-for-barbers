@@ -6,7 +6,7 @@ import LightTunnel from '@/components/ui/light-tunnel';
 import { StrokeWordmark } from '@/components/ui/stroke-wordmark';
 
 type SilentraLoadingProps = {
-  variant?: 'fullscreen' | 'compact';
+  variant?: 'fullscreen' | 'compact' | 'dashboard';
   message?: string;
 };
 
@@ -33,15 +33,20 @@ export function SilentraLoading({
   const { locale } = useLanguage();
   const accent = useLoadingAccent();
   const compact = variant === 'compact';
+  const isDashboard = variant === 'dashboard';
   const resolvedMessage =
     message ??
-    (compact
+    (isDashboard
       ? locale === 'en'
         ? 'Preparing your dashboard'
         : 'A preparar a tua dashboard'
-      : locale === 'en'
-        ? 'Preparing your experience'
-        : 'A preparar a experiência');
+      : compact
+        ? locale === 'en'
+          ? 'Preparing your dashboard'
+          : 'A preparar a tua dashboard'
+        : locale === 'en'
+          ? 'Preparing your experience'
+          : 'A preparar a experiência');
 
   const tunnelStyle = {
     background:

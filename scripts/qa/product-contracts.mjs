@@ -895,6 +895,13 @@ const checks = [
       source.includes('<SilentraLoading variant="compact" />') &&
       source.includes('<HeaderSkeleton />'),
   },
+  {
+    name: 'Dashboard route loading uses the full-screen Silentra animation',
+    file: 'app/dashboard/loading.tsx',
+    test: (source) =>
+      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes('<SilentraLoading variant="dashboard" />'),
+  },
 ];
 let failed = 0;
 for (const check of checks) {

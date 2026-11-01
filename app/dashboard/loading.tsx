@@ -1,5 +1,5 @@
-import { DashboardSkeleton } from './_components/dashboard-skeleton';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 
 export default function DashboardLoading() {
-  return <DashboardSkeleton variant="overview" />;
+  return <SilentraLoading variant="dashboard" />;
 }
