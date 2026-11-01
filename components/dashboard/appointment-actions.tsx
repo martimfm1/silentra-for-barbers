@@ -115,9 +115,19 @@ export function AppointmentActions({
                 {isEnglish ? 'Complete appointment' : 'Concluir atendimento'}
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-400">
-                {isEnglish ? 'Complete the appointment for ' : 'Finaliza o atendimento de '}{' '}
-                <strong className="text-zinc-200">{name}</strong> e escolhe como
-                foi recebido o pagamento.
+                {isEnglish ? (
+                  <>
+                    Complete the appointment for{' '}
+                    <strong className="text-zinc-200">{name}</strong> and choose
+                    how the payment was received.
+                  </>
+                ) : (
+                  <>
+                    Finaliza o atendimento de{' '}
+                    <strong className="text-zinc-200">{name}</strong> e escolhe
+                    como foi recebido o pagamento.
+                  </>
+                )}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
