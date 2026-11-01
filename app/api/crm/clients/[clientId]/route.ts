@@ -30,7 +30,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
       t.admin
         .from('users')
         .select(
-          'id, name_complete, name, email, num_phone, style_notes, created_at',
+          'id, name_complete, name, email, num_phone, birth_date, style_notes, created_at',
         )
         .eq('id', clientId)
         .eq('barbershop_id', t.barbershopId)
