@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ShieldCheck, Database, ClipboardCheck } from 'lucide-react';
+import { ShieldCheck, Database, ClipboardCheck, Store } from 'lucide-react';
 import { LegalDocumentPage } from '@/components/legal/legal-document-page';
 import { dataProcessingAddendum } from '@/lib/legal/additional-policies';
 
