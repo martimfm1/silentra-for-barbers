@@ -44,7 +44,7 @@ assert.match(
 );
 assert.match(
   initialHardening,
-  /grant update \([\s\S]*name_complete[\s\S]*birth_date\) on table public\.users/i,
+  /grant update \([\s\S]*name_complete[\s\S]*birth_date[\\s\\S]*\\) on table public\\.users/i,
   'Authenticated users may only update safe profile/CRM fields.',
 );
 assert.doesNotMatch(
