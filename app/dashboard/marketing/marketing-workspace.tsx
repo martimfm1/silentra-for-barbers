@@ -1307,8 +1307,9 @@ export function MarketingWorkspace({
                 size="icon"
                 onClick={() => setDetails(null)}
                 aria-label="Fechar"
+                className="size-11 shrink-0 sm:size-10"
               >
-                <X className="size-4" />
+                <X className="size-5" />
               </Button>
             </div>
             <div className="grid gap-6 p-5 sm:grid-cols-2">

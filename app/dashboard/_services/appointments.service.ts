@@ -138,13 +138,27 @@ export const appointmentService = {
     } = await supabase.auth.getUser();
     let query = supabase
       .from('users')
-      .select('id, name_complete, num_phone, email, birth_date, style_notes')
+      .select('id, name_complete, num_phone, email, birth_date, style_notes, created_at')
       .eq('barbershop_id', barbershopId)
       .eq('role', 'client')
       .order('name_complete', { ascending: true });
     if (user?.id) query = query.neq('id', user.id);
     const { data, error } = await query;
     return { data: data as Client[], error };
+  },
+
+  async getClientHistory(barbershopId: string, clientId: string) {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select(
+        'id, date_hour, status, payment_method, payment_status, services(name, price), professionals(name)',
+      )
+      .eq('barbershop_id', barbershopId)
+      .eq('client_id', clientId)
+      .order('date_hour', { ascending: false })
+      .limit(100);
+
+    return { data: data ?? [], error };
   },
 
   async createClient(payload: {

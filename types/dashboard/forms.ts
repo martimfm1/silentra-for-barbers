@@ -72,6 +72,7 @@ export interface ClientsListCardProps {
   >;
   handleCreateClient: (event: FormEvent) => Promise<boolean> | boolean;
   setEditingClient: (client: Client | null) => void;
+  onSelectClient: (client: Client) => void;
   handleDeleteClient: (clientId: string) => Promise<void> | void;
   loading: boolean;
 }

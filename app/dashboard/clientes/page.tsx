@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Users } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 import { Client } from '@/types';
@@ -12,6 +13,7 @@ import { useClients } from '@/app/state/_hooks/dashboard/useClients';
 
 import { ManagementPageHeader } from '@/app/dashboard/_components/shared/ManagementPageHeader';
 import { ClientsListCard } from '@/app/dashboard/_components/cards/ClientsListCard';
+import { ClientProfileDialog } from '@/app/dashboard/_components/ClientProfileDialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -30,6 +32,7 @@ export default function ClientesPage() {
   const [searchClientQuery, setSearchClientQuery] = useState('');
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   // --- Data Fetching ---
   const fetchClients = useCallback(async () => {
@@ -66,17 +69,24 @@ export default function ClientesPage() {
   } = useClients(barbershopId, fetchClients);
 
   // --- Computed State ---
-  const filteredClients = useMemo(
-    () =>
-      clients.filter(
-        (c) =>
-          c.name_complete
-            ?.toLowerCase()
-            .includes(searchClientQuery.toLowerCase()) ||
-          c.num_phone?.includes(searchClientQuery),
-      ),
-    [clients, searchClientQuery],
-  );
+  const filteredClients = useMemo(() => {
+    const query = searchClientQuery.trim().toLocaleLowerCase();
+    if (!query) return clients;
+    const digits = query.replace(/\D/g, '');
+    return clients.filter((client) => {
+      const fields = [
+        client.name_complete,
+        client.num_phone,
+        client.email,
+        client.style_notes,
+      ];
+      return (
+        fields.some((value) => value?.toLocaleLowerCase().includes(query)) ||
+        (digits.length > 0 &&
+          String(client.num_phone ?? '').replace(/\D/g, '').includes(digits))
+      );
+    });
+  }, [clients, searchClientQuery]);
 
   return (
     <main className="min-h-screen bg-zinc-950 p-4 pt-16 text-zinc-100 sm:p-6 sm:pt-16 lg:p-8 lg:pt-16">
@@ -103,6 +113,7 @@ export default function ClientesPage() {
             setNewClientData={setNewClientData}
             handleCreateClient={handleCreateClient}
             setEditingClient={setEditingClient}
+            onSelectClient={setSelectedClient}
             handleDeleteClient={handleDeleteClient}
             loading={loadingClients}
           />
@@ -114,6 +125,15 @@ export default function ClientesPage() {
           onUpdate={handleUpdateClient}
           onChange={setEditingClient}
           loading={loadingClients}
+        />
+        <ClientProfileDialog
+          client={selectedClient}
+          barbershopId={barbershopId}
+          onClose={() => setSelectedClient(null)}
+          onEdit={(client) => {
+            setSelectedClient(null);
+            setEditingClient(client);
+          }}
         />
       </div>
     </main>
@@ -209,6 +229,21 @@ function EditClientDialog({
             </div>
 
             <div className="grid gap-2">
+              <label htmlFor="edit-client-email" className="text-xs text-zinc-400">
+                {t('clientsPage.email')}
+              </label>
+              <input
+                id="edit-client-email"
+                type="email"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-emerald-500/50"
+                value={editingClient.email ?? ''}
+                onChange={(e) =>
+                  onChange({ ...editingClient, email: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid gap-2">
               <label
                 htmlFor="edit-client-birth-date"
                 className="text-xs text-zinc-400"
@@ -229,6 +264,23 @@ function EditClientDialog({
                     birth_date: e.target.value || null,
                   })
                 }
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="edit-client-style-notes" className="text-xs text-zinc-400">
+                {t('clientsPage.preferences')}
+                <span className="ml-1 text-zinc-600">{t('clientsPage.optional')}</span>
+              </label>
+              <Textarea
+                id="edit-client-style-notes"
+                value={editingClient.style_notes ?? ''}
+                onChange={(e) =>
+                  onChange({ ...editingClient, style_notes: e.target.value })
+                }
+                maxLength={2000}
+                rows={3}
+                className="border-white/10 bg-white/5"
               />
             </div>
 
