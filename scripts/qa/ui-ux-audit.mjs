@@ -180,17 +180,17 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
     `Settings ${category} form must remain visible inline`,
   );
 }
-assert.match(settingsPage, /settingsPage\\.rulesDialogDescription/);
-assert.match(settingsPage, /settingsPage\\.cancellationWindowHelp/);
-assert.match(settingsPage, /settingsPage\\.cancellationWindowNoLimit/);
+assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
 assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
-assert.match(settingsPage, /async function saveAll\\(\\)/);
-assert.match(settingsPage, /onClick=\\{\\(\\) => void saveAll\\(\\)\\}/);
+assert.match(settingsPage, /async function saveAll\(\)/);
+assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.doesNotMatch(
   settingsPage,
   /<Dialog|activeDialog|closeSettingsDialog|role="progressbar"|completedSetupSteps/,
 );
-assert.doesNotMatch(settingsPage, /<select\\b/);
+assert.doesNotMatch(settingsPage, /<select\b/);
 assert.match(settingsPage, /<SelectTrigger/);
 assert.match(settingsPage, /<SelectContent/);
 
