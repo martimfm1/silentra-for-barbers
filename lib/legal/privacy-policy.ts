@@ -123,7 +123,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         ],
       },
       {
-        title: '15. Informação facultada, pedidos e decisões automatizadas',
+        title: '20. Informação facultada, pedidos e decisões automatizadas',
         paragraphs: [
           'Os dados assinalados como necessários no formulário de reserva ou nos campos obrigatórios da conta são necessários para criar a conta, responder ao pedido ou prestar a funcionalidade solicitada. Se não forneceres esses dados, poderemos não conseguir concluir a reserva ou prestar a funcionalidade. A data de nascimento, a localização do dispositivo e as preferências de marketing são opcionais, salvo indicação clara em contrário para uma função específica.',
           'Não tomamos decisões exclusivamente automatizadas que produzam efeitos jurídicos ou efeitos significativamente semelhantes sobre os titulares. A confirmação automática de uma reserva, a atualização do estado de uma marcação ou a contagem de utilizações de um plano são operações operacionais baseadas em regras da barbearia e não substituem uma avaliação humana de direitos ou elegibilidade legal.',
@@ -246,7 +246,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         ],
       },
       {
-        title: '15. Information provided, requests, and automated decisions',
+        title: '20. Information provided, requests, and automated decisions',
         paragraphs: [
           'Data marked as required in a booking form or mandatory account fields is needed to create the account, respond to the request, or provide the requested feature. If you do not provide it, we may be unable to complete the booking or provide the feature. Date of birth, device location, and marketing preferences are optional unless clearly stated otherwise for a specific function.',
           'We do not make decisions based solely on automated processing that produce legal effects or similarly significant effects on data subjects. Automatic booking confirmation, booking-status updates, and plan-usage counts are operational actions based on barbershop rules and do not replace human assessment of rights or legal eligibility.',
