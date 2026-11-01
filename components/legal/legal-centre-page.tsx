@@ -5,11 +5,7 @@ import {
   ArrowUpRight,
   BookOpen,
   CalendarDays,
-  CreditCard,
-  FileText,
   LockKeyhole,
-  ShieldCheck,
-  Users,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
