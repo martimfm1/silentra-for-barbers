@@ -571,10 +571,10 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
                 <button
                   type="button"
                   onClick={() => setActiveRedemption(null)}
-                  className="flex size-10 items-center justify-center rounded-full bg-white/5 text-zinc-400"
+                  className="flex size-11 items-center justify-center rounded-full bg-white/5 text-zinc-400 sm:size-10"
                   aria-label="Fechar"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" />
                 </button>
               </div>
               <div className="mt-5 rounded-2xl border border-amber-400/15 bg-amber-400/[0.05] p-4 text-center">
@@ -640,10 +640,10 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
               <button
                 type="button"
                 onClick={() => setSelectedReward(null)}
-                className="flex size-10 items-center justify-center rounded-full bg-white/5 text-zinc-400"
+                className="flex size-11 items-center justify-center rounded-full bg-white/5 text-zinc-400 sm:size-10"
                 aria-label="Fechar"
               >
-                <X className="size-4" />
+                <X className="size-5" />
               </button>
             </div>
             <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
