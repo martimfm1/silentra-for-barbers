@@ -172,22 +172,22 @@ assert.match(
 
 assert.match(
   appointmentReferenceIndexes,
-  /create index if not exists appointments_client_id_fk_idx[\\s\\S]*on public\\.appointments \\(client_id\\)/i,
+  /create index if not exists appointments_client_id_fk_idx[\s\S]*on public\.appointments \(client_id\)/i,
   'Appointment client foreign keys must have a full leading-column B-tree index.',
 );
 assert.match(
   appointmentReferenceIndexes,
-  /create index if not exists appointments_professional_id_fk_idx[\\s\\S]*on public\\.appointments \\(professional_id\\)/i,
+  /create index if not exists appointments_professional_id_fk_idx[\s\S]*on public\.appointments \(professional_id\)/i,
   'Appointment professional foreign keys must have a full leading-column B-tree index.',
 );
 assert.match(
   appointmentReferenceIndexes,
-  /create index if not exists appointments_service_id_fk_idx[\\s\\S]*on public\\.appointments \\(service_id\\)/i,
+  /create index if not exists appointments_service_id_fk_idx[\s\S]*on public\.appointments \(service_id\)/i,
   'Appointment service foreign keys must have a full leading-column B-tree index.',
 );
 assert.match(
   appointmentReferenceIndexes,
-  /drop index if exists public\\.idx_appointments_management_token/i,
+  /drop index if exists public\.idx_appointments_management_token/i,
   'The redundant non-unique management-token index must be removed in favour of the existing unique index.',
 );
 
@@ -199,7 +199,7 @@ assert.doesNotMatch(
 
 assert.match(
   appointmentReferenceIndexes,
-  /create index if not exists appointments_client_id_fk_idx[\\s\\S]*create index if not exists appointments_professional_id_fk_idx[\\s\\S]*create index if not exists appointments_service_id_fk_idx/i,
+  /create index if not exists appointments_client_id_fk_idx[\s\S]*create index if not exists appointments_professional_id_fk_idx[\s\S]*create index if not exists appointments_service_id_fk_idx/i,
   'Appointment foreign-key references must have full B-tree indexes.',
 );
 assert.doesNotMatch(
@@ -209,33 +209,33 @@ assert.doesNotMatch(
 );
 assert.match(
   rlsPolicyPerformance,
-  /\\(select auth\\.uid\\(\\)\\)/i,
+  /\(select auth\.uid\(\)\)/i,
   'RLS policies must cache auth.uid() per statement.',
 );
 assert.match(
   rlsPolicyPerformance,
-  /select public\\.get_my_barbershop_id\\(\\)/i,
+  /select public\.get_my_barbershop_id\(\)/i,
   'RLS policies must cache tenant helper calls per statement.',
 );
 assert.match(
   rlsPolicyPerformance,
-  /drop policy if exists reviews_public_read[\\s\\S]*drop policy if exists "Leitura pública de serviços"/i,
+  /drop policy if exists reviews_public_read[\s\S]*drop policy if exists "Leitura pública de serviços"/i,
   'Redundant public SELECT policies must be removed without removing the canonical public policy.',
 );
 assert.match(
   rlsPolicyPerformance,
-  /drop policy if exists subscriptions_select_own[\\s\\S]*create policy subscriptions_select_own[\\s\\S]*or barbershop_id =/i,
+  /drop policy if exists subscriptions_select_own[\s\S]*create policy subscriptions_select_own[\s\S]*or barbershop_id =/i,
   'Subscription SELECT policies must be consolidated without changing either access path.',
 );
 
 assert.match(
   rlsPolicyPerformance,
-  /create policy "Permitir update de serviços da barbearia"[\\s\\S]*using \\(\\(select public\\.get_my_barbershop_id\\(\\)\\)\\)/i,
+  /create policy "Permitir update de serviços da barbearia"[\s\S]*using \(\(select public\.get_my_barbershop_id\(\)\)\)/i,
   'Service write policies must cache the tenant helper per statement.',
 );
 assert.match(
   rlsPolicyPerformance,
-  /create policy marketing_campaigns_staff_read[\\s\\S]*select public\\.get_my_barbershop_id\\(\\)/i,
+  /create policy marketing_campaigns_staff_read[\s\S]*select public\.get_my_barbershop_id\(\)/i,
   'Marketing tenant policies must cache the tenant helper per statement.',
 );
 
