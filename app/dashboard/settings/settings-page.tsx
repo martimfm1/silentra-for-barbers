@@ -9,14 +9,10 @@ import {
   CalendarCheck2,
   Camera,
   Check,
-  CheckCircle2,
-  Clock3,
   ImageIcon,
   LogOut,
-  MapPin,
   Save,
   ShieldCheck,
-  Store,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
@@ -337,21 +333,6 @@ export default function SettingsPageOrganized() {
     barbershopId && origin
       ? `${origin}/storage/v1/object/public/banner/${barbershopId}/banner.webp?t=${bannerTick}`
       : null;
-  const setupStepStatus = {
-    business: config.name.trim().length >= 2,
-    location: config.address.trim().length >= 6,
-    hours: Boolean(
-      config.opening_time &&
-      config.closing_time &&
-      config.opening_time < config.closing_time,
-    ),
-    rules:
-      Number.isInteger(config.minimum_booking_notice_minutes) &&
-      config.minimum_booking_notice_minutes >= 0 &&
-      Number.isInteger(config.time_limit_cancellation_hours) &&
-      config.time_limit_cancellation_hours >= 0,
-  };
-  const completedSetupSteps = Object.values(setupStepStatus).filter(Boolean).length;
   if (loading || planLoading)
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
@@ -413,85 +394,6 @@ export default function SettingsPageOrganized() {
         </header>
         <div className="mt-5">
           <div className="min-w-0 space-y-6">
-            <section id="settings-overview">
-              <Card className={CARD_CLASS}>
-                <CardContent className="space-y-6 p-5 sm:p-7">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300">
-                      {t('settingsPage.overviewEyebrow')}
-                    </p>
-                    <h2 className="mt-2 text-xl font-semibold sm:text-2xl">
-                      {t('settingsPage.overviewTitle')}
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                      {t('settingsPage.overviewDescription')}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3 text-xs">
-                      <span className="font-medium text-zinc-300">{t('settingsPage.setupProgress')}</span>
-                      <span className="font-semibold tabular-nums text-emerald-300">{completedSetupSteps}/4</span>
-                    </div>
-                    <div
-                      role="progressbar"
-                      aria-label={t('settingsPage.setupProgress')}
-                      aria-valuemin={0}
-                      aria-valuemax={4}
-                      aria-valuenow={completedSetupSteps}
-                      className="h-2 overflow-hidden rounded-full bg-white/10"
-                    >
-                      <div
-                        className="h-full rounded-full bg-emerald-400 transition-[width] duration-300"
-                        style={{ width: `${completedSetupSteps * 25}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div
-                                                                  className="flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.business ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '01'}</span>
-                        <Store className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.name || t('settingsPage.notConfigured')}</span>
-                    </div>
-                    <div
-                                                                  className="flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.location ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '02'}</span>
-                        <MapPin className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.address || t('settingsPage.notConfigured')}</span>
-                    </div>
-                    <div
-                                                                  className="flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.hours ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '03'}</span>
-                        <Clock3 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.opening_time} – {config.closing_time}</span>
-                    </div>
-                    <div
-                                                                  className="flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.rules ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '04'}</span>
-                        <CalendarCheck2 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.rules')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.time_limit_cancellation_hours === 0 ? t('settingsPage.cancellationWindowNoLimitShort') : t('settingsPage.cancellationWindowSummary', { hours: config.time_limit_cancellation_hours })}</span>
-                    </div>
-                  </div>
-                  <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.saveAllHint')}</p>
-                </CardContent>
-              </Card>
-            </section>
             <section id="settings-business" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="space-y-1">
