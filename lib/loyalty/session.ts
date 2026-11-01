@@ -76,7 +76,7 @@ export async function getLoyaltySession(barbershopId: string) {
   if (!token) return null;
 
   const admin = createAdminClient();
-  const { data } = await admin
+  const { data, error } = await admin
     .from('loyalty_sessions')
     .select('id, email, expires_at')
     .eq('barbershop_id', barbershopId)
@@ -84,12 +84,18 @@ export async function getLoyaltySession(barbershopId: string) {
     .gt('expires_at', new Date().toISOString())
     .maybeSingle();
 
+  if (error) throw error;
   if (!data) return null;
 
-  await admin
+  const { error: touchError } = await admin
     .from('loyalty_sessions')
     .update({ last_seen_at: new Date().toISOString() })
     .eq('id', data.id);
+  if (touchError) {
+    console.warn('[LOYALTY_SESSION_TOUCH_FAILED]', {
+      code: touchError.code ?? 'UNKNOWN',
+    });
+  }
   return {
     id: data.id,
     email: data.email as string,
