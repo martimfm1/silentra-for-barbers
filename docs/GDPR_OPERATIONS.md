@@ -48,7 +48,7 @@ Para cada categoria, especificar finalidade, base legal, período, evento de in�
 
 ## 4. Subprocessadores
 
-Manter uma lista verificável que inclua, no mínimo, alojamento/runtime (Vercel), base de dados/auth (Supabase), pagamentos (Stripe), email transacional (Brevo), analytics/pixels efetivamente ativos e storage opcional (AWS/S3, se ativado).
+Manter uma lista verificável que inclua, no mínimo, alojamento/runtime (Vercel), base de dados/auth (Supabase), pesquisa de moradas (Mapbox), mapas/base tiles (CARTO), pagamentos (Stripe), email transacional (Brevo), analytics/pixels efetivamente ativos e storage opcional (AWS/S3, se ativado).
 
 Para cada fornecedor, registar:
 
