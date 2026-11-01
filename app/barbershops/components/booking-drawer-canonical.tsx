@@ -553,7 +553,7 @@ export function BookingDrawerCanonical({
               aria-label={t('bookingDrawer.closeBooking')}
               className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              <X className="size-4" aria-hidden="true" />
+              <X className="size-5" aria-hidden="true" />
             </button>
           </div>
           {step < 4 && (
