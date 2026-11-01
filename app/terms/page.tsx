@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
 import { Scale, ShieldCheck, UsersRound } from 'lucide-react';
 import { LegalDocumentPage } from '@/components/legal/legal-document-page';
-import { termsAndConditions } from '@/lib/legal/terms-and-conditions';
-import {
-  CURRENT_LEGAL_UPDATE,
-  currentTermsAddendum,
-  currentTermsFeatureSections,
-} from '@/lib/legal/current-legal-addendum';
+import { currentTerms } from '@/lib/legal/current-terms';
 
 const CANONICAL_URL = 'https://barbers.silentra.me/terms';
 
@@ -29,27 +24,6 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-  },
-};
-
-const currentTerms = {
-  pt: {
-    ...termsAndConditions.pt,
-    lastUpdated: CURRENT_LEGAL_UPDATE,
-    sections: [
-      ...termsAndConditions.pt.sections,
-      currentTermsAddendum.pt,
-      ...currentTermsFeatureSections.pt,
-    ],
-  },
-  en: {
-    ...termsAndConditions.en,
-    lastUpdated: 'October 25, 2026',
-    sections: [
-      ...termsAndConditions.en.sections,
-      currentTermsAddendum.en,
-      ...currentTermsFeatureSections.en,
-    ],
   },
 };
 
