@@ -343,7 +343,7 @@ export default function SettingsPageOrganized() {
     <main className="min-h-screen bg-zinc-950 text-zinc-50">
       <div className="mx-auto max-w-7xl px-4 pb-28 pt-4 sm:px-6 lg:px-8">
         <header className="sticky top-0 z-30 -mx-4 border-b bg-zinc-950/10 px-4 py-4 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href="/dashboard"
@@ -353,7 +353,7 @@ export default function SettingsPageOrganized() {
                 <ArrowLeft className="size-4" />
               </Link>
               <div className="min-w-0">
-                <h1 className="truncate text-xl font-semibold sm:text-2xl">
+                <h1 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight sm:text-2xl">
                   {t('settingsPage.title')}
                 </h1>
               </div>
@@ -371,18 +371,27 @@ export default function SettingsPageOrganized() {
               <Button
                 onClick={() => void saveAll()}
                 disabled={!dirty || saving}
-                className="min-h-10 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100"
+                aria-label={
+                  saving
+                    ? t('settingsPage.saving')
+                    : dirty
+                      ? t('settingsPage.saveChanges')
+                      : t('settingsPage.allSaved')
+                }
+                className="min-h-10 w-10 shrink-0 rounded-xl bg-white px-0 text-zinc-950 hover:bg-zinc-100 sm:w-auto sm:px-4"
               >
                 {saving ? (
-                  <Spinner className="mr-2 size-4" />
+                  <Spinner className="mr-0 size-4 sm:mr-2" />
                 ) : (
-                  <Save className="mr-2 size-4" />
+                  <Save className="mr-0 size-4 sm:mr-2" />
                 )}
-                {saving
-                  ? t('settingsPage.saving')
-                  : dirty
-                    ? t('settingsPage.saveChanges')
-                    : t('settingsPage.allSaved')}
+                <span className="sr-only sm:not-sr-only">
+                  {saving
+                    ? t('settingsPage.saving')
+                    : dirty
+                      ? t('settingsPage.saveChanges')
+                      : t('settingsPage.allSaved')}
+                </span>
               </Button>
             </div>
           </div>

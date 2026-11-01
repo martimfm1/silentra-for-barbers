@@ -359,12 +359,6 @@ export function DashboardSidebar() {
                     <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
                       {label}
                     </span>
-                    {active ? (
-                      <span
-                        aria-hidden="true"
-                        className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
-                      />
-                    ) : null}
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent
@@ -408,12 +402,6 @@ export function DashboardSidebar() {
                 <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
                   {locale === 'en' ? 'More' : 'Mais'}
                 </span>
-                {moreActive ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-1.5 size-1 rounded-full bg-emerald-400 lg:bottom-1"
-                  />
-                ) : null}
               </button>
             </TooltipTrigger>
             <TooltipContent
