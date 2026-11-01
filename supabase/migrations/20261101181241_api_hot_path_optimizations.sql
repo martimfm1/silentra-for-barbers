@@ -102,3 +102,6 @@ comment on function public.get_module_access_context(uuid, text[]) is
   'Single-read server-side module access context. Keeps plan resolution and canonical/legacy tenant permissions consistent; executable only by service_role.';
 comment on function public.get_client_completed_total_spent(uuid, uuid) is
   'Returns the sum of completed appointment service and product amounts for one client in one barbershop; executable only by service_role.';
+
+-- Make the new RPC signatures immediately available through PostgREST.
+notify pgrst, 'reload schema';
