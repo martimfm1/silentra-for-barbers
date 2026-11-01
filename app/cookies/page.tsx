@@ -61,7 +61,7 @@ export default function CookiePolicyPage() {
         },
       ]}
       supportLabel={{ pt: 'Contacto de privacidade', en: 'Privacy contact' }}
-      supportValue="silentra.contact@gmail.com"
+      supportValue="contact@silentra.me"
       backLabel={{ pt: 'Voltar à home', en: 'Back home' }}
     />
   );
