@@ -40,13 +40,16 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ## Progresso desta implementação
 
-### 1. Grants e RLS (em preparação)
-- [ ] Migration criada e revista.
-- [ ] Migration aplicada à produção.
-- [ ] Advisors de segurança reavaliados.
-- [ ] Testes de leitura/escrita anónima confirmados.
-- [ ] Testes de atualização de role/tenant confirmados.
-- [ ] Fluxos de reserva pública e agenda autenticada confirmados.
+### 1. Grants e RLS (migration aplicada; validação funcional em curso)
+- [x] Migration criada e revista.
+- [x] Migration aplicada à produção — versão registada `20261101225911`.
+- [x] Grants verificados: anon não tem SELECT/INSERT/UPDATE/DELETE em `appointments` nem acesso à tabela `users`.
+- [x] Grants verificados: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; pode atualizar campos de perfil permitidos.
+- [x] Helper de permissões: EXECUTE negado a anon e autorizado a authenticated.
+- [x] Política pública permissiva de UPDATE em `barbershops` removida.
+- [ ] Testes RLS comportamentais com owner/staff/tenant diferente.
+- [ ] Testar reserva pública e agenda autenticada de ponta a ponta.
+- [ ] Reexecutar QA estático/CI e rever advisors após os restantes testes.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
 
