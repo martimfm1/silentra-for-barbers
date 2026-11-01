@@ -230,7 +230,7 @@ assert.match(
 
 assert.match(
   rlsPolicyPerformance,
-  /create policy "Permitir update de serviços da barbearia"[\s\S]*using \(\(select public\.get_my_barbershop_id\(\)\)\)/i,
+  /create policy "Permitir update de serviços da barbearia"[\s\S]*using \(\(select public\.get_my_barbershop_id\(\)\)\s*=/i,
   'Service write policies must cache the tenant helper per statement.',
 );
 assert.match(
