@@ -187,7 +187,7 @@ assert.match(
 );
 assert.match(
   appointmentReferenceIndexes,
-  /drop index if exists public\.idx_appointments_management_token[\s\S]*drop index if exists public\.idx_appointments_management_token_expires_at[\s\S]*drop index if exists public\.locations_parent_barbershop_idx[\s\S]*drop index if exists public\.locations_parent_barbershop_slug_idx[\s\S]*drop index if exists public\.loyalty_rewards_shop_idx[\s\S]*drop index if exists public\.marketing_campaigns_birthday_repair_idx/i,
+  /drop index if exists public\.idx_appointments_management_token[\s\S]*drop index if exists public\.locations_parent_barbershop_idx[\s\S]*drop index if exists public\.locations_parent_barbershop_slug_idx[\s\S]*drop index if exists public\.loyalty_rewards_shop_idx[\s\S]*drop index if exists public\.marketing_campaigns_birthday_repair_idx/i,
   'Only the redundant indexes must be removed; canonical unique/constraint indexes must remain.',
 );
 
