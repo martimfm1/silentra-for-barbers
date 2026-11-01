@@ -9,7 +9,6 @@ import {
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ clientId: string }> };
-type AdminClient = Awaited<ReturnType<typeof requireModuleContext>>['admin'];
 
 async function GET__unobserved(req: Request, { params }: Params) {
   try {
