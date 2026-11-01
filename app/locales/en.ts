@@ -1033,6 +1033,8 @@ export const en = {
     phone: 'Phone',
     customerSince: 'Customer since',
     styleNotes: 'Style notes',
+    birthDate: 'Date of birth',
+    noNotes: 'There are no notes for this customer yet.',
   },
   settingsLanguage: {
     title: 'Default language',
