@@ -687,7 +687,7 @@ export function MyBookingsPage() {
                 aria-label="Fechar"
                 className="flex size-10 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5"
               >
-                <X className="size-4" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
             <label className="mt-6 block text-xs font-medium text-zinc-400">
