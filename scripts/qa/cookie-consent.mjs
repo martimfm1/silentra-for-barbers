@@ -28,6 +28,7 @@ assert.match(
   consentSchema,
   /COOKIE_CONSENT_MAX_AGE_SECONDS = 60 \* 60 \* 24 \* 180/,
 );
+assert.match(consentSchema, /COOKIE_CONSENT_VERSION = 2/);
 assert.match(consentSchema, /value\.version !== COOKIE_CONSENT_VERSION/);
 assert.match(consentSchema, /typeof value\.analytics !== 'boolean'/);
 assert.match(consentSchema, /typeof value\.marketing !== 'boolean'/);
@@ -113,7 +114,8 @@ assert.match(
 assert.match(legalAddendum, /birthday messages|mensagens de aniversário/i);
 assert.match(legalAddendum, /API pública v1/);
 assert.match(legalAddendum, /silentra_cookie_consent/);
-assert.match(legalPage, /href="\/cookies"/);
+assert.match(legalPage, /href: '\/cookies'/);
+assert.match(legalPage, /href: '\/legal'/);
 assert.match(sitemap, /\$\{SITE_URL\}\/cookies/);
 
 console.log('Cookie consent and legal-document contracts passed.');
