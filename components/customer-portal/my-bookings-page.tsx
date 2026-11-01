@@ -598,7 +598,7 @@ export function MyBookingsPage() {
                 aria-label="Fechar detalhes"
                 className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5"
               >
-                <X className="size-4" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
             <div className="mt-6 grid gap-2.5">
