@@ -76,7 +76,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
       {
         title: '8. Partilha de dados',
         paragraphs: [
-          'Podemos partilhar dados com fornecedores que atuam por nossa conta ou prestam serviços de infraestrutura, incluindo alojamento e infraestrutura (Vercel), base de dados, autenticação e armazenamento (Supabase), pagamentos e faturação (Stripe), email transacional e operacional (Brevo), gestão de etiquetas (Google Tag Manager), medição de utilização/desempenho (Vercel Analytics/Speed Insights) e medição de campanhas (Whop), de acordo com a funcionalidade e as preferências de consentimento.',
+          'Podemos partilhar dados com fornecedores que atuam por nossa conta ou prestam serviços de infraestrutura, incluindo alojamento e infraestrutura (Vercel), base de dados e autenticação (Supabase), armazenamento de ficheiros (Supabase e AWS S3 quando configurado), pagamentos e faturação (Stripe), email transacional e operacional (Brevo), gestão de etiquetas (Google Tag Manager), medição de utilização/desempenho (Vercel Analytics/Speed Insights) e medição de campanhas (Whop), de acordo com a funcionalidade e as preferências de consentimento.',
           'Partilhamos com a barbearia os dados necessários para gerir reservas e clientes associados à respetiva operação. Não vendemos dados pessoais a terceiros.',
           'Podemos divulgar dados quando tal seja exigido por lei, por autoridade competente, por ordem judicial ou quando necessário para proteger direitos, segurança e integridade da plataforma.',
         ],
@@ -199,7 +199,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
       {
         title: '8. Data sharing',
         paragraphs: [
-          'We may share data with providers acting on our behalf or providing infrastructure services, including hosting and infrastructure (Vercel), database, authentication and storage (Supabase), payments and billing (Stripe), transactional and operational email (Brevo), tag management (Google Tag Manager), usage/performance measurement (Vercel Analytics/Speed Insights), and campaign measurement (Whop), depending on the feature and consent preferences.',
+          'We may share data with providers acting on our behalf or providing infrastructure services, including hosting and infrastructure (Vercel), database and authentication (Supabase), file storage (Supabase and AWS S3 when configured), payments and billing (Stripe), transactional and operational email (Brevo), tag management (Google Tag Manager), usage/performance measurement (Vercel Analytics/Speed Insights), and campaign measurement (Whop), depending on the feature and consent preferences.',
           'We share with a barbershop the data needed to manage bookings and customers associated with its operation. We do not sell personal data to third parties.',
           'We may disclose data when required by law, competent authorities, court order, or when necessary to protect rights, security, and platform integrity.',
         ],
