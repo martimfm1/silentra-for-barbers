@@ -20,7 +20,7 @@ Minimizar dados pessoais nos logs. Não registar tokens de tracking, credenciais
 
 ## 2. Pedidos de titulares
 
-Canal publicado: `contact@silentra.me`. Até existir um portal automatizado, os pedidos devem ser tratados por um processo controlado:
+Canal publicado: `contact.silentra@gmail.com`. Até existir um portal automatizado, os pedidos devem ser tratados por um processo controlado:
 
 1. Registar data de receção, tipo de pedido e responsável, sem copiar dados excessivos para tickets.
 2. Verificar a identidade proporcionalmente ao risco; nunca pedir palavras-passe ou códigos de autenticação.

@@ -398,7 +398,7 @@ export function PricingSection({
           </div>
         </div>
         <Link
-          href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Enterprise custom website' : 'Site próprio Enterprise')}`}
+          href={`mailto:contact.silentra@gmail.com?subject=${encodeURIComponent(english ? 'Enterprise custom website' : 'Site próprio Enterprise')}`}
           className="mt-4 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200 sm:mt-0 sm:w-auto"
         >
           {english ? 'Request website activation' : 'Pedir ativação do site'}{' '}

@@ -48,7 +48,7 @@ export default function DataProcessingPage() {
         },
       ]}
       supportLabel={{ pt: 'Pedidos DPA e privacidade', en: 'DPA and privacy requests' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );

@@ -48,7 +48,7 @@ export default function BookingTermsPage() {
         },
       ]}
       supportLabel={{ pt: 'Ajuda sobre a marcação', en: 'Booking support' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );

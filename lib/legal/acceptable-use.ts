@@ -36,7 +36,7 @@ export const acceptableUsePolicy: Record<'pt' | 'en', {
         paragraphs: [
           'É proibido explorar vulnerabilidades, fazer testes de intrusão sem autorização escrita, introduzir malware, interferir com a disponibilidade, contornar rate limits, automatizar scraping abusivo ou tentar aceder a dados privados de outra barbearia.',
           'Não efetues engenharia reversa, descompilação ou modificação de componentes proprietários, salvo quando a lei o permita ou exista autorização expressa.',
-          'Comunica vulnerabilidades ou acessos suspeitos a contact@silentra.me, sem explorar, alterar, copiar ou divulgar dados encontrados.',
+          'Comunica vulnerabilidades ou acessos suspeitos a contact.silentra@gmail.com, sem explorar, alterar, copiar ou divulgar dados encontrados.',
         ],
       },
       {
@@ -57,7 +57,7 @@ export const acceptableUsePolicy: Record<'pt' | 'en', {
         title: '7. Incumprimento e contacto',
         paragraphs: [
           'A Silentra pode aplicar medidas proporcionais, incluindo limitação, suspensão ou encerramento de acesso, quando existam motivos razoáveis de segurança, fraude, abuso, obrigação legal ou incumprimento, preservando direitos legais e, quando adequado, dando oportunidade de correção.',
-          'Para comunicar um problema de segurança ou esclarecer uma utilização permitida, contacta contact@silentra.me.',
+          'Para comunicar um problema de segurança ou esclarecer uma utilização permitida, contacta contact.silentra@gmail.com.',
         ],
       },
     ],
@@ -93,7 +93,7 @@ export const acceptableUsePolicy: Record<'pt' | 'en', {
         paragraphs: [
           'You must not exploit vulnerabilities, perform penetration testing without written authorization, introduce malware, interfere with availability, bypass rate limits, automate abusive scraping, or attempt to access another barbershop’s private data.',
           'Do not reverse engineer, decompile, or modify proprietary components except where permitted by law or expressly authorized.',
-          'Report vulnerabilities or suspected unauthorized access to contact@silentra.me without exploiting, changing, copying, or disclosing any data found.',
+          'Report vulnerabilities or suspected unauthorized access to contact.silentra@gmail.com without exploiting, changing, copying, or disclosing any data found.',
         ],
       },
       {
@@ -114,7 +114,7 @@ export const acceptableUsePolicy: Record<'pt' | 'en', {
         title: '7. Breaches and contact',
         paragraphs: [
           'Silentra may take proportionate measures, including access restrictions, suspension, or termination, where there are reasonable grounds involving security, fraud, abuse, legal obligations, or non-compliance, while preserving legal rights and providing an opportunity to remedy where appropriate.',
-          'To report a security issue or clarify permitted use, contact contact@silentra.me.',
+          'To report a security issue or clarify permitted use, contact contact.silentra@gmail.com.',
         ],
       },
     ],

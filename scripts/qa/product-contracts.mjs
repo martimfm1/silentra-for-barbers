@@ -466,7 +466,7 @@ const checks = [
     file: 'app/checkout/page.tsx',
     test: (source) =>
       source.includes("intent.plan === 'enterprise'") &&
-      source.includes('mailto:silentra.contact@gmail.com') &&
+      source.includes('mailto:contact.silentra@gmail.com') &&
       source.includes('pagamento único)') &&
       source.includes('one-time €50 fee') &&
       source.includes('domínio Silentra') &&

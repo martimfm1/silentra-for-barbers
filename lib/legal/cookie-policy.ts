@@ -62,7 +62,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '7. Responsável, direitos e contacto',
         paragraphs: [
           'O tratamento associado às funcionalidades da Silentra é realizado de acordo com a Política de Privacidade. Dependendo da operação, podes exercer direitos de acesso, retificação, apagamento, limitação, oposição e portabilidade, ou retirar consentimento quando o tratamento se baseie nele.',
-          'Para questões sobre cookies, consentimento ou privacidade, contacta contact@silentra.me. Também podes apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD).',
+          'Para questões sobre cookies, consentimento ou privacidade, contacta contact.silentra@gmail.com. Também podes apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD).',
           'Esta política pode ser atualizada quando as tecnologias utilizadas ou os requisitos legais mudarem. A data da última atualização é apresentada no início da página.',
         ],
       },
@@ -123,7 +123,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '7. Controller, rights, and contact',
         paragraphs: [
           'Processing associated with Silentra features follows the Privacy Policy. Depending on the operation, you may exercise rights of access, rectification, erasure, restriction, objection, and portability, or withdraw consent where processing is based on consent.',
-          'For questions about cookies, consent, or privacy, contact contact@silentra.me. You may also lodge a complaint with the Portuguese Data Protection Authority (CNPD).',
+          'For questions about cookies, consent, or privacy, contact contact.silentra@gmail.com. You may also lodge a complaint with the Portuguese Data Protection Authority (CNPD).',
           'This policy may be updated when the technologies used or legal requirements change. The last-update date is shown at the top of the page.',
         ],
       },

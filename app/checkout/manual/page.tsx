@@ -83,7 +83,7 @@ export default async function ManualCheckoutPage({
             </p>
           </div>
           <a
-            href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(english ? 'Custom website Enterprise' : 'Site próprio Enterprise')}`}
+            href={`mailto:contact.silentra@gmail.com?subject=${encodeURIComponent(english ? 'Custom website Enterprise' : 'Site próprio Enterprise')}`}
             className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200"
           >
             {english ? 'Contact Silentra' : 'Contactar a Silentra'}

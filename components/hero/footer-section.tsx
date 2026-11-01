@@ -71,11 +71,14 @@ export function FooterSection() {
             </p>
             <div className="mt-4 grid gap-3 text-sm text-zinc-300">
               <a
-                href="mailto:contact@silentra.me"
+                href="mailto:contact.silentra@gmail.com"
                 className="transition-colors hover:text-zinc-50"
               >
-                contact@silentra.me
+                contact.silentra@gmail.com
               </a>
+              <a href="https://instagram.com/silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">Instagram</a>
+              <a href="https://tiktok.com/@silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">TikTok</a>
+              <a href="https://facebook.com/silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">Facebook</a>
               <a
                 href="https://discord.gg/PwHWWyrGxe"
                 target="_blank"

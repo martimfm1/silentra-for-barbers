@@ -105,7 +105,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '12. Direitos dos titulares',
         paragraphs: [
           'Nos termos da legislação aplicável, podes exercer direitos de acesso, retificação, apagamento, limitação, oposição e portabilidade e retirar consentimento quando o tratamento se baseie em consentimento.',
-          'Os pedidos relativos a dados tratados em nome de uma barbearia podem ter de ser encaminhados para essa barbearia quando esta atuar como responsável pelo tratamento. Para questões de privacidade da Silentra, contacta contact@silentra.me.',
+          'Os pedidos relativos a dados tratados em nome de uma barbearia podem ter de ser encaminhados para essa barbearia quando esta atuar como responsável pelo tratamento. Para questões de privacidade da Silentra, contacta contact.silentra@gmail.com.',
           'Também podes apresentar reclamação junto da autoridade de controlo competente, incluindo a Comissão Nacional de Proteção de Dados (CNPD) em Portugal.',
         ],
       },
@@ -119,7 +119,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '14. Alterações e contacto',
         paragraphs: [
           'Podemos atualizar esta política para refletir alterações legais, técnicas ou funcionais. A data da última revisão é apresentada no topo desta página.',
-          'Para questões, pedidos de direitos ou dúvidas sobre privacidade, contacta contact@silentra.me.',
+          'Para questões, pedidos de direitos ou dúvidas sobre privacidade, contacta contact.silentra@gmail.com.',
         ],
       },
       {
@@ -127,7 +127,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         paragraphs: [
           'Os dados assinalados como necessários no formulário de reserva ou nos campos obrigatórios da conta são necessários para criar a conta, responder ao pedido ou prestar a funcionalidade solicitada. Se não forneceres esses dados, poderemos não conseguir concluir a reserva ou prestar a funcionalidade. A data de nascimento, a localização do dispositivo e as preferências de marketing são opcionais, salvo indicação clara em contrário para uma função específica.',
           'Não tomamos decisões exclusivamente automatizadas que produzam efeitos jurídicos ou efeitos significativamente semelhantes sobre os titulares. A confirmação automática de uma reserva, a atualização do estado de uma marcação ou a contagem de utilizações de um plano são operações operacionais baseadas em regras da barbearia e não substituem uma avaliação humana de direitos ou elegibilidade legal.',
-          'Podes apresentar um pedido de acesso, retificação, apagamento, limitação, oposição ou portabilidade através de contact@silentra.me. Quando tratarmos os dados por conta de uma barbearia, poderemos encaminhar o pedido para essa barbearia, que é normalmente a responsável pelo tratamento, e prestar-lhe a assistência contratada.',
+          'Podes apresentar um pedido de acesso, retificação, apagamento, limitação, oposição ou portabilidade através de contact.silentra@gmail.com. Quando tratarmos os dados por conta de uma barbearia, poderemos encaminhar o pedido para essa barbearia, que é normalmente a responsável pelo tratamento, e prestar-lhe a assistência contratada.',
           'Procuramos responder aos pedidos de direitos no prazo legal de um mês após a receção. Quando o pedido for complexo ou existirem vários pedidos, esse prazo pode ser prorrogado até dois meses adicionais, sendo-te comunicada a prorrogação e os respetivos motivos dentro do primeiro mês. Podemos solicitar informação adicional para confirmar a identidade quando tal seja necessário e proporcional.',
           'A conservação varia conforme a categoria e a finalidade. Documentos contabilísticos e fiscais podem estar sujeitos a prazos legais próprios; os restantes dados são conservados enquanto forem necessários para prestar o serviço, segurança, prevenção de fraude e resolução de litígios. Não existe um único prazo de eliminação aplicável a todas as categorias, e alguns registos técnicos ou cópias de segurança podem permanecer durante o respetivo ciclo operacional.',
           'Podes apresentar reclamação à Comissão Nacional de Proteção de Dados (CNPD) ou à autoridade de controlo competente no teu local de residência ou trabalho.',
@@ -228,7 +228,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '12. Data-subject rights',
         paragraphs: [
           'Subject to applicable law, you may exercise rights of access, rectification, erasure, restriction, objection, and portability, and withdraw consent where processing is based on consent.',
-          'Requests relating to data processed on behalf of a barbershop may need to be directed to that barbershop when it acts as controller. For Silentra privacy matters, contact contact@silentra.me.',
+          'Requests relating to data processed on behalf of a barbershop may need to be directed to that barbershop when it acts as controller. For Silentra privacy matters, contact contact.silentra@gmail.com.',
           'You may also lodge a complaint with the competent supervisory authority, including the Portuguese Data Protection Authority (CNPD).',
         ],
       },
@@ -242,7 +242,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '14. Changes and contact',
         paragraphs: [
           'We may update this policy to reflect legal, technical, or functional changes. The last revision date is shown at the top of this page.',
-          'For questions, rights requests, or privacy concerns, contact contact@silentra.me.',
+          'For questions, rights requests, or privacy concerns, contact contact.silentra@gmail.com.',
         ],
       },
       {
@@ -250,7 +250,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         paragraphs: [
           'Data marked as required in a booking form or mandatory account fields is needed to create the account, respond to the request, or provide the requested feature. If you do not provide it, we may be unable to complete the booking or provide the feature. Date of birth, device location, and marketing preferences are optional unless clearly stated otherwise for a specific function.',
           'We do not make decisions based solely on automated processing that produce legal effects or similarly significant effects on data subjects. Automatic booking confirmation, booking-status updates, and plan-usage counts are operational actions based on barbershop rules and do not replace human assessment of rights or legal eligibility.',
-          'You may submit an access, rectification, erasure, restriction, objection, or portability request through contact@silentra.me. Where we process data on behalf of a barbershop, we may forward the request to that barbershop, which is generally the controller, and provide the assistance agreed with it.',
+          'You may submit an access, rectification, erasure, restriction, objection, or portability request through contact.silentra@gmail.com. Where we process data on behalf of a barbershop, we may forward the request to that barbershop, which is generally the controller, and provide the assistance agreed with it.',
           'We aim to respond to data-subject requests within the statutory one-month period after receipt. Where a request is complex or there are several requests, the period may be extended by up to two additional months; we will notify you of the extension and reasons within the first month. We may request additional information to verify identity where necessary and proportionate.',
           'Retention varies by category and purpose. Accounting and tax documents may be subject to specific statutory periods; other data is retained for as long as needed to provide the service, ensure security, prevent fraud, and resolve disputes. There is no single deletion period for every category, and some technical logs or backups may remain for their operational cycle.',
           'You may lodge a complaint with the Portuguese Data Protection Authority (CNPD) or the competent supervisory authority at your place of residence or work.',

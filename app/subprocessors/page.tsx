@@ -48,7 +48,7 @@ export default function SubprocessorsPage() {
         },
       ]}
       supportLabel={{ pt: 'Questões sobre fornecedores', en: 'Provider questions' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );

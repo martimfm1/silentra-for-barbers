@@ -48,7 +48,7 @@ export default function BillingPolicyPage() {
         },
       ]}
       supportLabel={{ pt: 'Suporte de faturação', en: 'Billing support' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );

@@ -299,7 +299,7 @@ export default function CustomWebsiteDashboardPage() {
               : 'The team enables website request and management access after confirming your purchase.'}
           </p>
           <a
-            href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent((pt ? 'Adquirir site próprio' : 'Purchase custom website') + ' — ' + (plan === 'pro' ? 'Pro' : 'Free'))}`}
+            href={`mailto:contact.silentra@gmail.com?subject=${encodeURIComponent((pt ? 'Adquirir site próprio' : 'Purchase custom website') + ' — ' + (plan === 'pro' ? 'Pro' : 'Free'))}`}
             className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 hover:bg-emerald-200"
           >
             <Mail className="size-4" />
@@ -377,7 +377,7 @@ export default function CustomWebsiteDashboardPage() {
           </p>
         </div>
         <a
-          href={`mailto:silentra.contact@gmail.com?subject=${encodeURIComponent(pt ? 'Site próprio' : 'Custom website')}`}
+          href={`mailto:contact.silentra@gmail.com?subject=${encodeURIComponent(pt ? 'Site próprio' : 'Custom website')}`}
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.08]"
         >
           <Mail className="size-4" />
