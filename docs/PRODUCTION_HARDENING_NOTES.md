@@ -9,12 +9,12 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 ## Resumo da auditoria
 
 ### P0 — Segurança e isolamento
-- [ ] Remover acesso anónimo direto a `appointments` (SELECT/INSERT/UPDATE/DELETE).
-- [ ] Restringir SELECT/INSERT/UPDATE/DELETE de marcações a staff do tenant com permissões `agenda` / `appointments`.
-- [ ] Bloquear updates de `users.role`, `users.barbershop_id`, `users.id` e timestamps através do Data API.
-- [ ] Limitar CRUD da tabela `users` a dados CRM de clientes no tenant, sem permitir alteração de roles.
-- [ ] Remover políticas permissivas de UPDATE de `barbershops`; apenas owner/admin do tenant podem atualizar.
-- [ ] Adicionar testes de regressão para os limites de grants e RLS.
+- [x] Remover acesso anónimo direto a `appointments` (SELECT/INSERT/UPDATE/DELETE).
+- [x] Restringir SELECT/INSERT/UPDATE/DELETE de marcações a staff do tenant com permissões `agenda` / `appointments`.
+- [x] Bloquear updates de `users.role`, `users.barbershop_id`, `users.id` e timestamps através do Data API.
+- [x] Limitar CRUD da tabela `users` a dados CRM de clientes no tenant, sem permitir alteração de roles.
+- [x] Remover políticas permissivas de UPDATE de `barbershops`; apenas owner/admin do tenant podem atualizar.
+- [x] Adicionar contratos QA estáticos para grants/RLS; CI configurada para os executar.
 
 ### P1 — Supabase, Auth e migrations
 - [ ] Rever as funções `SECURITY DEFINER` sinalizadas e restringir EXECUTE.
@@ -50,9 +50,10 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Teste RLS comportamental com owner: consulta 11 marcações e 2 clientes da própria barbearia; 0 marcações e 0 clientes do outro tenant.
 - [x] Testes de UPDATE dentro de transação com rollback: owner atualiza registo próprio de barbearia, cliente e marcação; não atualiza barbearia nem marcação do outro tenant.
 - [x] Migration complementar `20261101230500_harden_appointment_update_rls` aplicada: permite updates a registos legados válidos e valida serviço/profissional/cliente apenas quando a referência muda.
+- [x] Migration `20261101231000_move_tenant_permission_helper_private` aplicada: a função auxiliar foi movida para o schema `private`, não exposto à Data API. O advisor voltou de 15 para 14 funções `SECURITY DEFINER` executáveis por authenticated.
 - [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
 - [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
-- [ ] Executar QA estático/CI e rever advisors após os restantes testes.
+- [ ] Executar CI/QA completo no GitHub e rever advisors finais. Os advisors atuais já não sinalizam a função auxiliar como RPC pública; permanecem 14 funções preexistentes a rever.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
 
@@ -60,9 +61,10 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 - Migration `20261101225911_harden_production_tenant_rls` aplicada à produção.
 - Migration `20261101230500_harden_appointment_update_rls` aplicada à produção.
+- Migration `20261101231000_move_tenant_permission_helper_private` aplicada à produção.
 - Grants: anon não tem privilégios de SELECT/INSERT/UPDATE/DELETE em `appointments`, nem SELECT/INSERT em `users`.
 - Grants por coluna: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; campos de perfil permitidos mantêm UPDATE.
-- Função `has_barbershop_permission`: execução negada a anon; permitida a authenticated para uso nas políticas RLS.
+- Função `private.has_barbershop_permission`: execução negada a anon; permitida a authenticated para uso nas políticas RLS; a antiga função em `public` foi removida.
 - Teste read-only com role authenticated (owner): own tenant permission=true; other tenant permission=false; own appointments=11, other appointments=0; own clients=2, other clients=0.
 - Teste de escrita dentro de transação com rollback: own shop=1, other shop=0, own client=1, own appointment=1, other appointment=0. Nenhuma alteração ficou persistida.
 - A verificação inicial de UPDATE encontrou incompatibilidade potencial com referências históricas em appointments. Foi corrigida com validação no trigger apenas quando service/professional/client são alterados.
@@ -73,7 +75,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - 33 tabelas RLS sem policies.
 - 61 foreign keys sem índices de cobertura.
 - 19 políticas com chamadas Auth reavaliadas por linha.
-- 14 grupos de políticas permissivas duplicadas.
+- 14 grupos de políticas permissivas duplicadas na auditoria inicial; após as correções restam 5 grupos, apenas em reviews, services e subscriptions.
 - 4 pares de índices duplicados.
 - Workers de booking automation, booking completion e MB WAY expiry ativos e sem falhas nos 7 dias analisados.
 - Deploy atual da Vercel estava `READY` durante a auditoria.
