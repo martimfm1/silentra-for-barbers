@@ -130,7 +130,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
     ],
   },
   en: {
-    lastUpdated: 'August 10, 2026',
+    lastUpdated: 'November 1, 2026',
     intro:
       'These Terms and Conditions govern access to and use of the Silentra for Barbers platform ("Silentra" or the "Platform"), a SaaS service for barbershop management, bookings, customers, communications, analytics, and billing. By creating an account, expressly accepting these terms, or entering into a subscription, you accept the applicable agreement. Merely browsing public pages does not constitute acceptance of a subscription agreement.',
     sections: [
