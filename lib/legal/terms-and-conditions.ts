@@ -63,7 +63,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'A utilização da Plataforma está sujeita à Política de Privacidade da Silentra. A barbearia permanece responsável pelos dados pessoais de clientes e profissionais que introduz e pelas obrigações legais que lhe sejam aplicáveis.',
           'A barbearia deve disponibilizar aos seus clientes informação adequada sobre o tratamento dos seus dados e obter consentimentos quando estes sejam legalmente necessários.',
-          'A Silentra pode atuar como responsável pelo tratamento ou como subcontratante, consoante a finalidade e a operação. Quando a barbearia determina as finalidades e a Silentra trata dados de clientes por sua conta, aplica-se a Adenda de Tratamento de Dados (DPA), disponível em /dpa, que integra o acordo entre as partes para esse tratamento.',
+          'A Silentra pode atuar como responsável pelo tratamento ou como subcontratante, consoante a finalidade e a operação. Quando a barbearia determina as finalidades e a Silentra trata dados de clientes por sua conta, as partes devem formalizar e aceitar a Adenda de Tratamento de Dados (DPA), disponível em /dpa, antes de esse tratamento começar.',
         ],
       },
       {
@@ -180,7 +180,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           "Use of the Platform is subject to Silentra's Privacy Policy. The barbershop remains responsible for personal data relating to customers and professionals that it enters and for its applicable legal obligations.",
           'The barbershop must provide appropriate privacy information to customers and obtain consent where legally required.',
-          "Silentra may act as controller or processor depending on the purpose and operation. Where the barbershop determines the purposes and Silentra processes customer data on its behalf, the Data Processing Addendum (DPA), available at /dpa, applies and forms part of the agreement for that processing.",
+          "Silentra may act as controller or processor depending on the purpose and operation. Where the barbershop determines the purposes and Silentra processes customer data on its behalf, the parties must formalize and accept the Data Processing Addendum (DPA), available at /dpa, before that processing begins.",
         ],
       },
       {
