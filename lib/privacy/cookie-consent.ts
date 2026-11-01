@@ -1,5 +1,5 @@
 export const COOKIE_CONSENT_COOKIE = 'silentra_cookie_consent';
-export const COOKIE_CONSENT_VERSION = 1;
+export const COOKIE_CONSENT_VERSION = 2;
 export const COOKIE_CONSENT_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
 
 export type CookieConsent = {
