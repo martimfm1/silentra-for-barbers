@@ -2054,6 +2054,15 @@ CREATE INDEX "automation_rules_tenant_idx" ON "public"."automation_rules" USING 
 CREATE INDEX "automation_runs_rule_idx" ON "public"."automation_runs" USING "btree" ("rule_id", "status");
 
 
+CREATE INDEX "appointments_client_id_fk_idx" ON "public"."appointments" USING "btree" ("client_id");
+
+
+CREATE INDEX "appointments_professional_id_fk_idx" ON "public"."appointments" USING "btree" ("professional_id");
+
+
+CREATE INDEX "appointments_service_id_fk_idx" ON "public"."appointments" USING "btree" ("service_id");
+
+
 
 CREATE INDEX "barbershop_invite_codes_active_idx" ON "public"."barbershop_invite_codes" USING "btree" ("barbershop_id", "expires_at") WHERE ("used_at" IS NULL);
 
