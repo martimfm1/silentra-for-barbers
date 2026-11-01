@@ -5,7 +5,7 @@ const root = process.cwd();
 const migrationDirectory = path.join(root, 'supabase/migrations');
 const migrationName = fs
   .readdirSync(migrationDirectory)
-  .filter((name) => /^\\d+_fix_loyalty_redemption_api\\.sql$/.test(name))
+  .filter((name) => /^\d+_fix_loyalty_redemption_api\.sql$/.test(name))
   .sort()
   .at(-1);
 
