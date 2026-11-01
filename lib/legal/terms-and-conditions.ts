@@ -108,7 +108,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
       {
         title: '12. Suspensão e encerramento',
         paragraphs: [
-          'Podes deixar de utilizar a Plataforma e solicitar o encerramento da conta através dos mecanismos disponibilizados ou contactando contact@silentra.me.',
+          'Podes deixar de utilizar a Plataforma e solicitar o encerramento da conta através dos mecanismos disponibilizados ou contactando contact.silentra@gmail.com.',
           'Podemos suspender ou encerrar uma conta em caso de violação destes termos, risco de segurança, fraude, obrigação legal ou abuso grave. Quando possível e adequado, será dada oportunidade para corrigir o incumprimento.',
           'Após encerramento, os dados podem ser conservados pelo período necessário para obrigações legais, faturação, resolução de litígios, segurança e backups, nos termos da Política de Privacidade.',
         ],
@@ -124,7 +124,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '14. Lei aplicável e contacto',
         paragraphs: [
           'Estes termos regem-se pela lei portuguesa, sem prejuízo das normas imperativas de proteção do consumidor ou outras regras que tenham aplicação obrigatória.',
-          'Para questões sobre estes termos, faturação ou utilização da Plataforma, contacta contact@silentra.me. A identificação jurídica completa da entidade exploradora (denominação legal, morada e NIF) deve ser confirmada através deste contacto antes da contratação, caso não esteja apresentada no checkout ou na informação comercial.',
+          'Para questões sobre estes termos, faturação ou utilização da Plataforma, contacta contact.silentra@gmail.com. A identificação jurídica completa da entidade exploradora (denominação legal, morada e NIF) deve ser confirmada através deste contacto antes da contratação, caso não esteja apresentada no checkout ou na informação comercial.',
         ],
       },
     ],
@@ -225,7 +225,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
       {
         title: '12. Suspension and termination',
         paragraphs: [
-          'You may stop using the Platform and request account closure through available account mechanisms or by contacting contact@silentra.me.',
+          'You may stop using the Platform and request account closure through available account mechanisms or by contacting contact.silentra@gmail.com.',
           'We may suspend or terminate an account for terms violations, security risks, fraud, legal obligations, or serious abuse. Where appropriate and possible, we will provide an opportunity to remedy the breach.',
           'After termination, data may be retained as necessary for legal obligations, billing, dispute resolution, security, and backups, as described in the Privacy Policy.',
         ],
@@ -241,7 +241,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         title: '14. Governing law and contact',
         paragraphs: [
           'These terms are governed by Portuguese law, without prejudice to mandatory consumer-protection rules or other provisions that must apply.',
-          'For questions about these terms, billing, or use of the Platform, contact contact@silentra.me. The full legal identification of the operating entity (legal name, address, and tax number) should be confirmed through this contact before contracting if it is not already shown at checkout or in the commercial information.',
+          'For questions about these terms, billing, or use of the Platform, contact contact.silentra@gmail.com. The full legal identification of the operating entity (legal name, address, and tax number) should be confirmed through this contact before contracting if it is not already shown at checkout or in the commercial information.',
         ],
       },
     ],
