@@ -77,7 +77,7 @@ export default function TermsPage() {
       ]}
       supportLabel={{ pt: 'Suporte legal', en: 'Legal support' }}
       supportValue="contact@silentra.me"
-      backLabel={{ pt: 'Voltar à home', en: 'Back home' }}
+      backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );
 }
