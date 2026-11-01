@@ -34,7 +34,7 @@ assert.match(detailApi, /p_client_id:\s*clientId/);
 assert.match(detailApi, /completedAppointmentsTotalResult\.error/);
 assert.match(
   detailApi,
-  /Number\(\s*completedAppointmentsTotalResult\.data \?\? 0\s*\)/,
+  /Number\(\s*completedAppointmentsTotalResult\.data \?\? 0,?\s*\)/,
 );
 assert.match(
   detailApi,
