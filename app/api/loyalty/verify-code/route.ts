@@ -65,7 +65,7 @@ async function POST__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    const { data: verification } = await admin
+    const { data: verification, error: verificationError } = await admin
       .from('loyalty_verifications')
       .select('id')
       .eq('barbershop_id', tenant.barbershopId)
@@ -75,6 +75,15 @@ async function POST__unobserved(request: Request) {
       .order('requested_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (verificationError) {
+      console.error('[LOYALTY_VERIFY_LOOKUP_ERROR]', {
+        code: verificationError.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        { error: 'Não foi possível consultar o código. Tenta novamente.' },
+        { status: 503 },
+      );
+    }
     if (!verification)
       return NextResponse.json(
         { error: 'Código inválido ou expirado.' },
