@@ -47,66 +47,15 @@ const PERMISSION_ALIASES: Record<string, readonly string[]> = {
   billing: ['billing'],
 };
 
-function jsonPermissionGranted(
-  permissions: unknown,
-  acceptedPermissions: readonly string[],
-) {
-  if (
-    !permissions ||
-    typeof permissions !== 'object' ||
-    Array.isArray(permissions)
-  )
-    return false;
-  const record = permissions as Record<string, unknown>;
-  return acceptedPermissions.some((permission) => record[permission] === true);
-}
-
-async function hasMemberPermission(
-  admin: ReturnType<typeof createAdminClient>,
-  barbershopId: string,
-  userId: string,
-  acceptedPermissions: readonly string[],
-): Promise<boolean> {
-  const { data: memberGrant, error: memberPermissionError } = await admin
-    .from('barbershop_member_permissions')
-    .select('permissions')
-    .eq('barbershop_id', barbershopId)
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (memberPermissionError) {
-    console.error('[MODULE_MEMBER_PERMISSION_LOOKUP]', memberPermissionError);
-  }
-
-  // Once a canonical permission row exists, its values are authoritative.
-  if (memberGrant)
-    return jsonPermissionGranted(memberGrant.permissions, acceptedPermissions);
-
-  // Compatibility fallback for legacy staff permission rows.
-  const { data: staffGrant, error: staffPermissionError } = await admin
-    .from('staff_permissions')
-    .select('allowed')
-    .eq('barbershop_id', barbershopId)
-    .eq('user_id', userId)
-    .in('permission', acceptedPermissions)
-    .eq('allowed', true)
-    .limit(1)
-    .maybeSingle();
-
-  if (staffPermissionError) {
-    console.error('[MODULE_STAFF_PERMISSION_LOOKUP]', staffPermissionError);
-    return false;
-  }
-
-  return Boolean(staffGrant?.allowed);
-}
-
 export async function requireModuleContext(
   feature: FeatureKey,
   permission?: string,
   request?: Request,
 ) {
-  const access = await getAccessPlanForRequest(request);
+  const acceptedPermissions = permission
+    ? (PERMISSION_ALIASES[permission] ?? [permission])
+    : [];
+  const access = await getAccessPlanForRequest(request, acceptedPermissions);
   if (!access.ok) throw new ModuleAuthorizationError('UNAUTHORIZED');
 
   try {
@@ -115,41 +64,25 @@ export async function requireModuleContext(
     throw new ModuleAuthorizationError('FEATURE_NOT_INCLUDED');
   }
 
-  const admin = createAdminClient();
-  const { data: profile, error } = await admin
-    .from('users')
-    .select('id, barbershop_id, role')
-    .eq('id', access.userId)
-    .maybeSingle();
-
-  if (error || !profile?.barbershop_id)
+  if (!access.barbershopId)
     throw new ModuleAuthorizationError('FORBIDDEN');
 
-  const role = String(profile.role ?? 'barber').toLowerCase();
+  const role = String(access.role ?? 'barber').toLowerCase();
 
-  // Owner is the tenant administrator and retains full access to the modules
-  // granted by the barbershop plan. Everyone else is controlled by the saved
-  // Team & Permissions switches.
-  if (permission && role !== 'owner') {
-    const acceptedPermissions = PERMISSION_ALIASES[permission] ?? [permission];
-    const granted = await hasMemberPermission(
-      admin,
-      profile.barbershop_id,
-      access.userId,
-      acceptedPermissions,
-    );
-    if (!granted) throw new ModuleAuthorizationError('PERMISSION_DENIED');
-  }
+  // Owner is the tenant administrator. Other team members must have an
+  // explicit canonical permission, falling back to legacy grants only when
+  // no canonical permissions row exists.
+  if (permission && role !== 'owner' && !access.permissionGranted)
+    throw new ModuleAuthorizationError('PERMISSION_DENIED');
 
   return {
     userId: access.userId,
-    barbershopId: profile.barbershop_id as string,
-    role: profile.role ?? 'barber',
+    barbershopId: access.barbershopId,
+    role,
     plan: access.plan,
-    admin,
+    admin: createAdminClient(),
   };
 }
-
 export function moduleErrorResponse(error: unknown) {
   if (!(error instanceof ModuleAuthorizationError)) return null;
   const status = error.code === 'UNAUTHORIZED' ? 401 : 403;
