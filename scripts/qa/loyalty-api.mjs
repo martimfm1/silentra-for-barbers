@@ -11,6 +11,45 @@ const migrationName = fs
 
 const checks = [
   {
+    file: 'app/api/loyalty/route.ts',
+    markers: [
+      'currentSettings',
+      'typeof body.enabled === \'boolean\'',
+      'currentSettings?.points_per_euro ?? 1',
+      'moduleErrorResponse',
+    ],
+  },
+  {
+    file: 'app/api/loyalty/rewards/route.ts',
+    markers: [
+      'moduleErrorResponse',
+      'typeof body.active !== \'boolean\'',
+      'Invalid reward value',
+    ],
+  },
+  {
+    file: 'app/api/loyalty/earning-rules/route.ts',
+    markers: [
+      'moduleErrorResponse',
+      'serviceError',
+      'Regra não encontrada.',
+    ],
+  },
+  {
+    file: 'app/api/loyalty/redemption/qr/route.ts',
+    markers: [
+      'redemptionError',
+      \'Cache-Control\': \'private, no-store\'',
+    ],
+  },
+  {
+    file: 'app/api/loyalty/me/route.ts',
+    markers: [
+      'clearLoyaltyCookie()',
+      '{ authenticated: false }',
+    ],
+  },
+  {
     file: 'app/api/loyalty/redeem/route.ts',
     markers: [
       "allowedKeys: ['slug', 'rewardId']",
