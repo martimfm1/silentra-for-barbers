@@ -484,7 +484,7 @@ const requestValidationChecks = [
       'requireTenantAuthorization(request, QR_MANAGE_ROLES)',
       'planSupportsCustomSlug(plan)',
       'BarbershopStripeService.getEffectivePlan(tenant.userId)',
-      "allowedKeys: ['slug', 'text']",
+      'validatePublicProfileSlug(slug)',
     ],
     label: 'QR code settings request validation and tenant binding',
   },
@@ -557,7 +557,7 @@ const requestValidationChecks = [
   {
     file: 'app/api/silentra-admin/loyalty/points/route.ts',
     markers: [
-      "admin.rpc('admin_grant_loyalty_points_by_email'",
+      "'admin_grant_loyalty_points_by_email'",
       "error.code === 'P0002'",
       'requirePlatformAdmin()',
     ],
