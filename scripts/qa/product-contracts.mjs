@@ -867,7 +867,7 @@ const checks = [
     file: 'app/loading.tsx',
     test: (source) =>
       source.includes("import { DepthLoading } from '@/components/ui/depth-loading'") &&
-      source.includes('<DepthLoading message='),
+      source.includes('<DepthLoading />'),
   },
   {
     name: 'Dashboard loading skeletons reuse the compact Silentra depth-text animation',
