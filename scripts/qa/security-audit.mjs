@@ -564,7 +564,7 @@ const requestValidationChecks = [
     label: 'Platform-admin loyalty points API uses the protected points RPC',
   },
   {
-    file: 'supabase/migrations/20261101190000_fix_admin_loyalty_grant_return_types.sql',
+    file: 'supabase/migrations/20261101190526_fix_admin_loyalty_grant_return_types.sql',
     markers: [
       'v_shop.name::text',
       "set search_path = ''",
