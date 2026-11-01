@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-import { CalendarDays, Clock3, User } from 'lucide-react';
+import { CalendarDays, User } from 'lucide-react';
 import type { Appointment } from '@/types';
 import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
 import { AppointmentActions } from './appointment-actions';
@@ -78,6 +78,11 @@ export function AppointmentMobileCard({
               {name}
             </h3>
             <StatusBadge status={appointment.status} />
+            {appointment.payment_status === 'awaiting_review' ? (
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-semibold text-amber-200">
+                {isEnglish ? 'MB WAY review' : 'MB WAY por validar'}
+              </span>
+            ) : null}
           </div>
           {phone ? (
             <a
@@ -123,18 +128,12 @@ export function AppointmentMobileCard({
         </div>
         <div className="min-w-0 rounded-xl border border-white/[0.055] bg-black/10 p-3">
           <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
-            {isEnglish ? 'Payment' : 'Pagamento'}
+            {isEnglish ? 'Barber' : 'Barbeiro'}
           </span>
-          {appointment.payment_status === 'awaiting_review' ? (
-            <span className="mt-1.5 inline-flex max-w-full rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">
-              {isEnglish ? 'MB WAY awaiting review' : 'MB WAY por validar'}
-            </span>
-          ) : (
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-zinc-400">
-              <Clock3 className="size-3.5 text-zinc-500" aria-hidden="true" />
-              {isEnglish ? 'See booking details' : 'Ver detalhes da marcação'}
-            </p>
-          )}
+          <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-sm font-medium text-zinc-200">
+            <User className="size-3.5 shrink-0 text-zinc-500" aria-hidden="true" />
+            <span className="truncate">{professional}</span>
+          </p>
         </div>
       </div>
 
