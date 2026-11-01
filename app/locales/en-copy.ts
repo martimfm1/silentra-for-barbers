@@ -312,6 +312,7 @@ export const enCopy = {
     planPaymentSaved: 'Monthly payment marked as paid.',
     planPaymentPending: 'Monthly payment marked as pending.',
     planCancelConfirm: 'Are you sure you want to end this plan?',
+    planLoading: 'Loading plans…',
     plansTitle: 'Monthly plan',
     planActive: 'Active',
     planMonthlyPrice: 'Monthly fee',
