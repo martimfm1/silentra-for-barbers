@@ -65,6 +65,7 @@ export function useClients(
         num_phone: editingClient.num_phone.trim(),
         email: editingClient.email?.trim() || '',
         birth_date: editingClient.birth_date || null,
+        style_notes: editingClient.style_notes?.trim() || null,
       });
       if (error) throw error;
       toast.success('Cliente editado com sucesso!');
