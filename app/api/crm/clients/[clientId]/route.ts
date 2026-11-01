@@ -90,7 +90,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
       t.admin
         .from('appointments')
         .select(
-          'id, date_hour, status, service_price, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name), professionals(name)',
+          'id, date_hour, status, service_price, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name,price), professionals(name)',
         )
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId)
@@ -100,7 +100,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
       t.admin
         .from('appointments')
         .select(
-          'id, date_hour, status, service_price, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name), professionals(name)',
+          'id, date_hour, status, service_price, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name,price), professionals(name)',
         )
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId)
