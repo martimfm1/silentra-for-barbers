@@ -158,6 +158,7 @@ export function AppointmentsTable({
                     <AppointmentActions
                       appointment={appointment}
                       onDetails={() => onDetails(appointment)}
+                      locale={locale}
                       compact
                       {...actionProps}
                     />
