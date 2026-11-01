@@ -12,6 +12,7 @@ type Params = { params: Promise<{ clientId: string }> };
 type AdminClient = Awaited<ReturnType<typeof requireModuleContext>>['admin'];
 
 type CompletedAppointmentAmount = {
+  service_price?: number | string | null;
   value_products?: number | string | null;
   services?:
     | { price?: number | string | null }
@@ -31,7 +32,7 @@ async function getCompletedAppointmentsTotal(
   while (true) {
     const { data, error } = await admin
       .from('appointments')
-      .select('value_products, services(price)')
+      .select('service_price, value_products')
       .eq('barbershop_id', barbershopId)
       .eq('client_id', clientId)
       .eq('status', 'completed')
@@ -46,10 +47,8 @@ async function getCompletedAppointmentsTotal(
 
     const rows = (data ?? []) as unknown as CompletedAppointmentAmount[];
     for (const appointment of rows) {
-      const relation = appointment.services;
-      const service = Array.isArray(relation) ? relation[0] : relation;
       total +=
-        (Number(service?.price) || 0) +
+        (Number(appointment.service_price) || 0) +
         (Number(appointment.value_products) || 0);
     }
 
@@ -91,7 +90,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
       t.admin
         .from('appointments')
         .select(
-          'id, date_hour, status, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name,price), professionals(name)',
+          'id, date_hour, status, service_price, value_products, payment_method, service_id, professional_id, description_products, created_at, services(name), professionals(name)',
         )
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId)
