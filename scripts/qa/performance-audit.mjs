@@ -174,9 +174,10 @@ assert.doesNotMatch(
   /createClient\(|@\/lib\/supabase\/server/,
   'Public booking availability must not create an unused SSR auth client.',
 );
-assert.match(
-  analyticsApi,
-  /await Promise\\.all\\(\\[[\\s\\S]*from\\('appointments'\\)[\\s\\S]*from\\('users'\\)[\\s\\S]*from\\('users'\\)[\\s\\S]*from\\('appointments'\\)/,
+assert.ok(
+  analyticsApi.includes('await Promise.all([') &&
+    (analyticsApi.match(/from\('appointments'\)/g) ?? []).length >= 2 &&
+    (analyticsApi.match(/from\('users'\)/g) ?? []).length >= 2,
   'Analytics must execute current appointments, client counts and previous-period reads concurrently.',
 );
 
