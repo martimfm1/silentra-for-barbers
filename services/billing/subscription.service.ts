@@ -2,7 +2,7 @@ import type Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripeClient } from '@/lib/stripe/server';
 import { planForPrice, PLANS } from '@/lib/stripe/constants';
-import { PLAN_ACCESS_STATUSES, resolvePlan } from '@/lib/billing/plan-access';
+import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import {
   BillingError,
   type BillingPlan,
@@ -23,6 +23,14 @@ type SubscriptionRow = Pick<
   | 'payment_method'
 > & {
   barbershop_id?: string | null;
+};
+
+
+type RequestAccessContext = {
+  barbershopId: string | null;
+  role: string;
+  plan: BillingPlan;
+  permissionGranted: boolean;
 };
 
 function subscriptionPeriodEnd(
@@ -254,46 +262,73 @@ export class SubscriptionService {
       : null;
   }
 
+  static async getAccessContextForUser(
+    userId: string,
+    permissionKeys: readonly string[] = [],
+  ): Promise<RequestAccessContext> {
+    const { data, error } = await createAdminClient().rpc(
+      'get_module_access_context',
+      {
+        p_user_id: userId,
+        p_permission_keys: [...permissionKeys],
+      },
+    );
+    const row = (Array.isArray(data) ? data[0] : data) as
+      | {
+          barbershop_id?: string | null;
+          role?: string | null;
+          plan?: string | null;
+          permission_granted?: boolean | null;
+        }
+      | null;
+    if (error || !row)
+      throw new BillingError(
+        'Could not load request access context.',
+        'DB_READ_FAILED',
+        { userId },
+      );
+
+    const rawPlan = String(row.plan ?? PLANS.FREE).toLowerCase();
+    const plan: BillingPlan =
+      rawPlan === PLANS.PRO
+        ? PLANS.PRO
+        : rawPlan === PLANS.ENTERPRISE
+          ? PLANS.ENTERPRISE
+          : PLANS.FREE;
+
+    return {
+      barbershopId: row.barbershop_id ?? null,
+      role: String(row.role ?? 'barber').toLowerCase(),
+      plan,
+      permissionGranted: row.permission_granted === true,
+    };
+  }
+
   static async getAccessPlanForBarbershop(
     barbershopId: string,
   ): Promise<BillingPlan> {
-    const admin = createAdminClient();
-    const { data: assignment, error: assignmentError } = await admin
-      .from('barbershop_plan_assignments')
-      .select('plan, expires_at')
-      .eq('barbershop_id', barbershopId)
-      .maybeSingle();
-    if (assignmentError)
+    const { data, error } = await createAdminClient().rpc(
+      'get_effective_billing_plan_for_barbershop',
+      { p_barbershop_id: barbershopId },
+    );
+    if (error)
       throw new BillingError(
-        'Could not load barbershop plan assignment.',
+        'Could not load barbershop plan.',
         'DB_READ_FAILED',
         { barbershopId },
       );
-    if (
-      assignment &&
-      (!assignment.expires_at ||
-        new Date(assignment.expires_at).getTime() > Date.now())
-    )
-      return assignment.plan as BillingPlan;
-    const subscription = await this.getForBarbershop(barbershopId);
-    if (!subscription) return PLANS.FREE;
-    if (subscription.plan_override)
-      return subscription.plan_override as BillingPlan;
-    const reconciled = await this.reconcileStripeSubscription(
-      subscription.user_id,
-      subscription,
-    );
-    return resolvePlan(reconciled ?? subscription);
+
+    const rawPlan = String(data ?? PLANS.FREE).toLowerCase();
+    return rawPlan === PLANS.PRO
+      ? PLANS.PRO
+      : rawPlan === PLANS.ENTERPRISE
+        ? PLANS.ENTERPRISE
+        : PLANS.FREE;
   }
 
   static async getAccessPlan(userId: string): Promise<BillingPlan> {
-    const barbershopId = await this.getBarbershopIdForUser(userId);
-
-    // Manual subscriptions are a valid source of paid access and must be
-    // resolved exactly like Stripe subscriptions. Stripe migration guards
-    // belong to Stripe-specific flows, not to the global access resolver.
-    if (!barbershopId) return PLANS.FREE;
-    return this.getAccessPlanForBarbershop(barbershopId);
+    const context = await this.getAccessContextForUser(userId);
+    return context.plan;
   }
 
   static async resolveAccessPlanForUser(userId: string): Promise<BillingPlan> {
