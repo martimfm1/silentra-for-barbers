@@ -64,6 +64,9 @@ jobs:
       - name: Client database, history and notes contracts
         run: pnpm qa:client-database
 
+      - name: Client plans and booking spend contracts
+        run: pnpm qa:client-plans
+
       - name: Minimum booking notice contracts
         run: pnpm qa:minimum-booking-notice
 
