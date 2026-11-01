@@ -1038,6 +1038,8 @@ export const pt = {
     styleNotes: 'Notas de estilo',
     birthDate: 'Data de nascimento',
     noNotes: 'Ainda não existem notas para este cliente.',
+    completedBookings: 'Marcações concluídas',
+    totalSpent: 'Total gasto',
   },
   settingsLanguage: {
     title: 'Idioma predefinido',
