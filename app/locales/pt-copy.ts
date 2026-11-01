@@ -707,8 +707,8 @@ export const ptCopy = {
     countSingular: 'cliente',
     countPlural: 'clientes',
     countSuffix: 'na tua base.',
-    searchPlaceholder: 'Pesquisar por nome, telemóvel, email ou notas',
-    searchLabel: 'Pesquisar clientes por nome, telemóvel, email ou notas',
+    searchPlaceholder: 'Pesquisar por nome, telemóvel, email ou preferências',
+    searchLabel: 'Pesquisar clientes por nome, telemóvel, email ou preferências',
     addClient: 'Adicionar cliente',
     addDialogTitle: 'Adicionar cliente',
     addDialogDescription:
@@ -719,7 +719,7 @@ export const ptCopy = {
     emailPlaceholder: 'cliente@email.com',
     submit: 'Adicionar',
     notFound: 'Não encontrámos esse cliente',
-    tryAnotherSearch: 'Experimenta outro nome ou telemóvel.',
+    tryAnotherSearch: 'Experimenta outro nome, telemóvel, email ou preferência.',
     clearSearch: 'Limpar pesquisa',
     emptyTitle: 'A tua base ainda está vazia',
     emptyDescriptionLong:
