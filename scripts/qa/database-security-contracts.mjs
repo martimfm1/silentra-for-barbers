@@ -5,64 +5,98 @@ import { join } from 'node:path';
 const root = process.cwd();
 const read = (file) => readFile(join(root, file), 'utf8');
 
-const migration = await read(
+const initialHardening = await read(
   'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
-const appointmentUpdateMigration = await read(\n  'supabase/migrations/20261101230500_harden_appointment_update_rls.sql',\n);\nconst bookingApi = await read('app/api/bookings/route.ts');
+const appointmentUpdateHardening = await read(
+  'supabase/migrations/20261101230500_harden_appointment_update_rls.sql',
+);
+const privateHelperHardening = await read(
+  'supabase/migrations/20261101231000_move_tenant_permission_helper_private.sql',
+);
+const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
 );
 
 assert.match(
-  migration,
-  /revoke all privileges on table public\.appointments from anon/i,
+  initialHardening,
+  /revoke all privileges on table public\\.appointments from anon/i,
   'Anonymous users must not have direct appointment table privileges.',
 );
 assert.match(
-  migration,
-  /appointments_staff_read_tenant[\s\S]*has_barbershop_permission/i,
+  initialHardening,
+  /appointments_staff_read_tenant[\\s\\S]*has_barbershop_permission/i,
   'Appointment reads must be restricted to the current tenant and agenda permission.',
 );
 assert.match(
-  migration,
-  /appointments_staff_insert_tenant[\s\S]*status in \('pending', 'scheduled'\)/i,
+  initialHardening,
+  /appointments_staff_insert_tenant[\\s\\S]*status in \\(\'pending\', \'scheduled\'\\)/i,
   'Direct authenticated appointment inserts must be tenant-checked and limited to initial states.',
 );
 assert.match(
-  migration,
-  /revoke all privileges on table public\.users from anon/i,
+  initialHardening,
+  /revoke all privileges on table public\\.users from anon/i,
   'Anonymous users must not have direct user/CRM table privileges.',
 );
 assert.match(
-  migration,
-  /grant update \([\s\S]*name_complete[\s\S]*birth_date\) on table public\.users/i,
+  initialHardening,
+  /grant update \\([\\s\\S]*name_complete[\\s\\S]*birth_date\\) on table public\\.users/i,
   'Authenticated users may only update safe profile/CRM fields.',
 );
 assert.doesNotMatch(
-  migration,
-  /grant update \([^)]*\b(role|barbershop_id|id)\b/i,
+  initialHardening,
+  /grant update \\([^)]*\\b(role|barbershop_id|id)\\b/i,
   'Protected account/tenant columns must never be granted for client updates.',
 );
 assert.match(
-  migration,
-  /barbershops_owner_admin_update[\s\S]*actor\.role in \('owner', 'admin'\)/i,
+  initialHardening,
+  /barbershops_owner_admin_update[\\s\\S]*actor\\.role in \\(\'owner\', \'admin\'\\)/i,
   'Barbershop writes must be restricted to its owner/admin.',
 );
 assert.doesNotMatch(
-  migration,
+  initialHardening,
   /create policy[^;]+to public[^;]+for update/i,
   'No permissive public UPDATE policy may be recreated.',
 );
+
 assert.match(
-  migration,
-  /has_barbershop_permission[\s\S]*security definer[\s\S]*set search_path = ''/i,
-  'The permission helper must use a pinned empty search_path.',
+  appointmentUpdateHardening,
+  /appointments_staff_update_tenant[\\s\\S]*with check[\\s\\S]*has_barbershop_permission/i,
+  'Appointment updates must remain restricted to the caller tenant and agenda permission.',
 );
 assert.match(
-  migration,
-  /revoke all on function public\.has_barbershop_permission\(uuid, text\[\]\)[\s\S]*from public, anon, authenticated/i,
-  'The permission helper must explicitly revoke public execution before granting it.',
+  appointmentUpdateHardening,
+  /new\\.barbershop_id is distinct from old\\.barbershop_id/i,
+  'An appointment tenant must not be reassigned by a direct update.',
 );
+assert.match(
+  appointmentUpdateHardening,
+  /new\\.service_id is distinct from old\\.service_id[\\s\\S]*new\\.professional_id is distinct from old\\.professional_id[\\s\\S]*new\\.client_id is distinct from old\\.client_id/i,
+  'Changed appointment references must be checked against the same tenant.',
+);
+
+assert.match(
+  privateHelperHardening,
+  /create schema if not exists private/i,
+  'The permission helper must live in a non-exposed schema.',
+);
+assert.match(
+  privateHelperHardening,
+  /create or replace function private\\.has_barbershop_permission/i,
+  'The private permission helper must exist.',
+);
+assert.match(
+  privateHelperHardening,
+  /grant usage on schema private to authenticated, service_role/i,
+  'Only trusted authenticated/server roles should be allowed to resolve the private helper schema.',
+);
+assert.match(
+  privateHelperHardening,
+  /drop function if exists public\\.has_barbershop_permission/i,
+  'The previous public RPC must be removed.',
+);
+
 assert.match(
   bookingApi,
   /create_booking_atomic/,
@@ -70,10 +104,10 @@ assert.match(
 );
 assert.match(
   bookingRpcHardening,
-  /grant execute[\s\S]*to service_role/i,
+  /grant execute[\\s\\S]*to service_role/i,
   'Atomic booking RPC must remain service-role-only.',
 );
 
 console.log(
-  '[DATABASE_SECURITY_QA] tenant-scoped appointments, protected users and owner/admin barbershop writes passed',
+  '[DATABASE_SECURITY_QA] tenant-scoped appointments, protected users and private permission helper passed',
 );
