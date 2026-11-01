@@ -2083,7 +2083,6 @@ CREATE INDEX "customer_tags_tenant_idx" ON "public"."customer_tags" USING "btree
 
 
 
-CREATE INDEX "idx_appointments_management_token" ON "public"."appointments" USING "btree" ("management_token");
 
 
 
