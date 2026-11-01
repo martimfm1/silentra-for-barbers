@@ -72,7 +72,7 @@ export default function ClientesPage() {
   const filteredClients = useMemo(() => {
     const query = searchClientQuery.trim().toLocaleLowerCase();
     if (!query) return clients;
-    const digits = query.replace(/\\D/g, '');
+    const digits = query.replace(/\D/g, '');
     return clients.filter((client) => {
       const fields = [
         client.name_complete,
@@ -83,7 +83,7 @@ export default function ClientesPage() {
       return (
         fields.some((value) => value?.toLocaleLowerCase().includes(query)) ||
         (digits.length > 0 &&
-          String(client.num_phone ?? '').replace(/\\D/g, '').includes(digits))
+          String(client.num_phone ?? '').replace(/\D/g, '').includes(digits))
       );
     });
   }, [clients, searchClientQuery]);
