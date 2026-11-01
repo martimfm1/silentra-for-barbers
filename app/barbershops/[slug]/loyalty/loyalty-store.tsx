@@ -574,7 +574,7 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
                   className="flex size-10 items-center justify-center rounded-full bg-white/5 text-zinc-400"
                   aria-label="Fechar"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" aria-hidden="true" />
                 </button>
               </div>
               <div className="mt-5 rounded-2xl border border-amber-400/15 bg-amber-400/[0.05] p-4 text-center">
