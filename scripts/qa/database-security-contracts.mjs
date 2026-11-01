@@ -223,6 +223,17 @@ assert.match(
 );
 
 assert.match(
+  rlsPolicyPerformance,
+  /create policy "Permitir update de serviços da barbearia"[\\s\\S]*using \\(\\(select public\\.get_my_barbershop_id\\(\\)\\)\\)/i,
+  'Service write policies must cache the tenant helper per statement.',
+);
+assert.match(
+  rlsPolicyPerformance,
+  /create policy marketing_campaigns_staff_read[\\s\\S]*select public\\.get_my_barbershop_id\\(\\)/i,
+  'Marketing tenant policies must cache the tenant helper per statement.',
+);
+
+assert.match(
   bookingApi,
   /create_booking_atomic/,
   'Public booking must keep using the server-side atomic booking RPC.',
