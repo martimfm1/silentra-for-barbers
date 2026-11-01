@@ -112,8 +112,8 @@ export function LegalCentrePage() {
               {active === 'pt' ? 'Para dúvidas legais ou pedidos de privacidade, escreve-nos.' : 'For legal questions or privacy requests, contact us.'}
             </p>
           </div>
-          <a href="mailto:contact@silentra.me" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white hover:bg-white/[0.1]">
-            contact@silentra.me
+          <a href="mailto:contact.silentra@gmail.com" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white hover:bg-white/[0.1]">
+            contact.silentra@gmail.com
           </a>
         </section>
       </div>
