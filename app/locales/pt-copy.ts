@@ -683,8 +683,9 @@ export const ptCopy = {
     countSingular: 'cliente',
     countPlural: 'clientes',
     countSuffix: 'na tua base.',
-    searchPlaceholder: 'Pesquisar por nome ou telemóvel',
-    searchLabel: 'Pesquisar clientes por nome ou telemóvel',
+    viewProfile: 'Ver ficha',
+    searchPlaceholder: 'Pesquisar por nome, email ou telemóvel',
+    searchLabel: 'Pesquisar clientes por nome, email ou telemóvel',
     addClient: 'Adicionar cliente',
     addDialogTitle: 'Adicionar cliente',
     addDialogDescription:
