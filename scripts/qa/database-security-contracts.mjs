@@ -193,7 +193,7 @@ assert.match(
 
 assert.doesNotMatch(
   appointmentReferenceIndexes,
-  /drop index if exists public\\.idx_appointments_management_token_expires_at/i,
+  /drop index if exists public\.idx_appointments_management_token_expires_at/i,
   'The independent appointment expiry index must be preserved.',
 );
 
