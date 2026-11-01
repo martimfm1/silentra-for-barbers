@@ -51,9 +51,10 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Testes de UPDATE dentro de transação com rollback: owner atualiza registo próprio de barbearia, cliente e marcação; não atualiza barbearia nem marcação do outro tenant.
 - [x] Migration complementar `20261101230103_harden_appointment_update_rls` aplicada: permite updates a registos legados válidos e valida serviço/profissional/cliente apenas quando a referência muda.
 - [x] Migration `20261101230225_move_tenant_permission_helper_private` aplicada: a função auxiliar foi movida para o schema `private`, não exposto à Data API. O advisor voltou de 15 para 14 funções `SECURITY DEFINER` executáveis por authenticated.
+- [x] Migration `20261101230417_fix_loyalty_redemption_api` aplicada; a assinatura antiga de 5 argumentos foi removida. Teste com membro/recompensa reais em transação com ROLLBACK não descontou pontos nem criou resgate pendente.
 - [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
 - [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
-- [ ] Executar CI/QA completo no GitHub e rever advisors finais. Os advisors atuais já não sinalizam a função auxiliar como RPC pública; permanecem 14 funções preexistentes a rever.
+- [ ] Executar CI/QA completo no GitHub e rever advisors finais. A nova execução CI já passou TypeScript e encontra-se em Lint; ainda não está concluída.
 
 **Decisão:** o fluxo público de reservas continua a usar `/api/bookings` e o RPC atómico `create_booking_atomic`. O acesso anónimo direto à tabela de marcações deixa de ser necessário. A agenda interna continua a poder ler e alterar marcações através do cliente autenticado, mas passa a exigir uma permissão de agenda do mesmo tenant.
 
@@ -63,6 +64,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - Migration `20261101230103_harden_appointment_update_rls` aplicada à produção.
 - Migration `20261101230225_move_tenant_permission_helper_private` aplicada à produção.
 - Migration `20261101230417_fix_loyalty_redemption_api` aplicada à produção; a função antiga de cinco argumentos foi removida, mantendo apenas a assinatura de sete argumentos acessível a `service_role`.
+- `LOYALTY_REDEMPTION_SECRET` estava configurada mas vazia. Foi substituída por uma chave aleatória e guardada como variável sensível na Vercel (production/preview); valor nunca exposto. Não existiam vouchers pendentes com tokens cifrados antes da alteração.
 - Grants: anon não tem privilégios de SELECT/INSERT/UPDATE/DELETE em `appointments`, nem SELECT/INSERT em `users`.
 - Grants por coluna: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; campos de perfil permitidos mantêm UPDATE.
 - Função `private.has_barbershop_permission`: execução negada a anon; permitida a authenticated para uso nas políticas RLS; a antiga função em `public` foi removida.
