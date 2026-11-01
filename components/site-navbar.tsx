@@ -12,6 +12,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import { lockBodyScroll } from '@/lib/ui/body-scroll-lock';
 import { PwaInstallButton } from '@/components/pwa-install-button';
 import { NAVBAR_POPUP_TRANSITION, NAVBAR_TRANSITION } from './navbar-motion';
 
@@ -159,15 +160,8 @@ export function SiteNavbar() {
   }, []);
 
   useEffect(() => {
-    if (!open) {
-      document.body.style.overflow = '';
-      return;
-    }
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
+    if (!open) return;
+    return lockBodyScroll();
   }, [open]);
 
   useEffect(() => {
@@ -652,7 +646,7 @@ export function SiteNavbar() {
               defaultValue: 'Menu de navegação',
             })}
           >
-            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-y-auto">
+            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain">
               <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/8 pb-5 sm:mb-8">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
