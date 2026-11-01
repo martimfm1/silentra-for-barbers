@@ -42,6 +42,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
   const [guide, setGuide] = useState<InstallGuide>('desktop');
   const [desktopBrowser, setDesktopBrowser] = useState<DesktopBrowser>('other');
   const [isInstalled, setIsInstalled] = useState(false);
+  const [installFeedback, setInstallFeedback] = useState<string | null>(null);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(
     null,
   );
@@ -80,6 +81,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
     const onAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
+      setInstallFeedback(null);
       setOpen(false);
     };
 
@@ -92,9 +94,24 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
     };
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = async (fromDialog = false) => {
     if (!installPrompt) {
-      setOpen(true);
+      if (fromDialog) {
+        setInstallFeedback(
+          guide === 'apple'
+            ? isEnglish
+              ? 'On iPhone and iPad, Safari does not allow a website to open the install prompt automatically. Use Share, choose “Add to Home Screen” and confirm.'
+              : 'No iPhone e iPad, o Safari não permite abrir a instalação automaticamente. Usa Partilhar, escolhe «Adicionar ao ecrã principal» e confirma.'
+            : isEnglish
+              ? 'This browser has not made a direct install prompt available. Follow the steps beside this card and use your browser menu.'
+              : 'Este navegador não disponibilizou a instalação direta. Segue os passos ao lado e utiliza o menu do navegador.',
+        );
+        document
+          .getElementById('install-guide-panel')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        setOpen(true);
+      }
       return;
     }
 
@@ -106,6 +123,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === 'accepted') {
         setIsInstalled(true);
+        setInstallFeedback(null);
         setOpen(false);
       } else {
         setOpen(true);
@@ -327,7 +345,10 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                       role="tab"
                       aria-selected={selected}
                       aria-controls="install-guide-panel"
-                      onClick={() => setGuide(id)}
+                      onClick={() => {
+                        setGuide(id);
+                        setInstallFeedback(null);
+                      }}
                       className={
                         selected
                           ? 'flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-emerald-200/20 bg-emerald-300/[0.12] px-1.5 text-[11px] font-semibold text-emerald-50 shadow-[0_4px_20px_rgba(16,185,129,0.07)] transition-colors sm:gap-2 sm:px-3 sm:text-sm'
@@ -423,7 +444,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                   {isDashboardPage ? (
                     <button
                       type="button"
-                      onClick={() => void handleInstallClick()}
+                      onClick={() => void handleInstallClick(true)}
                       className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/[0.1] px-4 py-2.5 text-sm font-semibold text-emerald-50 transition-colors hover:border-emerald-200/35 hover:bg-emerald-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:mt-auto"
                     >
                       <Download className="size-4" aria-hidden="true" />
@@ -439,6 +460,15 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
                       <ArrowRight className="size-4" aria-hidden="true" />
                     </Link>
                   )}
+                  {installFeedback ? (
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="mt-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.045] px-3 py-2.5 text-xs leading-5 text-amber-100/85"
+                    >
+                      {installFeedback}
+                    </p>
+                  ) : null}
                 </section>
 
                 <section className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
