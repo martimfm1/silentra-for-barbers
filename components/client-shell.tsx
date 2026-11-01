@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Toaster } from '@/components/ui/sonner';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { CookieConsentManager } from '@/components/privacy/cookie-consent-manager';
+import { CursorFollowHint } from '@/components/ui/cursor-follow-hint';
 
 const dashboardRoutePrefixes = [
   '/dashboard',
@@ -28,6 +29,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen text-zinc-50">
       <QueryProvider>{children}</QueryProvider>
+      {isDashboardRoute(pathname) ? <CursorFollowHint /> : null}
       <Toaster richColors position="top-right" />
       {showCookieConsent ? <CookieConsentManager /> : null}
     </div>

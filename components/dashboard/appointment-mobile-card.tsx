@@ -58,6 +58,7 @@ export function AppointmentMobileCard({
       }}
       tabIndex={onDetails ? 0 : undefined}
       role={onDetails ? 'button' : undefined}
+      data-cursor-label={onDetails ? (isEnglish ? 'Open booking' : 'Ver marcação') : undefined}
       aria-label={
         onDetails
           ? isEnglish

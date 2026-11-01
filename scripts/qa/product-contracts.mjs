@@ -756,6 +756,52 @@ const checks = [
       source.includes('export const DELETE'),
   },
   {
+    name: 'Shared Radix dialogs use the Animate UI-inspired 3D entrance and quicker exit',
+    file: 'app/globals.css',
+    test: (source) =>
+      source.includes('@keyframes silentra-dialog-enter') &&
+      source.includes('@keyframes silentra-dialog-exit') &&
+      source.includes("[data-slot='dialog-content'][data-state='open']") &&
+      source.includes("[data-slot='alert-dialog-content'][data-state='open']") &&
+      source.includes('prefers-reduced-motion: reduce'),
+  },
+  {
+    name: 'All shared modal overlays use progressive blur and a quick exit',
+    file: 'app/globals.css',
+    test: (source) =>
+      source.includes('@keyframes silentra-modal-overlay-in') &&
+      source.includes("[data-slot='sheet-overlay'][data-state='open']") &&
+      source.includes("[data-slot='drawer-overlay'][data-state='open']"),
+  },
+  {
+    name: 'Popover, dropdown, select and tooltip surfaces use the shared motion cadence',
+    file: 'app/globals.css',
+    test: (source) =>
+      source.includes('@keyframes silentra-floating-enter') &&
+      source.includes("[data-slot='popover-content'][data-state='open']") &&
+      source.includes("[data-slot='dropdown-menu-content'][data-state='open']") &&
+      source.includes("[data-slot='select-content'][data-state='open']") &&
+      source.includes("[data-slot='tooltip-content'][data-state='delayed-open']"),
+  },
+  {
+    name: 'Contextual cursor-follow hint is spring animated, opt-in and touch-safe',
+    file: 'components/ui/cursor-follow-hint.tsx',
+    test: (source) =>
+      source.includes('useMotionValue') &&
+      source.includes('useSpring') &&
+      source.includes("'(hover: hover) and (pointer: fine)'") &&
+      source.includes("'[data-cursor-label]'") &&
+      source.includes('prefersReducedMotion'),
+  },
+  {
+    name: 'Dashboard appointment surfaces expose contextual cursor labels',
+    file: 'components/dashboard/appointments-table.tsx',
+    test: (source) =>
+      source.includes('data-cursor-label=') &&
+      source.includes('Open booking') &&
+      source.includes('Ver marcação'),
+  },
+  {
     name: 'Dashboard iPhone calendar tutorial is localized, step-by-step and displayed in a dialog',
     file: 'components/dashboard/calendar-sync-card.tsx',
     test: (source) =>
