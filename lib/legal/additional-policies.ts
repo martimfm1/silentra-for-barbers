@@ -68,7 +68,7 @@ export const bookingPolicy: LocalizedPolicy = {
         title: '7. Ajuda e reclamações',
         paragraphs: [
           'Para dúvidas sobre o serviço, preços, atrasos, cancelamento, pré-pagamento ou reembolso, contacta primeiro a barbearia indicada na confirmação.',
-          'Para dificuldades técnicas com a página de reserva ou questões sobre o funcionamento da plataforma, contacta contact@silentra.me. Não envies palavras-passe, códigos de autenticação ou dados completos de cartões por email.',
+          'Para dificuldades técnicas com a página de reserva ou questões sobre o funcionamento da plataforma, contacta contact.silentra@gmail.com. Não envies palavras-passe, códigos de autenticação ou dados completos de cartões por email.',
           'Esta política não limita os teus direitos legais. Podes recorrer às entidades de resolução de conflitos de consumo ou às autoridades competentes quando aplicável.',
         ],
       },
@@ -130,7 +130,7 @@ export const bookingPolicy: LocalizedPolicy = {
         title: '7. Help and complaints',
         paragraphs: [
           'For questions about the service, prices, lateness, cancellation, prepayment, or refunds, contact the barbershop named in the confirmation first.',
-          'For technical issues with the booking page or questions about the platform, contact contact@silentra.me. Do not email passwords, authentication codes, or full card details.',
+          'For technical issues with the booking page or questions about the platform, contact contact.silentra@gmail.com. Do not email passwords, authentication codes, or full card details.',
           'This policy does not limit your legal rights. You may use consumer dispute-resolution bodies or competent authorities where applicable.',
         ],
       },
@@ -165,7 +165,7 @@ export const billingPolicy: LocalizedPolicy = {
         paragraphs: [
           'Para subscrições recorrentes, a periodicidade e a próxima cobrança são as apresentadas no checkout e na área de faturação. É tua responsabilidade consultar a data de renovação e cancelar antes da cobrança seguinte caso não pretendas continuar.',
           'Quando a opção de cancelamento está disponível na área de faturação, podes solicitar o cancelamento através desse fluxo. A página deve indicar se o acesso termina imediatamente ou no fim do período já pago. Guarda a confirmação do cancelamento.',
-          'Se não conseguires cancelar online, contacta contact@silentra.me antes da próxima data de cobrança. O contacto não substitui o pedido de cancelamento quando a área de faturação disponibiliza um fluxo funcional, mas permite comunicar uma falha técnica.',
+          'Se não conseguires cancelar online, contacta contact.silentra@gmail.com antes da próxima data de cobrança. O contacto não substitui o pedido de cancelamento quando a área de faturação disponibiliza um fluxo funcional, mas permite comunicar uma falha técnica.',
         ],
       },
       {
@@ -187,7 +187,7 @@ export const billingPolicy: LocalizedPolicy = {
         paragraphs: [
           'Os pedidos de reembolso são analisados caso a caso, considerando o método de pagamento, os serviços efetivamente prestados, o estado da subscrição, a informação apresentada no momento da compra e os direitos legais aplicáveis.',
           'O cancelamento de uma subscrição não significa automaticamente o reembolso de períodos já utilizados. Esta regra não limita direitos imperativos que possam exigir reembolso, incluindo situações de cobrança indevida ou outras previstas na lei.',
-          'Para pedir análise, contacta contact@silentra.me com o email da conta, o identificador do pagamento ou documento e uma descrição do pedido. Nunca envies o número completo do cartão ou códigos de autenticação.',
+          'Para pedir análise, contacta contact.silentra@gmail.com com o email da conta, o identificador do pagamento ou documento e uma descrição do pedido. Nunca envies o número completo do cartão ou códigos de autenticação.',
         ],
       },
       {
@@ -201,7 +201,7 @@ export const billingPolicy: LocalizedPolicy = {
         title: '8. Falhas de pagamento e contacto',
         paragraphs: [
           'Uma falha de pagamento, chargeback ou estado de subscrição inválido pode suspender o acesso a funcionalidades pagas. Quando possível, a área de faturação apresenta o estado e as ações necessárias para regularizar a conta.',
-          'Para dúvidas sobre faturação ou pagamentos, contacta contact@silentra.me. Esta política não exclui nem limita direitos legais que não possam ser afastados por contrato.',
+          'Para dúvidas sobre faturação ou pagamentos, contacta contact.silentra@gmail.com. Esta política não exclui nem limita direitos legais que não possam ser afastados por contrato.',
         ],
       },
     ],
@@ -232,7 +232,7 @@ export const billingPolicy: LocalizedPolicy = {
         paragraphs: [
           'For recurring subscriptions, the billing interval and next charge are those shown at checkout and in the billing area. You should check the renewal date and cancel before the next charge if you do not wish to continue.',
           'When cancellation is available in the billing area, you may request it through that flow. The page should indicate whether access ends immediately or at the end of the already-paid period. Keep the cancellation confirmation.',
-          'If you cannot cancel online, contact contact@silentra.me before the next billing date. Contacting support does not replace the cancellation request where a functional billing cancellation flow is available, but it allows you to report a technical failure.',
+          'If you cannot cancel online, contact contact.silentra@gmail.com before the next billing date. Contacting support does not replace the cancellation request where a functional billing cancellation flow is available, but it allows you to report a technical failure.',
         ],
       },
       {
@@ -254,7 +254,7 @@ export const billingPolicy: LocalizedPolicy = {
         paragraphs: [
           'Refund requests are reviewed case by case, taking into account the payment method, services actually supplied, subscription state, information shown at purchase, and applicable legal rights.',
           'Canceling a subscription does not automatically mean that already-used periods are refunded. This does not limit mandatory rights that may require a refund, including improper charges or other cases provided by law.',
-          'To request a review, contact contact@silentra.me with the account email, payment or document identifier, and a description of the request. Never send a full card number or authentication codes.',
+          'To request a review, contact contact.silentra@gmail.com with the account email, payment or document identifier, and a description of the request. Never send a full card number or authentication codes.',
         ],
       },
       {
@@ -268,7 +268,7 @@ export const billingPolicy: LocalizedPolicy = {
         title: '8. Payment failures and contact',
         paragraphs: [
           'A failed payment, chargeback, or invalid subscription state may suspend access to paid features. Where possible, the billing area shows the status and actions needed to restore the account.',
-          'For billing or payment questions, contact contact@silentra.me. This policy does not exclude or limit legal rights that cannot be waived by contract.',
+          'For billing or payment questions, contact contact.silentra@gmail.com. This policy does not exclude or limit legal rights that cannot be waived by contract.',
         ],
       },
     ],
@@ -341,7 +341,7 @@ export const dataProcessingAddendum: LocalizedPolicy = {
       {
         title: '8. Devolução, eliminação e conservação',
         paragraphs: [
-          'No fim dos serviços, a barbearia pode solicitar a devolução ou eliminação dos dados pessoais tratados por sua conta, conforme as funcionalidades de exportação e os mecanismos técnicos disponíveis. O pedido deve ser feito para contact@silentra.me.',
+          'No fim dos serviços, a barbearia pode solicitar a devolução ou eliminação dos dados pessoais tratados por sua conta, conforme as funcionalidades de exportação e os mecanismos técnicos disponíveis. O pedido deve ser feito para contact.silentra@gmail.com.',
           'A eliminação pode ser limitada por obrigações legais de conservação, prevenção de fraude, segurança, resolução de litígios ou ciclos de cópia de segurança. Os dados abrangidos por essas exceções ficam limitados e protegidos, sendo eliminados quando deixarem de ser necessários.',
           'Nem todas as exportações ou eliminações são atualmente executadas por um botão automático. A Silentra confirma o âmbito, a possibilidade técnica e as exceções aplicáveis antes de concluir o pedido.',
         ],
@@ -350,7 +350,7 @@ export const dataProcessingAddendum: LocalizedPolicy = {
         title: '9. Transferências internacionais e contacto',
         paragraphs: [
           'Quando os dados forem tratados fora do Espaço Económico Europeu, a transferência deve basear-se num mecanismo permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, incluindo cláusulas contratuais-tipo quando aplicáveis. A lista de subprocessadores identifica os fornecedores conhecidos e deve ser consultada em conjunto com a configuração efetiva da conta.',
-          'Para exercer direitos enquanto responsável pelo tratamento, a barbearia deve contactar contact@silentra.me. Esta DPA deve ser revista e aceite pelas partes e não substitui acordos adicionais legalmente exigidos para operações específicas.',
+          'Para exercer direitos enquanto responsável pelo tratamento, a barbearia deve contactar contact.silentra@gmail.com. Esta DPA deve ser revista e aceite pelas partes e não substitui acordos adicionais legalmente exigidos para operações específicas.',
         ],
       },
     ],
@@ -420,7 +420,7 @@ export const dataProcessingAddendum: LocalizedPolicy = {
       {
         title: '8. Return, deletion, and retention',
         paragraphs: [
-          'At the end of the services, the barbershop may request return or deletion of personal data processed on its behalf, subject to the export features and technical mechanisms available. Requests should be sent to contact@silentra.me.',
+          'At the end of the services, the barbershop may request return or deletion of personal data processed on its behalf, subject to the export features and technical mechanisms available. Requests should be sent to contact.silentra@gmail.com.',
           'Deletion may be limited by legal retention duties, fraud prevention, security, dispute resolution, or backup cycles. Data covered by these exceptions remains restricted and protected and is deleted when no longer required.',
           'Not all exports or deletions are currently performed through an automatic button. Silentra confirms the scope, technical feasibility, and applicable exceptions before completing a request.',
         ],
@@ -429,7 +429,7 @@ export const dataProcessingAddendum: LocalizedPolicy = {
         title: '9. International transfers and contact',
         paragraphs: [
           'Where data is processed outside the European Economic Area, the transfer must rely on a GDPR-permitted mechanism, such as an adequacy decision or appropriate safeguards, including standard contractual clauses where applicable. The subprocessor list identifies known providers and should be read together with the account’s actual configuration.',
-          'To exercise its controller responsibilities, the barbershop should contact contact@silentra.me. This DPA should be reviewed and accepted by the parties and does not replace additional agreements legally required for specific operations.',
+          'To exercise its controller responsibilities, the barbershop should contact contact.silentra@gmail.com. This DPA should be reviewed and accepted by the parties and does not replace additional agreements legally required for specific operations.',
         ],
       },
     ],
@@ -481,7 +481,7 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         title: '6. Transferências internacionais',
         paragraphs: [
           'A localização de tratamento pode variar por fornecedor, produto, região, suporte ou configuração da conta. Quando um fornecedor trate dados fora do Espaço Económico Europeu, a transferência deve estar coberta por um mecanismo permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, incluindo cláusulas contratuais-tipo quando aplicável.',
-          'Esta página não substitui a consulta dos contratos e definições reais de cada fornecedor. Para obter informação sobre o mecanismo aplicável a um fornecedor ou conta específica, contacta contact@silentra.me.',
+          'Esta página não substitui a consulta dos contratos e definições reais de cada fornecedor. Para obter informação sobre o mecanismo aplicável a um fornecedor ou conta específica, contacta contact.silentra@gmail.com.',
         ],
       },
       {
@@ -536,7 +536,7 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         title: '6. International transfers',
         paragraphs: [
           'Processing location may vary by provider, product, region, support, or account configuration. Where a provider processes data outside the European Economic Area, the transfer must be covered by a GDPR-permitted mechanism, such as an adequacy decision or appropriate safeguards, including standard contractual clauses where applicable.',
-          'This page does not replace review of the actual contracts and settings of each provider. For information about the mechanism applicable to a specific provider or account, contact contact@silentra.me.',
+          'This page does not replace review of the actual contracts and settings of each provider. For information about the mechanism applicable to a specific provider or account, contact contact.silentra@gmail.com.',
         ],
       },
       {
