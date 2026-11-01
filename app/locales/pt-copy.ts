@@ -727,6 +727,7 @@ export const ptCopy = {
     addFirst: 'Adicionar primeiro cliente',
     client: 'Cliente',
     viewProfile: 'Ver ficha de {name}',
+    viewProfileAction: 'Ver ficha',
     editAction: 'Editar',
     edit: 'Editar {name}',
     delete: 'Eliminar {name}',
