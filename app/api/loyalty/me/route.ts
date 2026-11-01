@@ -58,7 +58,14 @@ async function GET__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    if (expiryError) {
+      console.error('[LOYALTY_ME_EXPIRY_ERROR]', { code: expiryError.code ?? 'UNKNOWN' });
+      return NextResponse.json(
+        { error: 'Não foi possível atualizar os resgates da fidelização.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
 
     const { data: memberData, error: memberError } = await admin
       .from('loyalty_members')
@@ -78,7 +85,7 @@ async function GET__unobserved(request: Request) {
     const [
       { data: rewardsData, error: rewardsError },
       { data: redemptionsData, error: redemptionsError },
-      { data: barbershop },
+      { data: barbershop, error: barbershopError },
     ] = await Promise.all([
       admin
         .from('loyalty_rewards')
@@ -106,7 +113,7 @@ async function GET__unobserved(request: Request) {
         .maybeSingle(),
     ]);
 
-    if (rewardsError || redemptionsError)
+    if (rewardsError || redemptionsError || barbershopError)
       return NextResponse.json(
         { error: 'Não foi possível carregar a fidelização.' },
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
