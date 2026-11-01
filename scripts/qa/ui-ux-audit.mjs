@@ -172,21 +172,25 @@ for (const source of confirmationTargets) {
   assert.doesNotMatch(source, /window\.confirm/);
 }
 
-// Settings should expose focused, independently saveable dialogs instead of one long form.
+// Settings stay consolidated into one inline page with a single save flow.
 for (const category of ['business', 'location', 'hours', 'rules']) {
-  assert.ok(
-    settingsPage.includes(`open={activeDialog === '${category}'}`),
-    `Settings ${category} form must have its own dialog`,
+  assert.match(
+    settingsPage,
+    new RegExp(`<section id="settings-${category}"`),
+    `Settings ${category} form must remain visible inline`,
   );
 }
-assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
-assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
-assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
+assert.match(settingsPage, /settingsPage\\.rulesDialogDescription/);
+assert.match(settingsPage, /settingsPage\\.cancellationWindowHelp/);
+assert.match(settingsPage, /settingsPage\\.cancellationWindowNoLimit/);
 assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
-assert.match(settingsPage, /role="progressbar"/);
-assert.match(settingsPage, /completedSetupSteps/);
-assert.match(settingsPage, /function closeSettingsDialog\(\)/);
-assert.doesNotMatch(settingsPage, /<select\b/);
+assert.match(settingsPage, /async function saveAll\\(\\)/);
+assert.match(settingsPage, /onClick=\\{\\(\\) => void saveAll\\(\\)\\}/);
+assert.doesNotMatch(
+  settingsPage,
+  /<Dialog|activeDialog|closeSettingsDialog|role="progressbar"|completedSetupSteps/,
+);
+assert.doesNotMatch(settingsPage, /<select\\b/);
 assert.match(settingsPage, /<SelectTrigger/);
 assert.match(settingsPage, /<SelectContent/);
 
