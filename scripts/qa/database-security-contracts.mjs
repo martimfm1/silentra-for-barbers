@@ -21,37 +21,37 @@ const bookingRpcHardening = await read(
 
 assert.match(
   initialHardening,
-  /revoke all privileges on table public\\.appointments from anon/i,
+  /revoke all privileges on table public\.appointments from anon/i,
   'Anonymous users must not have direct appointment table privileges.',
 );
 assert.match(
   initialHardening,
-  /appointments_staff_read_tenant[\\s\\S]*has_barbershop_permission/i,
+  /appointments_staff_read_tenant[\s\S]*has_barbershop_permission/i,
   'Appointment reads must be restricted to the current tenant and agenda permission.',
 );
 assert.match(
   initialHardening,
-  /appointments_staff_insert_tenant[\\s\\S]*status in \\(\'pending\', \'scheduled\'\\)/i,
+  /appointments_staff_insert_tenant[\s\S]*status in \('pending', 'scheduled'\)/i,
   'Direct authenticated appointment inserts must be tenant-checked and limited to initial states.',
 );
 assert.match(
   initialHardening,
-  /revoke all privileges on table public\\.users from anon/i,
+  /revoke all privileges on table public\.users from anon/i,
   'Anonymous users must not have direct user/CRM table privileges.',
 );
 assert.match(
   initialHardening,
-  /grant update \\([\\s\\S]*name_complete[\\s\\S]*birth_date\\) on table public\\.users/i,
+  /grant update \([\s\S]*name_complete[\s\S]*birth_date\) on table public\.users/i,
   'Authenticated users may only update safe profile/CRM fields.',
 );
 assert.doesNotMatch(
   initialHardening,
-  /grant update \\([^)]*\\b(role|barbershop_id|id)\\b/i,
+  /grant update \([^)]*\b(role|barbershop_id|id)\b/i,
   'Protected account/tenant columns must never be granted for client updates.',
 );
 assert.match(
   initialHardening,
-  /barbershops_owner_admin_update[\\s\\S]*actor\\.role in \\(\'owner\', \'admin\'\\)/i,
+  /barbershops_owner_admin_update[\s\S]*actor\.role in \('owner', 'admin'\)/i,
   'Barbershop writes must be restricted to its owner/admin.',
 );
 assert.doesNotMatch(
@@ -62,17 +62,17 @@ assert.doesNotMatch(
 
 assert.match(
   appointmentUpdateHardening,
-  /appointments_staff_update_tenant[\\s\\S]*with check[\\s\\S]*has_barbershop_permission/i,
+  /appointments_staff_update_tenant[\s\S]*with check[\s\S]*has_barbershop_permission/i,
   'Appointment updates must remain restricted to the caller tenant and agenda permission.',
 );
 assert.match(
   appointmentUpdateHardening,
-  /new\\.barbershop_id is distinct from old\\.barbershop_id/i,
+  /new\.barbershop_id is distinct from old\.barbershop_id/i,
   'An appointment tenant must not be reassigned by a direct update.',
 );
 assert.match(
   appointmentUpdateHardening,
-  /new\\.service_id is distinct from old\\.service_id[\\s\\S]*new\\.professional_id is distinct from old\\.professional_id[\\s\\S]*new\\.client_id is distinct from old\\.client_id/i,
+  /new\.service_id is distinct from old\.service_id[\s\S]*new\.professional_id is distinct from old\.professional_id[\s\S]*new\.client_id is distinct from old\.client_id/i,
   'Changed appointment references must be checked against the same tenant.',
 );
 
@@ -83,7 +83,7 @@ assert.match(
 );
 assert.match(
   privateHelperHardening,
-  /create or replace function private\\.has_barbershop_permission/i,
+  /create or replace function private\.has_barbershop_permission/i,
   'The private permission helper must exist.',
 );
 assert.match(
@@ -93,7 +93,7 @@ assert.match(
 );
 assert.match(
   privateHelperHardening,
-  /drop function if exists public\\.has_barbershop_permission/i,
+  /drop function if exists public\.has_barbershop_permission/i,
   'The previous public RPC must be removed.',
 );
 
@@ -104,7 +104,7 @@ assert.match(
 );
 assert.match(
   bookingRpcHardening,
-  /grant execute[\\s\\S]*to service_role/i,
+  /grant execute[\s\S]*to service_role/i,
   'Atomic booking RPC must remain service-role-only.',
 );
 
