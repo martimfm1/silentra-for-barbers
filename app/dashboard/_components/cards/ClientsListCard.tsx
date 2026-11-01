@@ -15,7 +15,7 @@ import {
   X,
   ArrowRight,
   Cake,
-  ChevronRight,
+  Eye,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,8 +53,11 @@ export function ClientsListCard({
   setNewClientData,
   handleCreateClient,
   setEditingClient,
-  onSelectClient,
   handleDeleteClient,
+  onViewClient,
+  currentPage,
+  totalPages,
+  onPageChange,
   loading,
 }: ClientsListCardProps) {
   const { t } = useLanguage();
@@ -99,7 +102,7 @@ export function ClientsListCard({
                   aria-label={t('clientsListCard.clearSearch')}
                   className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 hover:bg-white/10 hover:text-white"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -150,18 +153,47 @@ export function ClientsListCard({
             setShowAddClientForm={setShowAddClientForm}
           />
         ) : (
-          <div className="space-y-2.5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredClients.map((client) => (
               <ClientItemCard
                 key={client.id}
                 client={client}
                 setEditingClient={setEditingClient}
-                onSelectClient={onSelectClient}
                 handleDeleteClient={handleDeleteClient}
+                onViewClient={onViewClient}
               />
             ))}
           </div>
         )}
+        {totalPages > 1 ? (
+          <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-zinc-500 tabular-nums">
+              {currentPage} / {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage <= 1}
+                onClick={() => onPageChange(currentPage - 1)}
+                className="min-h-10 flex-1 border-white/10 bg-white/[0.03] sm:flex-none"
+              >
+                {t('common.previous')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= totalPages}
+                onClick={() => onPageChange(currentPage + 1)}
+                className="min-h-10 flex-1 border-white/10 bg-white/[0.03] sm:flex-none"
+              >
+                {t('common.next')}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -334,109 +366,118 @@ function EmptyClientsState({
 interface ClientItemCardProps {
   client: Client;
   setEditingClient: (client: Client) => void;
-  onSelectClient: (client: Client) => void;
   handleDeleteClient: (id: string) => void;
+  onViewClient: (client: Client) => void;
 }
 
 function ClientItemCard({
   client,
   setEditingClient,
-  onSelectClient,
   handleDeleteClient,
+  onViewClient,
 }: ClientItemCardProps) {
   const { t, locale } = useLanguage();
   return (
-    <article className="group rounded-2xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-blue-500/25 hover:bg-white/[0.04] sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <button
-          type="button"
-          onClick={() => onSelectClient(client)}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          aria-label={t('clientsListCard.viewProfile', { name: client.name_complete })}
-        >
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-blue-400/15 bg-blue-500/10 text-sm font-semibold text-blue-200">
+    <article className="group flex min-h-[190px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-blue-500/30 hover:bg-white/[0.045]">
+      <div>
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-sm font-semibold text-blue-300">
             {client.name_complete.slice(0, 1).toUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-zinc-100 sm:text-base">
+          </div>
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-zinc-100">
               {client.name_complete}
-            </span>
-            <span className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500">
-              {client.num_phone ? (
-                <span className="inline-flex min-w-0 items-center gap-1.5">
-                  <Phone className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />
-                  <span>{client.num_phone}</span>
-                </span>
-              ) : null}
-              {client.email ? (
-                <span className="inline-flex min-w-0 items-center gap-1.5">
-                  <Mail className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />
-                  <span className="truncate">{client.email}</span>
-                </span>
-              ) : null}
-              {client.birth_date ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Cake className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />
-                  {new Date(`${client.birth_date}T12:00:00`).toLocaleDateString(
-                    locale === 'pt' ? 'pt-PT' : 'en-GB',
-                  )}
-                </span>
-              ) : null}
-            </span>
-          </span>
-          <span className="shrink-0 text-[11px] font-semibold text-blue-300">{t('clientsListCard.viewProfileAction')}</span>
-          <ChevronRight className="size-5 shrink-0 text-zinc-500 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-        </button>
-
-        {client.style_notes?.trim() ? (
-          <p className="line-clamp-1 border-l border-white/[0.07] pl-3 text-xs text-zinc-500 sm:max-w-[220px]">
-            {client.style_notes}
-          </p>
-        ) : null}
-
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setEditingClient(client)}
-            className="min-h-11 justify-center gap-2 border-white/10 bg-white/[0.035] px-4 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08] sm:min-w-24"
-            aria-label={t('clientsListCard.edit', { name: client.name_complete })}
-          >
-            <Pencil className="size-4" aria-hidden="true" />
-            {t('clientsListCard.editAction')}
-          </Button>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11 justify-center gap-2 border-red-400/15 bg-red-400/[0.035] px-4 text-xs font-semibold text-red-200 hover:border-red-400/30 hover:bg-red-400/[0.09] sm:min-w-24"
-                aria-label={t('clientsListCard.delete', { name: client.name_complete })}
-              >
-                <Trash2 className="size-4" aria-hidden="true" />
-                {t('clientsListCard.deleteAction')}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="border-white/10 bg-zinc-950">
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('clientsListCard.deleteTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('clientsListCard.deleteDescription')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="min-h-11 border-white/10 bg-transparent text-white">
-                  {t('clientsListCard.keep')}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="min-h-11 bg-red-600 text-white"
-                  onClick={() => handleDeleteClient(client.id)}
-                >
-                  {t('clientsListCard.deleteAction')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              {t('clientsListCard.client')}
+            </p>
+          </div>
         </div>
+
+        <div className="mt-4 space-y-2">
+          {client.num_phone && (
+            <p className="flex items-center gap-2 text-xs text-zinc-400">
+              <Phone className="size-3.5 text-zinc-600" />
+              {client.num_phone}
+            </p>
+          )}
+          {client.email && (
+            <p className="flex items-center gap-2 truncate text-xs text-zinc-500">
+              <Mail className="size-3.5 text-zinc-600" />
+              {client.email}
+            </p>
+          )}
+          {client.birth_date && (
+            <p className="flex items-center gap-2 text-xs text-zinc-500">
+              <Cake className="size-3.5 text-zinc-600" />
+              {new Date(`${client.birth_date}T12:00:00`).toLocaleDateString(
+                locale === 'pt' ? 'pt-PT' : 'en-GB',
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onViewClient(client)}
+          className="min-h-11 flex-1 rounded-xl border-blue-500/20 bg-blue-500/[0.06] px-3 text-blue-200 hover:bg-blue-500/10 hover:text-white"
+        >
+          <Eye className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+          <span>{t('clientsListCard.viewProfile')}</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setEditingClient(client)}
+          className="min-h-11 rounded-xl border-white/10 bg-white/[0.03] px-3 text-zinc-200 hover:bg-white/[0.08] hover:text-white"
+          aria-label={t('clientsListCard.edit', { name: client.name_complete })}
+        >
+          <Pencil className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+          <span>{t('common.edit')}</span>
+        </Button>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11 rounded-xl border-red-500/20 bg-red-500/[0.04] px-3 text-red-300 hover:bg-red-500/10 hover:text-red-200"
+              aria-label={t('clientsListCard.delete', {
+                name: client.name_complete,
+              })}
+            >
+              <Trash2 className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+              <span>{t('common.delete')}</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="border-white/10 bg-zinc-950">
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t('clientsListCard.deleteTitle')}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('clientsListCard.deleteDescription')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-white/10 bg-transparent text-white">
+                {t('clientsListCard.keep')}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 text-white"
+                onClick={() => handleDeleteClient(client.id)}
+              >
+                {t('clientsListCard.deleteAction')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </article>
   );

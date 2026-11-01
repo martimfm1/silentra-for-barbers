@@ -490,7 +490,7 @@ export function DashboardSidebar() {
                 <button
                   type="button"
                   onClick={closeMore}
-                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:size-10"
+                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   aria-label={locale === 'en' ? 'Close menu' : 'Fechar menu'}
                 >
                   <X className="size-5" aria-hidden="true" />

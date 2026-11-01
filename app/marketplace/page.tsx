@@ -598,10 +598,10 @@ export default function MarketplacePage() {
                 setSubmitted(null);
                 setTrackingToken(null);
               }}
-              className="ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5 hover:text-white"
+              className="ml-auto flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-600 hover:bg-white/5 hover:text-white"
               aria-label={t('storefront.closeConfirmation')}
             >
-              <X className="size-5" />
+              <X className="size-5" aria-hidden="true" />
             </button>
           </div>
         )}
@@ -759,7 +759,7 @@ export default function MarketplacePage() {
               type="button"
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => setCartOpen(false)}
-              aria-label={t('common.close')}
+              aria-label={t('storefront.cart')}
             />
             <motion.aside
               initial={{ x: '100%' }}
@@ -780,8 +780,8 @@ export default function MarketplacePage() {
                 <button
                   type="button"
                   onClick={() => setCartOpen(false)}
-                  className="flex size-11 items-center justify-center rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white sm:size-10"
-                  aria-label={t('common.close')}
+                  className="flex size-10 items-center justify-center rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white"
+                  aria-label={t('storefront.cart')}
                 >
                   <X className="size-5" />
                 </button>
