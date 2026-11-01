@@ -70,8 +70,8 @@ export default function ClientesPage() {
       const search = searchClientQuery.trim();
       if (search) params.set('search', search);
 
-      const response = await fetch(\`/api/crm/clients?\${params.toString()}\`, {
-        headers: { Authorization: \`Bearer \${session.access_token}\` },
+      const response = await fetch(`/api/crm/clients?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
         cache: 'no-store',
         signal: controller.signal,
       });
