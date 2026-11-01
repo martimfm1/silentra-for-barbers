@@ -26,9 +26,15 @@ const [
 assert.match(profile, /const servicePrice = Number\(service\?\.price\) \|\| 0/);
 assert.match(profile, /const productsPrice = Number\(appointment\.value_products\) \|\| 0/);
 assert.match(profile, /return servicePrice \+ productsPrice/);
+assert.match(profile, /appointment\.service_price \?\? service\?\.price/);
 assert.match(profile, /appointment\.status === 'completed'/);
 assert.match(detailApi, /getCompletedAppointmentsTotal/);
 assert.match(detailApi, /\.eq\('status', 'completed'\)/);
+assert.match(detailApi, /\.select\('service_price, value_products'\)/);
+assert.match(detailApi, /Number\(appointment\.service_price\)/);
+assert.match(migration, /add column if not exists service_price numeric\(10,2\)/i);
+assert.match(migration, /appointments_sync_service_price/);
+assert.match(migration, /set service_price = service\.price/i);
 assert.match(detailApi, /\.range\(offset, offset \+ pageSize - 1\)/);
 assert.match(detailApi, /totalSpent: completedAppointmentsTotal\.total/);
 assert.match(profile, /totalSpent: Number\(json\.totalSpent\) \|\| 0/);
