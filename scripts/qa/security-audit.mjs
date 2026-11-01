@@ -480,9 +480,11 @@ const requestValidationChecks = [
     file: 'app/api/barbershops/qr-code/route.ts',
     markers: [
       'readJsonObject(request',
-      "allowedKeys: ['text']",
+      "allowedKeys: ['slug', 'text']",
       'requireTenantAuthorization(request, QR_MANAGE_ROLES)',
-      ".eq('id', tenant.barbershopId)",
+      'planSupportsCustomSlug(plan)',
+      'BarbershopStripeService.getEffectivePlan(tenant.userId)',
+      "allowedKeys: ['slug', 'text']",
     ],
     label: 'QR code settings request validation and tenant binding',
   },
@@ -538,8 +540,8 @@ const requestValidationChecks = [
 
   {
     file: 'lib/barbershops/public-profile.ts',
-    markers: ["return plan === 'enterprise';"],
-    label: 'Custom public URL is restricted to Enterprise plans',
+    markers: ["return plan === 'pro' || plan === 'enterprise';"],
+    label: 'Custom public URLs are available to Pro and Enterprise plans',
   },
   {
     file: 'app/api/barbershops/public-profile/route.ts',
@@ -547,10 +549,30 @@ const requestValidationChecks = [
       'readJsonObject(request',
       'maxBytes: 8 * 1024',
       'allowedKeys: [',
-      "const canCustomizeSlug = plan === 'enterprise';",
-      'exclusivamente no plano Enterprise',
+      'const canCustomizeSlug = planSupportsCustomSlug(plan);',
+      'planSupportsCustomSlug(plan)',
     ],
-    label: 'Public URL changes require server-verified Enterprise entitlement',
+    label: 'Public URL changes require server-verified Pro or Enterprise entitlement',
+  },
+  {
+    file: 'app/api/silentra-admin/loyalty/points/route.ts',
+    markers: [
+      "admin.rpc('admin_grant_loyalty_points_by_email'",
+      "error.code === 'P0002'",
+      'requirePlatformAdmin()',
+    ],
+    label: 'Platform-admin loyalty points API uses the protected points RPC',
+  },
+  {
+    file: 'supabase/migrations/20261101190000_fix_admin_loyalty_grant_return_types.sql',
+    markers: [
+      'v_shop.name::text',
+      "set search_path = ''",
+      'revoke all on function public.admin_grant_loyalty_points_by_email',
+      'grant execute on function public.admin_grant_loyalty_points_by_email',
+      'to service_role;',
+    ],
+    label: 'Admin loyalty grant RPC returns explicit types and is service-role-only',
   },
   {
     file: 'app/api/loyalty/route.ts',
