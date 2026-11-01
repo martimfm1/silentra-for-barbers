@@ -26,7 +26,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ### P1 — Performance
 - [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration `20261101234500_add_appointment_reference_indexes` com índices B-tree completos preparada, pendente de CI e aplicação.
-- [ ] Rever 4 pares de índices duplicados. Um par exato em `appointments.management_token` foi identificado; manter a decisão de remoção pendente até confirmar o snapshot `supabase/schema.sql` e a utilização.
+- [ ] Rever 4 pares de índices duplicados. Um par exato em `appointments.management_token` foi confirmado: o índice não único não tem scans registados e foi removido na migration `20261101234500_add_appointment_reference_indexes`; o índice único fica preservado. O snapshot `supabase/schema.sql` foi sincronizado.
 - [ ] Investigar índices sem uso antes de remover.
 - [ ] Fazer profiling dos endpoints mais lentos e criar testes de carga multi-tenant.
 
@@ -86,7 +86,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Consultar advisor e confirmar que as três FKs de `appointments` sem cobertura são `client_id`, `professional_id` e `service_id`.
 - [x] Rever índices existentes: `appointments_client_timeline_idx` começa por `barbershop_id` e não cobre `client_id` isoladamente; o índice GiST de sobreposição e o índice de slot não substituem índices B-tree nas FKs.
 - [x] Criar migration `20261101234500_add_appointment_reference_indexes` com três índices B-tree completos (não parciais).
-- [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência.
+- [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência, e que garantem a remoção apenas do índice não único duplicado.
 - [ ] Aguardar CI; aplicar migration à produção; verificar advisor e `EXPLAIN` nos padrões de agenda/CRM.
 - [ ] Rever restantes FKs por impacto e volume antes de indexar em massa. A base de produção tem poucos registos em várias tabelas; evitar criar dezenas de índices sem benefício medido.
 
@@ -109,7 +109,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Rever as policies atuais de `shops`, `services`, `marketing_campaigns`, `barbershop_dashboard_customizations`, `subscriptions` e `reviews` antes de alterar.
 - [x] Confirmar que a migration `20261101240000_optimize_rls_policy_initplans` preserva as condições de acesso e combina políticas permissivas equivalentes com `OR`.
 - [x] Adicionar contratos QA para chamadas Auth/helper em initplan e para consolidação das policies.
-- [ ] Executar CI na ponta atual da branch; aplicar migration à produção; confirmar descida do advisor sem alterar visibilidade pública/tenant.
+- [ ] Executar CI na ponta atual da branch; aplicar migrations de índices e RLS à produção; confirmar descida do advisor sem alterar visibilidade pública/tenant.
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
