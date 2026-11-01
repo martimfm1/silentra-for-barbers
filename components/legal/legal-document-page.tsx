@@ -133,10 +133,10 @@ export function LegalDocumentPage({
     [activeLocale, document.sections, query],
   );
 
-  const entityName = process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME?.trim() ?? '';
+  const entityName = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME || '').trim();
   const entityAddress =
-    process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS?.trim() ?? '';
-  const entityTaxId = process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID?.trim() ?? '';
+    (process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS || '').trim();
+  const entityTaxId = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID || '').trim();
   const hasLegalIdentity = Boolean(entityName && entityAddress && entityTaxId);
 
   return (
