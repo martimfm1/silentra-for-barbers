@@ -28,6 +28,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { lockBodyScroll } from '@/lib/ui/body-scroll-lock';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import type { FeatureKey } from '@/lib/billing/plan-features';
 import { useBarbershop } from '@/context/BarbershopContext';
@@ -198,8 +199,7 @@ export function DashboardSidebar() {
     const dialog = moreDialogRef.current;
     if (!dialog) return;
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const releaseScrollLock = lockBodyScroll();
     const selector =
       'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const getFocusable = () =>
@@ -234,7 +234,7 @@ export function DashboardSidebar() {
 
     document.addEventListener('keydown', handleDialogKeys);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      releaseScrollLock();
       document.removeEventListener('keydown', handleDialogKeys);
       moreTriggerRef.current?.focus();
     };

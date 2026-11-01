@@ -44,6 +44,11 @@ const [
   button,
   supportService,
   emailMigration,
+  agendaPage,
+  appointmentMobileCard,
+  appointmentsTable,
+  appointmentActions,
+  bodyScrollLock,
 ] = await Promise.all([
   read('components/site-navbar.tsx'),
   read('app/dashboard/_components/DashboardSidebar.tsx'),
@@ -54,6 +59,11 @@ const [
   read('components/ui/button.tsx'),
   read('services/support/support-chat.service.ts'),
   read('supabase/migrations/20261017122241_support_notify_every_message.sql'),
+  read('app/dashboard/agenda/page.tsx'),
+  read('components/dashboard/appointment-mobile-card.tsx'),
+  read('components/dashboard/appointments-table.tsx'),
+  read('components/dashboard/appointment-actions.tsx'),
+  read('lib/ui/body-scroll-lock.ts'),
 ]);
 
 // Navigation correctness: catch the old English slugs that silently led to 404s.
@@ -206,6 +216,22 @@ assert.match(dashboardShell, /viewport\.content = previousViewportContent/);
 // Core accessibility regressions: keyboard focus, landmarks, target sizes and motion.
 assert.match(navbar, /keepFocusInside/);
 assert.match(navbar, /aria-controls="site-navigation-overlay"/);
+assert.match(navbar, /lockBodyScroll\(\)/);
+assert.match(navbar, /min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain touch-pan-y/);
+assert.match(sidebar, /lockBodyScroll\(\)/);
+assert.match(bodyScrollLock, /body\.style\.position = 'fixed'/);
+assert.match(bodyScrollLock, /root\.style\.overscrollBehavior = 'none'/);
+assert.match(bodyScrollLock, /window\.scrollTo\(0, scrollY\)/);
+assert.match(agendaPage, /Gerir marcações/);
+assert.match(agendaPage, /grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 xl:hidden/);
+assert.match(agendaPage, /className="hidden xl:block"/);
+assert.match(agendaPage, /locale=\{locale\}/);
+assert.match(appointmentMobileCard, /date\.toLocaleDateString\(languageTag/);
+assert.match(appointmentMobileCard, /AppointmentActions[\s\S]*?locale=\{locale\}/);
+assert.match(appointmentsTable, /min-w-\[900px\]/);
+assert.match(appointmentsTable, /locale=\{locale\}/);
+assert.match(appointmentActions, /locale = 'pt'/);
+assert.match(appointmentActions, /View details/);
 assert.match(dashboardShell, /href="#dashboard-main-content"/);
 assert.match(dashboardShell, /id="dashboard-main-content"/);
 assert.match(dashboardShell, /isSettingsPage \? 'pt-0' : 'pt-16'/);

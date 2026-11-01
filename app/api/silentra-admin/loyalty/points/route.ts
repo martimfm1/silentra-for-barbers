@@ -51,7 +51,10 @@ async function POST__unobserved(request: Request) {
     );
 
     if (error) {
-      if (error.message === 'LOYALTY_MEMBER_NOT_FOUND') {
+      if (
+        error.message.includes('LOYALTY_MEMBER_NOT_FOUND') ||
+        error.code === 'P0002'
+      ) {
         return NextResponse.json(
           {
             error: 'Não existe um membro ativo de fidelização com esse email.',

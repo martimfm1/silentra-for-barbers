@@ -91,7 +91,7 @@ async function PATCH__unobserved(request: Request) {
     if (error || !user) return jsonError('Não autenticado.', 401);
     const tenant = await BarbershopStripeService.getTenantContext(user.id);
     const plan = await BarbershopStripeService.getEffectivePlan(user.id);
-    const canCustomizeSlug = plan === 'enterprise';
+    const canCustomizeSlug = planSupportsCustomSlug(plan);
     const canCustomizeEnterprise = plan === 'enterprise';
 
     const bodyResult = await readJsonObject(request, {
@@ -131,7 +131,7 @@ async function PATCH__unobserved(request: Request) {
     if (typeof body.slug === 'string') {
       if (!canCustomizeSlug)
         return jsonError(
-          'A alteração do URL público está disponível exclusivamente no plano Enterprise.',
+          'A alteração do URL público está disponível nos planos Pro e Enterprise.',
           403,
         );
       const slug = normalizePublicProfileSlug(body.slug);
