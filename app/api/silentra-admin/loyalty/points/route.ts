@@ -2,6 +2,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { BillingError } from '@/types/stripe';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
+import { readJsonObject } from '@/lib/security/request-validation';
 import {
   assertSameOrigin,
   billingErrorResponse,
@@ -16,14 +17,16 @@ async function POST__unobserved(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
-    const body = (await request.json().catch(() => null)) as Record<
-      string,
-      unknown
-    > | null;
+    const bodyResult = await readJsonObject(request, {
+      maxBytes: 4 * 1024,
+      allowedKeys: ['email', 'points', 'reason'],
+    });
+    if (!bodyResult.ok) return bodyResult.response;
+    const body = bodyResult.value;
     const email =
-      typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
-    const points = Number(body?.points);
-    const reason = typeof body?.reason === 'string' ? body.reason.trim() : '';
+      typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const points = Number(body.points);
+    const reason = typeof body.reason === 'string' ? body.reason.trim() : '';
 
     if (!EMAIL_RE.test(email) || email.length > 254) {
       return NextResponse.json({ error: 'Email inválido.' }, { status: 400 });
