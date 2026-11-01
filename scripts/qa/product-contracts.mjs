@@ -756,12 +756,14 @@ const checks = [
       source.includes('export const DELETE'),
   },
   {
-    name: 'Dashboard agenda exposes the bilingual iPhone calendar subscription controls',
+    name: 'Dashboard iPhone calendar tutorial is localized, step-by-step and displayed in a dialog',
     file: 'components/dashboard/calendar-sync-card.tsx',
     test: (source) =>
       source.includes('/api/calendar/feed/settings') &&
       source.includes('navigator.clipboard.writeText') &&
-      source.includes('calendarSyncInstructions') &&
+      source.includes('<Dialog open={showInstructions}') &&
+      source.includes('tutorialSteps.map') &&
+      source.includes('calendarSyncStepFourDescription') &&
       source.includes('calendarSyncRotate') &&
       source.includes('calendarSyncDisable'),
   },
