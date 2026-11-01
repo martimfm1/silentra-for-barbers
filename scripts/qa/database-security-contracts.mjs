@@ -185,6 +185,12 @@ assert.match(
   /create index if not exists appointments_service_id_fk_idx[\\s\\S]*on public\\.appointments \\(service_id\\)/i,
   'Appointment service foreign keys must have a full leading-column B-tree index.',
 );
+assert.match(
+  appointmentReferenceIndexes,
+  /drop index if exists public\\.idx_appointments_management_token/i,
+  'The redundant non-unique management-token index must be removed in favour of the existing unique index.',
+);
+
 assert.doesNotMatch(
   appointmentReferenceIndexes,
   /where (client_id|professional_id|service_id) is not null/i,
