@@ -19,6 +19,12 @@ const [
   billingSummaryApi,
   billingHistoryApi,
   adminObservabilityApi,
+  clientDetailApi,
+  bookingDataApi,
+  moduleAuthorization,
+  planAccessGuard,
+  subscriptionService,
+  apiHotPathMigration,
 ] = await Promise.all([
   read('next.config.ts'),
   read('app/layout.tsx'),
@@ -34,6 +40,12 @@ const [
   read('app/api/stripe/billing-summary/route.ts'),
   read('app/api/billing/history/route.ts'),
   read('app/api/silentra-admin/observability/route.ts'),
+  read('app/api/crm/clients/[clientId]/route.ts'),
+  read('app/api/shops/[id]/booking-data/route.ts'),
+  read('services/modules/authorization.ts'),
+  read('services/billing/plan-access.guard.ts'),
+  read('services/billing/subscription.service.ts'),
+  read('supabase/migrations/20261101181241_api_hot_path_optimizations.sql'),
 ]);
 
 assert.match(
@@ -139,6 +151,68 @@ assert.doesNotMatch(
   'Availability probes should not run expensive exact row counts.',
 );
 
+
+assert.match(
+  clientDetailApi,
+  /get_client_completed_total_spent/,
+  'Client lifetime spend should be aggregated inside Postgres.',
+);
+assert.doesNotMatch(
+  clientDetailApi,
+  /getCompletedAppointmentsTotal|\.range\(/,
+  'Client profile reads must not paginate every completed appointment just to calculate spend.',
+);
+assert.match(
+  bookingDataApi,
+  /await Promise\.all\(\[/,
+  'Independent booking availability reads should execute concurrently.',
+);
+assert.doesNotMatch(
+  bookingDataApi,
+  /createClient\(|@\/lib\/supabase\/server/,
+  'Public booking availability must not create an unused SSR auth client.',
+);
+assert.match(
+  planAccessGuard,
+  /getAccessContextForUser\(\s*userId,\s*permissionKeys/,
+  'Request authorization should use one combined plan/permission context.',
+);
+assert.match(
+  moduleAuthorization,
+  /getAccessPlanForRequest\(request, acceptedPermissions\)/,
+  'Module permission checks should be included in the combined access lookup.',
+);
+assert.doesNotMatch(
+  moduleAuthorization,
+  /hasMemberPermission\(/,
+  'Module authorization must not make sequential per-table permission reads.',
+);
+assert.match(
+  subscriptionService,
+  /rpc\(\s*'get_module_access_context'/,
+  'The combined access RPC should resolve user tenant, plan and permission state.',
+);
+assert.match(
+  subscriptionService,
+  /rpc\(\s*'get_effective_billing_plan_for_barbershop'/,
+  'Barbershop plan reads should use persisted webhook state rather than Stripe reconciliation.',
+);
+assert.match(
+  apiHotPathMigration,
+  /create index if not exists appointments_client_timeline_idx/i,
+  'Client history and spending queries should have a covering tenant index.',
+);
+assert.match(
+  apiHotPathMigration,
+  /create or replace function public\.get_module_access_context/i,
+  'The migration should install the combined service-role-only access resolver.',
+);
+assert.match(
+  apiHotPathMigration,
+  /revoke all on function public\.get_module_access_context\(uuid, text\[\]\)/i,
+  'The combined resolver must not be executable by public or authenticated roles.',
+);
+
 console.log(
-  '[PERFORMANCE_QA] image optimization, deferred third-party pixel, public cache headers and parallel catalogue reads passed',
+  '[PERFORMANCE_QA] image optimization, parallel data paths, tenant access aggregation and CRM database aggregates passed',
 );

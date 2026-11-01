@@ -9,6 +9,7 @@ const [
   plansApi,
   plansUi,
   migration,
+  apiHotPathMigration,
   portuguese,
   english,
 ] = await Promise.all([
@@ -17,33 +18,42 @@ const [
   read('app/api/crm/clients/[clientId]/plans/route.ts'),
   read('components/dashboard/client-plans-manager.tsx'),
   read('supabase/migrations/20261101162000_client_membership_plans.sql'),
+  read('supabase/migrations/20261101181241_api_hot_path_optimizations.sql'),
   read('app/locales/pt-copy.ts'),
   read('app/locales/en-copy.ts'),
 ]);
 
-// Customer lifetime spend is the sum of service price and product total,
-// and only completed appointments contribute.
+// Customer lifetime spend is the sum of captured service and product prices,
+// calculated in a single tenant-scoped database aggregate over completed bookings.
 assert.match(
-  profile,
-  /const servicePrice =\s*Number\(appointment\.service_price \?\? service\?\.price\) \|\| 0/,
+  detailApi,
+  /get_client_completed_total_spent/,
 );
-assert.match(profile, /const productsPrice = Number\(appointment\.value_products\) \|\| 0/);
-assert.match(profile, /return servicePrice \+ productsPrice/);
-assert.match(profile, /appointment\.service_price \?\? service\?\.price/);
-assert.match(profile, /appointment\.status === 'completed'/);
-assert.match(detailApi, /getCompletedAppointmentsTotal/);
-assert.match(detailApi, /\.eq\('status', 'completed'\)/);
-assert.match(detailApi, /\.select\('service_price, value_products'\)/);
+assert.match(detailApi, /p_barbershop_id:\s*t\.barbershopId/);
+assert.match(detailApi, /p_client_id:\s*clientId/);
+assert.match(detailApi, /completedAppointmentsTotalResult\.error/);
+assert.match(
+  detailApi,
+  /Number\(\s*completedAppointmentsTotalResult\.data \?\? 0,?\s*\)/,
+);
+assert.match(
+  detailApi,
+  /totalSpent: Math\.round\(completedAppointmentsTotal \* 100\) \/ 100/,
+);
+assert.doesNotMatch(detailApi, /getCompletedAppointmentsTotal|\.range\(/);
 assert.equal(
   (detailApi.match(/id, date_hour, status, service_price, value_products/g) ?? []).length,
   2,
 );
-assert.match(detailApi, /Number\(appointment\.service_price\)/);
+assert.match(
+  apiHotPathMigration,
+  /sum\(coalesce\(a\.service_price, 0\) \+ coalesce\(a\.value_products, 0\)\)/i,
+);
+assert.match(apiHotPathMigration, /a\.status = 'completed'/i);
+assert.match(apiHotPathMigration, /a\.barbershop_id = p_barbershop_id/i);
 assert.match(migration, /add column if not exists service_price numeric\(10,2\)/i);
 assert.match(migration, /appointments_sync_service_price/);
 assert.match(migration, /set service_price = service\.price/i);
-assert.match(detailApi, /\.range\(offset, offset \+ pageSize - 1\)/);
-assert.match(detailApi, /totalSpent: completedAppointmentsTotal\.total/);
 assert.match(profile, /totalSpent: Number\(json\.totalSpent\) \|\| 0/);
 assert.match(profile, /details\?\.totalSpent/);
 

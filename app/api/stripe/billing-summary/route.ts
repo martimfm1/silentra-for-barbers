@@ -17,7 +17,7 @@ import type { BillingPlan, SubscriptionRecord } from '@/types/stripe';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const STRIPE_RECONCILIATION_CACHE_TTL_MS = 120_000;
+const STRIPE_RECONCILIATION_CACHE_TTL_MS = 5 * 60_000;
 const recentStripeReconciliations = new Map<string, number>();
 const inFlightStripeReconciliations = new Map<
   string,
@@ -201,7 +201,7 @@ async function GET__unobserved() {
       : Number.NaN;
     const subscriptionIsFresh =
       Number.isFinite(subscriptionUpdatedAt) &&
-      Date.now() - subscriptionUpdatedAt < 120_000;
+      Date.now() - subscriptionUpdatedAt < STRIPE_RECONCILIATION_CACHE_TTL_MS;
     if (
       subscription?.stripe_subscription_id &&
       !subscription.plan_override &&

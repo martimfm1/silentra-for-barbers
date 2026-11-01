@@ -1,6 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
@@ -104,7 +103,6 @@ async function GET__unobserved(
         { status: 400 },
       );
 
-    const supabase = await createClient();
     const admin = createAdminClient();
     const { data: shopRecord, error: shopError } = await admin
       .from('shops')
@@ -130,10 +128,42 @@ async function GET__unobserved(
         { error: 'Configuração da barbearia indisponível.' },
         { status: 503 },
       );
-    const { data: effectivePlan } = await admin.rpc(
-      'get_effective_billing_plan_for_barbershop',
-      { p_barbershop_id: barbershopId },
-    );
+    const dayStart = `${date}T00:00:00`;
+    const dayEnd = `${date}T23:59:59`;
+    const [
+      planResult,
+      servicesResult,
+      professionalsResult,
+      blocksResult,
+      appointmentsResult,
+    ] = await Promise.all([
+      admin.rpc('get_effective_billing_plan_for_barbershop', {
+        p_barbershop_id: barbershopId,
+      }),
+      admin.from('services').select('*').eq('barbershop_id', barbershopId),
+      admin
+        .from('professionals')
+        .select('id, name, active')
+        .eq('barbershop_id', barbershopId)
+        .eq('active', true)
+        .order('name', { ascending: true }),
+      admin
+        .from('schedule_blocks')
+        .select('id, professional_id, date, start_time, end_time, reason')
+        .eq('barbershop_id', barbershopId)
+        .eq('date', date)
+        .order('start_time', { ascending: true }),
+      admin
+        .from('appointments')
+        .select('date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at')
+        .eq('barbershop_id', barbershopId)
+        .gte('date_hour', dayStart)
+        .lte('date_hour', dayEnd)
+        .in('status', ['pending', 'scheduled']),
+    ]);
+    const effectivePlan = planResult.data;
+    const { data: blockRows, error: blocksError } = blocksResult;
+    const { data: appointments, error: appointmentsError } = appointmentsResult;
     const mbwayPhone = String(relation.mbway_phone ?? '').trim();
     const whatsappPhone = String(relation.phone ?? '').trim();
     const manualPrepayment = {
@@ -157,10 +187,6 @@ async function GET__unobserved(
     const selectedWeekday = new Date(`${date}T12:00:00`).getDay();
     const isClosedDay = closedDays.has(selectedWeekday);
 
-    const servicesResult = await admin
-      .from('services')
-      .select('*')
-      .eq('barbershop_id', barbershopId);
     if (servicesResult.error) {
       console.error(
         '[BOOKING_SERVICES_ERROR]',
@@ -197,12 +223,6 @@ async function GET__unobserved(
 
     // The live professionals table contains only id/barbershop_id/name/commission/active/created_at.
     // Do not query user_id or role here; those columns do not exist and caused 42703.
-    const professionalsResult = await admin
-      .from('professionals')
-      .select('id, name, active')
-      .eq('barbershop_id', barbershopId)
-      .eq('active', true)
-      .order('name', { ascending: true });
     if (professionalsResult.error) {
       console.error(
         '[BOOKING_PROFESSIONALS_ERROR]',
@@ -230,12 +250,6 @@ async function GET__unobserved(
         { status: 400 },
       );
 
-    const { data: blockRows, error: blocksError } = await admin
-      .from('schedule_blocks')
-      .select('id, professional_id, date, start_time, end_time, reason')
-      .eq('barbershop_id', barbershopId)
-      .eq('date', date)
-      .order('start_time', { ascending: true });
     if (blocksError && blocksError.code !== '42P01') {
       console.error('[BOOKING_BLOCKS_ERROR]', blocksError.code ?? 'UNKNOWN');
       return NextResponse.json(
@@ -254,15 +268,6 @@ async function GET__unobserved(
       }),
     );
 
-    const dayStart = `${date}T00:00:00`;
-    const dayEnd = `${date}T23:59:59`;
-    const { data: appointments, error: appointmentsError } = await admin
-      .from('appointments')
-      .select('date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at')
-      .eq('barbershop_id', barbershopId)
-      .gte('date_hour', dayStart)
-      .lte('date_hour', dayEnd)
-      .in('status', ['pending', 'scheduled']);
     if (appointmentsError) {
       console.error(
         '[BOOKING_APPOINTMENTS_ERROR]',
