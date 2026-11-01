@@ -121,10 +121,7 @@ export function AppointmentMobileCard({
           <p className="mt-1 truncate text-sm font-medium text-zinc-200">
             {service}
           </p>
-          <p className="mt-1.5 flex min-w-0 items-center gap-1.5 truncate text-[11px] text-zinc-500">
-            <User className="size-3 shrink-0" aria-hidden="true" />
-            <span className="truncate">{professional}</span>
-          </p>
+
         </div>
         <div className="min-w-0 rounded-xl border border-white/[0.055] bg-black/10 p-3">
           <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
