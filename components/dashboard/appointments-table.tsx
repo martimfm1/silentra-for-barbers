@@ -84,6 +84,7 @@ export function AppointmentsTable({
                 key={appointment.id}
                 tabIndex={0}
                 role="button"
+                data-cursor-label={isEnglish ? 'Open booking' : 'Ver marcação'}
                 className="group cursor-pointer border-white/[0.055] transition-colors hover:bg-white/[0.025] focus-visible:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/50"
                 onClick={() => onDetails(appointment)}
                 onKeyDown={(event) => {

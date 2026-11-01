@@ -1045,3 +1045,200 @@ body[data-dashboard-theme='true'] :is(
     transition: none !important;
   }
 }
+
+
+/* Animate UI-inspired motion system for every shared Radix modal primitive. */
+@keyframes silentra-modal-overlay-in {
+  from { background-color: rgb(0 0 0 / 0); backdrop-filter: blur(0); }
+  to { background-color: rgb(0 0 0 / 0.65); backdrop-filter: blur(14px); }
+}
+@keyframes silentra-modal-overlay-out {
+  from { background-color: rgb(0 0 0 / 0.65); backdrop-filter: blur(14px); }
+  to { background-color: rgb(0 0 0 / 0); backdrop-filter: blur(0); }
+}
+@keyframes silentra-dialog-enter {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: perspective(700px) rotateX(-18deg) scale(0.84);
+  }
+  72% {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(700px) rotateX(1.5deg) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(700px) rotateX(0) scale(1);
+  }
+}
+@keyframes silentra-dialog-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(700px) rotateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: perspective(700px) rotateX(10deg) scale(0.94);
+  }
+}
+@keyframes silentra-sheet-in-right {
+  from { opacity: 0; filter: blur(4px); transform: translate3d(1.5rem, 0, 0) scale(0.985); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes silentra-sheet-out-right {
+  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; filter: blur(3px); transform: translate3d(1rem, 0, 0) scale(0.985); }
+}
+@keyframes silentra-sheet-in-left {
+  from { opacity: 0; filter: blur(4px); transform: translate3d(-1.5rem, 0, 0) scale(0.985); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes silentra-sheet-out-left {
+  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; filter: blur(3px); transform: translate3d(-1rem, 0, 0) scale(0.985); }
+}
+@keyframes silentra-sheet-in-top {
+  from { opacity: 0; filter: blur(4px); transform: translate3d(0, -1.25rem, 0) scale(0.985); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes silentra-sheet-out-top {
+  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; filter: blur(3px); transform: translate3d(0, -1rem, 0) scale(0.985); }
+}
+@keyframes silentra-sheet-in-bottom {
+  from { opacity: 0; filter: blur(4px); transform: translate3d(0, 1.25rem, 0) scale(0.985); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes silentra-sheet-out-bottom {
+  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; filter: blur(3px); transform: translate3d(0, 1rem, 0) scale(0.985); }
+}
+
+[data-slot='dialog-overlay'][data-state='open'],
+[data-slot='alert-dialog-overlay'][data-state='open'],
+[data-slot='sheet-overlay'][data-state='open'],
+[data-slot='drawer-overlay'][data-state='open'] {
+  animation: silentra-modal-overlay-in 400ms cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+[data-slot='dialog-overlay'][data-state='closed'],
+[data-slot='alert-dialog-overlay'][data-state='closed'],
+[data-slot='sheet-overlay'][data-state='closed'],
+[data-slot='drawer-overlay'][data-state='closed'] {
+  animation: silentra-modal-overlay-out 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+[data-slot='dialog-content'][data-state='open'],
+[data-slot='alert-dialog-content'][data-state='open'] {
+  transform-origin: center;
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
+  animation: silentra-dialog-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-slot='dialog-content'][data-state='closed'],
+[data-slot='alert-dialog-content'][data-state='closed'] {
+  transform-origin: center;
+  backface-visibility: hidden;
+  animation: silentra-dialog-exit 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+[data-slot='sheet-content'][data-side='right'][data-state='open'] {
+  animation: silentra-sheet-in-right 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-slot='sheet-content'][data-side='right'][data-state='closed'] {
+  animation: silentra-sheet-out-right 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+[data-slot='sheet-content'][data-side='left'][data-state='open'] {
+  animation: silentra-sheet-in-left 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-slot='sheet-content'][data-side='left'][data-state='closed'] {
+  animation: silentra-sheet-out-left 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+[data-slot='sheet-content'][data-side='top'][data-state='open'] {
+  animation: silentra-sheet-in-top 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-slot='sheet-content'][data-side='top'][data-state='closed'] {
+  animation: silentra-sheet-out-top 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+[data-slot='sheet-content'][data-side='bottom'][data-state='open'] {
+  animation: silentra-sheet-in-bottom 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-slot='sheet-content'][data-side='bottom'][data-state='closed'] {
+  animation: silentra-sheet-out-bottom 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='dialog-overlay'],
+  [data-slot='alert-dialog-overlay'],
+  [data-slot='sheet-overlay'],
+  [data-slot='drawer-overlay'] {
+    animation-duration: 100ms !important;
+  }
+  [data-slot='dialog-content'],
+  [data-slot='alert-dialog-content'],
+  [data-slot='sheet-content'] {
+    animation-duration: 100ms !important;
+    filter: none !important;
+  }
+  [data-slot='dialog-content'],
+  [data-slot='alert-dialog-content'] {
+    transform: none !important;
+  }
+}
+
+
+/* Lightweight, consistent motion for floating Radix surfaces and tooltips. */
+@keyframes silentra-floating-enter {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(0, -0.3rem, 0) scale(0.96);
+  }
+  78% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0.04rem, 0) scale(1.006);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes silentra-floating-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(0, -0.15rem, 0) scale(0.98);
+  }
+}
+[data-slot='popover-content'][data-state='open'],
+[data-slot='dropdown-menu-content'][data-state='open'],
+[data-slot='select-content'][data-state='open'],
+[data-slot='tooltip-content'][data-state='delayed-open'],
+[data-slot='tooltip-content'][data-state='instant-open'] {
+  animation: silentra-floating-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity, filter;
+}
+[data-slot='popover-content'][data-state='closed'],
+[data-slot='dropdown-menu-content'][data-state='closed'],
+[data-slot='select-content'][data-state='closed'],
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: silentra-floating-exit 140ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='popover-content'],
+  [data-slot='dropdown-menu-content'],
+  [data-slot='select-content'],
+  [data-slot='tooltip-content'] {
+    animation-duration: 80ms !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
