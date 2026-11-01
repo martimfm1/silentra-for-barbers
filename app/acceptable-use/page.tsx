@@ -48,7 +48,7 @@ export default function AcceptableUsePage() {
         },
       ]}
       supportLabel={{ pt: 'Questões de segurança e utilização', en: 'Security and acceptable-use questions' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );
