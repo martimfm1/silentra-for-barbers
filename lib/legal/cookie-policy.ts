@@ -8,7 +8,7 @@ export type CookiePolicyDocument = {
 
 export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
   pt: {
-    lastUpdated: '25 de outubro de 2026',
+    lastUpdated: '1 de novembro de 2026',
     intro:
       'Esta Política de Cookies explica que tecnologias são utilizadas na Silentra for Barbers, para que servem, quando são ativadas e como podes gerir ou retirar o consentimento.',
     sections: [
@@ -23,7 +23,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '2. Tecnologias estritamente necessárias',
         paragraphs: [
           'Estas tecnologias permitem prestar funcionalidades pedidas, manter a sessão e autenticação, proteger a plataforma, recordar o idioma e guardar a escolha de cookies. Permanecem ativas mesmo quando rejeitas as categorias opcionais.',
-          'O cookie «silentra_cookie_consent» regista a versão do consentimento, as categorias selecionadas e a data/hora da escolha. A duração configurada é de 180 dias. Se o valor estiver inválido ou corresponder a uma versão desconhecida, as tecnologias opcionais permanecem desativadas.',
+          'O cookie «silentra_cookie_consent» regista a versão do consentimento, as categorias selecionadas e a data/hora da escolha. A duração configurada é de 180 dias. A versão de consentimento é atualizada quando a estrutura ou a informação sobre categorias é revista; uma versão desconhecida é tratada como ausência de consentimento e volta a pedir uma escolha. Se o valor estiver inválido ou corresponder a uma versão desconhecida, as tecnologias opcionais permanecem desativadas.',
           'Os mecanismos de sessão e autenticação podem ter a sua própria duração, controlada pelo serviço de autenticação e pelas definições da conta. O cookie de idioma «locale», quando utilizado, ajuda a apresentar a interface no idioma escolhido.',
         ],
       },
@@ -31,7 +31,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '3. Estatísticas e desempenho',
         paragraphs: [
           'Se autorizares esta categoria, a Silentra pode ativar Vercel Analytics e Vercel Speed Insights para compreender padrões de utilização, medir o desempenho e identificar problemas técnicos. Estes serviços podem tratar informação técnica do navegador, páginas consultadas, dados do pedido e métricas de desempenho.',
-          'A categoria de estatísticas é opcional. Se não a autorizares, estes componentes não são renderizados pelo servidor. O tratamento exato e os identificadores utilizados por cada fornecedor dependem da versão do serviço e das respetivas definições.',
+          'A categoria de estatísticas é opcional. Se não a autorizares, estes componentes não são renderizados pelo servidor. A recusa não desativa autenticação, segurança ou funções essenciais. O tratamento exato e os identificadores utilizados por cada fornecedor dependem da versão do serviço e das respetivas definições.',
         ],
       },
       {
@@ -39,14 +39,14 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         paragraphs: [
           'Se autorizares marketing, a Plataforma pode carregar o pixel Whop, utilizado para medição de campanhas e eventos associados ao serviço. Este fornecedor pode receber dados técnicos de navegação necessários ao funcionamento do pixel.',
           'O Google Tag Manager pode executar etiquetas de diferentes finalidades. Para evitar que o contentor seja carregado com apenas uma categoria autorizada, a Silentra só o carrega quando autorizas simultaneamente estatísticas e marketing. A configuração do contentor deve ser revista antes de serem publicadas novas etiquetas.',
-          'As etiquetas de terceiros podem criar ou ler identificadores próprios. A lista exata e o prazo de validade desses identificadores dependem das etiquetas efetivamente ativas no contentor e das definições de cada fornecedor, pelo que não existe uma duração única controlada pela Silentra para todos eles.',
+          'As etiquetas de terceiros podem criar ou ler identificadores próprios. A lista exata e o prazo de validade desses identificadores dependem das etiquetas efetivamente publicadas no contentor e das definições de cada fornecedor. A Silentra deve rever o contentor antes de publicar novas etiquetas; a lista pública de fornecedores encontra-se em /subprocessors.',
         ],
       },
       {
         title: '5. Resumo das categorias e duração',
         paragraphs: [
           'Necessárias — sessão, autenticação, segurança, idioma e preferências; ficam ativas para prestar o serviço. «silentra_cookie_consent» tem uma duração configurada de 180 dias; a duração dos mecanismos de autenticação depende da sessão e do fornecedor.',
-          'Estatísticas — Vercel Analytics e Vercel Speed Insights; ativadas apenas após autorização. A duração dos eventuais identificadores é determinada pelo fornecedor e pela configuração ativa.',
+          'Estatísticas — Vercel Analytics e Vercel Speed Insights; ativadas apenas após autorização. A duração dos eventuais identificadores é determinada pelo fornecedor e pela configuração ativa; a lista de fornecedores e finalidades encontra-se em /subprocessors.',
           'Marketing — pixel Whop; ativado apenas após autorização. Google Tag Manager só é ativado quando estatísticas e marketing estão ambos autorizados, pois o contentor pode conter etiquetas de diferentes finalidades.',
         ],
       },
@@ -62,14 +62,14 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '7. Responsável, direitos e contacto',
         paragraphs: [
           'O tratamento associado às funcionalidades da Silentra é realizado de acordo com a Política de Privacidade. Dependendo da operação, podes exercer direitos de acesso, retificação, apagamento, limitação, oposição e portabilidade, ou retirar consentimento quando o tratamento se baseie nele.',
-          'Para questões sobre cookies, consentimento ou privacidade, contacta silentra.contact@gmail.com. Também podes apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD).',
+          'Para questões sobre cookies, consentimento ou privacidade, contacta contact@silentra.me. Também podes apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD).',
           'Esta política pode ser atualizada quando as tecnologias utilizadas ou os requisitos legais mudarem. A data da última atualização é apresentada no início da página.',
         ],
       },
     ],
   },
   en: {
-    lastUpdated: 'October 25, 2026',
+    lastUpdated: 'November 1, 2026',
     intro:
       'This Cookie Policy explains which technologies are used by Silentra for Barbers, why they are used, when they are activated, and how you can manage or withdraw consent.',
     sections: [
@@ -84,7 +84,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '2. Strictly necessary technologies',
         paragraphs: [
           'These technologies allow us to provide requested features, maintain session and authentication, protect the Platform, remember language, and store the cookie choice. They remain active even when you reject optional categories.',
-          'The «silentra_cookie_consent» cookie records the consent version, selected categories, and date/time of the choice. Its configured lifetime is 180 days. If the value is invalid or from an unknown version, optional technologies remain disabled.',
+          'The «silentra_cookie_consent» cookie records the consent version, selected categories, and date/time of the choice. Its configured lifetime is 180 days. The consent version is updated when the structure or category information is revised; an unknown version is treated as missing consent and prompts a fresh choice. If the value is invalid or from an unknown version, optional technologies remain disabled.',
           'Session and authentication mechanisms may have their own lifetime, controlled by the authentication service and account settings. The «locale» language cookie, when used, helps display the interface in your selected language.',
         ],
       },
@@ -92,7 +92,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '3. Analytics and performance',
         paragraphs: [
           'If you authorize this category, Silentra may activate Vercel Analytics and Vercel Speed Insights to understand usage patterns, measure performance, and identify technical issues. These services may process technical browser information, viewed pages, request data, and performance metrics.',
-          'Analytics is optional. If you do not authorize it, these components are not rendered by the server. Exact processing and identifiers used by each provider depend on the service version and its settings.',
+          'Analytics is optional. If you do not authorize it, these components are not rendered by the server. Refusal does not disable authentication, security, or essential functionality. Exact processing and identifiers used by each provider depend on the service version and its settings.',
         ],
       },
       {
@@ -100,14 +100,14 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         paragraphs: [
           'If you authorize marketing, the Platform may load the Whop pixel, which is used to measure campaigns and events associated with the service. This provider may receive technical browsing data required for the pixel to operate.',
           'Google Tag Manager can run tags for different purposes. To avoid loading the container with only one category authorized, Silentra loads it only when you authorize both analytics and marketing. The container configuration should be reviewed before new tags are published.',
-          'Third-party tags may create or read their own identifiers. The exact list and lifetime of those identifiers depend on the tags actually active in the container and each provider’s settings, so there is no single lifetime controlled by Silentra for all of them.',
+          'Third-party tags may create or read their own identifiers. The exact list and lifetime of those identifiers depend on the tags actually published in the container and each provider’s settings. Silentra should review the container before publishing new tags; the public provider list is available at /subprocessors.',
         ],
       },
       {
         title: '5. Category and lifetime summary',
         paragraphs: [
           'Necessary — session, authentication, security, language, and preferences; remain active to provide the service. «silentra_cookie_consent» has a configured lifetime of 180 days; authentication mechanisms depend on the session and provider.',
-          'Analytics — Vercel Analytics and Vercel Speed Insights; activated only after consent. Any identifiers’ lifetime is set by the provider and active configuration.',
+          'Analytics — Vercel Analytics and Vercel Speed Insights; activated only after consent. Any identifiers’ lifetime is set by the provider and active configuration; the provider and purpose list is available at /subprocessors.',
           'Marketing — Whop pixel; activated only after consent. Google Tag Manager is activated only when analytics and marketing are both authorized because the container may include tags for different purposes.',
         ],
       },
@@ -123,7 +123,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '7. Controller, rights, and contact',
         paragraphs: [
           'Processing associated with Silentra features follows the Privacy Policy. Depending on the operation, you may exercise rights of access, rectification, erasure, restriction, objection, and portability, or withdraw consent where processing is based on consent.',
-          'For questions about cookies, consent, or privacy, contact silentra.contact@gmail.com. You may also lodge a complaint with the Portuguese Data Protection Authority (CNPD).',
+          'For questions about cookies, consent, or privacy, contact contact@silentra.me. You may also lodge a complaint with the Portuguese Data Protection Authority (CNPD).',
           'This policy may be updated when the technologies used or legal requirements change. The last-update date is shown at the top of the page.',
         ],
       },
