@@ -11,6 +11,31 @@ const migrationName = fs
 
 const checks = [
   {
+    file: 'app/api/customer-portal/loyalty/route.ts',
+    markers: [
+      "admin.rpc('expire_loyalty_redemptions')",
+      'if (expiryError)',
+      'shopError',
+      'publicShopError',
+      'rewardsError',
+      'Cache-Control',
+    ],
+  },
+  {
+    file: 'app/api/silentra-admin/loyalty/points/route.ts',
+    markers: [
+      "allowedKeys: ['email', 'points', 'reason']",
+      'maxBytes: 4 * 1024',
+    ],
+  },
+  {
+    file: 'lib/loyalty/session.ts',
+    markers: [
+      'if (error) throw error;',
+      'LOYALTY_SESSION_TOUCH_FAILED',
+    ],
+  },
+  {
     file: 'app/api/loyalty/route.ts',
     markers: [
       'currentSettings',
@@ -89,6 +114,7 @@ const checks = [
       'verificationError',
       "'consume_loyalty_verification'",
       "'join_loyalty_program'",
+      'previousSessionsError',
     ],
   },
   {
