@@ -639,14 +639,14 @@ export function SiteNavbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={NAVBAR_TRANSITION}
-            className="glassmorphism fixed inset-0 z-[150] flex flex-col bg-zinc-950/97 px-5 pb-6 pt-24 text-zinc-50 backdrop-blur-2xl sm:px-8 sm:pt-28"
+            className="glassmorphism fixed inset-0 z-[150] flex min-h-0 flex-col overflow-hidden bg-zinc-950/97 px-5 pb-6 pt-24 text-zinc-50 backdrop-blur-2xl sm:px-8 sm:pt-28"
             role="dialog"
             aria-modal="true"
             aria-label={t('dashboard.mainNavigation', {
               defaultValue: 'Menu de navegação',
             })}
           >
-            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain">
+            <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain touch-pan-y pb-[env(safe-area-inset-bottom)] [-webkit-overflow-scrolling:touch]">
               <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/8 pb-5 sm:mb-8">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
