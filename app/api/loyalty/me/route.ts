@@ -1,7 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getLoyaltySession } from '@/lib/loyalty/session';
+import { clearLoyaltyCookie, getLoyaltySession } from '@/lib/loyalty/session';
 import { requireTenantAuthorization } from '@/lib/security/tenant-guard';
 import { getLoyaltyTenantBySlug } from '@/lib/loyalty/public-tenant';
 
@@ -58,7 +58,14 @@ async function GET__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    if (expiryError) {
+      console.error('[LOYALTY_ME_EXPIRY_ERROR]', { code: expiryError.code ?? 'UNKNOWN' });
+      return NextResponse.json(
+        { error: 'Não foi possível atualizar os resgates da fidelização.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
 
     const { data: memberData, error: memberError } = await admin
       .from('loyalty_members')
@@ -75,10 +82,32 @@ async function GET__unobserved(request: Request) {
       );
 
     const member = memberData as LoyaltyMember | null;
+    if (!member) {
+      const { error: staleSessionError } = await admin
+        .from('loyalty_sessions')
+        .delete()
+        .eq('barbershop_id', tenant.barbershopId)
+        .eq('email', session.email);
+      if (staleSessionError) {
+        console.error('[LOYALTY_ME_SESSION_CLEANUP]', {
+          code: staleSessionError.code ?? 'UNKNOWN',
+        });
+        return NextResponse.json(
+          { error: 'Não foi possível atualizar a sessão da fidelização.' },
+          { status: 503, headers: { 'Cache-Control': 'no-store' } },
+        );
+      }
+      await clearLoyaltyCookie();
+      return NextResponse.json(
+        { authenticated: false },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
     const [
       { data: rewardsData, error: rewardsError },
       { data: redemptionsData, error: redemptionsError },
-      { data: barbershop },
+      { data: barbershop, error: barbershopError },
     ] = await Promise.all([
       admin
         .from('loyalty_rewards')
@@ -106,7 +135,7 @@ async function GET__unobserved(request: Request) {
         .maybeSingle(),
     ]);
 
-    if (rewardsError || redemptionsError)
+    if (rewardsError || redemptionsError || barbershopError)
       return NextResponse.json(
         { error: 'Não foi possível carregar a fidelização.' },
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
@@ -122,12 +151,7 @@ async function GET__unobserved(request: Request) {
       {
         authenticated: true,
         email: session.email,
-        member: member ?? {
-          email: session.email,
-          name: null,
-          points_balance: 0,
-          status: 'active',
-        },
+        member,
         rewards,
         redemptions,
         nextReward,

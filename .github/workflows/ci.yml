@@ -58,6 +58,9 @@ jobs:
       - name: API audit
         run: pnpm qa:api
 
+      - name: Loyalty API contracts
+        run: pnpm qa:loyalty
+
       - name: Client matching and tenant isolation contracts
         run: pnpm qa:client-matching
 

@@ -14,11 +14,17 @@ async function GET__unobserved(request: Request) {
   }
 
   const admin = createAdminClient();
-  const { data: redemption } = await admin
+  const { data: redemption, error: redemptionError } = await admin
     .from('loyalty_redemptions')
     .select('id, token_hash, status, expires_at')
     .eq('token_hash', hashLoyaltyToken(token))
     .maybeSingle();
+
+  if (redemptionError)
+    return new NextResponse('Temporarily unavailable', {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store' },
+    });
 
   if (
     !redemption ||
@@ -40,7 +46,7 @@ async function GET__unobserved(request: Request) {
     status: 200,
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'private, max-age=300, must-revalidate',
+      'Cache-Control': 'private, no-store',
       'Content-Disposition': 'inline; filename="silentra-loyalty-qr.png"',
       'X-Content-Type-Options': 'nosniff',
     },

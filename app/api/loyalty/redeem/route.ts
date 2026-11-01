@@ -104,7 +104,18 @@ async function POST__unobserved(request: Request) {
         requestId,
       });
 
-    await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    if (expiryError) {
+      console.error('[LOYALTY_REDEEM_EXPIRY_ERROR]', {
+        requestId,
+        code: expiryError.code ?? 'UNKNOWN',
+      });
+      return errorResponse(
+        'Não foi possível atualizar os resgates da fidelização.',
+        503,
+        { requestId },
+      );
+    }
 
     const { data: member, error: memberError } = await admin
       .from('loyalty_members')
@@ -142,27 +153,6 @@ async function POST__unobserved(request: Request) {
     if (member.points_balance < reward.points_cost)
       return errorResponse(
         'Ainda não tens pontos suficientes para esta recompensa.',
-        409,
-        { requestId },
-      );
-
-    const { data: existingRedemption, error: existingError } = await admin
-      .from('loyalty_redemptions')
-      .select('id')
-      .eq('member_id', member.id)
-      .eq('status', 'pending')
-      .gt('expires_at', new Date().toISOString())
-      .limit(1)
-      .maybeSingle();
-    if (existingError)
-      return errorResponse(
-        'Não foi possível validar os teus resgates pendentes.',
-        503,
-        { requestId },
-      );
-    if (existingRedemption)
-      return errorResponse(
-        'Já tens uma recompensa reservada. Utiliza-a antes de criar outro resgate.',
         409,
         { requestId },
       );
@@ -205,6 +195,11 @@ async function POST__unobserved(request: Request) {
           404,
         ],
         LOYALTY_MEMBER_NOT_FOUND: ['Adesão inválida ou expirada.', 401],
+        LOYALTY_ACTIVE_REDEMPTION_EXISTS: [
+          'Já tens uma recompensa reservada. Utiliza-a antes de criar outro resgate.',
+          409,
+        ],
+        LOYALTY_REDEMPTION_INVALID: ['Não foi possível validar os dados do resgate.', 400],
       };
       const mapped = map[error.message];
       return mapped

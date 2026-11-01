@@ -11,6 +11,7 @@ const required = [
   'STRIPE_PRICE_ENTERPRISE_YEARLY',
   'BREVO_API_KEY',
   'RATE_LIMIT_SECRET',
+  'LOYALTY_REDEMPTION_SECRET',
 ];
 
 const configuredAppUrl =
@@ -62,7 +63,10 @@ for (const name of required) {
   }
   if (placeholderPatterns.some((pattern) => pattern.test(value)))
     placeholders.push(name);
-  if (name === 'RATE_LIMIT_SECRET' && value.length < 32) weakSecrets.push(name);
+  if (name === 'RATE_LIMIT_SECRET' && value.length < 32)
+    weakSecrets.push(name);
+  if (name === 'LOYALTY_REDEMPTION_SECRET' && value.length < 32)
+    weakSecrets.push(name);
 }
 
 for (const [name, value] of Object.entries(process.env)) {
