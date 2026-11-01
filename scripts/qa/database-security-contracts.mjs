@@ -26,6 +26,9 @@ const internalTableHardening = await read(
 const appointmentReferenceIndexes = await read(
   'supabase/migrations/20261101234500_add_appointment_reference_indexes.sql',
 );
+const rlsPolicyPerformance = await read(
+  'supabase/migrations/20261101240000_optimize_rls_policy_initplans.sql',
+);
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
@@ -186,6 +189,37 @@ assert.doesNotMatch(
   appointmentReferenceIndexes,
   /where (client_id|professional_id|service_id) is not null/i,
   'Foreign-key coverage indexes must not be partial.',
+);
+
+assert.match(
+  appointmentReferenceIndexes,
+  /create index if not exists appointments_client_id_fk_idx[\\s\\S]*create index if not exists appointments_professional_id_fk_idx[\\s\\S]*create index if not exists appointments_service_id_fk_idx/i,
+  'Appointment foreign-key references must have full B-tree indexes.',
+);
+assert.doesNotMatch(
+  appointmentReferenceIndexes,
+  /where client_id is not null|where professional_id is not null|where service_id is not null/i,
+  'Foreign-key indexes must not be partial indexes.',
+);
+assert.match(
+  rlsPolicyPerformance,
+  /\\(select auth\\.uid\\(\\)\\)/i,
+  'RLS policies must cache auth.uid() per statement.',
+);
+assert.match(
+  rlsPolicyPerformance,
+  /select public\\.get_my_barbershop_id\\(\\)/i,
+  'RLS policies must cache tenant helper calls per statement.',
+);
+assert.match(
+  rlsPolicyPerformance,
+  /drop policy if exists reviews_public_read[\\s\\S]*drop policy if exists "Leitura pública de serviços"/i,
+  'Redundant public SELECT policies must be removed without removing the canonical public policy.',
+);
+assert.match(
+  rlsPolicyPerformance,
+  /drop policy if exists subscriptions_select_own[\\s\\S]*create policy subscriptions_select_own[\\s\\S]*or barbershop_id =/i,
+  'Subscription SELECT policies must be consolidated without changing either access path.',
 );
 
 assert.match(
