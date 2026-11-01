@@ -90,6 +90,20 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Aguardar CI; aplicar migration à produção; verificar advisor e `EXPLAIN` nos padrões de agenda/CRM.
 - [ ] Rever restantes FKs por impacto e volume antes de indexar em massa. A base de produção tem poucos registos em várias tabelas; evitar criar dezenas de índices sem benefício medido.
 
+### 4. Auditoria P1 — performance da base de dados (em curso)
+- [x] Recontar os advisors após as migrations P1: 61 FKs sem índice de cobertura; 8 políticas com Auth initplan; 5 alertas de políticas permissivas duplicadas; 4 pares de índices duplicados; 72 índices sem uso.
+- [x] Rever os padrões de consulta no código e os índices existentes. Em `appointments`, o índice de timeline começa por `barbershop_id` e não cobre pesquisas/FK checks por `client_id`; os índices GiST/slot também não substituem B-tree para `professional_id` e `service_id`.
+- [ ] Migration `20261101234500_add_appointment_reference_indexes` no PR adiciona B-tree completo para `appointments(client_id)`, `appointments(professional_id)` e `appointments(service_id)`. Aguardando CI antes de aplicar.
+- [x] Identificar e preparar correção para as 8 políticas com Auth initplan: shops (INSERT/UPDATE), marketing_campaigns (INSERT), barbershop_dashboard_customizations (SELECT/INSERT/UPDATE/DELETE) e subscriptions (SELECT).
+- [x] Migration `20261101240000_optimize_rls_policy_initplans` preparada: usa subqueries escalares para cache de `auth.uid()`/helper por statement, consolida as duas políticas SELECT de subscriptions preservando ambas as condições, remove políticas SELECT redundantes de reviews/services sem alterar o acesso público. Inclui também cache do helper de tenant nas políticas de escrita/consulta de services e marketing.
+- [x] Validar a migration de políticas em transação com ROLLBACK; as políticas resultantes mantêm o tenant check, o acesso público e as operações permitidas.
+- [ ] Aplicar migrations de performance após CI e confirmar a descida dos findings dos advisors.
+- [ ] Rever os 58 FKs restantes por padrões de consulta/cascades antes de adicionar índices; não criar índices em massa sem evidência de workload.
+- [ ] Rever os 4 pares de índices duplicados; não remover índices ainda porque alguns são constraints/índices únicos e precisam de validação de dependências.
+- [ ] Rever os 72 índices sem uso; não remover com base apenas em estatísticas de uma base de dados com poucas linhas e tráfego limitado.
+- [x] Consultar p95 dos últimos 7 dias. Maiores valores com pelo menos 5 pedidos: `/api/analytics` 3.0s (9 pedidos), `/api/cron/marketing` 2.9s (8), `/api/loyalty/me` 2.4s (7), `/api/marketing/campaigns/automation` 2.1s (6), `/api/barbershops/public-profile` 2.1s (27), `/api/shops/[id]/booking-data` 1.8s (55). Sem respostas 5xx nesses grupos; amostras pequenas em vários endpoints.
+- [x] Confirmar que as tabelas de negócio consultadas continuam pequenas no ambiente atual (ex.: appointments 11 linhas estimadas; services 4). Isto limita conclusões de EXPLAIN e impede afirmar ganhos de latência antes de um teste de carga real.
+
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
 - 14 funções `SECURITY DEFINER` preexistentes assinaladas como executáveis por authenticated (o helper novo está no schema `private`).
