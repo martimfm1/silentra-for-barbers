@@ -82,7 +82,7 @@ async function authHeaders(contentType = false): Promise<Record<string, string>>
   }
 
   return {
-    Authorization: \`Bearer \${session.access_token}\`,
+    Authorization: `Bearer ${session.access_token}`,
     ...(contentType ? { 'Content-Type': 'application/json' } : {}),
   };
 }
@@ -149,7 +149,7 @@ export function ClientDetailsDialog({
 
     void (async () => {
       try {
-        const response = await fetch(\`/api/crm/clients/\${clientId}\`, {
+        const response = await fetch(`/api/crm/clients/${clientId}`, {
           headers: await authHeaders(),
           cache: 'no-store',
           signal: controller.signal,
@@ -192,7 +192,7 @@ export function ClientDetailsDialog({
     setSavingNote(true);
     try {
       const response = await fetch(
-        \`/api/crm/clients/\${clientId}/notes\`,
+        `/api/crm/clients/${clientId}/notes`,
         {
           method: 'POST',
           headers: await authHeaders(true),
