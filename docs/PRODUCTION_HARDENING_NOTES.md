@@ -26,7 +26,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ### P1 — Performance
 - [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration `20261101234500_add_appointment_reference_indexes` com índices B-tree completos preparada, pendente de CI e aplicação.
-- [ ] Rever 4 pares de índices duplicados. Foram confirmados quatro pares com definições equivalentes: `appointments.management_token`, `locations(parent_barbershop_id, slug)`, `loyalty_rewards(barbershop_id, active)` e o índice parcial de campanhas de aniversário. A migration `20261101234500_add_appointment_reference_indexes` remove apenas os duplicados não canónicos e mantém o índice único/constraint de cada chave; o snapshot `supabase/schema.sql` foi sincronizado.
+- [ ] Rever os pares de índices duplicados. Além dos quatro grupos assinalados pelo advisor, foi confirmado manualmente um quinto par redundante em `locations(parent_barbershop_id)`. A migration `20261101234500_add_appointment_reference_indexes` remove apenas os duplicados comprovados em `appointments.management_token`, `locations(parent_barbershop_id)`, `locations(parent_barbershop_id, slug)`, `loyalty_rewards(barbershop_id, active)` e o índice parcial de campanhas de aniversário. Preserva os índices canónicos e o índice independente `appointments(management_token_expires_at)`; o snapshot `supabase/schema.sql` foi sincronizado.
 - [ ] Investigar índices sem uso antes de remover.
 - [ ] Fazer profiling dos endpoints mais lentos e criar testes de carga multi-tenant.
 
@@ -99,7 +99,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Validar a migration de políticas em transação com ROLLBACK; as políticas resultantes mantêm o tenant check, o acesso público e as operações permitidas.
 - [ ] Aplicar migrations de performance após CI e confirmar a descida dos findings dos advisors.
 - [ ] Rever os 58 FKs restantes por padrões de consulta/cascades antes de adicionar índices; não criar índices em massa sem evidência de workload.
-- [ ] Rever os 4 pares de índices duplicados; não remover índices ainda porque alguns são constraints/índices únicos e precisam de validação de dependências.
+- [x] Rever os pares duplicados listados acima e confirmar as definições sobreviventes e constraints associadas; migration remove apenas cinco índices redundantes com cobertura idêntica. O índice de expiração MB WAY é independente e foi explicitamente mantido.
 - [ ] Rever os 72 índices sem uso; não remover com base apenas em estatísticas de uma base de dados com poucas linhas e tráfego limitado.
 - [x] Consultar p95 dos últimos 7 dias. Maiores valores com pelo menos 5 pedidos: `/api/analytics` 3.0s (9 pedidos), `/api/cron/marketing` 2.9s (8), `/api/loyalty/me` 2.4s (7), `/api/marketing/campaigns/automation` 2.1s (6), `/api/barbershops/public-profile` 2.1s (27), `/api/shops/[id]/booking-data` 1.8s (55). Sem respostas 5xx nesses grupos; amostras pequenas em vários endpoints.
 - [x] Confirmar que as tabelas de negócio consultadas continuam pequenas no ambiente atual (ex.: appointments 11 linhas estimadas; services 4). Isto limita conclusões de EXPLAIN e impede afirmar ganhos de latência antes de um teste de carga real.
