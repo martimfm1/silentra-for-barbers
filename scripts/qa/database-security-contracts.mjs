@@ -20,6 +20,9 @@ const loyaltyRedemptionHardening = await read(
 const teamMemberHardening = await read(
   'supabase/migrations/20261101233000_harden_team_member_management_rpc.sql',
 );
+const internalTableHardening = await read(
+  'supabase/migrations/20261101233100_revoke_internal_table_client_grants.sql',
+);
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
@@ -148,6 +151,17 @@ assert.match(
   teamMemberHardening,
   /v_target_role = 'client'[\s\S]*clients_are_not_team_members/i,
   'The team removal RPC must not detach CRM clients.',
+);
+
+assert.match(
+  internalTableHardening,
+  /revoke all on table[\\s\\S]*public\\.audit_logs[\\s\\S]*public\\.verification_tokens[\\s\\S]*from public, anon, authenticated/i,
+  'Internal audit, queue, configuration, rate-limit and token tables must not be exposed to client roles.',
+);
+assert.match(
+  internalTableHardening,
+  /grant all on table[\\s\\S]*public\\.verification_tokens[\\s\\S]*to service_role/i,
+  'Trusted server-side workers must retain access to internal tables.',
 );
 
 assert.match(
