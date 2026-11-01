@@ -44,7 +44,17 @@ async function GET__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    if (expiryError) {
+      console.error('[LOYALTY_REDEMPTION_RECOVER_EXPIRY_ERROR]', {
+        requestId,
+        code: expiryError.code ?? 'UNKNOWN',
+      });
+      return response(
+        { error: 'Não foi possível atualizar o estado do voucher.', requestId },
+        503,
+      );
+    }
 
     const { data: redemption, error: redemptionError } = await admin
       .from('loyalty_redemptions')
@@ -113,7 +123,10 @@ async function GET__unobserved(request: Request) {
       );
     }
 
-    const [{ data: reward }, { data: settings }] = await Promise.all([
+    const [
+      { data: reward, error: rewardError },
+      { data: settings, error: settingsError },
+    ] = await Promise.all([
       admin
         .from('loyalty_rewards')
         .select('name')
@@ -126,6 +139,18 @@ async function GET__unobserved(request: Request) {
         .eq('barbershop_id', tenant.barbershopId)
         .maybeSingle(),
     ]);
+
+    if (rewardError || settingsError) {
+      console.error('[LOYALTY_REDEMPTION_RECOVER_CONTEXT_ERROR]', {
+        requestId,
+        rewardCode: rewardError?.code ?? null,
+        settingsCode: settingsError?.code ?? null,
+      });
+      return response(
+        { error: 'Não foi possível validar a barbearia e a recompensa.', requestId },
+        503,
+      );
+    }
 
     if (settings?.enabled !== true)
       return response(
