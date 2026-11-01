@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cloud, Mail, CreditCard } from 'lucide-react';
+import { Cloud, Mail, CreditCard, ShieldCheck } from 'lucide-react';
 import { LegalDocumentPage } from '@/components/legal/legal-document-page';
 import { subprocessorsPolicy } from '@/lib/legal/additional-policies';
 
