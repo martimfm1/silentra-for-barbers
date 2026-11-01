@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Client } from '@/types';
+import { createClient } from '@/lib/supabase/client';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { useClients } from '@/app/state/_hooks/dashboard/useClients';
 
 import { ManagementPageHeader } from '@/app/dashboard/_components/shared/ManagementPageHeader';
 import { ClientsListCard } from '@/app/dashboard/_components/cards/ClientsListCard';
+import { ClientDetailsDialog } from '@/components/dashboard/client-details-dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -22,38 +24,117 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 
+const CLIENTS_PAGE_SIZE = 50;
+
 export default function ClientesPage() {
   const { t } = useLanguage();
-  // --- Context & State ---
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const [clients, setClients] = useState<Client[]>([]);
+  const [totalClients, setTotalClients] = useState(0);
   const [searchClientQuery, setSearchClientQuery] = useState('');
+  const [offset, setOffset] = useState(0);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const requestController = useRef<AbortController | null>(null);
 
-  // --- Data Fetching ---
   const fetchClients = useCallback(async () => {
-    if (!barbershopId) return;
-    setLoadingInitial(true);
-    try {
-      const res = await appointmentService.getClients(barbershopId);
-      if (res.error) throw res.error;
-      setClients(res.data ?? []);
-    } catch (error) {
-      console.error('[Clientes Sync Error]:', error);
-      toast.error(t('clientsPage.loadError'));
-    } finally {
+    if (!barbershopId) {
+      setClients([]);
+      setTotalClients(0);
       setLoadingInitial(false);
+      return;
     }
-  }, [barbershopId, t]);
+
+    requestController.current?.abort();
+    const controller = new AbortController();
+    requestController.current = controller;
+    setLoadingInitial((current) => current && clients.length === 0);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error(t('crm.sessionExpired'));
+      }
+
+      const params = new URLSearchParams({
+        limit: String(CLIENTS_PAGE_SIZE),
+        offset: String(offset),
+      });
+      const search = searchClientQuery.trim();
+      if (search) params.set('search', search);
+
+      const response = await fetch(\`/api/crm/clients?\${params.toString()}\`, {
+        headers: { Authorization: \`Bearer \${session.access_token}\` },
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !Array.isArray(payload.clients)) {
+        throw new Error(payload.error ?? t('clientsPage.loadError'));
+      }
+
+      const total = Number(payload.total) || 0;
+      const lastValidOffset =
+        total > 0
+          ? Math.floor((total - 1) / CLIENTS_PAGE_SIZE) * CLIENTS_PAGE_SIZE
+          : 0;
+
+      setTotalClients(total);
+      if (offset > lastValidOffset) {
+        setOffset(lastValidOffset);
+        return;
+      }
+
+      setClients(payload.clients as Client[]);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      console.error('[Clientes Sync Error]:', error);
+      toast.error(
+        error instanceof Error ? error.message : t('clientsPage.loadError'),
+      );
+    } finally {
+      if (!controller.signal.aborted) setLoadingInitial(false);
+    }
+  }, [barbershopId, clients.length, offset, searchClientQuery, t]);
 
   useEffect(() => {
-    if (!isLoadingBarbershop && barbershopId) {
-      queueMicrotask(() => void fetchClients());
-    }
-  }, [barbershopId, fetchClients, isLoadingBarbershop]);
+    if (isLoadingBarbershop) return;
 
-  // --- Custom Hook & Handlers ---
+    const timer = window.setTimeout(
+      () => void fetchClients(),
+      searchClientQuery.trim() ? 250 : 0,
+    );
+
+    return () => {
+      window.clearTimeout(timer);
+      requestController.current?.abort();
+    };
+  }, [
+    barbershopId,
+    fetchClients,
+    isLoadingBarbershop,
+    offset,
+    searchClientQuery,
+  ]);
+
+  useEffect(
+    () => () => {
+      requestController.current?.abort();
+    },
+    [],
+  );
+
+  const updateSearch = (value: string) => {
+    setSearchClientQuery(value);
+    setOffset(0);
+  };
+
   const {
     loadingClients,
     newClientData,
@@ -65,18 +146,8 @@ export default function ClientesPage() {
     handleDeleteClient,
   } = useClients(barbershopId, fetchClients);
 
-  // --- Computed State ---
-  const filteredClients = useMemo(
-    () =>
-      clients.filter(
-        (c) =>
-          c.name_complete
-            ?.toLowerCase()
-            .includes(searchClientQuery.toLowerCase()) ||
-          c.num_phone?.includes(searchClientQuery),
-      ),
-    [clients, searchClientQuery],
-  );
+  const currentPage = Math.floor(offset / CLIENTS_PAGE_SIZE) + 1;
+  const totalPages = Math.max(1, Math.ceil(totalClients / CLIENTS_PAGE_SIZE));
 
   return (
     <main className="min-h-screen bg-zinc-950 p-4 pt-16 text-zinc-100 sm:p-6 sm:pt-16 lg:p-8 lg:pt-16">
@@ -93,10 +164,10 @@ export default function ClientesPage() {
           <ClientsListSkeleton />
         ) : (
           <ClientsListCard
-            clientsCount={clients.length}
-            filteredClients={filteredClients}
+            clientsCount={totalClients}
+            filteredClients={clients}
             searchClientQuery={searchClientQuery}
-            setSearchClientQuery={setSearchClientQuery}
+            setSearchClientQuery={updateSearch}
             showAddClientForm={showAddClientForm}
             setShowAddClientForm={setShowAddClientForm}
             newClientData={newClientData}
@@ -104,9 +175,23 @@ export default function ClientesPage() {
             handleCreateClient={handleCreateClient}
             setEditingClient={setEditingClient}
             handleDeleteClient={handleDeleteClient}
+            onViewClient={(client) => setSelectedClientId(client.id)}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) =>
+              setOffset((page - 1) * CLIENTS_PAGE_SIZE)
+            }
             loading={loadingClients}
           />
         )}
+
+        <ClientDetailsDialog
+          clientId={selectedClientId}
+          open={Boolean(selectedClientId)}
+          onOpenChange={(open) => {
+            if (!open) setSelectedClientId(null);
+          }}
+        />
 
         <EditClientDialog
           editingClient={editingClient}
@@ -119,8 +204,6 @@ export default function ClientesPage() {
     </main>
   );
 }
-
-// --- Sub-componentes para melhor organização visual ---
 
 function ClientsListSkeleton() {
   const { t } = useLanguage();
@@ -156,9 +239,10 @@ function EditClientDialog({
   loading,
 }: EditClientDialogProps) {
   const { t } = useLanguage();
+
   return (
     <Dialog open={!!editingClient} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{t('clientsPage.editTitle')}</DialogTitle>
         </DialogHeader>
@@ -166,44 +250,50 @@ function EditClientDialog({
         {editingClient && (
           <form onSubmit={onUpdate} className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <label
-                htmlFor="edit-client-name"
-                className="text-xs text-zinc-400"
-              >
+              <label htmlFor="edit-client-name" className="text-xs text-zinc-400">
                 {t('clientsPage.name')}
               </label>
               <input
                 id="edit-client-name"
                 required
-                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-emerald-500/50"
+                disabled={loading}
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-blue-500/50"
                 value={editingClient.name_complete ?? ''}
                 onChange={(e) =>
-                  onChange({
-                    ...editingClient,
-                    name_complete: e.target.value,
-                  })
+                  onChange({ ...editingClient, name_complete: e.target.value })
                 }
               />
             </div>
 
             <div className="grid gap-2">
-              <label
-                htmlFor="edit-client-phone"
-                className="text-xs text-zinc-400"
-              >
+              <label htmlFor="edit-client-phone" className="text-xs text-zinc-400">
                 {t('clientsPage.phone')}
               </label>
               <input
                 id="edit-client-phone"
                 required
+                disabled={loading}
                 type="tel"
-                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-emerald-500/50"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-blue-500/50"
                 value={editingClient.num_phone ?? ''}
                 onChange={(e) =>
-                  onChange({
-                    ...editingClient,
-                    num_phone: e.target.value,
-                  })
+                  onChange({ ...editingClient, num_phone: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="edit-client-email" className="text-xs text-zinc-400">
+                {t('auth.email')}
+              </label>
+              <input
+                id="edit-client-email"
+                disabled={loading}
+                type="email"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-blue-500/50"
+                value={editingClient.email ?? ''}
+                onChange={(e) =>
+                  onChange({ ...editingClient, email: e.target.value })
                 }
               />
             </div>
@@ -214,14 +304,13 @@ function EditClientDialog({
                 className="text-xs text-zinc-400"
               >
                 {t('clientsPage.birthDate')}{' '}
-                <span className="text-zinc-600">
-                  {t('clientsPage.optional')}
-                </span>
+                <span className="text-zinc-600">{t('clientsPage.optional')}</span>
               </label>
               <input
                 id="edit-client-birth-date"
+                disabled={loading}
                 type="date"
-                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-emerald-500/50"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-sm outline-none focus:border-blue-500/50"
                 value={editingClient.birth_date ?? ''}
                 onChange={(e) =>
                   onChange({
@@ -232,18 +321,31 @@ function EditClientDialog({
               />
             </div>
 
+            <div className="grid gap-2">
+              <label htmlFor="edit-client-style-notes" className="text-xs text-zinc-400">
+                {t('crmDetail.styleNotes')}
+              </label>
+              <Textarea
+                id="edit-client-style-notes"
+                disabled={loading}
+                rows={3}
+                maxLength={5000}
+                value={editingClient.style_notes ?? ''}
+                onChange={(e) =>
+                  onChange({ ...editingClient, style_notes: e.target.value })
+                }
+                placeholder={t('crmDetail.notePlaceholder')}
+              />
+            </div>
+
             <DialogFooter>
               <Button
                 aria-label={loading ? 'A guardar cliente' : 'Guardar cliente'}
                 type="submit"
                 disabled={loading}
-                className="min-h-11 w-full bg-emerald-600 text-white hover:bg-emerald-500"
+                className="min-h-11 w-full bg-blue-600 text-white hover:bg-blue-500"
               >
-                {loading ? (
-                  <Spinner className="size-4" />
-                ) : (
-                  t('clientsPage.saveChanges')
-                )}
+                {loading ? <Spinner className="size-4" /> : t('clientsPage.saveChanges')}
               </Button>
             </DialogFooter>
           </form>
