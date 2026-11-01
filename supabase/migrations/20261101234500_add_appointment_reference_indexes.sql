@@ -6,15 +6,12 @@ begin;
 -- FK checks by client_id alone. The exclusion GiST index also does not replace
 -- B-tree FK indexes.
 create index if not exists appointments_client_id_fk_idx
-  on public.appointments (client_id)
-  where client_id is not null;
+  on public.appointments (client_id);
 
 create index if not exists appointments_professional_id_fk_idx
-  on public.appointments (professional_id)
-  where professional_id is not null;
+  on public.appointments (professional_id);
 
 create index if not exists appointments_service_id_fk_idx
-  on public.appointments (service_id)
-  where service_id is not null;
+  on public.appointments (service_id);
 
 commit;
