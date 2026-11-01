@@ -54,7 +54,7 @@ export const cookiePolicy: Record<'pt' | 'en', CookiePolicyDocument> = {
         title: '6. Como gerir ou retirar o consentimento',
         paragraphs: [
           'Na primeira visita, podes aceitar todas as categorias opcionais, rejeitá-las ou abrir a configuração para escolher separadamente estatísticas e marketing. Nenhuma categoria opcional está pré-selecionada.',
-          'Depois de guardares a tua escolha, o atalho «Preferências de cookies» permanece disponível no canto inferior esquerdo. Podes alterar a escolha a qualquer momento; a página é recarregada para aplicar a nova preferência e impedir o carregamento subsequente das categorias não autorizadas.',
+          'Depois de guardares a tua escolha, o aviso inicial desaparece. Podes voltar a abrir as preferências através do botão «Gerir preferências de cookies» nesta página e alterar a escolha a qualquer momento; a página é recarregada para aplicar a nova preferência e impedir o carregamento subsequente das categorias não autorizadas.',
           'Retirar o consentimento não afeta a licitude do tratamento efetuado antes da retirada. A eliminação imediata de cookies de terceiros já colocados pode depender do domínio e dos mecanismos do fornecedor; o bloqueio de carregamento impede a sua ativação em visitas posteriores quando a categoria deixa de estar autorizada.',
         ],
       },
