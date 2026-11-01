@@ -16,6 +16,8 @@ const checks = [
       "allowedKeys: ['slug', 'rewardId']",
       'getLoyaltySession(tenant.barbershopId)',
       'encryptRedemptionSecret(token)',
+      "admin.rpc('expire_loyalty_redemptions')",
+      'LOYALTY_REDEEM_EXPIRY_ERROR',
       'p_token_encrypted: tokenEncrypted',
       'p_code_encrypted: codeEncrypted',
       'LOYALTY_ACTIVE_REDEMPTION_EXISTS',
