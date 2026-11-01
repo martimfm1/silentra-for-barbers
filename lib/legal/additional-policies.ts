@@ -451,19 +451,26 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         ],
       },
       {
-        title: '2. Pagamentos e faturação',
+        title: '2. Pesquisa de moradas e mapas',
+        paragraphs: [
+          'Mapbox — pesquisa e geocodificação de moradas através da API do servidor. Quando utilizas o autocomplete, o texto da morada, código postal e localidade é enviado ao Mapbox. Se autorizares a localização do dispositivo, as coordenadas podem ser enviadas como proximidade para ordenar sugestões. O token Mapbox permanece no servidor.',
+          'CARTO — fornecimento dos mosaicos de mapa utilizados no diretório público de barbearias. O browser solicita as imagens correspondentes à área do mapa que está a visualizar; esses pedidos podem incluir o endereço IP, metadados técnicos e coordenadas dos mosaicos consultados. A localização do dispositivo não é guardada pela Silentra na base de dados.',
+        ],
+      },
+      {
+        title: '3. Pagamentos e faturação',
         paragraphs: [
           'Stripe — processamento de pagamentos de subscrições, estado de cobrança, faturas e eventos de faturação quando o checkout Stripe está ativo. Os dados de cartão são tratados pela Stripe de acordo com o seu serviço; a Silentra conserva identificadores e estado de subscrição necessários à gestão da conta.',
         ],
       },
       {
-        title: '3. Email e comunicações',
+        title: '4. Email e comunicações',
         paragraphs: [
           'Brevo — envio de email transacional e operacional, incluindo mensagens relacionadas com marcações, notificações e comunicações configuradas. Pode tratar o endereço de email, o nome do destinatário e metadados de entrega.',
         ],
       },
       {
-        title: '4. Estatísticas, desempenho e marketing',
+        title: '5. Estatísticas, desempenho e marketing',
         paragraphs: [
           'Vercel Analytics e Vercel Speed Insights — medição de utilização e desempenho, apenas quando a categoria de estatísticas está autorizada.',
           'Whop — pixel de medição de campanhas e eventos, apenas quando a categoria de marketing está autorizada.',
@@ -471,14 +478,14 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         ],
       },
       {
-        title: '5. Transferências internacionais',
+        title: '6. Transferências internacionais',
         paragraphs: [
           'A localização de tratamento pode variar por fornecedor, produto, região, suporte ou configuração da conta. Quando um fornecedor trate dados fora do Espaço Económico Europeu, a transferência deve estar coberta por um mecanismo permitido pelo RGPD, como uma decisão de adequação ou garantias apropriadas, incluindo cláusulas contratuais-tipo quando aplicável.',
           'Esta página não substitui a consulta dos contratos e definições reais de cada fornecedor. Para obter informação sobre o mecanismo aplicável a um fornecedor ou conta específica, contacta contact@silentra.me.',
         ],
       },
       {
-        title: '6. Alterações à lista',
+        title: '7. Alterações à lista',
         paragraphs: [
           'A lista pode ser atualizada quando novos fornecedores forem introduzidos, removidos ou substituídos. As barbearias que atuem como responsáveis pelo tratamento devem consultar esta página juntamente com a DPA e podem apresentar uma objeção fundamentada nos termos dessa adenda.',
         ],
@@ -499,19 +506,26 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         ],
       },
       {
-        title: '2. Payments and billing',
+        title: '2. Address search and maps',
+        paragraphs: [
+          'Mapbox — address search and geocoding through the server API. When you use autocomplete, the address text, postal code, and city are sent to Mapbox. If you authorize device location, coordinates may be sent as proximity to rank suggestions. The Mapbox token remains on the server.',
+          'CARTO — map tiles used by the public barbershop directory. The browser requests the images corresponding to the map area being viewed; those requests may include IP address, technical metadata, and coordinates of the requested tiles. Silentra does not store the device location in its database.',
+        ],
+      },
+      {
+        title: '3. Payments and billing',
         paragraphs: [
           'Stripe — processing subscription payments, billing state, invoices, and billing events when Stripe checkout is enabled. Card data is handled by Stripe under its service; Silentra retains the identifiers and subscription state needed to manage the account.',
         ],
       },
       {
-        title: '3. Email and communications',
+        title: '4. Email and communications',
         paragraphs: [
           'Brevo — sending transactional and operational email, including booking-related messages, notifications, and configured communications. It may process email address, recipient name, and delivery metadata.',
         ],
       },
       {
-        title: '4. Analytics, performance, and marketing',
+        title: '5. Analytics, performance, and marketing',
         paragraphs: [
           'Vercel Analytics and Vercel Speed Insights — usage and performance measurement, only when the analytics category is authorized.',
           'Whop — campaign and event measurement pixel, only when the marketing category is authorized.',
@@ -519,14 +533,14 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         ],
       },
       {
-        title: '5. International transfers',
+        title: '6. International transfers',
         paragraphs: [
           'Processing location may vary by provider, product, region, support, or account configuration. Where a provider processes data outside the European Economic Area, the transfer must be covered by a GDPR-permitted mechanism, such as an adequacy decision or appropriate safeguards, including standard contractual clauses where applicable.',
           'This page does not replace review of the actual contracts and settings of each provider. For information about the mechanism applicable to a specific provider or account, contact contact@silentra.me.',
         ],
       },
       {
-        title: '6. Changes to this list',
+        title: '7. Changes to this list',
         paragraphs: [
           'This list may be updated when providers are added, removed, or replaced. Barbershops acting as controllers should review this page together with the DPA and may raise a reasoned objection under that addendum.',
         ],
