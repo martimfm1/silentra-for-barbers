@@ -62,40 +62,216 @@ grant all privileges on table public.client_plan_payments to service_role;
 
 create policy client_plans_tenant_select
   on public.client_plans for select to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plans.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plans.client_id
+      and client.barbershop_id = client_plans.barbershop_id
+      and client.role = 'client'
+  )
+  );
 
 create policy client_plans_tenant_insert
   on public.client_plans for insert to authenticated
   with check (
     barbershop_id = get_my_barbershop_id()::uuid
     and created_by = (select auth.uid())
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plans.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plans.client_id
+      and client.barbershop_id = client_plans.barbershop_id
+      and client.role = 'client'
+  )
   );
 
 create policy client_plans_tenant_update
   on public.client_plans for update to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid)
-  with check (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plans.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plans.client_id
+      and client.barbershop_id = client_plans.barbershop_id
+      and client.role = 'client'
+  )
+  )
+  with check (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plans.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plans.client_id
+      and client.barbershop_id = client_plans.barbershop_id
+      and client.role = 'client'
+  )
+  );
 
 create policy client_plans_tenant_delete
   on public.client_plans for delete to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plans.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plans.client_id
+      and client.barbershop_id = client_plans.barbershop_id
+      and client.role = 'client'
+  )
+  );
 
 create policy client_plan_payments_tenant_select
   on public.client_plan_payments for select to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plan_payments.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plan_payments.client_id
+      and client.barbershop_id = client_plan_payments.barbershop_id
+      and client.role = 'client'
+  )
+  );
 
 create policy client_plan_payments_tenant_insert
   on public.client_plan_payments for insert to authenticated
   with check (
     barbershop_id = get_my_barbershop_id()::uuid
     and (created_by is null or created_by = (select auth.uid()))
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plan_payments.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plan_payments.client_id
+      and client.barbershop_id = client_plan_payments.barbershop_id
+      and client.role = 'client'
+  )
   );
 
 create policy client_plan_payments_tenant_update
   on public.client_plan_payments for update to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid)
-  with check (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plan_payments.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plan_payments.client_id
+      and client.barbershop_id = client_plan_payments.barbershop_id
+      and client.role = 'client'
+  )
+  )
+  with check (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plan_payments.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plan_payments.client_id
+      and client.barbershop_id = client_plan_payments.barbershop_id
+      and client.role = 'client'
+  )
+  );
 
 create policy client_plan_payments_tenant_delete
   on public.client_plan_payments for delete to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid);
+  using (
+    barbershop_id = get_my_barbershop_id()::uuid
+    and exists (
+    select 1
+    from public.users actor
+    where actor.id = (select auth.uid())
+      and actor.barbershop_id = client_plan_payments.barbershop_id
+      and coalesce(lower(actor.role), 'barber') in (
+        'owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'
+      )
+  )
+    and exists (
+    select 1
+    from public.users client
+    where client.id = client_plan_payments.client_id
+      and client.barbershop_id = client_plan_payments.barbershop_id
+      and client.role = 'client'
+  )
+  );
