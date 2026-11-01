@@ -1242,3 +1242,46 @@ body[data-dashboard-theme='true'] :is(
     transform: none !important;
   }
 }
+
+
+/* React Bits Stroke Text adaptation for the Silentra loading wordmark. */
+@keyframes silentra-stroke-outline {
+  from {
+    stroke-dashoffset: 640;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes silentra-stroke-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 760px;
+  }
+}
+
+.silentra-stroke-char {
+  stroke-dasharray: 640;
+  stroke-dashoffset: 640;
+  animation: silentra-stroke-outline 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--stroke-index, 0) * 65ms);
+}
+
+.silentra-stroke-fill-wipe {
+  animation: silentra-stroke-fill 700ms cubic-bezier(0.16, 1, 0.3, 1) 1.58s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .silentra-stroke-char {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+
+  .silentra-stroke-fill-wipe {
+    animation: none !important;
+    width: 760px;
+  }
+}
