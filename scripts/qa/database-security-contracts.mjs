@@ -23,6 +23,9 @@ const teamMemberHardening = await read(
 const internalTableHardening = await read(
   'supabase/migrations/20261101233354_revoke_internal_table_client_grants.sql',
 );
+const appointmentReferenceIndexes = await read(
+  'supabase/migrations/20261101234500_add_appointment_reference_indexes.sql',
+);
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
@@ -162,6 +165,27 @@ assert.match(
   internalTableHardening,
   /grant all on table[\s\S]*public\.verification_tokens[\s\S]*to service_role/i,
   'Trusted server-side workers must retain access to internal tables.',
+);
+
+assert.match(
+  appointmentReferenceIndexes,
+  /create index if not exists appointments_client_id_fk_idx[\\s\\S]*on public\\.appointments \\(client_id\\)/i,
+  'Appointment client foreign keys must have a full leading-column B-tree index.',
+);
+assert.match(
+  appointmentReferenceIndexes,
+  /create index if not exists appointments_professional_id_fk_idx[\\s\\S]*on public\\.appointments \\(professional_id\\)/i,
+  'Appointment professional foreign keys must have a full leading-column B-tree index.',
+);
+assert.match(
+  appointmentReferenceIndexes,
+  /create index if not exists appointments_service_id_fk_idx[\\s\\S]*on public\\.appointments \\(service_id\\)/i,
+  'Appointment service foreign keys must have a full leading-column B-tree index.',
+);
+assert.doesNotMatch(
+  appointmentReferenceIndexes,
+  /where (client_id|professional_id|service_id) is not null/i,
+  'Foreign-key coverage indexes must not be partial.',
 );
 
 assert.match(
