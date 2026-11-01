@@ -7,6 +7,7 @@ import {
   useSpring,
 } from 'motion/react';
 import type { PointerEvent } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 type DepthLoadingProps = {
   message?: string;
@@ -30,15 +31,25 @@ const DEPTH_LAYERS = Array.from({ length: 7 }, (_, index) => index + 1);
  * presentation for users who prefer reduced motion.
  */
 export function DepthLoading({
-  message = 'A preparar a experiência',
+  message,
   variant = 'fullscreen',
 }: DepthLoadingProps) {
+  const { locale } = useLanguage();
   const prefersReducedMotion = useReducedMotion();
   const targetRotateX = useMotionValue(0);
   const targetRotateY = useMotionValue(0);
   const rotateX = useSpring(targetRotateX, SPRING);
   const rotateY = useSpring(targetRotateY, SPRING);
   const isCompact = variant === 'compact';
+  const resolvedMessage =
+    message ??
+    (isCompact
+      ? locale === 'en'
+        ? 'Preparing your dashboard'
+        : 'A preparar a tua dashboard'
+      : locale === 'en'
+        ? 'Preparing your experience'
+        : 'A preparar a experiência');
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (prefersReducedMotion || event.pointerType !== 'mouse') return;
@@ -122,7 +133,7 @@ export function DepthLoading({
         role="status"
         aria-live="polite"
         aria-busy="true"
-        aria-label={message}
+        aria-label={resolvedMessage}
         className="flex min-w-0 items-center gap-3 py-1"
       >
         <div aria-hidden="true" className="shrink-0">
@@ -130,7 +141,7 @@ export function DepthLoading({
         </div>
         <div className="min-w-0">
           <p className="truncate text-[10px] font-semibold tracking-[0.22em] text-muted-foreground uppercase">
-            {message}
+            {resolvedMessage}
           </p>
           <div className="mt-2 h-px w-24 overflow-hidden rounded-full bg-white/10">
             <motion.div
@@ -155,7 +166,7 @@ export function DepthLoading({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label={message}
+      aria-label={resolvedMessage}
       className="fixed inset-0 z-[9999] flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#08090b] px-6 text-center text-foreground"
       style={{
         background:
@@ -240,7 +251,7 @@ export function DepthLoading({
         </div>
 
         <p className="mt-5 text-[10px] font-semibold tracking-[0.28em] text-muted-foreground uppercase sm:text-xs">
-          {message}
+          {resolvedMessage}
         </p>
         <div aria-hidden="true" className="mt-4 flex items-center gap-1.5">
           {[0, 1, 2].map((dot) => (
