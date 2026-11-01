@@ -46,6 +46,7 @@ type LegalDocumentPageProps = {
 
 const legalLinks = [
   { href: '/legal', pt: 'Centro legal', en: 'Legal centre' },
+  { href: '/acceptable-use', pt: 'Utilização aceitável', en: 'Acceptable use' },
   { href: '/terms', pt: 'Termos e Condições', en: 'Terms and Conditions' },
   { href: '/privacy', pt: 'Privacidade', en: 'Privacy' },
   { href: '/cookies', pt: 'Cookies', en: 'Cookies' },
