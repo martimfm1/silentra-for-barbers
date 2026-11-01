@@ -155,12 +155,12 @@ assert.match(
 
 assert.match(
   internalTableHardening,
-  /revoke all on table[\\s\\S]*public\\.audit_logs[\\s\\S]*public\\.verification_tokens[\\s\\S]*from public, anon, authenticated/i,
+  /revoke all on table[\s\S]*public\.audit_logs[\s\S]*public\.verification_tokens[\s\S]*from public, anon, authenticated/i,
   'Internal audit, queue, configuration, rate-limit and token tables must not be exposed to client roles.',
 );
 assert.match(
   internalTableHardening,
-  /grant all on table[\\s\\S]*public\\.verification_tokens[\\s\\S]*to service_role/i,
+  /grant all on table[\s\S]*public\.verification_tokens[\s\S]*to service_role/i,
   'Trusted server-side workers must retain access to internal tables.',
 );
 
@@ -176,5 +176,5 @@ assert.match(
 );
 
 console.log(
-  '[DATABASE_SECURITY_QA] tenant RLS, protected account fields, private permission helper and loyalty redemption contracts passed',
+  '[DATABASE_SECURITY_QA] tenant RLS, privileged RPCs, internal table grants and loyalty redemption contracts passed',
 );
