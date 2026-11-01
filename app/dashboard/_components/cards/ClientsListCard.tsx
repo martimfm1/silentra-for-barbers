@@ -438,4 +438,5 @@ function ClientItemCard({
         </div>
       </div>
     </article>
+  );
 }
