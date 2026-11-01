@@ -71,10 +71,10 @@ export function FooterSection() {
             </p>
             <div className="mt-4 grid gap-3 text-sm text-zinc-300">
               <a
-                href="mailto:silentra.contact@gmail.com"
+                href="mailto:contact@silentra.me"
                 className="transition-colors hover:text-zinc-50"
               >
-                silentra.contact@gmail.com
+                contact@silentra.me
               </a>
               <a
                 href="https://discord.gg/PwHWWyrGxe"
@@ -103,14 +103,29 @@ export function FooterSection() {
             : '. Built for modern barbershops.'}
         </p>
         <div className="flex flex-wrap gap-4">
+          <Link href="/legal" className="transition-colors hover:text-zinc-300">
+            {pt ? 'Centro legal' : 'Legal centre'}
+          </Link>
           <Link href="/terms" className="transition-colors hover:text-zinc-300">
             {pt ? 'Termos' : 'Terms'}
+          </Link>
+          <Link
+            href="/booking-terms"
+            className="transition-colors hover:text-zinc-300"
+          >
+            {pt ? 'Reservas' : 'Bookings'}
           </Link>
           <Link
             href="/privacy"
             className="transition-colors hover:text-zinc-300"
           >
             {pt ? 'Privacidade' : 'Privacy'}
+          </Link>
+          <Link
+            href="/cookies"
+            className="transition-colors hover:text-zinc-300"
+          >
+            {pt ? 'Cookies' : 'Cookies'}
           </Link>
           <Link
             href="/registo"
