@@ -720,6 +720,7 @@ export const enCopy = {
     addFirst: 'Add first client',
     client: 'Client',
     viewProfile: 'View {name} profile',
+    viewProfileAction: 'View profile',
     editAction: 'Edit',
     edit: 'Edit {name}',
     delete: 'Delete {name}',
