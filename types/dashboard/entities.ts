@@ -5,7 +5,8 @@ export interface Client {
   num_phone: string;
   email?: string;
   birth_date?: string | null;
-  style_notes?: string;
+  style_notes?: string | null;
+  created_at?: string;
   role?: 'owner' | 'admin' | 'barber' | 'client' | string;
 }
 
