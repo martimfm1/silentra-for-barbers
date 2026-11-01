@@ -51,8 +51,6 @@ begin
     raise exception 'LOYALTY_REDEMPTION_INVALID';
   end if;
 
-  perform public.expire_loyalty_redemptions();
-
   -- Serialize reservations for this member. The pending check below therefore
   -- remains correct even when the customer double-clicks or sends concurrent requests.
   select lm.*
@@ -144,6 +142,9 @@ begin
     v_redemption_id,
     v_reward.name
   );
+
+  -- Keep the legacy account balance in sync for customers who also have an account.
+  perform public.sync_loyalty_legacy_account(v_member.id);
 
   redemption_id := v_redemption_id;
   points_balance := v_new_balance;
