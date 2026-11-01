@@ -85,7 +85,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 ### 4. Performance — índices de foreign keys (em curso)
 - [x] Consultar advisor e confirmar que as três FKs de `appointments` sem cobertura são `client_id`, `professional_id` e `service_id`.
 - [x] Rever índices existentes: `appointments_client_timeline_idx` começa por `barbershop_id` e não cobre `client_id` isoladamente; o índice GiST de sobreposição e o índice de slot não substituem índices B-tree nas FKs.
-- [x] Criar migration `20261101234500_add_appointment_reference_indexes` com três índices B-tree completos (não parciais).
+- [x] Criar migration `20261101235218_add_appointment_reference_indexes` com três índices B-tree completos (não parciais).
 - [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência, e que garantem a remoção dos quatro duplicados sem apagar índices canónicos.
 - [ ] Aguardar CI; aplicar migration à produção; verificar advisor e `EXPLAIN` nos padrões de agenda/CRM.
 - [ ] Rever restantes FKs por impacto e volume antes de indexar em massa. A base de produção tem poucos registos em várias tabelas; evitar criar dezenas de índices sem benefício medido.
@@ -95,7 +95,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Rever os padrões de consulta no código e os índices existentes. Em `appointments`, o índice de timeline começa por `barbershop_id` e não cobre pesquisas/FK checks por `client_id`; os índices GiST/slot também não substituem B-tree para `professional_id` e `service_id`.
 - [x] Migration `20261101235218_add_appointment_reference_indexes` aplicada: adiciona B-tree completo para `appointments(client_id)`, `appointments(professional_id)` e `appointments(service_id)` e remove cinco índices redundantes comprovados.
 - [x] Identificar e preparar correção para as 8 políticas com Auth initplan: shops (INSERT/UPDATE), marketing_campaigns (INSERT), barbershop_dashboard_customizations (SELECT/INSERT/UPDATE/DELETE) e subscriptions (SELECT).
-- [x] Migration `20261101240000_optimize_rls_policy_initplans` preparada: usa subqueries escalares para cache de `auth.uid()`/helper por statement, consolida as duas políticas SELECT de subscriptions preservando ambas as condições, remove políticas SELECT redundantes de reviews/services sem alterar o acesso público. Inclui também cache do helper de tenant nas políticas de escrita/consulta de services e marketing.
+- [x] Migration `20261101235220_optimize_rls_policy_initplans` aplicada: usa subqueries escalares para cache de `auth.uid()`/helper por statement, consolida as duas políticas SELECT de subscriptions preservando ambas as condições, remove políticas SELECT redundantes de reviews/services sem alterar o acesso público. Inclui também cache do helper de tenant nas políticas de escrita/consulta de services e marketing.
 - [x] Validar a migration de políticas em transação com ROLLBACK; as políticas resultantes mantêm o tenant check, o acesso público e as operações permitidas.
 - [x] Aplicar migrations de performance após CI e confirmar a descida dos findings: Auth initplan 8→0, políticas permissivas duplicadas 5→0, índices duplicados 4→0 e FKs sem índice 61→58.
 - [ ] Rever os 58 FKs restantes por padrões de consulta/cascades antes de adicionar índices; não criar índices em massa sem evidência de workload.
