@@ -34,6 +34,10 @@ assert.match(profile, /appointment\.status === 'completed'/);
 assert.match(detailApi, /getCompletedAppointmentsTotal/);
 assert.match(detailApi, /\.eq\('status', 'completed'\)/);
 assert.match(detailApi, /\.select\('service_price, value_products'\)/);
+assert.equal(
+  (detailApi.match(/id, date_hour, status, service_price, value_products/g) ?? []).length,
+  2,
+);
 assert.match(detailApi, /Number\(appointment\.service_price\)/);
 assert.match(migration, /add column if not exists service_price numeric\(10,2\)/i);
 assert.match(migration, /appointments_sync_service_price/);
