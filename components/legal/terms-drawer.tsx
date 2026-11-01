@@ -9,11 +9,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { useLanguage } from '@/context/LanguageContext';
-import { termsAndConditions } from '@/lib/legal/terms-and-conditions';
-import {
-  CURRENT_LEGAL_UPDATE,
-  currentTermsAddendum,
-} from '@/lib/legal/current-legal-addendum';
+import { currentTerms } from '@/lib/legal/current-terms';
 
 type TermsDrawerProps = {
   trigger: React.ReactNode;
@@ -21,12 +17,7 @@ type TermsDrawerProps = {
 
 export function TermsDrawer({ trigger }: TermsDrawerProps) {
   const { locale, t } = useLanguage();
-  const terms = termsAndConditions[locale];
-  const updatedTerms = {
-    ...terms,
-    lastUpdated: locale === 'pt' ? CURRENT_LEGAL_UPDATE : 'August 16, 2026',
-    sections: [...terms.sections, currentTermsAddendum[locale]],
-  };
+  const updatedTerms = currentTerms[locale];
 
   return (
     <Drawer>
