@@ -37,11 +37,13 @@ export default function ClientesPage() {
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const requestController = useRef<AbortController | null>(null);
+  const hasLoadedClients = useRef(false);
 
   const fetchClients = useCallback(async () => {
     if (!barbershopId) {
       setClients([]);
       setTotalClients(0);
+      hasLoadedClients.current = true;
       setLoadingInitial(false);
       return;
     }
@@ -49,7 +51,7 @@ export default function ClientesPage() {
     requestController.current?.abort();
     const controller = new AbortController();
     requestController.current = controller;
-    setLoadingInitial((current) => current && clients.length === 0);
+    setLoadingInitial(!hasLoadedClients.current);
 
     try {
       const supabase = createClient();
@@ -92,6 +94,7 @@ export default function ClientesPage() {
       }
 
       setClients(payload.clients as Client[]);
+      hasLoadedClients.current = true;
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error('[Clientes Sync Error]:', error);
@@ -101,7 +104,7 @@ export default function ClientesPage() {
     } finally {
       if (!controller.signal.aborted) setLoadingInitial(false);
     }
-  }, [barbershopId, clients.length, offset, searchClientQuery, t]);
+  }, [barbershopId, offset, searchClientQuery, t]);
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
