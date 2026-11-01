@@ -314,6 +314,7 @@ export const ptCopy = {
     planPaymentSaved: 'Mensalidade registada como paga.',
     planPaymentPending: 'Mensalidade marcada como pendente.',
     planCancelConfirm: 'Queres mesmo terminar este plano?',
+    planLoading: 'A carregar os planos…',
     plansTitle: 'Plano mensal',
     planActive: 'Ativo',
     planMonthlyPrice: 'Mensalidade',
