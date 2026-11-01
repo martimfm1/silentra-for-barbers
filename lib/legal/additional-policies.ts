@@ -447,6 +447,7 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         paragraphs: [
           'Vercel — alojamento da aplicação, entrega de conteúdo e execução de funções da plataforma. Pode tratar dados técnicos de pedidos e registos operacionais necessários à prestação e segurança do serviço.',
           'Supabase — base de dados, autenticação e armazenamento de ficheiros utilizados pela plataforma. Pode tratar dados de conta, barbearias, reservas, CRM, ficheiros e metadados técnicos de acordo com as funcionalidades utilizadas.',
+          'AWS S3 — armazenamento de objetos e ficheiros, apenas quando a integração S3 estiver configurada e for utilizada nesta implementação. Os dados transmitidos dependem do tipo de ficheiro e da funcionalidade que o utiliza.',
         ],
       },
       {
@@ -494,6 +495,7 @@ export const subprocessorsPolicy: LocalizedPolicy = {
         paragraphs: [
           'Vercel — application hosting, content delivery, and execution of platform functions. It may process technical request data and operational logs needed to provide and secure the service.',
           'Supabase — database, authentication, and file storage used by the platform. It may process account, barbershop, booking, CRM, file, and technical metadata according to the features used.',
+          'AWS S3 — object and file storage, only when the S3 integration is configured and used in this deployment. The data transmitted depends on the file type and the feature using it.',
         ],
       },
       {
