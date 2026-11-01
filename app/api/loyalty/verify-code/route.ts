@@ -140,11 +140,19 @@ async function POST__unobserved(request: Request) {
           );
     }
 
-    await admin
+    const { error: previousSessionsError } = await admin
       .from('loyalty_sessions')
       .delete()
-      .eq('email', email)
-      .neq('barbershop_id', tenant.barbershopId);
+      .eq('email', email);
+    if (previousSessionsError) {
+      console.error('[LOYALTY_VERIFY_SESSION_CLEANUP]', {
+        code: previousSessionsError.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        { error: 'Não foi possível atualizar a sessão da fidelização.' },
+        { status: 503 },
+      );
+    }
 
     const token = generateLoyaltyToken();
     const expiresAt = loyaltySessionExpiry();
