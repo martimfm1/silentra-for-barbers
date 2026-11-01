@@ -2,6 +2,55 @@
 -- A plan belongs to exactly one customer in one barbershop. Usage is derived from
 -- completed appointments in the current billing cycle, avoiding duplicated counters.
 
+-- Preserve the service price charged when each appointment is created.
+-- Existing rows are backfilled with the service's current catalog price.
+alter table public.appointments
+  add column if not exists service_price numeric(10,2);
+
+update public.appointments as appointment
+set service_price = service.price
+from public.services as service
+where appointment.service_price is null
+  and appointment.service_id = service.id
+  and appointment.barbershop_id = service.barbershop_id;
+
+create or replace function public.set_appointment_service_price()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $
+begin
+  if new.service_id is null then
+    new.service_price := null;
+  elsif tg_op = 'UPDATE' and new.service_id is distinct from old.service_id then
+    select service.price
+    into new.service_price
+    from public.services service
+    where service.id = new.service_id
+      and service.barbershop_id = new.barbershop_id;
+  elsif new.service_price is null then
+    select service.price
+    into new.service_price
+    from public.services service
+    where service.id = new.service_id
+      and service.barbershop_id = new.barbershop_id;
+  end if;
+
+  return new;
+end;
+$;
+
+drop trigger if exists appointments_sync_service_price on public.appointments;
+create trigger appointments_sync_service_price
+before insert or update of service_id, service_price
+on public.appointments
+for each row
+execute function public.set_appointment_service_price();
+
+comment on column public.appointments.service_price is
+  'Snapshot of the service price for this appointment, captured when the appointment is created or its service changes.';
+
+
 create table if not exists public.client_plans (
   id uuid primary key default gen_random_uuid(),
   barbershop_id uuid not null references public.barbershops(id) on delete cascade,
