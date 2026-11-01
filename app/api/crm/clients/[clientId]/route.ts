@@ -9,6 +9,56 @@ import {
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ clientId: string }> };
+type AdminClient = Awaited<ReturnType<typeof requireModuleContext>>['admin'];
+
+type CompletedAppointmentAmount = {
+  value_products?: number | string | null;
+  services?:
+    | { price?: number | string | null }
+    | Array<{ price?: number | string | null }>
+    | null;
+};
+
+async function getCompletedAppointmentsTotal(
+  admin: AdminClient,
+  barbershopId: string,
+  clientId: string,
+): Promise<{ total: number; error: boolean }> {
+  const pageSize = 500;
+  let offset = 0;
+  let total = 0;
+
+  while (true) {
+    const { data, error } = await admin
+      .from('appointments')
+      .select('value_products, services(price)')
+      .eq('barbershop_id', barbershopId)
+      .eq('client_id', clientId)
+      .eq('status', 'completed')
+      .order('date_hour', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      console.error('[CRM_CLIENT_TOTAL_SPENT_ERROR]', error.code ?? 'UNKNOWN');
+      return { total: 0, error: true };
+    }
+
+    const rows = (data ?? []) as unknown as CompletedAppointmentAmount[];
+    for (const appointment of rows) {
+      const relation = appointment.services;
+      const service = Array.isArray(relation) ? relation[0] : relation;
+      total +=
+        (Number(service?.price) || 0) +
+        (Number(appointment.value_products) || 0);
+    }
+
+    if (rows.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return { total: Math.round(total * 100) / 100, error: false };
+}
 
 async function GET__unobserved(req: Request, { params }: Params) {
   try {
@@ -27,6 +77,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
       { data: upcomingAppointments, error: upcomingAppointmentError },
       { data: notes },
       { data: tags },
+      completedAppointmentsTotal,
     ] = await Promise.all([
       t.admin
         .from('users')
@@ -69,6 +120,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
         .select('tag_id, client_tags(id, name)')
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId),
+      getCompletedAppointmentsTotal(t.admin, t.barbershopId, clientId),
     ]);
 
     if (clientError)
@@ -83,11 +135,17 @@ async function GET__unobserved(req: Request, { params }: Params) {
         { error: 'Failed to load client bookings' },
         { status: 500 },
       );
+    if (completedAppointmentsTotal.error)
+      return NextResponse.json(
+        { error: 'Failed to calculate client spending' },
+        { status: 503 },
+      );
     return NextResponse.json(
       {
         client,
         appointments: appointments ?? [],
         upcomingAppointments: upcomingAppointments ?? [],
+        totalSpent: completedAppointmentsTotal.total,
         notes: notes ?? [],
         tags: tags ?? [],
       },
