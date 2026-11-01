@@ -15,6 +15,7 @@ import {
   X,
   ArrowRight,
   Cake,
+  Eye,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,10 @@ export function ClientsListCard({
   handleCreateClient,
   setEditingClient,
   handleDeleteClient,
+  onViewClient,
+  currentPage,
+  totalPages,
+  onPageChange,
   loading,
 }: ClientsListCardProps) {
   const { t } = useLanguage();
@@ -97,7 +102,7 @@ export function ClientsListCard({
                   aria-label={t('clientsListCard.clearSearch')}
                   className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 hover:bg-white/10 hover:text-white"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -155,10 +160,40 @@ export function ClientsListCard({
                 client={client}
                 setEditingClient={setEditingClient}
                 handleDeleteClient={handleDeleteClient}
+                onViewClient={onViewClient}
               />
             ))}
           </div>
         )}
+        {totalPages > 1 ? (
+          <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-zinc-500 tabular-nums">
+              {currentPage} / {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage <= 1}
+                onClick={() => onPageChange(currentPage - 1)}
+                className="min-h-10 flex-1 border-white/10 bg-white/[0.03] sm:flex-none"
+              >
+                {t('common.previous')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= totalPages}
+                onClick={() => onPageChange(currentPage + 1)}
+                className="min-h-10 flex-1 border-white/10 bg-white/[0.03] sm:flex-none"
+              >
+                {t('common.next')}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -332,12 +367,14 @@ interface ClientItemCardProps {
   client: Client;
   setEditingClient: (client: Client) => void;
   handleDeleteClient: (id: string) => void;
+  onViewClient: (client: Client) => void;
 }
 
 function ClientItemCard({
   client,
   setEditingClient,
   handleDeleteClient,
+  onViewClient,
 }: ClientItemCardProps) {
   const { t, locale } = useLanguage();
   return (
@@ -381,28 +418,42 @@ function ClientItemCard({
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-1 border-t border-white/5 pt-3">
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
         <Button
-          variant="ghost"
-          size="icon"
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onViewClient(client)}
+          className="min-h-11 flex-1 rounded-xl border-blue-500/20 bg-blue-500/[0.06] px-3 text-blue-200 hover:bg-blue-500/10 hover:text-white"
+        >
+          <Eye className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+          <span>{t('clientsListCard.viewProfile')}</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
           onClick={() => setEditingClient(client)}
-          className="size-9 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white"
+          className="min-h-11 rounded-xl border-white/10 bg-white/[0.03] px-3 text-zinc-200 hover:bg-white/[0.08] hover:text-white"
           aria-label={t('clientsListCard.edit', { name: client.name_complete })}
         >
-          <Pencil className="size-4" />
+          <Pencil className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+          <span>{t('common.edit')}</span>
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon"
-              className="size-9 rounded-lg text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11 rounded-xl border-red-500/20 bg-red-500/[0.04] px-3 text-red-300 hover:bg-red-500/10 hover:text-red-200"
               aria-label={t('clientsListCard.delete', {
                 name: client.name_complete,
               })}
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
+              <span>{t('common.delete')}</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
