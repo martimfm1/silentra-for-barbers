@@ -65,6 +65,7 @@ type ClientDetails = {
   client: ClientProfile;
   appointments: Appointment[];
   upcomingAppointments: Appointment[];
+  totalSpent: number;
   notes: ClientNote[];
 };
 
@@ -176,6 +177,7 @@ export function ClientDetailsDialog({
             upcomingAppointments: Array.isArray(json.upcomingAppointments)
               ? json.upcomingAppointments
               : [],
+            totalSpent: Number(json.totalSpent) || 0,
             notes: Array.isArray(json.notes) ? json.notes : [],
           });
         }
@@ -246,10 +248,7 @@ export function ClientDetailsDialog({
     const productsPrice = Number(appointment.value_products) || 0;
     return servicePrice + productsPrice;
   };
-  const totalSpent = completedAppointments.reduce(
-    (total, appointment) => total + appointmentTotal(appointment),
-    0,
-  );
+  const totalSpent = details?.totalSpent ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
