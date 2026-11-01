@@ -1,7 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
-import { requireModuleContext } from '@/services/modules/authorization';
+import { requireModuleContext, moduleErrorResponse } from '@/services/modules/authorization';
 
 function uuid(value: unknown): string | null {
   return typeof value === 'string' &&
@@ -39,7 +39,9 @@ async function GET__unobserved() {
       { rules: rules ?? [], services: services ?? [] },
       { headers: { 'Cache-Control': 'no-store' } },
     );
-  } catch {
+  } catch (error) {
+    const moduleResponse = moduleErrorResponse(error);
+    if (moduleResponse) return moduleResponse;
     return NextResponse.json(
       { error: 'Não foi possível carregar as regras de pontos.' },
       { status: 500 },
@@ -63,9 +65,13 @@ async function POST__unobserved(request: Request) {
       typeof body.name === 'string' ? body.name.trim().slice(0, 120) : '';
     const serviceId = uuid(body.serviceId);
     const points = Math.floor(Number(body.points));
-    const active = body.active !== false;
+    const activeValue = body.active;
+    if (activeValue !== undefined && typeof activeValue !== 'boolean')
+      return NextResponse.json({ error: 'Estado da regra inválido.' }, { status: 400 });
+    const active = activeValue ?? true;
     if (
       !name ||
+      name.length > 120 ||
       !serviceId ||
       !Number.isInteger(points) ||
       points <= 0 ||
@@ -73,12 +79,14 @@ async function POST__unobserved(request: Request) {
     )
       return NextResponse.json({ error: 'Regra inválida.' }, { status: 400 });
 
-    const { data: service } = await admin
+    const { data: service, error: serviceError } = await admin
       .from('services')
       .select('id,name')
       .eq('id', serviceId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
+    if (serviceError)
+      return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
     if (!service)
       return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
 
@@ -95,7 +103,9 @@ async function POST__unobserved(request: Request) {
       .single();
     if (error) throw error;
     return NextResponse.json({ rule: data }, { status: 201 });
-  } catch {
+  } catch (error) {
+    const moduleResponse = moduleErrorResponse(error);
+    if (moduleResponse) return moduleResponse;
     return NextResponse.json(
       { error: 'Não foi possível criar a regra.' },
       { status: 500 },
@@ -121,13 +131,22 @@ async function PATCH__unobserved(request: Request) {
     const patch: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
-    if (body.name !== undefined)
-      patch.name =
-        typeof body.name === 'string' ? body.name.trim().slice(0, 120) : '';
-    if (body.points !== undefined)
-      patch.points = Math.floor(Number(body.points));
-    if (body.active !== undefined) patch.active = body.active === true;
-    if (body.serviceId !== undefined) patch.service_id = uuid(body.serviceId);
+    if (body.name !== undefined) {
+      if (typeof body.name !== 'string' || !body.name.trim() || body.name.trim().length > 120)
+        return NextResponse.json({ error: 'Nome da regra inválido.' }, { status: 400 });
+      patch.name = body.name.trim();
+    }
+    if (body.points !== undefined) patch.points = Number(body.points);
+    if (body.active !== undefined) {
+      if (typeof body.active !== 'boolean')
+        return NextResponse.json({ error: 'Estado da regra inválido.' }, { status: 400 });
+      patch.active = body.active;
+    }
+    if (body.serviceId !== undefined) {
+      patch.service_id = uuid(body.serviceId);
+      if (!patch.service_id)
+        return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
+    }
     if (
       typeof patch.points === 'number' &&
       (!Number.isInteger(patch.points) ||
@@ -137,12 +156,14 @@ async function PATCH__unobserved(request: Request) {
       return NextResponse.json({ error: 'Pontos inválidos.' }, { status: 400 });
 
     if (patch.service_id) {
-      const { data: service } = await admin
+      const { data: service, error: serviceError } = await admin
         .from('services')
         .select('id')
         .eq('id', patch.service_id)
         .eq('barbershop_id', barbershopId)
         .maybeSingle();
+      if (serviceError)
+        return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
       if (!service)
         return NextResponse.json(
           { error: 'Serviço inválido.' },
@@ -164,7 +185,9 @@ async function PATCH__unobserved(request: Request) {
         { status: 404 },
       );
     return NextResponse.json({ rule: data });
-  } catch {
+  } catch (error) {
+    const moduleResponse = moduleErrorResponse(error);
+    if (moduleResponse) return moduleResponse;
     return NextResponse.json(
       { error: 'Não foi possível atualizar a regra.' },
       { status: 500 },
@@ -181,14 +204,26 @@ async function DELETE__unobserved(request: Request) {
     const id = uuid(new URL(request.url).searchParams.get('id'));
     if (!id)
       return NextResponse.json({ error: 'Regra inválida.' }, { status: 400 });
-    const { error } = await admin
+
+    const { data, error } = await admin
       .from('loyalty_earning_rules')
       .delete()
       .eq('id', id)
-      .eq('barbershop_id', barbershopId);
+      .eq('barbershop_id', barbershopId)
+      .select('id')
+      .maybeSingle();
+
     if (error) throw error;
+    if (!data)
+      return NextResponse.json(
+        { error: 'Regra não encontrada.' },
+        { status: 404 },
+      );
+
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    const moduleResponse = moduleErrorResponse(error);
+    if (moduleResponse) return moduleResponse;
     return NextResponse.json(
       { error: 'Não foi possível eliminar a regra.' },
       { status: 500 },
