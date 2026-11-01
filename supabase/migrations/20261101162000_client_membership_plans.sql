@@ -18,7 +18,7 @@ create or replace function public.set_appointment_service_price()
 returns trigger
 language plpgsql
 set search_path = pg_catalog, public
-as $
+as $$
 begin
   if new.service_id is null then
     new.service_price := null;
@@ -38,7 +38,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists appointments_sync_service_price on public.appointments;
 create trigger appointments_sync_service_price
