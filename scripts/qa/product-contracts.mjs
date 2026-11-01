@@ -853,28 +853,46 @@ const checks = [
       source.includes("'/site/barbearia-silentra-ecf1da6c'"),
   },
   {
-    name: 'Shared loading motion uses layered depth text, pointer spring and reduced-motion support',
-    file: 'components/ui/depth-loading.tsx',
+    name: 'Light Tunnel background uses a capped WebGL2 render loop with React Bits attribution',
+    file: 'components/ui/light-tunnel.tsx',
     test: (source) =>
-      source.includes('DEPTH_LAYERS') &&
-      source.includes('useSpring') &&
-      source.includes('useReducedMotion') &&
-      source.includes("event.pointerType !== 'mouse'") &&
+      source.includes('getContext(\'webgl2\'') &&
+      source.includes('1000 / 30') &&
+      source.includes('David Haz') &&
+      source.includes('loseContext'),
+  },
+  {
+    name: 'Stroke wordmark draws outlined characters and wipes in its fill',
+    file: 'components/ui/stroke-wordmark.tsx',
+    test: (source) =>
+      source.includes('silentra-stroke-char') &&
+      source.includes('silentra-stroke-fill-wipe') &&
+      source.includes('SILENTRA'),
+  },
+  {
+    name: 'Shared Silentra loading combines Light Tunnel and Stroke Text with localization',
+    file: 'components/ui/silentra-loading.tsx',
+    test: (source) =>
+      source.includes('<LightTunnel') &&
+      source.includes('<StrokeWordmark') &&
+      source.includes('Preparing your experience') &&
+      source.includes('A preparar a experiência') &&
+      source.includes('dpr={0.85}') &&
       source.includes('aria-busy="true"'),
   },
   {
-    name: 'Global route loading uses the shared Silentra depth-text animation',
+    name: 'Global route loading uses the shared Light Tunnel and Stroke Text animation',
     file: 'app/loading.tsx',
     test: (source) =>
-      source.includes("import { DepthLoading } from '@/components/ui/depth-loading'") &&
-      source.includes('<DepthLoading />'),
+      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes('<SilentraLoading />'),
   },
   {
-    name: 'Dashboard loading skeletons reuse the compact Silentra depth-text animation',
+    name: 'Dashboard loading skeletons reuse the compact Light Tunnel and Stroke Text animation',
     file: 'app/dashboard/_components/dashboard-skeleton.tsx',
     test: (source) =>
-      source.includes("import { DepthLoading } from '@/components/ui/depth-loading'") &&
-      source.includes('variant="compact"') &&
+      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes('<SilentraLoading variant="compact" />') &&
       source.includes('<HeaderSkeleton />'),
   },
 ];

@@ -1,5 +1,5 @@
-import { DepthLoading } from '@/components/ui/depth-loading';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 
 export default function Loading() {
-  return <DepthLoading />;
+  return <SilentraLoading />;
 }
