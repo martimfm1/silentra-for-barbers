@@ -101,9 +101,11 @@ assert.match(cookiePolicy, /Vercel Analytics/);
 assert.match(cookiePolicy, /Google Tag Manager/);
 assert.match(cookiePolicy, /Whop/);
 assert.match(cookiePolicy, /withdraw|retirar o consentimento/i);
-assert.match(termsPage, /currentTermsFeatureSections/);
+assert.match(termsPage, /currentTerms/);
+assert.match(read('lib/legal/current-terms.ts'), /currentTermsFeatureSections/);
 assert.match(privacyPage, /currentPrivacyFeatureSections/);
-assert.match(legalAddendum, /25 de outubro de 2026/);
+assert.match(legalAddendum, /1 de novembro de 2026/);
+assert.match(legalAddendum, /November 1, 2026/);
 assert.match(
   legalAddendum,
   /automatically confirmed|confirmadas automaticamente/i,
