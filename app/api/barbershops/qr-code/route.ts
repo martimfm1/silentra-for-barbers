@@ -109,7 +109,7 @@ async function PATCH__unobserved(request: Request) {
 
     const { data: currentShop, error: shopError } = await tenant.admin
       .from('shops')
-      .select('id, slug')
+      .select('id, slug, custom_slug')
       .eq('barbershop_id', tenant.barbershopId)
       .eq('is_active', true)
       .maybeSingle();
@@ -134,11 +134,12 @@ async function PATCH__unobserved(request: Request) {
         409,
       );
 
-    if (currentShop.slug && currentShop.slug !== slug) {
+    const previousPublicSlug = currentShop.custom_slug || currentShop.slug;
+    if (previousPublicSlug && previousPublicSlug !== slug) {
       const { error: redirectError } = await tenant.admin
         .from('shop_slug_redirects')
         .upsert(
-          { shop_id: currentShop.id, old_slug: currentShop.slug },
+          { shop_id: currentShop.id, old_slug: previousPublicSlug },
           { onConflict: 'shop_id,old_slug' },
         );
       if (redirectError)
