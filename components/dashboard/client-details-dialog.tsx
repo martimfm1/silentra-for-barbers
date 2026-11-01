@@ -71,14 +71,17 @@ interface ClientDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-async function authHeaders(contentType = false): Promise<Record<string, string>> {
+async function authHeaders(
+  contentType = false,
+  sessionExpiredMessage: string,
+): Promise<Record<string, string>> {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error('A sessão expirou. Inicia sessão novamente.');
+    throw new Error(sessionExpiredMessage);
   }
 
   return {
@@ -106,6 +109,7 @@ function formatDate(value: string | null | undefined, locale: string) {
 }
 
 function formatCurrency(value: number | string | null | undefined, locale: string) {
+  if (value === null || value === undefined || value === '') return '—';
   const amount = Number(value);
   if (!Number.isFinite(amount)) return '—';
 
@@ -150,7 +154,7 @@ export function ClientDetailsDialog({
     void (async () => {
       try {
         const response = await fetch(`/api/crm/clients/${clientId}`, {
-          headers: await authHeaders(),
+          headers: await authHeaders(false, t('crm.sessionExpired')),
           cache: 'no-store',
           signal: controller.signal,
         });
@@ -195,7 +199,7 @@ export function ClientDetailsDialog({
         `/api/crm/clients/${clientId}/notes`,
         {
           method: 'POST',
-          headers: await authHeaders(true),
+          headers: await authHeaders(true, t('crm.sessionExpired')),
           body: JSON.stringify({ content }),
         },
       );
@@ -281,7 +285,7 @@ export function ClientDetailsDialog({
                 <Card className="border-white/10 bg-white/[0.03]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
-                      {locale === 'pt' ? 'Marcações concluídas' : 'Completed bookings'}
+                      {t('crmDetail.completedBookings')}
                     </p>
                     <p className="mt-1 text-2xl font-semibold tabular-nums">
                       {completedAppointments.length}
@@ -291,7 +295,7 @@ export function ClientDetailsDialog({
                 <Card className="border-white/10 bg-white/[0.03]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
-                      {locale === 'pt' ? 'Total gasto' : 'Total spent'}
+                      {t('crmDetail.totalSpent')}
                     </p>
                     <p className="mt-1 text-xl font-semibold tabular-nums">
                       {formatCurrency(totalSpent, locale)}
