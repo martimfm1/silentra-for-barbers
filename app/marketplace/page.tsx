@@ -598,10 +598,10 @@ export default function MarketplacePage() {
                 setSubmitted(null);
                 setTrackingToken(null);
               }}
-              className="ml-auto shrink-0 text-zinc-600 hover:text-white"
+              className="ml-auto flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-600 hover:bg-white/5 hover:text-white"
               aria-label={t('storefront.closeConfirmation')}
             >
-              <X className="size-4" />
+              <X className="size-5" aria-hidden="true" />
             </button>
           </div>
         )}
