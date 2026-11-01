@@ -20,7 +20,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [ ] Rever as funções `SECURITY DEFINER` sinalizadas e restringir EXECUTE.
 - [ ] Ativar leaked-password protection.
 - [ ] Rever 33 tabelas RLS sem policies, separando tabelas internas server-only das tabelas acessíveis por clientes.
-- [ ] Aplicar e sincronizar a migration de fidelização `20261101213122_fix_loyalty_redemption_api`.
+- [x] Aplicar e sincronizar a migration de fidelização `20261101230417_fix_loyalty_redemption_api`.
 - [ ] Consolidar políticas permissivas duplicadas.
 - [ ] Corrigir chamadas de Auth em políticas com initplan.
 
@@ -49,8 +49,8 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Política pública permissiva de UPDATE em `barbershops` removida.
 - [x] Teste RLS comportamental com owner: consulta 11 marcações e 2 clientes da própria barbearia; 0 marcações e 0 clientes do outro tenant.
 - [x] Testes de UPDATE dentro de transação com rollback: owner atualiza registo próprio de barbearia, cliente e marcação; não atualiza barbearia nem marcação do outro tenant.
-- [x] Migration complementar `20261101230500_harden_appointment_update_rls` aplicada: permite updates a registos legados válidos e valida serviço/profissional/cliente apenas quando a referência muda.
-- [x] Migration `20261101231000_move_tenant_permission_helper_private` aplicada: a função auxiliar foi movida para o schema `private`, não exposto à Data API. O advisor voltou de 15 para 14 funções `SECURITY DEFINER` executáveis por authenticated.
+- [x] Migration complementar `20261101230103_harden_appointment_update_rls` aplicada: permite updates a registos legados válidos e valida serviço/profissional/cliente apenas quando a referência muda.
+- [x] Migration `20261101230225_move_tenant_permission_helper_private` aplicada: a função auxiliar foi movida para o schema `private`, não exposto à Data API. O advisor voltou de 15 para 14 funções `SECURITY DEFINER` executáveis por authenticated.
 - [ ] Testar reserva pública e agenda autenticada de ponta a ponta através da aplicação HTTP.
 - [ ] Testes com staff sem permissão e com permissões legadas/canónicas (não há utilizadores staff ativos no dataset de produção consultado).
 - [ ] Executar CI/QA completo no GitHub e rever advisors finais. Os advisors atuais já não sinalizam a função auxiliar como RPC pública; permanecem 14 funções preexistentes a rever.
@@ -60,8 +60,9 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 ## Evidência de hardening aplicado e verificado
 
 - Migration `20261101225911_harden_production_tenant_rls` aplicada à produção.
-- Migration `20261101230500_harden_appointment_update_rls` aplicada à produção.
-- Migration `20261101231000_move_tenant_permission_helper_private` aplicada à produção.
+- Migration `20261101230103_harden_appointment_update_rls` aplicada à produção.
+- Migration `20261101230225_move_tenant_permission_helper_private` aplicada à produção.
+- Migration `20261101230417_fix_loyalty_redemption_api` aplicada à produção; a função antiga de cinco argumentos foi removida, mantendo apenas a assinatura de sete argumentos acessível a `service_role`.
 - Grants: anon não tem privilégios de SELECT/INSERT/UPDATE/DELETE em `appointments`, nem SELECT/INSERT em `users`.
 - Grants por coluna: authenticated não pode atualizar `users.role`, `users.barbershop_id` ou `users.id`; campos de perfil permitidos mantêm UPDATE.
 - Função `private.has_barbershop_permission`: execução negada a anon; permitida a authenticated para uso nas políticas RLS; a antiga função em `public` foi removida.
@@ -71,7 +72,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ## Evidência de produção observada
 - Supabase PostgreSQL 17, região `eu-west-1`, estado `ACTIVE_HEALTHY`.
-- 14 funções `SECURITY DEFINER` assinaladas como executáveis por authenticated.
+- 14 funções `SECURITY DEFINER` preexistentes assinaladas como executáveis por authenticated (o helper novo está no schema `private`).
 - 33 tabelas RLS sem policies.
 - 61 foreign keys sem índices de cobertura.
 - 19 políticas com chamadas Auth reavaliadas por linha.
