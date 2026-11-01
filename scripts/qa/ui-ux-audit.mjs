@@ -217,6 +217,7 @@ assert.match(dashboardShell, /viewport\.content = previousViewportContent/);
 assert.match(navbar, /keepFocusInside/);
 assert.match(navbar, /aria-controls="site-navigation-overlay"/);
 assert.match(navbar, /lockBodyScroll\(\)/);
+assert.match(navbar, /min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain touch-pan-y/);
 assert.match(sidebar, /lockBodyScroll\(\)/);
 assert.match(bodyScrollLock, /body\.style\.position = 'fixed'/);
 assert.match(bodyScrollLock, /root\.style\.overscrollBehavior = 'none'/);
