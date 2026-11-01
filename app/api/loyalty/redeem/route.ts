@@ -104,6 +104,19 @@ async function POST__unobserved(request: Request) {
         requestId,
       });
 
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    if (expiryError) {
+      console.error('[LOYALTY_REDEEM_EXPIRY_ERROR]', {
+        requestId,
+        code: expiryError.code ?? 'UNKNOWN',
+      });
+      return errorResponse(
+        'Não foi possível atualizar os resgates da fidelização.',
+        503,
+        { requestId },
+      );
+    }
+
     const { data: member, error: memberError } = await admin
       .from('loyalty_members')
       .select('id, email, name, points_balance, status')
