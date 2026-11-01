@@ -115,12 +115,32 @@ assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /moreTriggerRef\.current\?\.focus\(\)/);
 assert.match(sidebar, /moreItems\.some\(isActive\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
-assert.match(settingsPage, /const sectionGroups/);
-assert.match(settingsPage, /navigationGroups\.map/);
-assert.match(settingsPage, /<SelectGroup/);
-assert.match(settingsPage, /<SelectLabel/);
-assert.match(settingsPage, /aria-current=\{section === id \? 'location'/);
-assert.doesNotMatch(settingsPage, /<CardDescription>/);
+// Settings stay on one page: no category switcher, modal editor, or shortcut step.
+assert.doesNotMatch(settingsPage, /const sectionGroups|navigationGroups|setSection|activeDialog|SettingsDialog/);
+assert.doesNotMatch(settingsPage, /<Dialog|<DialogContent|<DialogFooter|closeSettingsDialog/);
+assert.doesNotMatch(settingsPage, /<aside|settingsPage\.navigation|settingsPage\.section/);
+assert.doesNotMatch(settingsPage, /onClick=\{\(\) => go\(/);
+assert.doesNotMatch(settingsPage, /settingsPage\.overviewTitle|completedSetupSteps|role="progressbar"/);
+for (const category of ['business', 'location', 'hours', 'rules']) {
+  assert.match(
+    settingsPage,
+    new RegExp(`<section id="settings-${category}"`),
+    `Settings ${category} form must be visible inline`,
+  );
+}
+assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
+assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
+assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
+assert.match(settingsPage, /async function saveAll\(\)/);
+assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
+assert.match(settingsPage, /sticky top-0/);
+assert.match(settingsPage, /setLocale\(n\.default_language\)/);
+assert.match(settingsPage, /canManualMbway/);
+assert.match(settingsPage, /automationAllowed/);
+assert.doesNotMatch(settingsPage, /<select\b/);
+assert.match(settingsPage, /<SelectTrigger/);
+assert.match(settingsPage, /<SelectContent/);
 
 // Public navigation stays compact at desktop widths and uses a reduced mobile menu.
 assert.match(navbar, /className="hidden min-w-0 items-center gap-1 lg:flex"/);
@@ -152,20 +172,24 @@ for (const source of confirmationTargets) {
   assert.doesNotMatch(source, /window\.confirm/);
 }
 
-// Settings should expose focused, independently saveable dialogs instead of one long form.
+// Settings stay consolidated into one inline page with a single save flow.
 for (const category of ['business', 'location', 'hours', 'rules']) {
-  assert.ok(
-    settingsPage.includes(`open={activeDialog === '${category}'}`),
-    `Settings ${category} form must have its own dialog`,
+  assert.match(
+    settingsPage,
+    new RegExp(`<section id="settings-${category}"`),
+    `Settings ${category} form must remain visible inline`,
   );
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
 assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
-assert.match(settingsPage, /role="progressbar"/);
-assert.match(settingsPage, /completedSetupSteps/);
-assert.match(settingsPage, /function closeSettingsDialog\(\)/);
+assert.match(settingsPage, /async function saveAll\(\)/);
+assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
+assert.doesNotMatch(
+  settingsPage,
+  /<Dialog|activeDialog|closeSettingsDialog|role="progressbar"|completedSetupSteps/,
+);
 assert.doesNotMatch(settingsPage, /<select\b/);
 assert.match(settingsPage, /<SelectTrigger/);
 assert.match(settingsPage, /<SelectContent/);

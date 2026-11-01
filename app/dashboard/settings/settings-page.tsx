@@ -6,21 +6,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  ArrowUpRight,
   CalendarCheck2,
   Camera,
   Check,
-  CheckCircle2,
-  Clock3,
-  CreditCard,
   ImageIcon,
   LogOut,
-  MapPin,
   Save,
-  Search,
-  Settings,
   ShieldCheck,
-  Store,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
@@ -49,19 +41,9 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -71,17 +53,7 @@ import {
   type BarbershopAmenities,
 } from '@/lib/barbershops/amenities';
 
-type Section =
-  | 'overview'
-  | 'business'
-  | 'location'
-  | 'hours'
-  | 'rules'
-  | 'appearance'
-  | 'billing'
-  | 'account';
 const INPUT_CLASS = 'min-h-11 max-w-sm rounded-xl border-white/10 bg-white/5 text-sm';
-type SettingsDialog = 'business' | 'location' | 'hours' | 'rules';
 const CARD_CLASS = 'rounded-2xl border border-white/10 bg-white/[.02]';
 type Config = {
   name: string;
@@ -102,24 +74,7 @@ type Config = {
   mbway_enabled: boolean;
   mbway_phone: string;
 };
-const sections: [Section, string, string, typeof Settings][] = [
-  ['overview', 'Visão geral', 'Estado da configuração', Settings],
-  ['business', 'Informações', 'Nome, contactos e preferências públicas', Store],
-  ['location', 'Localização', 'Morada e características do espaço', MapPin],
-  ['hours', 'Horários', 'Funcionamento da barbearia', Clock3],
-  ['rules', 'Regras', 'Antecedência, cancelamento e confirmações', CalendarCheck2],
-  ['appearance', 'Aparência', 'Logótipo e imagem de capa', ImageIcon],
-  ['billing', 'Plano e faturação', 'Subscrição e faturas', CreditCard],
-  ['account', 'Conta e segurança', 'Sessão e acesso', ShieldCheck],
-];
-const sectionGroups: {
-  id: 'barbershopGroup' | 'bookingGroup' | 'accountGroup';
-  sections: Section[];
-}[] = [
-  { id: 'barbershopGroup', sections: ['business', 'location', 'appearance'] },
-  { id: 'bookingGroup', sections: ['hours', 'rules'] },
-  { id: 'accountGroup', sections: ['billing', 'account'] },
-];
+
 const days = [
   ['Monday', 'Monday', 'Segunda-feira'],
   ['Tuesday', 'Tuesday', 'Terça-feira'],
@@ -186,9 +141,6 @@ export default function SettingsPageOrganized() {
   const canDirectory = hasFeature('directory_visibility');
   const canManualMbway = hasFeature('manual_mbway_prepayment');
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
-  const [section, setSection] = useState<Section>('overview');
-  const [activeDialog, setActiveDialog] = useState<SettingsDialog | null>(null);
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -257,52 +209,8 @@ export default function SettingsPageOrganized() {
     () => closedList(config.closed_days),
     [config.closed_days],
   );
-  const filtered = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
-    return q
-      ? sections.filter(([id]) => {
-          const label = t(`settingsPage.${id}`).toLocaleLowerCase();
-          const description = t(`settingsPage.${id}Description`).toLocaleLowerCase();
-          const group = sectionGroups.find((item) => item.sections.includes(id));
-          const groupLabel = group ? t(`settingsPage.${group.id}`).toLocaleLowerCase() : '';
-          return `${label} ${description} ${groupLabel}`.includes(q);
-        })
-      : sections;
-  }, [search, t, locale]);
-  const navigationGroups = useMemo(
-    () =>
-      sectionGroups
-        .map((group) => ({
-          ...group,
-          entries: filtered.filter(([id]) => group.sections.includes(id)),
-        }))
-        .filter((group) => group.entries.length > 0),
-    [filtered],
-  );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
-  function closeSettingsDialog() {
-    setActiveDialog(null);
-    setSection('overview');
-  }
-  function go(s: Section) {
-    setSection(s);
-    if (
-      s === 'business' ||
-      s === 'location' ||
-      s === 'hours' ||
-      s === 'rules'
-    ) {
-      setActiveDialog(s);
-      return;
-    }
-    setActiveDialog(null);
-    requestAnimationFrame(() =>
-      document
-        .getElementById(`settings-${s}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-    );
-  }
   async function saveAll() {
     if (!barbershopId || !dirty || saving) return;
     if (config.opening_time >= config.closing_time)
@@ -369,8 +277,6 @@ export default function SettingsPageOrganized() {
       setLocale(n.default_language);
       setSuggestion(null);
       toast.success(t('settingsPage.saved'));
-      setActiveDialog(null);
-      setSection('overview');
     } catch (e) {
       toast.error(e instanceof Error && e.message ? e.message : t('settingsPage.saveFailed'));
     } finally {
@@ -427,21 +333,6 @@ export default function SettingsPageOrganized() {
     barbershopId && origin
       ? `${origin}/storage/v1/object/public/banner/${barbershopId}/banner.webp?t=${bannerTick}`
       : null;
-  const setupStepStatus = {
-    business: config.name.trim().length >= 2,
-    location: config.address.trim().length >= 6,
-    hours: Boolean(
-      config.opening_time &&
-      config.closing_time &&
-      config.opening_time < config.closing_time,
-    ),
-    rules:
-      Number.isInteger(config.minimum_booking_notice_minutes) &&
-      config.minimum_booking_notice_minutes >= 0 &&
-      Number.isInteger(config.time_limit_cancellation_hours) &&
-      config.time_limit_cancellation_hours >= 0,
-  };
-  const completedSetupSteps = Object.values(setupStepStatus).filter(Boolean).length;
   if (loading || planLoading)
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
@@ -501,211 +392,14 @@ export default function SettingsPageOrganized() {
             </p>
           )}
         </header>
-        <div className="mt-5 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-3">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
-                <Input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={t('settingsPage.search')}
-                  aria-label={t('settingsPage.search')}
-                  className={`${INPUT_CLASS} max-w-none pl-9`}
-                />
-              </div>
-              <nav
-                aria-label={t('settingsPage.navigation')}
-                className="rounded-2xl border border-white/10 bg-white/[.02] p-2"
-              >
-                {filtered.some(([id]) => id === 'overview') && (
-                  <button
-                    type="button"
-                    onClick={() => go('overview')}
-                    aria-current={section === 'overview' ? 'location' : undefined}
-                    className={cn(
-                      'mb-3 flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium',
-                      section === 'overview'
-                        ? 'bg-white/[.07] text-zinc-100'
-                        : 'text-zinc-400 hover:bg-white/[.04] hover:text-white',
-                    )}
-                  >
-                    <Settings className="size-4" aria-hidden="true" />
-                    {t('settingsPage.overview')}
-                  </button>
-                )}
-                {navigationGroups.map((group) => (
-                  <section key={group.id} className="mt-3 first:mt-0">
-                    <h2 className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[.16em] text-zinc-500">
-                      {t(`settingsPage.${group.id}`)}
-                    </h2>
-                    <div className="grid gap-1">
-                      {group.entries.map(([id, , , Icon]) => (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => go(id)}
-                          aria-current={section === id ? 'location' : undefined}
-                          className={cn(
-                            'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors',
-                            section === id
-                              ? 'bg-white/[.07] text-zinc-100'
-                              : 'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-100',
-                          )}
-                        >
-                          <Icon className="size-4 shrink-0" aria-hidden="true" />
-                          <span>{t(`settingsPage.${id}`)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </nav>
-            </div>
-          </aside>
+        <div className="mt-5">
           <div className="min-w-0 space-y-6">
-            <div className="flex gap-2 lg:hidden">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('settingsPage.search')}
-                  aria-label={t('settingsPage.search')}
-                  className={`${INPUT_CLASS} max-w-none pl-9`}
-                />
-              </div>
-              <Select value={section} onValueChange={(value) => go(value as Section)}>
-                <SelectTrigger
-                  aria-label={t('settingsPage.section')}
-                  className="h-11 w-[min(48%,14rem)] min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
-                >
-                  <SelectValue placeholder={t('settingsPage.section')} />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  align="end"
-                  className="w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]"
-                >
-                  {section !== 'overview' && !filtered.some(([id]) => id === section) && (
-                    <SelectItem value={section}>{t(`settingsPage.${section}`)}</SelectItem>
-                  )}
-                  {filtered.some(([id]) => id === 'overview') && (
-                    <SelectItem value="overview">{t('settingsPage.overview')}</SelectItem>
-                  )}
-                  {navigationGroups.map((group) => (
-                    <SelectGroup key={group.id}>
-                      <SelectLabel>{t(`settingsPage.${group.id}`)}</SelectLabel>
-                      {group.entries.map(([id]) => (
-                        <SelectItem key={id} value={id}>
-                          {t(`settingsPage.${id}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <section id="settings-overview">
-              <Card className={CARD_CLASS}>
-                <CardContent className="space-y-6 p-5 sm:p-7">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300">
-                      {t('settingsPage.overviewEyebrow')}
-                    </p>
-                    <h2 className="mt-2 text-xl font-semibold sm:text-2xl">
-                      {t('settingsPage.overviewTitle')}
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                      {t('settingsPage.overviewDescription')}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3 text-xs">
-                      <span className="font-medium text-zinc-300">{t('settingsPage.setupProgress')}</span>
-                      <span className="font-semibold tabular-nums text-emerald-300">{completedSetupSteps}/4</span>
-                    </div>
-                    <div
-                      role="progressbar"
-                      aria-label={t('settingsPage.setupProgress')}
-                      aria-valuemin={0}
-                      aria-valuemax={4}
-                      aria-valuenow={completedSetupSteps}
-                      className="h-2 overflow-hidden rounded-full bg-white/10"
-                    >
-                      <div
-                        className="h-full rounded-full bg-emerald-400 transition-[width] duration-300"
-                        style={{ width: `${completedSetupSteps * 25}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => go('business')}
-                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.business ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '01'}</span>
-                        <Store className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.name || t('settingsPage.notConfigured')}</span>
-                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => go('location')}
-                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.location ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '02'}</span>
-                        <MapPin className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.address || t('settingsPage.notConfigured')}</span>
-                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => go('hours')}
-                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.hours ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '03'}</span>
-                        <Clock3 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.opening_time} – {config.closing_time}</span>
-                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => go('rules')}
-                      className="group flex min-h-36 min-w-0 flex-col items-start rounded-2xl border border-white/10 bg-white/[.025] p-4 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/[.04]"
-                    >
-                      <span className="flex w-full items-center justify-between">
-                        <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-xs font-bold text-emerald-300">{setupStepStatus.rules ? <CheckCircle2 className="size-4" aria-hidden="true" /> : '04'}</span>
-                        <CalendarCheck2 className="size-4 text-zinc-500 transition group-hover:text-emerald-300" />
-                      </span>
-                      <span className="mt-3 text-sm font-semibold text-zinc-100">{t('settingsPage.rules')}</span>
-                      <span className="mt-1 line-clamp-1 text-xs text-zinc-500">{config.time_limit_cancellation_hours === 0 ? t('settingsPage.cancellationWindowNoLimitShort') : t('settingsPage.cancellationWindowSummary', { hours: config.time_limit_cancellation_hours })}</span>
-                      <span className="mt-auto pt-3 text-xs font-semibold text-emerald-300">{t('settingsPage.openSection')} <ArrowUpRight className="ml-1 inline size-3.5" /></span>
-                    </button>
-                  </div>
-                  <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.saveAllHint')}</p>
-                </CardContent>
-              </Card>
-            </section>
-            <Dialog
-              open={activeDialog === 'business'}
-              onOpenChange={(open) => open ? setActiveDialog('business') : closeSettingsDialog()}
-            >
-              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('settingsPage.business')}</DialogTitle>
-                  <DialogDescription>{t('settingsPage.businessDialogDescription')}</DialogDescription>
-                </DialogHeader>
+            <section id="settings-business" className="scroll-mt-24">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">{t('settingsPage.business')}</h2>
+                  <p className="text-sm leading-5 text-zinc-500">{t('settingsPage.businessDialogDescription')}</p>
+                </div>
                 <Card className={CARD_CLASS}>
                   <CardContent className="grid gap-5 sm:grid-cols-2 ">
                     <div className="grid gap-2">
@@ -812,31 +506,14 @@ export default function SettingsPageOrganized() {
                   </div>
                   </CardContent>
                 </Card>
-                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
-                  {t('settingsPage.closeDialog')}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => void saveAll()}
-                  disabled={!dirty || saving}
-                  className="bg-white text-zinc-950 hover:bg-zinc-100"
-                >
-                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
-                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
-                </Button>
-              </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Dialog
-              open={activeDialog === 'location'}
-              onOpenChange={(open) => open ? setActiveDialog('location') : closeSettingsDialog()}
-            >
-              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('settingsPage.location')}</DialogTitle>
-                  <DialogDescription>{t('settingsPage.locationDialogDescription')}</DialogDescription>
-                </DialogHeader>
+              </div>
+            </section>
+            <section id="settings-location" className="scroll-mt-24">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">{t('settingsPage.location')}</h2>
+                  <p className="text-sm leading-5 text-zinc-500">{t('settingsPage.locationDialogDescription')}</p>
+                </div>
                 <Card className={CARD_CLASS}>
                   <CardContent className="space-y-6 ">
                     <div className="w-full max-w-2xl">
@@ -917,31 +594,14 @@ export default function SettingsPageOrganized() {
                   </div>
                   </CardContent>
                 </Card>
-                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
-                  {t('settingsPage.closeDialog')}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => void saveAll()}
-                  disabled={!dirty || saving}
-                  className="bg-white text-zinc-950 hover:bg-zinc-100"
-                >
-                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
-                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
-                </Button>
-              </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Dialog
-              open={activeDialog === 'hours'}
-              onOpenChange={(open) => open ? setActiveDialog('hours') : closeSettingsDialog()}
-            >
-              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('settingsPage.hours')}</DialogTitle>
-                  <DialogDescription>{t('settingsPage.hoursDialogDescription')}</DialogDescription>
-                </DialogHeader>
+              </div>
+            </section>
+            <section id="settings-hours" className="scroll-mt-24">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">{t('settingsPage.hours')}</h2>
+                  <p className="text-sm leading-5 text-zinc-500">{t('settingsPage.hoursDialogDescription')}</p>
+                </div>
                 <Card className={CARD_CLASS}>
                   <CardContent className="space-y-6 ">
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -1052,31 +712,14 @@ export default function SettingsPageOrganized() {
                   </div>
                   </CardContent>
                 </Card>
-                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
-                  {t('settingsPage.closeDialog')}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => void saveAll()}
-                  disabled={!dirty || saving}
-                  className="bg-white text-zinc-950 hover:bg-zinc-100"
-                >
-                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
-                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
-                </Button>
-              </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Dialog
-              open={activeDialog === 'rules'}
-              onOpenChange={(open) => open ? setActiveDialog('rules') : closeSettingsDialog()}
-            >
-              <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('settingsPage.rules')}</DialogTitle>
-                  <DialogDescription>{t('settingsPage.rulesDialogDescription')}</DialogDescription>
-                </DialogHeader>
+              </div>
+            </section>
+            <section id="settings-rules" className="scroll-mt-24">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">{t('settingsPage.rules')}</h2>
+                  <p className="text-sm leading-5 text-zinc-500">{t('settingsPage.rulesDialogDescription')}</p>
+                </div>
                 <Card className={CARD_CLASS}>
                   <CardContent className="space-y-6 ">
                     <div className="grid gap-2">
@@ -1217,22 +860,8 @@ export default function SettingsPageOrganized() {
                   </div>
                   </CardContent>
                 </Card>
-                <DialogFooter className="border-t border-white/10 pt-4 sm:justify-between">
-                <Button type="button" variant="ghost" onClick={closeSettingsDialog}>
-                  {t('settingsPage.closeDialog')}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => void saveAll()}
-                  disabled={!dirty || saving}
-                  className="bg-white text-zinc-950 hover:bg-zinc-100"
-                >
-                  {saving ? <Spinner className="mr-2 size-4" /> : <Save className="mr-2 size-4" />}
-                  {saving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
-                </Button>
-              </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              </div>
+            </section>
             <section id="settings-appearance">
               <Card className={CARD_CLASS}>
                 <CardHeader>
