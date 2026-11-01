@@ -79,6 +79,9 @@ jobs:
       - name: Security audit
         run: pnpm qa:security
 
+      - name: Database security contracts
+        run: pnpm qa:database-security
+
       - name: CSRF origin contracts
         run: pnpm qa:csrf
 
