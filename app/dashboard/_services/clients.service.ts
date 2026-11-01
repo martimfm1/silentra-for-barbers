@@ -21,6 +21,7 @@ export interface UpdateClientPayload {
   num_phone: string;
   email?: string;
   birth_date?: string | null;
+  style_notes?: string;
 }
 
 export const clientsService = {
