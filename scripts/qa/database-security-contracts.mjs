@@ -24,10 +24,10 @@ const internalTableHardening = await read(
   'supabase/migrations/20261101233354_revoke_internal_table_client_grants.sql',
 );
 const appointmentReferenceIndexes = await read(
-  'supabase/migrations/20261101234500_add_appointment_reference_indexes.sql',
+  'supabase/migrations/20261101235218_add_appointment_reference_indexes.sql',
 );
 const rlsPolicyPerformance = await read(
-  'supabase/migrations/20261101240000_optimize_rls_policy_initplans.sql',
+  'supabase/migrations/20261101235220_optimize_rls_policy_initplans.sql',
 );
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
