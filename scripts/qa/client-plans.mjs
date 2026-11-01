@@ -27,7 +27,12 @@ assert.match(profile, /const servicePrice = Number\(service\?\.price\) \|\| 0/);
 assert.match(profile, /const productsPrice = Number\(appointment\.value_products\) \|\| 0/);
 assert.match(profile, /return servicePrice \+ productsPrice/);
 assert.match(profile, /appointment\.status === 'completed'/);
-assert.match(profile, /total \+ appointmentTotal\(appointment\)/);
+assert.match(detailApi, /getCompletedAppointmentsTotal/);
+assert.match(detailApi, /\.eq\('status', 'completed'\)/);
+assert.match(detailApi, /\.range\(offset, offset \+ pageSize - 1\)/);
+assert.match(detailApi, /totalSpent: completedAppointmentsTotal\.total/);
+assert.match(profile, /totalSpent: Number\(json\.totalSpent\) \|\| 0/);
+assert.match(profile, /details\?\.totalSpent/);
 
 // Upcoming appointments are queried independently and ordered nearest-first.
 assert.match(detailApi, /upcomingAppointments/);
