@@ -14,8 +14,8 @@ create index if not exists appointments_professional_id_fk_idx
 create index if not exists appointments_service_id_fk_idx
   on public.appointments (service_id);
 
--- The canonical unique/constraint indexes already cover these exact keys.
--- The duplicate indexes add write and storage cost without adding coverage.
+-- Each removed index has an identical surviving index on the same table.
+-- The unique constraints and the independent MB WAY expiry index are preserved.
 drop index if exists public.idx_appointments_management_token;
 drop index if exists public.locations_parent_barbershop_idx;
 drop index if exists public.locations_parent_barbershop_slug_idx;
