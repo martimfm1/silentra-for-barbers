@@ -700,8 +700,8 @@ export const enCopy = {
     countSingular: 'client',
     countPlural: 'clients',
     countSuffix: 'in your list.',
-    searchPlaceholder: 'Search by name, phone, email or notes',
-    searchLabel: 'Search clients by name, phone, email or notes',
+    searchPlaceholder: 'Search by name, phone, email or preferences',
+    searchLabel: 'Search clients by name, phone, email or preferences',
     addClient: 'Add client',
     addDialogTitle: 'Add client',
     addDialogDescription:
@@ -712,7 +712,7 @@ export const enCopy = {
     emailPlaceholder: 'client@email.com',
     submit: 'Add',
     notFound: 'We could not find that client',
-    tryAnotherSearch: 'Try another name or phone number.',
+    tryAnotherSearch: 'Try another name, phone number, email or preference.',
     clearSearch: 'Clear search',
     emptyTitle: 'Your client list is empty',
     emptyDescriptionLong:
