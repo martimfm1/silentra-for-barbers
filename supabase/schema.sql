@@ -2086,7 +2086,6 @@ CREATE INDEX "customer_tags_tenant_idx" ON "public"."customer_tags" USING "btree
 
 
 
-CREATE INDEX "idx_appointments_management_token_expires_at" ON "public"."appointments" USING "btree" ("management_token_expires_at");
 
 
 
@@ -2190,7 +2189,6 @@ CREATE INDEX "loyalty_accounts_client_idx" ON "public"."loyalty_accounts" USING 
 
 
 
-CREATE INDEX "loyalty_rewards_shop_idx" ON "public"."loyalty_rewards" USING "btree" ("barbershop_id", "active");
 
 
 
