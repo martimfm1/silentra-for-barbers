@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
+  Pencil,
   Clock3,
   Mail,
   MessageSquareText,
@@ -50,12 +51,14 @@ type ClientProfileDialogProps = {
   client: ClientProfile | null;
   barbershopId: string | null;
   onClose: () => void;
+  onEdit: (client: Client) => void;
 };
 
 export function ClientProfileDialog({
   client,
   barbershopId,
   onClose,
+  onEdit,
 }: ClientProfileDialogProps) {
   const { t, locale } = useLanguage();
   const [history, setHistory] = useState<ClientHistoryEntry[]>([]);
@@ -174,6 +177,15 @@ export function ClientProfileDialog({
                     {t('clientsPage.detailDescription')}
                   </DialogDescription>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onEdit(client)}
+                  className="ml-auto min-h-11 shrink-0 gap-2 border-white/10 bg-white/[0.035] px-3 text-xs text-zinc-200 hover:bg-white/[0.08]"
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                  {t('clientsPage.editTitle')}
+                </Button>
               </div>
             </DialogHeader>
 
