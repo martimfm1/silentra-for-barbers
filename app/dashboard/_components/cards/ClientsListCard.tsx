@@ -384,7 +384,8 @@ function ClientItemCard({
               ) : null}
             </span>
           </span>
-          <ChevronRight className="size-5 shrink-0 text-zinc-600 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          <span className="shrink-0 text-[11px] font-semibold text-blue-300">{t('clientsListCard.viewProfileAction')}</span>
+          <ChevronRight className="size-5 shrink-0 text-zinc-500 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </button>
 
         {client.style_notes?.trim() ? (
