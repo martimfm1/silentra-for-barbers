@@ -72,7 +72,9 @@ const ui = {
     entityName: 'Denominação legal',
     entityAddress: 'Morada',
     entityTaxId: 'NIF',
-    entityMissing: 'Os dados de identificação jurídica da entidade exploradora ainda não estão configurados nesta página. Solicita-os através do contacto indicado antes de celebrar um contrato.',
+    entityRegistration: 'N.º de registo (se aplicável)',
+    entityPhone: 'Telefone',
+    entityMissing: 'A identificação da entidade exploradora ainda não está configurada. Antes da publicação, adiciona a denominação legal, a morada geográfica e o NIF oficiais.',
     supportHint: 'Para pedidos, esclarecimentos ou exercício de direitos, utiliza o contacto indicado. Não envies palavras-passe, códigos de autenticação ou dados de cartão por email.',
     allDocuments: 'Todos os documentos',
     goHome: 'Voltar ao site',
@@ -92,7 +94,9 @@ const ui = {
     entityName: 'Legal name',
     entityAddress: 'Address',
     entityTaxId: 'Tax number',
-    entityMissing: 'The operator’s legal identification details are not configured on this page yet. Request them using the contact below before entering into a contract.',
+    entityRegistration: 'Registration no. (if applicable)',
+    entityPhone: 'Phone',
+    entityMissing: 'The platform operator’s legal identity is not configured yet. Add the official legal name, geographic address, and tax number before making the platform public.',
     supportHint: 'For requests, questions, or to exercise your rights, use the contact below. Do not email passwords, authentication codes, or card details.',
     allDocuments: 'All documents',
     goHome: 'Back to website',
@@ -137,6 +141,8 @@ export function LegalDocumentPage({
   const entityAddress =
     (process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS || '').trim();
   const entityTaxId = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID || '').trim();
+  const entityRegistration = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION || '').trim();
+  const entityPhone = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_PHONE || '').trim();
   const hasLegalIdentity = Boolean(entityName && entityAddress && entityTaxId);
 
   return (
@@ -339,6 +345,18 @@ export function LegalDocumentPage({
                     <dt className="text-zinc-500">{copy.entityTaxId}</dt>
                     <dd className="mt-1 text-zinc-200">{entityTaxId}</dd>
                   </div>
+                  {entityRegistration ? (
+                    <div>
+                      <dt className="text-zinc-500">{copy.entityRegistration}</dt>
+                      <dd className="mt-1 text-zinc-200">{entityRegistration}</dd>
+                    </div>
+                  ) : null}
+                  {entityPhone ? (
+                    <div>
+                      <dt className="text-zinc-500">{copy.entityPhone}</dt>
+                      <dd className="mt-1 text-zinc-200">{entityPhone}</dd>
+                    </div>
+                  ) : null}
                 </dl>
               ) : (
                 <p className="mt-2 text-xs leading-5 text-amber-200/90">{copy.entityMissing}</p>
