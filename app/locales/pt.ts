@@ -1036,6 +1036,8 @@ export const pt = {
     phone: 'Telefone',
     customerSince: 'Cliente desde',
     styleNotes: 'Notas de estilo',
+    birthDate: 'Data de nascimento',
+    noNotes: 'Ainda não existem notas para este cliente.',
   },
   settingsLanguage: {
     title: 'Idioma predefinido',
