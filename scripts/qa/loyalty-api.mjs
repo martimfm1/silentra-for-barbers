@@ -39,7 +39,7 @@ const checks = [
     file: 'app/api/loyalty/redemption/qr/route.ts',
     markers: [
       'redemptionError',
-      \'Cache-Control\': \'private, no-store\'',
+      "'Cache-Control': 'private, no-store'",
     ],
   },
   {
