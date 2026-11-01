@@ -26,7 +26,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 
 ### P1 — Performance
 - [ ] Rever as 61 foreign keys sem índices de cobertura. A triagem identificou três referências de alto impacto em `appointments` (cliente, profissional e serviço); migration `20261101234500_add_appointment_reference_indexes` com índices B-tree completos preparada, pendente de CI e aplicação.
-- [ ] Rever 4 pares de índices duplicados. Um par exato em `appointments.management_token` foi confirmado: o índice não único não tem scans registados e foi removido na migration `20261101234500_add_appointment_reference_indexes`; o índice único fica preservado. O snapshot `supabase/schema.sql` foi sincronizado.
+- [ ] Rever 4 pares de índices duplicados. Foram confirmados quatro pares com definições equivalentes: `appointments.management_token`, `locations(parent_barbershop_id, slug)`, `loyalty_rewards(barbershop_id, active)` e o índice parcial de campanhas de aniversário. A migration `20261101234500_add_appointment_reference_indexes` remove apenas os duplicados não canónicos e mantém o índice único/constraint de cada chave; o snapshot `supabase/schema.sql` foi sincronizado.
 - [ ] Investigar índices sem uso antes de remover.
 - [ ] Fazer profiling dos endpoints mais lentos e criar testes de carga multi-tenant.
 
@@ -86,7 +86,7 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 - [x] Consultar advisor e confirmar que as três FKs de `appointments` sem cobertura são `client_id`, `professional_id` e `service_id`.
 - [x] Rever índices existentes: `appointments_client_timeline_idx` começa por `barbershop_id` e não cobre `client_id` isoladamente; o índice GiST de sobreposição e o índice de slot não substituem índices B-tree nas FKs.
 - [x] Criar migration `20261101234500_add_appointment_reference_indexes` com três índices B-tree completos (não parciais).
-- [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência, e que garantem a remoção apenas do índice não único duplicado.
+- [x] Adicionar contratos QA que falham se os índices forem parciais ou se faltar alguma referência, e que garantem a remoção dos quatro duplicados sem apagar índices canónicos.
 - [ ] Aguardar CI; aplicar migration à produção; verificar advisor e `EXPLAIN` nos padrões de agenda/CRM.
 - [ ] Rever restantes FKs por impacto e volume antes de indexar em massa. A base de produção tem poucos registos em várias tabelas; evitar criar dezenas de índices sem benefício medido.
 
