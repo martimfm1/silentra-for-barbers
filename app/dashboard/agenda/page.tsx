@@ -363,7 +363,12 @@ export default function AgendaPage() {
                     onClick={() => setStatusFilter(filter.id)}
                     className={`min-h-10 shrink-0 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${statusFilter === filter.id ? 'border-emerald-400/30 bg-emerald-400/[0.1] text-emerald-200' : 'border-white/10 bg-white/[0.02] text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-300'}`}
                   >
-                    {t(filter.label)}
+                    <span>{t(filter.label)}</span>
+                    <span className="rounded-md bg-black/15 px-1.5 py-0.5 text-[10px] tabular-nums opacity-75">
+                      {filter.id === 'all'
+                        ? appointments.length
+                        : metrics[filter.id]}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -446,7 +451,7 @@ export default function AgendaPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 lg:hidden">
+                    <div className="grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 xl:hidden">
                       {orderedAppointments.map((appointment) => (
                         <AppointmentMobileCard
                           key={appointment.id}
@@ -457,7 +462,7 @@ export default function AgendaPage() {
                         />
                       ))}
                     </div>
-                    <div className="hidden lg:block">
+                    <div className="hidden xl:block">
                       <AppointmentsTable
                         appointments={orderedAppointments}
                         locale={locale}
