@@ -243,7 +243,7 @@ export function CookieConsentManager() {
                 type="button"
                 onClick={() => setPreferencesOpen(false)}
                 aria-label={t.close}
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:size-10"
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               >
                 <X className="size-5" aria-hidden="true" />
               </button>

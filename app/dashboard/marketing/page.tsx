@@ -280,10 +280,9 @@ export default function MarketingPage() {
                   size="icon"
                   onClick={closeComposer}
                   aria-label={t('marketingPage.closeEditor')}
-                  className="size-11 shrink-0 sm:size-10"
                   disabled={creating}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="size-5" aria-hidden="true" />
                 </Button>
               </div>
             </CardHeader>

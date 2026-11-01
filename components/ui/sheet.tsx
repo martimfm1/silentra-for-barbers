@@ -72,10 +72,10 @@ function SheetContent({
           <SheetPrimitive.Close data-slot="sheet-close" asChild>
             <Button
               variant="ghost"
-              className="absolute right-4 top-4 inline-flex size-11 items-center justify-center rounded-xl border border-white/10 bg-secondary text-foreground hover:bg-secondary/80 sm:size-10"
+              className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-xl bg-secondary focus-visible:ring-2 focus-visible:ring-primary/60"
               size="icon"
             >
-              <IconX className="size-5" />
+              <IconX className="size-5" aria-hidden="true" />
               <span className="sr-only">Close</span>
             </Button>
           </SheetPrimitive.Close>

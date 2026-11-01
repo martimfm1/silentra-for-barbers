@@ -596,9 +596,9 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => setDetails(null)}
                 aria-label="Fechar detalhes"
-                className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5 sm:size-10"
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5"
               >
-                <X className="size-5" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
             <div className="mt-6 grid gap-2.5">
@@ -685,9 +685,9 @@ export function MyBookingsPage() {
               <button
                 onClick={() => setReschedule(null)}
                 aria-label="Fechar"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5 sm:size-10"
+                className="flex size-10 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/5"
               >
-                <X className="size-5" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
             <label className="mt-6 block text-xs font-medium text-zinc-400">

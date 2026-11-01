@@ -238,9 +238,9 @@ export default function CRMPage() {
                     type="button"
                     onClick={() => setSearch('')}
                     aria-label={t('crm.clearSearch')}
-                    className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                    className="absolute right-1 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-white/10 hover:text-foreground"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="size-5" aria-hidden="true" />
                   </button>
                 )}
               </div>

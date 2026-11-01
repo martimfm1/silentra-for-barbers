@@ -456,7 +456,7 @@ export default function SupportPage() {
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               {createTicketOpen ? (
-                <X className="size-5" />
+                <X className="size-5" aria-hidden="true" />
               ) : (
                 <Plus className="size-4" />
               )}

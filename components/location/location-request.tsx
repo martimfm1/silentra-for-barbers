@@ -112,10 +112,10 @@ export function LocationRequest({
               setState('idle');
               requestedRef.current = false;
             }}
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-500 hover:bg-white/10 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-500 hover:bg-white/10 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             aria-label="Remover localização"
           >
-            <X className="size-4" />
+            <X className="size-5" aria-hidden="true" />
           </button>
         </div>
       </div>

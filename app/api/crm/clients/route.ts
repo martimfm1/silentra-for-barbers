@@ -23,7 +23,7 @@ async function GET__unobserved(req: Request) {
 
     let query = tenant.admin
       .from('users')
-      .select('id,name_complete,name,email,num_phone,style_notes,created_at', {
+      .select('id,name_complete,name,email,num_phone,birth_date,style_notes,created_at', {
         count: 'exact',
       })
       .eq('barbershop_id', tenant.barbershopId)
