@@ -14,8 +14,11 @@ create index if not exists appointments_professional_id_fk_idx
 create index if not exists appointments_service_id_fk_idx
   on public.appointments (service_id);
 
--- A unique index already covers the same management_token key. This
--- non-unique duplicate has no recorded scans and only adds write/storage cost.
+-- The canonical unique/constraint indexes already cover these exact keys.
+-- The duplicate indexes add write and storage cost without adding coverage.
 drop index if exists public.idx_appointments_management_token;
+drop index if exists public.locations_parent_barbershop_slug_idx;
+drop index if exists public.loyalty_rewards_shop_idx;
+drop index if exists public.marketing_campaigns_birthday_repair_idx;
 
 commit;
