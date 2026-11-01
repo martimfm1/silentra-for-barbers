@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/context/LanguageContext';
+import { normalizePublicProfileSlug } from '@/lib/barbershops/public-profile-slug';
 
 function download(href: string, filename: string) {
   const link = document.createElement('a');
@@ -28,6 +29,8 @@ export default function QrCodePage() {
   const { t } = useLanguage();
   const defaultText = t('qrCodePage.defaultText');
   const [slug, setSlug] = useState('');
+  const [savedSlug, setSavedSlug] = useState('');
+  const [canCustomize, setCanCustomize] = useState(false);
   const [name, setName] = useState('Barbearia');
   const [text, setText] = useState(defaultText);
   const [savedText, setSavedText] = useState(defaultText);
@@ -35,15 +38,16 @@ export default function QrCodePage() {
   const [svg, setSvg] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const normalizedSlug = useMemo(() => normalizePublicProfileSlug(slug), [slug]);
   const publicUrl = useMemo(() => {
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
       (typeof window === 'undefined' ? '' : window.location.origin);
-    return slug && origin
-      ? `${origin.replace(/\/$/, '')}/barbershops/${encodeURIComponent(slug)}`
+    return normalizedSlug && origin
+      ? `${origin.replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
       : '';
-  }, [slug]);
+  }, [normalizedSlug]);
   useEffect(() => {
     fetch('/api/barbershops/qr-code', { cache: 'no-store' })
       .then(async (response) => {
@@ -52,10 +56,13 @@ export default function QrCodePage() {
           slug: string;
           name: string;
           text: string;
+          canCustomize: boolean;
         }>;
       })
       .then((data) => {
         setSlug(data.slug);
+        setSavedSlug(data.slug);
+        setCanCustomize(data.canCustomize);
         setName(data.name);
         setText(data.text);
         setSavedText(data.text);
@@ -81,21 +88,31 @@ export default function QrCodePage() {
       setSvg(nextSvg);
     });
   }, [publicUrl]);
-  const saveText = async () => {
+  const saveSettings = async () => {
+    if (!canCustomize) return;
     setSaving(true);
     try {
       const response = await fetch('/api/barbershops/qr-code', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ slug: normalizedSlug, text }),
       });
-      if (!response.ok) throw new Error();
-      const data = (await response.json()) as { text: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        slug?: string;
+        text?: string;
+        error?: string;
+      };
+      if (!response.ok || !data.slug || !data.text)
+        throw new Error(data.error || t('qrCodePage.saveError'));
+      setSlug(data.slug);
+      setSavedSlug(data.slug);
       setText(data.text);
       setSavedText(data.text);
       toast.success(t('qrCodePage.saveSuccess'));
-    } catch {
-      toast.error(t('qrCodePage.saveError'));
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : t('qrCodePage.saveError'),
+      );
     } finally {
       setSaving(false);
     }
@@ -234,6 +251,29 @@ export default function QrCodePage() {
                     </div>
                   </div>
                   <div className="silentra-form-field">
+                    <label htmlFor="qr-slug">{t('qrCodePage.publicSlug')}</label>
+                    <div className="flex min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] focus-within:border-emerald-400/30">
+                      <span className="hidden shrink-0 items-center border-r border-white/10 px-3 text-xs text-zinc-500 sm:inline-flex">
+                        barbers.silentra.me/barbershops/
+                      </span>
+                      <Input
+                        id="qr-slug"
+                        value={slug}
+                        maxLength={60}
+                        disabled={!canCustomize || saving}
+                        onChange={(event) => setSlug(event.target.value)}
+                        placeholder={t('qrCodePage.slugPlaceholder')}
+                        className="min-w-0 border-0 bg-transparent shadow-none focus-visible:ring-0"
+                        aria-describedby="qr-slug-hint"
+                      />
+                    </div>
+                    <p id="qr-slug-hint" className="text-xs text-muted-foreground">
+                      {canCustomize
+                        ? t('qrCodePage.slugHint')
+                        : t('qrCodePage.proFeatureHint')}
+                    </p>
+                  </div>
+                  <div className="silentra-form-field">
                     <label htmlFor="qr-text">
                       {t('qrCodePage.adjacentText')}
                     </label>
@@ -241,29 +281,36 @@ export default function QrCodePage() {
                       id="qr-text"
                       value={text}
                       maxLength={160}
+                      disabled={!canCustomize || saving}
                       onChange={(event) => setText(event.target.value)}
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between gap-3 text-xs text-muted-foreground">
                       <span>{t('qrCodePage.previewPrintHint')}</span>
-                      <span>{text.length}/160</span>
+                      <span className="shrink-0 tabular-nums">{text.length}/160</span>
                     </div>
                   </div>
+                  {!canCustomize ? (
+                    <p className="rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2.5 text-xs leading-5 text-zinc-500">
+                      {t('qrCodePage.proFeatureHint')}
+                    </p>
+                  ) : null}
                   <Button
-                    aria-label={
-                      saving
-                        ? 'A guardar texto do QR code'
-                        : 'Guardar texto do QR code'
-                    }
+                    aria-label={t('qrCodePage.saveSettings')}
                     type="button"
-                    onClick={() => void saveText()}
-                    disabled={saving || text === savedText}
+                    onClick={() => void saveSettings()}
+                    disabled={
+                      !canCustomize ||
+                      saving ||
+                      (normalizedSlug === savedSlug && text === savedText)
+                    }
+                    className="min-h-11 w-full sm:w-auto"
                   >
                     {saving ? (
                       t('qrCodePage.saving')
                     ) : (
                       <>
                         <Check className="size-4" />
-                        {t('qrCodePage.saveText')}
+                        {t('qrCodePage.saveSettings')}
                       </>
                     )}
                   </Button>
