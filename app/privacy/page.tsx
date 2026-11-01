@@ -104,7 +104,7 @@ export default function PrivacyPage() {
         },
       ]}
       supportLabel={{ pt: 'Pedidos de privacidade', en: 'Privacy requests' }}
-      supportValue="contact@silentra.me"
+      supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />
   );
