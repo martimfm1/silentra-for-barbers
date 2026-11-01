@@ -57,6 +57,28 @@ import {
   type BarbershopAmenities,
 } from '@/lib/barbershops/amenities';
 
+const INPUT_CLASS = 'min-h-11 max-w-sm rounded-xl border-white/10 bg-white/5 text-sm';
+const CARD_CLASS = 'rounded-2xl border border-white/10 bg-white/[.02]';
+type Config = {
+  name: string;
+  phone: string;
+  address: string;
+  opening_time: string;
+  closing_time: string;
+  lunch_start: string;
+  lunch_end: string;
+  closed_days: string;
+  minimum_booking_notice_minutes: number;
+  allow_online_bookings: boolean;
+  is_public_in_directory: boolean;
+  time_limit_cancellation_hours: number;
+  auto_confirm_bookings: boolean;
+  auto_complete_bookings: boolean;
+  default_language: 'pt' | 'en';
+  mbway_enabled: boolean;
+  mbway_phone: string;
+};
+
 const days = [
   ['Monday', 'Monday', 'Segunda-feira'],
   ['Tuesday', 'Tuesday', 'Terça-feira'],
