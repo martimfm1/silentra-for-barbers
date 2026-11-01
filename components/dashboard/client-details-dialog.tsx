@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {
+  CalendarClock,
   CalendarDays,
   Mail,
   Phone,
@@ -14,6 +15,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { ClientPlansManager } from '@/components/dashboard/client-plans-manager';
 import { Spinner } from '@/components/ui/spinner';
 import {
   Dialog,
@@ -45,6 +47,7 @@ type Appointment = {
   id: string;
   date_hour: string;
   status: string;
+  service_price?: number | string | null;
   value_products?: number | string | null;
   payment_method?: string | null;
   services?: Relation<{ name?: string | null; price?: number | string | null }>;
@@ -62,6 +65,8 @@ type ClientNote = {
 type ClientDetails = {
   client: ClientProfile;
   appointments: Appointment[];
+  upcomingAppointments: Appointment[];
+  totalSpent: number;
   notes: ClientNote[];
 };
 
@@ -170,6 +175,10 @@ export function ClientDetailsDialog({
             appointments: Array.isArray(json.appointments)
               ? json.appointments
               : [],
+            upcomingAppointments: Array.isArray(json.upcomingAppointments)
+              ? json.upcomingAppointments
+              : [],
+            totalSpent: Number(json.totalSpent) || 0,
             notes: Array.isArray(json.notes) ? json.notes : [],
           });
         }
@@ -229,14 +238,19 @@ export function ClientDetailsDialog({
 
   const client = details?.client;
   const appointments = details?.appointments ?? [];
+  const upcomingAppointments = details?.upcomingAppointments ?? [];
   const notes = details?.notes ?? [];
   const completedAppointments = appointments.filter(
     (appointment) => appointment.status === 'completed',
   );
-  const totalSpent = completedAppointments.reduce(
-    (total, appointment) => total + (Number(appointment.value_products) || 0),
-    0,
-  );
+  const appointmentTotal = (appointment: Appointment) => {
+    const service = firstRelation(appointment.services);
+    const servicePrice =
+      Number(appointment.service_price ?? service?.price) || 0;
+    const productsPrice = Number(appointment.value_products) || 0;
+    return servicePrice + productsPrice;
+  };
+  const totalSpent = details?.totalSpent ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -278,7 +292,7 @@ export function ClientDetailsDialog({
                       {t('crmDetail.appointmentHistory')}
                     </p>
                     <p className="mt-1 text-2xl font-semibold tabular-nums">
-                      {appointments.length}
+                      {appointments.length + upcomingAppointments.length}
                     </p>
                   </CardContent>
                 </Card>
@@ -303,6 +317,58 @@ export function ClientDetailsDialog({
                   </CardContent>
                 </Card>
               </div>
+
+              <Card className="min-w-0 border-white/10 bg-white/[0.03]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <CalendarClock className="size-5 text-blue-400" />
+                    {t('clientsPage.upcomingAppointments')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {upcomingAppointments.length === 0 ? (
+                    <p className="text-sm text-zinc-500">
+                      {t('clientsPage.noUpcomingAppointments')}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {upcomingAppointments.map((appointment) => {
+                        const service = firstRelation(appointment.services);
+                        const professional = firstRelation(appointment.professionals);
+                        return (
+                          <article
+                            key={appointment.id}
+                            className="flex min-w-0 flex-col gap-2 rounded-xl border border-blue-500/15 bg-blue-500/[0.04] p-3 sm:flex-row sm:items-center sm:justify-between"
+                          >
+                            <div className="min-w-0">
+                              <p className="font-medium text-zinc-100">
+                                {formatDate(appointment.date_hour, locale)}
+                              </p>
+                              <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+                                <span>{service?.name || t('clientsPage.unknownService')}</span>
+                                {professional?.name ? (
+                                  <>
+                                    <span aria-hidden="true">·</span>
+                                    <span>{professional.name}</span>
+                                  </>
+                                ) : null}
+                                <span aria-hidden="true">·</span>
+                                <span>{statusLabel(appointment.status, t)}</span>
+                              </p>
+                            </div>
+                            <p className="shrink-0 text-sm font-medium tabular-nums text-zinc-200">
+                              {formatCurrency(
+                                appointmentTotal(appointment),
+                                locale,
+                              )}
+                            </p>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <Card className="min-w-0 border-white/10 bg-white/[0.03]">
                 <CardHeader className="pb-3">
@@ -350,9 +416,30 @@ export function ClientDetailsDialog({
                                 </p>
                               ) : null}
                             </div>
-                            <p className="shrink-0 text-sm font-medium tabular-nums text-zinc-200">
-                              {formatCurrency(appointment.value_products, locale)}
-                            </p>
+                            <div className="shrink-0 text-right">
+                              <p className="text-sm font-medium tabular-nums text-zinc-200">
+                                {formatCurrency(
+                                  appointment.status === 'completed'
+                                    ? appointmentTotal(appointment)
+                                    : null,
+                                  locale,
+                                )}
+                              </p>
+                              {appointment.status === 'completed' ? (
+                                <p className="mt-1 text-[11px] text-zinc-500">
+                                  {t('clientsPage.serviceAndProducts', {
+                                    service: formatCurrency(
+                                      Number(appointment.service_price ?? service?.price) || 0,
+                                      locale,
+                                    ),
+                                    products: formatCurrency(
+                                      Number(appointment.value_products) || 0,
+                                      locale,
+                                    ),
+                                  })}
+                                </p>
+                              ) : null}
+                            </div>
                           </article>
                         );
                       })}
@@ -403,6 +490,8 @@ export function ClientDetailsDialog({
                   ) : null}
                 </CardContent>
               </Card>
+
+              <ClientPlansManager clientId={client.id} />
 
               {client.style_notes?.trim() ? (
                 <Card className="border-white/10 bg-white/[0.03]">
