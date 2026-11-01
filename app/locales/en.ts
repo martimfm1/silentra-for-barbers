@@ -551,17 +551,33 @@ export const en = {
     calendarSyncCopy: 'Copy link',
     calendarSyncCopied: 'Link copied.',
     calendarSyncCopyFailed: 'Could not copy the link.',
-    calendarSyncInstructions: 'How to add it on iPhone',
-    calendarSyncHideInstructions: 'Hide instructions',
-    calendarSyncHowTo: 'Add the calendar on iPhone',
-    calendarSyncStepOne:
-      'Open the Calendar app on your iPhone and tap “Calendars”.',
-    calendarSyncStepTwo:
-      'Choose “Add Calendar”, then “Add Subscribed Calendar”.',
-    calendarSyncStepThree:
-      'Paste the link above, tap “Find”, and confirm the subscription.',
-    calendarSyncRefreshNotice:
-      'The subscription is read-only. iPhone refreshes it periodically, so changes may take a little while to appear.',
+    calendarSyncInstructions: 'View iPhone setup guide',
+    calendarSyncHowTo: 'Add the calendar to Apple Calendar',
+    calendarSyncGuideLabel: 'IPHONE SETUP GUIDE',
+    calendarSyncDialogDescription:
+      'Set this up once to view your barbershop schedule in the iPhone Calendar app.',
+    calendarSyncCopyBeforeStart: 'Before you start, copy your private link',
+    calendarSyncCopyBeforeStartDescription:
+      'You will need this address to create the subscription on your iPhone.',
+    calendarSyncStepsLabel: 'Steps on your iPhone',
+    calendarSyncStepOneTitle: 'Open the Calendar app',
+    calendarSyncStepOneDescription:
+      'On your iPhone, open Calendar and tap “Calendars” at the bottom of the screen.',
+    calendarSyncStepTwoTitle: 'Add a subscribed calendar',
+    calendarSyncStepTwoDescription:
+      'Tap “Add Calendar”, then choose “Add Subscription Calendar”.',
+    calendarSyncStepThreeTitle: 'Paste your Silentra link',
+    calendarSyncStepThreeDescription:
+      'Paste the private link into the address field. On iOS 26 or later, tap “Find”; on iOS 18 or earlier, tap “Subscribe”.',
+    calendarSyncStepFourTitle: 'Choose iCloud and save',
+    calendarSyncStepFourDescription:
+      'Choose a name and colour for the calendar. Under “Account”, select “iCloud”, then tap “Done” (iOS 26 or later) or “Add” (iOS 18 or earlier).',
+    calendarSyncICloudNote:
+      'Choosing iCloud also makes the calendar available on your other Apple devices signed in to the same Apple Account.',
+    calendarSyncVerifyNotice:
+      'Finally, return to the “Calendars” list and make sure the new calendar is selected so its bookings are visible.',
+    calendarSyncReadOnlyNotice:
+      'This is a read-only subscription. Make changes in Silentra; they will appear on your iPhone when Calendar refreshes the feed.',
     calendarSyncRotate: 'Generate new link',
     calendarSyncRotateConfirm:
       'Generating a new link invalidates the current one. You will need to update the subscription on your iPhone. Continue?',
