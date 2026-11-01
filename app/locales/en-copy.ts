@@ -676,8 +676,9 @@ export const enCopy = {
     countSingular: 'client',
     countPlural: 'clients',
     countSuffix: 'in your list.',
-    searchPlaceholder: 'Search by name or phone',
-    searchLabel: 'Search clients by name or phone',
+    viewProfile: 'View profile',
+    searchPlaceholder: 'Search by name, email or phone',
+    searchLabel: 'Search clients by name, email or phone',
     addClient: 'Add client',
     addDialogTitle: 'Add client',
     addDialogDescription:
