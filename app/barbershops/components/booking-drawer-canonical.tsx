@@ -483,7 +483,7 @@ export function BookingDrawerCanonical({
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent
         data-booking-theme={appearance}
-        className={`mx-auto flex h-[min(90dvh,48rem)] max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl ${appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#171717]' : 'border-white/10 bg-zinc-950 text-zinc-100'}`}
+        className={`mx-auto flex h-[min(90svh,48rem)] max-h-[90svh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl sm:h-auto sm:max-h-[92dvh] sm:rounded-t-3xl ${appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#171717]' : 'border-white/10 bg-zinc-950 text-zinc-100'}`}
       >
         {appearance === 'agenda' && (
           <style>{`
@@ -540,7 +540,7 @@ export function BookingDrawerCanonical({
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
-                  ? t('bookingDrawer.chooseBarberDayService')
+                  ? appearance === 'agenda' ? (locale === 'pt' ? 'Escolhe o dia e o serviço' : 'Choose a day and service') : t('bookingDrawer.chooseBarberDayService')
                   : step === 2
                     ? t('bookingDrawer.nextChooseTime')
                     : step === 3
