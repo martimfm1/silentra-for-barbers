@@ -86,6 +86,30 @@ export function useServices(
     [editingService, onRefreshData],
   );
 
+  const handleToggleServiceActive = useCallback(
+    async (service: Service) => {
+      setLoading(true);
+      try {
+        const { error } = await servicesService.update(service.id, {
+          is_active: service.is_active === false,
+        });
+        if (error) throw error;
+        toast.success(
+          service.is_active === false
+            ? 'Serviço ativado com sucesso.'
+            : 'Serviço desativado. Continua disponível no histórico.',
+        );
+        await onRefreshData();
+      } catch (error) {
+        console.error('[Toggle Service Status Error]:', error);
+        toast.error(getErrorMessage(error));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onRefreshData],
+  );
+
   const handleDeleteService = useCallback(
     async (id: string) => {
       setLoading(true);
@@ -115,5 +139,6 @@ export function useServices(
     handleCreateService,
     handleUpdateService,
     handleDeleteService,
+    handleToggleServiceActive,
   };
 }
