@@ -120,6 +120,19 @@ export const clientsService = {
 
   async deleteClient(id: string) {
     const supabase = createClient();
+    const { data: linkedAppointments, error: lookupError } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('client_id', id)
+      .limit(1);
+    if (lookupError) return { error: lookupError };
+    if (linkedAppointments?.length) {
+      return {
+        error: new Error(
+          'Este cliente tem histórico de marcações. Não pode ser eliminado para preservar os registos.',
+        ),
+      };
+    }
     return await supabase.from('users').delete().eq('id', id);
   },
 
