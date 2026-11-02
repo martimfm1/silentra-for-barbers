@@ -11,7 +11,7 @@ async function GET__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients', req);
     const url = new URL(req.url);
-    const search = url.searchParams.get('search')?.trim().slice(0, 80) ?? '';
+    const search = (url.searchParams.get('search')?.trim().slice(0, 80) ?? '').replace(/[,%()_*]/g, ' ').trim();
     const parsedLimit = Number(url.searchParams.get('limit') ?? 50);
     const parsedOffset = Number(url.searchParams.get('offset') ?? 0);
     const limit = Number.isFinite(parsedLimit)
@@ -31,11 +31,9 @@ async function GET__unobserved(req: Request) {
       .eq('role', 'client');
 
     if (search) {
-      const escaped = search.replace(/[,%()_*]/g, ' ').trim();
-      if (escaped)
-        countQuery = countQuery.or(
-          `name_complete.ilike.%${escaped}%,name.ilike.%${escaped}%,email.ilike.%${escaped}%,num_phone.ilike.%${escaped}%`,
-        );
+      countQuery = countQuery.or(
+        `name_complete.ilike.%${search}%,name.ilike.%${search}%,email.ilike.%${search}%,num_phone.ilike.%${search}%`,
+      );
     }
 
     const [{ count, error: countError }, { data, error }] = await Promise.all([
