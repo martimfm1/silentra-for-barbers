@@ -7,6 +7,21 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+type CrmClientPageRow = {
+  client_id: string;
+  name_complete: string;
+  name: string | null;
+  email: string | null;
+  num_phone: string | null;
+  birth_date: string | null;
+  style_notes: string | null;
+  created_at: string;
+  appointment_count: number | string | null;
+  total_spent: number | string | null;
+  last_visit: string | null;
+};
+
+
 async function GET__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients', req);
@@ -53,7 +68,8 @@ async function GET__unobserved(req: Request) {
         { status: 503 },
       );
     }
-    const clients = (data ?? []).map((client) => ({
+    const pageRows = (data ?? []) as CrmClientPageRow[];
+    const clients = pageRows.map((client) => ({
       id: client.client_id,
       name_complete: client.name_complete,
       name: client.name,
