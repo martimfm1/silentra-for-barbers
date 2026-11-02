@@ -77,6 +77,8 @@ export interface ClientsListCardProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  sortBy: 'recent' | 'name' | 'visits' | 'spent';
+  setSortBy: (value: 'recent' | 'name' | 'visits' | 'spent') => void;
   loading: boolean;
 }
 export interface ServicesListCardProps {
