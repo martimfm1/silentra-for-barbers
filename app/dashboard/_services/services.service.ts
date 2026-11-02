@@ -11,9 +11,10 @@ export interface CreateServicePayload {
 }
 
 export interface UpdateServicePayload {
-  name: string;
-  price: number;
-  duration: number;
+  name?: string;
+  price?: number;
+  duration?: number;
+  is_active?: boolean;
 }
 
 export const servicesService = {
