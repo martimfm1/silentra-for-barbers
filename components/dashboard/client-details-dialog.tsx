@@ -55,7 +55,13 @@ type Appointment = {
   professionals?: Relation<{ name?: string | null }>;
 };
 
-type ClientTag = {\n  id: string;\n  name: string;\n  color?: string | null;\n};\n\ntype ClientNote = {
+type ClientTag = {
+  id: string;
+  name: string;
+  color?: string | null;
+};
+
+type ClientNote = {
   id: string;
   content: string;
   author_id?: string | null;
@@ -144,7 +150,10 @@ export function ClientDetailsDialog({
 }: ClientDetailsDialogProps) {
   const { t, locale } = useLanguage();
   const [details, setDetails] = useState<ClientDetails | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');\n  const [availableTags, setAvailableTags] = useState<ClientTag[]>([]);\n  const [selectedTagId, setSelectedTagId] = useState('');\n  const [savingTag, setSavingTag] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [availableTags, setAvailableTags] = useState<ClientTag[]>([]);
+  const [selectedTagId, setSelectedTagId] = useState('');
+  const [savingTag, setSavingTag] = useState(false);
   const [loading, setLoading] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,10 +166,14 @@ export function ClientDetailsDialog({
     setError(null);
     setDetails(null);
     setNoteDraft('');
+    setAvailableTags([]);
+    setSelectedTagId('');
 
     void (async () => {
       try {
-        const headers = await authHeaders(false, t('crm.sessionExpired'));\n        const response = await fetch(`/api/crm/clients/${clientId}`, {\n          headers,
+        const headers = await authHeaders(false, t('crm.sessionExpired'));
+        const response = await fetch(`/api/crm/clients/${clientId}`, {
+          headers,
           cache: 'no-store',
           signal: controller.signal,
         });
@@ -180,7 +193,14 @@ export function ClientDetailsDialog({
               ? json.upcomingAppointments
               : [],
             totalSpent: Number(json.totalSpent) || 0,
-            notes: Array.isArray(json.notes) ? json.notes : [],\n            tags: Array.isArray(json.tags) ? json.tags : [],\n          });\n          const tagsResponse = await fetch('/api/crm/tags', { headers, cache: 'no-store', signal: controller.signal });\n          if (tagsResponse.ok) {\n            const tagsPayload = await tagsResponse.json();\n            setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);\n          }
+            notes: Array.isArray(json.notes) ? json.notes : [],
+            tags: Array.isArray(json.tags) ? json.tags : [],
+          });
+          const tagsResponse = await fetch('/api/crm/tags', { headers, cache: 'no-store', signal: controller.signal });
+          if (tagsResponse.ok) {
+            const tagsPayload = await tagsResponse.json();
+            setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);
+          }
         }
       } catch (requestError) {
         if (controller.signal.aborted) return;
@@ -269,7 +289,8 @@ export function ClientDetailsDialog({
   const client = details?.client;
   const appointments = details?.appointments ?? [];
   const upcomingAppointments = details?.upcomingAppointments ?? [];
-  const notes = details?.notes ?? [];\n  const tags = details?.tags ?? [];
+  const notes = details?.notes ?? [];
+  const tags = details?.tags ?? [];
   const completedAppointments = appointments.filter(
     (appointment) => appointment.status === 'completed',
   );
