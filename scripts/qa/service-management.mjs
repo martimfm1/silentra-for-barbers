@@ -52,7 +52,7 @@ assert.match(serviceHook, /price < 0/);
 assert.match(serviceHook, /duration > 1440/);
 assert.match(serviceHook, /is_active: service\.is_active === false/);
 assert.match(serviceRepository, /linkedAppointments/);
-assert.match(serviceRepository, /serviço tem marcações associadas/i);
+assert.match(serviceRepository, /SERVICE_HAS_BOOKINGS/);
 assert.match(serviceTypes, /is_active\?: boolean/);
 
 for (const source of [bookingApi, bookingDataApi, publicApi, publicV1Api, agendaPage, posPage]) {
