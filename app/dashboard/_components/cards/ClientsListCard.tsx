@@ -2,7 +2,6 @@
 
 import { Client, ClientsListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
-import { useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Users,
