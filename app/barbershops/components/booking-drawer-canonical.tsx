@@ -197,8 +197,11 @@ export function BookingDrawerCanonical({
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  // Keep closed days visible so customers can understand the shop schedule.
-  const availableDays = days;
+  // Do not offer configured days off in either the general or custom booking drawer.
+  const availableDays = useMemo(
+    () => days.filter((day) => !closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay())),
+    [days, closedDays],
+  );
   const currentDay = availableDays[dayIndex] ?? availableDays[0] ?? null;
   const currentDayClosed = !currentDay || closedDays.has(
     new Date(currentDay.dateStr + 'T12:00:00').getDay(),
