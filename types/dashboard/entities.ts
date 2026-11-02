@@ -16,6 +16,7 @@ export interface Service {
   price: string;
   duration: string | number;
   min_duration?: string | number;
+  is_active?: boolean;
 }
 
 export interface Professional {
