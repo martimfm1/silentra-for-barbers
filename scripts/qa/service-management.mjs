@@ -17,7 +17,7 @@ const [
   posPage,
   serviceTypes,
 ] = await Promise.all([
-  read('supabase/migrations/20261102120000_service_archiving_and_client_crm_metrics.sql'),
+  read('supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql'),
   read('app/dashboard/_components/cards/ServicesListCard.tsx'),
   read('app/dashboard/servicos/page.tsx'),
   read('app/state/_hooks/dashboard/useServices.ts'),
