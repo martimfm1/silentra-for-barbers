@@ -19,6 +19,7 @@ type ServicePayload = {
   name?: unknown;
   price?: unknown;
   duration?: unknown;
+  is_active?: unknown;
 };
 
 async function authorizeServices(request: Request) {
@@ -130,7 +131,7 @@ async function GET__unobserved(request: Request) {
 
   const { data, error } = await auth.tenant.admin
     .from('services')
-    .select('id, name, price, duration, barbershop_id')
+    .select('id, name, price, duration, is_active, barbershop_id')
     .eq('barbershop_id', auth.tenant.barbershopId)
     .order('name', { ascending: true });
 
@@ -173,7 +174,7 @@ async function POST__unobserved(request: Request) {
   const { data, error } = await auth.tenant.admin
     .from('services')
     .insert({ ...validated.value, barbershop_id: auth.tenant.barbershopId })
-    .select('id, name, price, duration, barbershop_id')
+    .select('id, name, price, duration, is_active, barbershop_id')
     .single();
 
   if (error) {
@@ -209,6 +210,27 @@ async function PATCH__unobserved(request: Request) {
       { status: 400 },
     );
   }
+  if (
+    typeof body.is_active === 'boolean' &&
+    body.name === undefined &&
+    body.price === undefined &&
+    body.duration === undefined
+  ) {
+    const { data, error } = await auth.tenant.admin
+      .from('services')
+      .update({ is_active: body.is_active })
+      .eq('id', body.id)
+      .eq('barbershop_id', auth.tenant.barbershopId)
+      .select('id, name, price, duration, is_active, barbershop_id')
+      .maybeSingle();
+    if (error) {
+      console.error('[MOBILE_SERVICES_STATUS_FAIL]', error.code ?? 'UNKNOWN');
+      return NextResponse.json({ error: 'Não foi possível alterar o estado do serviço.' }, { status: 409 });
+    }
+    if (!data) return NextResponse.json({ error: 'Serviço não encontrado nesta barbearia.' }, { status: 404 });
+    return NextResponse.json({ success: true, service: data }, { headers: { 'Cache-Control': 'no-store' } });
+  }
+
   const validated = validateService(body);
   if ('error' in validated)
     return NextResponse.json({ error: validated.error }, { status: 400 });
@@ -218,7 +240,7 @@ async function PATCH__unobserved(request: Request) {
     .update(validated.value)
     .eq('id', body.id)
     .eq('barbershop_id', auth.tenant.barbershopId)
-    .select('id, name, price, duration, barbershop_id')
+    .select('id, name, price, duration, is_active, barbershop_id')
     .maybeSingle();
 
   if (error) {
