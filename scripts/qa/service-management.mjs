@@ -17,6 +17,7 @@ const [
   posPage,
   serviceTypes,
   referenceMigration,
+  linkedRecordsMigration,
   manualAppointmentsApi,
   mobileServicesApi,
   crmPlansApi,
@@ -37,6 +38,7 @@ const [
   read('app/dashboard/pos/page.tsx'),
   read('types/dashboard/entities.ts'),
   read('supabase/migrations/20261102115012_preserve_service_appointment_references.sql'),
+  read('supabase/migrations/20261102115559_preserve_service_linked_records.sql'),
   read('app/api/appointments/route.ts'),
   read('app/api/mobile/services/route.ts'),
   read('app/api/crm/clients/[clientId]/plans/route.ts'),
@@ -54,6 +56,9 @@ assert.match(migration, /total_spent/);
 assert.match(migration, /last_visit/);
 assert.match(referenceMigration, /on delete restrict/i);
 assert.match(referenceMigration, /validate constraint appointments_service_id_fkey/i);
+assert.match(linkedRecordsMigration, /loyalty_earning_rules_service_id_fkey[\s\S]*?on delete restrict/i);
+assert.match(linkedRecordsMigration, /pos_transaction_items_service_id_fkey[\s\S]*?on delete restrict/i);
+assert.match(linkedRecordsMigration, /marketing_campaigns_birthday_reward_service_id_fkey[\s\S]*?on delete restrict/i);
 
 assert.match(serviceCard, /statusFilter/);
 assert.match(serviceCard, /'active' \| 'inactive'/);
