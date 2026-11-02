@@ -267,7 +267,7 @@ export function BookingDrawerCanonical({
           );
       });
     return () => controller.abort();
-  }, [currentDay?.dateStr, isOpen, retryKey, shop]);
+  }, [appearance, currentDay?.dateStr, isOpen, retryKey, shop]);
 
   useEffect(() => {
     if (
