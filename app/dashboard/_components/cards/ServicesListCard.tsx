@@ -69,7 +69,15 @@ export function ServicesListCard({
           ? Number(a.price) - Number(b.price)
           : Number(a.duration ?? (a as any).min_duration ?? 0) - Number(b.duration ?? (b as any).min_duration ?? 0));
   }, [services, search, sortBy, locale, statusFilter]);
+  const activeServices = services.filter((service) => service.is_active !== false);
+  const averagePrice = activeServices.length
+    ? activeServices.reduce((total, service) => total + Number(service.price || 0), 0) / activeServices.length
+    : null;
+  const averageDuration = activeServices.length
+    ? Math.round(activeServices.reduce((total, service) => total + Number(service.duration ?? service.min_duration ?? 0), 0) / activeServices.length)
+    : null;
   const duplicateService = (service: Service) => {
+    setStatusFilter('all');
     setNewServiceData({
       name: `${service.name} (${locale === 'pt' ? 'cópia' : 'copy'})`,
       price: Number(service.price),
@@ -93,7 +101,11 @@ export function ServicesListCard({
                 {servicesCount === 0
                   ? t('servicesListCard.emptyDescription')
                   : `${servicesCount} ${servicesCount === 1 ? t('servicesListCard.configuredSingular') : t('servicesListCard.configuredPlural')}.`}
-              </p>
+              </p>              {servicesCount > 0 ? (
+                <p className="mt-1 text-xs text-zinc-500">
+                  {activeServices.length} {locale === 'pt' ? 'ativos' : 'active'} · {locale === 'pt' ? 'média' : 'avg.'} {averagePrice === null ? '—' : new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(averagePrice)} · {averageDuration === null ? '—' : `${averageDuration} min`}
+                </p>
+              ) : null}
             </div>
           </div>
           <Button
