@@ -120,16 +120,19 @@ export const clientsService = {
 
   async deleteClient(id: string) {
     const supabase = createClient();
-    const { data: linkedAppointments, error: lookupError } = await supabase
-      .from('appointments')
-      .select('id')
-      .eq('client_id', id)
-      .limit(1);
-    if (lookupError) return { error: lookupError };
-    if (linkedAppointments?.length) {
+    const [
+      { data: linkedAppointments, error: appointmentsError },
+      { data: linkedNotes, error: notesError },
+    ] = await Promise.all([
+      supabase.from('appointments').select('id').eq('client_id', id).limit(1),
+      supabase.from('client_notes').select('id').eq('client_id', id).limit(1),
+    ]);
+    if (appointmentsError) return { error: appointmentsError };
+    if (notesError) return { error: notesError };
+    if (linkedAppointments?.length || linkedNotes?.length) {
       return {
         error: new Error(
-          'Este cliente tem histórico de marcações. Não pode ser eliminado para preservar os registos.',
+          'Este cliente tem histórico ou notas internas. Não pode ser eliminado para preservar os registos.',
         ),
       };
     }
