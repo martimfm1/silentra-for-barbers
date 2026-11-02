@@ -36,7 +36,7 @@ const [
   read('app/barbershops/components/booking-drawer-canonical.tsx'),
   read('app/dashboard/_components/DashboardSidebar.tsx'),
   read('package.json'),
-  read('supabase/migrations/20261102120000_service_archiving_and_client_crm_metrics.sql'),
+  read('supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql'),
   read('app/api/crm/clients/[clientId]/tags/route.ts'),
   read('app/api/crm/tags/route.ts'),
 ]);
