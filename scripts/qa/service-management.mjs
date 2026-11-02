@@ -19,6 +19,7 @@ const [
   referenceMigration,
   linkedRecordsMigration,
   historyIndexesMigration,
+  validateConstraintsMigration,
   manualAppointmentsApi,
   mobileServicesApi,
   crmPlansApi,
@@ -41,6 +42,7 @@ const [
   read('supabase/migrations/20261102115012_preserve_service_appointment_references.sql'),
   read('supabase/migrations/20261102115559_preserve_service_linked_records.sql'),
   read('supabase/migrations/20261102115639_client_service_history_fk_indexes.sql'),
+  read('supabase/migrations/20261102115816_validate_service_constraints.sql'),
   read('app/api/appointments/route.ts'),
   read('app/api/mobile/services/route.ts'),
   read('app/api/crm/clients/[clientId]/plans/route.ts'),
@@ -63,6 +65,8 @@ assert.match(linkedRecordsMigration, /pos_transaction_items_service_id_fkey[\s\S
 assert.match(linkedRecordsMigration, /marketing_campaigns_birthday_reward_service_id_fkey[\s\S]*?on delete restrict/i);
 assert.match(historyIndexesMigration, /loyalty_earning_rules_service_fk_idx/);
 assert.match(historyIndexesMigration, /pos_transaction_items_service_fk_idx/);
+assert.match(validateConstraintsMigration, /validate constraint services_price_non_negative/i);
+assert.match(validateConstraintsMigration, /validate constraint services_duration_valid/i);
 
 assert.match(serviceCard, /statusFilter/);
 assert.match(serviceCard, /'active' \| 'inactive'/);
