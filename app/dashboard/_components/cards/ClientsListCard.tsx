@@ -419,6 +419,9 @@ function ClientItemCard({
             <p className="mt-1 text-[11px] text-zinc-500">
               {Number(client.appointment_count ?? 0)} {locale === 'pt' ? 'visitas' : 'visits'} · {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(Number(client.total_spent ?? 0))}
             </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              {locale === 'pt' ? 'Última visita:' : 'Last visit:'} {client.last_visit ? new Date(client.last_visit).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-GB') : '—'}
+            </p>
           </div>
         </div>
 
