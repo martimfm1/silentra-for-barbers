@@ -22,6 +22,7 @@ async function getData(slug: string) {
     .from('services')
     .select('id,name,price,duration,popular')
     .eq('barbershop_id', profile.barbershop_id ?? profile.id)
+    .eq('is_active', true)
     .order('popular', { ascending: false })
     .order('name', { ascending: true });
 
