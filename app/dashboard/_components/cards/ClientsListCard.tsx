@@ -2,6 +2,7 @@
 
 import { Client, ClientsListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Users,
@@ -60,7 +61,11 @@ export function ClientsListCard({
   onPageChange,
   loading,
 }: ClientsListCardProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
+  const sortedClients = useMemo(() => [...filteredClients].sort((a, b) => sortBy === 'name'
+    ? a.name_complete.localeCompare(b.name_complete, locale === 'pt' ? 'pt-PT' : 'en-GB')
+    : new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime()), [filteredClients, sortBy, locale]);
   const hasSearch = searchClientQuery.trim().length > 0;
 
   return (
@@ -118,6 +123,14 @@ export function ClientsListCard({
       </CardHeader>
 
       <CardContent className="p-5 sm:p-6">
+        {filteredClients.length > 1 && (
+          <div className="mb-4 flex justify-end">
+            <select aria-label={locale === 'pt' ? 'Ordenar clientes' : 'Sort clients'} value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="min-h-11 max-w-full rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
+              <option value="recent">{locale === 'pt' ? 'Mais recentes' : 'Most recent'}</option>
+              <option value="name">{locale === 'pt' ? 'Nome (A–Z)' : 'Name (A–Z)'}</option>
+            </select>
+          </div>
+        )}
         <Dialog open={showAddClientForm} onOpenChange={setShowAddClientForm}>
           <DialogContent className="border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-2xl">
             <DialogHeader>
@@ -154,7 +167,7 @@ export function ClientsListCard({
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredClients.map((client) => (
+            {sortedClients.map((client) => (
               <ClientItemCard
                 key={client.id}
                 client={client}
