@@ -45,6 +45,7 @@ async function GET__unobserved() {
       .from('services')
       .select('id,name,price,duration')
       .eq('barbershop_id', barbershopId)
+      .eq('is_active', true)
       .order('name', { ascending: true });
 
     if (serviceError) {
@@ -191,6 +192,7 @@ async function PATCH__unobserved(request: NextRequest) {
           .select('id')
           .eq('id', rewardServiceId)
           .eq('barbershop_id', barbershopId)
+          .eq('is_active', true)
           .maybeSingle();
         if (serviceError) throw serviceError;
         if (!service) {
