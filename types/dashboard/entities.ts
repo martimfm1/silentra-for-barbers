@@ -7,6 +7,9 @@ export interface Client {
   birth_date?: string | null;
   style_notes?: string | null;
   created_at?: string;
+  appointment_count?: number;
+  total_spent?: number;
+  last_visit?: string | null;
   role?: 'owner' | 'admin' | 'barber' | 'client' | string;
 }
 
