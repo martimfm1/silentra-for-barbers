@@ -344,7 +344,7 @@ function ServiceItemCard({
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-1 border-t border-white/5 pt-3">
+      <div className="mt-4 flex flex-wrap justify-start gap-1 border-t border-white/5 pt-3">
         <Button
           variant="ghost"
           onClick={() => setEditingService(service)}
