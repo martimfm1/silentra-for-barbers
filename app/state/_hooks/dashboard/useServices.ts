@@ -25,8 +25,17 @@ export function useServices(
       e.preventDefault();
       if (!barbershopId) return false;
 
-      if (!newServiceData.name.trim() || !newServiceData.price) {
-        toast.error('Introduz o nome e o preço do serviço.');
+      const price = Number(newServiceData.price);
+      const duration = Number(newServiceData.duration);
+      if (
+        !newServiceData.name.trim() ||
+        !Number.isFinite(price) ||
+        price < 0 ||
+        !Number.isInteger(duration) ||
+        duration < 1 ||
+        duration > 1440
+      ) {
+        toast.error('Indica um nome, um preço igual ou superior a 0 € e uma duração entre 1 e 1440 minutos.');
         return false;
       }
 
@@ -34,8 +43,8 @@ export function useServices(
       try {
         const { error } = await servicesService.create({
           name: newServiceData.name.trim(),
-          price: Number(newServiceData.price),
-          duration: Number(newServiceData.duration),
+          price,
+          duration,
           barbershop_id: barbershopId,
         });
 
@@ -60,15 +69,19 @@ export function useServices(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!editingService) return;
+      const price = Number(editingService.price);
+      const duration = Number(editingService.duration ?? editingService.min_duration);
+      if (!editingService.name.trim() || !Number.isFinite(price) || price < 0 || !Number.isInteger(duration) || duration < 1 || duration > 1440) {
+        toast.error('Verifica o nome, o preço e a duração do serviço.');
+        return;
+      }
 
       setLoading(true);
       try {
         const { error } = await servicesService.update(editingService.id, {
           name: editingService.name.trim(),
-          price: Number(editingService.price),
-          duration: Number(
-            (editingService as any).duration ?? editingService.duration,
-          ),
+          price,
+          duration,
         });
 
         if (error) throw error;
