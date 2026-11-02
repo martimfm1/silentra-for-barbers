@@ -72,6 +72,8 @@ assert.match(serviceCard, /statusFilter/);
 assert.match(serviceCard, /'active' \| 'inactive'/);
 assert.match(serviceCard, /handleToggleServiceActive/);
 assert.match(serviceCard, /service\.is_active === false/);
+assert.match(serviceCard, /averagePrice/);
+assert.match(serviceCard, /averageDuration/);
 assert.match(servicePage, /handleToggleServiceActive=\{handleToggleServiceActive\}/);
 assert.match(serviceHook, /price < 0/);
 assert.match(serviceHook, /duration > 1440/);
