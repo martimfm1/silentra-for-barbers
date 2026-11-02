@@ -2,7 +2,7 @@
 
 import { Client, ClientsListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Users,
@@ -60,16 +60,11 @@ export function ClientsListCard({
   currentPage,
   totalPages,
   onPageChange,
+  sortBy,
+  setSortBy,
   loading,
 }: ClientsListCardProps) {
   const { t, locale } = useLanguage();
-  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'visits' | 'spent'>('recent');
-  const sortedClients = useMemo(() => [...filteredClients].sort((a, b) => {
-    if (sortBy === 'name') return a.name_complete.localeCompare(b.name_complete, locale === 'pt' ? 'pt-PT' : 'en-GB');
-    if (sortBy === 'visits') return Number(b.appointment_count ?? 0) - Number(a.appointment_count ?? 0);
-    if (sortBy === 'spent') return Number(b.total_spent ?? 0) - Number(a.total_spent ?? 0);
-    return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
-  }), [filteredClients, sortBy, locale]);
   const hasSearch = searchClientQuery.trim().length > 0;
 
   return (
@@ -182,7 +177,7 @@ export function ClientsListCard({
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sortedClients.map((client) => (
+            {filteredClients.map((client) => (
               <ClientItemCard
                 key={client.id}
                 client={client}
