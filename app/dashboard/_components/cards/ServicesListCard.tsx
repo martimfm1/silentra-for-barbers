@@ -172,6 +172,7 @@ export function ServicesListCard({
                 setEditingService={setEditingService}
                 handleDeleteService={handleDeleteService}
                 handleToggleServiceActive={handleToggleServiceActive}
+                loading={loading}
                 onDuplicate={duplicateService}
               />
                 ))}
@@ -328,6 +329,7 @@ interface ServiceItemCardProps {
   setEditingService: (service: Service) => void;
   handleDeleteService: (id: string) => void;
   handleToggleServiceActive: (service: Service) => void;
+  loading: boolean;
   onDuplicate: (service: Service) => void;
 }
 
@@ -336,6 +338,7 @@ function ServiceItemCard({
   setEditingService,
   handleDeleteService,
   handleToggleServiceActive,
+  loading,
   onDuplicate,
 }: ServiceItemCardProps) {
   const { t, locale } = useLanguage();
@@ -369,7 +372,7 @@ function ServiceItemCard({
           <Pencil className="mr-2 size-4" />
           {t('common.edit')}
         </Button>
-        <Button variant="ghost" onClick={() => handleToggleServiceActive(service)} className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label={service.is_active === false ? (locale === 'pt' ? `Ativar ${service.name}` : `Activate ${service.name}`) : (locale === 'pt' ? `Desativar ${service.name}` : `Deactivate ${service.name}`)}>
+        <Button disabled={loading} variant="ghost" onClick={() => handleToggleServiceActive(service)} className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label={service.is_active === false ? (locale === 'pt' ? `Ativar ${service.name}` : `Activate ${service.name}`) : (locale === 'pt' ? `Desativar ${service.name}` : `Deactivate ${service.name}`)}>
           <Power className="mr-2 size-4" />
           {service.is_active === false ? (locale === 'pt' ? 'Ativar' : 'Activate') : (locale === 'pt' ? 'Desativar' : 'Deactivate')}
         </Button>
