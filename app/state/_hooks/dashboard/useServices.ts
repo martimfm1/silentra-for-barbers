@@ -66,7 +66,7 @@ export function useServices(
         setLoading(false);
       }
     },
-    [barbershopId, newServiceData, onRefreshData],
+    [barbershopId, isPortuguese, newServiceData, onRefreshData],
   );
 
   const handleUpdateService = useCallback(
@@ -100,7 +100,7 @@ export function useServices(
         setLoading(false);
       }
     },
-    [editingService, onRefreshData],
+    [editingService, isPortuguese, onRefreshData],
   );
 
   const handleToggleServiceActive = useCallback(
@@ -124,7 +124,7 @@ export function useServices(
         setLoading(false);
       }
     },
-    [onRefreshData],
+    [isPortuguese, onRefreshData],
   );
 
   const handleDeleteService = useCallback(
