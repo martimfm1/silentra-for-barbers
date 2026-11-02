@@ -6,6 +6,27 @@ create index if not exists services_active_by_barbershop_idx
   on public.services (barbershop_id, name)
   where is_active = true;
 
+do $
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'services_price_non_negative'
+      and conrelid = 'public.services'::regclass
+  ) then
+    alter table public.services
+      add constraint services_price_non_negative check (price >= 0) not valid;
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'services_duration_valid'
+      and conrelid = 'public.services'::regclass
+  ) then
+    alter table public.services
+      add constraint services_duration_valid check (duration between 1 and 1440) not valid;
+  end if;
+end;
+$;
+
 -- Lightweight CRM metrics for the currently paginated client list.
 create or replace function public.get_client_crm_metrics(
   p_barbershop_id uuid,
