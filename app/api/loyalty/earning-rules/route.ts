@@ -31,6 +31,7 @@ async function GET__unobserved() {
         .from('services')
         .select('id,name,price,duration')
         .eq('barbershop_id', barbershopId)
+        .eq('is_active', true)
         .order('name', { ascending: true }),
     ]);
     if (rulesError) throw rulesError;
@@ -84,6 +85,7 @@ async function POST__unobserved(request: Request) {
       .select('id,name')
       .eq('id', serviceId)
       .eq('barbershop_id', barbershopId)
+      .eq('is_active', true)
       .maybeSingle();
     if (serviceError)
       return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
@@ -161,6 +163,7 @@ async function PATCH__unobserved(request: Request) {
         .select('id')
         .eq('id', patch.service_id)
         .eq('barbershop_id', barbershopId)
+        .eq('is_active', true)
         .maybeSingle();
       if (serviceError)
         return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
