@@ -59,7 +59,7 @@ export const servicesService = {
     if (linkedAppointments?.length) {
       return {
         error: new Error(
-          'Este serviço tem marcações associadas. Desativa-o para o remover do catálogo sem perder o histórico.',
+          'SERVICE_HAS_BOOKINGS',
         ),
       };
     }
