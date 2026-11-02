@@ -22,6 +22,7 @@ const [
   clientTagsApi,
   crmTagsApi,
   clientHistoryMigration,
+  agendaPage,
 ] = await Promise.all([
   read('app/dashboard/clientes/page.tsx'),
   read('app/dashboard/_components/cards/ClientsListCard.tsx'),
@@ -41,6 +42,7 @@ const [
   read('app/api/crm/clients/[clientId]/tags/route.ts'),
   read('app/api/crm/tags/route.ts'),
   read('supabase/migrations/20261102115246_preserve_client_history_references.sql'),
+  read('app/dashboard/agenda/page.tsx'),
 ]);
 
 // The standard clients page provides server-side search and pagination.
@@ -84,6 +86,10 @@ assert.match(clientsCard, /value="spent"/);
 assert.match(clientsCard, /wa\.me/);
 assert.match(clientsCard, /tel:/);
 assert.match(clientsCard, /mailto:/);
+assert.match(clientsCard, /dashboard\/agenda\?clientId/);
+assert.match(clientsCard, /navigator\.clipboard\.writeText/);
+assert.match(agendaPage, /new URLSearchParams\(window\.location\.search\)/);
+assert.match(agendaPage, /setBookingDialogOpen\(true\)/);
 assert.match(clientDetailApi, /requireModuleContext\('clients', 'clients', req\)/);
 assert.match(clientDetailApi, /\.eq\('barbershop_id', t\.barbershopId\)/);
 assert.match(clientDetailApi, /\.eq\('client_id', clientId\)/);
