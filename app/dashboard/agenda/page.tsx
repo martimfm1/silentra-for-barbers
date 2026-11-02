@@ -70,24 +70,6 @@ export default function AgendaPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [todayOnly, setTodayOnly] = useState(false);
 
-  useEffect(() => {
-    const clientId = new URLSearchParams(window.location.search).get('clientId');
-    if (!clientId || clients.length === 0) return;
-    const client = clients.find((item) => item.id === clientId);
-    if (!client) return;
-    setFormData({
-      clientId: client.id,
-      name_complete: client.name_complete,
-      num_phone: client.num_phone ?? '',
-      email: client.email ?? '',
-      service_id: '',
-    });
-    setBookingDialogOpen(true);
-    const url = new URL(window.location.href);
-    url.searchParams.delete('clientId');
-    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-  }, [clients]);
-
   const fetchInitialData = useCallback(async () => {
     if (!barbershopId) return;
     setLoadingInitial(true);
@@ -150,6 +132,24 @@ export default function AgendaPage() {
   const [selectedProfessionalId, setSelectedProfessionalId] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+
+  useEffect(() => {
+    const clientId = new URLSearchParams(window.location.search).get('clientId');
+    if (!clientId || clients.length === 0) return;
+    const client = clients.find((item) => item.id === clientId);
+    if (!client) return;
+    setFormData({
+      clientId: client.id,
+      name_complete: client.name_complete,
+      num_phone: client.num_phone ?? '',
+      email: client.email ?? '',
+      service_id: '',
+    });
+    setBookingDialogOpen(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('clientId');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  }, [clients]);
 
   useEffect(() => {
     setBookingFormData((prev) => {
