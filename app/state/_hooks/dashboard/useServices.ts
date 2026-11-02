@@ -39,7 +39,11 @@ export function useServices(
         duration < 1 ||
         duration > 1440
       ) {
-        toast.error(\n          isPortuguese\n            ? 'Indica um nome, um preço igual ou superior a 0 € e uma duração entre 1 e 1440 minutos.'\n            : 'Enter a name, a non-negative price and a duration between 1 and 1440 minutes.',\n        );
+        toast.error(
+          isPortuguese
+            ? 'Indica um nome, um preço igual ou superior a 0 € e uma duração entre 1 e 1440 minutos.'
+            : 'Enter a name, a non-negative price and a duration between 1 and 1440 minutes.',
+        );
         return false;
       }
 
@@ -75,8 +79,20 @@ export function useServices(
       if (!editingService) return;
       const price = Number(editingService.price);
       const duration = Number(editingService.duration ?? editingService.min_duration);
-      if (\n        !editingService.name.trim() ||\n        editingService.price === '' ||\n        !Number.isFinite(price) ||\n        price < 0 ||\n        !Number.isInteger(duration) ||\n        duration < 1 ||\n        duration > 1440\n      ) {
-        toast.error(\n          isPortuguese\n            ? 'Verifica o nome, o preço e a duração do serviço.'\n            : 'Check the service name, price and duration.',\n        );
+      if (
+        !editingService.name.trim() ||
+        editingService.price === '' ||
+        !Number.isFinite(price) ||
+        price < 0 ||
+        !Number.isInteger(duration) ||
+        duration < 1 ||
+        duration > 1440
+      ) {
+        toast.error(
+          isPortuguese
+            ? 'Verifica o nome, o preço e a duração do serviço.'
+            : 'Check the service name, price and duration.',
+        );
         return;
       }
 
