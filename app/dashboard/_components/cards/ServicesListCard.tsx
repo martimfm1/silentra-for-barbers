@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { Service, ServicesListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import {
@@ -11,6 +12,8 @@ import {
   Euro,
   Sparkles,
   ArrowRight,
+  Search,
+  Copy,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,7 +52,27 @@ export function ServicesListCard({
   handleDeleteService,
   loading,
 }: ServicesListCardProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'duration'>('name');
+  const filteredServices = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
+    return [...services]
+      .filter((service) => service.name.toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB').includes(query))
+      .sort((a, b) => sortBy === 'name'
+        ? a.name.localeCompare(b.name, locale === 'pt' ? 'pt-PT' : 'en-GB')
+        : sortBy === 'price'
+          ? Number(a.price) - Number(b.price)
+          : Number(a.duration ?? (a as any).min_duration ?? 0) - Number(b.duration ?? (b as any).min_duration ?? 0));
+  }, [services, search, sortBy, locale]);
+  const duplicateService = (service: Service) => {
+    setNewServiceData({
+      name: `${service.name} (${locale === 'pt' ? 'cópia' : 'copy'})`,
+      price: Number(service.price),
+      duration: Number(service.duration ?? (service as any).min_duration ?? 30),
+    });
+    setShowAddServiceForm(true);
+  };
   return (
     <Card className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-xl">
       <CardHeader className="border-b border-white/10 p-5 sm:p-6">
@@ -117,15 +140,33 @@ export function ServicesListCard({
             tone="amber"
           />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={locale === 'pt' ? 'Pesquisar serviços…' : 'Search services…'} aria-label={locale === 'pt' ? 'Pesquisar serviços' : 'Search services'} className="min-h-11 bg-zinc-950/70 pl-9" />
+              </div>
+              <select aria-label={locale === 'pt' ? 'Ordenar serviços' : 'Sort services'} value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
+                <option value="name">{locale === 'pt' ? 'Nome' : 'Name'}</option>
+                <option value="price">{locale === 'pt' ? 'Preço' : 'Price'}</option>
+                <option value="duration">{locale === 'pt' ? 'Duração' : 'Duration'}</option>
+              </select>
+            </div>
+            {filteredServices.length === 0 ? (
+              <p className="rounded-xl border border-white/10 p-6 text-center text-sm text-zinc-500">{locale === 'pt' ? 'Não foram encontrados serviços.' : 'No services found.'}</p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredServices.map((service) => (
               <ServiceItemCard
                 key={service.id}
                 service={service}
                 setEditingService={setEditingService}
                 handleDeleteService={handleDeleteService}
+                onDuplicate={duplicateService}
               />
-            ))}
+                ))}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
@@ -276,12 +317,14 @@ interface ServiceItemCardProps {
   service: Service;
   setEditingService: (service: Service) => void;
   handleDeleteService: (id: string) => void;
+  onDuplicate: (service: Service) => void;
 }
 
 function ServiceItemCard({
   service,
   setEditingService,
   handleDeleteService,
+  onDuplicate,
 }: ServiceItemCardProps) {
   const { t } = useLanguage();
   return (
@@ -304,23 +347,27 @@ function ServiceItemCard({
       <div className="mt-4 flex justify-end gap-1 border-t border-white/5 pt-3">
         <Button
           variant="ghost"
-          size="icon"
           onClick={() => setEditingService(service)}
-          className="size-9 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white"
+          className="min-h-11 rounded-lg px-3 text-zinc-200 hover:bg-white/10 hover:text-white"
           aria-label={t('servicesListCard.edit', { name: service.name })}
         >
-          <Pencil className="size-4" />
+          <Pencil className="mr-2 size-4" />
+          {t('common.edit')}
+        </Button>
+        <Button variant="ghost" onClick={() => onDuplicate(service)} className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label={locale === 'pt' ? `Duplicar ${service.name}` : `Duplicate ${service.name}`}>
+          <Copy className="mr-2 size-4" />
+          {locale === 'pt' ? 'Duplicar' : 'Duplicate'}
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
-              className="size-9 rounded-lg text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+              className="min-h-11 rounded-lg px-3 text-red-300 hover:bg-red-500/10 hover:text-red-200"
               aria-label={t('servicesListCard.delete', { name: service.name })}
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="mr-2 size-4" />
+              {t('common.delete')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="border-white/10 bg-zinc-950">
