@@ -29,6 +29,7 @@ export function useServices(
       const duration = Number(newServiceData.duration);
       if (
         !newServiceData.name.trim() ||
+        newServiceData.price === '' ||
         !Number.isFinite(price) ||
         price < 0 ||
         !Number.isInteger(duration) ||
