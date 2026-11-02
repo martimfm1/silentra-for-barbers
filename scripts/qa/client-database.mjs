@@ -18,6 +18,9 @@ const [
   bookingDrawer,
   dashboardSidebar,
   packageJson,
+  crmMetricsMigration,
+  clientTagsApi,
+  crmTagsApi,
 ] = await Promise.all([
   read('app/dashboard/clientes/page.tsx'),
   read('app/dashboard/_components/cards/ClientsListCard.tsx'),
@@ -33,6 +36,9 @@ const [
   read('app/barbershops/components/booking-drawer-canonical.tsx'),
   read('app/dashboard/_components/DashboardSidebar.tsx'),
   read('package.json'),
+  read('supabase/migrations/20261102120000_service_archiving_and_client_crm_metrics.sql'),
+  read('app/api/crm/clients/[clientId]/tags/route.ts'),
+  read('app/api/crm/tags/route.ts'),
 ]);
 
 // The standard clients page provides server-side search and pagination.
@@ -66,11 +72,30 @@ assert.match(clientsListApi, /\.eq\('role', 'client'\)/);
 assert.match(clientsListApi, /name_complete\.ilike/);
 assert.match(clientsListApi, /email\.ilike/);
 assert.match(clientsListApi, /num_phone\.ilike/);
+assert.match(clientsListApi, /get_client_crm_metrics/);
+assert.match(clientsListApi, /appointment_count/);
+assert.match(clientsListApi, /total_spent/);
+assert.match(clientsCard, /value="visits"/);
+assert.match(clientsCard, /value="spent"/);
+assert.match(clientsCard, /wa\.me/);
+assert.match(clientsCard, /tel:/);
+assert.match(clientsCard, /mailto:/);
 assert.match(clientDetailApi, /requireModuleContext\('clients', 'clients', req\)/);
 assert.match(clientDetailApi, /\.eq\('barbershop_id', t\.barbershopId\)/);
 assert.match(clientDetailApi, /\.eq\('client_id', clientId\)/);
 assert.match(clientDetailApi, /\.from\('appointments'\)/);
 assert.match(clientDetailApi, /\.from\('client_notes'\)/);
+assert.match(clientDetailApi, /customer_tag_assignments/);
+assert.match(clientDetailApi, /customer_tags/);
+assert.match(clientProfile, /updateClientTag/);
+assert.match(clientProfile, /lastVisit/);
+assert.match(clientTagsApi, /requireModuleContext\('advanced_crm', 'clients', req\)/);
+assert.match(clientTagsApi, /customer_tag_assignments/);
+assert.match(clientTagsApi, /customer_tags/);
+assert.match(crmTagsApi, /customer_tags/);
+assert.match(crmMetricsMigration, /get_client_crm_metrics/);
+assert.match(crmMetricsMigration, /p_barbershop_id/);
+assert.match(crmMetricsMigration, /a\.barbershop_id = p_barbershop_id/);
 assert.match(clientNotesApi, /requireModuleContext\('clients', 'clients', req\)/);
 assert.match(clientNotesApi, /author_id: tenant\.userId/);
 assert.match(clientNotesApi, /\.eq\('barbershop_id', tenant\.barbershopId\)/);
