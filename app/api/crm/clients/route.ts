@@ -31,7 +31,7 @@ async function GET__unobserved(req: Request) {
       .eq('role', 'client');
 
     if (search) {
-      const escaped = search.replace(/[,%()]/g, ' ').trim();
+      const escaped = search.replace(/[,%()_*]/g, ' ').trim();
       if (escaped)
         countQuery = countQuery.or(
           `name_complete.ilike.%${escaped}%,name.ilike.%${escaped}%,email.ilike.%${escaped}%,num_phone.ilike.%${escaped}%`,
