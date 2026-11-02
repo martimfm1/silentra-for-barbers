@@ -24,6 +24,7 @@ const [
   clientHistoryMigration,
   agendaPage,
   historyIndexesMigration,
+  posClientHistoryMigration,
 ] = await Promise.all([
   read('app/dashboard/clientes/page.tsx'),
   read('app/dashboard/_components/cards/ClientsListCard.tsx'),
@@ -45,6 +46,7 @@ const [
   read('supabase/migrations/20261102115246_preserve_client_history_references.sql'),
   read('app/dashboard/agenda/page.tsx'),
   read('supabase/migrations/20261102115639_client_service_history_fk_indexes.sql'),
+  read('supabase/migrations/20261102120037_preserve_pos_client_history.sql'),
 ]);
 
 // The standard clients page provides server-side search and pagination.
@@ -114,6 +116,8 @@ assert.match(clientHistoryMigration, /loyalty_transactions[\s\S]*?on delete rest
 assert.match(clientHistoryMigration, /marketing_campaign_recipients[\s\S]*?on delete restrict/i);
 assert.match(historyIndexesMigration, /client_notes_client_fk_idx/);
 assert.match(historyIndexesMigration, /loyalty_transactions_client_fk_idx/);
+assert.match(posClientHistoryMigration, /pos_transactions_client_id_fkey[\s\S]*?on delete restrict/i);
+assert.match(posClientHistoryMigration, /booking_automation_outbox_client_id_fkey[\s\S]*?on delete restrict/i);
 assert.match(clientNotesApi, /requireModuleContext\('clients', 'clients', req\)/);
 assert.match(clientNotesApi, /author_id: tenant\.userId/);
 assert.match(clientNotesApi, /\.eq\('barbershop_id', tenant\.barbershopId\)/);
