@@ -88,7 +88,7 @@ assert.match(clientDetailApi, /\.from\('client_notes'\)/);
 assert.match(clientDetailApi, /customer_tag_assignments/);
 assert.match(clientDetailApi, /customer_tags/);
 assert.match(clientProfile, /updateClientTag/);
-assert.match(clientProfile, /lastVisit/);
+assert.match(clientProfile, /completedAppointments\[0\]/);
 assert.match(clientTagsApi, /requireModuleContext\('advanced_crm', 'clients', req\)/);
 assert.match(clientTagsApi, /customer_tag_assignments/);
 assert.match(clientTagsApi, /customer_tags/);
