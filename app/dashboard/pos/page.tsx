@@ -122,6 +122,7 @@ export default function POSPage() {
         supabase
           .from('services')
           .select('id,name,price,duration')
+          .eq('is_active', true)
           .order('name'),
         supabase
           .from('users')
