@@ -32,7 +32,7 @@ export default function ClientesPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [totalClients, setTotalClients] = useState(0);
   const [searchClientQuery, setSearchClientQuery] = useState('');
-  const [offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState(0);\n  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'visits' | 'spent'>('recent');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -68,7 +68,7 @@ export default function ClientesPage() {
         offset: String(offset),
       });
       const search = searchClientQuery.trim();
-      if (search) params.set('search', search);
+      if (search) params.set('search', search);\n      params.set('sort', sortBy);
 
       const response = await fetch(`/api/crm/clients?${params.toString()}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -104,7 +104,7 @@ export default function ClientesPage() {
     } finally {
       if (!controller.signal.aborted) setLoadingInitial(false);
     }
-  }, [barbershopId, offset, searchClientQuery, t]);
+  }, [barbershopId, offset, searchClientQuery, sortBy, t]);
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
@@ -184,6 +184,8 @@ export default function ClientesPage() {
             onPageChange={(page) =>
               setOffset((page - 1) * CLIENTS_PAGE_SIZE)
             }
+            sortBy={sortBy}
+            setSortBy={(value) => { setSortBy(value); setOffset(0); }}
             loading={loadingClients}
           />
         )}
