@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { toast } from 'sonner';
 import { Client, ClientsListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import type { FormEvent } from 'react';
@@ -17,6 +19,7 @@ import {
   Cake,
   Eye,
   MessageCircle,
+  Copy,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -459,6 +462,28 @@ function ClientItemCard({
             <Mail className="size-4" aria-hidden="true" /> Email
           </a>
         ) : null}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button asChild type="button" variant="outline" className="min-h-10 flex-1 border-blue-500/20 bg-blue-500/[0.05] px-2 text-xs text-blue-200 hover:bg-blue-500/10">
+          <Link href={`/dashboard/agenda?clientId=${encodeURIComponent(client.id)}`}>
+            <UserPlus className="mr-1.5 size-4" aria-hidden="true" />
+            {locale === 'pt' ? 'Marcar' : 'Book'}
+          </Link>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-10 flex-1 border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]"
+          onClick={() => {
+            const details = [client.name_complete, client.num_phone, client.email].filter(Boolean).join('\n');
+            void navigator.clipboard.writeText(details)
+              .then(() => toast.success(locale === 'pt' ? 'Dados do cliente copiados.' : 'Customer details copied.'))
+              .catch(() => toast.error(locale === 'pt' ? 'Não foi possível copiar os dados.' : 'Could not copy customer details.'));
+          }}
+        >
+          <Copy className="mr-1.5 size-4" aria-hidden="true" />
+          {locale === 'pt' ? 'Copiar dados' : 'Copy details'}
+        </Button>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Button
