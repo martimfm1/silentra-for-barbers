@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Clock3, MapPin, Phone } from 'lucide-react';
+
 import { useLanguage } from '@/context/LanguageContext';
 import { DEFAULT_BARBERSHOP_BANNER } from '@/lib/barbershops/default-media';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
@@ -96,7 +96,7 @@ export default function ProBookingPage({
   return (
     <main className="min-h-screen overflow-x-clip bg-[#f7f7f5] text-[#171717]">
       <section
-        className="relative flex min-h-[250px] items-end bg-[#d8d8d2] bg-cover bg-center px-5 pb-12 pt-16 sm:min-h-[330px] sm:pb-16"
+        className="relative flex min-h-[250px] items-center justify-center bg-[#d8d8d2] bg-cover bg-center px-5 py-12 text-center sm:min-h-[330px] sm:pb-16"
         style={{
           backgroundImage: `linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.16)),url("${cover}")`,
         }}
@@ -108,31 +108,7 @@ export default function ProBookingPage({
           <h1 className="mt-3 max-w-2xl break-words text-3xl font-semibold tracking-tight text-white drop-shadow sm:text-5xl">
             {profile.name}
           </h1>
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/85">
-            {(profile.address || profile.city) && (
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin className="size-3.5" aria-hidden="true" />
-                {[profile.address, profile.city].filter(Boolean).join(', ')}
-              </span>
-            )}
-            {profile.phone && (
-              <a
-                href={`tel:${profile.phone}`}
-                className="inline-flex items-center gap-1.5 underline underline-offset-4"
-              >
-                <Phone className="size-3.5" aria-hidden="true" />
-                {profile.phone}
-              </a>
-            )}
-            {(openingTime || closingTime) && (
-              <span className="inline-flex items-center gap-1.5">
-                <Clock3 className="size-3.5" aria-hidden="true" />
-                {openingTime?.slice(0, 5) || '--:--'} –{' '}
-                {closingTime?.slice(0, 5) || '--:--'}
-              </span>
-            )}
-          </div>
-        </div>
+       </div>
       </section>
 
       <section className="relative z-10 mx-auto -mt-7 w-full max-w-3xl px-4 pb-16 sm:px-6">
