@@ -50,6 +50,19 @@ export const servicesService = {
   },
 
   async delete(id: string) {
+    const { data: linkedAppointments, error: lookupError } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('service_id', id)
+      .limit(1);
+    if (lookupError) return { error: lookupError };
+    if (linkedAppointments?.length) {
+      return {
+        error: new Error(
+          'Este serviço tem marcações associadas. Desativa-o para o remover do catálogo sem perder o histórico.',
+        ),
+      };
+    }
     const { error } = await supabase.from('services').delete().eq('id', id);
     return { error };
   },
