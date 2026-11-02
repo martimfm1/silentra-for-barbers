@@ -6,11 +6,14 @@ import {
 } from '@/app/dashboard/_services/clients.service';
 import { getErrorMessage } from '@/app/dashboard/_lib/error-utils';
 import { Client } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function useClients(
   barbershopId: string | null,
   onRefreshData: () => Promise<void>,
 ) {
+  const { locale } = useLanguage();
+  const isPortuguese = locale === 'pt';
   const [loadingClients, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -84,12 +87,14 @@ export function useClients(
     try {
       const { error } = await clientsService.deleteClient(id);
       if (error) throw error;
-      toast.success('Cliente removido com sucesso.');
+      toast.success(isPortuguese ? 'Cliente removido com sucesso.' : 'Customer deleted successfully.');
       await onRefreshData();
     } catch (error) {
       console.error('[Delete Client Hook Error]:', error);
       toast.error(
-        'Não é possível eliminar um cliente com histórico de marcações ou notas internas.',
+        isPortuguese
+          ? 'Não é possível eliminar um cliente com histórico ou outros registos associados.'
+          : 'A customer with booking history or other linked records cannot be deleted.',
       );
     } finally {
       setLoading(false);
