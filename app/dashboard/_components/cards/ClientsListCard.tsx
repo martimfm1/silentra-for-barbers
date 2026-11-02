@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Cake,
   Eye,
+  MessageCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,10 +63,13 @@ export function ClientsListCard({
   loading,
 }: ClientsListCardProps) {
   const { t, locale } = useLanguage();
-  const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
-  const sortedClients = useMemo(() => [...filteredClients].sort((a, b) => sortBy === 'name'
-    ? a.name_complete.localeCompare(b.name_complete, locale === 'pt' ? 'pt-PT' : 'en-GB')
-    : new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime()), [filteredClients, sortBy, locale]);
+  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'visits' | 'spent'>('recent');
+  const sortedClients = useMemo(() => [...filteredClients].sort((a, b) => {
+    if (sortBy === 'name') return a.name_complete.localeCompare(b.name_complete, locale === 'pt' ? 'pt-PT' : 'en-GB');
+    if (sortBy === 'visits') return Number(b.appointment_count ?? 0) - Number(a.appointment_count ?? 0);
+    if (sortBy === 'spent') return Number(b.total_spent ?? 0) - Number(a.total_spent ?? 0);
+    return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
+  }), [filteredClients, sortBy, locale]);
   const hasSearch = searchClientQuery.trim().length > 0;
 
   return (
@@ -111,8 +115,19 @@ export function ClientsListCard({
                 </button>
               )}
             </div>
+            <select
+              aria-label={locale === 'pt' ? 'Ordenar clientes' : 'Sort clients'}
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+              className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
+            >
+              <option value="recent">{locale === 'pt' ? 'Mais recentes' : 'Most recent'}</option>
+              <option value="name">{locale === 'pt' ? 'Nome A–Z' : 'Name A–Z'}</option>
+              <option value="visits">{locale === 'pt' ? 'Mais visitas' : 'Most visits'}</option>
+              <option value="spent">{locale === 'pt' ? 'Maior valor gasto' : 'Highest spend'}</option>
+            </select>
             <Button
-              onClick={() => setShowAddClientForm(true)}
+              onClick={() => setShowAddClientForm(true)
               className="min-h-11 rounded-lg bg-zinc-50 text-zinc-950 hover:bg-white"
             >
               <UserPlus className="mr-2 size-4" />
@@ -404,6 +419,9 @@ function ClientItemCard({
             <p className="mt-1 text-xs text-zinc-500">
               {t('clientsListCard.client')}
             </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              {Number(client.appointment_count ?? 0)} {locale === 'pt' ? 'visitas' : 'visits'} · {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(Number(client.total_spent ?? 0))}
+            </p>
           </div>
         </div>
 
@@ -431,7 +449,24 @@ function ClientItemCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/5 pt-3">
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
+        {client.num_phone ? (
+          <>
+            <a href={`tel:${client.num_phone.replace(/\s/g, '')}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Ligar a ${client.name_complete}` : `Call ${client.name_complete}`}>
+              <Phone className="size-4" aria-hidden="true" /> {locale === 'pt' ? 'Ligar' : 'Call'}
+            </a>
+            <a href={`https://wa.me/${(() => { const digits = client.num_phone.replace(/\D/g, ''); return digits.length === 9 ? `351${digits}` : digits; })()}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2 text-xs text-emerald-200 hover:bg-emerald-500/10" aria-label={locale === 'pt' ? `WhatsApp de ${client.name_complete}` : `${client.name_complete} on WhatsApp`}>
+              <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp
+            </a>
+          </>
+        ) : null}
+        {client.email ? (
+          <a href={`mailto:${client.email}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Enviar email a ${client.name_complete}` : `Email ${client.name_complete}`}>
+            <Mail className="size-4" aria-hidden="true" /> Email
+          </a>
+        ) : null}
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
         <Button
           type="button"
           variant="outline"
