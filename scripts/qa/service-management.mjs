@@ -17,6 +17,12 @@ const [
   posPage,
   serviceTypes,
   referenceMigration,
+  manualAppointmentsApi,
+  mobileServicesApi,
+  crmPlansApi,
+  loyaltyApi,
+  marketingApi,
+  salesPage,
 ] = await Promise.all([
   read('supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql'),
   read('app/dashboard/_components/cards/ServicesListCard.tsx'),
@@ -31,6 +37,12 @@ const [
   read('app/dashboard/pos/page.tsx'),
   read('types/dashboard/entities.ts'),
   read('supabase/migrations/20261102115012_preserve_service_appointment_references.sql'),
+  read('app/api/appointments/route.ts'),
+  read('app/api/mobile/services/route.ts'),
+  read('app/api/crm/clients/[clientId]/plans/route.ts'),
+  read('app/api/loyalty/earning-rules/route.ts'),
+  read('app/api/marketing/campaigns/automation/route.ts'),
+  read('app/barbershops/[slug]/vendas/page.tsx'),
 ]);
 
 assert.match(migration, /add column if not exists is_active boolean not null default true/i);
@@ -55,12 +67,18 @@ assert.match(serviceRepository, /linkedAppointments/);
 assert.match(serviceRepository, /SERVICE_HAS_BOOKINGS/);
 assert.match(serviceTypes, /is_active\?: boolean/);
 
-for (const source of [bookingApi, bookingDataApi, publicApi, publicV1Api, agendaPage, posPage]) {
+for (const source of [bookingApi, bookingDataApi, publicApi, publicV1Api, agendaPage, posPage, manualAppointmentsApi, crmPlansApi, loyaltyApi, marketingApi, salesPage]) {
   assert.match(source, /is_active/);
 }
 assert.match(bookingApi, /\.eq\('is_active', true\)/);
 assert.match(bookingDataApi, /\.eq\('is_active', true\)/);
 assert.match(publicApi, /\.eq\('is_active', true\)/);
 assert.match(publicV1Api, /\.eq\('is_active', true\)/);
+assert.match(manualAppointmentsApi, /\.eq\('is_active', true\)/);
+assert.match(crmPlansApi, /\.eq\('is_active', true\)/);
+assert.match(loyaltyApi, /\.eq\('is_active', true\)/);
+assert.match(marketingApi, /\.eq\('is_active', true\)/);
+assert.match(salesPage, /\.eq\('is_active', true\)/);
+assert.match(mobileServicesApi, /body\.is_active/);
 
 console.log('[SERVICE_MANAGEMENT_QA] archiving, filtering, validation and booking history protection passed');
