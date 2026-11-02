@@ -113,7 +113,9 @@ async function GET__unobserved(req: Request, { params }: Params) {
         upcomingAppointments: upcomingAppointments ?? [],
         totalSpent: Math.round(completedAppointmentsTotal * 100) / 100,
         notes: notes ?? [],
-        tags: tags ?? [],
+        tags: (tags ?? [])
+          .map((assignment) => assignment.customer_tags)
+          .filter(Boolean),
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
