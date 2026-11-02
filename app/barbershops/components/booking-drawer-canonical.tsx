@@ -197,15 +197,12 @@ export function BookingDrawerCanonical({
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  const availableDays = useMemo(
-    () =>
-      days.filter(
-        (day) => !closedDays.has(new Date(`${day.dateStr}T12:00:00`).getDay()),
-      ),
-    [days, closedDays],
-  );
+  // Keep closed days visible so customers can understand the shop schedule.
+  const availableDays = days;
   const currentDay = availableDays[dayIndex] ?? availableDays[0] ?? null;
-  const currentDayClosed = !currentDay;
+  const currentDayClosed = !currentDay || closedDays.has(
+    new Date(currentDay.dateStr + 'T12:00:00').getDay(),
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -655,16 +652,19 @@ export function BookingDrawerCanonical({
                 </div>
                 {availableDays.length ? (
                   <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {availableDays.map((day, index) => (
+                    {availableDays.map((day, index) => {
+                      const isDayOff = closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay());
+                      return (
                       <button
                         key={day.dateStr}
                         type="button"
                         aria-pressed={dayIndex === index}
+                        aria-label={day.fullDateFormatted + (isDayOff ? (locale === 'pt' ? ', folga' : ', day off') : '')}
                         onClick={() => {
                           setDayIndex(index);
                           setSelectedSlot(null);
                         }}
-                        className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                        className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isDayOff ? 'border-rose-400/35 bg-rose-400/[0.08] text-rose-200 hover:border-rose-300/50' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                       >
                         <span className="block text-[10px] font-semibold text-zinc-500">
                           {day.isToday
@@ -676,15 +676,21 @@ export function BookingDrawerCanonical({
                         <span className="mt-1 block text-xl font-black">
                           {day.dayNumeric}
                         </span>
-                        <span className="mt-1 block text-[10px] text-zinc-500">
-                          {day.fullDateFormatted.split(' ')[2] ?? ''}
+                        <span className={`mt-1 block text-[10px] ${isDayOff ? 'font-semibold text-rose-300' : 'text-zinc-500'}`}>
+                          {isDayOff ? (locale === 'pt' ? 'Folga' : 'Day off') : (day.fullDateFormatted.split(' ')[2] ?? '')}
                         </span>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
                     {t('bookingDrawer.noOpenDays')}
+                  </p>
+                )}
+                {currentDayClosed && currentDay && (
+                  <p role="status" className="mt-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-3 py-2.5 text-xs font-medium text-rose-200">
+                    {locale === 'pt' ? 'A barbearia está de folga neste dia. Escolhe outra data para continuar.' : 'The barbershop is closed on this day. Choose another date to continue.'}
                   </p>
                 )}
               </div>
