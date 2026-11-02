@@ -89,7 +89,7 @@ export function useClients(
     } catch (error) {
       console.error('[Delete Client Hook Error]:', error);
       toast.error(
-        'Impossível remover. O cliente pode conter marcações ativas.',
+        'Não é possível eliminar um cliente com histórico de marcações ou notas internas.',
       );
     } finally {
       setLoading(false);
