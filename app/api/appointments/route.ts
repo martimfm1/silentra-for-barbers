@@ -395,6 +395,7 @@ async function POST__unobserved(request: Request) {
       .select('id,duration')
       .eq('id', serviceId)
       .eq('barbershop_id', barbershopId)
+      .eq('is_active', true)
       .maybeSingle();
     if (!service)
       return NextResponse.json(
