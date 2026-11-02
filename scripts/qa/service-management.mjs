@@ -16,6 +16,7 @@ const [
   agendaPage,
   posPage,
   serviceTypes,
+  referenceMigration,
 ] = await Promise.all([
   read('supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql'),
   read('app/dashboard/_components/cards/ServicesListCard.tsx'),
@@ -29,6 +30,7 @@ const [
   read('app/agendadovictor/page.tsx'),
   read('app/dashboard/pos/page.tsx'),
   read('types/dashboard/entities.ts'),
+  read('supabase/migrations/20261102115012_preserve_service_appointment_references.sql'),
 ]);
 
 assert.match(migration, /add column if not exists is_active boolean not null default true/i);
@@ -38,6 +40,8 @@ assert.match(migration, /get_client_crm_metrics/);
 assert.match(migration, /appointment_count/);
 assert.match(migration, /total_spent/);
 assert.match(migration, /last_visit/);
+assert.match(referenceMigration, /on delete restrict/i);
+assert.match(referenceMigration, /validate constraint appointments_service_id_fkey/i);
 
 assert.match(serviceCard, /statusFilter/);
 assert.match(serviceCard, /'active' \| 'inactive'/);
