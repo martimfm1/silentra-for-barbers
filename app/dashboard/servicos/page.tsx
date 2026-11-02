@@ -58,6 +58,7 @@ export default function ServicosPage() {
     handleCreateService,
     handleUpdateService,
     handleDeleteService,
+    handleToggleServiceActive,
   } = useServices(barbershopId, fetchServices);
 
   return (
@@ -84,6 +85,7 @@ export default function ServicosPage() {
             handleCreateService={handleCreateService}
             setEditingService={setEditingService}
             handleDeleteService={handleDeleteService}
+            handleToggleServiceActive={handleToggleServiceActive}
             loading={loadingService}
           />
         )}
