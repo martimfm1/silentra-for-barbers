@@ -402,6 +402,8 @@ function ClientItemCard({
   onViewClient,
 }: ClientItemCardProps) {
   const { t, locale } = useLanguage();
+  const phoneDigits = client.num_phone?.replace(/\D/g, '') ?? '';
+  const whatsappNumber = phoneDigits.length === 9 ? `351${phoneDigits}` : phoneDigits;
   return (
     <article className="group flex min-h-[190px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-blue-500/30 hover:bg-white/[0.045]">
       <div>
@@ -450,12 +452,12 @@ function ClientItemCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
-        {client.num_phone ? (
+        {client.num_phone && phoneDigits.length >= 7 ? (
           <>
-            <a href={`tel:${client.num_phone.replace(/\s/g, '')}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Ligar a ${client.name_complete}` : `Call ${client.name_complete}`}>
+            <a href={`tel:${client.num_phone.replace(/[^\d+]/g, '')}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Ligar a ${client.name_complete}` : `Call ${client.name_complete}`}>
               <Phone className="size-4" aria-hidden="true" /> {locale === 'pt' ? 'Ligar' : 'Call'}
             </a>
-            <a href={`https://wa.me/${(() => { const digits = client.num_phone.replace(/\D/g, ''); return digits.length === 9 ? `351${digits}` : digits; })()}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2 text-xs text-emerald-200 hover:bg-emerald-500/10" aria-label={locale === 'pt' ? `WhatsApp de ${client.name_complete}` : `${client.name_complete} on WhatsApp`}>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2 text-xs text-emerald-200 hover:bg-emerald-500/10" aria-label={locale === 'pt' ? `WhatsApp de ${client.name_complete}` : `${client.name_complete} on WhatsApp`}>
               <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp
             </a>
           </>
