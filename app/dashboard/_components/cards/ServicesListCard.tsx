@@ -326,7 +326,7 @@ function ServiceItemCard({
   handleDeleteService,
   onDuplicate,
 }: ServiceItemCardProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   return (
     <article className="group flex min-h-[150px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-amber-500/30 hover:bg-white/[0.045]">
       <div>
