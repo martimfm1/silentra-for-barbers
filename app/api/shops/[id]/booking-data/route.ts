@@ -140,7 +140,7 @@ async function GET__unobserved(
       admin.rpc('get_effective_billing_plan_for_barbershop', {
         p_barbershop_id: barbershopId,
       }),
-      admin.from('services').select('*').eq('barbershop_id', barbershopId),
+      admin.from('services').select('*').eq('barbershop_id', barbershopId).eq('is_active', true),
       admin
         .from('professionals')
         .select('id, name, active')
@@ -202,7 +202,8 @@ async function GET__unobserved(
       const legacy = await admin
         .from('services')
         .select('*')
-        .eq('shop_id', shopId);
+        .eq('shop_id', shopId)
+        .eq('is_active', true);
       if (legacy.error && legacy.error.code !== '42703')
         return NextResponse.json(
           { error: 'Não foi possível carregar os serviços.' },
