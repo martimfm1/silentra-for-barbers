@@ -96,6 +96,7 @@ async function GET__unobserved(request: Request) {
       .from('services')
       .select('id,name,price,duration')
       .eq('barbershop_id', tenant.barbershopId)
+      .eq('is_active', true)
       .order('name', { ascending: true }),
   ]);
 
