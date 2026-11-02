@@ -26,7 +26,8 @@ async function GET__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients', req);
     const url = new URL(req.url);
-    const search = (url.searchParams.get('search')?.trim().slice(0, 80) ?? '').replace(/[,%()_*]/g, ' ').trim();
+    const search = url.searchParams.get('search')?.trim().slice(0, 80) ?? '';
+    const normalizedSearch = search.replace(/[,%()_*]/g, ' ').trim();
     const parsedLimit = Number(url.searchParams.get('limit') ?? 50);
     const parsedOffset = Number(url.searchParams.get('offset') ?? 0);
     const limit = Number.isFinite(parsedLimit)
@@ -45,9 +46,9 @@ async function GET__unobserved(req: Request) {
       .eq('barbershop_id', tenant.barbershopId)
       .eq('role', 'client');
 
-    if (search) {
+    if (normalizedSearch) {
       countQuery = countQuery.or(
-        `name_complete.ilike.%${search}%,name.ilike.%${search}%,email.ilike.%${search}%,num_phone.ilike.%${search}%`,
+        `name_complete.ilike.%${normalizedSearch}%,name.ilike.%${normalizedSearch}%,email.ilike.%${normalizedSearch}%,num_phone.ilike.%${normalizedSearch}%`,
       );
     }
 
@@ -55,7 +56,7 @@ async function GET__unobserved(req: Request) {
       countQuery,
       tenant.admin.rpc('get_crm_clients_page', {
         p_barbershop_id: tenant.barbershopId,
-        p_search: search,
+        p_search: normalizedSearch,
         p_sort: sort,
         p_limit: limit,
         p_offset: offset,
