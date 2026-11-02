@@ -70,6 +70,9 @@ jobs:
       - name: Client plans and booking spend contracts
         run: pnpm qa:client-plans
 
+      - name: Service management, archiving and booking contracts
+        run: pnpm qa:service-management
+
       - name: Minimum booking notice contracts
         run: pnpm qa:minimum-booking-notice
 
