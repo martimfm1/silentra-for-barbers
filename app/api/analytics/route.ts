@@ -94,15 +94,51 @@ async function GET__unobserved(request: Request) {
         { status: 400 },
       );
 
-    const { data: appointments, error: appointmentsError } = await admin
-      .from('appointments')
-      .select(
-        'id,date_hour,status,value_products,client_id,manual_birth_date,service:services(name,price),professional:professionals(name),user:users(birth_date)',
-      )
-      .eq('barbershop_id', barbershopId)
-      .gte('date_hour', from.toISOString())
-      .lte('date_hour', to.toISOString());
+    const previousTo = new Date(from.getTime() - 1);
+    const previousFrom = new Date(
+      previousTo.getTime() - (to.getTime() - from.getTime()),
+    );
+
+    // These reads are independent: issue them together to avoid serial
+    // PostgREST round-trips on the analytics dashboard hot path.
+    const [
+      { data: appointments, error: appointmentsError },
+      { count: newClients, error: clientsError },
+      { count: totalClients, error: totalClientsError },
+      { data: previousAppointments, error: previousError },
+    ] = await Promise.all([
+      admin
+        .from('appointments')
+        .select(
+          'id,date_hour,status,value_products,client_id,manual_birth_date,service:services(name,price),professional:professionals(name),user:users(birth_date)',
+        )
+        .eq('barbershop_id', barbershopId)
+        .gte('date_hour', from.toISOString())
+        .lte('date_hour', to.toISOString()),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client')
+        .gte('created_at', from.toISOString())
+        .lte('created_at', to.toISOString()),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client'),
+      admin
+        .from('appointments')
+        .select('status,value_products,service:services(price)')
+        .eq('barbershop_id', barbershopId)
+        .gte('date_hour', previousFrom.toISOString())
+        .lte('date_hour', previousTo.toISOString()),
+    ]);
+
     if (appointmentsError) throw appointmentsError;
+    if (clientsError) throw clientsError;
+    if (totalClientsError) throw totalClientsError;
+    if (previousError) throw previousError;
     const rows = (appointments ?? []) as unknown as AppointmentRow[];
     const completed = rows.filter((row) => row.status === 'completed');
     const scheduled = rows.filter((row) => row.status === 'scheduled');
@@ -170,20 +206,6 @@ async function GET__unobserved(request: Request) {
     const ageInsights: AgeGroup[] = orderedAgeLabels
       .map((label) => ({ label, count: clientAgeGroups.get(label)?.size ?? 0 }))
       .filter((item) => item.count > 0);
-    const { count: newClients, error: clientsError } = await admin
-      .from('users')
-      .select('id', { count: 'exact', head: true })
-      .eq('barbershop_id', barbershopId)
-      .eq('role', 'client')
-      .gte('created_at', from.toISOString())
-      .lte('created_at', to.toISOString());
-    if (clientsError) throw clientsError;
-    const { count: totalClients, error: totalClientsError } = await admin
-      .from('users')
-      .select('id', { count: 'exact', head: true })
-      .eq('barbershop_id', barbershopId)
-      .eq('role', 'client');
-    if (totalClientsError) throw totalClientsError;
     const revenue = money(
       completed.reduce(
         (sum, row) =>
@@ -193,17 +215,6 @@ async function GET__unobserved(request: Request) {
         0,
       ),
     );
-    const previousTo = new Date(from.getTime() - 1);
-    const previousFrom = new Date(
-      previousTo.getTime() - (to.getTime() - from.getTime()),
-    );
-    const { data: previousAppointments, error: previousError } = await admin
-      .from('appointments')
-      .select('status,value_products,service:services(price)')
-      .eq('barbershop_id', barbershopId)
-      .gte('date_hour', previousFrom.toISOString())
-      .lte('date_hour', previousTo.toISOString());
-    if (previousError) throw previousError;
     const previousRevenue = money(
       (
         (previousAppointments ?? []) as unknown as Array<{

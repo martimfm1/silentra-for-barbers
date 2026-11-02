@@ -21,6 +21,7 @@ const [
   adminObservabilityApi,
   clientDetailApi,
   bookingDataApi,
+  analyticsApi,
   moduleAuthorization,
   planAccessGuard,
   subscriptionService,
@@ -42,6 +43,7 @@ const [
   read('app/api/silentra-admin/observability/route.ts'),
   read('app/api/crm/clients/[clientId]/route.ts'),
   read('app/api/shops/[id]/booking-data/route.ts'),
+  read('app/api/analytics/route.ts'),
   read('services/modules/authorization.ts'),
   read('services/billing/plan-access.guard.ts'),
   read('services/billing/subscription.service.ts'),
@@ -172,6 +174,13 @@ assert.doesNotMatch(
   /createClient\(|@\/lib\/supabase\/server/,
   'Public booking availability must not create an unused SSR auth client.',
 );
+assert.ok(
+  analyticsApi.includes('await Promise.all([') &&
+    (analyticsApi.match(/from\('appointments'\)/g) ?? []).length >= 2 &&
+    (analyticsApi.match(/from\('users'\)/g) ?? []).length >= 2,
+  'Analytics must execute current appointments, client counts and previous-period reads concurrently.',
+);
+
 assert.match(
   planAccessGuard,
   /getAccessContextForUser\(\s*userId,\s*permissionKeys/,
