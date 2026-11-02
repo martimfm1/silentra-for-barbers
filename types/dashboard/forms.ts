@@ -99,6 +99,7 @@ export interface ServicesListCardProps {
   handleCreateService: (event: FormEvent) => Promise<boolean> | boolean;
   setEditingService: (service: Service | null) => void;
   handleDeleteService: (serviceId: string) => Promise<void> | void;
+  handleToggleServiceActive: (service: Service) => Promise<void> | void;
   loading: boolean;
 }
 export interface ManualMessageFormProps {
