@@ -9,6 +9,7 @@ import {
   Scissors,
   StickyNote,
   UserRound,
+  Tag,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/context/LanguageContext';
@@ -54,7 +55,7 @@ type Appointment = {
   professionals?: Relation<{ name?: string | null }>;
 };
 
-type ClientNote = {
+type ClientTag = {\n  id: string;\n  name: string;\n  color?: string | null;\n};\n\ntype ClientNote = {
   id: string;
   content: string;
   author_id?: string | null;
@@ -68,6 +69,7 @@ type ClientDetails = {
   upcomingAppointments: Appointment[];
   totalSpent: number;
   notes: ClientNote[];
+  tags: ClientTag[];
 };
 
 interface ClientDetailsDialogProps {
@@ -142,7 +144,7 @@ export function ClientDetailsDialog({
 }: ClientDetailsDialogProps) {
   const { t, locale } = useLanguage();
   const [details, setDetails] = useState<ClientDetails | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');
+  const [noteDraft, setNoteDraft] = useState('');\n  const [availableTags, setAvailableTags] = useState<ClientTag[]>([]);\n  const [selectedTagId, setSelectedTagId] = useState('');\n  const [savingTag, setSavingTag] = useState(false);
   const [loading, setLoading] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,8 +160,7 @@ export function ClientDetailsDialog({
 
     void (async () => {
       try {
-        const response = await fetch(`/api/crm/clients/${clientId}`, {
-          headers: await authHeaders(false, t('crm.sessionExpired')),
+        const headers = await authHeaders(false, t('crm.sessionExpired'));\n        const response = await fetch(`/api/crm/clients/${clientId}`, {\n          headers,
           cache: 'no-store',
           signal: controller.signal,
         });
@@ -179,8 +180,7 @@ export function ClientDetailsDialog({
               ? json.upcomingAppointments
               : [],
             totalSpent: Number(json.totalSpent) || 0,
-            notes: Array.isArray(json.notes) ? json.notes : [],
-          });
+            notes: Array.isArray(json.notes) ? json.notes : [],\n            tags: Array.isArray(json.tags) ? json.tags : [],\n          });\n          const tagsResponse = await fetch('/api/crm/tags', { headers, cache: 'no-store', signal: controller.signal });\n          if (tagsResponse.ok) {\n            const tagsPayload = await tagsResponse.json();\n            setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);\n          }
         }
       } catch (requestError) {
         if (controller.signal.aborted) return;
@@ -196,6 +196,36 @@ export function ClientDetailsDialog({
 
     return () => controller.abort();
   }, [clientId, open, t]);
+
+  async function updateClientTag(tagId: string, action: 'add' | 'remove') {
+    if (!clientId || !tagId || savingTag) return;
+    setSavingTag(true);
+    try {
+      const headers = await authHeaders(action === 'add', t('crm.sessionExpired'));
+      const response = await fetch(
+        `/api/crm/clients/${clientId}/tags${action === 'remove' ? `?tagId=${encodeURIComponent(tagId)}` : ''}`,
+        {
+          method: action === 'add' ? 'POST' : 'DELETE',
+          headers,
+          ...(action === 'add' ? { body: JSON.stringify({ tagId }) } : {}),
+        },
+      );
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error ?? (locale === 'pt' ? 'Não foi possível atualizar as etiquetas.' : 'Could not update tags.'));
+      const tag = availableTags.find((item) => item.id === tagId);
+      setDetails((current) => current
+        ? { ...current, tags: action === 'add'
+            ? [...current.tags.filter((item) => item.id !== tagId), ...(tag ? [tag] : [])]
+            : current.tags.filter((item) => item.id !== tagId) }
+        : current);
+      setSelectedTagId('');
+      toast.success(locale === 'pt' ? 'Etiquetas atualizadas.' : 'Tags updated.');
+    } catch (tagError) {
+      toast.error(tagError instanceof Error ? tagError.message : (locale === 'pt' ? 'Erro ao atualizar etiquetas.' : 'Could not update tags.'));
+    } finally {
+      setSavingTag(false);
+    }
+  }
 
   async function addNote(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -239,7 +269,7 @@ export function ClientDetailsDialog({
   const client = details?.client;
   const appointments = details?.appointments ?? [];
   const upcomingAppointments = details?.upcomingAppointments ?? [];
-  const notes = details?.notes ?? [];
+  const notes = details?.notes ?? [];\n  const tags = details?.tags ?? [];
   const completedAppointments = appointments.filter(
     (appointment) => appointment.status === 'completed',
   );
@@ -285,7 +315,7 @@ export function ClientDetailsDialog({
         ) : client ? (
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)]">
             <section className="min-w-0 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <Card className="border-white/10 bg-white/[0.03]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
@@ -313,6 +343,14 @@ export function ClientDetailsDialog({
                     </p>
                     <p className="mt-1 text-xl font-semibold tabular-nums">
                       {formatCurrency(totalSpent, locale)}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="border-white/10 bg-white/[0.03]">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-zinc-500">{locale === 'pt' ? 'Última visita' : 'Last visit'}</p>
+                    <p className="mt-1 text-sm font-semibold tabular-nums">
+                      {completedAppointments[0] ? formatDate(completedAppointments[0].date_hour, locale) : '—'}
                     </p>
                   </CardContent>
                 </Card>
@@ -509,6 +547,34 @@ export function ClientDetailsDialog({
                 </Card>
               ) : null}
 
+              <Card className="border-white/10 bg-white/[0.03]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Tag className="size-5 text-blue-400" />
+                    {locale === 'pt' ? 'Etiquetas do cliente' : 'Customer tags'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.length ? tags.map((tag) => (
+                      <span key={tag.id} className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/[0.08] px-3 py-1.5 text-xs text-blue-100">
+                        {tag.name}
+                        <button type="button" disabled={savingTag} onClick={() => void updateClientTag(tag.id, 'remove')} aria-label={locale === 'pt' ? `Remover etiqueta ${tag.name}` : `Remove tag ${tag.name}`} className="rounded-full p-0.5 text-blue-200/70 hover:bg-white/10 hover:text-white">×</button>
+                      </span>
+                    )) : <p className="text-xs text-zinc-500">{locale === 'pt' ? 'Ainda não existem etiquetas associadas.' : 'No tags assigned yet.'}</p>}
+                  </div>
+                  {availableTags.filter((tag) => !tags.some((assigned) => assigned.id === tag.id)).length ? (
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <select value={selectedTagId} onChange={(event) => setSelectedTagId(event.target.value)} disabled={savingTag} aria-label={locale === 'pt' ? 'Escolher etiqueta' : 'Choose tag'} className="min-h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
+                        <option value="">{locale === 'pt' ? 'Selecionar etiqueta…' : 'Select a tag…'}</option>
+                        {availableTags.filter((tag) => !tags.some((assigned) => assigned.id === tag.id)).map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+                      </select>
+                      <Button type="button" disabled={!selectedTagId || savingTag} onClick={() => void updateClientTag(selectedTagId, 'add')} className="min-h-10">{locale === 'pt' ? 'Adicionar etiqueta' : 'Add tag'}</Button>
+                    </div>
+                  ) : null}
+                  {availableTags.length === 0 ? <p className="text-xs text-zinc-500">{locale === 'pt' ? 'As etiquetas avançadas não estão disponíveis neste plano ou ainda não foram criadas.' : 'Advanced tags are unavailable on this plan or have not been created yet.'}</p> : null}
+                </CardContent>
+              </Card>
               <Card className="border-white/10 bg-white/[0.03]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
