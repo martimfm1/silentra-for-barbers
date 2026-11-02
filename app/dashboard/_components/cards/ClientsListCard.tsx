@@ -127,7 +127,7 @@ export function ClientsListCard({
               <option value="spent">{locale === 'pt' ? 'Maior valor gasto' : 'Highest spend'}</option>
             </select>
             <Button
-              onClick={() => setShowAddClientForm(true)
+              onClick={() => setShowAddClientForm(true)}
               className="min-h-11 rounded-lg bg-zinc-50 text-zinc-950 hover:bg-white"
             >
               <UserPlus className="mr-2 size-4" />
