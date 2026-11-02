@@ -73,6 +73,8 @@ assert.match(clientsListApi, /name_complete\.ilike/);
 assert.match(clientsListApi, /email\.ilike/);
 assert.match(clientsListApi, /num_phone\.ilike/);
 assert.match(clientsListApi, /get_crm_clients_page/);
+assert.match(clientsListApi, /p_sort: sort/);
+assert.match(clientsPage, /params\.set\('sort', sortBy\)/);
 assert.match(clientsListApi, /appointment_count/);
 assert.match(clientsListApi, /total_spent/);
 assert.match(clientsCard, /value="visits"/);
