@@ -704,17 +704,16 @@ const checks = [
       source.includes('shop={bookingShop}'),
   },
   {
-    name: 'Booking drawer keeps closed weekdays visible, labels them and blocks continuation',
+    name: 'Booking drawer hides configured closed weekdays for every appearance',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
-      const normalized = source.replace(/\s+/g, ' ').trim();
+      const normalized = source.replace(/\\s+/g, ' ').trim();
       return (
-        normalized.includes('const availableDays = days;') &&
-        normalized.includes('const currentDayClosed = !currentDay || closedDays.has(') &&
+        normalized.includes('const availableDays = useMemo(') &&
+        normalized.includes('days.filter((day) => !closedDays.has(new Date(day.dateStr + \'T12:00:00\').getDay()))') &&
+        normalized.includes('const currentDay = availableDays[dayIndex] ?? availableDays[0] ?? null;') &&
         normalized.includes('availableDays.map((day, index)') &&
-        normalized.includes('const isDayOff = closedDays.has(') &&
-        normalized.includes("locale === 'pt' ? 'Folga' : 'Day off'") &&
-        normalized.includes('if (currentDayClosed) return toast.error(t(\'bookingDrawer.chooseOpenDay\'))') &&
+        normalized.includes('if (currentDayClosed) return toast.error(t(\\'bookingDrawer.chooseOpenDay\\'))') &&
         normalized.includes('data-booking-theme={appearance}')
       );
     },
