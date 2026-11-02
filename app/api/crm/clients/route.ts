@@ -47,8 +47,34 @@ async function GET__unobserved(req: Request) {
         { status: 500 },
       );
     }
+    const clientRows = data ?? [];
+    const metricsResult = clientRows.length
+      ? await tenant.admin.rpc('get_client_crm_metrics', {
+          p_barbershop_id: tenant.barbershopId,
+          p_client_ids: clientRows.map((client) => client.id),
+        })
+      : { data: [], error: null };
+    if (metricsResult.error) {
+      console.error('[CRM_CLIENT_METRICS_ERROR]', metricsResult.error.code ?? 'UNKNOWN');
+      return NextResponse.json(
+        { error: 'Não foi possível calcular as métricas dos clientes.' },
+        { status: 503 },
+      );
+    }
+    const metricsByClient = new Map(
+      (metricsResult.data ?? []).map((metric) => [metric.client_id, metric]),
+    );
+    const clients = clientRows.map((client) => {
+      const metrics = metricsByClient.get(client.id);
+      return {
+        ...client,
+        appointment_count: Number(metrics?.appointment_count ?? 0),
+        total_spent: Number(metrics?.total_spent ?? 0),
+        last_visit: metrics?.last_visit ?? null,
+      };
+    });
     return NextResponse.json(
-      { clients: data ?? [], total: count ?? 0, limit, offset },
+      { clients, total: count ?? 0, limit, offset },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
