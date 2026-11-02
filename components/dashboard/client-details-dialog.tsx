@@ -588,7 +588,9 @@ export function ClientDetailsDialog({
                     {tags.length ? tags.map((tag) => (
                       <span key={tag.id} className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/[0.08] px-3 py-1.5 text-xs text-blue-100">
                         {tag.name}
-                        <button type="button" disabled={savingTag} onClick={() => void updateClientTag(tag.id, 'remove')} aria-label={locale === 'pt' ? `Remover etiqueta ${tag.name}` : `Remove tag ${tag.name}`} className="rounded-full p-0.5 text-blue-200/70 hover:bg-white/10 hover:text-white">×</button>
+                        {availableTags.some((availableTag) => availableTag.id === tag.id) ? (
+                          <button type="button" disabled={savingTag} onClick={() => void updateClientTag(tag.id, 'remove')} aria-label={locale === 'pt' ? `Remover etiqueta ${tag.name}` : `Remove tag ${tag.name}`} className="rounded-full p-0.5 text-blue-200/70 hover:bg-white/10 hover:text-white">×</button>
+                        ) : null}
                       </span>
                     )) : <p className="text-xs text-zinc-500">{locale === 'pt' ? 'Ainda não existem etiquetas associadas.' : 'No tags assigned yet.'}</p>}
                   </div>
