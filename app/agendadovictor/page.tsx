@@ -46,6 +46,7 @@ export default async function AgendaDoVictorRoute() {
       .from('services')
       .select('id,name,price,duration')
       .eq('barbershop_id', profile.barbershop_id)
+      .eq('is_active', true)
       .order('name', { ascending: true }),
     database
       .from('shops')
