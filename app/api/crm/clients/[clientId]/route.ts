@@ -66,8 +66,8 @@ async function GET__unobserved(req: Request, { params }: Params) {
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       t.admin
-        .from('client_tag_assignments')
-        .select('tag_id, client_tags(id, name)')
+        .from('customer_tag_assignments')
+        .select('tag_id, customer_tags(id, name, color)')
         .eq('barbershop_id', t.barbershopId)
         .eq('client_id', clientId),
       t.admin.rpc('get_client_completed_total_spent', {
