@@ -153,12 +153,18 @@ export function useServices(
         await onRefreshData();
       } catch (error) {
         console.error('❌ [Delete Service Hook Error]:', error);
-        const message =
-          error instanceof Error && error.message === 'SERVICE_HAS_BOOKINGS'
-            ? (isPortuguese
-                ? 'Não é possível remover um serviço com marcações associadas. Desativa-o para o retirar do catálogo.'
-                : 'A service linked to bookings cannot be deleted. Deactivate it to remove it from the catalogue.')
-            : getErrorMessage(error);
+        const errorCode =
+          typeof error === 'object' && error !== null && 'code' in error
+            ? String(error.code)
+            : '';
+        const hasLinkedHistory =
+          errorCode === '23503' ||
+          (error instanceof Error && error.message === 'SERVICE_HAS_BOOKINGS');
+        const message = hasLinkedHistory
+          ? (isPortuguese
+              ? 'Não é possível remover um serviço com histórico associado. Desativa-o para o retirar do catálogo.'
+              : 'A service with linked history cannot be deleted. Deactivate it to remove it from the catalogue.')
+          : getErrorMessage(error);
         toast.error(message);
       } finally {
         setLoading(false);
