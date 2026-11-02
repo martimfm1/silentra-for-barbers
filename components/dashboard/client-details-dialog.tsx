@@ -196,10 +196,18 @@ export function ClientDetailsDialog({
             notes: Array.isArray(json.notes) ? json.notes : [],
             tags: Array.isArray(json.tags) ? json.tags : [],
           });
-          const tagsResponse = await fetch('/api/crm/tags', { headers, cache: 'no-store', signal: controller.signal });
-          if (tagsResponse.ok) {
-            const tagsPayload = await tagsResponse.json();
-            setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);
+          try {
+            const tagsResponse = await fetch('/api/crm/tags', {
+              headers,
+              cache: 'no-store',
+              signal: controller.signal,
+            });
+            if (tagsResponse.ok) {
+              const tagsPayload = await tagsResponse.json();
+              setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);
+            }
+          } catch {
+            if (!controller.signal.aborted) setAvailableTags([]);
           }
         }
       } catch (requestError) {
