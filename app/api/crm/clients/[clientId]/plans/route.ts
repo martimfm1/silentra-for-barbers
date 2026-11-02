@@ -122,6 +122,7 @@ async function validateServices(
     .from('services')
     .select('id')
     .eq('barbershop_id', barbershopId)
+    .eq('is_active', true)
     .in('id', serviceIds);
   return !error && (data?.length ?? 0) === serviceIds.length;
 }
@@ -187,6 +188,7 @@ async function GET__unobserved(req: Request, { params }: Params) {
           .from('services')
           .select('id, name')
           .eq('barbershop_id', tenant.barbershopId)
+          .eq('is_active', true)
           .order('name', { ascending: true }),
       ]);
 
