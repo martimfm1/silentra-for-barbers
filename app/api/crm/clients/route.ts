@@ -21,60 +21,55 @@ async function GET__unobserved(req: Request) {
       ? Math.min(Math.max(Math.trunc(parsedOffset), 0), 100_000)
       : 0;
 
-    let query = tenant.admin
+    const sort = ['name', 'visits', 'spent'].includes(url.searchParams.get('sort') ?? '')
+      ? url.searchParams.get('sort')!
+      : 'recent';
+    let countQuery = tenant.admin
       .from('users')
-      .select('id,name_complete,name,email,num_phone,birth_date,style_notes,created_at', {
-        count: 'exact',
-      })
+      .select('id', { count: 'exact', head: true })
       .eq('barbershop_id', tenant.barbershopId)
-      .eq('role', 'client')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .eq('role', 'client');
 
     if (search) {
       const escaped = search.replace(/[,%()]/g, ' ').trim();
       if (escaped)
-        query = query.or(
+        countQuery = countQuery.or(
           `name_complete.ilike.%${escaped}%,name.ilike.%${escaped}%,email.ilike.%${escaped}%,num_phone.ilike.%${escaped}%`,
         );
     }
 
-    const { data, count, error } = await query;
-    if (error) {
-      console.error('[CRM_CLIENTS_LIST_ERROR]', error);
+    const [{ count, error: countError }, { data, error }] = await Promise.all([
+      countQuery,
+      tenant.admin.rpc('get_crm_clients_page', {
+        p_barbershop_id: tenant.barbershopId,
+        p_search: search,
+        p_sort: sort,
+        p_limit: limit,
+        p_offset: offset,
+      }),
+    ]);
+    if (countError || error) {
+      console.error('[CRM_CLIENTS_LIST_ERROR]', countError?.code ?? error?.code ?? 'UNKNOWN');
       return NextResponse.json(
         { error: 'Não foi possível carregar os clientes.' },
-        { status: 500 },
-      );
-    }
-    const clientRows = data ?? [];
-    const metricsResult = clientRows.length
-      ? await tenant.admin.rpc('get_client_crm_metrics', {
-          p_barbershop_id: tenant.barbershopId,
-          p_client_ids: clientRows.map((client) => client.id),
-        })
-      : { data: [], error: null };
-    if (metricsResult.error) {
-      console.error('[CRM_CLIENT_METRICS_ERROR]', metricsResult.error.code ?? 'UNKNOWN');
-      return NextResponse.json(
-        { error: 'Não foi possível calcular as métricas dos clientes.' },
         { status: 503 },
       );
     }
-    const metricsByClient = new Map(
-      (metricsResult.data ?? []).map((metric) => [metric.client_id, metric]),
-    );
-    const clients = clientRows.map((client) => {
-      const metrics = metricsByClient.get(client.id);
-      return {
-        ...client,
-        appointment_count: Number(metrics?.appointment_count ?? 0),
-        total_spent: Number(metrics?.total_spent ?? 0),
-        last_visit: metrics?.last_visit ?? null,
-      };
-    });
+    const clients = (data ?? []).map((client) => ({
+      id: client.client_id,
+      name_complete: client.name_complete,
+      name: client.name,
+      email: client.email,
+      num_phone: client.num_phone,
+      birth_date: client.birth_date,
+      style_notes: client.style_notes,
+      created_at: client.created_at,
+      appointment_count: Number(client.appointment_count ?? 0),
+      total_spent: Number(client.total_spent ?? 0),
+      last_visit: client.last_visit ?? null,
+    }));
     return NextResponse.json(
-      { clients, total: count ?? 0, limit, offset },
+      { clients, total: count ?? 0, limit, offset, sort },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
