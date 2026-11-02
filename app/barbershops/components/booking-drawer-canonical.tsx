@@ -669,9 +669,11 @@ export function BookingDrawerCanonical({
                         aria-pressed={dayIndex === index}
                         aria-label={day.fullDateFormatted + (isDayOff ? (locale === 'pt' ? ', folga' : ', day off') : '')}
                         onClick={() => {
+                          if (isDayOff) return;
                           setDayIndex(index);
                           setSelectedSlot(null);
                         }}
+                        disabled={isDayOff}
                         className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isDayOff ? 'border-rose-400/35 bg-rose-400/[0.08] text-rose-200 hover:border-rose-300/50' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                       >
                         <span className="block text-[10px] font-semibold text-zinc-500">
