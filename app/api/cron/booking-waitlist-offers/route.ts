@@ -43,7 +43,7 @@ function authorized(request: Request) {
 
   const timestamp = request.headers.get('x-waitlist-timestamp') ?? '';
   const signature = request.headers.get('x-waitlist-signature') ?? '';
-  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
+  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
     return false;
 
   const seconds = Number(timestamp);
@@ -149,7 +149,7 @@ async function GET__unobserved(request: Request) {
           process.env.NEXT_PUBLIC_APP_URL ??
           process.env.NEXT_PUBLIC_SITE_URL ??
           'https://barbers.silentra.me'
-        ).replace(/\\/$/, '');
+        ).replace(/\/$/, '');
         const bookingUrl = new URL(
           `/barbershops/${encodeURIComponent(profile.slug)}`,
           siteUrl,
@@ -167,6 +167,7 @@ async function GET__unobserved(request: Request) {
         const time = formatOfferTime(event.offered_time);
         const expiry = formatExpiry(event.offer_expires_at, language);
         const shopName = event.shop_name?.trim() || profile.name;
+        const serviceName = event.service_name?.trim() || (english ? 'Service' : 'Serviço');
         const professional = event.professional_name?.trim() || '';
         const subject = english
           ? `A time opened up at ${shopName}`
@@ -184,7 +185,7 @@ async function GET__unobserved(request: Request) {
         const button = english ? 'Open booking page' : 'Abrir página de marcação';
 
         const details = [
-          [english ? 'Service' : 'Serviço', event.service_name],
+          [english ? 'Service' : 'Serviço', serviceName],
           ...(professional
             ? [[english ? 'Professional' : 'Profissional', professional]]
             : []),
@@ -247,7 +248,7 @@ async function GET__unobserved(request: Request) {
         const reason =
           error instanceof Error ? error.message : 'UNKNOWN_WAITLIST_OFFER_ERROR';
         if (!deliveryAccepted) {
-          await releaseFailedOffer(admin, event, reason);
+          await releaseFailedOffer(admin, event, 'WAITLIST_OFFER_DELIVERY_FAILED');
         }
         failed += 1;
         console.error('[BOOKING_WAITLIST_OFFER_FAILED]', {
