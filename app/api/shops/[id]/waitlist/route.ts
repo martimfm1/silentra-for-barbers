@@ -5,7 +5,7 @@ import { getClientIp } from '@/lib/security/public-rate-limit';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isSafePublicBookingDate, isValidTime, normalizeText, UUID_PATTERN } from '@/lib/validation';
 
-const EMAIL_PATTERN = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RATE_LIMIT = 8;
 const RATE_WINDOW_SECONDS = 10 * 60;
 
@@ -90,7 +90,7 @@ export async function POST(
       !email ||
       !EMAIL_PATTERN.test(email) ||
       !phone ||
-      phone.replace(/\\D/g, '').length < 7 ||
+      phone.replace(/\D/g, '').length < 7 ||
       body.consent !== true ||
       (timeStart && !isValidTime(timeStart)) ||
       (timeEnd && !isValidTime(timeEnd)) ||
