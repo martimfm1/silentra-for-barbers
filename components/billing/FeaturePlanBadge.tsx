@@ -19,7 +19,6 @@ type FeaturePlanBadgeProps = {
 export function FeaturePlanBadge({
   feature,
   minimumPlan: explicitMinimumPlan,
-  detail,
   className = '',
 }: FeaturePlanBadgeProps) {
   const { locale } = useLanguage();
