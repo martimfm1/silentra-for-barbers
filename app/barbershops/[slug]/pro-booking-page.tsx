@@ -31,6 +31,12 @@ export type ProBookingService = {
 
 export type ProBookingPageProps = {
   profile: Omit<PublicProfileRecord, 'owner_user_id'>;
+  bookingOffer?: {
+    serviceId: string;
+    date: string;
+    time: string;
+    professionalId: string;
+  } | null;
   services: ProBookingService[];
   openingTime: string | null;
   closingTime: string | null;
@@ -51,15 +57,16 @@ function getCoverUrl(value: string | null, barbershopId: string): string | null 
 
 export default function ProBookingPage({
   profile,
+  bookingOffer = null,
   services,
   openingTime,
   closingTime,
   closedDays,
 }: ProBookingPageProps) {
   const { t, locale } = useLanguage();
-  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(Boolean(bookingOffer));
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
+    bookingOffer?.serviceId ?? null,
   );
   const barbershopId = profile.barbershop_id || profile.id;
   // Keep this page on the exact object uploaded by Dashboard > Settings > Appearance.
@@ -205,6 +212,9 @@ export default function ProBookingPage({
         isOpen={bookingOpen}
         onClose={() => setBookingOpen(false)}
         selectedServiceId={selectedServiceId}
+        selectedDate={bookingOffer?.date}
+        selectedTime={bookingOffer?.time}
+        selectedProfessionalId={bookingOffer?.professionalId}
         appearance="agenda"
         onSuccess={() => setBookingOpen(false)}
       />
