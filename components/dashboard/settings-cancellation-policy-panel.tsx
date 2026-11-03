@@ -83,7 +83,7 @@ export function SettingsCancellationPolicyPanel() {
   return createPortal(
     <div className="space-y-6" data-cancellation-policy-panel>
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/15 bg-amber-400/[0.06] text-amber-300">
+        <span className="mt-0.5 shrink-0 text-amber-300">
           <CalendarX2 className="size-4" aria-hidden="true" />
         </span>
         <div className="min-w-0">
@@ -127,7 +127,7 @@ export function SettingsCancellationPolicyPanel() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] px-5 py-4 sm:min-w-52">
+        <div className="border-l border-white/10 pl-5 sm:min-w-52">
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
             <Clock3 className="size-3.5" aria-hidden="true" /> Regra atual
           </p>
