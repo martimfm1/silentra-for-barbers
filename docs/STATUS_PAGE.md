@@ -9,7 +9,8 @@ The public status page is available at:
 
 - Application and public status API: the server response serving the status request.
 - Database: a read-only request to the platform's Supabase REST API using the server-side service-role credential. No records are returned to the browser.
-- Supabase, Vercel, Stripe and Brevo: current status, unresolved incidents and scheduled maintenance from each provider's public Statuspage API.
+- Supabase and Vercel: current status, unresolved incidents and scheduled maintenance from each provider's public summary feed.
+- Stripe and Brevo: current status, unresolved incidents and upcoming maintenance from their public Statuspage status, incidents and scheduled-maintenance feeds.
 
 Provider data is cached for 60 seconds. The public API response is shared-cacheable for 60 seconds with a 5-minute stale-while-revalidate window. Provider timeouts and unavailable status feeds are reported as unknown, never as operational.
 
