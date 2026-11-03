@@ -687,9 +687,10 @@ export default function AnalyticsPage() {
                 <CardHeader className="border-b border-border bg-muted/20">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex flex-wrap items-center gap-2">
                         <Download className="h-5 w-5 text-primary" />
                         {t('analyticsPage.exportData')}
+                        <FeaturePlanBadge feature="advanced_reports" />
                       </CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {t('analyticsPage.exportDescription')}
@@ -716,13 +717,16 @@ export default function AnalyticsPage() {
                     to={to}
                   />
                   {plan === 'enterprise' ? (
-                    <ExportCard
-                      title="{t('analyticsPage.financialReport')}"
-                      description="{t('analyticsPage.financialReportDescription')}"
-                      type="pos"
-                      from={from}
-                      to={to}
-                    />
+                    <div className="space-y-2">
+                      <FeaturePlanBadge minimumPlan="enterprise" />
+                      <ExportCard
+                        title="{t('analyticsPage.financialReport')}"
+                        description="{t('analyticsPage.financialReportDescription')}"
+                        type="pos"
+                        from={from}
+                        to={to}
+                      />
+                    </div>
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5">
                       <div className="flex flex-wrap items-center gap-2">
