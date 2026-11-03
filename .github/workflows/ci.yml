@@ -139,6 +139,9 @@ jobs:
       - name: SEO foundation contracts
         run: pnpm qa:seo
 
+      - name: Public status page contracts
+        run: pnpm qa:status
+
       - name: PWA installability contracts
         run: pnpm qa:pwa
 

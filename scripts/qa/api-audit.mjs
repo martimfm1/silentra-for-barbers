@@ -4,6 +4,7 @@ import path from 'node:path';
 const root = path.resolve('app/api');
 const publicRoutePatterns = [
   /\/health\/route\.ts$/,
+  /\/public\/status\/route\.ts$/,
   /\/shops\/route\.ts$/,
   /\/shops\/\[id\]\/.*route\.ts$/,
   /\/bookings\/route\.ts$/,

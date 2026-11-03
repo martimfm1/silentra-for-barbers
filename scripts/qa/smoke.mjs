@@ -9,6 +9,8 @@ const routes = [
   '/',
   '/login',
   '/api/health',
+  '/status',
+  '/api/public/status',
   '/dashboard',
   '/dashboard/agenda',
   '/dashboard/clientes',
@@ -51,6 +53,15 @@ async function checkRoute(route) {
       (response.status >= 300 && response.status < 400),
     `${route}: estado inesperado ${response.status}${location ? ` -> ${location}` : ''}`,
   );
+
+  if (route === '/api/public/status') {
+    assert(response.status === 200, '/api/public/status: esperado 200');
+    const payload = await response.json();
+    assert(payload?.ok === true, '/api/public/status: payload inválido');
+    assert(Array.isArray(payload?.components), '/api/public/status: componentes em falta');
+    assert(payload.components.some((item) => item.id === 'application'), '/api/public/status: aplicação em falta');
+    assert(payload.components.some((item) => item.id === 'database'), '/api/public/status: base de dados em falta');
+  }
 
   if (route === '/api/health') {
     assert(
