@@ -268,8 +268,8 @@ export default function AnalyticsPage() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                <BarChart3 className="h-4 w-4" /> Analytics ·{' '}
-                {plan === 'enterprise' ? 'Enterprise' : 'Pro'}
+                <BarChart3 className="h-4 w-4" /> Analytics
+                <FeaturePlanBadge feature="advanced_analytics" />
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                 {t('analyticsPage.title')}
