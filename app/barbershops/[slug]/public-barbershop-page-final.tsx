@@ -119,7 +119,7 @@ export default function BarbershopPublicPageFinal({
     serviceId: string;
     date: string;
     time: string;
-    professionalId: string;
+    professionalId: string | null;
   } | null;
 }) {
   const shop = initialData as PublicData;
