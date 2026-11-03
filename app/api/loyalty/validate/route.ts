@@ -21,12 +21,27 @@ async function POST__unobserved(request: Request) {
       allowedKeys: ['identifier'],
     });
     if (!bodyResult.ok) return bodyResult.response;
-    const identifier =
+    const rawIdentifier =
       typeof bodyResult.value.identifier === 'string'
         ? bodyResult.value.identifier.trim()
         : '';
-    if (!identifier || identifier.length > 256) {
-      return NextResponse.json({ error: 'Código inválido.' }, { status: 400 });
+    // Reward vouchers have two equivalent validation methods:
+    // - an opaque 64-character token embedded in the QR code;
+    // - an 8-character human-readable code from the customer's voucher.
+    // Normalize each format before hashing, without accepting arbitrary QR payloads.
+    const identifier = /^[a-f0-9]{64}$/i.test(rawIdentifier)
+      ? rawIdentifier.toLowerCase()
+      : /^[A-HJ-NP-Z2-9]{8}$/i.test(rawIdentifier)
+        ? rawIdentifier.toUpperCase()
+        : '';
+    if (!identifier) {
+      return NextResponse.json(
+        {
+          error:
+            'Código inválido. Introduz o código de 8 caracteres ou lê o QR de uma recompensa.',
+        },
+        { status: 400 },
+      );
     }
 
     const allowed = await consumePublicRateLimit(
