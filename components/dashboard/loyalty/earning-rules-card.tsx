@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -224,9 +225,9 @@ export function EarningRulesCard() {
                   : 'Cria pelo menos um serviço para poderes definir os pontos.'}
               </p>
               <Button asChild variant="outline" size="sm" className="mt-3">
-                <a href="/dashboard/servicos">
+                <Link href="/dashboard/servicos">
                   {locale === 'en' ? 'Manage services' : 'Gerir serviços'}
-                </a>
+                </Link>
               </Button>
             </div>
           ) : (
