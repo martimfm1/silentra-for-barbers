@@ -711,6 +711,7 @@ export const enCopy = {
     rewardsTitle: 'Available rewards',
     rewardsManagementDescription: 'Keep rewards simple and easy to understand. Customers see the points required before redeeming.',
     rewardValueHint: 'e.g. 5',
+    inactiveRewardsLabel: 'Inactive rewards',
     noActiveRewards: 'You have no active rewards.',
     noActiveRewardsHint: 'Create a reward or reactivate one you have already configured.',
     editReward: 'Edit',
