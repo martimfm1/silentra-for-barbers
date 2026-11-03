@@ -141,6 +141,13 @@ begin
   delete from public.billing_documents
   where barbershop_id = p_barbershop_id;
 
+  -- These operational tables intentionally do not all have direct tenant FKs.
+  delete from public.client_plan_payments
+  where barbershop_id = p_barbershop_id;
+
+  delete from public.notification_queue
+  where barbershop_id = p_barbershop_id;
+
   delete from public.subscriptions
   where barbershop_id = p_barbershop_id;
 
@@ -150,7 +157,8 @@ begin
   where barbershop_id = p_barbershop_id;
 
   delete from public.audit_logs
-  where metadata ->> 'barbershop_id' = p_barbershop_id::text;
+  where metadata ->> 'barbershop_id' = p_barbershop_id::text
+     or (entity_type = 'barbershop' and entity_id = p_barbershop_id::text);
 
   delete from public.barbershops
   where id = p_barbershop_id
