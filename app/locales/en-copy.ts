@@ -937,6 +937,7 @@ export const enCopy = {
     description:
       'Set how many points each service earns when a booking is completed.',
     validateReward: 'Validate reward',
+    earningHint: 'Points are awarded when a booking for the selected service is completed. Each booking can earn points only once.',
     manageRewards: 'Manage rewards',
   },
   earningRules: {
