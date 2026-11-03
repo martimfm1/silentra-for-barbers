@@ -1271,7 +1271,7 @@ export const enCopy = {
     openButton: 'Delete barbershop',
     confirmTitle: 'Are you sure you want to delete this barbershop?',
     confirmDescription: 'To protect your account, first confirm your password. We will then send a security code to your account email.',
-    codeDescription: 'Enter the 6-digit code sent to your account email and confirm your password again to complete deletion.',
+    codeDescription: 'Enter the 6-digit code sent to your account email. Your password will also be checked before deletion.',
     password: 'Account password',
     emailCode: 'Email security code',
     codeExpiry: 'The code is valid for 10 minutes and can only be used once.',
