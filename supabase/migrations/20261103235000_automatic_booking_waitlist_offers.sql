@@ -65,7 +65,6 @@ begin
     into v_shop_id
   from public.shops s
   where s.barbershop_id = new.barbershop_id
-  order by s.created_at asc
   limit 1;
 
   if v_shop_id is null then
@@ -284,6 +283,16 @@ begin
   where status = 'offered'
     and offer_expires_at <= now();
 
+  update public.booking_waitlist w
+  set status = 'expired',
+      updated_at = now()
+  from public.booking_waitlist_vacancies v
+  where v.waitlist_id = w.id
+    and v.status = 'dispatching'
+    and v.locked_at < now() - interval '10 minutes'
+    and v.offer_expires_at <= now()
+    and w.status = 'offered';
+
   -- If a worker lost its connection after sending the email, preserve the
   -- existing offer rather than sending the same invitation twice.
   update public.booking_waitlist_vacancies
@@ -406,6 +415,8 @@ begin
       where id = v_vacancy.id;
       continue;
     end if;
+
+    v_waitlist_id := null;
 
     select w.id
       into v_waitlist_id
@@ -536,7 +547,7 @@ begin
       waitlist_id = null,
       offer_expires_at = null,
       locked_at = null,
-      available_at = now() + make_interval(mins => case when v_attempts >= 5 then 0 else least(30, 2 ^ v_attempts) end),
+      available_at = now() + make_interval(mins => case when v_attempts >= 5 then 0 else least(30, power(2, v_attempts)::integer) end),
       last_error = left(coalesce(p_error, 'Email could not be sent'), 500),
       updated_at = now()
   where id = p_vacancy_id
