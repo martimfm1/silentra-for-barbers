@@ -714,7 +714,7 @@ const checks = [
         normalized.includes('availableDays.map((day, index)') &&
         normalized.includes('currentDayClosed && currentDay') &&
         normalized.includes('A barbearia está de folga neste dia. Escolhe outra data para continuar.') &&
-        normalized.includes('if (currentDayClosed) return toast.error(t(\\'bookingDrawer.chooseOpenDay\\'))') &&
+        normalized.includes("if (currentDayClosed) return toast.error(t('bookingDrawer.chooseOpenDay'))") &&
         normalized.includes('data-booking-theme={appearance}')
       );
     },
