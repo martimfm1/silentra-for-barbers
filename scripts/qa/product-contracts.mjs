@@ -494,7 +494,7 @@ const checks = [
       source.includes('touch-pan-y') &&
       source.includes('overscroll-contain') &&
       source.includes('safe-area-inset-bottom') &&
-      source.includes('h-[min(90dvh,48rem)]'),
+      source.includes('h-[min(90svh,48rem)]'),
   },
   {
     name: 'Stripe webhook ledger stores sanitized failure identifiers only',
@@ -714,7 +714,7 @@ const checks = [
         normalized.includes('availableDays.map((day, index)') &&
         normalized.includes('currentDayClosed && currentDay') &&
         normalized.includes('A barbearia está de folga neste dia. Escolhe outra data para continuar.') &&
-        normalized.includes('if (currentDayClosed) return toast.error(t(\\'bookingDrawer.chooseOpenDay\\'))') &&
+        normalized.includes("if (currentDayClosed) return toast.error(t('bookingDrawer.chooseOpenDay'))") &&
         normalized.includes('data-booking-theme={appearance}')
       );
     },
@@ -903,6 +903,39 @@ const checks = [
     test: (source) =>
       source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
       source.includes('<SilentraLoading variant="dashboard" />'),
+  },
+  {
+    name: 'Barbershop deletion requires password and a one-time email code on the server',
+    file: 'app/api/dashboard/barbershop-deletion/request-code/route.ts',
+    test: (source) =>
+      source.includes('supabase.auth.getUser()') &&
+      source.includes('verifyAccountPassword(user.email, password)') &&
+      source.includes('consumePublicRateLimit') &&
+      source.includes('sendBarbershopDeletionCodeEmail') &&
+      source.includes('expiresInSeconds: 600'),
+  },
+  {
+    name: 'Barbershop deletion cancels Stripe and atomically removes tenant data without deleting user accounts',
+    file: 'app/api/dashboard/barbershop-deletion/confirm/route.ts',
+    test: (source) =>
+      source.includes('verify_barbershop_deletion_code') &&
+      source.includes('stripe.subscriptions.cancel') &&
+      source.includes('delete_barbershop_after_verification') &&
+      source.includes("storage.from('avatar').remove") &&
+      source.includes("storage.from('banner').remove"),
+  },
+  {
+    name: 'Barbershop deletion migration detaches user profiles and restricts verification RPCs to service role',
+    file: 'supabase/migrations/20261103000000_secure_barbershop_deletion.sql',
+    test: (source) =>
+      source.includes('on delete set null') &&
+      source.includes('barbershop_deletion_verifications') &&
+      source.includes('delete from public.billing_documents') &&
+      source.includes('delete from public.client_plan_payments') &&
+      source.includes('delete from public.notification_queue') &&
+      source.includes('delete from public.subscriptions') &&
+      source.includes('revoke all on function public.delete_barbershop_after_verification') &&
+      source.includes('to service_role'),
   },
 ];
 let failed = 0;
