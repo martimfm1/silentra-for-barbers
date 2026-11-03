@@ -54,7 +54,7 @@ async function GET__unobserved() {
     const { data: shop, error: shopError } = await database
       .from('shops')
       .select(
-        'id, slug, custom_slug, public_profile_enabled, seo_title, seo_description, og_image_url, theme_config, amenities',
+        'id, slug, custom_slug, city, price, tags, public_profile_enabled, seo_title, seo_description, og_image_url, theme_config, amenities',
       )
       .eq('barbershop_id', tenant.barbershopId)
       .maybeSingle();
@@ -98,6 +98,9 @@ async function PATCH__unobserved(request: Request) {
       maxBytes: 8 * 1024,
       allowedKeys: [
         'slug',
+        'city',
+        'price',
+        'tags',
         'seoTitle',
         'seoDescription',
         'ogImageUrl',
@@ -110,7 +113,7 @@ async function PATCH__unobserved(request: Request) {
     const database = createAdminClient();
     const { data: currentShop, error: currentError } = await database
       .from('shops')
-      .select('id, slug, custom_slug, amenities')
+      .select('id, slug, custom_slug, city, price, tags, amenities')
       .eq('barbershop_id', tenant.barbershopId)
       .maybeSingle();
     if (currentError)
@@ -165,6 +168,25 @@ async function PATCH__unobserved(request: Request) {
       updates.custom_slug = slug;
     }
 
+    if (body.city !== undefined) {
+      const city = cleanText(body.city, 100);
+      if (!city) return jsonError('Indica uma cidade ou localidade válida.', 400);
+      updates.city = city;
+    }
+
+    if (body.price !== undefined) {
+      const price = typeof body.price === 'number' ? body.price : Number(body.price);
+      if (!Number.isFinite(price) || price < 0 || price > 10000)
+        return jsonError('O preço de referência tem de estar entre 0 € e 10 000 €.', 400);
+      updates.price = Math.round(price * 100) / 100;
+    }
+
+    if (body.tags !== undefined) {
+      if (!Array.isArray(body.tags) || body.tags.length > 12 || body.tags.some((tag) => typeof tag !== 'string'))
+        return jsonError('A lista de serviços e características é inválida.', 400);
+      updates.tags = [...new Set(body.tags.map((tag) => tag.trim().slice(0, 60)).filter(Boolean))];
+    }
+
     if (body.amenities !== undefined) {
       if (
         !body.amenities ||
@@ -211,7 +233,7 @@ async function PATCH__unobserved(request: Request) {
       .eq('id', currentShop.id)
       .eq('barbershop_id', tenant.barbershopId)
       .select(
-        'id, slug, custom_slug, public_profile_enabled, seo_title, seo_description, og_image_url, theme_config, amenities',
+        'id, slug, custom_slug, city, price, tags, public_profile_enabled, seo_title, seo_description, og_image_url, theme_config, amenities',
       )
       .maybeSingle();
     if (updateError || !updated)
