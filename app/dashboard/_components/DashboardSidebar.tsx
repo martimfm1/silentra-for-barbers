@@ -12,6 +12,7 @@ import {
   CreditCard,
   LayoutDashboard,
   CalendarDays,
+  Clock3,
   Users,
   Scissors,
   Briefcase,
@@ -91,6 +92,12 @@ const communicationItems: SidebarItem[] = [
 const toolsItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
   {
+    href: '/dashboard/espera',
+    label: 'Lista de espera',
+    icon: Clock3,
+    feature: 'appointments',
+  },
+  {
     href: '/dashboard/analytics',
     label: 'Relatórios',
     icon: BarChart3,
@@ -135,6 +142,7 @@ const englishLabels: Record<string, string> = {
   Campanhas: 'Campaigns',
   Automações: 'Automations',
   'QR Code': 'QR code',
+  'Lista de espera': 'Waitlist',
   Relatórios: 'Reports',
   Fidelização: 'Loyalty',
   'Regras de pontos': 'Points rules',
