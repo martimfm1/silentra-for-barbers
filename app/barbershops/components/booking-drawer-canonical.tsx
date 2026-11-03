@@ -151,6 +151,9 @@ export function BookingDrawerCanonical({
   onClose,
   onSuccess,
   selectedServiceId = null,
+  selectedDate = null,
+  selectedTime = null,
+  selectedProfessionalId = null,
   appearance = 'default',
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
@@ -220,8 +223,20 @@ export function BookingDrawerCanonical({
 
   useEffect(() => {
     if (!isOpen) return;
-    setStep(1);
-    setDayIndex(firstOpenDayIndex >= 0 ? firstOpenDayIndex : 0);
+    const requestedDayIndex = selectedDate
+      ? days.findIndex((day) => day.dateStr === selectedDate)
+      : -1;
+    const hasCompleteOffer = Boolean(
+      selectedServiceId && selectedDate && selectedTime && selectedProfessionalId,
+    );
+    setStep(hasCompleteOffer ? 2 : 1);
+    setDayIndex(
+      requestedDayIndex >= 0
+        ? requestedDayIndex
+        : firstOpenDayIndex >= 0
+          ? firstOpenDayIndex
+          : 0,
+    );
     setServiceId(selectedServiceId);
     setProfessional(null);
     setServices([]);
@@ -245,7 +260,15 @@ export function BookingDrawerCanonical({
     controllerRef.current?.abort();
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
-  }, [firstOpenDayIndex, isOpen, selectedServiceId]);
+  }, [
+    days,
+    firstOpenDayIndex,
+    isOpen,
+    selectedDate,
+    selectedProfessionalId,
+    selectedServiceId,
+    selectedTime,
+  ]);
 
   useEffect(() => {
     if (!isOpen || !shop || !currentDay) return;
@@ -266,10 +289,17 @@ export function BookingDrawerCanonical({
         if (controller.signal.aborted) return;
         const loadedProfessionals = payload.professionals ?? [];
         setProfessionals(loadedProfessionals);
-        if (loadedProfessionals.length === 1) {
+        const requestedProfessional = selectedProfessionalId
+          ? loadedProfessionals.find((item) => item.id === selectedProfessionalId)
+          : null;
+        if (requestedProfessional) {
+          setProfessional(requestedProfessional);
+        } else if (loadedProfessionals.length === 1) {
           // A single-professional shop has no meaningful choice to present.
           // Assign that professional automatically in every public booking flow.
           setProfessional(loadedProfessionals[0]);
+        } else if (selectedProfessionalId) {
+          setStep(1);
         }
         setServices(payload.services ?? []);
         setManualPrepayment(payload.manualPrepayment?.enabled ? payload.manualPrepayment : null);
@@ -283,7 +313,14 @@ export function BookingDrawerCanonical({
           );
       });
     return () => controller.abort();
-  }, [appearance, currentDay?.dateStr, isOpen, retryKey, shop]);
+  }, [
+    appearance,
+    currentDay?.dateStr,
+    isOpen,
+    retryKey,
+    selectedProfessionalId,
+    shop,
+  ]);
 
   useEffect(() => {
     if (
@@ -303,7 +340,13 @@ export function BookingDrawerCanonical({
     const key = `${shop.id}|${professional.id}|${service.id}|${currentDay.dateStr}`;
     const cached = cacheRef.current.get(key);
     if (cached && Date.now() - cached.timestamp < 8000) {
-      setSlots(cached.data.availableSlots ?? []);
+      const cachedSlots = cached.data.availableSlots ?? [];
+      setSlots(cachedSlots);
+      setSelectedSlot(
+        selectedDate === currentDay.dateStr && selectedTime && cachedSlots.includes(selectedTime)
+          ? selectedTime
+          : null,
+      );
       setLoadingAvailability(false);
       return () => controller.abort();
     }
@@ -322,7 +365,13 @@ export function BookingDrawerCanonical({
       .then((payload) => {
         if (controller.signal.aborted) return;
         cacheRef.current.set(key, { data: payload, timestamp: Date.now() });
-        setSlots(payload.availableSlots ?? []);
+        const availableSlots = payload.availableSlots ?? [];
+        setSlots(availableSlots);
+        setSelectedSlot(
+          selectedDate === currentDay.dateStr && selectedTime && availableSlots.includes(selectedTime)
+            ? selectedTime
+            : null,
+        );
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError')
@@ -341,6 +390,8 @@ export function BookingDrawerCanonical({
     isOpen,
     professional,
     retryKey,
+    selectedDate,
+    selectedTime,
     service,
     shop,
     step,
