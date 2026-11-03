@@ -967,6 +967,8 @@ export const enCopy = {
     removeGenericError: 'Error removing the rule.',
     ruleCreated: 'Points rule created.',
     ruleRemoved: 'Rule removed.',
+    pausedSuccess: 'Rule paused.',
+    activatedSuccess: 'Rule activated.',
     removeConfirm: 'Remove points rule?',
     noRules: 'No rules yet.',
     active: 'Active',
