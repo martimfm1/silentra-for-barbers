@@ -89,7 +89,9 @@ export async function processAndUploadImage({
       .from(storageBucket)
       .upload(webpPath, webpBlob, {
         contentType: 'image/webp',
-        cacheControl: '31536000',
+        // Banner files are overwritten in place and are consumed by public pages.
+        // Keep their CDN cache short so a new Settings upload becomes visible quickly.
+        cacheControl: bucket === 'banner' ? '60' : '31536000',
         upsert: true,
       });
 
