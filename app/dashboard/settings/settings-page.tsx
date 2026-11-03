@@ -13,6 +13,7 @@ import {
   LogOut,
   Save,
   ShieldCheck,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
@@ -30,6 +31,15 @@ import {
   AddressAutocomplete,
   type AddressSuggestion,
 } from '@/components/location/address-autocomplete';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -144,6 +154,11 @@ export default function SettingsPageOrganized() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteCode, setDeleteCode] = useState('');
+  const [deleteCodeSent, setDeleteCodeSent] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [config, setConfig] = useState<Config>(normalize({}));
   const [noticeUnit, setNoticeUnit] = useState<'minutes' | 'hours'>('minutes');
   const [initial, setInitial] = useState<Config | null>(null);
@@ -313,6 +328,57 @@ export default function SettingsPageOrganized() {
         : t('settingsPage.coverUpdated'),
     );
   }
+  async function requestBarbershopDeletionCode() {
+    if (!deletePassword || deleteLoading) return;
+    setDeleteLoading(true);
+    try {
+      const response = await fetch('/api/dashboard/barbershop-deletion/request-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || t('barbershopDeletion.requestFailed'));
+      setDeleteCodeSent(true);
+      toast.success(t('barbershopDeletion.codeSent'));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('barbershopDeletion.requestFailed'));
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
+  async function confirmBarbershopDeletion() {
+    if (!deletePassword || !/^\\d{6}$/.test(deleteCode) || deleteLoading) return;
+    setDeleteLoading(true);
+    try {
+      const response = await fetch('/api/dashboard/barbershop-deletion/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ password: deletePassword, code: deleteCode }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || t('barbershopDeletion.deleteFailed'));
+      toast.success(t('barbershopDeletion.deleted'));
+      router.replace(result.redirectTo || '/onboarding');
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('barbershopDeletion.deleteFailed'));
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
+  function closeBarbershopDeletionDialog(open: boolean) {
+    if (deleteLoading) return;
+    setDeleteDialogOpen(open);
+    if (!open) {
+      setDeletePassword('');
+      setDeleteCode('');
+      setDeleteCodeSent(false);
+    }
+  }
+
   async function logout() {
     setLogoutLoading(true);
     try {
@@ -975,6 +1041,31 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
+            <section id="settings-danger" className="scroll-mt-24">
+              <Card className="rounded-2xl border border-rose-500/25 bg-rose-500/[.035]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-rose-200">
+                    <Trash2 className="size-4" />
+                    {t('barbershopDeletion.dangerZone')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-zinc-100">{t('barbershopDeletion.title')}</p>
+                    <p className="max-w-2xl text-sm leading-6 text-zinc-400">{t('barbershopDeletion.description')}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="min-h-11"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    {t('barbershopDeletion.openButton')}
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
             <section id="settings-account">
               <Card className={CARD_CLASS}>
                 <CardHeader>
@@ -1001,6 +1092,68 @@ export default function SettingsPageOrganized() {
           </div>
         </div>
       </div>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={closeBarbershopDeletionDialog}>
+        <AlertDialogContent className="max-h-[90dvh] overflow-y-auto border border-rose-500/20 bg-zinc-950 text-zinc-100">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-rose-200">{t('barbershopDeletion.confirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              {deleteCodeSent ? t('barbershopDeletion.codeDescription') : t('barbershopDeletion.confirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="delete-barbershop-password" className="text-sm font-medium text-zinc-200">
+                {t('barbershopDeletion.password')}
+              </label>
+              <Input
+                id="delete-barbershop-password"
+                type="password"
+                autoComplete="current-password"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+                className={INPUT_CLASS}
+                disabled={deleteLoading}
+              />
+            </div>
+            {deleteCodeSent && (
+              <div className="space-y-2">
+                <label htmlFor="delete-barbershop-code" className="text-sm font-medium text-zinc-200">
+                  {t('barbershopDeletion.emailCode')}
+                </label>
+                <Input
+                  id="delete-barbershop-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={deleteCode}
+                  onChange={(event) => setDeleteCode(event.target.value.replace(/\\D/g, '').slice(0, 6))}
+                  className={INPUT_CLASS}
+                  disabled={deleteLoading}
+                />
+                <p className="text-xs text-zinc-500">{t('barbershopDeletion.codeExpiry')}</p>
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading} onClick={() => closeBarbershopDeletionDialog(false)}>
+              {t('barbershopDeletion.cancel')}
+            </AlertDialogCancel>
+            {!deleteCodeSent ? (
+              <Button type="button" variant="destructive" onClick={() => void requestBarbershopDeletionCode()} disabled={deleteLoading || !deletePassword}>
+                {deleteLoading ? <Spinner className="mr-2 size-4" /> : null}
+                {deleteLoading ? t('barbershopDeletion.sending') : t('barbershopDeletion.sendCode')}
+              </Button>
+            ) : (
+              <Button type="button" variant="destructive" onClick={() => void confirmBarbershopDeletion()} disabled={deleteLoading || !deletePassword || deleteCode.length !== 6}>
+                {deleteLoading ? <Spinner className="mr-2 size-4" /> : <Trash2 className="mr-2 size-4" />}
+                {deleteLoading ? t('barbershopDeletion.deleting') : t('barbershopDeletion.deleteForever')}
+              </Button>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {dirty && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/95 p-3 backdrop-blur-xl sm:hidden">
           <div className="mx-auto flex max-w-xl gap-2">
