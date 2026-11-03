@@ -21,7 +21,7 @@ assert.match(migration, /booking_waitlist_active_duplicate_uidx/i);
 assert.match(migration, /offered_date date/i);
 assert.match(migration, /offered_time time/i);
 
-assert.match(offersMigration, /create table if not exists public\\.booking_waitlist_vacancies/i);
+assert.match(offersMigration, /create table if not exists public\.booking_waitlist_vacancies/i);
 assert.match(offersMigration, /appointments_enqueue_waitlist_vacancy/i);
 assert.match(offersMigration, /appointments_sync_booking_waitlist_vacancies/i);
 assert.match(offersMigration, /claim_booking_waitlist_vacancies/i);
