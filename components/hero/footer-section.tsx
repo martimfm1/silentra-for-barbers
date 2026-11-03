@@ -124,6 +124,9 @@ export function FooterSection() {
           >
             {pt ? 'Privacidade' : 'Privacy'}
           </Link>
+          <Link href="/status" className="transition-colors hover:text-zinc-300">
+            {pt ? 'Estado da plataforma' : 'Platform status'}
+          </Link>
           <Link
             href="/cookies"
             className="transition-colors hover:text-zinc-300"
