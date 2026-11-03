@@ -750,7 +750,7 @@ export default function OnboardingPage() {
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
                         {businessMode === 'team'
                           ? t('onboarding.teamNextStep')
-                          : t('onboarding.soloNextStep')} {t('onboarding.addDetailsLater')}
+                          : t('onboarding.soloNextStep')} {t('onboarding.editLater')}
                       </p>
                     </div>
                     <Button
