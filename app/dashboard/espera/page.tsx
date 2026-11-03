@@ -25,6 +25,9 @@ type WaitlistEntry = {
   preferred_date: string;
   preferred_time_start: string | null;
   preferred_time_end: string | null;
+  offered_date: string | null;
+  offered_time: string | null;
+  offer_expires_at: string | null;
   status: 'waiting' | 'offered' | 'booked' | 'cancelled' | 'expired';
   created_at: string;
   services?: { name?: string | null } | Array<{ name?: string | null }> | null;
@@ -242,6 +245,22 @@ export default function WaitlistPage() {
                         <span className="flex min-w-0 items-center gap-2"><UserRound className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />{relationName(entry.professionals, en ? 'Any barber' : 'Qualquer barbeiro')}</span>
                         <span className="flex min-w-0 items-center gap-2"><Clock3 className="size-3.5 shrink-0 text-zinc-600" aria-hidden="true" />{entry.preferred_time_start && entry.preferred_time_end ? `${entry.preferred_time_start.slice(0,5)}–${entry.preferred_time_end.slice(0,5)}` : en ? 'Any time' : 'Qualquer horário'}</span>
                       </div>
+                      {entry.status === 'offered' && entry.offered_date && entry.offered_time && (
+                        <p className="mt-3 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.045] px-3 py-2.5 text-xs leading-5 text-emerald-100">
+                          <span className="font-semibold">{en ? 'Proposed opening:' : 'Vaga proposta:'}</span>{' '}
+                          {dateLabel(entry.offered_date, locale)} · {entry.offered_time.slice(0, 5)}
+                          {entry.offer_expires_at ? (
+                            <span className="block text-emerald-100/65">
+                              {en ? 'Offer expires at' : 'A proposta termina às'}{' '}
+                              {new Intl.DateTimeFormat(en ? 'en-GB' : 'pt-PT', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: 'Europe/Lisbon',
+                              }).format(new Date(entry.offer_expires_at))}
+                            </span>
+                          ) : null}
+                        </p>
+                      )}
                       <div className="mt-3 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:flex-wrap sm:gap-4">
                         <a className="flex min-h-8 items-center gap-2 hover:text-zinc-200" href={`mailto:${entry.customer_email}`}><Mail className="size-3.5" aria-hidden="true" />{entry.customer_email}</a>
                         <a className="flex min-h-8 items-center gap-2 hover:text-zinc-200" href={`tel:${entry.customer_phone}`}><Phone className="size-3.5" aria-hidden="true" />{entry.customer_phone}</a>
