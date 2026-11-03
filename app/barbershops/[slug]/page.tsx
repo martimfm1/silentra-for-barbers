@@ -15,15 +15,17 @@ import ProBookingPage from './pro-booking-page';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
 
+type BarbershopSearchParams = {
+  booking?: string;
+  service?: string;
+  date?: string;
+  time?: string;
+  professional?: string;
+};
+
 interface BarbershopPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{
-    booking?: string;
-    service?: string;
-    date?: string;
-    time?: string;
-    professional?: string;
-  }>;
+  searchParams?: Promise<BarbershopSearchParams>;
 }
 
 const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
@@ -265,7 +267,7 @@ export default async function BarbershopPage({
 }: BarbershopPageProps) {
   const [{ slug }, query] = await Promise.all([
     params,
-    searchParams ?? Promise.resolve({ booking: undefined }),
+    searchParams ?? Promise.resolve({} as BarbershopSearchParams),
   ]);
   const bookingMode = query.booking === '1';
   const bookingOffer =
