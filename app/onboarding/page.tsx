@@ -174,12 +174,10 @@ export default function OnboardingPage() {
   );
 
   const createProgress = useMemo(() => {
-    const requiredFields = [
-      shopName.trim(),
-      address.trim(),
-      city.trim(),
-      price === '' ? '' : String(price),
-    ];
+    // Only ask for the information needed to create the shop.
+    // Pricing, opening hours and discovery tags already have sensible defaults
+    // and can be adjusted later from the dashboard.
+    const requiredFields = [shopName.trim(), address.trim(), city.trim()];
     const completed = requiredFields.filter(Boolean).length;
     return 35 + Math.round((completed / requiredFields.length) * 55);
   }, [shopName, address, city, price]);
@@ -214,8 +212,8 @@ export default function OnboardingPage() {
 
   async function handleCreateShop(event: React.FormEvent) {
     event.preventDefault();
-    if (!shopName.trim() || !address.trim() || !city.trim() || price === '') {
-      toast.error('Preencha os dados essenciais para criar a sua barbearia.');
+    if (!shopName.trim() || !address.trim() || !city.trim()) {
+      toast.error('Indique o nome e a localização da sua barbearia para continuar.');
       return;
     }
 
@@ -231,7 +229,7 @@ export default function OnboardingPage() {
           address: fullAddress,
           city: city.trim(),
           hours: `${openTime} - ${closeTime}`,
-          price: Number(price) || 0,
+          price: price === '' ? 15 : Number(price),
           tags: formattedTags,
           lat: lat ?? 0,
           lng: lng ?? 0,
@@ -239,7 +237,13 @@ export default function OnboardingPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
+      if (!response.ok) {
+        throw new Error(
+          typeof data?.error === 'string'
+            ? data.error
+            : t('onboarding.unexpectedError'),
+        );
+      }
 
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
       router.push('/dashboard');
@@ -266,7 +270,13 @@ export default function OnboardingPage() {
         body: JSON.stringify({ inviteCode: normalizeInviteCode(inviteCode) }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(t('onboarding.unexpectedError'));
+      if (!response.ok) {
+        throw new Error(
+          typeof data?.error === 'string'
+            ? data.error
+            : t('onboarding.unexpectedError'),
+        );
+      }
 
       toast.success(t('onboarding.inviteSuccess'));
       router.push('/dashboard');
@@ -439,8 +449,9 @@ export default function OnboardingPage() {
                         {t('onboarding.prepareYourShop')}
                       </CardTitle>
                       <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
-                        Preencha apenas o essencial. Os restantes detalhes podem
-                        ser ajustados no painel depois.
+                        Só precisa do nome e da localização. Os horários, preços
+                        e serviços começam com valores sugeridos e podem ser
+                        alterados no painel quando quiser.
                       </CardDescription>
                     </CardHeader>
 
