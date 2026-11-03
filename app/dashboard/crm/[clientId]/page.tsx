@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -136,6 +137,7 @@ export default function CRMClientPage({ params }: Props) {
           <CardContent className="flex flex-col items-center gap-5 py-16 text-center">
             <Lock className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-semibold">{t('crmDetail.title')}</h1>
+            <FeaturePlanBadge feature="advanced_crm" />
             <p className="text-muted-foreground">
               {t('crmDetail.planRequired')}
             </p>
