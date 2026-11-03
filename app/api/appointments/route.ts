@@ -5,6 +5,7 @@ import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
+import { notifyBarbersOfNewBooking } from '@/lib/brevo/barber-booking-notification';
 
 const APPOINTMENT_WRITE_ROLES = [
   'owner',
@@ -392,7 +393,7 @@ async function POST__unobserved(request: Request) {
 
     const { data: service } = await admin
       .from('services')
-      .select('id,duration')
+      .select('id,duration,name')
       .eq('id', serviceId)
       .eq('barbershop_id', barbershopId)
       .eq('is_active', true)
@@ -455,6 +456,23 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
+
+    void notifyBarbersOfNewBooking({
+      appointmentId: appointment.id,
+      barbershopId,
+      professionalId,
+      customerName: clientName || 'Cliente',
+      customerPhone: clientPhone,
+      customerEmail: clientEmail,
+      serviceName: service.name || 'Serviço',
+      date,
+      time: dateHour.slice(0, 5),
+      durationMinutes,
+      status: 'confirmed',
+    }, { sendEmail: false }).catch((notificationError) =>
+      console.error('[APPOINTMENT_PUSH_NOTIFICATION_ERROR]',
+        notificationError instanceof Error ? notificationError.name : 'UNKNOWN'),
+    );
 
     return NextResponse.json({ success: true, appointment }, { status: 201 });
   } catch (error) {

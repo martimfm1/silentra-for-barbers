@@ -142,6 +142,9 @@ jobs:
       - name: PWA installability contracts
         run: pnpm qa:pwa
 
+      - name: Web Push notification contracts
+        run: pnpm qa:push
+
       - name: Cookie consent and legal-document contracts
         run: pnpm qa:cookies
 
