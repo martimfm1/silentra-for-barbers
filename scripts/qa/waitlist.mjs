@@ -60,11 +60,21 @@ assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/
 assert.match(dashboardApi, /allowedStatuses/);
 
 assert.match(bookingDrawer, /\/api\/shops\/\$\{shop\.id\}\/waitlist/);
+assert.match(bookingDrawer, /selectedDate/);
+assert.match(bookingDrawer, /selectedTime/);
+assert.match(bookingDrawer, /selectedProfessionalId/);
+assert.match(bookingDrawer, /hasCompleteOffer/);
+assert.match(offersWorker, /searchParams\.set\('service'/);
+assert.match(offersWorker, /searchParams\.set\('date'/);
+assert.match(offersWorker, /searchParams\.set\('time'/);
+assert.match(offersWorker, /searchParams\.set\('professional'/);
 assert.match(bookingDrawer, /setWaitlistConsent/);
 assert.match(bookingDrawer, /waitlistOnly && !waitlistConsent/);
 assert.match(bookingDrawer, /Join the waitlist|Entrar na lista de espera/);
 assert.match(dashboardPage, /\/api\/dashboard\/waitlist/);
 assert.match(dashboardPage, /Mark booked|Marcar reservada/);
 assert.match(sidebar, /\/dashboard\/espera/);
+assert.match(read('docs/WAITLIST.md'), /20 minutos/);
+assert.match(read('docs/WAITLIST.md'), /não fica reservada/);
 
 console.log('Customer waitlist contracts passed.');
