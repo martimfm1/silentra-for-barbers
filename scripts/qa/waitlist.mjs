@@ -30,6 +30,9 @@ assert.match(offersMigration, /release_booking_waitlist_offer/i);
 assert.match(offersMigration, /complete_booking_waitlist_offer_delivery/i);
 assert.match(offersMigration, /silentra-booking-waitlist-offers/i);
 assert.match(offersMigration, /for update skip locked/i);
+assert.match(offersMigration, /slot_time < v_vacancy\.slot_time \+ make_interval/i);
+assert.match(offersMigration, /other\.professional_id is null/i);
+assert.match(offersMigration, /An overlapping offer is still active/i);
 assert.match(offersMigration, /interval '20 minutes'/i);
 
 assert.match(offersWorker, /withApiObservability/);
