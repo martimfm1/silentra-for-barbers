@@ -1,3 +1,4 @@
+import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { UUID_PATTERN } from '@/lib/validation';
@@ -48,7 +49,7 @@ async function authorize(request: Request) {
   return { tenant };
 }
 
-export async function GET(request: Request) {
+async function GET__unobserved(request: Request) {
   try {
     const access = await authorize(request);
     if ('response' in access) return access.response;
@@ -73,7 +74,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function PATCH__unobserved(request: Request) {
   try {
     const access = await authorize(request);
     if ('response' in access) return access.response;
@@ -100,3 +101,14 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: false, error: 'Não foi possível atualizar o pedido.' }, { status: 503 });
   }
 }
+
+
+export const GET = withApiObservability(
+  '/api/dashboard/waitlist',
+  GET__unobserved,
+);
+
+export const PATCH = withApiObservability(
+  '/api/dashboard/waitlist',
+  PATCH__unobserved,
+);
