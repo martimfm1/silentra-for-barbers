@@ -494,7 +494,7 @@ const checks = [
       source.includes('touch-pan-y') &&
       source.includes('overscroll-contain') &&
       source.includes('safe-area-inset-bottom') &&
-      source.includes('h-[min(90dvh,48rem)]'),
+      source.includes('h-[min(90svh,48rem)]'),
   },
   {
     name: 'Stripe webhook ledger stores sanitized failure identifiers only',
