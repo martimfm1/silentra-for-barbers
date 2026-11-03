@@ -603,8 +603,8 @@ export function MarketingWorkspace({
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing ·
-              Pro
+              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing
+              <FeaturePlanBadge feature="marketing_campaigns" />
             </div>
             <h1
               id="marketing-title"
