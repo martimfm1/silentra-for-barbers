@@ -9,7 +9,7 @@ export type PrivacyDocument = {
   sections: PrivacySection[];
 };
 
-export const PRIVACY_LAST_UPDATED = '1 de novembro de 2026';
+export const PRIVACY_LAST_UPDATED = '3 de novembro de 2026';
 
 export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
   pt: {
@@ -32,6 +32,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
           'Podemos tratar dados de conta e autenticação, incluindo nome, email, telefone, identificadores de conta, função e dados necessários à segurança da sessão.',
           'Podemos tratar dados da barbearia, incluindo nome, contacto, morada, horários, dias de encerramento, serviços, preços, profissionais, comissões e configurações da conta.',
           'Para reservas e gestão de clientes, podemos tratar nome, telefone, email, serviço, profissional, data e hora, estado da marcação, notas e dados introduzidos manualmente pela barbearia ou pelo cliente.',
+          'Quando pedes para entrar numa lista de espera, tratamos os teus dados de contacto, serviço, profissional opcional, data pretendida e registo do consentimento para a barbearia selecionada poder contactar-te sobre uma vaga. Este pedido não é uma marcação nem reserva um horário. O consentimento para este contacto operacional não é consentimento para marketing.',
           'Podemos tratar avaliações, dados de utilização, registos de auditoria, informações técnicas, identificadores de sessão, dados de subscrição e informação necessária para prevenir abuso e manter a segurança.',
           'As notificações push podem utilizar os dados técnicos necessários para manter uma subscrição do dispositivo. O envio push atualmente é usado para notificações operacionais dirigidas aos barbeiros, nomeadamente novos bookings.',
         ],
@@ -55,6 +56,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '5. Finalidades e bases legais',
         paragraphs: [
           'Tratamos dados para criar e administrar contas, prestar as funcionalidades contratadas, gerir reservas e clientes, enviar comunicações operacionais, processar faturação, prestar suporte, prevenir fraude e abuso, proteger a segurança e melhorar a fiabilidade da plataforma.',
+          'Os dados da lista de espera são utilizados apenas para registar o pedido e permitir que a barbearia escolhida te contacte sobre uma vaga compatível. Não utilizamos esse consentimento para campanhas ou comunicações comerciais.',
           'As bases legais podem incluir a execução de um contrato, o cumprimento de obrigações legais, interesses legítimos da Silentra ou da barbearia, e consentimento quando este seja exigido pela legislação aplicável.',
           'As funcionalidades de marketing e mensagens devem ser utilizadas pela barbearia apenas quando esta disponha de uma base legal adequada para contactar os respetivos destinatários e cumpra as regras aplicáveis a comunicações comerciais.',
         ],
@@ -63,6 +65,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '6. Reservas públicas e marketplace',
         paragraphs: [
           'O marketplace pode permitir que um cliente final pesquise uma barbearia e faça uma reserva sem criar uma conta. Os dados necessários à reserva são transmitidos à barbearia selecionada para que esta possa gerir a marcação.',
+          'A página de reserva pode também permitir um pedido de lista de espera para um serviço e data pretendidos. Os dados de contacto e o pedido são transmitidos à barbearia selecionada apenas para este fim; o pedido não cria uma marcação, não bloqueia um horário e não garante que surja uma vaga.',
           'A Silentra fornece a infraestrutura tecnológica e não é responsável pelo serviço de barbearia, pela qualidade do atendimento, pelos preços, pela disponibilidade efetiva ou pelo cumprimento das obrigações da barbearia perante o cliente final.',
         ],
       },
@@ -136,7 +139,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
     ],
   },
   en: {
-    lastUpdated: 'August 10, 2026',
+    lastUpdated: 'November 3, 2026',
     intro:
       'This Privacy Policy explains how Silentra for Barbers (' +
       '"Silentra") processes personal data when you use the SaaS barbershop management platform, public marketplace, booking, communications, analytics, and billing features.',
@@ -155,6 +158,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
           'We may process account and authentication data, including name, email, phone number, account identifiers, role, and information required to secure sessions.',
           'We may process barbershop data, including name, contact details, address, opening hours, closed days, services, prices, professionals, commissions, and account settings.',
           'For bookings and customer management, we may process name, phone, email, service, professional, date and time, appointment status, notes, and information entered manually by the barbershop or customer.',
+          'When you ask to join a waitlist, we process your contact details, requested service, optional professional, preferred date, and consent record so the selected barbershop can contact you about an opening. A waitlist request is not an appointment and does not reserve a time. Consent to this operational contact is not marketing consent.',
           'We may process reviews, usage data, audit records, technical information, session identifiers, subscription data, and information required to prevent abuse and maintain security.',
           'Push notifications may use technical data required to maintain a device subscription. Push is currently used for operational notifications to barbers, including new bookings.',
         ],
@@ -178,6 +182,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '5. Purposes and legal bases',
         paragraphs: [
           'We process data to create and administer accounts, provide contracted features, manage bookings and customers, send operational communications, process billing, provide support, prevent fraud and abuse, protect security, and improve platform reliability.',
+          'Waitlist data is used only to record the request and allow the selected barbershop to contact you about a suitable opening. We do not use this consent for campaigns or commercial communications.',
           'Legal bases may include contract performance, legal obligations, legitimate interests of Silentra or the barbershop, and consent where required by applicable law.',
           'Marketing and messaging features must be used by barbershops only when they have an appropriate lawful basis to contact recipients and comply with applicable commercial-communications rules.',
         ],
@@ -186,6 +191,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '6. Public bookings and marketplace',
         paragraphs: [
           'The marketplace may allow an end customer to discover a barbershop and book without creating an account. Required booking data is provided to the selected barbershop so it can manage the appointment.',
+          'The booking page may also allow a waitlist request for a requested service and date. Contact details and request information are provided to the selected barbershop for this purpose only; the request does not create an appointment, hold a time, or guarantee that an opening will become available.',
           "Silentra provides the technology infrastructure and is not responsible for the barbershop service, quality, pricing, actual availability, or the barbershop's obligations toward its customers.",
         ],
       },
