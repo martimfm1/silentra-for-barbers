@@ -4,121 +4,48 @@ import type {
   PublicStatusPayload,
   ServiceStatus,
   StatusComponent,
-  StatusIncident,
-  StatusMaintenance,
 } from '@/lib/status/types';
 
+export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const revalidate = 60;
 
-type ProviderConfig = {
-  id: 'supabase' | 'vercel' | 'stripe' | 'brevo';
-  name: string;
-  description: string;
-  summaryUrl?: string;
-  statusApiUrl?: string;
-  incidentsApiUrl?: string;
-  maintenanceApiUrl?: string;
-  statusUrl: string;
-};
+async function checkApi(request: Request): Promise<ServiceStatus> {
+  const startedAt = performance.now();
 
-type ProviderResult = {
-  component: StatusComponent;
-  incidents: StatusIncident[];
-  maintenances: StatusMaintenance[];
-};
+  try {
+    const healthUrl = new URL('/api/health', request.url);
+    const response = await fetch(healthUrl, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(4500),
+    });
 
-const PROVIDERS: ProviderConfig[] = [
-  {
-    id: 'supabase',
-    name: 'Supabase',
-    description: 'Infraestrutura de base de dados e autenticação.',
-    summaryUrl: 'https://status.supabase.com/api/v2/summary.json',
-    statusUrl: 'https://status.supabase.com/',
-  },
-  {
-    id: 'vercel',
-    name: 'Vercel',
-    description: 'Alojamento e infraestrutura de distribuição da aplicação.',
-    summaryUrl: 'https://www.vercel-status.com/api/v2/summary.json',
-    statusUrl: 'https://www.vercel-status.com/',
-  },
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Processamento de pagamentos e faturação.',
-    statusApiUrl: 'https://status.stripe.com/api/v2/status.json',
-    incidentsApiUrl: 'https://status.stripe.com/api/v2/incidents/unresolved.json',
-    maintenanceApiUrl:
-      'https://status.stripe.com/api/v2/scheduled-maintenances/upcoming.json',
-    statusUrl: 'https://status.stripe.com/',
-  },
-  {
-    id: 'brevo',
-    name: 'Brevo',
-    description: 'Email transacional e notificações por email.',
-    statusApiUrl: 'https://status.brevo.com/api/v2/status.json',
-    incidentsApiUrl: 'https://status.brevo.com/api/v2/incidents/unresolved.json',
-    maintenanceApiUrl:
-      'https://status.brevo.com/api/v2/scheduled-maintenances/upcoming.json',
-    statusUrl: 'https://status.brevo.com/',
-  },
-];
+    if (!response.ok) {
+      return response.status >= 500 || response.status === 408
+        ? 'major_outage'
+        : 'unknown';
+    }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
+    const payload: unknown = await response.json();
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !('ok' in payload) ||
+      payload.ok !== true ||
+      !('service' in payload) ||
+      payload.service !== 'silentra-for-barbers' ||
+      !('status' in payload) ||
+      payload.status !== 'healthy'
+    ) {
+      return 'unknown';
+    }
 
-function safeText(value: unknown, maxLength = 180): string {
-  return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
-}
-
-function mapIndicator(value: unknown): ServiceStatus {
-  const indicator = safeText(value, 40).toLowerCase();
-
-  if (indicator === 'none' || indicator === 'operational' || indicator === 'up')
-    return 'operational';
-  if (indicator === 'minor' || indicator === 'degraded')
-    return 'degraded';
-  if (indicator === 'maintenance' || indicator === 'under_maintenance')
-    return 'maintenance';
-  if (indicator === 'major' || indicator === 'critical')
-    return 'major_outage';
-  if (indicator === 'partial_outage') return 'partial_outage';
-
-  return 'unknown';
-}
-
-function mapOverallStatus(
-  components: StatusComponent[],
-): ServiceStatus {
-  const application = components.find((item) => item.id === 'application');
-  const database = components.find((item) => item.id === 'database');
-
-  if (
-    application?.status === 'major_outage' ||
-    database?.status === 'major_outage'
-  ) {
+    const durationMs = performance.now() - startedAt;
+    return durationMs >= 2000 ? 'degraded' : 'operational';
+  } catch {
     return 'major_outage';
   }
-
-  const providerStatuses = components
-    .filter((item) => item.id !== 'application' && item.id !== 'database')
-    .map((item) => item.status);
-
-  if (providerStatuses.includes('major_outage') || providerStatuses.includes('partial_outage'))
-    return 'partial_outage';
-  if (providerStatuses.includes('degraded')) return 'degraded';
-  if (
-    components.some((item) => item.status === 'maintenance')
-  ) {
-    return 'maintenance';
-  }
-  if (components.some((item) => item.status === 'unknown')) return 'unknown';
-
-  return 'operational';
 }
 
 async function checkDatabase(): Promise<ServiceStatus> {
@@ -147,180 +74,66 @@ async function checkDatabase(): Promise<ServiceStatus> {
     if (response.status >= 500 || response.status === 408)
       return 'major_outage';
 
-    // Authentication/configuration or schema errors are not proof of an outage.
+    // A credentials or schema error is not enough evidence to report an outage.
     return 'unknown';
   } catch {
     return 'major_outage';
   }
 }
 
-async function fetchStatusFeed(url: string): Promise<Record<string, unknown> | null> {
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'SilentraStatusPage/1.0 (+https://barbers.silentra.me/status)',
-      },
-      next: { revalidate: 60 },
-      signal: AbortSignal.timeout(4500),
-    });
+function getOverallStatus(
+  apiStatus: ServiceStatus,
+  databaseStatus: ServiceStatus,
+): ServiceStatus {
+  const statuses = [apiStatus, databaseStatus];
 
-    if (!response.ok) return null;
-    return asRecord(await response.json());
-  } catch {
-    return null;
+  if (statuses.includes('major_outage')) return 'major_outage';
+  if (statuses.includes('maintenance')) return 'maintenance';
+  if (
+    statuses.includes('degraded') ||
+    statuses.includes('partial_outage')
+  ) {
+    return 'degraded';
   }
+  if (statuses.includes('unknown')) return 'unknown';
+
+  return 'operational';
 }
 
-async function fetchProviderStatus(
-  provider: ProviderConfig,
-): Promise<ProviderResult> {
-  const component: StatusComponent = {
-    id: provider.id,
-    name: provider.name,
-    description: provider.description,
-    status: 'unknown',
-    sourceUrl: provider.statusUrl,
-    sourceUpdatedAt: null,
-  };
-
-  const [summary, statusFeed, incidentsFeed, maintenanceFeed] =
-    await Promise.all([
-      provider.summaryUrl
-        ? fetchStatusFeed(provider.summaryUrl)
-        : Promise.resolve(null),
-      provider.statusApiUrl
-        ? fetchStatusFeed(provider.statusApiUrl)
-        : Promise.resolve(null),
-      provider.incidentsApiUrl
-        ? fetchStatusFeed(provider.incidentsApiUrl)
-        : Promise.resolve(null),
-      provider.maintenanceApiUrl
-        ? fetchStatusFeed(provider.maintenanceApiUrl)
-        : Promise.resolve(null),
-    ]);
-
-  const statusPayload = summary ?? statusFeed;
-  const providerStatus = asRecord(statusPayload?.status);
-  const page = asRecord(statusPayload?.page);
-  component.status = mapIndicator(providerStatus?.indicator);
-  component.sourceUpdatedAt = safeText(page?.updated_at, 80) || null;
-
-  const incidentSource = Array.isArray(summary?.incidents)
-    ? summary
-    : incidentsFeed;
-  const incidents: StatusIncident[] = Array.isArray(
-    incidentSource?.incidents,
-  )
-    ? incidentSource.incidents
-        .map((entry, index) => {
-          const incident = asRecord(entry);
-          if (!incident) return null;
-          const status = safeText(incident.status, 40);
-          if (!status || status.toLowerCase() === 'resolved') return null;
-
-          return {
-            id: `${provider.id}-${safeText(incident.id, 80) || index}`,
-            provider: provider.name,
-            title: safeText(incident.name, 180) || 'Incidente comunicado',
-            status,
-            impact: safeText(incident.impact, 40) || 'unknown',
-            updatedAt: safeText(incident.updated_at, 80) || null,
-            sourceUrl: provider.statusUrl,
-          };
-        })
-        .filter((item): item is StatusIncident => item !== null)
-        .slice(0, 5)
-    : [];
-
-  const maintenanceSource = Array.isArray(summary?.scheduled_maintenances)
-    ? summary
-    : maintenanceFeed;
-  const maintenances: StatusMaintenance[] = Array.isArray(
-    maintenanceSource?.scheduled_maintenances,
-  )
-    ? maintenanceSource.scheduled_maintenances
-        .map((entry, index) => {
-          const maintenance = asRecord(entry);
-          if (!maintenance) return null;
-          const status = safeText(maintenance.status, 40);
-          if (
-            !status ||
-            ['completed', 'cancelled', 'canceled'].includes(
-              status.toLowerCase(),
-            )
-          ) {
-            return null;
-          }
-
-          return {
-            id: `${provider.id}-maintenance-${safeText(maintenance.id, 80) || index}`,
-            provider: provider.name,
-            title:
-              safeText(maintenance.name, 180) || 'Manutenção programada',
-            status,
-            scheduledFor:
-              safeText(maintenance.scheduled_for, 80) ||
-              safeText(maintenance.scheduled_for_date, 80) ||
-              null,
-            scheduledUntil:
-              safeText(maintenance.scheduled_until, 80) ||
-              safeText(maintenance.scheduled_until_date, 80) ||
-              null,
-            sourceUrl: provider.statusUrl,
-          };
-        })
-        .filter((item): item is StatusMaintenance => item !== null)
-        .slice(0, 5)
-    : [];
-
-  return { component, incidents, maintenances };
-}
-
-async function GET__unobserved() {
-  const [databaseStatus, providerResults] = await Promise.all([
+async function GET__unobserved(request: Request) {
+  const [apiStatus, databaseStatus] = await Promise.all([
+    checkApi(request),
     checkDatabase(),
-    Promise.all(PROVIDERS.map(fetchProviderStatus)),
   ]);
 
   const components: StatusComponent[] = [
     {
-      id: 'application',
-      name: 'Aplicação e API pública',
+      id: 'api',
+      name: 'APIs da Silentra',
       description:
-        'O servidor respondeu ao pedido de estado da plataforma.',
-      status: 'operational',
+        'Verificação da disponibilidade da camada de API através do endpoint interno de saúde.',
+      status: apiStatus,
     },
     {
       id: 'database',
       name: 'Base de dados',
       description:
-        'Verificação de leitura à base de dados utilizada pela plataforma.',
+        'Consulta de leitura à base de dados principal, sem devolver registos públicos.',
       status: databaseStatus,
-      sourceUrl: 'https://status.supabase.com/',
     },
-    ...providerResults.map((result) => result.component),
   ];
-
-  const incidents = providerResults.flatMap((result) => result.incidents);
-  const maintenances = providerResults.flatMap(
-    (result) => result.maintenances,
-  );
 
   const payload: PublicStatusPayload = {
     ok: true,
     generatedAt: new Date().toISOString(),
-    overall: mapOverallStatus(components),
+    overall: getOverallStatus(apiStatus, databaseStatus),
     components,
-    incidents: incidents.slice(0, 12),
-    maintenances: maintenances.slice(0, 8),
   };
 
   return NextResponse.json(payload, {
     status: 200,
     headers: {
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
       'X-Content-Type-Options': 'nosniff',
     },
   });
