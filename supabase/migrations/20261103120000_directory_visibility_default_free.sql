@@ -79,7 +79,8 @@ GRANT EXECUTE ON FUNCTION public.set_barbershop_directory_visibility(uuid, uuid,
 -- A Free barbershop cannot retain an old opt-out after a downgrade. Restore
 -- directory presence for shops without a current Pro/Enterprise entitlement.
 UPDATE public.barbershops b
-SET is_public_in_directory = TRUE
+SET is_public_in_directory = TRUE,
+    updated_at = now()
 WHERE b.is_public_in_directory = FALSE
   AND NOT EXISTS (
     SELECT 1
@@ -138,7 +139,8 @@ BEGIN
 
   IF NOT v_has_directory_control THEN
     UPDATE public.barbershops
-    SET is_public_in_directory = TRUE
+    SET is_public_in_directory = TRUE,
+        updated_at = now()
     WHERE id = v_barbershop_id
       AND is_public_in_directory = FALSE;
   END IF;
@@ -153,9 +155,17 @@ REVOKE ALL ON FUNCTION public.restore_directory_visibility_without_pro()
 
 DROP TRIGGER IF EXISTS restore_directory_visibility_without_pro
   ON public.subscriptions;
+DROP TRIGGER IF EXISTS restore_directory_visibility_after_plan_update
+  ON public.subscriptions;
 
 CREATE TRIGGER restore_directory_visibility_without_pro
-AFTER INSERT OR UPDATE OF status, plan, plan_override OR DELETE
+AFTER INSERT OR DELETE
+ON public.subscriptions
+FOR EACH ROW
+EXECUTE FUNCTION public.restore_directory_visibility_without_pro();
+
+CREATE TRIGGER restore_directory_visibility_after_plan_update
+AFTER UPDATE OF status, plan, plan_override
 ON public.subscriptions
 FOR EACH ROW
 EXECUTE FUNCTION public.restore_directory_visibility_without_pro();
