@@ -325,6 +325,8 @@ returns table (
   vacancy_id uuid,
   waitlist_id uuid,
   shop_id uuid,
+  service_id uuid,
+  professional_id uuid,
   barbershop_id uuid,
   preferred_date date,
   offered_time time,
@@ -483,6 +485,8 @@ begin
       v_vacancy.id,
       w.id,
       w.shop_id,
+      w.service_id,
+      v_vacancy.professional_id,
       w.barbershop_id,
       w.offered_date,
       w.offered_time,
@@ -497,7 +501,7 @@ begin
       v_vacancy.attempts + 1
     from public.booking_waitlist w
     join public.services s on s.id = w.service_id
-    left join public.professionals p on p.id = w.professional_id
+    left join public.professionals p on p.id = v_vacancy.professional_id
     join public.shops sh on sh.id = w.shop_id
     join public.barbershops b on b.id = w.barbershop_id
     where w.id = v_waitlist_id;
