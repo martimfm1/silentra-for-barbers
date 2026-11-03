@@ -3,18 +3,10 @@
 import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Lock } from 'lucide-react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import type { FeatureKey } from '@/lib/billing/plan-features';
 import { getMinimumPlanForFeature } from '@/lib/billing/plan-features';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
-
-/**
- * Only features that are genuinely unavailable on Free need a minimum-plan
- * override here. Team/professional management is available on every plan;
- * Free is limited by the professional quota (1), not by feature access.
- */
-
 
 export function useFeatureGate() {
   const router = useRouter();
@@ -22,7 +14,7 @@ export function useFeatureGate() {
   const requestUpgrade = (feature: FeatureKey) => {
     if (hasFeature(feature)) return true;
     const requiredPlan = getMinimumPlanForFeature(feature) ?? 'pro';
-s    const planLabel = requiredPlan === 'enterprise' ? 'Enterprise' : 'Pro';
+    const planLabel = requiredPlan === 'enterprise' ? 'Enterprise' : 'Pro';
     toast(`Esta funcionalidade requer o plano ${planLabel}.`, {
       description: 'Faz upgrade para desbloquear esta funcionalidade.',
       action: { label: 'Ver planos', onClick: () => router.push('/plans') },
