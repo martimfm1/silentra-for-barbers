@@ -557,7 +557,7 @@ export default function SettingsPageOrganized() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-sm font-semibold">{t('settingsPage.mbwayTitle')}</p>
-                          {!canManualMbway && <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-semibold text-amber-200">PRO</span>}
+                          <FeaturePlanBadge feature="manual_mbway_prepayment" />
                         </div>
                         <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">{t('settingsPage.mbwayDescription')}</p>
                       </div>
