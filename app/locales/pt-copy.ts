@@ -702,6 +702,7 @@ export const ptCopy = {
     rewardReactivated: 'Recompensa reativada.',
     deactivateRewardDescription: 'A recompensa deixa de estar disponível para novos resgates. Podes reativá-la mais tarde.',
     deactivateRewardAction: 'Desativar recompensa',
+    deactivateRewardConfirm: 'Desativar esta recompensa?',
     validateShortcutDescription: 'Lê o QR privado do voucher ou introduz o código de utilização.',
     pointsShortcutDescription: 'Define quantos pontos cada serviço concluído atribui.',
     programSetupDescription: 'Define como os clientes acumulam pontos e os bónus de adesão e recomendação.',
