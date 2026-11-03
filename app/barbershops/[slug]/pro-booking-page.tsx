@@ -62,8 +62,15 @@ export default function ProBookingPage({
     null,
   );
   const barbershopId = profile.barbershop_id || profile.id;
+  // Keep this page on the exact object uploaded by Dashboard > Settings > Appearance.
+  // Do not use shops.cover_url here: the settings uploader writes to this canonical path.
+  const settingsBannerUrl = SUPABASE_URL
+    ? `${SUPABASE_URL}/storage/v1/object/public/banner/${barbershopId}/banner.webp`
+    : null;
   const cover =
-    getCoverUrl(profile.cover_url, barbershopId) || DEFAULT_BARBERSHOP_BANNER;
+    settingsBannerUrl ||
+    getCoverUrl(profile.cover_url, barbershopId) ||
+    DEFAULT_BARBERSHOP_BANNER;
   const bookingShop: MarketplaceShop = {
     id: profile.id,
     barbershop_id: barbershopId,
