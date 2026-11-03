@@ -18,6 +18,8 @@ create table if not exists public.booking_waitlist (
   last_contacted_at timestamptz,
   offer_expires_at timestamptz,
   linked_appointment_id uuid references public.appointments(id) on delete set null,
+  offered_date date,
+  offered_time time,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint booking_waitlist_time_range_check check (
