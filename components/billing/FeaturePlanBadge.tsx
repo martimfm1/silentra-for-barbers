@@ -7,17 +7,24 @@ import {
   type FeatureKey,
 } from '@/lib/billing/plan-features';
 
-export function FeaturePlanBadge({
-  feature,
-  detail,
-  className = '',
-}: {
-  feature: FeatureKey;
+type FeaturePlanBadgeProps = {
   detail?: string;
   className?: string;
-}) {
+} & (
+  | { feature: FeatureKey; minimumPlan?: never }
+  | { feature?: never; minimumPlan: 'pro' | 'enterprise' }
+);
+
+export function FeaturePlanBadge({
+  feature,
+  minimumPlan: explicitMinimumPlan,
+  detail,
+  className = '',
+}: FeaturePlanBadgeProps) {
   const { locale } = useLanguage();
-  const minimumPlan = getMinimumPlanForFeature(feature);
+  const minimumPlan = feature
+    ? getMinimumPlanForFeature(feature)
+    : explicitMinimumPlan;
 
   if (!minimumPlan) return null;
 
