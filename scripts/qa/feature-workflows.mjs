@@ -69,6 +69,15 @@ const bookingOutboxMigration = read(
 const bookingOutboxWorker = read(
   'app/api/cron/booking-automation-outbox/route.ts',
 );
+const appointmentReminderMigration = read(
+  'supabase/migrations/20261103090000_automatic_appointment_reminders.sql',
+);
+const appointmentReminderSchedule = read(
+  'supabase/migrations/20261103090100_schedule_appointment_reminders.sql',
+);
+const appointmentReminderWorker = read(
+  'app/api/cron/appointment-reminders/route.ts',
+);
 const bookingLifecycleCron = read('app/api/cron/booking-lifecycle/route.ts');
 const appointmentCompleteApi = read(
   'app/api/appointments/[appointmentId]/complete/route.ts',
@@ -183,6 +192,18 @@ assert.match(bookingOutboxWorker, /x-booking-timestamp/);
 assert.match(bookingOutboxSchedule, /silentra-booking-automation-outbox/);
 assert.match(bookingOutboxSchedule, /\*\/10 \* \* \* \*/);
 assert.match(bookingOutboxSchedule, /vault\.decrypted_secrets/);
+assert.match(appointmentReminderMigration, /appointment_reminder_outbox/);
+assert.match(appointmentReminderMigration, /for update skip locked/i);
+assert.match(appointmentReminderMigration, /create unique index[\s\S]*?on public\.appointment_reminder_outbox \(appointment_id, scheduled_for\)/);
+assert.match(appointmentReminderMigration, /AUTOMATED_REMINDERS_PRO_REQUIRED/);
+assert.match(appointmentReminderMigration, /interval '24 hours'/);
+assert.match(appointmentReminderWorker, /claim_appointment_reminder_events/);
+assert.match(appointmentReminderWorker, /sendBrevoEmail/);
+assert.match(appointmentReminderWorker, /x-reminder-signature/);
+assert.match(appointmentReminderSchedule, /silentra-appointment-reminders/);
+assert.match(appointmentReminderSchedule, /\*\/10 \* \* \* \*/);
+assert.match(bookingSettings, /auto_reminders/);
+assert.match(bookingSettings, /autoRemindersTitle/);
 assert.match(bookingOutboxTimeout, /timeout_milliseconds := 15000/);
 assert.match(adminReportsPage, /getPlatformAdminContext/);
 assert.match(adminReportsUi, /Relatórios da plataforma/);

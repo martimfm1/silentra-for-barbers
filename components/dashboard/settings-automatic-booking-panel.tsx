@@ -18,9 +18,11 @@ export function SettingsAutomaticBookingPanel({
   const { t } = useLanguage();
   const { plan, loading: planLoading } = useFeatureAccess();
   const eligible = plan === 'pro' || plan === 'enterprise';
+  const [autoReminders, setAutoReminders] = useState(false);
   const [autoConfirm, setAutoConfirm] = useState(false);
   const [autoComplete, setAutoComplete] = useState(false);
   const [initial, setInitial] = useState({
+    autoReminders: false,
     autoConfirm: false,
     autoComplete: false,
   });
@@ -38,9 +40,11 @@ export function SettingsAutomaticBookingPanel({
         );
       } else if (result.data) {
         const next = {
+          autoReminders: result.data.auto_reminders === true,
           autoConfirm: result.data.auto_confirm_bookings === true,
           autoComplete: result.data.auto_complete_bookings === true,
         };
+        setAutoReminders(next.autoReminders);
         setAutoConfirm(next.autoConfirm);
         setAutoComplete(next.autoComplete);
         setInitial(next);
@@ -53,6 +57,7 @@ export function SettingsAutomaticBookingPanel({
   }, [barbershopId, t]);
 
   const dirty =
+    autoReminders !== initial.autoReminders ||
     autoConfirm !== initial.autoConfirm ||
     autoComplete !== initial.autoComplete;
 
@@ -64,6 +69,7 @@ export function SettingsAutomaticBookingPanel({
     if (!dirty) return;
     setSaving(true);
     const result = await barbershopService.updateConfig(barbershopId, {
+      auto_reminders: autoReminders,
       auto_confirm_bookings: autoConfirm,
       auto_complete_bookings: autoComplete,
     });
@@ -74,7 +80,7 @@ export function SettingsAutomaticBookingPanel({
       );
       return;
     }
-    setInitial({ autoConfirm, autoComplete });
+    setInitial({ autoReminders, autoConfirm, autoComplete });
     toast.success(t('automaticBookingSettings.saved'));
   }
 
@@ -88,6 +94,25 @@ export function SettingsAutomaticBookingPanel({
 
   return (
     <div className="space-y-3">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">
+              {t('automaticBookingSettings.autoRemindersTitle')}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              {t('automaticBookingSettings.autoRemindersDescription')}
+            </p>
+          </div>
+          <Switch
+            checked={autoReminders}
+            disabled={!eligible}
+            onCheckedChange={setAutoReminders}
+            aria-label={t('automaticBookingSettings.autoRemindersAria')}
+          />
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">

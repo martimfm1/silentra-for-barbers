@@ -885,6 +885,9 @@ export const enCopy = {
     planError: 'These options are only available on Pro and Enterprise plans.',
     saveError: 'Unable to save these options.',
     saved: 'Changes saved.',
+    autoRemindersTitle: 'Send an automatic reminder 24 hours before',
+    autoRemindersDescription: 'Email the customer on the day before their appointment. Only confirmed bookings are included, and this can be turned off at any time.',
+    autoRemindersAria: 'Enable automatic email reminders',
     autoConfirmTitle: 'Automatically confirm new bookings',
     autoConfirmDescription:
       'New bookings are confirmed as soon as they arrive, without needing to open them manually.',

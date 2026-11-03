@@ -46,6 +46,14 @@ O trigger `appointments_enqueue_booking_completed_automation` cria um evento ide
 
 O agendamento de alta frequência deve ser feito pelo Supabase Cron através de `pg_net`, com URL e segredo HMAC guardados no Vault; não adicionar um cron horário ao Vercel Hobby. O pedido HTTP tem timeout de 15 segundos para tolerar arranques a frio do Vercel.
 
+## Lembretes automáticos de marcações
+
+A opção **Enviar lembrete automático 24 horas antes** fica nas definições de marcações e está disponível nos planos Pro e Enterprise. Quando ativa, o trigger `appointments_sync_reminder` coloca em fila apenas marcações `scheduled` com mais de 24 horas de antecedência. O worker `/api/cron/appointment-reminders` envia um email localizado (PT/EN) através do Brevo.
+
+A fila `appointment_reminder_outbox` é idempotente por marcação e hora agendada, cancela lembretes pendentes quando a marcação é cancelada ou reagendada, usa `FOR UPDATE SKIP LOCKED`, recupera leases abandonadas e aplica novas tentativas com atraso exponencial. O Supabase Cron executa o worker a cada 10 minutos usando o mesmo URL e segredo HMAC guardados no Vault que a fila de automações de marcações.
+
+A migration de agendamento deriva o endpoint `/api/cron/appointment-reminders` a partir de `silentra_booking_outbox_url`; não é necessário guardar um segundo URL. Confirmar que o Vault contém `silentra_booking_outbox_cron_secret` e `silentra_booking_outbox_url` antes de ativar o job.
+
 ## Vercel
 
 `vercel.json` mantém apenas cron jobs diários compatíveis com Vercel Hobby. Não agendar `/api/cron/booking-lifecycle` de hora a hora em Vercel Hobby: o deploy de produção é rejeitado por essa frequência. O estado da conclusão automática é tratado pelo job `silentra-booking-completion` do Supabase a cada 10 minutos. A emissão das automações `booking_completed` pela rota HTTP ainda requer uma estratégia de execução compatível com o plano antes de ser considerada ativa em produção.
