@@ -60,7 +60,7 @@ async function GET__unobserved(request: Request) {
       return NextResponse.json({ success: false, error: 'Estado inválido.' }, { status: 400 });
     let query = access.tenant.admin
       .from('booking_waitlist')
-      .select('id,customer_name,customer_email,customer_phone,preferred_date,preferred_time_start,preferred_time_end,status,created_at,last_contacted_at,offer_expires_at,services(name),professionals(name)')
+      .select('id,customer_name,customer_email,customer_phone,preferred_date,preferred_time_start,preferred_time_end,offered_date,offered_time,status,created_at,last_contacted_at,offer_expires_at,services(name),professionals(name)')
       .eq('barbershop_id', access.tenant.barbershopId)
       .order('created_at', { ascending: true })
       .limit(200);
