@@ -168,6 +168,7 @@ export default function CRMClientPage({ params }: Props) {
           <div>
             <p className="text-sm text-primary">{t('crmDetail.profile')}</p>
             <h1 className="text-3xl font-semibold">{client.name_complete}</h1>
+            <div className="mt-2"><FeaturePlanBadge feature="advanced_crm" /></div>
             <p className="mt-1 text-muted-foreground">
               {client.email || t('crmDetail.noEmail')} ·{' '}
               {client.num_phone || t('crmDetail.noPhone')}
