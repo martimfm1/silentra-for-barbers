@@ -623,7 +623,6 @@ export default function OnboardingPage() {
                                 type="number"
                                 min="0"
                                 step="0.5"
-                                required
                                 value={price}
                                 onChange={(event) =>
                                   setPrice(
@@ -651,7 +650,6 @@ export default function OnboardingPage() {
                               <Input
                                 id="open-time"
                                 type="time"
-                                required
                                 value={openTime}
                                 onChange={(event) =>
                                   setOpenTime(event.target.value)
@@ -675,7 +673,6 @@ export default function OnboardingPage() {
                               <Input
                                 id="close-time"
                                 type="time"
-                                required
                                 value={closeTime}
                                 onChange={(event) =>
                                   setCloseTime(event.target.value)
@@ -710,7 +707,6 @@ export default function OnboardingPage() {
                         </Label>
                         <Input
                           id="tags"
-                          required
                           value={tagsInput}
                           onChange={(event) => setTagsInput(event.target.value)}
                           placeholder="Corte, Barba, Toalha quente"
