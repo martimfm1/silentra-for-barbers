@@ -19,13 +19,16 @@ assert.match(migration, /booking_waitlist_active_duplicate_uidx/i);
 
 assert.match(publicApi, /readJsonObject/);
 assert.match(publicApi, /isSafePublicBookingDate/);
-assert.match(publicApi, /consume_public_rate_limit/);
+assert.match(publicApi, /consumePublicRateLimit/);
+assert.match(publicApi, /customer-waitlist/);
+assert.match(publicApi, /withApiObservability/);
 assert.match(publicApi, /body\.consent !== true/);
 assert.match(publicApi, /eq\('barbershop_id', shop\.barbershop_id\)/);
 assert.match(publicApi, /eq\('shop_id', shopId\)/);
 assert.match(publicApi, /in\('status', \['waiting', 'offered'\]\)/);
 assert.match(publicApi, /status: 'waiting'/);
 
+assert.match(dashboardApi, /withApiObservability/);
 assert.match(dashboardApi, /requireTenantAuthorization/);
 assert.match(dashboardApi, /barbershop_member_permissions/);
 assert.match(dashboardApi, /resolveAccessPlanForUser/);
