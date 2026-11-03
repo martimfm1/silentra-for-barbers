@@ -1279,7 +1279,7 @@ export const ptCopy = {
     openButton: 'Apagar barbearia',
     confirmTitle: 'Tens a certeza de que queres apagar a barbearia?',
     confirmDescription: 'Para proteger a tua conta, confirma primeiro a palavra-passe. Enviaremos depois um código de segurança para o email da tua conta.',
-    codeDescription: 'Introduz o código de 6 dígitos enviado para o email da tua conta e confirma novamente a palavra-passe para concluir a eliminação.',
+    codeDescription: 'Introduz o código de 6 dígitos enviado para o email da tua conta. A palavra-passe também será validada antes da eliminação.',
     password: 'Palavra-passe da conta',
     emailCode: 'Código enviado por email',
     codeExpiry: 'O código é válido durante 10 minutos e só pode ser utilizado uma vez.',
