@@ -187,8 +187,8 @@ async function GET__unobserved(request: Request) {
           ? 'This time is not held automatically. It is confirmed only after you complete the booking, and may become unavailable if someone else books first.'
           : 'Este horário não fica reservado automaticamente. Só fica confirmado depois de concluíres a marcação e poderá deixar de estar disponível se outra pessoa marcar primeiro.';
         const expiryNote = english
-          ? `You can try to book this opening until ${expiry} (Lisbon time).`
-          : `Podes tentar marcar esta vaga até às ${expiry} (hora de Portugal continental).`;
+          ? `Your priority offer expires at ${expiry} (Lisbon time). After that, the opening may be offered to someone else. You can still check current availability on the booking page.`
+          : `A prioridade deste convite termina às ${expiry} (hora de Portugal continental). Depois disso, a vaga poderá ser proposta a outra pessoa. Podes continuar a consultar os horários disponíveis na página de marcação.`;
         const button = english ? 'Open booking page' : 'Abrir página de marcação';
 
         const details = [
