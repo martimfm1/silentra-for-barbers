@@ -71,8 +71,8 @@ begin
     return new;
   end if;
 
-  v_slot_date := (new.date_hour at time zone 'Europe/Lisbon')::date;
-  v_slot_time := (new.date_hour at time zone 'Europe/Lisbon')::time;
+  v_slot_date := (new.date_hour at time zone 'UTC')::date;
+  v_slot_time := (new.date_hour at time zone 'UTC')::time;
 
   insert into public.booking_waitlist_vacancies (
     appointment_id,
@@ -216,8 +216,8 @@ begin
     return new;
   end if;
 
-  v_local_date := (new.date_hour at time zone 'Europe/Lisbon')::date;
-  v_local_time := (new.date_hour at time zone 'Europe/Lisbon')::time;
+  v_local_date := (new.date_hour at time zone 'UTC')::date;
+  v_local_time := (new.date_hour at time zone 'UTC')::time;
 
   for v_vacancy in
     select v.*
@@ -230,8 +230,8 @@ begin
         or new.professional_id is null
         or v.professional_id = new.professional_id
       )
-      and (new.date_hour < ((v.slot_date::text || ' ' || v.slot_time::text)::timestamp at time zone 'Europe/Lisbon') + make_interval(mins => v.duration_minutes))
-      and (new.date_hour + make_interval(mins => greatest(1, least(coalesce(new.duration_minutes, 30), 1440))) > ((v.slot_date::text || ' ' || v.slot_time::text)::timestamp at time zone 'Europe/Lisbon'))
+      and (new.date_hour < ((v.slot_date::text || ' ' || v.slot_time::text)::timestamp at time zone 'UTC') + make_interval(mins => v.duration_minutes))
+      and (new.date_hour + make_interval(mins => greatest(1, least(coalesce(new.duration_minutes, 30), 1440))) > ((v.slot_date::text || ' ' || v.slot_time::text)::timestamp at time zone 'UTC'))
     for update
   loop
     if v_vacancy.waitlist_id is not null then
@@ -435,8 +435,8 @@ begin
       where a.barbershop_id = v_vacancy.barbershop_id
         and a.id <> v_vacancy.appointment_id
         and a.status::text in ('pending', 'scheduled')
-        and a.date_hour < ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'Europe/Lisbon') + make_interval(mins => v_vacancy.duration_minutes)
-        and a.date_hour + make_interval(mins => greatest(1, least(coalesce(a.duration_minutes, 30), 1440))) > ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'Europe/Lisbon')
+        and a.date_hour < ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'UTC') + make_interval(mins => v_vacancy.duration_minutes)
+        and a.date_hour + make_interval(mins => greatest(1, least(coalesce(a.duration_minutes, 30), 1440))) > ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'UTC')
         and (
           v_vacancy.professional_id is null
           or a.professional_id is null
