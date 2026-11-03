@@ -59,7 +59,8 @@ async function checkRoute(route) {
     const payload = await response.json();
     assert(payload?.ok === true, '/api/public/status: payload inválido');
     assert(Array.isArray(payload?.components), '/api/public/status: componentes em falta');
-    assert(payload.components.some((item) => item.id === 'application'), '/api/public/status: aplicação em falta');
+    assert(payload.components.length === 2, '/api/public/status: devem existir apenas dois componentes');
+    assert(payload.components.some((item) => item.id === 'api'), '/api/public/status: APIs da Silentra em falta');
     assert(payload.components.some((item) => item.id === 'database'), '/api/public/status: base de dados em falta');
   }
 
