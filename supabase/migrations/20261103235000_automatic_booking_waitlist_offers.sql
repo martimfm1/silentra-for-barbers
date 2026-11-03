@@ -356,6 +356,7 @@ begin
     from public.booking_waitlist_vacancies v
     where v.status = 'pending'
       and v.available_at <= now()
+      and v.slot_date <= (now() at time zone 'Europe/Lisbon')::date + 13
       and v.attempts < 5
     order by v.created_at asc, v.id asc
     limit greatest(1, least(coalesce(p_batch_size, 25), 100))
