@@ -568,7 +568,7 @@ export default function SettingsPageOrganized() {
                         aria-label={t('settingsPage.mbwayEnabled')}
                       />
                     </div>
-                    <div className="mt-4 grid gap-2 sm:max-w-md">
+                    <div className="grid gap-2 sm:max-w-md">
                       <label htmlFor="settings-mbway-phone" className="text-xs font-medium text-zinc-300">{t('settingsPage.mbwayPhone')}</label>
                       <Input
                         id="settings-mbway-phone"
@@ -584,7 +584,7 @@ export default function SettingsPageOrganized() {
                       <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.mbwayWhatsappNotice')}</p>
                     </div>
                     {!canManualMbway && (
-                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
                         <p className="text-xs text-zinc-400">{t('settingsPage.mbwayProRequired')}</p>
                         <Button asChild size="sm" variant="outline"><Link href="/dashboard/billing">{t('settingsPage.upgradePlan')}</Link></Button>
                       </div>
