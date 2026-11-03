@@ -182,6 +182,12 @@ export default function LoyaltyValidationPage() {
       scannerControlsRef.current = controls;
       streamRef.current =
         video.srcObject instanceof MediaStream ? video.srcObject : null;
+      // Some cameras can decode immediately as the scanner starts. In that
+      // case the QR callback may run before decodeFromConstraints resolves.
+      if (scanHandledRef.current || validatingRef.current) {
+        stopCamera();
+        return;
+      }
       setStatus(t('loyaltyValidation.cameraReady'));
     } catch (error) {
       stopCamera();
