@@ -110,16 +110,23 @@ function amenityItems(amenities: BarbershopAmenities): AmenityItem[] {
 export default function BarbershopPublicPageFinal({
   initialData,
   loyaltyEnabled = false,
+  bookingOffer = null,
 }: {
   slug: string;
   loyaltyEnabled?: boolean;
   initialData: BarbershopPublicDetails;
+  bookingOffer?: {
+    serviceId: string;
+    date: string;
+    time: string;
+    professionalId: string;
+  } | null;
 }) {
   const shop = initialData as PublicData;
   const { locale } = useLanguage();
-  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(Boolean(bookingOffer));
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
+    bookingOffer?.serviceId ?? null,
   );
   const [reviewToken, setReviewToken] = useState('');
   const [reviewName, setReviewName] = useState('');
@@ -599,6 +606,9 @@ export default function BarbershopPublicPageFinal({
           setSelectedServiceId(null);
         }}
         selectedServiceId={selectedServiceId}
+        selectedDate={bookingOffer?.date}
+        selectedTime={bookingOffer?.time}
+        selectedProfessionalId={bookingOffer?.professionalId}
       />
     </main>
   );
