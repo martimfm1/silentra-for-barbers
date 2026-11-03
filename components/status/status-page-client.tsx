@@ -35,6 +35,24 @@ const SERVICE_ICONS: Record<string, LucideIcon> = {
   brevo: Mail,
 };
 
+const SERVICE_NAMES: Record<string, { pt: string; en: string }> = {
+  application: { pt: 'Aplicação e API pública', en: 'Application and public API' },
+  database: { pt: 'Base de dados', en: 'Database' },
+  supabase: { pt: 'Supabase', en: 'Supabase' },
+  vercel: { pt: 'Vercel', en: 'Vercel' },
+  stripe: { pt: 'Stripe', en: 'Stripe' },
+  brevo: { pt: 'Brevo', en: 'Brevo' },
+};
+
+const ENGLISH_DESCRIPTIONS: Record<string, string> = {
+  application: 'The server responded to the platform status request.',
+  database: 'Read-only connectivity check against the platform database.',
+  supabase: 'Public status published by the infrastructure provider.',
+  vercel: 'Public status published by the hosting provider.',
+  stripe: 'Public status published by the payments provider.',
+  brevo: 'Public status published by the email provider.',
+};
+
 const STATUS_STYLES: Record<
   ServiceStatus,
   { pt: string; en: string; className: string; icon: LucideIcon }
@@ -184,19 +202,13 @@ function ServiceCard({
   locale: Locale;
 }) {
   const Icon = SERVICE_ICONS[component.id] ?? ShieldCheck;
+  const serviceName =
+    SERVICE_NAMES[component.id]?.[locale] ?? component.name;
   const description =
     locale === 'pt'
       ? component.description
-      : ({
-          application:
-            'The server responded to the platform status request.',
-          database:
-            'Read-only connectivity check against the platform database.',
-          supabase: 'Public status published by the infrastructure provider.',
-          vercel: 'Public status published by the hosting provider.',
-          stripe: 'Public status published by the payments provider.',
-          brevo: 'Public status published by the email provider.',
-        }[component.id] ?? 'Status published by the service provider.');
+      : ENGLISH_DESCRIPTIONS[component.id] ??
+        'Status published by the service provider.';
 
   return (
     <article className="flex min-w-0 flex-col justify-between gap-5 rounded-2xl border border-white/[0.09] bg-white/[0.025] p-5 transition-colors hover:border-white/[0.14] hover:bg-white/[0.035] sm:p-6">
@@ -207,7 +219,7 @@ function ServiceCard({
           </span>
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-zinc-100">
-              {component.name}
+              {serviceName}
             </h3>
             <p className="mt-1 text-xs text-zinc-500">
               {locale === 'pt' ? 'Componente monitorizado' : 'Monitored component'}
