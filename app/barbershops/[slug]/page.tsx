@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { UUID_PATTERN } from '@/lib/validation';
+import { isValidDate, isValidTime, UUID_PATTERN } from '@/lib/validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getPublicProfileById,
@@ -17,7 +17,13 @@ import type { BarbershopPublicDetails } from './services/public-barbershop.servi
 
 interface BarbershopPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ booking?: string }>;
+  searchParams?: Promise<{
+    booking?: string;
+    service?: string;
+    date?: string;
+    time?: string;
+    professional?: string;
+  }>;
 }
 
 const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
@@ -262,6 +268,22 @@ export default async function BarbershopPage({
     searchParams ?? Promise.resolve({ booking: undefined }),
   ]);
   const bookingMode = query.booking === '1';
+  const bookingOffer =
+    query.service &&
+    UUID_PATTERN.test(query.service) &&
+    query.date &&
+    isValidDate(query.date) &&
+    query.time &&
+    isValidTime(query.time) &&
+    query.professional &&
+    UUID_PATTERN.test(query.professional)
+      ? {
+          serviceId: query.service,
+          date: query.date,
+          time: query.time,
+          professionalId: query.professional,
+        }
+      : null;
   logPublicProfile('info', 'request', slug, {
     isUuid: UUID_PATTERN.test(slug),
   });
@@ -349,6 +371,7 @@ export default async function BarbershopPage({
           }
         />
         <ProBookingPage
+          bookingOffer={bookingOffer}
           profile={initialData}
           services={initialData.services}
           openingTime={initialData.opening_time ?? null}
@@ -379,6 +402,7 @@ export default async function BarbershopPage({
         image={image}
       />
       <BarbershopPublicPage
+        bookingOffer={bookingOffer}
         slug={profile.slug}
         loyaltyEnabled={loyaltyEnabled}
         initialData={initialData}
