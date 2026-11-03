@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
@@ -262,6 +263,7 @@ export default function LoyaltyPage() {
               <h1 className="text-2xl font-semibold">
                 {t('loyalty.upgradeTitle')}
               </h1>
+              <FeaturePlanBadge feature="loyalty" />
               <p className="text-muted-foreground">
                 {t('loyalty.upgradeDescription')}
               </p>
@@ -297,6 +299,7 @@ export default function LoyaltyPage() {
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('loyaltyPage.pointsAndRewards')}
             </h1>
+            <div className="mt-2"><FeaturePlanBadge feature="loyalty" /></div>
             <p className="mt-2 max-w-2xl text-muted-foreground">
               {t('loyaltyPage.subtitle')}
             </p>

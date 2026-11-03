@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
@@ -429,6 +430,7 @@ export default function POSPage() {
               <h1 className="text-2xl font-semibold">
                 {t('posPage.enterpriseTitle')}
               </h1>
+              <FeaturePlanBadge feature="pos" />
               <p className="text-muted-foreground">
                 {t('posPage.enterpriseDescription')}
               </p>
@@ -446,9 +448,12 @@ export default function POSPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-sm font-medium text-primary">
-              {t('posPage.kicker')}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-medium text-primary">
+                {t('posPage.kicker')}
+              </p>
+              <FeaturePlanBadge feature="pos" />
+            </div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('posPage.title')}
             </h1>

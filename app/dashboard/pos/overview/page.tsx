@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -192,6 +193,7 @@ export default function SalesOverviewPage() {
               <h1 className="text-2xl font-semibold">
                 {t('posOverviewPage.managementTitle')}
               </h1>
+              <FeaturePlanBadge feature="pos" />
               <p className="text-muted-foreground">
                 {t('posOverviewPage.managementDescription')}
               </p>
@@ -218,9 +220,12 @@ export default function SalesOverviewPage() {
             >
               <ArrowLeft className="size-4" /> {t('posOverviewPage.backToPos')}
             </Link>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Vendas
-            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Vendas
+              </p>
+              <FeaturePlanBadge feature="pos" />
+            </div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('posOverviewPage.title')}
             </h1>

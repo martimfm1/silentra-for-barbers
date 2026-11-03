@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -499,6 +500,7 @@ export default function PublicProfileSettingsPage() {
             <h2 id="url-title" className="font-semibold">
               {copy.publicUrl}
             </h2>
+            <FeaturePlanBadge minimumPlan="pro" detail={english ? 'custom URL' : 'URL personalizada'} />
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-white/10 bg-black/20">
@@ -535,6 +537,7 @@ export default function PublicProfileSettingsPage() {
             <h2 id="seo-title" className="font-semibold">
               {copy.advancedSeo}
             </h2>
+            <FeaturePlanBadge minimumPlan="enterprise" />
           </div>
           {profile.canCustomizeEnterprise ? (
             <div className="mt-5 space-y-4">
@@ -586,6 +589,7 @@ export default function PublicProfileSettingsPage() {
             <h2 id="og-title" className="font-semibold">
               Open Graph
             </h2>
+            <FeaturePlanBadge minimumPlan="enterprise" />
           </div>
           {profile.canCustomizeEnterprise ? (
             <div className="mt-5 grid gap-2">

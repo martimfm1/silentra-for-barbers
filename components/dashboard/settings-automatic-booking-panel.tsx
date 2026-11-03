@@ -1,7 +1,7 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -97,9 +97,12 @@ export function SettingsAutomaticBookingPanel({
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-medium">
-              {t('automaticBookingSettings.autoRemindersTitle')}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-medium">
+                {t('automaticBookingSettings.autoRemindersTitle')}
+              </p>
+              <FeaturePlanBadge feature="automated_reminders" />
+            </div>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
               {t('automaticBookingSettings.autoRemindersDescription')}
             </p>
@@ -116,9 +119,12 @@ export function SettingsAutomaticBookingPanel({
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-medium">
-              {t('automaticBookingSettings.autoConfirmTitle')}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-medium">
+                {t('automaticBookingSettings.autoConfirmTitle')}
+              </p>
+              <FeaturePlanBadge feature="automated_reminders" />
+            </div>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
               {t('automaticBookingSettings.autoConfirmDescription')}
             </p>
@@ -135,9 +141,12 @@ export function SettingsAutomaticBookingPanel({
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-medium">
-              {t('automaticBookingSettings.autoCompleteTitle')}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-medium">
+                {t('automaticBookingSettings.autoCompleteTitle')}
+              </p>
+              <FeaturePlanBadge feature="automated_reminders" />
+            </div>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
               {t('automaticBookingSettings.autoCompleteDescription')}
             </p>
@@ -152,10 +161,10 @@ export function SettingsAutomaticBookingPanel({
       </div>
 
       {!eligible && (
-        <p className="flex items-center gap-2 text-xs text-zinc-500">
-          <Check className="size-3.5 text-emerald-300" aria-hidden="true" />
-          {t('automaticBookingSettings.upgradeHint')}
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          <FeaturePlanBadge feature="automated_reminders" />
+          <p>{t('automaticBookingSettings.upgradeHint')}</p>
+        </div>
       )}
 
       <div className="flex justify-end border-t border-white/10 pt-4">

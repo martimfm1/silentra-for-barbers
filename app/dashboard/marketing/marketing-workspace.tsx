@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -578,6 +579,7 @@ export function MarketingWorkspace({
           <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
             <Sparkles className="size-8 text-primary" aria-hidden="true" />
             <h1 className="text-2xl font-semibold">Marketing avançado</h1>
+            <FeaturePlanBadge feature="marketing_campaigns" />
             <p className="text-muted-foreground">
               Campanhas de email e SMS, automações e delivery num só lugar.
             </p>
@@ -601,8 +603,8 @@ export function MarketingWorkspace({
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing ·
-              Pro
+              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing
+              <FeaturePlanBadge feature="marketing_campaigns" />
             </div>
             <h1
               id="marketing-title"

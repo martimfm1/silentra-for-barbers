@@ -164,7 +164,7 @@ export async function updateBarbershopConfig(
       if (error) {
         if (error.message.includes('DIRECTORY_VISIBILITY_PRO_REQUIRED')) {
           throw new Error(
-            'A visibilidade no diretório está disponível no plano Pro.',
+            'Para ocultar a barbearia do diretório precisas do plano Pro.',
           );
         }
         throw error;

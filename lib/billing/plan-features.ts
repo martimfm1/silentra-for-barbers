@@ -133,6 +133,23 @@ export function getPlanFeatures(plan: BillingPlan) {
   return PLAN_FEATURES[plan];
 }
 
+export function getMinimumPlanForFeature(
+  feature: FeatureKey,
+): 'pro' | 'enterprise' | null {
+  const canonicalFeature =
+    feature in LEGACY_FEATURE_ALIASES
+      ? LEGACY_FEATURE_ALIASES[feature as LegacyFeatureKey]
+      : (feature as FreeFeatureKey | ProFeatureKey | EnterpriseFeatureKey);
+
+  if ((ENTERPRISE_FEATURES as readonly string[]).includes(canonicalFeature)) {
+    return 'enterprise';
+  }
+  if ((PRO_FEATURES as readonly string[]).includes(canonicalFeature)) {
+    return 'pro';
+  }
+  return null;
+}
+
 export function hasPlanFeature(
   plan: BillingPlan,
   feature: FeatureKey,
@@ -174,7 +191,7 @@ export const FEATURE_LABELS: Record<
   basic_notifications: 'Notificações essenciais',
   team_management: 'Gestão de equipa',
   messaging: 'Mensagens por email',
-  directory_visibility: 'Visibilidade no diretório',
+  directory_visibility: 'Controlar ocultação no diretório',
   manual_mbway_prepayment: 'Pré-pagamento MB WAY',
   advanced_crm: 'CRM avançado',
   advanced_analytics: 'Analytics avançado',

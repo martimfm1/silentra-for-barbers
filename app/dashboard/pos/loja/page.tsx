@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
@@ -496,6 +497,9 @@ export default function POSStorePage() {
                 'Enterprise store',
               )}
             </h1>
+            <div className="mt-2 flex justify-center">
+              <FeaturePlanBadge feature="pos" />
+            </div>
             <p className="mt-2 text-zinc-500">
               {localizedText(
                 activeLocale,
@@ -541,6 +545,7 @@ export default function POSStorePage() {
                     'Sales centre',
                   )}
                 </h1>
+                <div className="mt-2"><FeaturePlanBadge feature="pos" /></div>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">

@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import {
@@ -326,14 +327,17 @@ export default function CustomWebsiteDashboardPage() {
             <ArrowLeft className="size-4" />
             {pt ? 'Painel' : 'Dashboard'}
           </Link>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
-            {plan === 'enterprise'
-              ? 'Enterprise'
-              : pt
-                ? 'Acesso autorizado'
-                : 'Authorized access'}{' '}
-            · {pt ? 'Serviço à medida' : 'Custom service'}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+              {plan === 'enterprise'
+                ? 'Enterprise'
+                : pt
+                  ? 'Acesso autorizado'
+                  : 'Authorized access'}{' '}
+              · {pt ? 'Serviço à medida' : 'Custom service'}
+            </p>
+            <FeaturePlanBadge feature="custom_website" />
+          </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
             {pt ? 'Site próprio' : 'Custom website'}
           </h1>
