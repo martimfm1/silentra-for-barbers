@@ -425,7 +425,7 @@ export const en = {
   onboarding: {
     title: 'Set up your barbershop',
     subtitle:
-      'Complete a few steps. Your progress is saved so you can continue later.',
+      'Complete the essentials now and adjust the remaining details later in Settings.',
     createTitle: 'Create barbershop',
     createSubtitle:
       'Start with the essential details. You can complete the rest later.',
