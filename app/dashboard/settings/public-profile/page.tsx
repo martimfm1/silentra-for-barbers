@@ -500,7 +500,7 @@ export default function PublicProfileSettingsPage() {
             <h2 id="url-title" className="font-semibold">
               {copy.publicUrl}
             </h2>
-            <FeaturePlanBadge minimumPlan="pro" detail={english ? 'custom URL' : 'URL personalizada'} />
+            <FeaturePlanBadge minimumPlan="pro" />
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-white/10 bg-black/20">
