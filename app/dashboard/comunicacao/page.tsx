@@ -144,7 +144,7 @@ export default function CommunicationPage() {
                     </div>
                     <CardTitle className="mt-4 flex flex-wrap items-center gap-2 text-lg text-zinc-100">
                       {t(`communicationPage.${workflow.titleKey}`)}
-                      {locked ? <FeaturePlanBadge feature={workflow.feature} /> : null}
+                      <FeaturePlanBadge feature={workflow.feature} />
                     </CardTitle>
                     <CardDescription className="text-sm leading-6 text-zinc-400">
                       {t(`communicationPage.${workflow.descriptionKey}`)}
