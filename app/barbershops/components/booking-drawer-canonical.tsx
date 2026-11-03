@@ -227,9 +227,9 @@ export function BookingDrawerCanonical({
       ? days.findIndex((day) => day.dateStr === selectedDate)
       : -1;
     const hasCompleteOffer = Boolean(
-      selectedServiceId && selectedDate && selectedTime && selectedProfessionalId,
+      selectedServiceId && selectedDate && selectedTime,
     );
-    setStep(hasCompleteOffer ? 2 : 1);
+    setStep(hasCompleteOffer && selectedProfessionalId ? 2 : 1);
     setDayIndex(
       requestedDayIndex >= 0
         ? requestedDayIndex
