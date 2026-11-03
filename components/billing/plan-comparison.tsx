@@ -109,7 +109,7 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
   basic_notifications: 'Essential notifications',
   team_management: 'Team management',
   messaging: 'Email messaging',
-  directory_visibility: 'Directory visibility',
+  directory_visibility: 'Hide from public directory',
   manual_mbway_prepayment: 'Manual MB WAY prepayment',
   advanced_crm: 'Advanced CRM',
   advanced_analytics: 'Advanced analytics',
