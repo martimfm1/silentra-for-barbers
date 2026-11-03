@@ -697,7 +697,7 @@ export function BookingDrawerCanonical({
             </div>
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
-              {appearance !== 'agenda' && (
+              {(appearance !== 'agenda' || professionals.length !== 1) && (
                 professionals.length === 1 ? (
                   <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                     <div className="mb-2 flex items-center gap-2">
@@ -715,7 +715,7 @@ export function BookingDrawerCanonical({
                   <div>
                     <div className="mb-3 flex items-center gap-2">
                       <UserRound
-                        className="size-4 text-emerald-300"
+                        className={`size-4 ${appearance === 'agenda' ? 'text-emerald-700' : 'text-emerald-300'}`}
                         aria-hidden="true"
                       />
                       <h3 id="booking-step-one" className="text-sm font-semibold">
@@ -729,7 +729,7 @@ export function BookingDrawerCanonical({
                           type="button"
                           aria-pressed={professional?.id === item.id}
                           onClick={() => setProfessional(item)}
-                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? appearance === 'agenda' ? 'border-emerald-500/35 bg-emerald-50 text-[#173d30]' : 'border-emerald-400/40 bg-emerald-400/[0.08]' : appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#292929] hover:border-[#c5c5bb]' : 'border-white/10 bg-white/[0.025] text-zinc-200 hover:border-white/20'}`}
                         >
                           <span>
                             <span className="block text-sm font-semibold">
@@ -741,7 +741,7 @@ export function BookingDrawerCanonical({
                           </span>
                           {professional?.id === item.id && (
                             <Check
-                              className="size-5 text-emerald-300"
+                              className={`size-5 ${appearance === 'agenda' ? 'text-emerald-700' : 'text-emerald-300'}`}
                               aria-hidden="true"
                             />
                           )}
@@ -749,7 +749,7 @@ export function BookingDrawerCanonical({
                       ))}
                     </div>
                     {!professionals.length && (
-                      <p className="rounded-2xl border border-white/10 p-4 text-sm text-zinc-500">
+                      <p className={`rounded-2xl border p-4 text-sm ${appearance === 'agenda' ? 'border-[#e8e7e2] text-[#73736c]' : 'border-white/10 text-zinc-500'}`}>
                         {t('bookingDrawer.noBarbers')}
                       </p>
                     )}
