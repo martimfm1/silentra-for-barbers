@@ -129,10 +129,7 @@ export function BarbershopVisibilitySetting() {
               <h2 className="text-sm font-semibold text-zinc-100">
                 {english ? 'Directory visibility' : 'Visibilidade no diretório'}
               </h2>
-              <FeaturePlanBadge
-                feature="directory_visibility"
-                detail={english ? 'to hide' : 'para ocultar'}
-              />
+              <FeaturePlanBadge feature="directory_visibility" />
             </div>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-400">
               {english
