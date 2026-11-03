@@ -15,7 +15,10 @@ type ProviderConfig = {
   id: 'supabase' | 'vercel' | 'stripe' | 'brevo';
   name: string;
   description: string;
-  summaryUrl: string;
+  summaryUrl?: string;
+  statusApiUrl?: string;
+  incidentsApiUrl?: string;
+  maintenanceApiUrl?: string;
   statusUrl: string;
 };
 
@@ -44,14 +47,20 @@ const PROVIDERS: ProviderConfig[] = [
     id: 'stripe',
     name: 'Stripe',
     description: 'Processamento de pagamentos e faturação.',
-    summaryUrl: 'https://status.stripe.com/api/v2/summary.json',
+    statusApiUrl: 'https://status.stripe.com/api/v2/status.json',
+    incidentsApiUrl: 'https://status.stripe.com/api/v2/incidents/unresolved.json',
+    maintenanceApiUrl:
+      'https://status.stripe.com/api/v2/scheduled-maintenances/upcoming.json',
     statusUrl: 'https://status.stripe.com/',
   },
   {
     id: 'brevo',
     name: 'Brevo',
     description: 'Email transacional e notificações por email.',
-    summaryUrl: 'https://status.brevo.com/api/v2/summary.json',
+    statusApiUrl: 'https://status.brevo.com/api/v2/status.json',
+    incidentsApiUrl: 'https://status.brevo.com/api/v2/incidents/unresolved.json',
+    maintenanceApiUrl:
+      'https://status.brevo.com/api/v2/scheduled-maintenances/upcoming.json',
     statusUrl: 'https://status.brevo.com/',
   },
 ];
@@ -145,6 +154,25 @@ async function checkDatabase(): Promise<ServiceStatus> {
   }
 }
 
+async function fetchStatusFeed(url: string): Promise<Record<string, unknown> | null> {
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'SilentraStatusPage/1.0 (+https://barbers.silentra.me/status)',
+      },
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(4500),
+    });
+
+    if (!response.ok) return null;
+    return asRecord(await response.json());
+  } catch {
+    return null;
+  }
+}
+
 async function fetchProviderStatus(
   provider: ProviderConfig,
 ): Promise<ProviderResult> {
@@ -157,91 +185,98 @@ async function fetchProviderStatus(
     sourceUpdatedAt: null,
   };
 
-  try {
-    const response = await fetch(provider.summaryUrl, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      next: { revalidate: 60 },
-      signal: AbortSignal.timeout(4500),
-    });
+  const [summary, statusFeed, incidentsFeed, maintenanceFeed] =
+    await Promise.all([
+      provider.summaryUrl
+        ? fetchStatusFeed(provider.summaryUrl)
+        : Promise.resolve(null),
+      provider.statusApiUrl
+        ? fetchStatusFeed(provider.statusApiUrl)
+        : Promise.resolve(null),
+      provider.incidentsApiUrl
+        ? fetchStatusFeed(provider.incidentsApiUrl)
+        : Promise.resolve(null),
+      provider.maintenanceApiUrl
+        ? fetchStatusFeed(provider.maintenanceApiUrl)
+        : Promise.resolve(null),
+    ]);
 
-    if (!response.ok) {
-      return { component, incidents: [], maintenances: [] };
-    }
+  const statusPayload = summary ?? statusFeed;
+  const providerStatus = asRecord(statusPayload?.status);
+  const page = asRecord(statusPayload?.page);
+  component.status = mapIndicator(providerStatus?.indicator);
+  component.sourceUpdatedAt = safeText(page?.updated_at, 80) || null;
 
-    const payload = asRecord(await response.json());
-    if (!payload) return { component, incidents: [], maintenances: [] };
+  const incidentSource = Array.isArray(summary?.incidents)
+    ? summary
+    : incidentsFeed;
+  const incidents: StatusIncident[] = Array.isArray(
+    incidentSource?.incidents,
+  )
+    ? incidentSource.incidents
+        .map((entry, index) => {
+          const incident = asRecord(entry);
+          if (!incident) return null;
+          const status = safeText(incident.status, 40);
+          if (!status || status.toLowerCase() === 'resolved') return null;
 
-    const providerStatus = asRecord(payload.status);
-    const page = asRecord(payload.page);
-    component.status = mapIndicator(providerStatus?.indicator);
-    component.sourceUpdatedAt =
-      safeText(page?.updated_at, 80) || null;
+          return {
+            id: `${provider.id}-${safeText(incident.id, 80) || index}`,
+            provider: provider.name,
+            title: safeText(incident.name, 180) || 'Incidente comunicado',
+            status,
+            impact: safeText(incident.impact, 40) || 'unknown',
+            updatedAt: safeText(incident.updated_at, 80) || null,
+            sourceUrl: provider.statusUrl,
+          };
+        })
+        .filter((item): item is StatusIncident => item !== null)
+        .slice(0, 5)
+    : [];
 
-    const incidents: StatusIncident[] = Array.isArray(payload.incidents)
-      ? payload.incidents
-          .map((entry, index) => {
-            const incident = asRecord(entry);
-            if (!incident) return null;
-            const status = safeText(incident.status, 40);
-            if (!status || status.toLowerCase() === 'resolved') return null;
+  const maintenanceSource = Array.isArray(summary?.scheduled_maintenances)
+    ? summary
+    : maintenanceFeed;
+  const maintenances: StatusMaintenance[] = Array.isArray(
+    maintenanceSource?.scheduled_maintenances,
+  )
+    ? maintenanceSource.scheduled_maintenances
+        .map((entry, index) => {
+          const maintenance = asRecord(entry);
+          if (!maintenance) return null;
+          const status = safeText(maintenance.status, 40);
+          if (
+            !status ||
+            ['completed', 'cancelled', 'canceled'].includes(
+              status.toLowerCase(),
+            )
+          ) {
+            return null;
+          }
 
-            return {
-              id: `${provider.id}-${safeText(incident.id, 80) || index}`,
-              provider: provider.name,
-              title: safeText(incident.name, 180) || 'Incidente comunicado',
-              status,
-              impact: safeText(incident.impact, 40) || 'unknown',
-              updatedAt: safeText(incident.updated_at, 80) || null,
-              sourceUrl: provider.statusUrl,
-            };
-          })
-          .filter((item): item is StatusIncident => item !== null)
-          .slice(0, 5)
-      : [];
+          return {
+            id: `${provider.id}-maintenance-${safeText(maintenance.id, 80) || index}`,
+            provider: provider.name,
+            title:
+              safeText(maintenance.name, 180) || 'Manutenção programada',
+            status,
+            impact: safeText(maintenance.impact, 40) || 'unknown',
+            scheduledFor:
+              safeText(maintenance.scheduled_for, 80) ||
+              safeText(maintenance.scheduled_for_date, 80) ||
+              null,
+            scheduledUntil:
+              safeText(maintenance.scheduled_until, 80) ||
+              safeText(maintenance.scheduled_until_date, 80) ||
+              null,
+            sourceUrl: provider.statusUrl,
+          };
+        })
+        .filter((item): item is StatusMaintenance => item !== null)
+        .slice(0, 5)
+    : [];
 
-    const maintenances: StatusMaintenance[] = Array.isArray(
-      payload.scheduled_maintenances,
-    )
-      ? payload.scheduled_maintenances
-          .map((entry, index) => {
-            const maintenance = asRecord(entry);
-            if (!maintenance) return null;
-            const status = safeText(maintenance.status, 40);
-            if (
-              !status ||
-              ['completed', 'cancelled', 'canceled'].includes(
-                status.toLowerCase(),
-              )
-            ) {
-              return null;
-            }
-
-            return {
-              id: `${provider.id}-maintenance-${safeText(maintenance.id, 80) || index}`,
-              provider: provider.name,
-              title:
-                safeText(maintenance.name, 180) || 'Manutenção programada',
-              status,
-              scheduledFor:
-                safeText(maintenance.scheduled_for, 80) ||
-                safeText(maintenance.scheduled_for_date, 80) ||
-                null,
-              scheduledUntil:
-                safeText(maintenance.scheduled_until, 80) ||
-                safeText(maintenance.scheduled_until_date, 80) ||
-                null,
-              sourceUrl: provider.statusUrl,
-            };
-          })
-          .filter((item): item is StatusMaintenance => item !== null)
-          .slice(0, 5)
-      : [];
-
-    return { component, incidents, maintenances };
-  } catch {
-    return { component, incidents: [], maintenances: [] };
-  }
+  return { component, incidents, maintenances };
 }
 
 async function GET__unobserved() {
