@@ -694,6 +694,36 @@ export const ptCopy = {
     subtitle:
       'Configura como os clientes acumulam pontos, o que podem resgatar e valida as recompensas no balcão.',
     refresh: 'Atualizar fidelização',
+    invalidSettings: 'Confirma os valores: pontos por euro têm de ser superiores a 0 e os pontos extra não podem ser negativos.',
+    invalidRewardName: 'Introduz um nome para a recompensa (máximo de 120 caracteres).',
+    invalidRewardPoints: 'Os pontos necessários têm de ser um número inteiro superior a 0.',
+    invalidRewardValue: 'O valor da recompensa tem de ser um número igual ou superior a 0.',
+    rewardStatusError: 'Não foi possível atualizar o estado da recompensa.',
+    rewardReactivated: 'Recompensa reativada.',
+    deactivateRewardDescription: 'A recompensa deixa de estar disponível para novos resgates. Podes reativá-la mais tarde.',
+    deactivateRewardAction: 'Desativar recompensa',
+    deactivateRewardConfirm: 'Desativar esta recompensa?',
+    validateShortcutDescription: 'Lê o QR privado do voucher ou introduz o código de utilização.',
+    pointsShortcutDescription: 'Define quantos pontos cada serviço concluído atribui.',
+    programSetupDescription: 'Define como os clientes acumulam pontos e os bónus de adesão e recomendação.',
+    activeProgramDescription: 'Os clientes podem aderir, acumular pontos e resgatar as recompensas disponíveis.',
+    pointsRateHint: 'Pontos atribuídos por cada euro elegível.',
+    unsavedSettings: 'Tens alterações por guardar.',
+    settingsUpToDate: 'As regras estão guardadas.',
+    programSummaryDescription: 'Um resumo rápido das regras e recompensas configuradas.',
+    activeRewardsLabel: 'Recompensas ativas',
+    welcomePointsLabel: 'Pontos de boas-vindas',
+    welcomePointsHint: 'Pontos atribuídos quando um cliente adere ao programa.',
+    rewardCatalogueEyebrow: 'Catálogo',
+    rewardsTitle: 'Recompensas disponíveis',
+    rewardsManagementDescription: 'Mantém as recompensas simples e fáceis de perceber. Os clientes veem os pontos necessários antes de resgatar.',
+    rewardValueHint: 'Ex.: 5',
+    inactiveRewardsLabel: 'Recompensas inativas',
+    noActiveRewards: 'Não tens recompensas ativas.',
+    noActiveRewardsHint: 'Cria uma recompensa ou reativa uma que já tenhas configurado.',
+    editReward: 'Editar',
+    deactivate: 'Desativar',
+    reactivate: 'Reativar',
   },
 
   marketingPage: {
@@ -915,6 +945,7 @@ export const ptCopy = {
     description:
       'Define quantos pontos cada serviço gera quando a marcação fica concluída.',
     validateReward: 'Validar recompensa',
+    earningHint: 'Os pontos são atribuídos quando uma marcação do serviço configurado fica concluída. Cada marcação só pode gerar pontos uma vez.',
     manageRewards: 'Gerir recompensas',
   },
   earningRules: {
@@ -944,6 +975,8 @@ export const ptCopy = {
     removeGenericError: 'Erro ao remover a regra.',
     ruleCreated: 'Regra de pontos criada.',
     ruleRemoved: 'Regra removida.',
+    pausedSuccess: 'Regra pausada.',
+    activatedSuccess: 'Regra ativada.',
     removeConfirm: 'Remover regra de pontos?',
     noRules: 'Ainda não existem regras.',
     active: 'Ativa',
@@ -991,7 +1024,13 @@ export const ptCopy = {
     validating: 'A validar…',
     validate: 'Validar',
     codeHelp:
-      'Introduz o código recebido pelo cliente. Também podes usar o código QR acima.',
+      'Introduz o código alfanumérico de 8 caracteres que aparece no voucher.',
+    manualCodeHint:
+      'Este campo aceita apenas o código de utilização. O QR é lido separadamente e nunca substitui este código.',
+    qrScanHint:
+      'Lê o QR privado apresentado no voucher da recompensa. O QR público de marcações não é válido aqui.',
+    invalidQr:
+      'Este QR não corresponde a um voucher de recompensa. Lê o QR apresentado no voucher do cliente.',
     readyForNext: 'Pronto para validar outra recompensa.',
     successStatus: 'Recompensa {reward} validada com sucesso.',
     successToast: 'Recompensa validada.',

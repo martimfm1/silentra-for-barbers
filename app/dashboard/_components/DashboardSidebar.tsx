@@ -20,6 +20,8 @@ import {
   QrCode,
   Globe2,
   MoreHorizontal,
+  Sparkles,
+  ScanLine,
   X,
   Zap,
   type LucideIcon,
@@ -100,6 +102,18 @@ const toolsItems: SidebarItem[] = [
     icon: Heart,
     feature: 'loyalty',
   },
+  {
+    href: '/dashboard/loyalty/points',
+    label: 'Regras de pontos',
+    icon: Sparkles,
+    feature: 'loyalty',
+  },
+  {
+    href: '/dashboard/loyalty/validate',
+    label: 'Validar recompensa',
+    icon: ScanLine,
+    feature: 'loyalty',
+  },
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
 ];
@@ -123,6 +137,8 @@ const englishLabels: Record<string, string> = {
   'QR Code': 'QR code',
   Relatórios: 'Reports',
   Fidelização: 'Loyalty',
+  'Regras de pontos': 'Points rules',
+  'Validar recompensa': 'Validate reward',
   Vendas: 'Sales',
   'Site próprio': 'Website',
   'Suporte Silentra': 'Silentra Support',
@@ -242,7 +258,9 @@ export function DashboardSidebar() {
 
   const isActive = (item: SidebarItem) =>
     pathname === item.href ||
-    (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+    (item.href !== '/dashboard' &&
+      item.href !== '/dashboard/loyalty' &&
+      pathname.startsWith(`${item.href}/`));
   const moreItems = [
     ...teamItems,
     ...communicationItems,

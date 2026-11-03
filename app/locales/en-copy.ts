@@ -687,6 +687,36 @@ export const enCopy = {
     subtitle:
       'Configure how clients earn points, what they can redeem, and validate rewards at the counter.',
     refresh: 'Refresh loyalty',
+    invalidSettings: 'Check the values: points per euro must be greater than 0 and bonus points cannot be negative.',
+    invalidRewardName: 'Enter a reward name (up to 120 characters).',
+    invalidRewardPoints: 'Required points must be a whole number greater than 0.',
+    invalidRewardValue: 'Reward value must be a number greater than or equal to 0.',
+    rewardStatusError: 'Unable to update the reward status.',
+    rewardReactivated: 'Reward reactivated.',
+    deactivateRewardDescription: 'The reward will no longer be available for new redemptions. You can reactivate it later.',
+    deactivateRewardAction: 'Deactivate reward',
+    deactivateRewardConfirm: 'Deactivate this reward?',
+    validateShortcutDescription: 'Scan the voucher’s private QR code or enter its redemption code.',
+    pointsShortcutDescription: 'Choose how many points each completed service awards.',
+    programSetupDescription: 'Set how customers earn points, including sign-up and referral bonuses.',
+    activeProgramDescription: 'Customers can join, earn points and redeem the available rewards.',
+    pointsRateHint: 'Points awarded for each eligible euro spent.',
+    unsavedSettings: 'You have unsaved changes.',
+    settingsUpToDate: 'Your rules are saved.',
+    programSummaryDescription: 'A quick overview of your configured rules and rewards.',
+    activeRewardsLabel: 'Active rewards',
+    welcomePointsLabel: 'Welcome points',
+    welcomePointsHint: 'Points awarded when a customer joins the programme.',
+    rewardCatalogueEyebrow: 'Catalogue',
+    rewardsTitle: 'Available rewards',
+    rewardsManagementDescription: 'Keep rewards simple and easy to understand. Customers see the points required before redeeming.',
+    rewardValueHint: 'e.g. 5',
+    inactiveRewardsLabel: 'Inactive rewards',
+    noActiveRewards: 'You have no active rewards.',
+    noActiveRewardsHint: 'Create a reward or reactivate one you have already configured.',
+    editReward: 'Edit',
+    deactivate: 'Deactivate',
+    reactivate: 'Reactivate',
   },
 
   marketingPage: {
@@ -908,6 +938,7 @@ export const enCopy = {
     description:
       'Set how many points each service earns when a booking is completed.',
     validateReward: 'Validate reward',
+    earningHint: 'Points are awarded when a booking for the selected service is completed. Each booking can earn points only once.',
     manageRewards: 'Manage rewards',
   },
   earningRules: {
@@ -937,6 +968,8 @@ export const enCopy = {
     removeGenericError: 'Error removing the rule.',
     ruleCreated: 'Points rule created.',
     ruleRemoved: 'Rule removed.',
+    pausedSuccess: 'Rule paused.',
+    activatedSuccess: 'Rule activated.',
     removeConfirm: 'Remove points rule?',
     noRules: 'No rules yet.',
     active: 'Active',
@@ -985,7 +1018,13 @@ export const enCopy = {
     validating: 'Validating…',
     validate: 'Validate',
     codeHelp:
-      'Enter the code received by the customer. You can also use the QR code above.',
+      'Enter the 8-character alphanumeric redemption code shown on the voucher.',
+    manualCodeHint:
+      'This field is only for the redemption code. QR scanning runs separately and does not replace this code.',
+    qrScanHint:
+      'Scan the private QR shown on the reward voucher. The public booking QR is not valid here.',
+    invalidQr:
+      'This QR code is not a reward voucher. Scan the QR shown on the customer’s reward voucher.',
     readyForNext: 'Ready to validate another reward.',
     successStatus: 'Reward {reward} validated successfully.',
     successToast: 'Reward validated.',
