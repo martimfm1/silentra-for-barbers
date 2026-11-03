@@ -65,7 +65,7 @@ import {
 } from '@/lib/barbershops/amenities';
 
 const INPUT_CLASS = 'min-h-11 max-w-sm rounded-xl border-white/10 bg-white/5 text-sm';
-const CARD_CLASS = 'rounded-2xl border border-white/10 bg-white/[.02]';
+const CARD_CLASS = 'border border-white/10 bg-white/[.02] text-zinc-50';
 type PublicProfileSetup = {
   city: string;
   price: number;
@@ -524,7 +524,7 @@ export default function SettingsPageOrganized() {
                       className={INPUT_CLASS}
                     />
                   </div>
-                  <div className="sm:col-span-2 grid gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.03] p-4">
+                  <div className="sm:col-span-2 grid gap-2 border-t border-white/10 pt-5">
                     <label
                       htmlFor="settings-default-language"
                       className="text-sm font-medium"
@@ -552,7 +552,7 @@ export default function SettingsPageOrganized() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                  <div className="sm:col-span-2 space-y-4 border-t border-white/10 pt-5">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -584,13 +584,13 @@ export default function SettingsPageOrganized() {
                       <p className="text-xs leading-5 text-zinc-600">{t('settingsPage.mbwayWhatsappNotice')}</p>
                     </div>
                     {!canManualMbway && (
-                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/15 bg-amber-400/[.04] p-3">
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
                         <p className="text-xs text-zinc-400">{t('settingsPage.mbwayProRequired')}</p>
                         <Button asChild size="sm" variant="outline"><Link href="/dashboard/billing">{t('settingsPage.upgradePlan')}</Link></Button>
                       </div>
                     )}
                   </div>
-                  <div className="sm:col-span-2 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                  <div className="sm:col-span-2 flex items-center justify-between gap-4 border-t border-white/10 pt-5">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-medium">
@@ -912,7 +912,7 @@ export default function SettingsPageOrganized() {
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                  <div className="space-y-4 border-t border-white/10 pt-5">
                     {!automationAllowed && (
                       <div className="flex flex-wrap items-center gap-2">
                         <FeaturePlanBadge feature="automated_reminders" />
@@ -974,7 +974,7 @@ export default function SettingsPageOrganized() {
                       />
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                  <div className="border-t border-white/10 pt-5">
                     <div className="flex items-center gap-2">
                       <CalendarCheck2 className="size-4 text-amber-300" />
                       <label htmlFor="settings-cancellation-window" className="text-sm font-medium">
@@ -1094,7 +1094,7 @@ export default function SettingsPageOrganized() {
               </Card>
             </section>
             <section id="settings-billing">
-              <Card className="border-emerald-500/20 bg-emerald-500/[.04]">
+              <Card className={CARD_CLASS}>
                 <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[.16em] text-emerald-400">
@@ -1113,7 +1113,7 @@ export default function SettingsPageOrganized() {
               </Card>
             </section>
             <section id="settings-danger" className="scroll-mt-24">
-              <Card className="rounded-2xl border border-rose-500/25 bg-rose-500/[.035]">
+              <Card className={CARD_CLASS}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-rose-200">
                     <Trash2 className="size-4" />
