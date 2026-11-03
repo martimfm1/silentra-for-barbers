@@ -718,6 +718,7 @@ export const ptCopy = {
     rewardsTitle: 'Recompensas disponíveis',
     rewardsManagementDescription: 'Mantém as recompensas simples e fáceis de perceber. Os clientes veem os pontos necessários antes de resgatar.',
     rewardValueHint: 'Ex.: 5',
+    inactiveRewardsLabel: 'Recompensas inativas',
     noActiveRewards: 'Não tens recompensas ativas.',
     noActiveRewardsHint: 'Cria uma recompensa ou reativa uma que já tenhas configurado.',
     editReward: 'Editar',
