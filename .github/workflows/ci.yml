@@ -76,6 +76,9 @@ jobs:
       - name: Minimum booking notice contracts
         run: pnpm qa:minimum-booking-notice
 
+      - name: Customer waitlist contracts
+        run: pnpm qa:waitlist
+
       - name: Plan contracts
         run: pnpm qa:plans
 
