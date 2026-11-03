@@ -9,14 +9,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from '@/components/ui/combobox';
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -105,40 +97,48 @@ export function BookingForm({
                     {t('bookingForm.optional')}
                   </span>
                 </label>
-                <Combobox
-                  value={formData.clientId || ''}
-                  onValueChange={(val) => {
-                    const cl = clients.find((c) => c.id === val);
-                    if (cl) {
-                      setFormData({
-                        ...formData,
-                        clientId: cl.id,
-                        name_complete: cl.name_complete,
-                        num_phone: cl.num_phone,
-                        email: cl.email || '',
-                        birth_date: cl.birth_date || '',
-                      });
+                <Select
+                  value={formData.clientId || 'none'}
+                  onValueChange={(value) => {
+                    if (value === 'none') {
+                      setFormData({ ...formData, clientId: undefined });
+                      return;
                     }
+
+                    const client = clients.find((item) => item.id === value);
+                    if (!client) return;
+
+                    setFormData({
+                      ...formData,
+                      clientId: client.id,
+                      name_complete: client.name_complete,
+                      num_phone: client.num_phone ?? '',
+                      email: client.email || '',
+                      birth_date: client.birth_date || '',
+                    });
                   }}
                 >
-                  <ComboboxInput
+                  <SelectTrigger
                     id="booking-client"
-                    placeholder={t('bookingForm.searchCustomer')}
-                    className="min-h-11 border-white/10 bg-zinc-900 text-white"
-                  />
-                  <ComboboxContent className="border-white/10 bg-zinc-900 text-white">
-                    <ComboboxList>
-                      <ComboboxEmpty>
-                        {t('bookingForm.noCustomerFound')}
-                      </ComboboxEmpty>
-                      {clients.map((c) => (
-                        <ComboboxItem key={c.id} value={c.id}>
-                          {c.name_complete}
-                        </ComboboxItem>
+                    className="min-h-11 w-full cursor-pointer border-white/10 bg-zinc-900 text-white"
+                    aria-label={t('bookingForm.existingCustomer')}
+                  >
+                    <SelectValue placeholder={t('bookingForm.searchCustomer')} />
+                  </SelectTrigger>
+                  <SelectContent className="border-white/10 bg-zinc-900 text-white">
+                    <SelectGroup>
+                      <SelectItem value="none">
+                        {t('bookingForm.optional')}
+                      </SelectItem>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name_complete}
+                          {client.num_phone ? ` · ${client.num_phone}` : ''}
+                        </SelectItem>
                       ))}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">
