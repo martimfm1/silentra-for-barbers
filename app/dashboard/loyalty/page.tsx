@@ -299,6 +299,7 @@ export default function LoyaltyPage() {
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('loyaltyPage.pointsAndRewards')}
             </h1>
+            <div className="mt-2"><FeaturePlanBadge feature="loyalty" /></div>
             <p className="mt-2 max-w-2xl text-muted-foreground">
               {t('loyaltyPage.subtitle')}
             </p>
