@@ -695,6 +695,7 @@ export const enCopy = {
     rewardReactivated: 'Reward reactivated.',
     deactivateRewardDescription: 'The reward will no longer be available for new redemptions. You can reactivate it later.',
     deactivateRewardAction: 'Deactivate reward',
+    deactivateRewardConfirm: 'Deactivate this reward?',
     validateShortcutDescription: 'Scan the voucher’s private QR code or enter its redemption code.',
     pointsShortcutDescription: 'Choose how many points each completed service awards.',
     programSetupDescription: 'Set how customers earn points, including sign-up and referral bonuses.',
