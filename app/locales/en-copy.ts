@@ -985,7 +985,13 @@ export const enCopy = {
     validating: 'Validating…',
     validate: 'Validate',
     codeHelp:
-      'Enter the code received by the customer. You can also use the QR code above.',
+      'Enter the 8-character alphanumeric redemption code shown on the voucher.',
+    manualCodeHint:
+      'This field is only for the redemption code. QR scanning runs separately and does not replace this code.',
+    qrScanHint:
+      'Scan the private QR shown on the reward voucher. The public booking QR is not valid here.',
+    invalidQr:
+      'This QR code is not a reward voucher. Scan the QR shown on the customer’s reward voucher.',
     readyForNext: 'Ready to validate another reward.',
     successStatus: 'Reward {reward} validated successfully.',
     successToast: 'Reward validated.',
