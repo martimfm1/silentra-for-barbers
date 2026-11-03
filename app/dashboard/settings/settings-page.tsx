@@ -50,6 +50,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import {
   Select,
   SelectContent,
@@ -589,21 +590,32 @@ export default function SettingsPageOrganized() {
                       </div>
                     )}
                   </div>
-                  <div className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.02] p-4">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {t('settingsPage.directoryVisibility')}
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-600">
-                        {t('settingsPage.directoryDescription')}
+                  <div className="sm:col-span-2 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium">
+                          {t('settingsPage.directoryVisibility')}
+                        </p>
+                        <FeaturePlanBadge
+                          feature="directory_visibility"
+                          detail={locale === 'en' ? 'to hide' : 'para ocultar'}
+                        />
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-zinc-500">
+                        {canDirectory
+                          ? t('settingsPage.directoryDescription')
+                          : locale === 'en'
+                            ? 'Your barbershop stays visible in the directory on Free. Upgrade to Pro to hide it from search results.'
+                            : 'No plano Free, a tua barbearia aparece sempre no diretório. Com o Pro, podes ocultá-la dos resultados.'}
                       </p>
                     </div>
                     <Switch
-                      disabled={!canDirectory}
-                      checked={canDirectory && config.is_public_in_directory}
-                      onCheckedChange={(v) =>
-                        canDirectory && set({ is_public_in_directory: v })
+                      disabled={!canDirectory || planLoading || saving}
+                      checked={!canDirectory || config.is_public_in_directory}
+                      onCheckedChange={(value) =>
+                        canDirectory && set({ is_public_in_directory: value })
                       }
+                      aria-label={locale === 'en' ? 'Show barbershop in public directory' : 'Mostrar barbearia no diretório público'}
                     />
                   </div>
                   </CardContent>
@@ -905,9 +917,12 @@ export default function SettingsPageOrganized() {
                   </div>
                   <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-4">
                     {!automationAllowed && (
-                      <p className="text-xs text-amber-300">
-                        {t('settingsPage.automationPlanRequired')}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <FeaturePlanBadge feature="automated_reminders" />
+                        <p className="text-xs text-amber-300">
+                          {t('settingsPage.automationPlanRequired')}
+                        </p>
+                      </div>
                     )}
                     <div className="flex items-center justify-between gap-4">
                       <div>
@@ -924,9 +939,12 @@ export default function SettingsPageOrganized() {
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
-                        <p className="text-sm font-medium">
-                          {t('settingsPage.autoConfirm')}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-medium">
+                            {t('settingsPage.autoConfirm')}
+                          </p>
+                          <FeaturePlanBadge feature="automated_reminders" />
+                        </div>
                       </div>
                       <Switch
                         disabled={!automationAllowed}
@@ -940,9 +958,12 @@ export default function SettingsPageOrganized() {
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
                       <div>
-                        <p className="text-sm font-medium">
-                          {t('settingsPage.autoComplete')}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-medium">
+                            {t('settingsPage.autoComplete')}
+                          </p>
+                          <FeaturePlanBadge feature="automated_reminders" />
+                        </div>
                       </div>
                       <Switch
                         disabled={!automationAllowed}
