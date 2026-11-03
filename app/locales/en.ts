@@ -425,7 +425,7 @@ export const en = {
   onboarding: {
     title: 'Set up your barbershop',
     subtitle:
-      'Complete a few steps. Your progress is saved so you can continue later.',
+      'Complete the essentials now and adjust the remaining details later in Settings.',
     createTitle: 'Create barbershop',
     createSubtitle:
       'Start with the essential details. You can complete the rest later.',
@@ -460,6 +460,15 @@ export const en = {
       'Fill in only the essentials. You can adjust the remaining details in the dashboard later.',
     identity: 'Identity',
     identityDescription: 'How your barbershop will be presented.',
+    workModeTitle: 'How do you work?',
+    workModeDescription: 'We will tailor the next steps to the way you run your barbershop.',
+    soloMode: 'I work alone',
+    soloModeDescription: 'I manage services and bookings on my own.',
+    teamMode: 'I have a team',
+    teamModeDescription: 'I want to organise several professionals and their schedules.',
+    soloNextStep: 'Next, set up your services and working hours.',
+    teamNextStep: 'Next, add your professionals and organise your team.',
+
     requiredError: 'Fill in the essential details to create your barbershop.',
     createSuccess: "Barbershop created. We'll open your dashboard.",
     inviteRequired: 'Enter the invite code.',
@@ -1092,6 +1101,13 @@ export const en = {
     overviewStatus: 'Configuration status',
     business: 'Information',
     businessDescription: 'Name, contact details and public preferences',
+    publicBasicsTitle: 'Public page information',
+    publicBasicsDescription: 'Edit the details shown in discovery and on your barbershop page.',
+    profileCity: 'City / location',
+    profilePrice: 'Reference price',
+    profilePriceHint: 'An indicative value shown to customers; it does not replace service prices.',
+    profileTags: 'Services and features',
+    profileTagsHint: 'Separate each term with a comma. You can add up to 12.',
     location: 'Location',
     locationDescription: 'Address and venue details',
     hours: 'Hours',

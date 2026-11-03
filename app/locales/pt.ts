@@ -425,7 +425,7 @@ export const pt = {
   onboarding: {
     title: 'Vamos configurar a tua barbearia',
     subtitle:
-      'Só precisas de completar alguns passos. Guardamos o progresso para não perderes o que já fizeste.',
+      'Completa o essencial agora e ajusta os restantes detalhes mais tarde nas Definições.',
     createTitle: 'Criar barbearia',
     createSubtitle:
       'Começa com os dados essenciais. Podes completar o resto depois.',
@@ -460,6 +460,15 @@ export const pt = {
       'Preenche apenas o essencial. Os restantes detalhes podem ser ajustados no painel depois.',
     identity: 'Identidade',
     identityDescription: 'Como a tua barbearia será apresentada.',
+    workModeTitle: 'Como trabalhas?',
+    workModeDescription: 'Vamos adaptar os próximos passos à forma como geres a barbearia.',
+    soloMode: 'Trabalho sozinho',
+    soloModeDescription: 'Geres os serviços e as marcações por tua conta.',
+    teamMode: 'Tenho uma equipa',
+    teamModeDescription: 'Quero organizar vários profissionais e os seus horários.',
+    soloNextStep: 'A seguir, configura os teus serviços e horários de trabalho.',
+    teamNextStep: 'A seguir, adiciona os profissionais e organiza a equipa.',
+
     requiredError: 'Preenche os dados essenciais para criar a tua barbearia.',
     createSuccess: 'Barbearia criada. Vamos abrir o teu painel.',
     inviteRequired: 'Introduz o código de convite.',
@@ -1096,6 +1105,13 @@ export const pt = {
     overviewStatus: 'Estado da configuração',
     business: 'Informações',
     businessDescription: 'Nome, contactos e preferências públicas',
+    publicBasicsTitle: 'Informações da página pública',
+    publicBasicsDescription: 'Altera os dados que aparecem na descoberta e na apresentação da tua barbearia.',
+    profileCity: 'Cidade / localidade',
+    profilePrice: 'Preço de referência',
+    profilePriceHint: 'Valor indicativo apresentado aos clientes; não substitui os preços dos serviços.',
+    profileTags: 'Serviços e características',
+    profileTagsHint: 'Separa cada termo com uma vírgula. Podes adicionar até 12.',
     location: 'Localização',
     locationDescription: 'Morada e informações do espaço',
     hours: 'Horários',
