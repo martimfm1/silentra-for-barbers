@@ -1,7 +1,7 @@
-import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
-import { getClientIp } from '@/lib/security/public-rate-limit';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
+import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isSafePublicBookingDate, isValidTime, normalizeText, UUID_PATTERN } from '@/lib/validation';
 
@@ -21,27 +21,8 @@ type WaitlistBody = {
   consent?: unknown;
 };
 
-function rateLimitKey(request: Request, shopId: string) {
-  const secret = process.env.RATE_LIMIT_SECRET;
-  if (!secret || secret.length < 32)
-    throw new Error('RATE_LIMIT_SECRET is not configured.');
-  return createHmac('sha256', secret)
-    .update(`public-waitlist:${shopId}:${getClientIp(request)}`)
-    .digest('hex');
-}
 
-async function enforceRateLimit(request: Request, shopId: string) {
-  const admin = createAdminClient();
-  const { data, error } = await admin.rpc('consume_public_rate_limit', {
-    p_key: rateLimitKey(request, shopId),
-    p_limit: RATE_LIMIT,
-    p_window_seconds: RATE_WINDOW_SECONDS,
-  });
-  if (error) throw new Error('WAITLIST_RATE_LIMIT_UNAVAILABLE');
-  return data === true;
-}
-
-export async function POST(
+async function POST__unobserved(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
@@ -103,12 +84,20 @@ export async function POST(
       );
     }
 
-    const admin = createAdminClient();
-    if (!(await enforceRateLimit(request, shopId)))
+    const allowed = await consumePublicRateLimit(
+      request,
+      'customer-waitlist',
+      shopId,
+      RATE_LIMIT,
+      RATE_WINDOW_SECONDS,
+    );
+    if (!allowed)
       return NextResponse.json(
         { success: false, error: 'Demasiados pedidos. Tenta novamente mais tarde.' },
         { status: 429, headers: { 'Retry-After': String(RATE_WINDOW_SECONDS) } },
       );
+
+    const admin = createAdminClient();
 
     const { data: shop, error: shopError } = await admin
       .from('shops')
@@ -218,3 +207,9 @@ export async function POST(
     );
   }
 }
+
+
+export const POST = withApiObservability(
+  '/api/shops/[id]/waitlist',
+  POST__unobserved,
+);
