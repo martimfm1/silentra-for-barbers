@@ -82,7 +82,7 @@ async function PATCH__unobserved(request: Request) {
     if (!payload.ok) return payload.response;
     const id = typeof payload.value.id === 'string' ? payload.value.id : '';
     const status = typeof payload.value.status === 'string' ? payload.value.status : '';
-    if (!UUID_PATTERN.test(id) || !['booked', 'cancelled', 'expired', 'waiting'].includes(status))
+    if (!UUID_PATTERN.test(id) || !['booked', 'cancelled', 'expired'].includes(status))
       return NextResponse.json({ success: false, error: 'Dados inválidos.' }, { status: 400 });
     const { data, error } = await access.tenant.admin
       .from('booking_waitlist')
