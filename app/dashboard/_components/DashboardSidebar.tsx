@@ -303,6 +303,7 @@ export function DashboardSidebar() {
           aria-hidden="true"
         />
         <span className="min-w-0 flex-1 truncate">{label}</span>
+        {item.feature ? <FeaturePlanBadge feature={item.feature} /> : null}
         {active ? (
           <span
             className="size-1.5 shrink-0 rounded-full bg-emerald-400"
