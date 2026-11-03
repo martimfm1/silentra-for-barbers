@@ -118,7 +118,7 @@ export async function POST(
     if (shopError || !shop || shop.is_active !== true || !shop.barbershop_id)
       return NextResponse.json({ success: false, error: 'Barbearia indisponível.' }, { status: 404 });
 
-    let serviceQuery = await admin
+    const serviceQuery = await admin
       .from('services')
       .select('id')
       .eq('id', serviceId)
@@ -127,7 +127,9 @@ export async function POST(
       .maybeSingle();
     if (serviceQuery.error && serviceQuery.error.code !== '42703')
       throw new Error('WAITLIST_SERVICE_LOOKUP_FAILED');
-    if (!serviceQuery.data) {
+
+    let serviceExists = Boolean(serviceQuery.data);
+    if (!serviceExists) {
       const legacyServiceQuery = await admin
         .from('services')
         .select('id')
@@ -137,9 +139,9 @@ export async function POST(
         .maybeSingle();
       if (legacyServiceQuery.error && legacyServiceQuery.error.code !== '42703')
         throw new Error('WAITLIST_LEGACY_SERVICE_LOOKUP_FAILED');
-      serviceQuery = legacyServiceQuery as typeof serviceQuery;
+      serviceExists = Boolean(legacyServiceQuery.data);
     }
-    if (!serviceQuery.data)
+    if (!serviceExists)
       return NextResponse.json({ success: false, error: 'Serviço indisponível.' }, { status: 400 });
 
     if (professionalId) {
