@@ -589,7 +589,7 @@ export function BookingDrawerCanonical({
                       : paymentInstructions
                         ? t('bookingDrawer.prepaymentPendingDescription')
                         : waitlistOnly
-                          ? (locale === 'en' ? 'We will contact you if a suitable slot becomes available.' : 'Entraremos em contacto se surgir uma vaga adequada.')
+                          ? (locale === 'en' ? 'The barbershop may contact you if a suitable opening becomes available.' : 'A barbearia poderá contactar-te se surgir uma vaga adequada.')
                           : t('bookingDrawer.slotReserved')}
               </p>
             </div>
@@ -1097,12 +1097,16 @@ export function BookingDrawerCanonical({
                 id="booking-success-title"
                 className="mt-5 text-xl font-semibold"
               >
-                {paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')}
+                {paymentInstructions
+                  ? t('bookingDrawer.prepaymentPendingTitle')
+                  : waitlistOnly
+                    ? locale === 'en' ? 'You are on the waitlist' : 'Estás na lista de espera'
+                    : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {waitlistOnly
                   ? locale === 'en'
-                    ? `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. We will contact you if a suitable opening becomes available.`
+                    ? `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. The barbershop may contact you if a suitable opening becomes available.`
                     : `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. Entraremos em contacto se surgir uma vaga adequada.`
                   : <>
                       {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
