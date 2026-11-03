@@ -991,7 +991,13 @@ export const ptCopy = {
     validating: 'A validar…',
     validate: 'Validar',
     codeHelp:
-      'Introduz o código recebido pelo cliente. Também podes usar o código QR acima.',
+      'Introduz o código alfanumérico de 8 caracteres que aparece no voucher.',
+    manualCodeHint:
+      'Este campo aceita apenas o código de utilização. O QR é lido separadamente e nunca substitui este código.',
+    qrScanHint:
+      'Lê o QR privado apresentado no voucher da recompensa. O QR público de marcações não é válido aqui.',
+    invalidQr:
+      'Este QR não corresponde a um voucher de recompensa. Lê o QR apresentado no voucher do cliente.',
     readyForNext: 'Pronto para validar outra recompensa.',
     successStatus: 'Recompensa {reward} validada com sucesso.',
     successToast: 'Recompensa validada.',
