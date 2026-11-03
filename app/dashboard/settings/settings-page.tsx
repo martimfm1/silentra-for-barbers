@@ -349,7 +349,7 @@ export default function SettingsPageOrganized() {
   }
 
   async function confirmBarbershopDeletion() {
-    if (!deletePassword || !/^\\d{6}$/.test(deleteCode) || deleteLoading) return;
+    if (!deletePassword || !/^\d{6}$/.test(deleteCode) || deleteLoading) return;
     setDeleteLoading(true);
     try {
       const response = await fetch('/api/dashboard/barbershop-deletion/confirm', {
@@ -1128,7 +1128,7 @@ export default function SettingsPageOrganized() {
                   maxLength={6}
                   placeholder="000000"
                   value={deleteCode}
-                  onChange={(event) => setDeleteCode(event.target.value.replace(/\\D/g, '').slice(0, 6))}
+                  onChange={(event) => setDeleteCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   className={INPUT_CLASS}
                   disabled={deleteLoading}
                 />
