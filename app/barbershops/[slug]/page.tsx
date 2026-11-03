@@ -274,14 +274,15 @@ export default async function BarbershopPage({
     query.date &&
     isValidDate(query.date) &&
     query.time &&
-    isValidTime(query.time) &&
-    query.professional &&
-    UUID_PATTERN.test(query.professional)
+    isValidTime(query.time)
       ? {
           serviceId: query.service,
           date: query.date,
           time: query.time,
-          professionalId: query.professional,
+          professionalId:
+            query.professional && UUID_PATTERN.test(query.professional)
+              ? query.professional
+              : null,
         }
       : null;
   logPublicProfile('info', 'request', slug, {
