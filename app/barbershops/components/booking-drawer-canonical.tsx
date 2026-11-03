@@ -482,7 +482,7 @@ export function BookingDrawerCanonical({
           shopName: shop.name,
           serviceName: service.name,
           date: currentDay.dateStr,
-          time: selectedSlot,
+          time: selectedSlot ?? '',
           customerEmail: email.trim(),
         });
       }
