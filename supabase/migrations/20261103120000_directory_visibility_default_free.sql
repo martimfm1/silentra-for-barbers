@@ -18,10 +18,14 @@ DECLARE
   v_role text;
   v_plan text := 'free';
 BEGIN
+  IF auth.uid() IS NULL OR p_actor_user_id IS NULL OR auth.uid() <> p_actor_user_id THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'AUTHENTICATION_REQUIRED';
+  END IF;
+
   SELECT u.barbershop_id, u.role
     INTO v_user_barbershop_id, v_role
   FROM public.users u
-  WHERE u.id = p_actor_user_id;
+  WHERE u.id = auth.uid();
 
   IF v_user_barbershop_id IS NULL OR v_user_barbershop_id <> p_barbershop_id THEN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'BARBERSHOP_ACCESS_DENIED';
@@ -55,17 +59,22 @@ BEGIN
   END IF;
 
   UPDATE public.barbershops
-  SET is_public_in_directory = COALESCE(p_visible, TRUE)
+  SET is_public_in_directory = COALESCE(p_visible, TRUE),
+      updated_at = now()
   WHERE id = p_barbershop_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0002', MESSAGE = 'BARBERSHOP_NOT_FOUND';
+  END IF;
 
   RETURN TRUE;
 END;
 $$;
 
 REVOKE ALL ON FUNCTION public.set_barbershop_directory_visibility(uuid, uuid, boolean)
-  FROM PUBLIC, anon, authenticated;
+  FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.set_barbershop_directory_visibility(uuid, uuid, boolean)
-  TO service_role;
+  TO authenticated, service_role;
 
 -- A Free barbershop cannot retain an old opt-out after a downgrade. Restore
 -- directory presence for shops without a current Pro/Enterprise entitlement.
