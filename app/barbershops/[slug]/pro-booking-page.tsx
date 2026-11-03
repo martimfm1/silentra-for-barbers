@@ -35,7 +35,7 @@ export type ProBookingPageProps = {
     serviceId: string;
     date: string;
     time: string;
-    professionalId: string;
+    professionalId: string | null;
   } | null;
   services: ProBookingService[];
   openingTime: string | null;
