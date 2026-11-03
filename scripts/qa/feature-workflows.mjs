@@ -194,7 +194,7 @@ assert.match(bookingOutboxSchedule, /\*\/10 \* \* \* \*/);
 assert.match(bookingOutboxSchedule, /vault\.decrypted_secrets/);
 assert.match(appointmentReminderMigration, /appointment_reminder_outbox/);
 assert.match(appointmentReminderMigration, /for update skip locked/i);
-assert.match(appointmentReminderMigration, /unique \(appointment_id, scheduled_for\)/);
+assert.match(appointmentReminderMigration, /create unique index[\\s\\S]*?on public\\.appointment_reminder_outbox \\(appointment_id, scheduled_for\\)/);
 assert.match(appointmentReminderMigration, /AUTOMATED_REMINDERS_PRO_REQUIRED/);
 assert.match(appointmentReminderMigration, /interval '24 hours'/);
 assert.match(appointmentReminderWorker, /claim_appointment_reminder_events/);
