@@ -191,7 +191,7 @@ export const FEATURE_LABELS: Record<
   basic_notifications: 'Notificações essenciais',
   team_management: 'Gestão de equipa',
   messaging: 'Mensagens por email',
-  directory_visibility: 'Visibilidade no diretório',
+  directory_visibility: 'Controlar ocultação no diretório',
   manual_mbway_prepayment: 'Pré-pagamento MB WAY',
   advanced_crm: 'CRM avançado',
   advanced_analytics: 'Analytics avançado',
