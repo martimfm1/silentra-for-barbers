@@ -87,7 +87,7 @@ const STATUS_STYLES: Record<
 function overallCopy(status: ServiceStatus, locale: Locale) {
   const copy: Record<ServiceStatus, { title: string; description: string }> = {
     operational: {
-      title: locale === 'pt' ? 'Infraestrutura operacional.' : 'Infrastructure operational.',
+      title: locale === 'pt' ? 'Infraestrutura operacional.' : 'Everything is running normally.',
       description:
         locale === 'pt'
           ? 'As APIs e a base de dados da Silentra estão a funcionar normalmente.'
@@ -98,21 +98,21 @@ function overallCopy(status: ServiceStatus, locale: Locale) {
       description:
         locale === 'pt'
           ? 'A infraestrutura está disponível, mas foi detetada uma resposta mais lenta.'
-          : 'The infrastructure is available, but slower responses have been detected.',
+          : 'The platform is available, but some requests are taking longer than usual.',
     },
     partial_outage: {
       title: locale === 'pt' ? 'Interrupção parcial.' : 'Partial outage.',
       description:
         locale === 'pt'
           ? 'Uma parte da infraestrutura pode estar temporariamente afetada.'
-          : 'Part of the infrastructure may be temporarily affected.',
+          : 'Some parts of the platform may be temporarily affected.',
     },
     major_outage: {
-      title: locale === 'pt' ? 'Falha na infraestrutura.' : 'Infrastructure outage.',
+      title: locale === 'pt' ? 'Falha na infraestrutura.' : 'Service disruption.',
       description:
         locale === 'pt'
           ? 'Foi detetada uma falha numa parte essencial da infraestrutura.'
-          : 'A failure has been detected in a critical part of the infrastructure.',
+          : 'A failure has been detected in a critical part of the platform.',
     },
     maintenance: {
       title: locale === 'pt' ? 'Manutenção em curso.' : 'Maintenance in progress.',
@@ -186,7 +186,7 @@ function ServiceCard({
               {service?.name[locale] ?? component.name}
             </h3>
             <p className="mt-1 text-xs text-zinc-500">
-              {locale === 'pt' ? 'Infraestrutura própria' : 'Core infrastructure'}
+              {locale === 'pt' ? 'Infraestrutura própria' : 'Platform services'}
             </p>
           </div>
         </div>
@@ -264,7 +264,7 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
   const overall = data
     ? overallCopy(data.overall, locale)
     : {
-        title: locale === 'pt' ? 'A verificar a infraestrutura…' : 'Checking infrastructure…',
+        title: locale === 'pt' ? 'A verificar a infraestrutura…' : 'Checking platform services…',
         description:
           locale === 'pt'
             ? 'Estamos a consultar o estado das APIs e da base de dados.'
@@ -279,12 +279,12 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
       <div className="mx-auto w-full max-w-5xl">
         <header className="mb-8 border-b border-white/[0.08] pb-7 sm:mb-10 sm:pb-9">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300/80">
-            Silentra for Barbers · {locale === 'pt' ? 'Infraestrutura' : 'Infrastructure'}
+            Silentra for Barbers · {locale === 'pt' ? 'Infraestrutura' : 'Platform services'}
           </p>
           <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
               <h1 className="text-3xl font-semibold tracking-[-0.055em] text-white sm:text-4xl lg:text-5xl">
-                {locale === 'pt' ? 'Estado da infraestrutura' : 'Infrastructure status'}
+                {locale === 'pt' ? 'Estado da infraestrutura' : 'Platform status'}
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
                 {locale === 'pt'
@@ -384,7 +384,7 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                {locale === 'pt' ? 'Infraestrutura' : 'Infrastructure'}
+                {locale === 'pt' ? 'Infraestrutura' : 'Platform services'}
               </p>
               <h2 className="mt-2 text-xl font-semibold tracking-[-0.035em] text-white sm:text-2xl">
                 {locale === 'pt' ? 'Componentes monitorizados' : 'Monitored components'}
@@ -422,8 +422,8 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
 
         <div className="mt-8 border-t border-white/[0.07] pt-5 text-xs leading-5 text-zinc-500">
           {locale === 'pt'
-            ? 'A API é verificada através de um endpoint interno de saúde. A base de dados é testada com uma consulta de leitura; nenhum registo ou dado de clientes é exposto nesta página.'
-            : 'The API is checked through an internal health endpoint. The database is tested with a read-only query; no customer records or data are exposed on this page.'}
+            ? 'A disponibilidade das APIs é verificada através de um teste interno. A ligação à base de dados é testada sem expor registos ou dados de clientes nesta página.'
+            : 'API availability is checked internally. The database connection is tested without exposing customer records or data on this page.'}
         </div>
       </div>
     </main>
