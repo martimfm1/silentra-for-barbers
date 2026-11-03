@@ -985,7 +985,7 @@ export function BookingDrawerCanonical({
                     <span>
                       {locale === 'en'
                         ? 'I agree to be contacted by this barbershop about an available time for this request. This is not marketing consent.'
-                        : 'Aceito ser contactado por esta barbearia quando existir uma vaga para este pedido. Este consentimento não inclui mensagens de marketing.'}
+                        : 'Aceito que esta barbearia me contacte caso surja uma vaga para este pedido. Este consentimento não inclui mensagens de marketing.'}
                     </span>
                   </label>
                 )}
@@ -1107,7 +1107,7 @@ export function BookingDrawerCanonical({
                 {waitlistOnly
                   ? locale === 'en'
                     ? `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. The barbershop may contact you if a suitable opening becomes available.`
-                    : `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. Entraremos em contacto se surgir uma vaga adequada.`
+                    : `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. A barbearia poderá contactar-te se surgir uma vaga adequada.`
                   : <>
                       {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
                       {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
