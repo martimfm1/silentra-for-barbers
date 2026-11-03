@@ -596,10 +596,7 @@ export default function SettingsPageOrganized() {
                         <p className="text-sm font-medium">
                           {t('settingsPage.directoryVisibility')}
                         </p>
-                        <FeaturePlanBadge
-                          feature="directory_visibility"
-                          detail={locale === 'en' ? 'to hide' : 'para ocultar'}
-                        />
+                        <FeaturePlanBadge feature="directory_visibility" />
                       </div>
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
                         {canDirectory
