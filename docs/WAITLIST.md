@@ -8,7 +8,7 @@ A lista de espera permite a um cliente pedir para ser contactado quando não enc
 2. Se não existirem horários disponíveis, pode deixar nome, email e telefone e aceitar um aviso específico de contacto operacional.
 3. O pedido fica como `waiting`. Não cria uma marcação, não bloqueia um horário e não inclui consentimento para marketing.
 4. Quando surge uma vaga compatível, o sistema envia um email com o serviço, dia, hora e barbeiro (quando definido).
-5. A proposta expira após 20 minutos. O email deixa claro que a vaga não fica reservada: só é confirmada depois de o cliente concluir o processo normal de reserva.
+5. A prioridade do convite expira após 20 minutos. Depois disso, a vaga pode ser proposta a outra pessoa. O email deixa claro que a vaga não fica reservada: só é confirmada depois de o cliente concluir o processo normal de reserva.
 6. O link abre a página de marcação com os dados da vaga pré-selecionados. A API de marcações volta a validar disponibilidade e conflitos.
 7. Se o cliente concluir a marcação com o mesmo email e horário, o pedido passa a `booked` e fica ligado à nova marcação. Se outra pessoa ocupar a vaga, o convite é invalidado.
 
