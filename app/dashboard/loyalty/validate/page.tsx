@@ -357,7 +357,7 @@ export default function LoyaltyValidationPage() {
                     onChange={(event) =>
                       setIdentifier(
                         event.target.value
-                          .replace(/[^a-z0-9]/gi, '')
+                          .replace(/[^a-hj-np-z2-9]/gi, '')
                           .toUpperCase()
                           .slice(0, 8),
                       )
