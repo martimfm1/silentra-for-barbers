@@ -260,7 +260,6 @@ async function fetchProviderStatus(
             title:
               safeText(maintenance.name, 180) || 'Manutenção programada',
             status,
-            impact: safeText(maintenance.impact, 40) || 'unknown',
             scheduledFor:
               safeText(maintenance.scheduled_for, 80) ||
               safeText(maintenance.scheduled_for_date, 80) ||
