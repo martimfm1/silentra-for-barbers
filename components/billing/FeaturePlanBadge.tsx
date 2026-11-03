@@ -9,7 +9,6 @@ import {
 } from '@/lib/billing/plan-features';
 
 type FeaturePlanBadgeProps = {
-  detail?: string;
   className?: string;
 } & (
   | { feature: FeatureKey; minimumPlan?: never }
