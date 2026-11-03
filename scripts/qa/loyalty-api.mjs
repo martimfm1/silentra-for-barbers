@@ -76,7 +76,7 @@ const checks = [
   {
     file: 'app/dashboard/loyalty/points/page.tsx',
     markers: [
-      "href='/dashboard/loyalty/validate'",
+      'href="/dashboard/loyalty/validate"',
       'earningHint',
       'EarningRulesCard',
     ],
@@ -122,6 +122,9 @@ const checks = [
       'p_token_encrypted: tokenEncrypted',
       'p_code_encrypted: codeEncrypted',
       'LOYALTY_ACTIVE_REDEMPTION_EXISTS',
+      'const tokenHash = hashLoyaltyToken(token);',
+      'const codeHash = hashLoyaltyToken(code);',
+      'p_code_hash: codeHash',
       'Cache-Control',
     ],
   },
