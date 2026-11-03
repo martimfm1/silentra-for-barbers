@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -227,6 +228,7 @@ export default function AnalyticsPage() {
               <h1 className="text-2xl font-semibold">
                 {t('analyticsPage.advancedTitle')}
               </h1>
+              <FeaturePlanBadge feature="advanced_analytics" />
               <p className="text-muted-foreground">
                 {t('analyticsPage.upgradeDescription')}
               </p>
