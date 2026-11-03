@@ -944,6 +944,7 @@ export const ptCopy = {
     description:
       'Define quantos pontos cada serviço gera quando a marcação fica concluída.',
     validateReward: 'Validar recompensa',
+    earningHint: 'Os pontos são atribuídos quando uma marcação do serviço configurado fica concluída. Cada marcação só pode gerar pontos uma vez.',
     manageRewards: 'Gerir recompensas',
   },
   earningRules: {
