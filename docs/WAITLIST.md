@@ -16,7 +16,7 @@ A lista de espera permite a um cliente pedir para ser contactado quando não enc
 
 A página **Dashboard → Lista de espera** mostra pedidos ativos e histórico. Permite pesquisar clientes, consultar serviço, profissional, data e janela horária, abrir email/telefone e atualizar manualmente o estado.
 
-Quando uma marcação futura passa para `cancelled`, um trigger regista a vaga na fila. A fila só envia uma proposta de cada vez para cada vaga e respeita a ordem de entrada entre pedidos compatíveis da mesma barbearia, serviço, data, barbeiro e intervalo horário.
+Quando uma marcação futura passa para `cancelled`, um trigger regista a vaga na fila. A fila só envia uma proposta de cada vez para cada capacidade da agenda. Vagas que se sobrepõem na mesma barbearia e barbeiro (incluindo durações diferentes e vagas sem barbeiro fixo) aguardam a expiração da proposta ativa antes de avançarem. Entre pedidos compatíveis para a mesma vaga, respeita-se a ordem de entrada por barbearia, serviço, data, barbeiro e intervalo horário.
 
 ## Processamento automático
 
