@@ -974,6 +974,8 @@ export const ptCopy = {
     removeGenericError: 'Erro ao remover a regra.',
     ruleCreated: 'Regra de pontos criada.',
     ruleRemoved: 'Regra removida.',
+    pausedSuccess: 'Regra pausada.',
+    activatedSuccess: 'Regra ativada.',
     removeConfirm: 'Remover regra de pontos?',
     noRules: 'Ainda não existem regras.',
     active: 'Ativa',
