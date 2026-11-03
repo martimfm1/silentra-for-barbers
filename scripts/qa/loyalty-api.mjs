@@ -45,6 +45,43 @@ const checks = [
     ],
   },
   {
+    file: 'app/api/loyalty/validate/route.ts',
+    markers: [
+      "allowedKeys: ['identifier']",
+      "/^[a-f0-9]{64}$/i.test(rawIdentifier)",
+      "/^[A-HJ-NP-Z2-9]{8}$/i.test(rawIdentifier)",
+      'hashLoyaltyToken(identifier)',
+    ],
+  },
+  {
+    file: 'app/dashboard/loyalty/validate/page.tsx',
+    markers: [
+      'extractRedemptionToken',
+      'body: JSON.stringify({ identifier: clean })',
+      "void validate(token, 'qr')",
+      'maxLength={8}',
+      "t('loyaltyValidation.invalidQr')",
+    ],
+  },
+  {
+    file: 'app/dashboard/loyalty/page.tsx',
+    markers: [
+      'validateShortcutDescription',
+      'pointsShortcutDescription',
+      'rewardsManagementDescription',
+      'activeRewards.map',
+      'inactiveRewards.map',
+    ],
+  },
+  {
+    file: 'app/dashboard/loyalty/points/page.tsx',
+    markers: [
+      "href='/dashboard/loyalty/validate'",
+      'earningHint',
+      'EarningRulesCard',
+    ],
+  },
+  {
     file: 'app/api/loyalty/rewards/route.ts',
     markers: [
       'moduleErrorResponse',
@@ -163,6 +200,21 @@ if (!migrationName) {
       failures.push(`${migrationName}: missing ${marker}`);
     }
   }
+}
+
+const loyaltyValidationPage = fs.readFileSync(
+  path.join(root, 'app/dashboard/loyalty/validate/page.tsx'),
+  'utf8',
+);
+if (loyaltyValidationPage.includes('setIdentifier(value)')) {
+  failures.push(
+    'app/dashboard/loyalty/validate/page.tsx: scanned QR tokens must not be placed in the manual redemption-code input.',
+  );
+}
+if (loyaltyValidationPage.includes("body: JSON.stringify({ slug, identifier")) {
+  failures.push(
+    'app/dashboard/loyalty/validate/page.tsx: the validation API must not receive an unsupported public slug field.',
+  );
 }
 
 if (failures.length) {
