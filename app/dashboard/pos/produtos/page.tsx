@@ -500,6 +500,7 @@ export default function MarketplaceProductsPage() {
                 <h1 className="text-3xl font-semibold tracking-tight">
                   {localizedText(activeLocale, 'Produtos', 'Products')}
                 </h1>
+                <div className="mt-2"><FeaturePlanBadge feature="pos" /></div>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-zinc-500">
