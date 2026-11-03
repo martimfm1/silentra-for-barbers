@@ -197,17 +197,29 @@ export function BookingDrawerCanonical({
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  // Do not offer configured days off in either the general or custom booking drawer.
+  // Keep days off visible for context, but never allow them to be selected.
   const availableDays = days;
-  const currentDay = availableDays[dayIndex] ?? null;
-  const currentDayClosed = !currentDay || closedDays.has(
-    new Date(currentDay.dateStr + 'T12:00:00').getDay(),
+  const firstOpenDayIndex = availableDays.findIndex(
+    (day) => !closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay()),
   );
+  const currentDay = availableDays[dayIndex] ?? null;
+  const currentDayClosed = currentDay
+    ? closedDays.has(new Date(currentDay.dateStr + 'T12:00:00').getDay())
+    : true;
+
+  // If the drawer opens on a day off, start on the first selectable date.
+  // This avoids leaving the Pro drawer in a disabled state before the user
+  // has had a chance to interact with the calendar.
+  useEffect(() => {
+    if (!isOpen || !currentDayClosed || firstOpenDayIndex < 0) return;
+    setDayIndex(firstOpenDayIndex);
+    setSelectedSlot(null);
+  }, [currentDayClosed, firstOpenDayIndex, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
     setStep(1);
-    setDayIndex(0);
+    setDayIndex(firstOpenDayIndex >= 0 ? firstOpenDayIndex : 0);
     setServiceId(selectedServiceId);
     setProfessional(null);
     setServices([]);
@@ -229,7 +241,7 @@ export function BookingDrawerCanonical({
     controllerRef.current?.abort();
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
-  }, [isOpen, selectedServiceId]);
+  }, [firstOpenDayIndex, isOpen, selectedServiceId]);
 
   useEffect(() => {
     if (!isOpen || !shop || !currentDay) return;
@@ -250,9 +262,9 @@ export function BookingDrawerCanonical({
         if (controller.signal.aborted) return;
         const loadedProfessionals = payload.professionals ?? [];
         setProfessionals(loadedProfessionals);
-        if (appearance === 'agenda' && loadedProfessionals.length === 1) {
-          // The dedicated agenda page belongs to a single barber, so assign
-          // bookings to that barber without asking customers to choose.
+        if (loadedProfessionals.length === 1) {
+          // A single-professional shop has no meaningful choice to present.
+          // Assign that professional automatically in every public booking flow.
           setProfessional(loadedProfessionals[0]);
         }
         setServices(payload.services ?? []);
@@ -604,48 +616,63 @@ export function BookingDrawerCanonical({
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
               {appearance !== 'agenda' && (
-                <div>
-                  <div className="mb-3 flex items-center gap-2">
-                    <UserRound
-                      className="size-4 text-emerald-300"
-                      aria-hidden="true"
-                    />
-                    <h3 id="booking-step-one" className="text-sm font-semibold">
-                      {t('bookingDrawer.stepOneBarber')}
-                    </h3>
+                professionals.length === 1 ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <UserRound className="size-4 text-emerald-300" aria-hidden="true" />
+                      <h3 id="booking-step-one" className="text-sm font-semibold">
+                        {t('bookingDrawer.stepOneBarber')}
+                      </h3>
+                    </div>
+                    <p className="text-sm font-semibold">{professionals[0].name}</p>
+                    {professionals[0].role ? (
+                      <p className="mt-0.5 text-xs text-zinc-500">{professionals[0].role}</p>
+                    ) : null}
                   </div>
-                  <div className="grid gap-2">
-                    {professionals.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        aria-pressed={professional?.id === item.id}
-                        onClick={() => setProfessional(item)}
-                        className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
-                      >
-                        <span>
-                          <span className="block text-sm font-semibold">
-                            {item.name}
+                ) : (
+                  <div>
+                    <div className="mb-3 flex items-center gap-2">
+                      <UserRound
+                        className="size-4 text-emerald-300"
+                        aria-hidden="true"
+                      />
+                      <h3 id="booking-step-one" className="text-sm font-semibold">
+                        {t('bookingDrawer.stepOneBarber')}
+                      </h3>
+                    </div>
+                    <div className="grid gap-2">
+                      {professionals.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          aria-pressed={professional?.id === item.id}
+                          onClick={() => setProfessional(item)}
+                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                        >
+                          <span>
+                            <span className="block text-sm font-semibold">
+                              {item.name}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-zinc-500">
+                              {item.role || t('bookingDrawer.professionalDefault')}
+                            </span>
                           </span>
-                          <span className="mt-0.5 block text-xs text-zinc-500">
-                            {item.role || t('bookingDrawer.professionalDefault')}
-                          </span>
-                        </span>
-                        {professional?.id === item.id && (
-                          <Check
-                            className="size-5 text-emerald-300"
-                            aria-hidden="true"
-                          />
-                        )}
-                      </button>
-                    ))}
+                          {professional?.id === item.id && (
+                            <Check
+                              className="size-5 text-emerald-300"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    {!professionals.length && (
+                      <p className="rounded-2xl border border-white/10 p-4 text-sm text-zinc-500">
+                        {t('bookingDrawer.noBarbers')}
+                      </p>
+                    )}
                   </div>
-                  {!professionals.length && (
-                    <p className="rounded-2xl border border-white/10 p-4 text-sm text-zinc-500">
-                      {t('bookingDrawer.noBarbers')}
-                    </p>
-                  )}
-                </div>
+                )
               )}
 
               <div>
@@ -659,7 +686,8 @@ export function BookingDrawerCanonical({
                   </h3>
                 </div>
                 {availableDays.length ? (
-                  <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <>
+                    <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {availableDays.map((day, index) => {
                       const isDayOff = closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay());
                       return (
@@ -693,6 +721,13 @@ export function BookingDrawerCanonical({
                       );
                     })}
                   </div>
+                  {closedDays.size > 0 && (
+                    <p className="mt-2 flex items-center gap-2 text-[11px] text-rose-300" role="note">
+                      <span className="size-2 shrink-0 rounded-full bg-rose-400" aria-hidden="true" />
+                      {locale === 'pt' ? 'Dia de folga — indisponível para marcação' : 'Day off — unavailable for booking'}
+                    </p>
+                    )}
+                  </>
                 ) : (
                   <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
                     {t('bookingDrawer.noOpenDays')}
