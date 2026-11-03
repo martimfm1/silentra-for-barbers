@@ -187,7 +187,9 @@ export async function updateBarbershopConfig(
             ? 'Não tens permissão para alterar as definições desta barbearia.'
             : error.message === 'AUTOMATIC_BOOKING_SETTINGS_PRO_REQUIRED'
               ? 'A confirmação e conclusão automáticas estão disponíveis apenas nos planos Pro e Enterprise.'
-              : error.message,
+              : error.message === 'AUTOMATED_REMINDERS_PRO_REQUIRED'
+                ? 'Os lembretes automáticos estão disponíveis apenas nos planos Pro e Enterprise.'
+                : error.message,
         );
       }
     }

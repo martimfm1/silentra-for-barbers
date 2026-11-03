@@ -866,6 +866,9 @@ export const ptCopy = {
       'Estas opções estão disponíveis apenas nos planos Pro e Enterprise.',
     saveError: 'Não foi possível guardar estas opções.',
     saved: 'Alterações guardadas.',
+    autoRemindersTitle: 'Enviar lembrete automático 24 horas antes',
+    autoRemindersDescription: 'Envia um email ao cliente no dia anterior à marcação. Só é enviado para marcações confirmadas e pode ser desativado a qualquer momento.',
+    autoRemindersAria: 'Ativar lembretes automáticos por email',
     autoConfirmTitle: 'Confirmar novas marcações automaticamente',
     autoConfirmDescription:
       'Assim que uma nova marcação entrar, fica confirmada sem teres de a abrir manualmente.',
