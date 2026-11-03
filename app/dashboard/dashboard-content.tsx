@@ -61,6 +61,35 @@ const dashboardSurfaceStyles = `
     border-color: rgb(255 255 255 / 0.055) !important;
   }
 
+  /* Mobile viewport guard: dashboard content must not inherit desktop canvas widths. */
+  @media (max-width: 767px) {
+    .silentra-dashboard-shell {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: clip;
+    }
+
+    .silentra-dashboard-shell .dashboard-content,
+    .silentra-dashboard-shell .silentra-dashboard-main,
+    .silentra-dashboard-shell .dashboard-page {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin-inline: 0;
+      box-sizing: border-box;
+    }
+
+    .silentra-dashboard-shell .dashboard-page {
+      padding-inline: 1rem;
+    }
+
+    .silentra-dashboard-shell .dashboard-page > *,
+    .silentra-dashboard-shell .dashboard-page [data-slot="card"] {
+      min-width: 0;
+      max-width: 100%;
+    }
+  }
+
   @media (max-width: 1023px) {
     .silentra-dashboard-shell .dashboard-page {
       padding-bottom: calc(6.25rem + env(safe-area-inset-bottom));
