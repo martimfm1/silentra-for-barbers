@@ -142,7 +142,7 @@ begin
       available_at = now(),
       updated_at = now(),
       last_error = null
-  where v.status = 'no_match'
+  where v.status in ('no_match', 'failed')
     and v.barbershop_id = new.barbershop_id
     and v.shop_id = new.shop_id
     and v.service_id = new.service_id
@@ -162,6 +162,39 @@ end;
 $$;
 
 revoke all on function public.reactivate_waitlist_vacancies_for_new_request() from public, anon, authenticated;
+
+create or replace function public.sync_booking_waitlist_offer_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $
+begin
+  if old.status = 'offered' and new.status in ('booked', 'cancelled', 'expired') then
+    update public.booking_waitlist_vacancies
+    set status = case when new.status = 'booked' then 'completed' else 'pending' end,
+        waitlist_id = case when new.status = 'booked' then new.id else null end,
+        offer_expires_at = null,
+        locked_at = null,
+        available_at = case when new.status = 'booked' then available_at else now() end,
+        updated_at = now(),
+        last_error = case when new.status = 'booked' then null else 'Waitlist offer withdrawn or expired' end
+    where waitlist_id = old.id
+      and status in ('dispatching', 'offered');
+  end if;
+
+  return new;
+end;
+$;
+
+revoke all on function public.sync_booking_waitlist_offer_status() from public, anon, authenticated;
+
+drop trigger if exists booking_waitlist_sync_offer_status on public.booking_waitlist;
+create trigger booking_waitlist_sync_offer_status
+after update of status on public.booking_waitlist
+for each row
+when (old.status = 'offered' and new.status in ('booked', 'cancelled', 'expired'))
+execute function public.sync_booking_waitlist_offer_status();
 
 drop trigger if exists booking_waitlist_reactivate_vacancies on public.booking_waitlist;
 create trigger booking_waitlist_reactivate_vacancies
