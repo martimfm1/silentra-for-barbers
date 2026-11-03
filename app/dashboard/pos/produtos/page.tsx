@@ -987,13 +987,14 @@ export default function MarketplaceProductsPage() {
                             className="mt-0.5 size-4 accent-amber-300 disabled:opacity-40"
                           />
                           <span>
-                            <strong className="flex items-center gap-2 text-sm text-white">
+                            <strong className="flex flex-wrap items-center gap-2 text-sm text-white">
                               <Star className="size-4 text-amber-200" />
                               {localizedText(
                                 activeLocale,
-                                'Destaque Enterprise · 3 dias',
-                                'Enterprise featured · 3 days',
+                                'Destaque · até 3 dias',
+                                'Featured · up to 3 days',
                               )}
+                              <FeaturePlanBadge minimumPlan="enterprise" />
                             </strong>
                             <span className="mt-1 block text-xs leading-5 text-zinc-500">
                               {boostHint}
