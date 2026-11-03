@@ -425,7 +425,7 @@ export const pt = {
   onboarding: {
     title: 'Vamos configurar a tua barbearia',
     subtitle:
-      'Só precisas de completar alguns passos. Guardamos o progresso para não perderes o que já fizeste.',
+      'Completa o essencial agora e ajusta os restantes detalhes mais tarde nas Definições.',
     createTitle: 'Criar barbearia',
     createSubtitle:
       'Começa com os dados essenciais. Podes completar o resto depois.',
