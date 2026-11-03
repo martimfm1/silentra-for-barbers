@@ -725,9 +725,12 @@ export default function AnalyticsPage() {
                     />
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5">
-                      <p className="font-medium">
-                        {t('analyticsPage.financialReport')}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium">
+                          {t('analyticsPage.financialReport')}
+                        </p>
+                        <FeaturePlanBadge minimumPlan="enterprise" />
+                      </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {t('analyticsPage.availableEnterprise')}
                       </p>
