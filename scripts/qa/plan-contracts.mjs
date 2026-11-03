@@ -5,6 +5,15 @@ import path from 'node:path';
 const root = process.cwd();
 const featuresPath = path.join(root, 'lib', 'billing', 'plan-features.ts');
 const source = fs.readFileSync(featuresPath, 'utf8');
+const directoryMigration = fs.readFileSync(
+  path.join(
+    root,
+    'supabase',
+    'migrations',
+    '20261103120000_directory_visibility_default_free.sql',
+  ),
+  'utf8',
+);
 
 function expect(pattern, message) {
   assert.match(source, pattern, message);
@@ -32,11 +41,37 @@ expect(
 );
 expect(
   /directory_visibility/,
-  'Visibilidade no diretório deve permanecer identificada como feature Pro.',
+  'A opção de ocultar a barbearia do diretório deve permanecer identificada como feature Pro.',
 );
 expect(
   /manual_mbway_prepayment/,
   'Pré-pagamento MB WAY deve permanecer como feature Pro.',
 );
 
-console.log('✓ Plan limits e feature contracts OK');
+assert.match(
+  source,
+  /export function getMinimumPlanForFeature/,
+  'Os requisitos mínimos de plano devem ser resolvidos a partir do catálogo central.',
+);
+assert.match(
+  directoryMigration,
+  /alter column is_public_in_directory set default true/i,
+  'A presença no diretório deve estar ativa por defeito.',
+);
+assert.match(
+  directoryMigration,
+  /if not coalesce\(p_visible, true\) and v_plan not in \('pro', 'enterprise'\)/i,
+  'Só Pro e Enterprise podem desligar a visibilidade no diretório.',
+);
+assert.match(
+  directoryMigration,
+  /grant execute on function public\.set_barbershop_directory_visibility\(uuid, uuid, boolean\)\s+to authenticated, service_role/i,
+  'A atualização autenticada da visibilidade deve continuar permitida.',
+);
+assert.match(
+  directoryMigration,
+  /auth\.uid\(\) <> p_actor_user_id/,
+  'A RPC da visibilidade deve validar o utilizador autenticado.',
+);
+
+console.log('✓ Plan limits, tier labels e directory visibility contracts OK');
