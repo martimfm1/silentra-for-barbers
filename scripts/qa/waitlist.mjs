@@ -25,6 +25,8 @@ assert.match(offersMigration, /create table if not exists public\.booking_waitli
 assert.match(offersMigration, /appointments_enqueue_waitlist_vacancy/i);
 assert.match(offersMigration, /appointments_sync_booking_waitlist_vacancies/i);
 assert.match(offersMigration, /claim_booking_waitlist_vacancies/i);
+assert.match(offersMigration, /sync_booking_waitlist_offer_status/i);
+assert.match(offersMigration, /booking_waitlist_sync_offer_status/i);
 assert.match(offersMigration, /recover_stale_booking_waitlist_offers/i);
 assert.match(offersMigration, /release_booking_waitlist_offer/i);
 assert.match(offersMigration, /complete_booking_waitlist_offer_delivery/i);
@@ -61,6 +63,7 @@ assert.match(dashboardApi, /barbershop_member_permissions/);
 assert.match(dashboardApi, /resolveAccessPlanForUser/);
 assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/);
 assert.match(dashboardApi, /allowedStatuses/);
+assert.match(dashboardApi, /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/);
 
 assert.match(bookingDrawer, /\/api\/shops\/\$\{shop\.id\}\/waitlist/);
 assert.match(bookingDrawer, /selectedDate/);
