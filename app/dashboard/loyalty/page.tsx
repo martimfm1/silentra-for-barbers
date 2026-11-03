@@ -74,8 +74,15 @@ const EMPTY_REWARD: RewardForm = {
   reward_value: '',
 };
 
-async function readResponse(response: Response) {
-  return response.json().catch(() => ({})) as Promise<Record<string, any>>;
+type LoyaltyApiResponse = {
+  error?: string;
+  settings?: Partial<LoyaltySettings>;
+  rewards?: Reward[];
+  reward?: Reward;
+};
+
+async function readResponse(response: Response): Promise<LoyaltyApiResponse> {
+  return response.json().catch(() => ({})) as Promise<LoyaltyApiResponse>;
 }
 
 export default function LoyaltyPage() {
@@ -876,7 +883,7 @@ function RewardCard({
   onEdit: () => void;
   onDeactivate: () => void;
   onReactivate: () => void;
-  t: (key: string, values?: Record<string, string | number>) => string;
+  t: (key: string, values?: Record<string, unknown>) => string;
 }) {
   const rewardType =
     reward.reward_type === 'discount'
