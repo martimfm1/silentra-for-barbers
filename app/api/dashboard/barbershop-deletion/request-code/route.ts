@@ -1,4 +1,3 @@
-import { randomInt } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
