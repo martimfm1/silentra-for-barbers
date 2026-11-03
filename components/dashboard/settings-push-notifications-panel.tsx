@@ -162,7 +162,7 @@ export function SettingsPushNotificationsPanel() {
           <CardDescription className="text-zinc-400">{copy.description}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="flex items-start gap-3">
             {state === 'enabled' ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-400" /> : <Smartphone className="mt-0.5 size-5 shrink-0 text-zinc-400" />}
             <p className="text-sm leading-6 text-zinc-300">{statusText}</p>
           </div>
