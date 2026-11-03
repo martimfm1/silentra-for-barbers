@@ -15,6 +15,8 @@ type WaitlistOfferEvent = {
   waitlist_id: string;
   shop_id: string;
   barbershop_id: string;
+  service_id: string;
+  professional_id: string | null;
   preferred_date: string;
   offered_time: string;
   offer_expires_at: string;
@@ -156,6 +158,11 @@ async function GET__unobserved(request: Request) {
         );
         if (profile.plan === 'enterprise')
           bookingUrl.searchParams.set('booking', '1');
+        bookingUrl.searchParams.set('service', event.service_id);
+        bookingUrl.searchParams.set('date', event.preferred_date);
+        bookingUrl.searchParams.set('time', formatOfferTime(event.offered_time));
+        if (event.professional_id)
+          bookingUrl.searchParams.set('professional', event.professional_id);
 
         const language: 'pt' | 'en' = String(
           event.default_language ?? '',
