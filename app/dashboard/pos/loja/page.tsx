@@ -545,6 +545,7 @@ export default function POSStorePage() {
                     'Sales centre',
                   )}
                 </h1>
+                <div className="mt-2"><FeaturePlanBadge feature="pos" /></div>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
