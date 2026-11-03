@@ -47,6 +47,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import {
   DashboardCustomizationDialog,
   useDashboardCustomization,
@@ -293,6 +294,7 @@ export default function DashboardPage() {
       href: '/dashboard/loyalty',
       label: t('dashboard.loyalty'),
       icon: Gift,
+      feature: 'loyalty' as const,
     },
     {
       id: 'qr-code',
@@ -305,6 +307,7 @@ export default function DashboardPage() {
       href: '/dashboard/automations',
       label: t('dashboard.automations'),
       icon: Zap,
+      feature: 'marketing_campaigns' as const,
     },
     {
       id: 'messages',
@@ -317,12 +320,14 @@ export default function DashboardPage() {
       href: '/dashboard/marketing',
       label: t('dashboard.marketing'),
       icon: Megaphone,
+      feature: 'marketing_campaigns' as const,
     },
     {
       id: 'sales',
       href: '/dashboard/pos',
       label: t('dashboard.sales'),
       icon: ShoppingBag,
+      feature: 'pos' as const,
     },
     {
       id: 'website',
@@ -497,8 +502,11 @@ export default function DashboardPage() {
                       >
                         <Icon className="size-4" aria-hidden="true" />
                       </span>
-                      <span className="block font-heading text-sm font-semibold tracking-tight text-zinc-50">
-                        {action.label}
+                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2 font-heading text-sm font-semibold tracking-tight text-zinc-50">
+                        <span>{action.label}</span>
+                        {action.feature ? (
+                          <FeaturePlanBadge feature={action.feature} />
+                        ) : null}
                       </span>
                     </Link>
                   );
