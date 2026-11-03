@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
@@ -429,6 +430,7 @@ export default function POSPage() {
               <h1 className="text-2xl font-semibold">
                 {t('posPage.enterpriseTitle')}
               </h1>
+              <FeaturePlanBadge feature="pos" />
               <p className="text-muted-foreground">
                 {t('posPage.enterpriseDescription')}
               </p>
