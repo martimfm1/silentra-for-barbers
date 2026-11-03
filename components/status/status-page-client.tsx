@@ -47,10 +47,10 @@ const SERVICE_NAMES: Record<string, { pt: string; en: string }> = {
 const ENGLISH_DESCRIPTIONS: Record<string, string> = {
   application: 'The server responded to the platform status request.',
   database: 'Read-only connectivity check against the platform database.',
-  supabase: 'Public status published by the infrastructure provider.',
-  vercel: 'Public status published by the hosting provider.',
-  stripe: 'Public status published by the payments provider.',
-  brevo: 'Public status published by the email provider.',
+  supabase: 'Current availability reported by the service.',
+  vercel: 'Current availability reported by the hosting service.',
+  stripe: 'Current availability reported by the payments service.',
+  brevo: 'Current availability reported by the email service.',
 };
 
 const STATUS_STYLES: Record<
