@@ -235,7 +235,7 @@ export default function SettingsPageOrganized() {
       JSON.stringify(amenities) !== JSON.stringify(initialAmenities) ||
       JSON.stringify(profileSetup) !== JSON.stringify(initialProfileSetup) ||
       suggestion !== null,
-    [config, initial, amenities, initialAmenities, suggestion],
+    [config, initial, amenities, initialAmenities, profileSetup, initialProfileSetup, suggestion],
   );
   const closed = useMemo(
     () => closedList(config.closed_days),
