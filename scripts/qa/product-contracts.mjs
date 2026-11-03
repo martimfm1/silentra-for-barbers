@@ -931,6 +931,8 @@ const checks = [
       source.includes('on delete set null') &&
       source.includes('barbershop_deletion_verifications') &&
       source.includes('delete from public.billing_documents') &&
+      source.includes('delete from public.client_plan_payments') &&
+      source.includes('delete from public.notification_queue') &&
       source.includes('delete from public.subscriptions') &&
       source.includes('revoke all on function public.delete_barbershop_after_verification') &&
       source.includes('to service_role'),
