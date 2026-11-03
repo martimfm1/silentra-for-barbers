@@ -417,7 +417,7 @@ export function BookingDrawerCanonical({
       return toast.error(t('bookingDrawer.requiredFields'));
     if (waitlistOnly && !waitlistConsent)
       return toast.error(locale === 'en' ? 'Please accept the waitlist contact notice.' : 'Aceita o aviso de contacto para entrares na lista de espera.');
-    const birthDateIso = waitlistOnly ? null : birthDateToIso(birthDate);
+    const birthDateIso = birthDateToIso(birthDate);
     if (!waitlistOnly && !birthDateIso) return toast.error(t('bookingDrawer.validBirthDate'));
     setSubmitting(true);
     setError('');
@@ -447,7 +447,7 @@ export function BookingDrawerCanonical({
                   customerName: name.trim(),
                   customerPhone: phone.trim(),
                   customerEmail: email.trim(),
-                  customerBirthDate: birthDateIso,
+                  customerBirthDate: birthDateIso ?? '',
                   prepayment: prepaymentSelected,
                 },
           ),
