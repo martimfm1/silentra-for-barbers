@@ -1,5 +1,6 @@
 'use client';
 
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
@@ -441,6 +442,9 @@ export default function MarketplaceProductsPage() {
               'Products and sales',
             )}
           </h1>
+          <div className="mt-2 flex justify-center">
+            <FeaturePlanBadge feature="pos" />
+          </div>
           <p className="mt-2 text-sm text-zinc-500">
             {localizedText(
               activeLocale,
