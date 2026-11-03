@@ -133,6 +133,11 @@ const pageCopy = {
     emailSent: 'Email enviado com sucesso.',
     sendError: 'Ocorreu um erro ao enviar o email.',
     template: 'Modelo',
+    quickReplies: 'Respostas rápidas',
+    quickReplyHint: 'Insere uma resposta e adapta-a antes de enviar.',
+    quickReplyConfirm: 'Confirmar presença',
+    quickReplyReschedule: 'Reagendar',
+    quickReplyDirections: 'Localização',
   },
   en: {
     communication: 'Communication',
@@ -184,6 +189,11 @@ const pageCopy = {
     emailSent: 'Email sent successfully.',
     sendError: 'An error occurred while sending the email.',
     template: 'Template',
+    quickReplies: 'Quick replies',
+    quickReplyHint: 'Insert a reply and customise it before sending.',
+    quickReplyConfirm: 'Confirm attendance',
+    quickReplyReschedule: 'Reschedule',
+    quickReplyDirections: 'Location',
   },
 } as const;
 
@@ -249,6 +259,23 @@ export default function MensagensPage() {
         copy.customerName,
     )
     .replaceAll('{{barbearia}}', shopName || copy.fallbackShop);
+
+  const insertQuickReply = (kind: 'confirm' | 'reschedule' | 'directions') => {
+    const replies = english
+      ? {
+          confirm: 'Could you please confirm that you will be attending your appointment? Thank you!',
+          reschedule: 'If you need to reschedule, reply to this email and we will help you find another available time.',
+          directions: 'If you need help finding us, reply to this email and we will send you the directions.',
+        }
+      : {
+          confirm: 'Pode, por favor, confirmar se vai conseguir comparecer à sua marcação? Obrigado!',
+          reschedule: 'Se precisar de reagendar, responda a este email e ajudamos a encontrar outro horário disponível.',
+          directions: 'Se precisar de ajuda para chegar até nós, responda a este email e enviamos as indicações.',
+        };
+    const reply = replies[kind];
+    setBody((current) => current.trim() ? `${current.trim()}\n\n${reply}` : reply);
+    setTemplate('custom');
+  };
 
   const sendEmail = async () => {
     if (!clientId) return toast.error(copy.selectClient);
@@ -439,6 +466,17 @@ export default function MensagensPage() {
                     maxLength={8000}
                     className="min-h-56 resize-y bg-black/20 leading-6"
                   />
+                  <div className="space-y-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div>
+                      <p className="text-sm font-medium text-zinc-200">{copy.quickReplies}</p>
+                      <p className="mt-0.5 text-xs text-zinc-500">{copy.quickReplyHint}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('confirm')}>{copy.quickReplyConfirm}</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('reschedule')}>{copy.quickReplyReschedule}</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('directions')}>{copy.quickReplyDirections}</Button>
+                    </div>
+                  </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                     <span>{copy.availableVariables}</span>
                     <code className="rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5">

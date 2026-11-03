@@ -98,10 +98,16 @@ async function POST__unobserved(req: Request) {
       clientName,
       shopName,
     );
-    const subject = (
-      templateKey === 'custom' ? subjectInput : template.subject
-    ).trim();
-    const body = (templateKey === 'custom' ? bodyInput : template.body).trim();
+    // The composer allows barbers to edit every template. Always send the
+    // submitted content instead of silently replacing edited text with defaults.
+    const subject = (subjectInput || template.subject)
+      .replaceAll('{{barbearia}}', shopName)
+      .replaceAll('{{nome}}', clientName)
+      .trim();
+    const body = (bodyInput || template.body)
+      .replaceAll('{{barbearia}}', shopName)
+      .replaceAll('{{nome}}', clientName)
+      .trim();
     if (
       !subject ||
       !body ||
