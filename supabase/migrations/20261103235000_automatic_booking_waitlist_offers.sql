@@ -348,6 +348,7 @@ declare
   v_vacancy record;
   v_waitlist_id uuid;
   v_expiry timestamptz;
+  v_retry_at timestamptz;
 begin
   perform public.recover_stale_booking_waitlist_offers();
 
@@ -362,23 +363,35 @@ begin
     limit greatest(1, least(coalesce(p_batch_size, 25), 100))
     for update skip locked
   loop
-    if exists (
-      select 1
-      from public.booking_waitlist_vacancies other
-      where other.id <> v_vacancy.id
-        and other.barbershop_id = v_vacancy.barbershop_id
-        and other.shop_id = v_vacancy.shop_id
-        and other.service_id = v_vacancy.service_id
-        and other.slot_date = v_vacancy.slot_date
-        and other.slot_time = v_vacancy.slot_time
-        and other.professional_id is not distinct from v_vacancy.professional_id
-        and other.status in ('dispatching', 'offered')
-        and coalesce(other.offer_expires_at, now() + interval '1 minute') > now()
-    ) then
+    v_retry_at := null;
+
+    select max(
+      coalesce(other.offer_expires_at, now() + interval '1 minute')
+    )
+      into v_retry_at
+    from public.booking_waitlist_vacancies other
+    where other.id <> v_vacancy.id
+      and other.barbershop_id = v_vacancy.barbershop_id
+      and other.slot_date = v_vacancy.slot_date
+      and other.slot_time < v_vacancy.slot_time + make_interval(mins => v_vacancy.duration_minutes)
+      and other.slot_time + make_interval(mins => other.duration_minutes) > v_vacancy.slot_time
+      and (
+        other.professional_id is null
+        or v_vacancy.professional_id is null
+        or other.professional_id = v_vacancy.professional_id
+      )
+      and other.status in ('dispatching', 'offered')
+      and coalesce(other.offer_expires_at, now() + interval '1 minute') > now();
+
+    if v_retry_at is not null then
+      -- Keep overlapping vacancies queued until the active offer expires.
+      -- Do not mark them as unmatched: they may be usable after the offer
+      -- expires or may become irrelevant when the other vacancy is booked.
       update public.booking_waitlist_vacancies
-      set status = 'no_match',
+      set status = 'pending',
+          available_at = v_retry_at,
           updated_at = now(),
-          last_error = 'Another active offer already covers this slot'
+          last_error = 'An overlapping offer is still active'
       where id = v_vacancy.id;
       continue;
     end if;
