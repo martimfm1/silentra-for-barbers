@@ -436,8 +436,39 @@ export class BarbershopStripeService {
     const barbershopId = tenant?.barbershop_id;
     if (!barbershopId) return PLANS.FREE;
 
-    // Use the canonical resolver so administrative assignments and
-    // subscriptions.plan_override grant exactly the same access as paid plans.
+    const { data: assignment, error: assignmentError } = await database
+      .from('barbershop_plan_assignments')
+      .select('plan, expires_at')
+      .eq('barbershop_id', barbershopId)
+      .maybeSingle();
+
+    if (assignmentError)
+      throw new BillingError(
+        'Could not load barbershop plan assignment.',
+        'DB_READ_FAILED',
+      );
+
+    if (
+      assignment &&
+      (!assignment.expires_at ||
+        new Date(assignment.expires_at).getTime() > Date.now())
+    ) {
+      return assignment.plan as BillingPlan;
+    }
+
+    const subscription = await this.getSubscriptionForBarbershop(barbershopId);
+
+    // Explicit subscription overrides, including Free, take precedence over
+    // Stripe state and must not be rewritten by reconciliation.
+    if (subscription?.plan_override != null) {
+      return subscription.plan_override;
+    }
+
+    // Preserve the existing Stripe reconciliation for normal subscriptions.
+    await this.reconcileSubscription(barbershopId, subscription);
+
+    // Resolve again through the database's canonical plan function so every
+    // server feature gate uses the same plan calculation as quotas and APIs.
     const { data: effectivePlan, error: planError } = await database.rpc(
       'get_effective_billing_plan_for_barbershop',
       { p_barbershop_id: barbershopId },

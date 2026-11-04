@@ -186,6 +186,16 @@ assert.match(
 );
 assert.match(
   barbershopPlanServiceSource,
+  /subscription\?\.plan_override != null/,
+  'Os overrides explícitos de subscrição, incluindo Free, devem ter precedência.',
+);
+assert.match(
+  barbershopPlanServiceSource,
+  /await this\.reconcileSubscription\(barbershopId, subscription\)/,
+  'As subscrições Stripe normais devem continuar a reconciliar o estado antes da autorização.',
+);
+assert.match(
+  barbershopPlanServiceSource,
   /rpc\(\s*'get_effective_billing_plan_for_barbershop'/,
   'As permissões da dashboard devem usar o mesmo plano efetivo da base de dados.',
 );
