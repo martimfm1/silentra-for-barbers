@@ -64,6 +64,7 @@ export default function ProBookingPage({
   closedDays,
 }: ProBookingPageProps) {
   const { t, locale } = useLanguage();
+  const [activeBookingOffer, setActiveBookingOffer] = useState(bookingOffer);
   const [bookingOpen, setBookingOpen] = useState(Boolean(bookingOffer));
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     bookingOffer?.serviceId ?? null,
@@ -103,6 +104,7 @@ export default function ProBookingPage({
   );
 
   const openBooking = (serviceId: string) => {
+    setActiveBookingOffer(null);
     setSelectedServiceId(serviceId);
     setBookingOpen(true);
   };
@@ -210,13 +212,20 @@ export default function ProBookingPage({
       <BookingDrawer
         shop={bookingShop}
         isOpen={bookingOpen}
-        onClose={() => setBookingOpen(false)}
+        onClose={() => {
+          setBookingOpen(false);
+          setSelectedServiceId(null);
+          setActiveBookingOffer(null);
+        }}
         selectedServiceId={selectedServiceId}
-        selectedDate={bookingOffer?.date}
-        selectedTime={bookingOffer?.time}
-        selectedProfessionalId={bookingOffer?.professionalId}
+        selectedDate={activeBookingOffer?.date}
+        selectedTime={activeBookingOffer?.time}
+        selectedProfessionalId={activeBookingOffer?.professionalId}
         appearance="agenda"
-        onSuccess={() => setBookingOpen(false)}
+        onSuccess={() => {
+          setBookingOpen(false);
+          setActiveBookingOffer(null);
+        }}
       />
     </main>
   );
