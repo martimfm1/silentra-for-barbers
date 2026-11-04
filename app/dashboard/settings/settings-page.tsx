@@ -332,29 +332,60 @@ export default function SettingsPageOrganized() {
     setSuggestion(null);
   }
   async function upload(type: 'avatar' | 'banner', file: File) {
-    if (!barbershopId) return;
-    setUploading(type);
-    const r = await processAndUploadImage({
-      file,
-      bucket: type,
-      path: `${barbershopId}/${type}.webp`,
-      maxWidth: type === 'avatar' ? 400 : 1400,
-      quality: 0.85,
-    });
-    setUploading(null);
-    if (r.error) return toast.error(t('settingsPage.imageUpdateFailed'));
-    if (type === 'avatar') {
-      setAvatarPreviewError(false);
-      setAvatarTick(Date.now());
-    } else {
-      setBannerPreviewError(false);
-      setBannerTick(Date.now());
+    if (!barbershopId) {
+      toast.error(t('settingsPage.imageUpdateFailed'));
+      return;
     }
-    toast.success(
-      type === 'avatar'
-        ? t('settingsPage.logoUpdated')
-        : t('settingsPage.coverUpdated'),
-    );
+
+    setUploading(type);
+    try {
+      const result = await processAndUploadImage({
+        file,
+        bucket: type,
+        path: `${barbershopId}/${type}.webp`,
+        maxWidth: type === 'avatar' ? 400 : 1400,
+        quality: 0.85,
+      });
+
+      if (result.error) {
+        console.error(`[Barbershop ${type} Upload Failed]`, {
+          message: result.error.message,
+          fileType: file.type || 'unknown',
+          fileSize: file.size,
+          barbershopId,
+        });
+        toast.error(result.error.message || t('settingsPage.imageUpdateFailed'));
+        return;
+      }
+
+      if (!result.data?.publicUrl) {
+        toast.error(t('settingsPage.imageUpdateFailed'));
+        return;
+      }
+
+      if (type === 'avatar') {
+        setAvatarPreviewError(false);
+        setAvatarTick(Date.now());
+      } else {
+        setBannerPreviewError(false);
+        setBannerTick(Date.now());
+      }
+
+      toast.success(
+        type === 'avatar'
+          ? t('settingsPage.logoUpdated')
+          : t('settingsPage.coverUpdated'),
+      );
+    } catch (error) {
+      console.error(`[Barbershop ${type} Upload Unexpected Error]`, error);
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : t('settingsPage.imageUpdateFailed'),
+      );
+    } finally {
+      setUploading(null);
+    }
   }
   async function requestBarbershopDeletionCode() {
     if (!deletePassword || deleteLoading) return;
@@ -1050,7 +1081,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => bannerRef.current?.click()}
-                            disabled={uploading === 'banner'}
+                            disabled={uploading !== null}
                           >
                             <ImageIcon className="mr-2 size-4" />
                             {t('settingsPage.cover')}
@@ -1059,7 +1090,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => avatarRef.current?.click()}
-                            disabled={uploading === 'avatar'}
+                            disabled={uploading !== null}
                           >
                             <Camera className="mr-2 size-4" />
                             {t('settingsPage.logo')}
