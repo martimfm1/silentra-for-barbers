@@ -1,3 +1,6 @@
+import WaitlistDeclineClient from './waitlist-decline-client';
+import { UUID_PATTERN } from '@/lib/validation';
+
 export const metadata = {
   title: 'Recusar proposta | Silentra for Barbers',
   robots: {
@@ -5,9 +8,6 @@ export const metadata = {
     follow: false,
   },
 };
-
-import WaitlistDeclineClient from './waitlist-decline-client';
-import { UUID_PATTERN } from '@/lib/validation';
 
 type SearchParams = {
   shop?: string;
