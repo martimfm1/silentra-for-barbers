@@ -43,7 +43,7 @@ async function POST__unobserved(
   try {
     const { id: shopId } = await context.params;
     if (!UUID_PATTERN.test(shopId))
-      return NextResponse.json({ success: false, error: 'Pedido inválido.' }, { status: 400 });
+      return NextResponse.json({ success: false, code: 'INVALID_LINK', error: 'Pedido inválido.' }, { status: 400 });
 
     const payload = await readJsonObject(request, {
       maxBytes: 4 * 1024,
@@ -65,7 +65,7 @@ async function POST__unobserved(
       !/^[a-f0-9]{64}$/i.test(signature)
     ) {
       return NextResponse.json(
-        { success: false, error: 'O link não é válido.' },
+        { success: false, code: 'INVALID_LINK', error: 'O link não é válido.' },
         { status: 400 },
       );
     }
@@ -73,13 +73,13 @@ async function POST__unobserved(
     const secret = getSigningSecret();
     if (!secret || secret.length < 32)
       return NextResponse.json(
-        { success: false, error: 'O serviço está temporariamente indisponível.' },
+        { success: false, code: 'SERVICE_UNAVAILABLE', error: 'O serviço está temporariamente indisponível.' },
         { status: 503 },
       );
 
     if (Date.now() >= expires * 1000)
       return NextResponse.json(
-        { success: false, error: 'Esta proposta já expirou.' },
+        { success: false, code: 'OFFER_EXPIRED', error: 'Esta proposta já expirou.' },
         { status: 410 },
       );
 
@@ -98,7 +98,7 @@ async function POST__unobserved(
     );
     if (!allowed)
       return NextResponse.json(
-        { success: false, error: 'Demasiados pedidos. Tenta novamente mais tarde.' },
+        { success: false, code: 'RATE_LIMITED', error: 'Demasiados pedidos. Tenta novamente mais tarde.' },
         { status: 429, headers: { 'Retry-After': '600' } },
       );
 
@@ -118,7 +118,7 @@ async function POST__unobserved(
       throw new Error('WAITLIST_OFFER_LOOKUP_FAILED');
     if (!vacancy)
       return NextResponse.json(
-        { success: false, error: 'Esta proposta já não está disponível.' },
+        { success: false, code: 'OFFER_UNAVAILABLE', error: 'Esta proposta já não está disponível.' },
         { status: 410 },
       );
 
@@ -136,7 +136,7 @@ async function POST__unobserved(
       throw new Error('WAITLIST_DECLINE_UPDATE_FAILED');
     if (!entry)
       return NextResponse.json(
-        { success: false, error: 'Esta proposta já foi atualizada ou utilizada.' },
+        { success: false, code: 'OFFER_ALREADY_UPDATED', error: 'Esta proposta já foi atualizada ou utilizada.' },
         { status: 409 },
       );
 
@@ -150,7 +150,7 @@ async function POST__unobserved(
       error instanceof Error ? error.message : 'UNKNOWN',
     );
     return NextResponse.json(
-      { success: false, error: 'Não foi possível atualizar o pedido.' },
+      { success: false, code: 'SERVICE_UNAVAILABLE', error: 'Não foi possível atualizar o pedido.' },
       { status: 503 },
     );
   }
