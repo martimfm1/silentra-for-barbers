@@ -50,6 +50,9 @@ export function BookingForm({
 }: BookingFormProps) {
   const { t, locale } = useLanguage();
   const today = localDateValue(new Date());
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = localDateValue(tomorrowDate);
   const selectedClient = clients.find((client) => client.id === formData.clientId);
   const selectedService = services.find((service) => service.id === formData.service_id);
   const singleProfessional = professionals.length === 1 ? professionals[0] : null;
@@ -525,10 +528,10 @@ export function BookingForm({
                   <button
                     type="button"
                     onClick={() => setQuickDate(1)}
-                    aria-pressed={selectedDate === localDateValue(new Date(Date.now() + 86400000))}
+                    aria-pressed={selectedDate === tomorrow}
                     className={cn(
                       'min-h-9 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
-                      selectedDate === localDateValue(new Date(Date.now() + 86400000))
+                      selectedDate === tomorrow
                         ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
                         : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06]',
                     )}
