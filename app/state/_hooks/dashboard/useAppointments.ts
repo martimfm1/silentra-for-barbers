@@ -285,33 +285,43 @@ export function useAppointments(
     },
     [onRefreshData],
   );
-  const handleDeleteBooking = useCallback(
-    async (id: string, rejectPrepayment = false) => {
+  const handleCancelBooking = useCallback(
+    async (id: string) => {
       setLoading(true);
       try {
-        if (rejectPrepayment) {
-          const response = await fetch(
-            `/api/appointments/${encodeURIComponent(id)}/cancel`,
-            { method: 'DELETE' },
-          );
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok || payload.success !== true)
-            throw new Error(payload.error || 'Não foi possível rejeitar o pré-pagamento.');
-          toast.success('Pré-pagamento rejeitado e marcação cancelada.');
-        } else {
-          const { error } = await appointmentService.delete(id);
-          if (error) throw error;
-          toast.success('Marcação eliminada permanentemente.');
+        const response = await fetch(
+          '/api/appointments/' + encodeURIComponent(id) + '/cancel',
+          { method: 'DELETE' },
+        );
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success !== true) {
+          throw new Error(payload.error || 'Não foi possível cancelar a marcação.');
         }
+
+        if (payload.emailSent === true) {
+          toast.success(
+            locale === 'en'
+              ? 'Booking cancelled. The customer was notified by email.'
+              : 'Marcação cancelada. O cliente foi avisado por email.',
+          );
+        } else {
+          toast.warning(
+            payload.emailError ||
+              (locale === 'en'
+                ? 'Booking cancelled, but the customer email could not be sent.'
+                : 'Marcação cancelada, mas não foi possível enviar o email ao cliente.'),
+          );
+        }
+
         await onRefreshData();
       } catch (error) {
-        console.error('[Delete Booking Hook Error]:', error);
+        console.error('[Cancel Booking Hook Error]:', error);
         toast.error(getErrorMessage(error));
       } finally {
         setLoading(false);
       }
     },
-    [onRefreshData],
+    [locale, onRefreshData],
   );
 
   return {
@@ -333,6 +343,6 @@ export function useAppointments(
     addCompletedAppointmentClient,
     handleCreateBlock,
     handleDeleteBlock,
-    handleDeleteBooking,
+    handleCancelBooking,
   };
 }
