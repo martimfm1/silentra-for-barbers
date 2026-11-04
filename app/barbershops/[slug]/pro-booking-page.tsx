@@ -82,6 +82,7 @@ export default function ProBookingPage({
   const bookingShop: MarketplaceShop = {
     id: profile.id,
     barbershop_id: barbershopId,
+    plan: profile.plan,
     reviewsCount: 0,
     closing_time: closingTime || '',
     opening_time: openingTime || '',
