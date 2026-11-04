@@ -137,6 +137,17 @@ assert.match(sidebar, /handleDialogKeys/);
 assert.match(sidebar, /moreTriggerRef\.current\?\.focus\(\)/);
 assert.match(sidebar, /moreItems\.some\(isActive\)/);
 assert.match(sidebar, /localizeNavLabel\(item\.label, locale\)/);
+// Desktop navigation uses a dedicated fixed sidebar; mobile retains the bottom dock.
+assert.match(sidebar, /hidden w-64 flex-col[\\s\\S]*?lg:flex/);
+assert.match(sidebar, /Navegação principal da dashboard/);
+assert.match(sidebar, /Criar marcação/);
+assert.match(sidebar, /primaryItems\\.slice\\(0, 2\\)\\.map\\(renderItem\\)/);
+assert.match(sidebar, /managementItems\\.map\\(renderItem\\)/);
+assert.match(sidebar, /secondaryItems\\.map\\(renderItem\\)/);
+assert.match(sidebar, /lg:hidden/);
+assert.match(dashboardShell, /lg:pl-64/);
+assert.match(topBar, /lg:left-64/);
+
 // Settings stay on one page: no category switcher, modal editor, or shortcut step.
 assert.doesNotMatch(settingsPage, /const sectionGroups|navigationGroups|setSection|activeDialog|SettingsDialog/);
 assert.doesNotMatch(settingsPage, /<Dialog|<DialogContent|<DialogFooter|closeSettingsDialog/);
