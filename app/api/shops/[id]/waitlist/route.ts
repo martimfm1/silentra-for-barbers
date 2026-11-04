@@ -8,6 +8,16 @@ import { isSafePublicBookingDate, isValidTime, normalizeText, UUID_PATTERN } fro
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RATE_LIMIT = 8;
 const RATE_WINDOW_SECONDS = 10 * 60;
+const PUBLIC_BOOKING_WINDOW_DAYS = 14;
+
+function isWithinPublicBookingWindow(date: string) {
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Europe/Lisbon',
+  });
+  const lastAllowed = new Date(`${today}T12:00:00Z`);
+  lastAllowed.setUTCDate(lastAllowed.getUTCDate() + PUBLIC_BOOKING_WINDOW_DAYS - 1);
+  return date >= today && date <= lastAllowed.toISOString().slice(0, 10);
+}
 
 type WaitlistBody = {
   serviceId?: unknown;
@@ -66,6 +76,7 @@ async function POST__unobserved(
       !UUID_PATTERN.test(serviceId) ||
       (professionalId && !UUID_PATTERN.test(professionalId)) ||
       !isSafePublicBookingDate(date) ||
+      !isWithinPublicBookingWindow(date) ||
       !name ||
       name.length < 2 ||
       !email ||
