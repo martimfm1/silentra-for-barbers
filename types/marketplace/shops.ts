@@ -40,6 +40,7 @@ export interface MarketplaceShopResponse {
   nextSlot: string;
   rating: number;
   reviewsCount: number;
+  plan?: 'free' | 'pro' | 'enterprise' | null;
 }
 
 /** Marketplace card and map model. */
