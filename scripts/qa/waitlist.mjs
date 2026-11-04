@@ -42,9 +42,10 @@ assert.match(offersMigration, /slot_time < v_vacancy\.slot_time \+ make_interval
 assert.match(offersMigration, /other\.professional_id is null/i);
 assert.match(offersMigration, /An overlapping offer is still active/i);
 assert.match(offersMigration, /interval '20 minutes'/i);
-assert.equal((offersMigration.match(/^as \\$/gm) ?? []).length, 0);
-assert.equal((offersMigration.match(/^as \\\$\\\\?\\$/gm) ?? []).length, 0);
-assert.equal((offersMigration.match(/^as \\\$\\$/gm) ?? []).length, 8);
+const sqlFunctionLines = offersMigration.split(/\\r?\\n/).map((line) => line.trim());
+assert.equal(sqlFunctionLines.filter((line) => line === 'as $$').length, 8);
+assert.equal(sqlFunctionLines.filter((line) => line === '$$;').length, 8);
+assert.equal(sqlFunctionLines.some((line) => line === 'as $' || line === '$;'), false);
 
 assert.match(offersWorker, /const BATCH_SIZE = 10/);
 assert.match(offersWorker, /withApiObservability/);
