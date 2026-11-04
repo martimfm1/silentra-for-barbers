@@ -10,8 +10,8 @@ A lista de espera permite a um cliente pedir para ser contactado quando não enc
 4. Quando surge uma vaga compatível, o sistema envia um email com o serviço, dia, hora e barbeiro (quando definido).
 5. A prioridade do convite expira após 20 minutos. Depois disso, a vaga pode ser proposta a outra pessoa. O email deixa claro que a vaga não fica reservada: só é confirmada depois de o cliente concluir o processo normal de reserva.
 6. O cliente pode recusar explicitamente a proposta através de um link assinado no email. O link abre primeiro uma página de confirmação; só o botão de confirmação altera o pedido e liberta a vaga para a próxima pessoa.
-6. O link abre a página de marcação com os dados da vaga pré-selecionados. A API de marcações volta a validar disponibilidade e conflitos.
-7. Se o cliente concluir a marcação com o mesmo email e horário, o pedido passa a `booked` e fica ligado à nova marcação. Se outra pessoa ocupar a vaga, o convite é invalidado.
+7. O link abre a página de marcação com os dados da vaga pré-selecionados. A API de marcações volta a validar disponibilidade e conflitos.
+8. Se o cliente concluir a marcação com o mesmo email e horário, o pedido passa a `booked` e fica ligado à nova marcação. Se outra pessoa ocupar a vaga, o convite é invalidado.
 
 ## Fluxo da barbearia
 
