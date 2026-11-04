@@ -151,6 +151,9 @@ export function BookingDrawerCanonical({
   onClose,
   onSuccess,
   selectedServiceId = null,
+  selectedDate = null,
+  selectedTime = null,
+  selectedProfessionalId = null,
   appearance = 'default',
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
@@ -177,6 +180,8 @@ export function BookingDrawerCanonical({
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
   const [manualPrepayment, setManualPrepayment] = useState<MarketplaceBookingResponse['manualPrepayment'] | null>(null);
   const [prepaymentSelected, setPrepaymentSelected] = useState(false);
+  const [waitlistOnly, setWaitlistOnly] = useState(false);
+  const [waitlistConsent, setWaitlistConsent] = useState(false);
   const [paymentInstructions, setPaymentInstructions] = useState<ManualPrepaymentInstructions | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const customerControllerRef = useRef<AbortController | null>(null);
@@ -218,8 +223,20 @@ export function BookingDrawerCanonical({
 
   useEffect(() => {
     if (!isOpen) return;
-    setStep(1);
-    setDayIndex(firstOpenDayIndex >= 0 ? firstOpenDayIndex : 0);
+    const requestedDayIndex = selectedDate
+      ? days.findIndex((day) => day.dateStr === selectedDate)
+      : -1;
+    const hasCompleteOffer = Boolean(
+      selectedServiceId && selectedDate && selectedTime,
+    );
+    setStep(hasCompleteOffer && selectedProfessionalId ? 2 : 1);
+    setDayIndex(
+      requestedDayIndex >= 0
+        ? requestedDayIndex
+        : firstOpenDayIndex >= 0
+          ? firstOpenDayIndex
+          : 0,
+    );
     setServiceId(selectedServiceId);
     setProfessional(null);
     setServices([]);
@@ -238,10 +255,20 @@ export function BookingDrawerCanonical({
     setManualPrepayment(null);
     setPrepaymentSelected(false);
     setPaymentInstructions(null);
+    setWaitlistOnly(false);
+    setWaitlistConsent(false);
     controllerRef.current?.abort();
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
-  }, [firstOpenDayIndex, isOpen, selectedServiceId]);
+  }, [
+    days,
+    firstOpenDayIndex,
+    isOpen,
+    selectedDate,
+    selectedProfessionalId,
+    selectedServiceId,
+    selectedTime,
+  ]);
 
   useEffect(() => {
     if (!isOpen || !shop || !currentDay) return;
@@ -262,10 +289,17 @@ export function BookingDrawerCanonical({
         if (controller.signal.aborted) return;
         const loadedProfessionals = payload.professionals ?? [];
         setProfessionals(loadedProfessionals);
-        if (loadedProfessionals.length === 1) {
+        const requestedProfessional = selectedProfessionalId
+          ? loadedProfessionals.find((item) => item.id === selectedProfessionalId)
+          : null;
+        if (requestedProfessional) {
+          setProfessional(requestedProfessional);
+        } else if (loadedProfessionals.length === 1) {
           // A single-professional shop has no meaningful choice to present.
           // Assign that professional automatically in every public booking flow.
           setProfessional(loadedProfessionals[0]);
+        } else if (selectedProfessionalId) {
+          setStep(1);
         }
         setServices(payload.services ?? []);
         setManualPrepayment(payload.manualPrepayment?.enabled ? payload.manualPrepayment : null);
@@ -279,7 +313,14 @@ export function BookingDrawerCanonical({
           );
       });
     return () => controller.abort();
-  }, [appearance, currentDay?.dateStr, isOpen, retryKey, shop]);
+  }, [
+    appearance,
+    currentDay?.dateStr,
+    isOpen,
+    retryKey,
+    selectedProfessionalId,
+    shop,
+  ]);
 
   useEffect(() => {
     if (
@@ -299,7 +340,13 @@ export function BookingDrawerCanonical({
     const key = `${shop.id}|${professional.id}|${service.id}|${currentDay.dateStr}`;
     const cached = cacheRef.current.get(key);
     if (cached && Date.now() - cached.timestamp < 8000) {
-      setSlots(cached.data.availableSlots ?? []);
+      const cachedSlots = cached.data.availableSlots ?? [];
+      setSlots(cachedSlots);
+      setSelectedSlot(
+        selectedDate === currentDay.dateStr && selectedTime && cachedSlots.includes(selectedTime)
+          ? selectedTime
+          : null,
+      );
       setLoadingAvailability(false);
       return () => controller.abort();
     }
@@ -318,7 +365,13 @@ export function BookingDrawerCanonical({
       .then((payload) => {
         if (controller.signal.aborted) return;
         cacheRef.current.set(key, { data: payload, timestamp: Date.now() });
-        setSlots(payload.availableSlots ?? []);
+        const availableSlots = payload.availableSlots ?? [];
+        setSlots(availableSlots);
+        setSelectedSlot(
+          selectedDate === currentDay.dateStr && selectedTime && availableSlots.includes(selectedTime)
+            ? selectedTime
+            : null,
+        );
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError')
@@ -337,13 +390,15 @@ export function BookingDrawerCanonical({
     isOpen,
     professional,
     retryKey,
+    selectedDate,
+    selectedTime,
     service,
     shop,
     step,
   ]);
 
   useEffect(() => {
-    if (!isOpen || step !== 3 || !shop) return;
+    if (!isOpen || step !== 3 || !shop || waitlistOnly) return;
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPhone = phone.replace(/\D/g, '');
     if (!EMAIL_PATTERN.test(normalizedEmail) || normalizedPhone.length < 7) {
@@ -386,7 +441,7 @@ export function BookingDrawerCanonical({
       window.clearTimeout(timeout);
       customerControllerRef.current?.abort();
     };
-  }, [email, isOpen, phone, shop, step]);
+  }, [email, isOpen, phone, shop, step, waitlistOnly]);
 
   const canContinueOne = Boolean(
     currentDay && professional && service && !currentDayClosed,
@@ -407,35 +462,58 @@ export function BookingDrawerCanonical({
   }
 
   async function submit() {
-    if (!shop || !professional || !service || !selectedSlot || !currentDay)
+    if (!shop || !professional || !service || !currentDay || (!waitlistOnly && !selectedSlot))
       return;
     if (!name.trim() || !phone.trim() || !email.trim())
       return toast.error(t('bookingDrawer.requiredFields'));
+    if (waitlistOnly && !waitlistConsent)
+      return toast.error(locale === 'en' ? 'Please accept the waitlist contact notice.' : 'Aceita o aviso de contacto para entrares na lista de espera.');
     const birthDateIso = birthDateToIso(birthDate);
-    if (!birthDateIso) return toast.error(t('bookingDrawer.validBirthDate'));
+    if (!waitlistOnly && !birthDateIso) return toast.error(t('bookingDrawer.validBirthDate'));
     setSubmitting(true);
     setError('');
     try {
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shopId: shop.id,
-          service: service.id,
-          date: currentDay.dateStr,
-          slot: selectedSlot,
-          professionalId: professional.id,
-          customerName: name.trim(),
-          customerPhone: phone.trim(),
-          customerEmail: email.trim(),
-          customerBirthDate: birthDateIso,
-          prepayment: prepaymentSelected,
-        }),
-      });
+      const response = await fetch(
+        waitlistOnly ? `/api/shops/${shop.id}/waitlist` : '/api/bookings',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            waitlistOnly
+              ? {
+                  serviceId: service.id,
+                  professionalId: professional.id,
+                  date: currentDay.dateStr,
+                  customerName: name.trim(),
+                  customerPhone: phone.trim(),
+                  customerEmail: email.trim(),
+                  consent: true,
+                }
+              : {
+                  shopId: shop.id,
+                  service: service.id,
+                  date: currentDay.dateStr,
+                  slot: selectedSlot,
+                  professionalId: professional.id,
+                  customerName: name.trim(),
+                  customerPhone: phone.trim(),
+                  customerEmail: email.trim(),
+                  customerBirthDate: birthDateIso ?? '',
+                  prepayment: prepaymentSelected,
+                },
+          ),
+        },
+      );
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success)
         throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
+      if (waitlistOnly) {
+        setPaymentInstructions(null);
+        toast.success(locale === 'en' ? 'You are on the waitlist.' : 'Ficaste na lista de espera.');
+        setStep(4);
+        return;
+      }
       if (payload.payment?.method === 'mbway') {
         setPaymentInstructions({
           bookingId: String(payload.booking?.id ?? ''),
@@ -455,7 +533,7 @@ export function BookingDrawerCanonical({
           shopName: shop.name,
           serviceName: service.name,
           date: currentDay.dateStr,
-          time: selectedSlot,
+          time: selectedSlot ?? '',
           customerEmail: email.trim(),
         });
       }
@@ -548,7 +626,7 @@ export function BookingDrawerCanonical({
                 {t('bookingDrawer.bookingTitle')}
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
-                {step === 4 ? (paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')) : shop.name}
+                {step === 4 ? (paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : waitlistOnly ? (locale === 'en' ? 'You are on the waitlist' : 'Estás na lista de espera') : t('bookingDrawer.bookingConfirmed')) : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
@@ -556,10 +634,14 @@ export function BookingDrawerCanonical({
                   : step === 2
                     ? t('bookingDrawer.nextChooseTime')
                     : step === 3
-                      ? t('bookingDrawer.confirmYourDetails')
+                      ? waitlistOnly
+                        ? (locale === 'en' ? 'Leave your contact details to be notified about an opening.' : 'Deixa os teus contactos para receberes um aviso quando surgir uma vaga.')
+                        : t('bookingDrawer.confirmYourDetails')
                       : paymentInstructions
                         ? t('bookingDrawer.prepaymentPendingDescription')
-                        : t('bookingDrawer.slotReserved')}
+                        : waitlistOnly
+                          ? (locale === 'en' ? 'The barbershop may contact you if a suitable opening becomes available.' : 'A barbearia poderá contactar-te se surgir uma vaga adequada.')
+                          : t('bookingDrawer.slotReserved')}
               </p>
             </div>
             <button
@@ -615,7 +697,7 @@ export function BookingDrawerCanonical({
             </div>
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
-              {appearance !== 'agenda' && (
+              {(appearance !== 'agenda' || professionals.length !== 1) && (
                 professionals.length === 1 ? (
                   <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                     <div className="mb-2 flex items-center gap-2">
@@ -633,7 +715,7 @@ export function BookingDrawerCanonical({
                   <div>
                     <div className="mb-3 flex items-center gap-2">
                       <UserRound
-                        className="size-4 text-emerald-300"
+                        className={`size-4 ${appearance === 'agenda' ? 'text-emerald-700' : 'text-emerald-300'}`}
                         aria-hidden="true"
                       />
                       <h3 id="booking-step-one" className="text-sm font-semibold">
@@ -647,7 +729,7 @@ export function BookingDrawerCanonical({
                           type="button"
                           aria-pressed={professional?.id === item.id}
                           onClick={() => setProfessional(item)}
-                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? appearance === 'agenda' ? 'border-emerald-500/35 bg-emerald-50 text-[#173d30]' : 'border-emerald-400/40 bg-emerald-400/[0.08]' : appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#292929] hover:border-[#c5c5bb]' : 'border-white/10 bg-white/[0.025] text-zinc-200 hover:border-white/20'}`}
                         >
                           <span>
                             <span className="block text-sm font-semibold">
@@ -659,7 +741,7 @@ export function BookingDrawerCanonical({
                           </span>
                           {professional?.id === item.id && (
                             <Check
-                              className="size-5 text-emerald-300"
+                              className={`size-5 ${appearance === 'agenda' ? 'text-emerald-700' : 'text-emerald-300'}`}
                               aria-hidden="true"
                             />
                           )}
@@ -667,7 +749,7 @@ export function BookingDrawerCanonical({
                       ))}
                     </div>
                     {!professionals.length && (
-                      <p className="rounded-2xl border border-white/10 p-4 text-sm text-zinc-500">
+                      <p className={`rounded-2xl border p-4 text-sm ${appearance === 'agenda' ? 'border-[#e8e7e2] text-[#73736c]' : 'border-white/10 text-zinc-500'}`}>
                         {t('bookingDrawer.noBarbers')}
                       </p>
                     )}
@@ -830,6 +912,19 @@ export function BookingDrawerCanonical({
                   <p className="mt-1 text-xs text-zinc-500">
                     {t('bookingDrawer.tryOtherDayBarber')}
                   </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4 min-h-11 w-full border-emerald-400/20 text-emerald-200 hover:bg-emerald-400/[0.06]"
+                    onClick={() => {
+                      setWaitlistOnly(true);
+                      setWaitlistConsent(false);
+                      setStep(3);
+                    }}
+                  >
+                    <Clock3 className="mr-2 size-4" aria-hidden="true" />
+                    {locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'}
+                  </Button>
                 </div>
               )}
               <Button
@@ -847,18 +942,24 @@ export function BookingDrawerCanonical({
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h3 id="booking-step-three" className="text-sm font-semibold">
-                    {t('bookingDrawer.stepThreeDetails')}
+                    {waitlistOnly
+                      ? locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'
+                      : t('bookingDrawer.stepThreeDetails')}
                   </h3>
                   <p className="mt-1 text-xs text-zinc-500">
                     {service?.name} · {currentDay?.fullDateFormatted} ·{' '}
-                    {selectedSlot}
+                    {waitlistOnly ? (locale === 'en' ? 'Any time' : 'Qualquer horário') : selectedSlot}
                   </p>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setStep(2)}
+                  onClick={() => {
+                    setWaitlistOnly(false);
+                    setWaitlistConsent(false);
+                    setStep(2);
+                  }}
                 >
                   <ArrowLeft className="mr-1 size-4" aria-hidden="true" />
                   Voltar
@@ -908,21 +1009,39 @@ export function BookingDrawerCanonical({
                     />
                   </div>
                 </label>
-                <label className="grid gap-1.5 text-xs text-zinc-400">
-                  <span>{t('bookingDrawer.birthDate')} *</span>
-                  <Input
-                    value={birthDate}
-                    onChange={(event) =>
-                      setBirthDate(formatBirthDate(event.target.value))
-                    }
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="DD/MM/AAAA"
-                    autoComplete="bday"
-                  />
-                </label>
+                {!waitlistOnly && (
+                  <label className="grid gap-1.5 text-xs text-zinc-400">
+                    <span>{t('bookingDrawer.birthDate')} *</span>
+                    <Input
+                      value={birthDate}
+                      onChange={(event) =>
+                        setBirthDate(formatBirthDate(event.target.value))
+                      }
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="DD/MM/AAAA"
+                      autoComplete="bday"
+                    />
+                  </label>
+                )}
 
-                {manualPrepayment?.enabled && (
+                {waitlistOnly && (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.035] p-3 text-xs leading-5 text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={waitlistConsent}
+                      onChange={(event) => setWaitlistConsent(event.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 accent-emerald-400"
+                    />
+                    <span>
+                      {locale === 'en'
+                        ? 'I agree to be contacted by this barbershop about an available time for this request. This is not marketing consent.'
+                        : 'Aceito que esta barbearia me contacte caso surja uma vaga para este pedido. Este consentimento não inclui mensagens de marketing.'}
+                    </span>
+                  </label>
+                )}
+
+                { !waitlistOnly && manualPrepayment?.enabled && (
                   <div className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035]">
                     <button
                       type="button"
@@ -954,6 +1073,7 @@ export function BookingDrawerCanonical({
                   </div>
                 )}
 
+                {!waitlistOnly && (
                 <div
                   className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
                   aria-live="polite"
@@ -989,6 +1109,7 @@ export function BookingDrawerCanonical({
                     </p>
                   )}
                 </div>
+                )}
 
                 <Button
                   type="button"
@@ -1004,9 +1125,11 @@ export function BookingDrawerCanonical({
                   ) : null}
                   {submitting
                     ? t('bookingDrawer.reserving')
-                    : prepaymentSelected
-                      ? t('bookingDrawer.requestPrepayment')
-                      : t('bookingDrawer.confirmBooking')}
+                    : waitlistOnly
+                      ? locale === 'en' ? 'Join waitlist' : 'Entrar na lista de espera'
+                      : prepaymentSelected
+                        ? t('bookingDrawer.requestPrepayment')
+                        : t('bookingDrawer.confirmBooking')}
                 </Button>
               </div>
             </section>
@@ -1025,12 +1148,22 @@ export function BookingDrawerCanonical({
                 id="booking-success-title"
                 className="mt-5 text-xl font-semibold"
               >
-                {paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : t('bookingDrawer.bookingConfirmed')}
+                {paymentInstructions
+                  ? t('bookingDrawer.prepaymentPendingTitle')
+                  : waitlistOnly
+                    ? locale === 'en' ? 'You are on the waitlist' : 'Estás na lista de espera'
+                    : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
-                {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
-                {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
-                {selectedSlot}.
+                {waitlistOnly
+                  ? locale === 'en'
+                    ? `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. The barbershop may contact you if a suitable opening becomes available.`
+                    : `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. A barbearia poderá contactar-te se surgir uma vaga adequada.`
+                  : <>
+                      {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
+                      {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
+                      {selectedSlot}.
+                    </>}
               </p>
               {paymentInstructions && (
                 <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">

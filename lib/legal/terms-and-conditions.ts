@@ -46,6 +46,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'As reservas podem ser criadas por clientes finais ou pela própria barbearia. A Plataforma tenta manter a agenda consistente, mas não garante disponibilidade ininterrupta, ausência absoluta de conflitos ou funcionamento sem erros.',
           'A barbearia deve verificar e gerir as marcações e contactar diretamente o cliente quando seja necessário corrigir uma marcação, indisponibilidade ou erro.',
+          'A Plataforma pode permitir pedidos de lista de espera quando não existem horários adequados. Um pedido de lista de espera não é uma marcação, não reserva um horário e não garante que surja uma vaga. A barbearia pode contactar o cliente apenas nos termos do aviso apresentado e do consentimento dado para esse pedido.',
           'O contrato relativo ao serviço de barbearia é celebrado diretamente entre o cliente e a barbearia identificada na página de reserva. A Silentra disponibiliza a infraestrutura tecnológica e não presta nem recebe o preço do serviço de barbearia. As condições concretas de cancelamento, atrasos, faltas e pré-pagamentos são definidas pela barbearia e devem ser apresentadas antes da confirmação, sem prejuízo dos direitos imperativos do consumidor. Consulta também a Política de Reservas.',
         ],
       },
@@ -163,6 +164,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'Bookings may be created by end customers or by the barbershop. The Platform attempts to keep schedules consistent but does not guarantee uninterrupted availability, complete absence of conflicts, or error-free operation.',
           'The barbershop must review and manage bookings and contact the customer directly when a booking, availability issue, or technical error needs correction.',
+          'The Platform may allow waitlist requests when no suitable times are available. A waitlist request is not an appointment, does not reserve a time, and does not guarantee that an opening will become available. The barbershop may contact the customer only as described in the notice shown and within the consent given for that request.',
           'The contract for the barbershop service is made directly between the customer and the barbershop identified on the booking page. Silentra provides the technology infrastructure and does not provide the haircut or receive its service price. The specific rules for cancellation, lateness, no-shows, and prepayments are set by the barbershop and must be presented before the booking is confirmed, without prejudice to mandatory consumer rights. See also the Booking Policy.',
         ],
       },

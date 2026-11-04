@@ -110,16 +110,24 @@ function amenityItems(amenities: BarbershopAmenities): AmenityItem[] {
 export default function BarbershopPublicPageFinal({
   initialData,
   loyaltyEnabled = false,
+  bookingOffer = null,
 }: {
   slug: string;
   loyaltyEnabled?: boolean;
   initialData: BarbershopPublicDetails;
+  bookingOffer?: {
+    serviceId: string;
+    date: string;
+    time: string;
+    professionalId: string | null;
+  } | null;
 }) {
   const shop = initialData as PublicData;
   const { locale } = useLanguage();
-  const [bookingOpen, setBookingOpen] = useState(false);
+  const [activeBookingOffer, setActiveBookingOffer] = useState(bookingOffer);
+  const [bookingOpen, setBookingOpen] = useState(Boolean(bookingOffer));
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
+    bookingOffer?.serviceId ?? null,
   );
   const [reviewToken, setReviewToken] = useState('');
   const [reviewName, setReviewName] = useState('');
@@ -301,6 +309,7 @@ export default function BarbershopPublicPageFinal({
                 <Button
                   type="button"
                   onClick={() => {
+                    setActiveBookingOffer(null);
                     setSelectedServiceId(null);
                     setBookingOpen(true);
                   }}
@@ -429,6 +438,7 @@ export default function BarbershopPublicPageFinal({
                   type="button"
                   variant="outline"
                   onClick={() => {
+                    setActiveBookingOffer(null);
                     setSelectedServiceId(service.id);
                     setBookingOpen(true);
                   }}
@@ -597,8 +607,12 @@ export default function BarbershopPublicPageFinal({
         onClose={() => {
           setBookingOpen(false);
           setSelectedServiceId(null);
+          setActiveBookingOffer(null);
         }}
         selectedServiceId={selectedServiceId}
+        selectedDate={activeBookingOffer?.date}
+        selectedTime={activeBookingOffer?.time}
+        selectedProfessionalId={activeBookingOffer?.professionalId}
       />
     </main>
   );

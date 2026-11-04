@@ -55,6 +55,7 @@ export const bookingPolicy: LocalizedPolicy = {
         paragraphs: [
           'Para criar e gerir a marcação, a página pode pedir o teu nome e um meio de contacto, bem como o serviço, profissional e horário pretendidos. A data de nascimento ou outros dados adicionais só devem ser fornecidos quando solicitados e necessários para a funcionalidade explicada.',
           'Os dados da marcação são disponibilizados à barbearia escolhida para esta poder organizar e prestar o serviço, contactar-te, gerir alterações e cumprir as suas obrigações. A Política de Privacidade explica os papéis da barbearia e da Silentra.',
+          'Se não existirem horários adequados, poderás pedir para entrar na lista de espera. Este pedido não é uma marcação, não bloqueia um horário e não garante disponibilidade. Ao aceitares o aviso específico, autorizas a barbearia selecionada a contactar-te sobre uma vaga para o serviço e data indicados; esse consentimento não abrange marketing.',
           'Não introduzas informação sensível ou dados de outras pessoas sem autorização. Se fizeres uma reserva em nome de outra pessoa, assegura-te de que tens autorização para fornecer os respetivos dados.',
         ],
       },
@@ -117,6 +118,7 @@ export const bookingPolicy: LocalizedPolicy = {
         paragraphs: [
           'To create and manage the booking, the page may ask for your name and a contact method, as well as the requested service, professional, and time. Date of birth or other additional data should only be provided when requested and needed for the feature explained.',
           'Booking data is made available to the selected barbershop so it can arrange and provide the service, contact you, manage changes, and meet its obligations. The Privacy Policy explains the roles of the barbershop and Silentra.',
+          'If no suitable times are available, you may ask to join the waitlist. This request is not an appointment, does not hold a time, and does not guarantee availability. By accepting the specific notice, you allow the selected barbershop to contact you about an opening for the stated service and date; this consent does not cover marketing.',
           'Do not enter sensitive information or another person’s data without authorization. If you book on behalf of someone else, ensure you are authorized to provide their details.',
         ],
       },
