@@ -707,7 +707,7 @@ const checks = [
     name: 'Booking drawer disables days off, shows a red legend and starts on an open date',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
-      const normalized = source.replace(/\\s+/g, ' ').trim();
+      const normalized = source.replace(/\s+/g, ' ').trim();
       return (
         normalized.includes('const availableDays = days;') &&
         normalized.includes('availableDays.map((day, index)') &&
