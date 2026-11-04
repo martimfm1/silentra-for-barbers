@@ -164,6 +164,26 @@ async function GET__unobserved(request: Request) {
         if (event.professional_id)
           bookingUrl.searchParams.set('professional', event.professional_id);
 
+        const declineSecret = (
+          process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET
+        )?.trim();
+        if (!declineSecret || declineSecret.length < 32)
+          throw new Error('WAITLIST_DECLINE_SIGNING_SECRET_MISSING');
+        const declineExpires = Math.floor(
+          new Date(event.offer_expires_at).getTime() / 1000,
+        );
+        const declineSignature = createHmac('sha256', declineSecret)
+          .update(
+            `booking-waitlist-decline:${event.shop_id}:${event.vacancy_id}:${event.waitlist_id}:${declineExpires}`,
+          )
+          .digest('hex');
+        const declineUrl = new URL('/waitlist/decline', siteUrl);
+        declineUrl.searchParams.set('shop', event.shop_id);
+        declineUrl.searchParams.set('vacancy', event.vacancy_id);
+        declineUrl.searchParams.set('entry', event.waitlist_id);
+        declineUrl.searchParams.set('expires', String(declineExpires));
+        declineUrl.searchParams.set('signature', declineSignature);
+
         const language: 'pt' | 'en' = String(
           event.default_language ?? '',
         ).toLowerCase().startsWith('en')
@@ -190,6 +210,10 @@ async function GET__unobserved(request: Request) {
           ? `Your priority offer expires at ${expiry} (Lisbon time). After that, the opening may be offered to someone else. You can still check current availability on the booking page.`
           : `A prioridade deste convite termina às ${expiry} (hora de Portugal continental). Depois disso, a vaga poderá ser proposta a outra pessoa. Podes continuar a consultar os horários disponíveis na página de marcação.`;
         const button = english ? 'Open booking page' : 'Abrir página de marcação';
+        const declineLabel = english ? 'I am not interested in this opening' : 'Não tenho interesse nesta vaga';
+        const declineNote = english
+          ? 'You can decline this offer and let the barbershop contact the next customer.'
+          : 'Podes recusar esta proposta para que a barbearia contacte o próximo cliente.';
 
         const details = [
           [english ? 'Service' : 'Serviço', serviceName],
@@ -214,6 +238,8 @@ async function GET__unobserved(request: Request) {
     <p style="margin:18px 0 8px;line-height:1.6">${escapeHtml(expiryNote)}</p>
     <p style="margin:0 0 22px;color:#71717a;font-size:13px;line-height:1.6">${escapeHtml(availabilityNote)}</p>
     <a href="${escapeHtml(bookingUrl.toString())}" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#18181b;color:#fff;text-decoration:none;font-weight:700">${escapeHtml(button)}</a>
+    <p style="margin:20px 0 6px;font-size:13px;line-height:1.5">${escapeHtml(declineNote)}</p>
+    <a href="${escapeHtml(declineUrl.toString())}" style="display:inline-block;padding:10px 14px;border:1px solid #d4d4d8;border-radius:9px;color:#52525b;text-decoration:none;font-size:13px">${escapeHtml(declineLabel)}</a>
     <p style="margin:22px 0 0;color:#a1a1aa;font-size:12px">${escapeHtml(shopName)} · Silentra for Barbers</p>
   </main>
 </body>
