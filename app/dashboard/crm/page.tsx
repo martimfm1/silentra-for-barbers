@@ -168,7 +168,6 @@ export default function CRMPage() {
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
               {t('crm.customers')}
             </h1>
-            <div className="mt-2"><FeaturePlanBadge feature="advanced_crm" /></div>
             <p className="mt-2 max-w-2xl text-muted-foreground">
               {t('crm.subtitle')}
             </p>

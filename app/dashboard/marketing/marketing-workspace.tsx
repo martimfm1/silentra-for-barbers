@@ -604,7 +604,6 @@ export function MarketingWorkspace({
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <Sparkles className="size-3.5" aria-hidden="true" /> Marketing
-              <FeaturePlanBadge feature="marketing_campaigns" />
             </div>
             <h1
               id="marketing-title"

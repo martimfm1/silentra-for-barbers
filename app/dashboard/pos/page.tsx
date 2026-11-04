@@ -452,7 +452,6 @@ export default function POSPage() {
               <p className="text-sm font-medium text-primary">
                 {t('posPage.kicker')}
               </p>
-              <FeaturePlanBadge feature="pos" />
             </div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('posPage.title')}
