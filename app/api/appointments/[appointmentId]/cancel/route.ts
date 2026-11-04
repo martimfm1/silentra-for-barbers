@@ -190,7 +190,10 @@ async function DELETE__unobserved(
         })
       : {
           success: false as const,
-          error: 'Não existe um endereço de email registado para este cliente.',
+          error:
+            language === 'en'
+              ? 'There is no email address registered for this customer.'
+              : 'Não existe um endereço de email registado para este cliente.',
         };
 
     if (!emailResult.success) {

@@ -26,6 +26,7 @@ export async function sendAppointmentCancellationEmail(
   const isEnglish = payload.language === 'en';
   const locale = isEnglish ? 'en-GB' : 'pt-PT';
   const safeClientName = escapeHtml(payload.clientName || (isEnglish ? 'Customer' : 'Cliente'));
+  const subjectShopName = payload.barbershopName.replace(/[\\r\\n]/g, ' ').slice(0, 100);
   const safeShopName = escapeHtml(payload.barbershopName || (isEnglish ? 'Your barbershop' : 'A tua barbearia'));
   const safeServiceName = escapeHtml(payload.serviceName || (isEnglish ? 'Service' : 'Serviço'));
   const safeProfessionalName = payload.professionalName
@@ -44,7 +45,7 @@ export async function sendAppointmentCancellationEmail(
 
   const copy = isEnglish
     ? {
-        subject: 'Your appointment was cancelled — ' + payload.barbershopName,
+        subject: 'Your appointment was cancelled — ' + subjectShopName,
         title: 'Your appointment was cancelled by the barbershop',
         greeting: 'Hello <strong style="color:#fff;">' + safeClientName + '</strong>,',
         message:
@@ -57,7 +58,7 @@ export async function sendAppointmentCancellationEmail(
         reference: 'Booking reference',
       }
     : {
-        subject: 'A tua marcação foi cancelada — ' + payload.barbershopName,
+        subject: 'A tua marcação foi cancelada — ' + subjectShopName,
         title: 'A tua marcação foi cancelada pela barbearia',
         greeting: 'Olá <strong style="color:#fff;">' + safeClientName + '</strong>,',
         message:
