@@ -61,6 +61,8 @@ assert.match(dashboardPage, /Proposed opening:|Vaga proposta:/);
 
 assert.match(publicApi, /readJsonObject/);
 assert.match(publicApi, /isSafePublicBookingDate/);
+assert.match(publicApi, /PUBLIC_BOOKING_WINDOW_DAYS = 14/);
+assert.match(publicApi, /isWithinPublicBookingWindow\(date\)/);
 assert.match(publicApi, /consumePublicRateLimit/);
 assert.match(publicApi, /customer-waitlist/);
 assert.match(publicApi, /withApiObservability/);
