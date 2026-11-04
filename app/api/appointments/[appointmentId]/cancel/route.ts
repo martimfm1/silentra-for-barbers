@@ -197,11 +197,7 @@ async function DELETE__unobserved(
         };
 
     if (!emailResult.success) {
-      console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]', {
-        appointmentId: appointment.id,
-        barbershopId: tenant.barbershopId,
-        reason: emailResult.error,
-      });
+      console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]');
     }
 
     // Keep optional marketing automations separate from the mandatory
