@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
 import {
   Activity,
   ArrowDownRight,
@@ -233,24 +233,29 @@ export default function AnalyticsPage() {
   const [draftTo, setDraftTo] = useState(today);
   const [preset, setPreset] = useState<Preset>('30');
   const [data, setData] = useState<Analytics | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const requestControllerRef = useRef<AbortController | null>(null);
 
   const load = useCallback(async () => {
     if (!allowed) return;
+    requestControllerRef.current?.abort();
+    const controller = new AbortController();
+    requestControllerRef.current = controller;
     setLoading(true);
     setLoadError(false);
     try {
       const response = await fetch(
         '/api/analytics?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to),
-        { cache: 'no-store' },
+        { cache: 'no-store', signal: controller.signal },
       );
       const json = await response.json();
       if (!response.ok) {
         throw new Error(json.error ?? t('analyticsPage.loadError'));
       }
-      setData(json as Analytics);
+      if (!controller.signal.aborted) setData(json as Analytics);
     } catch (error) {
+      if (controller.signal.aborted) return;
       setLoadError(true);
       toast.error(
         error instanceof Error
@@ -258,12 +263,15 @@ export default function AnalyticsPage() {
           : t('analyticsPage.loadGenericError'),
       );
     } finally {
-      setLoading(false);
+      if (requestControllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   }, [allowed, from, to, t]);
 
   useEffect(() => {
     void load();
+    return () => requestControllerRef.current?.abort();
   }, [load]);
 
   const rangeIsValid =
@@ -449,7 +457,7 @@ export default function AnalyticsPage() {
             className="min-h-11 w-full shrink-0 gap-2 sm:w-auto"
           >
             <RefreshCw className={cn('size-4', loading && 'animate-spin')} aria-hidden="true" />
-            {t('statsPage.refresh')}
+            {t('analyticsPage.update')}
           </Button>
         </header>
 
@@ -578,7 +586,7 @@ export default function AnalyticsPage() {
         ) : data ? (
           <>
             <section
-              aria-label={t('analyticsPage.summary')}
+              aria-label={copy(locale, 'Indicadores principais', 'Key metrics')}
               className={cn('grid grid-cols-2 gap-3 xl:grid-cols-5', loading && 'opacity-60')}
             >
               <Metric
@@ -788,7 +796,7 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
                   <MetricMini label={t('analyticsPage.activeClients')} value={String(data.overview.activeClientsInPeriod)} detail={copy(locale, 'Clientes únicos com marcação concluída', 'Unique customers with completed visits')} />
-                  <MetricMini label={t('analyticsPage.newInPeriod', { count: data.overview.newClients })} value={String(data.overview.newClients)} detail={copy(locale, 'Novos registos na barbearia', 'New customer records for the shop')} />
+                  <MetricMini label={copy(locale, 'Novos clientes registados', 'New customer records')} value={String(data.overview.newClients)} detail={copy(locale, 'Registos criados no período', 'Records created in this period')} />
                   <MetricMini
                     label={copy(locale, 'Já têm nova marcação', 'Already rebooked')}
                     value={String(data.overview.rebookedClients)}
