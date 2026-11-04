@@ -135,7 +135,7 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
 const GROUP_LABELS_EN: Record<string, string> = {
   'Gestão da barbearia': 'Barbershop management',
   'Comunicação e automação': 'Communication and automation',
-  'Crescimento e clientes': 'Growth and customers',
+  'Crescimento e retenção': 'Growth and customer retention',
   'Analytics e relatórios': 'Analytics and reporting',
   'Equipa e operação': 'Team and operations',
   'Presença online e diretório': 'Online presence and directory',
