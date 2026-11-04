@@ -15,6 +15,7 @@ type AppointmentRow = {
   date_hour: string;
   status: string;
   value_products: number | string | null;
+  payment_method: string | null;
   service: { name: string; price: number | string } | null;
   professional: { name: string } | null;
   client_id: string | null;
@@ -110,7 +111,7 @@ async function GET__unobserved(request: Request) {
       admin
         .from('appointments')
         .select(
-          'id,date_hour,status,value_products,client_id,manual_birth_date,service:services(name,price),professional:professionals(name),user:users(birth_date)',
+          'id,date_hour,status,value_products,payment_method,client_id,manual_birth_date,service:services(name,price),professional:professionals(name),user:users(birth_date)',
         )
         .eq('barbershop_id', barbershopId)
         .gte('date_hour', from.toISOString())
@@ -152,13 +153,27 @@ async function GET__unobserved(request: Request) {
       string,
       { bookings: number; revenue: number }
     >();
+    const paymentStats = new Map<
+      string,
+      { transactions: number; revenue: number }
+    >();
     const clientIds = new Set<string>();
+    let serviceRevenue = 0;
+    let productRevenue = 0;
     const clientAgeGroups = new Map<string, Set<string>>();
 
     for (const row of completed) {
-      const revenue =
-        Number(row.service?.price ?? 0) + Number(row.value_products ?? 0);
-      const safeRevenue = Number.isFinite(revenue) ? revenue : 0;
+      const rawServiceRevenue = Number(row.service?.price ?? 0);
+      const rawProductRevenue = Number(row.value_products ?? 0);
+      const safeServiceRevenue = Number.isFinite(rawServiceRevenue)
+        ? rawServiceRevenue
+        : 0;
+      const safeProductRevenue = Number.isFinite(rawProductRevenue)
+        ? rawProductRevenue
+        : 0;
+      const safeRevenue = safeServiceRevenue + safeProductRevenue;
+      serviceRevenue += safeServiceRevenue;
+      productRevenue += safeProductRevenue;
       const day = row.date_hour.slice(0, 10);
       revenueByDay.set(day, money((revenueByDay.get(day) ?? 0) + safeRevenue));
       if (row.service?.name) {
@@ -167,7 +182,7 @@ async function GET__unobserved(request: Request) {
           revenue: 0,
         };
         current.bookings += 1;
-        current.revenue = money(current.revenue + safeRevenue);
+        current.revenue = money(current.revenue + safeServiceRevenue);
         serviceStats.set(row.service.name, current);
       }
       if (row.professional?.name) {
@@ -179,6 +194,15 @@ async function GET__unobserved(request: Request) {
         current.revenue = money(current.revenue + safeRevenue);
         professionalStats.set(row.professional.name, current);
       }
+      const paymentMethod = row.payment_method?.trim() || 'unspecified';
+      const payment = paymentStats.get(paymentMethod) ?? {
+        transactions: 0,
+        revenue: 0,
+      };
+      payment.transactions += 1;
+      payment.revenue = money(payment.revenue + safeRevenue);
+      paymentStats.set(paymentMethod, payment);
+
       if (row.client_id) {
         clientIds.add(row.client_id);
         const birthDate = row.user?.birth_date ?? row.manual_birth_date;
@@ -192,6 +216,29 @@ async function GET__unobserved(request: Request) {
           }
         }
       }
+    }
+
+    let rebookedClients = 0;
+    if (clientIds.size > 0) {
+      const { data: futureAppointments, error: futureAppointmentsError } =
+        await admin
+          .from('appointments')
+          .select('client_id')
+          .eq('barbershop_id', barbershopId)
+          .gt('date_hour', to.toISOString())
+          .in('status', ['pending', 'scheduled'])
+          .not('client_id', 'is', null)
+          .limit(10000);
+      if (futureAppointmentsError) throw futureAppointmentsError;
+
+      const futureClientIds = new Set(
+        (futureAppointments ?? [])
+          .map((row) => row.client_id)
+          .filter((id): id is string => typeof id === 'string'),
+      );
+      rebookedClients = Array.from(clientIds).filter((id) =>
+        futureClientIds.has(id),
+      ).length;
     }
 
     const orderedAgeLabels = [
@@ -257,7 +304,21 @@ async function GET__unobserved(request: Request) {
         newClients: newClients ?? 0,
         totalClients: totalClients ?? 0,
         activeClientsInPeriod: clientIds.size,
+        serviceRevenue: money(serviceRevenue),
+        productRevenue: money(productRevenue),
+        rebookedClients,
+        rebookingRate:
+          clientIds.size === 0
+            ? null
+            : money((rebookedClients / clientIds.size) * 100),
       },
+      paymentMethods: Array.from(paymentStats.entries())
+        .map(([name, stats]) => ({
+          name,
+          transactions: stats.transactions,
+          revenue: stats.revenue,
+        }))
+        .sort((a, b) => b.revenue - a.revenue),
       revenueByDay: Array.from(revenueByDay.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([date, value]) => ({ date, value })),
