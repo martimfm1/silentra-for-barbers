@@ -21,6 +21,7 @@ import {
   QrCode,
   Globe2,
   MoreHorizontal,
+  Plus,
   Sparkles,
   ScanLine,
   X,
@@ -53,6 +54,15 @@ interface SidebarItem {
 const primaryItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Início', icon: LayoutDashboard },
   { href: '/dashboard/agenda', label: 'Agenda', icon: CalendarDays },
+  {
+    href: '/dashboard/analytics',
+    label: 'Relatórios',
+    icon: BarChart3,
+    feature: 'advanced_analytics',
+  },
+];
+
+const managementItems: SidebarItem[] = [
   { href: '/dashboard/clientes', label: 'Clientes', icon: Users },
   { href: '/dashboard/servicos', label: 'Serviços', icon: Scissors },
 ];
@@ -97,12 +107,6 @@ const toolsItems: SidebarItem[] = [
     feature: 'waitlist',
   },
   {
-    href: '/dashboard/analytics',
-    label: 'Relatórios',
-    icon: BarChart3,
-    feature: 'advanced_analytics',
-  },
-  {
     href: '/dashboard/loyalty',
     label: 'Fidelização',
     icon: Heart,
@@ -131,7 +135,7 @@ const secondaryItems: SidebarItem[] = [
 ];
 
 const englishLabels: Record<string, string> = {
-  Início: 'Overview',
+  Início: 'Home',
   Agenda: 'Appointments',
   Clientes: 'Clients',
   Serviços: 'Services',
@@ -269,6 +273,7 @@ export function DashboardSidebar() {
       item.href !== '/dashboard/loyalty' &&
       pathname.startsWith(`${item.href}/`));
   const moreItems = [
+    ...managementItems,
     ...teamItems,
     ...communicationItems,
     ...toolsItems,
@@ -334,6 +339,47 @@ export function DashboardSidebar() {
     );
   };
 
+  const renderDockItem = (item: SidebarItem) => {
+    const active = isActive(item);
+    const Icon = item.icon;
+    const label = localizeNavLabel(item.label, locale);
+    return (
+      <Tooltip key={item.href}>
+        <TooltipTrigger asChild>
+          <Link
+            href={item.href}
+            aria-label={label}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
+              active
+                ? 'bg-white/[0.09] text-white'
+                : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
+            )}
+          >
+            <Icon
+              className={cn(
+                'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
+                active && 'text-emerald-400',
+              )}
+              aria-hidden="true"
+            />
+            <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
+              {label}
+            </span>
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          sideOffset={12}
+          className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
+        >
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
   const sectionTitle = (pt: string, en: string) => (
     <h2 className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
       {locale === 'en' ? en : pt}
@@ -352,46 +398,35 @@ export function DashboardSidebar() {
         className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5"
       >
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
-          {primaryItems.map((item) => {
-            const active = isActive(item);
-            const Icon = item.icon;
-            const label = localizeNavLabel(item.label, locale);
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    aria-label={label}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
-                      active
-                        ? 'bg-white/[0.09] text-white'
-                        : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
-                        active && 'text-emerald-400',
-                      )}
-                      aria-hidden="true"
-                    />
-                    <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-                      {label}
-                    </span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  sideOffset={12}
-                  className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
-                >
-                  {label}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+          {primaryItems.slice(0, 2).map(renderDockItem)}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="/dashboard/agenda?create=1"
+                onClick={(event) => {
+                  if (pathname === '/dashboard/agenda') {
+                    event.preventDefault();
+                    window.dispatchEvent(new Event('silentra:open-create-booking'));
+                  }
+                }}
+                aria-label={locale === 'en' ? 'Create appointment' : 'Criar marcação'}
+                className="group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-xl border border-emerald-300/30 bg-emerald-400 px-2 text-[10px] font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.2)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_32px_rgba(52,211,153,0.28)] active:scale-[0.94] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:size-[3.65rem] lg:min-h-0 lg:-translate-y-1 lg:gap-0"
+              >
+                <Plus className="size-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                <span className="max-w-full truncate text-[9px] sm:text-[10px] lg:hidden">
+                  {locale === 'en' ? 'Create' : 'Criar'}
+                </span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              sideOffset={12}
+              className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
+            >
+              {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
+            </TooltipContent>
+          </Tooltip>
+          {primaryItems.slice(2).map(renderDockItem)}
           <span
             aria-hidden="true"
             className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
@@ -509,7 +544,12 @@ export function DashboardSidebar() {
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5">
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   <section>
-                    {sectionTitle('Equipa', 'Team')}
+                    {sectionTitle('Gestão', 'Management')}
+                    <div className="grid gap-1.5">
+                      {managementItems.map(renderItem)}
+                    </div>
+                    <div className="mt-5">
+                      {sectionTitle('Equipa', 'Team')}
                     <div className="grid gap-1.5">
                       {teamItems.map(renderItem)}
                     </div>
