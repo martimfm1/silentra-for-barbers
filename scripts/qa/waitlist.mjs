@@ -14,6 +14,8 @@ const publicApi = read('app/api/shops/[id]/waitlist/route.ts');
 const dashboardApi = read('app/api/dashboard/waitlist/route.ts');
 const bookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
 const sidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
+const marketplaceApi = read('app/api/shops/route.ts');
+const marketplaceMapper = read('lib/marketplace/shop-mappers.ts');
 
 assert.match(migration, /create table if not exists public\.booking_waitlist/i);
 assert.match(migration, /barbershop_id uuid not null references public\.barbershops/i);
@@ -85,6 +87,9 @@ assert.match(publicApi, /plan !== 'enterprise'/);
 assert.match(dashboardPage, /hasFeature\('waitlist'\)/);
 assert.match(bookingDrawer, /shop\?\.plan === 'enterprise'/);
 assert.match(sidebar, /feature: 'waitlist'/);
+assert.match(marketplaceApi, /getAccessPlanForBarbershop/);
+assert.match(marketplaceApi, /plan: planByBarbershopId\.get/);
+assert.match(marketplaceMapper, /plan: shop\.plan/);
 assert.match(offersWorker, /profile\.plan !== 'enterprise'/);
 assert.match(dashboardApi, /allowedStatuses/);
 assert.match(dashboardApi, /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/);
