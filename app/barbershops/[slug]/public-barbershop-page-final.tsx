@@ -124,6 +124,7 @@ export default function BarbershopPublicPageFinal({
 }) {
   const shop = initialData as PublicData;
   const { locale } = useLanguage();
+  const [activeBookingOffer, setActiveBookingOffer] = useState(bookingOffer);
   const [bookingOpen, setBookingOpen] = useState(Boolean(bookingOffer));
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     bookingOffer?.serviceId ?? null,
@@ -308,6 +309,7 @@ export default function BarbershopPublicPageFinal({
                 <Button
                   type="button"
                   onClick={() => {
+                    setActiveBookingOffer(null);
                     setSelectedServiceId(null);
                     setBookingOpen(true);
                   }}
@@ -436,6 +438,7 @@ export default function BarbershopPublicPageFinal({
                   type="button"
                   variant="outline"
                   onClick={() => {
+                    setActiveBookingOffer(null);
                     setSelectedServiceId(service.id);
                     setBookingOpen(true);
                   }}
@@ -604,11 +607,12 @@ export default function BarbershopPublicPageFinal({
         onClose={() => {
           setBookingOpen(false);
           setSelectedServiceId(null);
+          setActiveBookingOffer(null);
         }}
         selectedServiceId={selectedServiceId}
-        selectedDate={bookingOffer?.date}
-        selectedTime={bookingOffer?.time}
-        selectedProfessionalId={bookingOffer?.professionalId}
+        selectedDate={activeBookingOffer?.date}
+        selectedTime={activeBookingOffer?.time}
+        selectedProfessionalId={activeBookingOffer?.professionalId}
       />
     </main>
   );
