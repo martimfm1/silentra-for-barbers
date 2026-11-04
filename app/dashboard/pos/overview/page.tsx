@@ -193,7 +193,6 @@ export default function SalesOverviewPage() {
               <h1 className="text-2xl font-semibold">
                 {t('posOverviewPage.managementTitle')}
               </h1>
-              <FeaturePlanBadge feature="pos" />
               <p className="text-muted-foreground">
                 {t('posOverviewPage.managementDescription')}
               </p>
