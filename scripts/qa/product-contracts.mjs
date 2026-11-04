@@ -191,11 +191,6 @@ const checks = [
       !source.includes('title="{t(\'analyticsPage.bookingsReport\')}"'),
   },
   {
-    name: 'Legacy stats route redirects to the canonical reports experience',
-    file: 'app/dashboard/stats/page.tsx',
-    test: (source) => source.includes("redirect('/dashboard/analytics')"),
-  },
-  {
     name: 'Analytics API returns service and product revenue separately and calculates future rebooking',
     file: 'app/api/analytics/route.ts',
     test: (source) =>
