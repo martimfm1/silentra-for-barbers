@@ -55,4 +55,6 @@ grant all on table public.booking_waitlist to service_role;
 comment on table public.booking_waitlist is
   'Customer requests for a specific date/service when no suitable booking slot is available. Access only through tenant-scoped server APIs.';
 
+notify pgrst, 'reload schema';
+
 commit;
