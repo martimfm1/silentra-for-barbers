@@ -716,7 +716,9 @@ const checks = [
         normalized.includes('bg-rose-400/[0.08]') &&
         normalized.includes('Dia de folga — indisponível para marcação') &&
         normalized.includes('firstOpenDayIndex') &&
-        normalized.includes('setDayIndex(firstOpenDayIndex >= 0 ? firstOpenDayIndex : 0)') &&
+        source.includes('requestedDayIndex >= 0') &&
+        source.includes('firstOpenDayIndex >= 0') &&
+        source.includes(': 0,') &&
         normalized.includes('professionals.length === 1') &&
         normalized.includes('data-booking-theme={appearance}')
       );
