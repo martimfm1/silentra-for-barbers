@@ -1,6 +1,5 @@
 'use client';
 
-import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import Link from 'next/link';
