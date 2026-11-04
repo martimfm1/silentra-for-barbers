@@ -9,6 +9,10 @@ const sidebarSource = fs.readFileSync(
   path.join(root, 'app', 'dashboard', '_components', 'DashboardSidebar.tsx'),
   'utf8',
 );
+const dashboardPageSource = fs.readFileSync(
+  path.join(root, 'app', 'dashboard', 'page.tsx'),
+  'utf8',
+);
 const directoryMigration = fs.readFileSync(
   path.join(
     root,
@@ -61,6 +65,11 @@ assert.doesNotMatch(
   sidebarSource,
   /FeaturePlanBadge/,
   'A navegação deve apresentar apenas secções; as badges pertencem às funcionalidades.',
+);
+assert.doesNotMatch(
+  dashboardPageSource,
+  /FeaturePlanBadge/,
+  'Os atalhos da página inicial não devem apresentar badges de plano.',
 );
 assert.match(
   source,
