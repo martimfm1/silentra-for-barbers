@@ -11,6 +11,9 @@ import {
   Heart,
   CreditCard,
   LayoutDashboard,
+  Home,
+  Plus,
+  Bell,
   CalendarDays,
   Clock3,
   Users,
@@ -349,98 +352,48 @@ export function DashboardSidebar() {
   return (
     <>
       <TooltipProvider delayDuration={120}>
-      <nav
-        aria-label={
-          locale === 'en'
-            ? 'Dashboard quick navigation'
-            : 'Navegação rápida do painel'
-        }
-        className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5"
-      >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
-          {primaryItems.map((item) => {
-            const active = isActive(item);
-            const Icon = item.icon;
-            const label = localizeNavLabel(item.label, locale);
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    aria-label={label}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
-                      active
-                        ? 'bg-white/[0.09] text-white'
-                        : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
-                        active && 'text-emerald-400',
-                      )}
-                      aria-hidden="true"
-                    />
-                    <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-                      {label}
-                    </span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  sideOffset={12}
-                  className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
-                >
-                  {label}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-          <span
-            aria-hidden="true"
-            className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                ref={moreTriggerRef}
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                aria-label={
-                  locale === 'en'
-                    ? 'Open more dashboard sections'
-                    : 'Abrir mais secções da dashboard'
-                }
-                aria-expanded={moreOpen}
-                aria-controls="dashboard-more-panel"
-                className={cn(
-                  'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
-                  moreOpen || moreActive
-                    ? 'bg-white/[0.09] text-white'
-                    : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-                )}
-              >
-                <MoreHorizontal
-                  className="size-4 lg:size-5"
-                  aria-hidden="true"
-                />
-                <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-                  {locale === 'en' ? 'More' : 'Mais'}
-                </span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              sideOffset={12}
-              className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
-            >
-              {locale === 'en' ? 'More' : 'Mais'}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </nav>
+        <nav
+          aria-label={locale === 'en' ? 'Dashboard navigation' : 'Navegação da dashboard'}
+          className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 mx-auto w-[min(34rem,calc(100vw-1.5rem))] px-1 sm:w-[min(38rem,calc(100vw-2rem))] lg:bottom-6"
+        >
+          <div className="relative rounded-full border border-white/20 bg-zinc-950/65 px-3 py-2 shadow-[0_12px_45px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl">
+            <div className="grid h-12 grid-cols-5 items-center">
+              {([
+                { href: '/dashboard', label: locale === 'en' ? 'Home' : 'Início', icon: Home },
+                { href: '/dashboard/loyalty', label: locale === 'en' ? 'Loyalty' : 'Fidelização', icon: Heart },
+                { href: '/dashboard/agenda', label: locale === 'en' ? 'New appointment' : 'Nova marcação', icon: Plus },
+                { href: '/dashboard/clientes', label: locale === 'en' ? 'Clients' : 'Clientes', icon: Users },
+                { href: '/dashboard/comunicacao', label: locale === 'en' ? 'Notifications' : 'Notificações', icon: Bell },
+              ]).map((item, index) => {
+                const active = isActive(item);
+                const Icon = item.icon;
+                return (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={item.href}
+                        aria-label={item.label}
+                        aria-current={active ? 'page' : undefined}
+                        className={cn(
+                          'relative mx-auto flex size-12 items-center justify-center rounded-full text-zinc-300 transition-[color,background-color,transform] duration-200 active:scale-95 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
+                          active && 'z-10 -translate-y-3 border border-emerald-200/30 bg-emerald-950/90 text-white shadow-[0_0_0_5px_rgba(16,185,129,0.08),0_8px_24px_rgba(0,0,0,0.35)]',
+                          index === 2 && !active && 'text-white hover:bg-white/10',
+                          !active && index !== 2 && 'hover:bg-white/10 hover:text-white',
+                        )}
+                      >
+                        <Icon className={cn('size-[1.35rem]', active && 'text-emerald-100')} aria-hidden="true" />
+                        {active ? <span className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-300" aria-hidden="true" /> : null}
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={14} className="border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
       </TooltipProvider>
 
       <AnimatePresence>
