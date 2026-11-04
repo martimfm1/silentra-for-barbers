@@ -313,8 +313,11 @@ async function GET__unobserved(request: Request) {
         sent += 1;
         if (completed !== true) skipped += 1;
       } catch (error) {
-        const reason =
+        const rawReason =
           error instanceof Error ? error.message : 'UNKNOWN_WAITLIST_OFFER_ERROR';
+        const reason = /^[A-Z0-9_]{1,80}$/.test(rawReason)
+          ? rawReason
+          : 'WAITLIST_OFFER_DELIVERY_FAILED';
         if (!deliveryAccepted) {
           await releaseFailedOffer(admin, event, 'WAITLIST_OFFER_DELIVERY_FAILED');
         }
