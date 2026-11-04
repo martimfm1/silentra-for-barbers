@@ -45,9 +45,9 @@ export function FeaturePlanBadge({
     <span
       title={accessibleLabel}
       aria-label={accessibleLabel}
-      className={`inline-flex min-h-5 shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${isEnterprise ? 'border-violet-400/25 bg-violet-400/10 text-violet-200' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'} ${className}`}
+      className={`inline-flex min-h-6 w-fit shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none tracking-normal normal-case shadow-sm shadow-black/[0.03] ${isEnterprise ? 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'border-emerald-600/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'} ${className}`}
     >
-      <Crown className="size-3" aria-hidden="true" />
+      <Crown className="size-3.5 shrink-0" aria-hidden="true" />
       <span>{isEnterprise ? 'Enterprise' : 'Pro'}</span>
     </span>
   );
