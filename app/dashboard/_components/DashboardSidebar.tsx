@@ -414,6 +414,94 @@ export function DashboardSidebar() {
 
   return (
     <>
+      <motion.aside
+        aria-label={
+          locale === 'en'
+            ? 'Main dashboard navigation'
+            : 'Navegação principal da dashboard'
+        }
+        initial={motionEnabled ? { opacity: 0, x: -10 } : false}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: motionEnabled ? 0.22 : 0, ease: 'easeOut' }}
+        className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-white/[0.07] bg-zinc-950/80 shadow-[12px_0_48px_rgba(0,0,0,0.18)] backdrop-blur-2xl lg:flex"
+      >
+        <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.07] px-5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-400/10 text-emerald-300">
+            <Sparkles className="size-[18px]" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold tracking-tight text-white">Silentra</p>
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.19em] text-zinc-500">Barbers · Dashboard</p>
+          </div>
+        </div>
+
+        <div className="mx-3 mt-4 flex shrink-0 items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.025] px-3 py-3">
+          <BrandAvatar avatarUrl={barbershopAvatarUrl} />
+          <div className="min-w-0">
+            <p className="truncate text-xs font-medium text-zinc-200">{locale === 'en' ? 'Barbershop workspace' : 'Espaço da barbearia'}</p>
+            <p className="mt-0.5 truncate text-[11px] text-zinc-500">{locale === 'en' ? 'Manage your business' : 'Gere o teu negócio'}</p>
+          </div>
+          <span className="ml-auto size-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.65)]" aria-hidden="true" />
+        </div>
+
+        <div className="px-3 pb-4 pt-4">
+          <Link
+            href="/dashboard/agenda?create=1"
+            onClick={(event) => {
+              if (pathname === '/dashboard/agenda') {
+                event.preventDefault();
+                window.dispatchEvent(new Event('silentra:open-create-booking'));
+              }
+            }}
+            className="group flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400 px-3 text-sm font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.14)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_28px_rgba(52,211,153,0.2)] active:translate-y-0 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+          >
+            <Plus className="size-[18px]" strokeWidth={2.5} aria-hidden="true" />
+            {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
+          </Link>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4 [scrollbar-color:rgba(161,161,170,0.25)_transparent] [scrollbar-width:thin]">
+          <nav aria-label={locale === 'en' ? 'Dashboard sections' : 'Secções da dashboard'} className="space-y-5">
+            <section>
+              {sectionTitle('Principal', 'Main')}
+              <div className="grid gap-1">{primaryItems.slice(0, 2).map(renderItem)}</div>
+            </section>
+            <section>
+              {sectionTitle('Análise', 'Insights')}
+              <div className="grid gap-1">{primaryItems.slice(2).map(renderItem)}</div>
+            </section>
+            <section>
+              {sectionTitle('Gestão', 'Management')}
+              <div className="grid gap-1">
+                {managementItems.map(renderItem)}
+                {teamItems.map(renderItem)}
+              </div>
+            </section>
+            <section>
+              {sectionTitle('Comunicação', 'Communication')}
+              <div className="grid gap-1">{communicationItems.map(renderItem)}</div>
+            </section>
+            <section>
+              {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
+              <div className="grid gap-1">{toolsItems.map(renderItem)}</div>
+            </section>
+          </nav>
+        </div>
+
+        <div className="shrink-0 border-t border-white/[0.07] bg-zinc-950/35 p-3">
+          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
+            {locale === 'en' ? 'Account & support' : 'Conta e ajuda'}
+          </p>
+          <div className="grid gap-1">
+            {secondaryItems.map(renderItem)}
+            <Link href="/documentation" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+              <Globe2 className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+              <span>{locale === 'en' ? 'Documentation' : 'Documentação'}</span>
+            </Link>
+          </div>
+        </div>
+      </motion.aside>
+
       <TooltipProvider delayDuration={120}>
       <nav
         aria-label={
@@ -421,7 +509,7 @@ export function DashboardSidebar() {
             ? 'Dashboard quick navigation'
             : 'Navegação rápida do painel'
         }
-        className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5"
+        className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5 lg:hidden"
       >
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
           {primaryItems.slice(0, 2).map(renderDockItem)}
