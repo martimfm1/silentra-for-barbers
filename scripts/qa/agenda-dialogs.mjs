@@ -4,6 +4,9 @@ import fs from 'node:fs';
 const read = (path) => fs.readFileSync(path, 'utf8');
 const agenda = read('app/dashboard/agenda/page.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
+
+const bookingForm = read('app/dashboard/_components/cards/BookingFormCard.tsx');
+const appointmentsService = read('app/dashboard/_services/appointments.service.ts');
 const blockForm = read('app/dashboard/_components/cards/BlockFormCard.tsx');
 const popover = read('components/ui/popover.tsx');
 const select = read('components/ui/select.tsx');
@@ -21,7 +24,26 @@ assert.match(
 );
 assert.match(agenda, /onClick=\{\(\) => setBookingDialogOpen\(true\)\}/);
 assert.match(agenda, /onClick=\{\(\) => setBlockDialogOpen\(true\)\}/);
-assert.match(agenda, /max-w-5xl overflow-y-auto/);
+assert.ok(agenda.includes('h-[100dvh] max-h-[100dvh] w-screen'));
+assert.ok(agenda.includes('showCloseButton={false}'));
+assert.ok(bookingForm.includes('overflow-y-auto overscroll-contain'));
+assert.ok(bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'));
+assert.ok(bookingForm.includes('type="search"'));
+assert.ok(bookingForm.includes('role="combobox"'));
+assert.ok(bookingForm.includes('matchingClients'));
+assert.ok(bookingForm.includes('replace(/\\D/g'));
+assert.ok(bookingForm.includes("addEventListener('pointerdown'"));
+assert.ok(bookingForm.includes('singleProfessional'));
+assert.ok(bookingForm.includes('services.length === 1'));
+assert.ok(bookingForm.includes('type="date"'));
+assert.ok(bookingForm.includes('type="time"'));
+assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes("Hoje"));
+assert.ok(bookingForm.includes('Amanhã'));
+assert.ok(agenda.includes('birth_date: client.birth_date ??'));
+assert.ok(agenda.includes('birthDate: formData.birth_date ??'));
+assert.ok(agenda.includes('setSelectedDate(getLocalDateInputValue())'));
+assert.ok(hook.includes('!manualName?.trim()') && hook.includes('!manualPhone?.trim()'));
+assert.ok(appointmentsService.includes('manual_birth_date: payload.manual_birth_date'));
 assert.doesNotMatch(
   agenda,
   /\{bookingDialogOpen && \(/,

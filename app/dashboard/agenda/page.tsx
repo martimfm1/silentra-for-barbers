@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
-import type { Appointment, Client, Professional, Service } from '@/types';
+import type { Appointment, BookingFormData, Client, Professional, Service } from '@/types';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
@@ -44,6 +44,13 @@ const STATUS_FILTERS = [
 ] as const;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['id'];
+
+function getLocalDateInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 function sameLocalDay(value: string, reference: Date) {
   const date = new Date(value);
@@ -122,15 +129,16 @@ export default function AgendaPage() {
     handleDeleteBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BookingFormData>({
     clientId: undefined as string | undefined,
     name_complete: '',
     num_phone: '',
     email: '',
     service_id: '',
+    birth_date: '',
   });
   const [selectedProfessionalId, setSelectedProfessionalId] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(getLocalDateInputValue);
   const [selectedTime, setSelectedTime] = useState('');
 
   useEffect(() => {
@@ -163,6 +171,7 @@ export default function AgendaPage() {
       num_phone: client.num_phone ?? '',
       email: client.email ?? '',
       service_id: '',
+      birth_date: client.birth_date ?? '',
     });
     setBookingDialogOpen(true);
     const url = new URL(window.location.href);
@@ -181,6 +190,7 @@ export default function AgendaPage() {
         time: selectedTime,
         manualName: formData.name_complete,
         manualPhone: formData.num_phone,
+        birthDate: formData.birth_date ?? '',
       };
       const changed =
         prev.clientId !== next.clientId ||
@@ -189,13 +199,15 @@ export default function AgendaPage() {
         prev.date !== next.date ||
         prev.time !== next.time ||
         prev.manualName !== next.manualName ||
-        prev.manualPhone !== next.manualPhone;
+        prev.manualPhone !== next.manualPhone ||
+        prev.birthDate !== next.birthDate;
       return changed ? next : prev;
     });
   }, [
     formData.clientId,
     formData.name_complete,
     formData.num_phone,
+    formData.birth_date,
     formData.service_id,
     selectedProfessionalId,
     selectedDate,
@@ -523,7 +535,10 @@ export default function AgendaPage() {
         )}
       </div>
       <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
-        <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-zinc-950/95 p-3 sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,900px)] sm:p-5">
+        <DialogContent
+          showCloseButton={false}
+          className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-zinc-950 p-0 sm:h-auto sm:max-h-[min(92dvh,900px)] sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:rounded-3xl sm:border sm:border-white/10"
+        >
           <DialogTitle className="sr-only">
             {t('bookingForm.title')}
           </DialogTitle>
@@ -553,9 +568,10 @@ export default function AgendaPage() {
                 num_phone: '',
                 email: '',
                 service_id: '',
+                birth_date: '',
               });
               setSelectedProfessionalId('');
-              setSelectedDate('');
+              setSelectedDate(getLocalDateInputValue());
               setSelectedTime('');
             }}
           />
