@@ -340,34 +340,60 @@ export function DashboardSidebar() {
   };
 
   const renderDockItem = (item: SidebarItem) => {
+    const locked = isLocked(item);
     const active = isActive(item);
     const Icon = item.icon;
     const label = localizeNavLabel(item.label, locale);
+    const itemClass = cn(
+      'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
+      active
+        ? 'bg-white/[0.09] text-white'
+        : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
+      locked && 'text-zinc-500 hover:text-zinc-300',
+    );
+    const icon = (
+      <Icon
+        className={cn(
+          'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
+          active && !locked && 'text-emerald-400',
+        )}
+        aria-hidden="true"
+      />
+    );
+    const visibleLabel = (
+      <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
+        {label}
+      </span>
+    );
+
     return (
       <Tooltip key={item.href}>
         <TooltipTrigger asChild>
-          <Link
-            href={item.href}
-            aria-label={label}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:overflow-visible lg:px-0',
-              active
-                ? 'bg-white/[0.09] text-white'
-                : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-            )}
-          >
-            <Icon
-              className={cn(
-                'size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none lg:size-5',
-                active && 'text-emerald-400',
-              )}
-              aria-hidden="true"
-            />
-            <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-              {label}
-            </span>
-          </Link>
+          {locked ? (
+            <button
+              type="button"
+              onClick={() => handleLocked(item)}
+              aria-label={
+                locale === 'en'
+                  ? `${label}, available on a higher plan`
+                  : `${label}, disponível num plano superior`
+              }
+              className={itemClass}
+            >
+              {icon}
+              {visibleLabel}
+            </button>
+          ) : (
+            <Link
+              href={item.href}
+              aria-label={label}
+              aria-current={active ? 'page' : undefined}
+              className={itemClass}
+            >
+              {icon}
+              {visibleLabel}
+            </Link>
+          )}
         </TooltipTrigger>
         <TooltipContent
           side="top"
@@ -550,8 +576,9 @@ export function DashboardSidebar() {
                     </div>
                     <div className="mt-5">
                       {sectionTitle('Equipa', 'Team')}
-                    <div className="grid gap-1.5">
-                      {teamItems.map(renderItem)}
+                      <div className="grid gap-1.5">
+                        {teamItems.map(renderItem)}
+                      </div>
                     </div>
                     <div className="mt-5">
                       {sectionTitle('Comunicação', 'Communication')}
