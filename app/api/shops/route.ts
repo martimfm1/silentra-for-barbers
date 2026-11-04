@@ -6,6 +6,7 @@ import type {
   MarketplaceShopRecord,
 } from '@/types/marketplace/shops';
 import { mapRecordToMarketplaceShopResponse } from '@/lib/marketplace/shop-mappers';
+import { SubscriptionService } from '@/services/billing/subscription.service';
 
 type ShopRelation = MarketplaceBarbershopRelation & {
   lunch_start?: string | null;
@@ -198,6 +199,26 @@ async function GET__unobserved(request: Request) {
       bookedByShop.get(appointment.barbershop_id)?.add(time);
     }
 
+    const uniqueBarbershopIds = [
+      ...new Set(records.map((record) => record.barbershop_id).filter(Boolean)),
+    ];
+    const planResults = await Promise.allSettled(
+      uniqueBarbershopIds.map(async (barbershopId) => ({
+        barbershopId,
+        plan: await SubscriptionService.getAccessPlanForBarbershop(barbershopId),
+      })),
+    );
+    const planByBarbershopId = new Map<string, 'free' | 'pro' | 'enterprise'>();
+    for (const result of planResults) {
+      if (result.status === 'fulfilled') {
+        planByBarbershopId.set(result.value.barbershopId, result.value.plan);
+      } else {
+        console.error('[SHOPS_PLAN_LOOKUP_FAILED]', {
+          reason: result.reason instanceof Error ? result.reason.message : 'UNKNOWN',
+        });
+      }
+    }
+
     const shops = records
       .filter((record) =>
         hasAvailableSlot(
@@ -220,6 +241,7 @@ async function GET__unobserved(request: Request) {
             : null;
         return {
           ...shop,
+          plan: planByBarbershopId.get(record.barbershop_id) ?? 'free',
           distanceKm: distanceKm === null ? 0 : Number(distanceKm.toFixed(1)),
         };
       });
