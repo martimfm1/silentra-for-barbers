@@ -284,7 +284,7 @@ export default function DashboardPage() {
     },
     {
       id: 'analytics',
-      href: '/dashboard/stats',
+      href: '/dashboard/analytics',
       label: t('dashboard.stats'),
       icon: Clock,
     },
@@ -591,7 +591,7 @@ export default function DashboardPage() {
                   : visibleMetrics.map((metric) => (
                       <Link
                         key={metric.key}
-                        href="/dashboard/stats"
+                        href="/dashboard/analytics"
                         className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                       >
                         <Card
@@ -643,7 +643,7 @@ export default function DashboardPage() {
                         </CardTitle>
                       </div>
                       <Link
-                        href="/dashboard/stats"
+                        href="/dashboard/analytics"
                         className="text-xs font-medium text-zinc-500 hover:text-zinc-200"
                       >
                         {t('dashboard.viewAnalytics')}

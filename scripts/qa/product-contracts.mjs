@@ -179,14 +179,27 @@ const checks = [
       source.includes('max-h-[90dvh]'),
   },
   {
-    name: 'Professional revenue chart uses readable horizontal labels and currency ticks',
-    file: 'app/dashboard/stats/page.tsx',
+    name: 'Reports page separates service revenue from product sales and supports client rebooking analysis',
+    file: 'app/dashboard/analytics/page.tsx',
     test: (source) =>
-      source.includes('className="stats-professional-chart border') &&
-      source.includes('layout="vertical"') &&
-      source.includes('type="category"') &&
-      source.includes('width={104}') &&
-      source.includes('currencyFormatter.format(value)'),
+      source.includes('data.overview.serviceRevenue') &&
+      source.includes('data.overview.productRevenue') &&
+      source.includes('data.overview.rebookingRate') &&
+      source.includes('buildRevenueSeries') &&
+      source.includes('aria-pressed={preset === value}') &&
+      source.includes('title={t(\'analyticsPage.bookingsReport\')}') &&
+      !source.includes('title="{t(\'analyticsPage.bookingsReport\')}"'),
+  },
+  {
+    name: 'Analytics API returns service and product revenue separately and calculates future rebooking',
+    file: 'app/api/analytics/route.ts',
+    test: (source) =>
+      source.includes('payment_method') &&
+      source.includes('serviceRevenue: money(serviceRevenue)') &&
+      source.includes('productRevenue: money(productRevenue)') &&
+      source.includes('rebookingRate:') &&
+      source.includes(".gt('date_hour', to.toISOString())") &&
+      source.includes(".in('status', ['pending', 'scheduled'])"),
   },
   {
     name: 'Mobile responsive layer prevents horizontal viewport scrolling and fits tables',
