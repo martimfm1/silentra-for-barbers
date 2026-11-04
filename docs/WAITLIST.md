@@ -27,7 +27,8 @@ Quando uma marcação futura passa para `cancelled`, um trigger regista a vaga n
 - A prioridade dos convites expira ao fim de 20 minutos.
 - O email inclui uma opção de recusa explícita. O link é assinado com HMAC e não executa a recusa por si só: exige confirmação numa página e só pode ser utilizado enquanto a proposta está ativa.
 - Falhas antes da aceitação do email pelo fornecedor libertam o pedido para nova tentativa com atraso progressivo; após o fornecedor aceitar o email, o worker não reenvia automaticamente em caso de falha ao atualizar o estado, para evitar duplicados.
-- A vaga deixa de ser oferecida se outra marcação ocupar o intervalo ou se a agenda for bloqueada entretanto.
+- Antes de cada email, o worker confirma novamente que a vaga e o pedido continuam ativos.
+- A vaga deixa de ser oferecida se outra marcação ocupar o intervalo ou se a agenda for bloqueada entretanto; a disponibilidade é novamente validada no booking.
 - O worker só processa datas dentro da janela atual de 14 dias apresentada no booking público.
 
 ## Dados e privacidade
