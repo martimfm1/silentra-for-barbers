@@ -53,6 +53,8 @@ assert.match(offersWorker, /claim_booking_waitlist_vacancies/);
 assert.match(offersWorker, /sendBrevoEmail/);
 assert.match(offersWorker, /isCurrentOffer/);
 assert.match(offersWorker, /WAITLIST_OFFER_REVALIDATION_FAILED/);
+assert.match(offersWorker, /const rawReason/);
+assert.match(offersWorker, /WAITLIST_OFFER_DELIVERY_FAILED/);
 assert.match(offersWorker, /complete_booking_waitlist_offer_delivery/);
 assert.match(offersWorker, /release_booking_waitlist_offer/);
 assert.match(offersWorker, /booking-waitlist-offers/);
