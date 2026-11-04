@@ -185,8 +185,18 @@ assert.match(
   'A RPC da visibilidade deve validar o utilizador autenticado.',
 );
 assert.match(
+  directoryMigration,
+  /security definer\s+set search_path = ''/i,
+  'As funções SECURITY DEFINER devem usar search_path vazio.',
+);
+assert.match(
+  publicProfileSource,
+  /return plan === 'pro' \|\| plan === 'enterprise'/,
+  'O URL público personalizado deve estar disponível em Pro e Enterprise.',
+);
+assert.match(
   barbershopPlanServiceSource,
-  /subscription\?\.plan_override != null/,
+  /const subscriptionOverride = subscription\?\.plan_override \?\? null/,
   'Os overrides explícitos de subscrição, incluindo Free, devem ter precedência.',
 );
 assert.match(

@@ -460,8 +460,9 @@ export class BarbershopStripeService {
 
     // Explicit subscription overrides, including Free, take precedence over
     // Stripe state and must not be rewritten by reconciliation.
-    if (subscription?.plan_override != null) {
-      return subscription.plan_override;
+    const subscriptionOverride = subscription?.plan_override ?? null;
+    if (subscriptionOverride !== null) {
+      return subscriptionOverride;
     }
 
     // Preserve the existing Stripe reconciliation for normal subscriptions.
