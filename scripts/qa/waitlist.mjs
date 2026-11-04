@@ -78,7 +78,14 @@ assert.match(dashboardApi, /withApiObservability/);
 assert.match(dashboardApi, /requireTenantAuthorization/);
 assert.match(dashboardApi, /barbershop_member_permissions/);
 assert.match(dashboardApi, /resolveAccessPlanForUser/);
+assert.match(dashboardApi, /hasPlanFeature\(plan, 'waitlist'\)/);
 assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/);
+assert.match(publicApi, /getAccessPlanForBarbershop/);
+assert.match(publicApi, /plan !== 'enterprise'/);
+assert.match(dashboardPage, /hasFeature\('waitlist'\)/);
+assert.match(bookingDrawer, /shop\?\.plan === 'enterprise'/);
+assert.match(sidebar, /feature: 'waitlist'/);
+assert.match(offersWorker, /profile\.plan !== 'enterprise'/);
 assert.match(dashboardApi, /allowedStatuses/);
 assert.match(dashboardApi, /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/);
 
