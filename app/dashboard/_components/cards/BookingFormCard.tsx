@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { type BookingFormProps } from '@/types';
@@ -62,6 +62,21 @@ export function BookingForm({
 
   const [clientQuery, setClientQuery] = useState('');
   const [showClientResults, setShowClientResults] = useState(false);
+  const clientSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showClientResults) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !clientSearchRef.current?.contains(event.target)
+      ) {
+        setShowClientResults(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [showClientResults]);
 
   useEffect(() => {
     if (selectedClient) setClientQuery(selectedClient.name_complete);
@@ -214,7 +229,7 @@ export function BookingForm({
               ) : null}
             </div>
 
-            <div className="relative mb-3 grid gap-2">
+            <div ref={clientSearchRef} className="relative mb-3 grid gap-2">
               <label htmlFor="booking-client-search" className="text-xs font-medium text-zinc-400">
                 {t('bookingForm.existingCustomer')} <span className="font-normal text-zinc-600">({t('bookingForm.optional')})</span>
               </label>
@@ -251,18 +266,14 @@ export function BookingForm({
                         ?.querySelector<HTMLButtonElement>('button')
                         ?.focus();
                     }
-                    if (event.key === 'Enter' && matchingClients.length > 0) {
+                    if (event.key === 'Enter') {
                       event.preventDefault();
-                      chooseClient(matchingClients[0].id);
+                      if (matchingClients.length > 0) {
+                        chooseClient(matchingClients[0].id);
+                      } else {
+                        setShowClientResults(false);
+                      }
                     }
-                  }}
-                  onBlur={(event) => {
-                    const results = document.getElementById('booking-client-results');
-                    const nextTarget = event.relatedTarget;
-                    if (results && nextTarget instanceof Node && results.contains(nextTarget)) {
-                      return;
-                    }
-                    setShowClientResults(false);
                   }}
                   placeholder={t('bookingForm.searchCustomer')}
                   role="combobox"
@@ -334,6 +345,7 @@ export function BookingForm({
                   maxLength={120}
                   placeholder={t('bookingForm.namePlaceholder')}
                   value={formData.name_complete}
+                  onFocus={() => setShowClientResults(false)}
                   onChange={(event) => updateCustomer('name_complete', event.target.value)}
                   className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
@@ -352,6 +364,7 @@ export function BookingForm({
                   maxLength={32}
                   placeholder="912 345 678"
                   value={formData.num_phone}
+                  onFocus={() => setShowClientResults(false)}
                   onChange={(event) => updateCustomer('num_phone', event.target.value)}
                   className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
