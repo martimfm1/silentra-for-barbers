@@ -8,7 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 10;
 
 type WaitlistOfferEvent = {
   vacancy_id: string;
