@@ -225,9 +225,9 @@ async function GET__unobserved(request: Request) {
           .from('appointments')
           .select('client_id')
           .eq('barbershop_id', barbershopId)
+          .in('client_id', Array.from(clientIds))
           .gt('date_hour', to.toISOString())
           .in('status', ['pending', 'scheduled'])
-          .not('client_id', 'is', null)
           .limit(10000);
       if (futureAppointmentsError) throw futureAppointmentsError;
 
