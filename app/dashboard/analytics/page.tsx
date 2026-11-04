@@ -271,7 +271,11 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     void load();
-    return () => requestControllerRef.current?.abort();
+    return () => {
+      const controller = requestControllerRef.current;
+      requestControllerRef.current = null;
+      controller?.abort();
+    };
   }, [load]);
 
   const rangeIsValid =
@@ -803,6 +807,11 @@ export default function AnalyticsPage() {
                     detail={copy(locale, 'Marcações futuras pendentes ou confirmadas', 'Future pending or confirmed bookings')}
                   />
                   <MetricMini
+                    label={t('analyticsPage.totalClients')}
+                    value={String(data.overview.totalClients)}
+                    detail={copy(locale, 'Base total registada', 'Total registered customer base')}
+                  />
+                  <MetricMini
                     label={t('analyticsPage.revenuePerActiveClient')}
                     value={data.overview.activeClientsInPeriod > 0 ? money(revenuePerClient, locale) : '—'}
                     detail={copy(locale, 'Faturação por cliente identificado', 'Revenue per identified customer')}
@@ -1065,6 +1074,11 @@ export default function AnalyticsPage() {
           </>
         ) : null}
 
+        {loadError && data ? (
+          <p role="status" className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
+            {copy(locale, 'Não foi possível atualizar os dados. Estás a ver a última versão carregada.', 'Could not refresh the data. You are viewing the last successfully loaded version.')}
+          </p>
+        ) : null}
         {loading && data ? (
           <p role="status" aria-live="polite" className="text-center text-xs text-muted-foreground">
             {t('analyticsPage.updating')}
