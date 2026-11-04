@@ -51,6 +51,8 @@ assert.match(offersWorker, /const BATCH_SIZE = 10/);
 assert.match(offersWorker, /withApiObservability/);
 assert.match(offersWorker, /claim_booking_waitlist_vacancies/);
 assert.match(offersWorker, /sendBrevoEmail/);
+assert.match(offersWorker, /isCurrentOffer/);
+assert.match(offersWorker, /WAITLIST_OFFER_REVALIDATION_FAILED/);
 assert.match(offersWorker, /complete_booking_waitlist_offer_delivery/);
 assert.match(offersWorker, /release_booking_waitlist_offer/);
 assert.match(offersWorker, /booking-waitlist-offers/);
