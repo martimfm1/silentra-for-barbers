@@ -15,11 +15,6 @@ canvas {
 }
 
 @media (max-width: 639px) {
-  /* Keep chart labels readable without making the viewport horizontally scrollable. */
-  .stats-professional-chart .recharts-cartesian-axis-tick text {
-    font-size: 9px;
-  }
-
   .silentra-page-content {
     width: min(100% - 1rem, 90rem);
     padding-block: 5rem 2.25rem;
