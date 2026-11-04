@@ -84,7 +84,7 @@ assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/
 assert.match(publicApi, /getAccessPlanForBarbershop/);
 assert.match(publicApi, /plan !== 'enterprise'/);
 assert.match(dashboardPage, /hasFeature\('waitlist'\)/);
-assert.match(bookingDrawer, /shop\?\.plan === 'enterprise'/);
+assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
 assert.match(sidebar, /feature: 'waitlist'/);
 assert.match(bookingDataApi, /get_effective_billing_plan_for_barbershop/);
 assert.match(bookingDataApi, /plan: resolvedPlan/);
