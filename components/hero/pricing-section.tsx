@@ -25,46 +25,50 @@ type BillingPrice = {
 
 const HERO_FEATURES = {
   free: [
-    'Agendamentos ilimitados',
-    'Clientes e serviços ilimitados',
-    'Reservas online + código QR',
+    'Marcações, clientes e serviços ilimitados',
+    'Reservas online, página pública e QR code',
+    'Agenda, dashboard e histórico essenciais',
+    'Notificações essenciais e mensagens por email',
     '1 barbeiro e 1 localização',
   ],
   pro: [
-    'Até 5 barbeiros',
-    'CRM e estatísticas avançadas',
-    'Automação e campanhas de marketing',
-    'Fidelização e seguimentos automáticos',
+    'Até 5 barbeiros e gestão de equipa',
+    'CRM, segmentos de clientes e analytics avançados',
+    'Fidelização e follow-ups automáticos',
+    'Lembretes, notificações e campanhas de marketing',
+    'Pré-pagamento manual MB WAY e controlo de visibilidade no diretório',
   ],
   enterprise: [
     'Barbeiros e localizações ilimitados',
-    'POS, stock e comissões',
-    'Permissões e gestão global',
-    'Relatórios empresariais avançados',
-    'Landing page profissional e domínio Silentra incluídos',
+    'Lista de espera e recuperação automática de vagas canceladas',
+    'POS, gestão de stock e comissões',
+    'Dashboard global, permissões avançadas e relatórios empresariais',
+    'Landing page profissional e endereço no domínio Silentra incluídos',
     'Site próprio com ativação única de 50 €',
   ],
 } as const;
 
 const HERO_FEATURES_EN = {
   free: [
-    'Unlimited bookings',
-    'Unlimited customers and services',
-    'Online bookings + QR code',
+    'Unlimited bookings, customers and services',
+    'Online booking, public booking page and QR code',
+    'Essential schedule, dashboard and customer history',
+    'Essential notifications and email messaging',
     '1 barber and 1 location',
   ],
   pro: [
-    'Up to 5 barbers',
-    'Advanced CRM and analytics',
-    'Marketing campaigns and automation',
-    'Loyalty and automated follow-ups',
+    'Up to 5 barbers and team management',
+    'Advanced CRM, customer segments and analytics',
+    'Loyalty programme and automated follow-ups',
+    'Reminders, advanced notifications and marketing campaigns',
+    'Manual MB WAY prepayment and directory visibility controls',
   ],
   enterprise: [
     'Unlimited barbers and locations',
-    'POS, inventory and commissions',
-    'Global permissions and management',
-    'Advanced business reports',
-    'Professional landing page and Silentra domain included',
+    'Waitlist and automatic recovery of cancelled slots',
+    'POS, inventory management and commissions',
+    'Global dashboard, advanced permissions and business reports',
+    'Professional landing page and Silentra public address included',
     'Custom website with a one-time €50 setup fee',
   ],
 } as const;
@@ -84,13 +88,13 @@ export function PricingSection({
         free: 'The essentials to start taking bookings and keep your barbershop organised.',
         pro: 'For barbershops ready to grow, retain customers and automate daily operations.',
         enterprise:
-          'For larger teams, with a landing page and public address on the Silentra domain included.',
+          'For larger operations that need automatic waitlist recovery, unlimited locations and advanced management.',
       }
     : {
         free: 'O essencial para começar a receber marcações e organizar a barbearia.',
         pro: 'Para barbearias que querem crescer, fidelizar clientes e automatizar o dia a dia.',
         enterprise:
-          'Para equipas maiores, landing page e endereço público no domínio Silentra incluídos.',
+          'Para operações maiores, com recuperação automática de vagas, localizações ilimitadas e gestão avançada.',
       };
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
