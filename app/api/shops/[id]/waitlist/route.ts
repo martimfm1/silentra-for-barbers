@@ -3,6 +3,7 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { SubscriptionService } from '@/services/billing/subscription.service';
 import { isSafePublicBookingDate, isValidTime, normalizeText, UUID_PATTERN } from '@/lib/validation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,6 +118,13 @@ async function POST__unobserved(
       .maybeSingle();
     if (shopError || !shop || shop.is_active !== true || !shop.barbershop_id)
       return NextResponse.json({ success: false, error: 'Barbearia indisponível.' }, { status: 404 });
+
+    const plan = await SubscriptionService.getAccessPlanForBarbershop(shop.barbershop_id);
+    if (plan !== 'enterprise')
+      return NextResponse.json(
+        { success: false, error: 'A lista de espera está disponível apenas no plano Enterprise.' },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } },
+      );
 
     const serviceQuery = await admin
       .from('services')
