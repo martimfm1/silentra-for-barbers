@@ -29,7 +29,7 @@ Quando uma marcação futura passa para `cancelled`, um trigger regista a vaga n
 - Falhas antes da aceitação do email pelo fornecedor libertam o pedido para nova tentativa com atraso progressivo; após o fornecedor aceitar o email, o worker não reenvia automaticamente em caso de falha ao atualizar o estado, para evitar duplicados.
 - Antes de cada email, o worker confirma novamente que a vaga e o pedido continuam ativos.
 - A vaga deixa de ser oferecida se outra marcação ocupar o intervalo ou se a agenda for bloqueada entretanto; a disponibilidade é novamente validada no booking.
-- O worker só processa datas dentro da janela atual de 14 dias apresentada no booking público.
+- O endpoint só aceita pedidos dentro da janela pública de 14 dias, e o worker só processa vagas dentro da mesma janela.
 
 ## Dados e privacidade
 
