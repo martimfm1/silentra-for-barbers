@@ -9,6 +9,7 @@ A lista de espera permite a um cliente pedir para ser contactado quando não enc
 3. O pedido fica como `waiting`. Não cria uma marcação, não bloqueia um horário e não inclui consentimento para marketing.
 4. Quando surge uma vaga compatível, o sistema envia um email com o serviço, dia, hora e barbeiro (quando definido).
 5. A prioridade do convite expira após 20 minutos. Depois disso, a vaga pode ser proposta a outra pessoa. O email deixa claro que a vaga não fica reservada: só é confirmada depois de o cliente concluir o processo normal de reserva.
+6. O cliente pode recusar explicitamente a proposta através de um link assinado no email. O link abre primeiro uma página de confirmação; só o botão de confirmação altera o pedido e liberta a vaga para a próxima pessoa.
 6. O link abre a página de marcação com os dados da vaga pré-selecionados. A API de marcações volta a validar disponibilidade e conflitos.
 7. Se o cliente concluir a marcação com o mesmo email e horário, o pedido passa a `booked` e fica ligado à nova marcação. Se outra pessoa ocupar a vaga, o convite é invalidado.
 
@@ -23,7 +24,8 @@ Quando uma marcação futura passa para `cancelled`, um trigger regista a vaga n
 - A fila é reclamada pelo worker `/api/cron/booking-waitlist-offers` em lotes, com `FOR UPDATE SKIP LOCKED`.
 - O Supabase Cron agenda a execução a cada 2 minutos.
 - A chamada é autenticada por HMAC, usando os segredos já partilhados com os workers de booking: `silentra_booking_outbox_cron_secret` e `silentra_booking_outbox_url`.
-- Os convites expiram ao fim de 20 minutos.
+- A prioridade dos convites expira ao fim de 20 minutos.
+- O email inclui uma opção de recusa explícita. O link é assinado com HMAC e não executa a recusa por si só: exige confirmação numa página e só pode ser utilizado enquanto a proposta está ativa.
 - Falhas antes da aceitação do email pelo fornecedor libertam o pedido para nova tentativa com atraso progressivo; após o fornecedor aceitar o email, o worker não reenvia automaticamente em caso de falha ao atualizar o estado, para evitar duplicados.
 - A vaga deixa de ser oferecida se outra marcação ocupar o intervalo ou se a agenda for bloqueada entretanto.
 - O worker só processa datas dentro da janela atual de 14 dias apresentada no booking público.
