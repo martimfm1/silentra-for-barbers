@@ -177,6 +177,37 @@ async function GET__unobserved(request: Request) {
         const profile = await getPublicProfileById(event.shop_id);
         if (!profile) throw new Error('WAITLIST_PUBLIC_PROFILE_UNAVAILABLE');
 
+        if (profile.plan !== 'enterprise') {
+          const now = new Date().toISOString();
+          const { error: entryError } = await admin
+            .from('booking_waitlist')
+            .update({ status: 'expired', updated_at: now })
+            .eq('id', event.waitlist_id)
+            .eq('shop_id', event.shop_id)
+            .in('status', ['waiting', 'offered']);
+          if (entryError) throw new Error('WAITLIST_ENTERPRISE_ENTRY_EXPIRY_FAILED');
+
+          // Expiring an already-offered request may reactivate its vacancy through
+          // the database trigger, so explicitly close that vacancy afterwards.
+          const { error: vacancyError } = await admin
+            .from('booking_waitlist_vacancies')
+            .update({
+              status: 'no_match',
+              waitlist_id: null,
+              offer_expires_at: null,
+              locked_at: null,
+              available_at: now,
+              last_error: 'Enterprise plan required for waitlist offers.',
+              updated_at: now,
+            })
+            .eq('id', event.vacancy_id)
+            .in('status', ['pending', 'dispatching', 'offered']);
+          if (vacancyError) throw new Error('WAITLIST_ENTERPRISE_VACANCY_CLOSE_FAILED');
+
+          skipped++;
+          continue;
+        }
+
         const siteUrl = (
           process.env.NEXT_PUBLIC_APP_URL ??
           process.env.NEXT_PUBLIC_SITE_URL ??
