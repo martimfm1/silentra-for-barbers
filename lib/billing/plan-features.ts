@@ -12,7 +12,6 @@ export type FreeFeatureKey =
   | 'basic_revenue'
   | 'basic_client_history'
   | 'basic_notifications'
-  | 'team_management'
   | 'messaging';
 
 export type ProFeatureKey =
@@ -26,7 +25,8 @@ export type ProFeatureKey =
   | 'advanced_reports'
   | 'advanced_notifications'
   | 'directory_visibility'
-  | 'manual_mbway_prepayment';
+  | 'manual_mbway_prepayment'
+  | 'team_management';
 
 export type EnterpriseFeatureKey =
   | 'multi_location'
@@ -57,7 +57,6 @@ const FREE_FEATURES: readonly (
   'basic_revenue',
   'basic_client_history',
   'basic_notifications',
-  'team_management',
   'messaging',
 ];
 
@@ -65,6 +64,7 @@ const PRO_FEATURES: readonly (
   FreeFeatureKey | ProFeatureKey | EnterpriseFeatureKey
 )[] = [
   ...FREE_FEATURES,
+  'team_management',
   'advanced_crm',
   'advanced_analytics',
   'automated_reminders',
@@ -143,6 +143,9 @@ export function getMinimumPlanForFeature(
 
   if ((ENTERPRISE_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return 'enterprise';
+  }
+  if ((FREE_FEATURES as readonly string[]).includes(canonicalFeature)) {
+    return null;
   }
   if ((PRO_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return 'pro';

@@ -30,7 +30,6 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { lockBodyScroll } from '@/lib/ui/body-scroll-lock';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import type { FeatureKey } from '@/lib/billing/plan-features';
@@ -305,10 +304,6 @@ export function DashboardSidebar() {
         >
           <Icon className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
           <span className="min-w-0 flex-1 truncate">{label}</span>
-          <FeaturePlanBadge
-            feature={item.feature!}
-            className="ml-auto"
-          />
         </button>
       );
     }
@@ -329,7 +324,6 @@ export function DashboardSidebar() {
           aria-hidden="true"
         />
         <span className="min-w-0 flex-1 truncate">{label}</span>
-        {item.feature ? <FeaturePlanBadge feature={item.feature} /> : null}
         {active ? (
           <span
             className="size-1.5 shrink-0 rounded-full bg-emerald-400"

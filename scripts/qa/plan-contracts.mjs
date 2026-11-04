@@ -5,6 +5,10 @@ import path from 'node:path';
 const root = process.cwd();
 const featuresPath = path.join(root, 'lib', 'billing', 'plan-features.ts');
 const source = fs.readFileSync(featuresPath, 'utf8');
+const sidebarSource = fs.readFileSync(
+  path.join(root, 'app', 'dashboard', '_components', 'DashboardSidebar.tsx'),
+  'utf8',
+);
 const directoryMigration = fs.readFileSync(
   path.join(
     root,
@@ -53,6 +57,16 @@ assert.match(
   /export function getMinimumPlanForFeature/,
   'Os requisitos mínimos de plano devem ser resolvidos a partir do catálogo central.',
 );
+assert.doesNotMatch(
+  sidebarSource,
+  /FeaturePlanBadge/,
+  'A navegação deve apresentar apenas secções; as badges pertencem às funcionalidades.',
+);
+assert.match(
+  source,
+  /if \(\(FREE_FEATURES as readonly string\[\]\)\.includes\(canonicalFeature\)\) \{\s*return null;/,
+  'Funcionalidades gratuitas não devem receber badges de upgrade.',
+);
 assert.match(
   directoryMigration,
   /alter column is_public_in_directory set default true/i,
@@ -74,4 +88,4 @@ assert.match(
   'A RPC da visibilidade deve validar o utilizador autenticado.',
 );
 
-console.log('✓ Plan limits, tier labels e directory visibility contracts OK');
+console.log('✓ Plan limits, feature badges e directory visibility contracts OK');
