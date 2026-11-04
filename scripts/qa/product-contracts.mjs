@@ -196,7 +196,7 @@ const checks = [
       source.includes("'/api/barbershops/image-convert'") &&
       source.includes('MAX_SERVER_CONVERSION_BYTES') &&
       source.includes("encodeCanvas(canvas, 'image/png', 1)") &&
-      source.includes("encodeCanvas(jpegCanvas, 'image/jpeg', candidate)"),
+      /encodeCanvas\(\s*jpegCanvas,\s*'image\/jpeg',\s*candidate,?\s*\)/.test(source),
   },
   {
     name: 'Server-side branding conversion validates tenant access, payload size and image signatures before using Sharp',
