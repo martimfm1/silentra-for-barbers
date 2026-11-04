@@ -51,7 +51,7 @@ assert.match(pricing, /Landing page profissional e endereço no domínio Silentr
 assert.match(pricing, /Site próprio com ativação única de 50 €/);
 assert.match(
   comparison,
-  /title: 'Presença online',\s*features: \['landing_page', 'custom_website'\]/,
+  /title: 'Presença online e diretório',\s*features: \['directory_visibility', 'landing_page', 'custom_website'\]/,
 );
 assert.match(landingPage, /profile\.plan !== 'enterprise'/);
 assert.match(landingPage, /entitlement\.status !== 'active'/);
