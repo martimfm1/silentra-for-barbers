@@ -144,6 +144,9 @@ export function getMinimumPlanForFeature(
   if ((ENTERPRISE_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return 'enterprise';
   }
+  if ((FREE_FEATURES as readonly string[]).includes(canonicalFeature)) {
+    return null;
+  }
   if ((PRO_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return 'pro';
   }
