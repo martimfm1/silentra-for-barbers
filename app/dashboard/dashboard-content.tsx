@@ -215,7 +215,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {!isSettingsPage && <DashboardTopBar />}
       <DashboardSidebar />
       <div
-        className={`dashboard-content silentra-dashboard-main min-w-0 lg:pl-64 ${
+        className={`dashboard-content min-w-0 lg:pl-64 ${
           isSettingsPage ? 'pt-0' : 'pt-16'
         }`}
       >
