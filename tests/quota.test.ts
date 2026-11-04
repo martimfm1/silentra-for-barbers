@@ -7,6 +7,7 @@ import {
   isUnlimited,
   hasPlanFeature,
   getPlanFeatures,
+  getMinimumPlanForFeature,
 } from '@/lib/billing/plan-features';
 import { getRequiredPlanForResource } from '@/services/billing/quota.service';
 
@@ -68,6 +69,16 @@ test('Free plan does not include Pro/Enterprise features', () => {
   assert.equal(hasPlanFeature(PLANS.FREE, 'team_management'), false);
   assert.equal(hasPlanFeature(PLANS.FREE, 'commissions'), false);
   assert.equal(hasPlanFeature(PLANS.FREE, 'multi_location'), false);
+});
+
+test('getMinimumPlanForFeature resolves the actual required tier', () => {
+  assert.equal(getMinimumPlanForFeature('appointments'), null);
+  assert.equal(getMinimumPlanForFeature('messaging'), null);
+  assert.equal(getMinimumPlanForFeature('team_management'), 'pro');
+  assert.equal(getMinimumPlanForFeature('advanced_crm'), 'pro');
+  assert.equal(getMinimumPlanForFeature('pos'), 'enterprise');
+  assert.equal(getMinimumPlanForFeature('professionals'), 'pro');
+  assert.equal(getMinimumPlanForFeature('analytics'), 'pro');
 });
 
 test('Pro inherits all Free features plus its own', () => {
