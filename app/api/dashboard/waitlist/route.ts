@@ -44,8 +44,8 @@ async function authorize(request: Request) {
   if (!(await canManageAgenda(tenant)))
     return { response: NextResponse.json({ success: false, error: 'Sem permissão para gerir a lista de espera.' }, { status: 403 }) };
   const plan = await resolveAccessPlanForUser(tenant.userId);
-  if (!hasPlanFeature(plan, 'appointments'))
-    return { response: NextResponse.json({ success: false, error: 'A agenda não está incluída no plano.' }, { status: 403 }) };
+  if (!hasPlanFeature(plan, 'waitlist'))
+    return { response: NextResponse.json({ success: false, error: 'A lista de espera está disponível apenas no plano Enterprise.' }, { status: 403 }) };
   return { tenant };
 }
 
