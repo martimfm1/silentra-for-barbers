@@ -13,6 +13,18 @@ const dashboardPageSource = fs.readFileSync(
   path.join(root, 'app', 'dashboard', 'page.tsx'),
   'utf8',
 );
+const waitlistPageSource = fs.readFileSync(
+  path.join(root, 'app', 'dashboard', 'espera', 'page.tsx'),
+  'utf8',
+);
+const planComparisonSource = fs.readFileSync(
+  path.join(root, 'components', 'billing', 'plan-comparison.tsx'),
+  'utf8',
+);
+const pricingCardsSource = fs.readFileSync(
+  path.join(root, 'components', 'hero', 'pricing-section.tsx'),
+  'utf8',
+);
 const directoryMigration = fs.readFileSync(
   path.join(
     root,
@@ -54,6 +66,40 @@ expect(
 expect(
   /manual_mbway_prepayment/,
   'Pré-pagamento MB WAY deve permanecer como feature Pro.',
+);
+expect(
+  /waitlist/,
+  'A lista de espera deve estar definida no catálogo de funcionalidades.',
+);
+assert.match(
+  source,
+  /waitlist[^\]]*\]/s,
+  'A lista de espera deve estar atribuída a um plano.',
+);
+assert.match(
+  planComparisonSource,
+  /features: \[[^\]]*'waitlist'/s,
+  'A comparação de planos deve apresentar a lista de espera.',
+);
+assert.match(
+  planComparisonSource,
+  /features: \['directory_visibility', 'landing_page', 'custom_website'\]/,
+  'A comparação deve apresentar a gestão da visibilidade no diretório.',
+);
+assert.match(
+  pricingCardsSource,
+  /Lista de espera e recuperação automática de vagas canceladas/,
+  'O cartão Enterprise deve anunciar a lista de espera.',
+);
+assert.match(
+  pricingCardsSource,
+  /Pré-pagamento manual MB WAY e controlo de visibilidade no diretório/,
+  'O cartão Pro deve refletir as funcionalidades Pro atuais.',
+);
+assert.match(
+  waitlistPageSource,
+  /hasFeature\('waitlist'\)/,
+  'A página de lista de espera deve estar bloqueada para planos inferiores.',
 );
 
 assert.match(
