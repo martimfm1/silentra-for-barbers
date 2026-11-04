@@ -193,6 +193,7 @@ export default function SalesOverviewPage() {
               <h1 className="text-2xl font-semibold">
                 {t('posOverviewPage.managementTitle')}
               </h1>
+              <FeaturePlanBadge feature="pos" />
               <p className="text-muted-foreground">
                 {t('posOverviewPage.managementDescription')}
               </p>
@@ -223,7 +224,6 @@ export default function SalesOverviewPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Vendas
               </p>
-              <FeaturePlanBadge feature="pos" />
             </div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t('posOverviewPage.title')}
