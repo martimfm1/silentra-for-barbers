@@ -15,8 +15,6 @@ const dashboardApi = read('app/api/dashboard/waitlist/route.ts');
 const bookingDataApi = read('app/api/shops/[id]/booking-data/route.ts');
 const bookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
 const sidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
-const marketplaceApi = read('app/api/shops/route.ts');
-const marketplaceMapper = read('lib/marketplace/shop-mappers.ts');
 
 assert.match(migration, /create table if not exists public\.booking_waitlist/i);
 assert.match(migration, /barbershop_id uuid not null references public\.barbershops/i);
