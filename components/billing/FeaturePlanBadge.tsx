@@ -7,6 +7,7 @@ import {
   getMinimumPlanForFeature,
   type FeatureKey,
 } from '@/lib/billing/plan-features';
+import { cn } from '@/lib/utils';
 
 type FeaturePlanBadgeProps = {
   className?: string;
@@ -18,7 +19,7 @@ type FeaturePlanBadgeProps = {
 export function FeaturePlanBadge({
   feature,
   minimumPlan: explicitMinimumPlan,
-  className = '',
+  className,
 }: FeaturePlanBadgeProps) {
   const { locale } = useLanguage();
   const { plan, loading } = useFeatureAccess();
@@ -28,7 +29,7 @@ export function FeaturePlanBadge({
 
   if (!minimumPlan || loading) return null;
 
-  // Only show a badge when the current plan does not include the feature.
+  // Show the badge only when the current subscription does not include the feature.
   // Free users see Pro and Enterprise; Pro users see Enterprise only.
   const alreadyHasRequiredPlan =
     minimumPlan === 'pro' ? plan !== 'free' : plan === 'enterprise';
@@ -43,12 +44,20 @@ export function FeaturePlanBadge({
 
   return (
     <span
+      role="note"
       title={accessibleLabel}
       aria-label={accessibleLabel}
-      className={`inline-flex min-h-6 w-fit shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none tracking-normal normal-case shadow-sm shadow-black/[0.03] ${isEnterprise ? 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'border-emerald-600/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'} ${className}`}
+      data-plan-badge={minimumPlan}
+      className={cn(
+        'inline-flex min-h-6 w-fit shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none tracking-normal normal-case',
+        isEnterprise
+          ? 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300'
+          : 'border-emerald-600/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+        className,
+      )}
     >
       <Crown className="size-3.5 shrink-0" aria-hidden="true" />
-      <span>{isEnterprise ? 'Enterprise' : 'Pro'}</span>
+      <span>{planLabel}</span>
     </span>
   );
 }
