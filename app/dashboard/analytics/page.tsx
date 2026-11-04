@@ -9,7 +9,6 @@ import {
   BarChart3,
   CalendarDays,
   CheckCircle2,
-  Clock3,
   CreditCard,
   Download,
   FileSpreadsheet,
@@ -351,7 +350,7 @@ export default function AnalyticsPage() {
           data.overview.rebookedClients + ' de ' + data.overview.activeClientsInPeriod + ' clientes com visita concluída já têm uma nova marcação futura (' + data.overview.rebookingRate.toFixed(1) + '%).',
           data.overview.rebookedClients + ' of ' + data.overview.activeClientsInPeriod + ' customers with a completed visit already have a future booking (' + data.overview.rebookingRate.toFixed(1) + '%).',
         ),
-        positive: data.overview.rebookingRate >= 50,
+        positive: undefined,
       });
     }
     if (data.topServices[0]) {
@@ -368,7 +367,7 @@ export default function AnalyticsPage() {
           data.overview.cancelledAppointments + ' marcações foram canceladas (' + data.overview.cancellationRate.toFixed(1) + '% do total no período).',
           data.overview.cancelledAppointments + ' bookings were cancelled (' + data.overview.cancellationRate.toFixed(1) + '% of the period total).',
         ),
-        positive: data.overview.cancellationRate < 10,
+        positive: undefined,
       });
     }
     if (data.professionals[0]) {
@@ -580,7 +579,7 @@ export default function AnalyticsPage() {
           <>
             <section
               aria-label={t('analyticsPage.summary')}
-              className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-5', loading && 'opacity-60')}
+              className={cn('grid grid-cols-2 gap-3 xl:grid-cols-5', loading && 'opacity-60')}
             >
               <Metric
                 featured
@@ -613,9 +612,11 @@ export default function AnalyticsPage() {
               <Metric
                 title={copy(locale, 'Concluídas', 'Completed')}
                 value={String(data.overview.completedAppointments)}
-                detail={t('analyticsPage.bookingCount', {
-                  count: data.overview.completedAppointments,
-                })}
+                detail={
+                  data.overview.appointments > 0
+                    ? data.overview.completedAppointments + ' / ' + data.overview.appointments + ' ' + copy(locale, 'marcações no período', 'bookings in period')
+                    : copy(locale, 'Sem marcações no período', 'No bookings in this period')
+                }
                 icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
               />
               <Metric
@@ -639,13 +640,7 @@ export default function AnalyticsPage() {
                   count: data.overview.cancelledAppointments,
                 })}
                 icon={<XCircle className="size-4" aria-hidden="true" />}
-                tone={
-                  data.overview.appointments === 0
-                    ? 'neutral'
-                    : data.overview.cancellationRate <= 10
-                      ? 'positive'
-                      : 'negative'
-                }
+                tone="neutral"
               />
             </section>
 
@@ -1088,7 +1083,7 @@ function Metric({
   featured?: boolean;
 }) {
   return (
-    <Card className={cn('min-w-0 overflow-hidden', featured && 'border-primary/25 bg-primary/[0.035]')}>
+    <Card className={cn('min-w-0 overflow-hidden', featured && 'col-span-2 border-primary/25 bg-primary/[0.035] xl:col-span-1')}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between gap-2 text-xs font-medium text-muted-foreground">
           <span className="min-w-0 truncate">{title}</span>
