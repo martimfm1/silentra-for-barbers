@@ -168,7 +168,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 begin
   if old.status = 'offered' and new.status in ('booked', 'cancelled', 'expired') then
     update public.booking_waitlist_vacancies
