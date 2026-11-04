@@ -179,6 +179,26 @@ const checks = [
       source.includes('max-h-[90dvh]'),
   },
   {
+    name: 'Branding uploads identify image formats from file signatures instead of trusting browser MIME labels',
+    file: 'lib/utils/upload-image.ts',
+    test: (source) =>
+      source.includes('detectImageMime(file)') &&
+      source.includes('file.slice(0, 64)') &&
+      source.includes("return 'image/jpeg'") &&
+      source.includes("return 'image/webp'") &&
+      source.includes("detectedType === 'image/heic'") &&
+      !source.includes('SUPPORTED_IMAGE_TYPES.has(file.type)'),
+  },
+  {
+    name: 'Dashboard branding uploads show actionable errors and always reset upload state',
+    file: 'app/dashboard/settings/settings-page.tsx',
+    test: (source) =>
+      source.includes('result.error.message') &&
+      source.includes('fileType: file.type || \'unknown\'') &&
+      source.includes('finally {\n      setUploading(null);') &&
+      source.includes('disabled={uploading !== null}'),
+  },
+  {
     name: 'Reports page separates service revenue from product sales and supports client rebooking analysis',
     file: 'app/dashboard/analytics/page.tsx',
     test: (source) =>
