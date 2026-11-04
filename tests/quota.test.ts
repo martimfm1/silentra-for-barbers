@@ -75,8 +75,12 @@ test('getMinimumPlanForFeature resolves the actual required tier', () => {
   assert.equal(getMinimumPlanForFeature('appointments'), null);
   assert.equal(getMinimumPlanForFeature('messaging'), null);
   assert.equal(getMinimumPlanForFeature('team_management'), 'pro');
+  assert.equal(getMinimumPlanForFeature('loyalty'), 'pro');
   assert.equal(getMinimumPlanForFeature('advanced_crm'), 'pro');
+  assert.equal(getMinimumPlanForFeature('advanced_analytics'), 'pro');
   assert.equal(getMinimumPlanForFeature('pos'), 'enterprise');
+  assert.equal(getMinimumPlanForFeature('multi_location'), 'enterprise');
+  assert.equal(getMinimumPlanForFeature('enterprise_reports'), 'enterprise');
   assert.equal(getMinimumPlanForFeature('professionals'), 'pro');
   assert.equal(getMinimumPlanForFeature('analytics'), 'pro');
 });

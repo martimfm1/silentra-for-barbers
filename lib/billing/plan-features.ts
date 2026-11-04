@@ -141,14 +141,15 @@ export function getMinimumPlanForFeature(
       ? LEGACY_FEATURE_ALIASES[feature as LegacyFeatureKey]
       : (feature as FreeFeatureKey | ProFeatureKey | EnterpriseFeatureKey);
 
-  if ((ENTERPRISE_FEATURES as readonly string[]).includes(canonicalFeature)) {
-    return 'enterprise';
-  }
   if ((FREE_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return null;
   }
+  // Resolve the cheapest tier first: Enterprise inherits Pro and Free features.
   if ((PRO_FEATURES as readonly string[]).includes(canonicalFeature)) {
     return 'pro';
+  }
+  if ((ENTERPRISE_FEATURES as readonly string[]).includes(canonicalFeature)) {
+    return 'enterprise';
   }
   return null;
 }
