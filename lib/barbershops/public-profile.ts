@@ -33,6 +33,7 @@ export interface PublicProfileRecord {
   tags: string[];
   barbershop_id: string | null;
   public_profile_enabled: boolean;
+  is_public_in_directory: boolean;
   seo_title: string | null;
   seo_description: string | null;
   og_image_url: string | null;
@@ -245,9 +246,9 @@ function buildPublicProfile(
     cover_url: shop?.cover_url ?? null,
     tags: Array.isArray(shop?.tags) ? shop.tags : [],
     barbershop_id: barbershop.id,
-    public_profile_enabled:
-      shop?.public_profile_enabled !== false &&
-      barbershop.is_public_in_directory !== false,
+    // Hiding from the directory must never disable the direct public URL.
+    public_profile_enabled: shop?.public_profile_enabled !== false,
+    is_public_in_directory: barbershop.is_public_in_directory !== false,
     seo_title: planSupportsEnterpriseCustomization(plan)
       ? (shop?.seo_title ?? null)
       : null,
@@ -266,7 +267,7 @@ function buildPublicProfile(
 async function resolvePublicBarbershop(
   barbershop: BarbershopRecord | null,
 ): Promise<PublicProfileRecord | null> {
-  if (!barbershop || barbershop.is_public_in_directory === false) return null;
+  if (!barbershop) return null;
 
   const shop = await getShopByBarbershopId(barbershop.id);
   const { plan, ownerUserId } = await getPlanForShop(barbershop.id);

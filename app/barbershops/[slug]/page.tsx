@@ -92,7 +92,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: canonicalPath },
-    robots: { index: true, follow: true },
+    robots: { index: profile.is_public_in_directory !== false, follow: true },
     openGraph: {
       type: 'website',
       title,

@@ -8,7 +8,7 @@ import {
   type CheckoutInterval,
   type CheckoutPlan,
 } from '@/lib/stripe/constants';
-import { PLAN_ACCESS_STATUSES, resolvePlan } from '@/lib/billing/plan-access';
+import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import {
   BillingError,
   type BillingPlan,
@@ -421,41 +421,38 @@ export class BarbershopStripeService {
 
   static async getEffectivePlan(userId: string): Promise<BillingPlan> {
     const database = createAdminClient();
-    const tenant = await database
+    const { data: tenant, error: tenantError } = await database
       .from('users')
       .select('barbershop_id')
       .eq('id', userId)
       .maybeSingle();
-    if (tenant.error)
+
+    if (tenantError)
       throw new BillingError(
         'Could not resolve SaaS account.',
         'DB_READ_FAILED',
       );
-    const barbershopId = tenant.data?.barbershop_id;
+
+    const barbershopId = tenant?.barbershop_id;
     if (!barbershopId) return PLANS.FREE;
 
-    const { data: assignment, error: assignmentError } = await database
-      .from('barbershop_plan_assignments')
-      .select('plan, expires_at')
-      .eq('barbershop_id', barbershopId)
-      .maybeSingle();
-    if (assignmentError)
+    // Use the canonical resolver so administrative assignments and
+    // subscriptions.plan_override grant exactly the same access as paid plans.
+    const { data: effectivePlan, error: planError } = await database.rpc(
+      'get_effective_billing_plan_for_barbershop',
+      { p_barbershop_id: barbershopId },
+    );
+
+    if (planError)
       throw new BillingError(
-        'Could not load barbershop plan assignment.',
+        'Could not resolve the effective barbershop plan.',
         'DB_READ_FAILED',
       );
-    if (
-      assignment &&
-      (!assignment.expires_at ||
-        new Date(assignment.expires_at).getTime() > Date.now())
-    )
-      return assignment.plan as BillingPlan;
 
-    const subscription = await this.reconcileSubscription(
-      barbershopId,
-      await this.getSubscriptionForBarbershop(barbershopId),
-    );
-    return resolvePlan(subscription);
+    const normalizedPlan = String(effectivePlan ?? PLANS.FREE).toLowerCase();
+    if (normalizedPlan === PLANS.PRO) return PLANS.PRO;
+    if (normalizedPlan === PLANS.ENTERPRISE) return PLANS.ENTERPRISE;
+    return PLANS.FREE;
   }
 
   static async createElementsCheckout(
