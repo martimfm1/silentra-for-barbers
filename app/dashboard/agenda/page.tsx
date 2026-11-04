@@ -134,6 +134,25 @@ export default function AgendaPage() {
   const [selectedTime, setSelectedTime] = useState('');
 
   useEffect(() => {
+    const openCreateBooking = () => setBookingDialogOpen(true);
+    window.addEventListener('silentra:open-create-booking', openCreateBooking);
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('create') === '1') {
+      setBookingDialogOpen(true);
+      url.searchParams.delete('create');
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      );
+    }
+
+    return () =>
+      window.removeEventListener('silentra:open-create-booking', openCreateBooking);
+  }, []);
+
+  useEffect(() => {
     const clientId = new URLSearchParams(window.location.search).get('clientId');
     if (!clientId || clients.length === 0) return;
     const client = clients.find((item) => item.id === clientId);
