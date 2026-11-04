@@ -37,7 +37,6 @@ export function mapMarketplaceShopResponseToMarketplaceShop(
   return {
     id: shop.id,
     barbershop_id: shop.barbershopId,
-    plan: shop.plan ?? 'free',
     slug: shop.slug,
     name: shop.name,
     address: shop.address,
