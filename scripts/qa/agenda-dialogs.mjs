@@ -24,24 +24,24 @@ assert.match(
 );
 assert.match(agenda, /onClick=\{\(\) => setBookingDialogOpen\(true\)\}/);
 assert.match(agenda, /onClick=\{\(\) => setBlockDialogOpen\(true\)\}/);
-assert.match(agenda, /h-\\[100dvh\\] max-h-\\[100dvh\\] w-screen/);
-assert.match(agenda, /showCloseButton=\\{false\\}/);
-assert.match(bookingForm, /overflow-y-auto overscroll-contain/);
-assert.match(bookingForm, /pb-\\[calc\\(0\\.875rem\\+env\\(safe-area-inset-bottom\\)\\)\\]/);
-assert.match(bookingForm, /type="search"/);
-assert.match(bookingForm, /role="combobox"/);
-assert.match(bookingForm, /matchingClients/);
-assert.match(bookingForm, /singleProfessional/);
-assert.match(bookingForm, /services.length === 1/);
-assert.match(bookingForm, /type="date"/);
-assert.match(bookingForm, /type="time"/);
-assert.match(bookingForm, /Hoje/);
-assert.match(bookingForm, /Amanhã/);
-assert.match(agenda, /birth_date: client.birth_date \\?\\? ''/);
-assert.match(agenda, /birthDate: formData.birth_date \\?\\? ''/);
-assert.match(agenda, /setSelectedDate\\(getLocalDateInputValue\\(\\)\\)/);
-assert.match(hook, /!manualName\\?\\.trim\\(\\) \\|\\| !manualPhone\\?\\.trim\\(\\)/);
-assert.match(appointmentsService, /manual_birth_date: payload.manual_birth_date/);
+assert.ok(agenda.includes('h-[100dvh] max-h-[100dvh] w-screen'));
+assert.ok(agenda.includes('showCloseButton={false}'));
+assert.ok(bookingForm.includes('overflow-y-auto overscroll-contain'));
+assert.ok(bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'));
+assert.ok(bookingForm.includes('type="search"'));
+assert.ok(bookingForm.includes('role="combobox"'));
+assert.ok(bookingForm.includes('matchingClients'));
+assert.ok(bookingForm.includes('singleProfessional'));
+assert.ok(bookingForm.includes('services.length === 1'));
+assert.ok(bookingForm.includes('type="date"'));
+assert.ok(bookingForm.includes('type="time"'));
+assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes("Hoje"));
+assert.ok(bookingForm.includes('Amanhã'));
+assert.ok(agenda.includes('birth_date: client.birth_date ??'));
+assert.ok(agenda.includes('birthDate: formData.birth_date ??'));
+assert.ok(agenda.includes('setSelectedDate(getLocalDateInputValue())'));
+assert.ok(hook.includes('!manualName?.trim()') && hook.includes('!manualPhone?.trim()'));
+assert.ok(appointmentsService.includes('manual_birth_date: payload.manual_birth_date'));
 assert.doesNotMatch(
   agenda,
   /\{bookingDialogOpen && \(/,
