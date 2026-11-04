@@ -167,6 +167,9 @@ export function BookingDrawerCanonical({
   const [professionals, setProfessionals] = useState<MarketplaceProfessional[]>(
     [],
   );
+  const [shopPlan, setShopPlan] = useState<
+    'free' | 'pro' | 'enterprise' | null
+  >(shop?.plan ?? null);
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
@@ -241,6 +244,7 @@ export function BookingDrawerCanonical({
     setProfessional(null);
     setServices([]);
     setProfessionals([]);
+    setShopPlan(shop?.plan ?? null);
     setSlots([]);
     setSelectedSlot(null);
     setLoadingAvailability(false);
@@ -264,6 +268,8 @@ export function BookingDrawerCanonical({
     days,
     firstOpenDayIndex,
     isOpen,
+    shop?.id,
+    shop?.plan,
     selectedDate,
     selectedProfessionalId,
     selectedServiceId,
@@ -288,6 +294,7 @@ export function BookingDrawerCanonical({
       .then((payload) => {
         if (controller.signal.aborted) return;
         const loadedProfessionals = payload.professionals ?? [];
+        setShopPlan(payload.plan ?? shop?.plan ?? 'free');
         setProfessionals(loadedProfessionals);
         const requestedProfessional = selectedProfessionalId
           ? loadedProfessionals.find((item) => item.id === selectedProfessionalId)
@@ -912,7 +919,7 @@ export function BookingDrawerCanonical({
                   <p className="mt-1 text-xs text-zinc-500">
                     {t('bookingDrawer.tryOtherDayBarber')}
                   </p>
-                  {shop?.plan === 'enterprise' ? (
+                  {shopPlan === 'enterprise' ? (
                     <Button
                       type="button"
                       variant="outline"
