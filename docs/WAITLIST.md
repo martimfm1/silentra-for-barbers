@@ -1,5 +1,7 @@
 # Lista de espera
 
+A lista de espera é uma funcionalidade exclusiva do plano **Barbers Enterprise**. A adesão pública, a gestão na dashboard e o envio automático de propostas exigem uma subscrição Enterprise ativa.
+
 A lista de espera permite a um cliente pedir para ser contactado quando não encontra um horário adequado e permite à barbearia recuperar vagas futuras libertadas por cancelamentos.
 
 ## Fluxo do cliente
