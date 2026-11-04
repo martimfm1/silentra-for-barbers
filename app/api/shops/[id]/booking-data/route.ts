@@ -162,6 +162,11 @@ async function GET__unobserved(
         .in('status', ['pending', 'scheduled']),
     ]);
     const effectivePlan = planResult.data;
+    const resolvedPlan = ['free', 'pro', 'enterprise'].includes(
+      String(effectivePlan ?? '').toLowerCase(),
+    )
+      ? (String(effectivePlan).toLowerCase() as 'free' | 'pro' | 'enterprise')
+      : 'free';
     const { data: blockRows, error: blocksError } = blocksResult;
     const { data: appointments, error: appointmentsError } = appointmentsResult;
     const mbwayPhone = String(relation.mbway_phone ?? '').trim();
@@ -428,6 +433,7 @@ async function GET__unobserved(
       isClosedDay || professionals.length === 0 || availableSlots.length === 0;
     return NextResponse.json(
       {
+        plan: resolvedPlan,
         services,
         professionals,
         availableSlots,
