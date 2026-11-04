@@ -8,11 +8,13 @@ import {
 import { combineDatetime } from '@/app/dashboard/_lib/date-utils';
 import { getErrorMessage } from '@/app/dashboard/_lib/error-utils';
 import type { BlockFormData } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function useAppointments(
   barbershopId: string | null,
   onRefreshData: () => Promise<void>,
 ) {
+  const { locale } = useLanguage();
   const [loadingAppointments, setLoading] = useState(false);
   const [finishingBookingId, setFinishingBookingId] = useState<string | null>(
     null,
@@ -83,8 +85,20 @@ export function useAppointments(
           manualPhone,
           birthDate,
         } = bookingFormData;
+        if (!manualName?.trim() || !manualPhone?.trim()) {
+          toast.error(
+            locale === 'en'
+              ? 'Enter the customer name and phone number.'
+              : 'Indica o nome e o telemóvel do cliente.',
+          );
+          return false;
+        }
         if (!serviceId || !professionalId || !date || !time) {
-          toast.error('Preenche o serviço, o profissional, a data e a hora.');
+          toast.error(
+            locale === 'en'
+              ? 'Choose a service, barber, date and time.'
+              : 'Escolhe o serviço, o barbeiro, a data e a hora.',
+          );
           return false;
         }
         const { error } = await appointmentService.create({
@@ -99,7 +113,9 @@ export function useAppointments(
           manual_birth_date: birthDate || null,
         });
         if (error) throw error;
-        toast.success('Marcação criada com sucesso.');
+        toast.success(
+          locale === 'en' ? 'Booking created successfully.' : 'Marcação criada com sucesso.',
+        );
         setBookingFormData({
           clientId: '',
           serviceId: '',
@@ -120,7 +136,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [barbershopId, bookingFormData, onRefreshData],
+    [barbershopId, bookingFormData, locale, onRefreshData],
   );
 
   const confirmBooking = useCallback(
