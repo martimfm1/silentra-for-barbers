@@ -48,11 +48,31 @@ export async function processAndUploadImage({
   error: Error | null;
 }> {
   try {
-    if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+    const detectedType = await detectImageMime(file);
+
+    if (!detectedType) {
       return {
         data: null,
         error: new Error(
-          'Formato de imagem não suportado. Usa JPG, JPEG, PNG, WebP, GIF, BMP, TIFF ou AVIF.',
+          'O ficheiro não tem uma assinatura de imagem válida. Escolhe um JPG, PNG, WebP, GIF, BMP, TIFF ou AVIF.',
+        ),
+      };
+    }
+
+    if (detectedType === 'image/heic') {
+      return {
+        data: null,
+        error: new Error(
+          'Este ficheiro está em formato HEIC/HEIF. Converte-o para JPG, PNG ou WebP antes de o carregar.',
+        ),
+      };
+    }
+
+    if (!SUPPORTED_IMAGE_TYPES.has(detectedType)) {
+      return {
+        data: null,
+        error: new Error(
+          `Formato de imagem não suportado (${detectedType}). Usa JPG, PNG, WebP, GIF, BMP, TIFF ou AVIF.`,
         ),
       };
     }
@@ -70,8 +90,6 @@ export async function processAndUploadImage({
         error: new Error('A imagem é demasiado grande. O limite é 10 MB.'),
       };
     }
-
-    await validateImageSignature(file);
 
     const webpBlob = await convertToWebp(file, maxWidth, quality);
     if (webpBlob.type !== 'image/webp' || webpBlob.size === 0) {
@@ -186,43 +204,68 @@ export async function processAndUploadImage({
   }
 }
 
-async function validateImageSignature(file: File): Promise<void> {
-  const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+async function detectImageMime(file: File): Promise<string | null> {
+  const bytes = new Uint8Array(await file.slice(0, 64).arrayBuffer());
 
   const startsWith = (...values: number[]) =>
     values.every((value, index) => bytes[index] === value);
 
-  const isJpeg = startsWith(0xff, 0xd8, 0xff);
-  const isPng = startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
-  const isWebp =
+  const asciiAt = (offset: number, length = 4) =>
+    String.fromCharCode(...bytes.slice(offset, offset + length));
+
+  if (startsWith(0xff, 0xd8, 0xff)) return 'image/jpeg';
+  if (startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) {
+    return 'image/png';
+  }
+  if (
     startsWith(0x52, 0x49, 0x46, 0x46) &&
     bytes[8] === 0x57 &&
     bytes[9] === 0x45 &&
     bytes[10] === 0x42 &&
-    bytes[11] === 0x50;
-  const isGif =
+    bytes[11] === 0x50
+  ) {
+    return 'image/webp';
+  }
+  if (
     startsWith(0x47, 0x49, 0x46, 0x38) &&
     (bytes[4] === 0x37 || bytes[4] === 0x39) &&
-    bytes[5] === 0x61;
-  const isBmp = startsWith(0x42, 0x4d);
-  const isTiff =
-    startsWith(0x49, 0x49, 0x2a, 0x00) || startsWith(0x4d, 0x4d, 0x00, 0x2a);
-  const isAvif =
-    bytes.length >= 12 &&
-    bytes[4] === 0x66 &&
-    bytes[5] === 0x74 &&
-    bytes[6] === 0x79 &&
-    bytes[7] === 0x70 &&
-    bytes[8] === 0x61 &&
-    bytes[9] === 0x76 &&
-    bytes[10] === 0x69 &&
-    bytes[11] === 0x66;
-
-  if (!(isJpeg || isPng || isWebp || isGif || isBmp || isTiff || isAvif)) {
-    throw new Error(
-      'O conteúdo do ficheiro não corresponde a uma imagem suportada.',
-    );
+    bytes[5] === 0x61
+  ) {
+    return 'image/gif';
   }
+  if (startsWith(0x42, 0x4d)) return 'image/bmp';
+  if (
+    startsWith(0x49, 0x49, 0x2a, 0x00) ||
+    startsWith(0x4d, 0x4d, 0x00, 0x2a)
+  ) {
+    return 'image/tiff';
+  }
+
+  // AVIF and HEIC are ISO Base Media files. Their brand may be present as
+  // either the major brand or a compatible brand, so inspect the full header
+  // rather than assuming it always starts at byte 8.
+  if (asciiAt(4) === 'ftyp' && bytes.length >= 16) {
+    const brands = [asciiAt(8)];
+    for (let offset = 16; offset + 4 <= bytes.length; offset += 4) {
+      brands.push(asciiAt(offset));
+    }
+
+    if (brands.some((brand) => brand === 'avif' || brand === 'avis')) {
+      return 'image/avif';
+    }
+
+    if (
+      brands.some((brand) =>
+        ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1'].includes(
+          brand,
+        ),
+      )
+    ) {
+      return 'image/heic';
+    }
+  }
+
+  return null;
 }
 
 function convertToWebp(
