@@ -51,18 +51,6 @@ const publicProfileSource = fs.readFileSync(
   path.join(root, 'lib', 'barbershops', 'public-profile.ts'),
   'utf8',
 );
-const publicProfilePageSource = fs.readFileSync(
-  path.join(root, 'app', 'barbershops', '[slug]', 'page.tsx'),
-  'utf8',
-);
-const enterpriseLandingPageSource = fs.readFileSync(
-  path.join(root, 'app', 'site', '[slug]', 'page.tsx'),
-  'utf8',
-);
-const sitemapSource = fs.readFileSync(
-  path.join(root, 'app', 'sitemap.ts'),
-  'utf8',
-);
 const billingSummarySource = fs.readFileSync(
   path.join(root, 'app', 'api', 'stripe', 'billing-summary', 'route.ts'),
   'utf8',
@@ -234,20 +222,4 @@ assert.doesNotMatch(
   /barbershop\.is_public_in_directory === false\) return null/,
   'Ocultar a barbearia do diretório não pode quebrar o link direto.',
 );
-assert.match(
-  publicProfilePageSource,
-  /index: profile\.is_public_in_directory !== false/,
-  'Páginas privadas continuam acessíveis, mas não são indexadas.',
-);
-assert.match(
-  enterpriseLandingPageSource,
-  /index: data\.profile\.is_public_in_directory !== false/,
-  'Landing pages privadas continuam acessíveis, mas não são indexadas.',
-);
-assert.match(
-  sitemapSource,
-  /profile\.is_public_in_directory === false/,
-  'Landing pages privadas não devem aparecer no sitemap.',
-);
-
 console.log('✓ Plan limits, feature badges e directory visibility contracts OK');

@@ -86,43 +86,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  const publicBarbershopIds = new Set<string>();
   let dynamicShopRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const database = createAdminClient();
-    const [
-      { data: shops, error: shopsError },
-      { data: visibleBarbershops, error: visibilityError },
-    ] = await Promise.all([
-      database
-        .from('shops')
-        .select('barbershop_id, slug, public_profile_enabled, updated_at')
-        .limit(50000),
-      database
-        .from('barbershops')
-        .select('id')
-        .eq('is_public_in_directory', true)
-        .limit(50000),
-    ]);
+    const { data: shops, error } = await database
+      .from('shops')
+      .select('slug, public_profile_enabled, updated_at')
+      .limit(50000);
 
-    if (!shopsError && shops && !visibilityError && visibleBarbershops) {
-      for (const barbershop of visibleBarbershops) {
-        publicBarbershopIds.add(String(barbershop.id));
-      }
-
+    if (!error && shops) {
       const seen = new Set<string>();
       const shopEntries: ShopSitemapEntry[] = [];
 
       for (const shop of shops) {
-        const barbershopId = String(shop.barbershop_id ?? '');
-        if (
-          !shop.slug ||
-          shop.public_profile_enabled === false ||
-          !publicBarbershopIds.has(barbershopId)
-        ) {
-          continue;
-        }
+        if (!shop.slug || shop.public_profile_enabled === false) continue;
 
         const slug = String(shop.slug).trim();
         if (!slug || seen.has(slug) || slug === AGENDA_DO_VICTOR_SHOP_SLUG)
@@ -173,8 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
               if (
                 !profile ||
                 profile.plan !== 'enterprise' ||
-                profile.public_profile_enabled === false ||
-                profile.is_public_in_directory === false
+                profile.public_profile_enabled === false
               ) {
                 return null;
               }
@@ -212,7 +189,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const database = createAdminClient();
     const { data: websites, error: websitesError } = await database
       .from('custom_website_requests')
-      .select('barbershop_id, public_slug, published_at, updated_at')
+      .select('public_slug, published_at, updated_at')
       .eq('status', 'published')
       .not('public_slug', 'is', null)
       .order('published_at', { ascending: false })
@@ -224,11 +201,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const slug = String(website.public_slug ?? '')
           .trim()
           .toLowerCase();
-        if (
-          !slug ||
-          seen.has(slug) ||
-          !publicBarbershopIds.has(String(website.barbershop_id ?? ''))
-        ) continue;
+        if (!slug || seen.has(slug)) continue;
         seen.add(slug);
         const lastModifiedValue = website.published_at ?? website.updated_at;
         const parsedLastModified = lastModifiedValue
