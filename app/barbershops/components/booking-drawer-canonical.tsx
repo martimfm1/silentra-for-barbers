@@ -912,19 +912,21 @@ export function BookingDrawerCanonical({
                   <p className="mt-1 text-xs text-zinc-500">
                     {t('bookingDrawer.tryOtherDayBarber')}
                   </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-4 min-h-11 w-full border-emerald-400/20 text-emerald-200 hover:bg-emerald-400/[0.06]"
-                    onClick={() => {
-                      setWaitlistOnly(true);
-                      setWaitlistConsent(false);
-                      setStep(3);
-                    }}
-                  >
-                    <Clock3 className="mr-2 size-4" aria-hidden="true" />
-                    {locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'}
-                  </Button>
+                  {shop?.plan === 'enterprise' ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4 min-h-11 w-full border-emerald-400/20 text-emerald-200 hover:bg-emerald-400/[0.06]"
+                      onClick={() => {
+                        setWaitlistOnly(true);
+                        setWaitlistConsent(false);
+                        setStep(3);
+                      }}
+                    >
+                      <Clock3 className="mr-2 size-4" aria-hidden="true" />
+                      {locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'}
+                    </Button>
+                  ) : null}
                 </div>
               )}
               <Button
