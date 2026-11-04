@@ -85,7 +85,7 @@ async function POST__unobserved(
 
     if (!validSignature(secret, shopId, vacancyId, waitlistId, expires, signature))
       return NextResponse.json(
-        { success: false, error: 'O link não é válido.' },
+        { success: false, code: 'INVALID_LINK', error: 'O link não é válido.' },
         { status: 403 },
       );
 
