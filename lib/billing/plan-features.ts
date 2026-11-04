@@ -37,7 +37,8 @@ export type EnterpriseFeatureKey =
   | 'pos'
   | 'enterprise_reports'
   | 'landing_page'
-  | 'custom_website';
+  | 'custom_website'
+  | 'waitlist';
 
 export type LegacyFeatureKey = 'professionals' | 'analytics';
 export type FeatureKey =
@@ -91,6 +92,7 @@ const ENTERPRISE_FEATURES: readonly (
   'enterprise_reports',
   'landing_page',
   'custom_website',
+  'waitlist',
 ];
 
 export const PLAN_FEATURES: Record<
@@ -169,7 +171,7 @@ export const PLAN_DESCRIPTIONS: Record<BillingPlan, string> = {
   free: 'Para uma barbearia pequena começar a gerir tudo gratuitamente.',
   pro: 'Para equipas em crescimento que querem automatizar e fazer crescer o negócio.',
   enterprise:
-    'Para operações com várias localizações, gestão avançada, landing page e endereço no domínio Silentra incluídos. Site próprio com ativação única de 50 €.',
+    'Para operações maiores, com lista de espera e recuperação automática de vagas, várias localizações, gestão avançada, landing page e endereço no domínio Silentra incluídos. Site próprio com ativação única de 50 €.',
 };
 
 export const PLAN_NAMES: Record<BillingPlan, string> = {
@@ -215,4 +217,5 @@ export const FEATURE_LABELS: Record<
   enterprise_reports: 'Relatórios empresariais',
   landing_page: 'Landing page profissional incluída',
   custom_website: 'Site próprio no domínio Silentra (ativação única de 50 €)',
+  waitlist: 'Lista de espera e recuperação automática de vagas',
 };
