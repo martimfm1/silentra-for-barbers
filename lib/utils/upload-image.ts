@@ -17,6 +17,7 @@ interface UploadImageResult {
 const MAX_SOURCE_SIZE = 10 * 1024 * 1024;
 const MAX_SOURCE_DIMENSION = 8192;
 const MAX_SOURCE_PIXELS = 40_000_000;
+const MAX_SERVER_CONVERSION_BYTES = 4 * 1024 * 1024;
 const SUPPORTED_IMAGE_TYPES = new Set([
   'image/jpeg',
   'image/png',
@@ -278,86 +279,198 @@ function convertToWebp(
     const img = new Image();
     let settled = false;
 
+    const cleanup = () => URL.revokeObjectURL(objectUrl);
     const fail = (error: Error) => {
       if (settled) return;
       settled = true;
-      URL.revokeObjectURL(objectUrl);
+      cleanup();
       reject(error);
+    };
+    const finish = (blob: Blob) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(blob);
+    };
+    const encodeCanvas = (
+      canvas: HTMLCanvasElement,
+      mimeType: string,
+      outputQuality: number,
+    ) =>
+      new Promise<Blob | null>((resolveBlob) => {
+        try {
+          canvas.toBlob(resolveBlob, mimeType, outputQuality);
+        } catch {
+          resolveBlob(null);
+        }
+      });
+
+    const convertOnServer = async (canvas: HTMLCanvasElement) => {
+      // Prefer PNG so transparent logos stay transparent. Fall back to a
+      // compressed JPEG only when the PNG would exceed the Vercel body limit.
+      let fallbackBlob = await encodeCanvas(canvas, 'image/png', 1);
+      let fallbackName = 'branding-fallback.png';
+
+      if (
+        !fallbackBlob ||
+        fallbackBlob.type !== 'image/png' ||
+        fallbackBlob.size === 0 ||
+        fallbackBlob.size > MAX_SERVER_CONVERSION_BYTES
+      ) {
+        const jpegCanvas = document.createElement('canvas');
+        jpegCanvas.width = canvas.width;
+        jpegCanvas.height = canvas.height;
+        const jpegContext = jpegCanvas.getContext('2d');
+        if (!jpegContext) {
+          throw new Error(
+            'Não foi possível preparar uma versão alternativa da imagem.',
+          );
+        }
+
+        // JPEG has no alpha channel. Use a neutral background rather than
+        // turning transparent parts of a logo black.
+        jpegContext.fillStyle = '#fff';
+        jpegContext.fillRect(0, 0, jpegCanvas.width, jpegCanvas.height);
+        jpegContext.drawImage(canvas, 0, 0);
+
+        fallbackName = 'branding-fallback.jpg';
+        fallbackBlob = null;
+        const qualityCandidates = [
+          Math.min(0.88, Math.max(0.5, quality)),
+          0.68,
+          0.5,
+        ];
+        for (const candidate of qualityCandidates) {
+          const candidateBlob = await encodeCanvas(
+            jpegCanvas,
+            'image/jpeg',
+            candidate,
+          );
+          if (
+            candidateBlob?.type === 'image/jpeg' &&
+            candidateBlob.size > 0 &&
+            candidateBlob.size <= MAX_SERVER_CONVERSION_BYTES
+          ) {
+            fallbackBlob = candidateBlob;
+            break;
+          }
+        }
+      }
+
+      if (
+        !fallbackBlob ||
+        fallbackBlob.size === 0 ||
+        fallbackBlob.size > MAX_SERVER_CONVERSION_BYTES
+      ) {
+        throw new Error(
+          'A imagem é demasiado grande para a conversão alternativa. Escolhe uma imagem mais pequena.',
+        );
+      }
+
+      const formData = new FormData();
+      formData.append('image', fallbackBlob, fallbackName);
+
+      const response = await fetch('/api/barbershops/image-convert', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const responseBody = await response.json().catch(() => null);
+        throw new Error(
+          typeof responseBody?.error === 'string'
+            ? responseBody.error
+            : 'Não foi possível converter a imagem no servidor.',
+        );
+      }
+
+      const convertedBlob = await response.blob();
+      if (
+        convertedBlob.type !== 'image/webp' ||
+        convertedBlob.size === 0
+      ) {
+        throw new Error(
+          'O servidor não devolveu uma imagem WebP válida.',
+        );
+      }
+
+      return convertedBlob;
     };
 
     img.onload = () => {
-      try {
-        const sourceWidth = img.naturalWidth;
-        const sourceHeight = img.naturalHeight;
+      void (async () => {
+        try {
+          const sourceWidth = img.naturalWidth;
+          const sourceHeight = img.naturalHeight;
 
-        if (!sourceWidth || !sourceHeight) {
-          fail(
-            new Error('Não foi possível determinar as dimensões da imagem.'),
+          if (!sourceWidth || !sourceHeight) {
+            throw new Error(
+              'Não foi possível determinar as dimensões da imagem.',
+            );
+          }
+
+          if (
+            sourceWidth > MAX_SOURCE_DIMENSION ||
+            sourceHeight > MAX_SOURCE_DIMENSION ||
+            sourceWidth * sourceHeight > MAX_SOURCE_PIXELS
+          ) {
+            throw new Error('As dimensões da imagem são demasiado grandes.');
+          }
+
+          // Limit the longest edge, not only the width. Very tall portrait
+          // images can otherwise create canvases that exceed browser limits.
+          const maxDimension = Math.max(1, maxWidth);
+          const scale = Math.min(
+            1,
+            maxDimension / Math.max(sourceWidth, sourceHeight),
           );
-          return;
-        }
+          const width = Math.max(1, Math.round(sourceWidth * scale));
+          const height = Math.max(1, Math.round(sourceHeight * scale));
 
-        if (
-          sourceWidth > MAX_SOURCE_DIMENSION ||
-          sourceHeight > MAX_SOURCE_DIMENSION ||
-          sourceWidth * sourceHeight > MAX_SOURCE_PIXELS
-        ) {
-          fail(new Error('As dimensões da imagem são demasiado grandes.'));
-          return;
-        }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
 
-        let width = sourceWidth;
-        let height = sourceHeight;
-
-        if (width > maxWidth) {
-          height = Math.max(1, Math.round((height * maxWidth) / width));
-          width = maxWidth;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          fail(
-            new Error(
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error(
               'Não foi possível inicializar o processamento da imagem.',
-            ),
+            );
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const normalizedQuality = Math.min(1, Math.max(0.1, quality));
+          const webpBlob = await encodeCanvas(
+            canvas,
+            'image/webp',
+            normalizedQuality,
           );
-          return;
+
+          if (
+            webpBlob?.type === 'image/webp' &&
+            webpBlob.size > 0
+          ) {
+            finish(webpBlob);
+            return;
+          }
+
+          // Some browsers can decode the source image but cannot encode WebP
+          // through HTMLCanvasElement.toBlob. In that case, send a bounded
+          // PNG/JPEG fallback to the authenticated Node.js converter.
+          const convertedBlob = await convertOnServer(canvas);
+          finish(convertedBlob);
+        } catch (error) {
+          fail(
+            error instanceof Error
+              ? error
+              : new Error('Falha ao processar a imagem.'),
+          );
         }
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (!blob || blob.type !== 'image/webp' || blob.size === 0) {
-              fail(
-                new Error(
-                  'O navegador não conseguiu converter a imagem para WebP.',
-                ),
-              );
-              return;
-            }
-
-            if (settled) return;
-            settled = true;
-            URL.revokeObjectURL(objectUrl);
-            resolve(blob);
-          },
-          'image/webp',
-          Math.min(1, Math.max(0.1, quality)),
-        );
-      } catch (error) {
-        fail(
-          error instanceof Error
-            ? error
-            : new Error('Falha ao processar a imagem.'),
-        );
-      }
+      })();
     };
 
     img.onerror = () => {
