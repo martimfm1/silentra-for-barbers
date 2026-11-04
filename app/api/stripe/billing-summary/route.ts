@@ -315,18 +315,18 @@ async function GET__unobserved() {
         ? (manualRequest?.billing_interval ?? null)
         : intervalForPriceId(subscription?.stripe_price_id);
 
-    const hasSubscriptionOverride = subscription?.plan_override != null;
+    const subscriptionOverride = subscription?.plan_override ?? null;
     const plan: BillingPlan =
       hasActiveAssignment && assignment
         ? (assignment.plan as BillingPlan)
-        : hasSubscriptionOverride
-          ? subscription.plan_override!
+        : subscriptionOverride !== null
+          ? subscriptionOverride
           : subscription
             ? resolvePlan(subscription)
             : PLANS.FREE;
     const planSource = hasActiveAssignment
       ? 'admin'
-      : hasSubscriptionOverride
+      : subscriptionOverride !== null
         ? 'subscription_override'
         : subscription?.payment_method === 'MANUAL' && plan !== PLANS.FREE
           ? 'manual'

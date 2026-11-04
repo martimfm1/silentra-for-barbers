@@ -63,6 +63,14 @@ const sitemapSource = fs.readFileSync(
   path.join(root, 'app', 'sitemap.ts'),
   'utf8',
 );
+const billingSummarySource = fs.readFileSync(
+  path.join(root, 'app', 'api', 'stripe', 'billing-summary', 'route.ts'),
+  'utf8',
+);
+const subscriptionHookSource = fs.readFileSync(
+  path.join(root, 'hooks', 'useSubscription.ts'),
+  'utf8',
+);
 
 function expect(pattern, message) {
   assert.match(source, pattern, message);
@@ -180,6 +188,16 @@ assert.match(
   barbershopPlanServiceSource,
   /rpc\(\s*'get_effective_billing_plan_for_barbershop'/,
   'As permissões da dashboard devem usar o mesmo plano efetivo da base de dados.',
+);
+assert.match(
+  billingSummarySource,
+  /const subscriptionOverride = subscription\?\.plan_override \?\? null/,
+  'O resumo de faturação deve respeitar todos os overrides explícitos, incluindo Free.',
+);
+assert.match(
+  subscriptionHookSource,
+  /planSource === 'admin' \|\| planSource === 'subscription_override'/,
+  'Os flags isPro/isBusiness devem reconhecer overrides de subscrição como direitos administrativos.',
 );
 assert.match(
   publicProfileSource,
