@@ -97,6 +97,36 @@ function formatExpiry(value: string, language: 'pt' | 'en') {
   }).format(new Date(value));
 }
 
+async function isCurrentOffer(
+  admin: ReturnType<typeof createAdminClient>,
+  event: WaitlistOfferEvent,
+) {
+  const now = new Date().toISOString();
+  const [vacancy, entry] = await Promise.all([
+    admin
+      .from('booking_waitlist_vacancies')
+      .select('id')
+      .eq('id', event.vacancy_id)
+      .eq('waitlist_id', event.waitlist_id)
+      .eq('status', 'dispatching')
+      .gt('offer_expires_at', now)
+      .maybeSingle(),
+    admin
+      .from('booking_waitlist')
+      .select('id')
+      .eq('id', event.waitlist_id)
+      .eq('shop_id', event.shop_id)
+      .eq('status', 'offered')
+      .gt('offer_expires_at', now)
+      .maybeSingle(),
+  ]);
+
+  if (vacancy.error || entry.error)
+    throw new Error('WAITLIST_OFFER_REVALIDATION_FAILED');
+
+  return Boolean(vacancy.data && entry.data);
+}
+
 async function releaseFailedOffer(
   admin: ReturnType<typeof createAdminClient>,
   event: WaitlistOfferEvent,
@@ -244,6 +274,11 @@ async function GET__unobserved(request: Request) {
   </main>
 </body>
 </html>`;
+
+        if (!(await isCurrentOffer(admin, event))) {
+          skipped += 1;
+          continue;
+        }
 
         const result = await sendBrevoEmail({
           to: email,
