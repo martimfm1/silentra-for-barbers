@@ -54,11 +54,18 @@ export function BookingForm({
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrow = localDateValue(tomorrowDate);
   const selectedClient = clients.find((client) => client.id === formData.clientId);
+  const selectedClientName = selectedClient?.name_complete ?? '';
   const selectedService = services.find((service) => service.id === formData.service_id);
   const singleProfessional = professionals.length === 1 ? professionals[0] : null;
+  const singleProfessionalId = singleProfessional?.id;
   const selectedProfessional = professionals.find(
     (professional) => professional.id === selectedProfessionalId,
   );
+  const selectedDateLabel = selectedDate
+    ? new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+        dateStyle: 'medium',
+      }).format(new Date(`${selectedDate}T00:00:00`))
+    : '';
 
   const [clientQuery, setClientQuery] = useState('');
   const [showClientResults, setShowClientResults] = useState(false);
@@ -79,14 +86,14 @@ export function BookingForm({
   }, [showClientResults]);
 
   useEffect(() => {
-    if (selectedClient) setClientQuery(selectedClient.name_complete);
-  }, [selectedClient?.id, selectedClient?.name_complete]);
+    if (selectedClientName) setClientQuery(selectedClientName);
+  }, [selectedClientName]);
 
   useEffect(() => {
-    if (singleProfessional && selectedProfessionalId !== singleProfessional.id) {
-      setSelectedProfessionalId(singleProfessional.id);
+    if (singleProfessionalId && selectedProfessionalId !== singleProfessionalId) {
+      setSelectedProfessionalId(singleProfessionalId);
     }
-  }, [singleProfessional?.id, selectedProfessionalId, setSelectedProfessionalId]);
+  }, [singleProfessionalId, selectedProfessionalId, setSelectedProfessionalId]);
 
   useEffect(() => {
     if (services.length === 1 && !formData.service_id) {
@@ -98,7 +105,7 @@ export function BookingForm({
     const query = clientQuery.trim().toLocaleLowerCase(
       locale === 'en' ? 'en-GB' : 'pt-PT',
     );
-    if (query.length < 2 || selectedClient) return [];
+    if (query.length < 2 || formData.clientId) return [];
 
     const digits = query.replace(/\D/g, '');
     return clients
@@ -115,7 +122,7 @@ export function BookingForm({
         );
       })
       .slice(0, 7);
-  }, [clientQuery, clients, locale, selectedClient]);
+  }, [clientQuery, clients, formData.clientId, locale]);
 
   const updateCustomer = (
     field: 'name_complete' | 'num_phone' | 'birth_date',
@@ -279,7 +286,11 @@ export function BookingForm({
                   role="combobox"
                   aria-autocomplete="list"
                   aria-expanded={showClientResults && matchingClients.length > 0}
-                  aria-controls="booking-client-results"
+                  aria-controls={
+                    showClientResults && matchingClients.length > 0
+                      ? 'booking-client-results'
+                      : undefined
+                  }
                   className="min-h-12 w-full rounded-xl border border-white/10 bg-zinc-900/80 pl-10 pr-11 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
                 {selectedClient ? (
@@ -588,7 +599,7 @@ export function BookingForm({
             {selectedProfessional ? (
               <span className="block truncate">
                 {selectedProfessional.name}
-                {selectedDate && selectedTime ? ` · ${selectedDate} ${selectedTime}` : ''}
+                {selectedDate && selectedTime ? ` · ${selectedDateLabel} ${selectedTime}` : ''}
               </span>
             ) : null}
           </div>
