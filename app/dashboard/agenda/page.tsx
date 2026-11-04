@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
-import type { Appointment, Client, Professional, Service } from '@/types';
+import type { Appointment, BookingFormData, Client, Professional, Service } from '@/types';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
@@ -129,7 +129,7 @@ export default function AgendaPage() {
     handleDeleteBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BookingFormData>({
     clientId: undefined as string | undefined,
     name_complete: '',
     num_phone: '',
