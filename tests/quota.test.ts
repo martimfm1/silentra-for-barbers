@@ -69,6 +69,7 @@ test('Free plan does not include Pro/Enterprise features', () => {
   assert.equal(hasPlanFeature(PLANS.FREE, 'team_management'), false);
   assert.equal(hasPlanFeature(PLANS.FREE, 'commissions'), false);
   assert.equal(hasPlanFeature(PLANS.FREE, 'multi_location'), false);
+  assert.equal(hasPlanFeature(PLANS.FREE, 'waitlist'), false);
 });
 
 test('getMinimumPlanForFeature resolves the actual required tier', () => {
@@ -81,6 +82,7 @@ test('getMinimumPlanForFeature resolves the actual required tier', () => {
   assert.equal(getMinimumPlanForFeature('pos'), 'enterprise');
   assert.equal(getMinimumPlanForFeature('multi_location'), 'enterprise');
   assert.equal(getMinimumPlanForFeature('enterprise_reports'), 'enterprise');
+  assert.equal(getMinimumPlanForFeature('waitlist'), 'enterprise');
   assert.equal(getMinimumPlanForFeature('professionals'), 'pro');
   assert.equal(getMinimumPlanForFeature('analytics'), 'pro');
 });
@@ -110,6 +112,9 @@ test('Enterprise inherits all Pro features plus its own', () => {
   assert.equal(ent.includes('multi_location'), true);
   assert.equal(ent.includes('pos'), true);
   assert.equal(ent.includes('enterprise_reports'), true);
+  assert.equal(ent.includes('waitlist'), true);
+  assert.equal(hasPlanFeature(PLANS.PRO, 'waitlist'), false);
+  assert.equal(hasPlanFeature(PLANS.ENTERPRISE, 'waitlist'), true);
 });
 
 test('Legacy keys still resolve on their original plans', () => {
