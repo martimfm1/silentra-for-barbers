@@ -14,6 +14,7 @@ import {
   Home,
   Plus,
   Bell,
+  UserRound,
   CalendarDays,
   Clock3,
   Users,
@@ -354,17 +355,17 @@ export function DashboardSidebar() {
       <TooltipProvider delayDuration={120}>
         <nav
           aria-label={locale === 'en' ? 'Dashboard navigation' : 'Navegação da dashboard'}
-          className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 mx-auto w-[min(34rem,calc(100vw-1.5rem))] px-1 sm:w-[min(38rem,calc(100vw-2rem))] lg:bottom-6"
+          className="fixed inset-x-0 bottom-[calc(0.8rem+env(safe-area-inset-bottom))] z-50 mx-auto w-[min(56rem,calc(100vw-1.25rem))] px-0.5 sm:bottom-5 sm:w-[min(58rem,calc(100vw-2rem))]"
         >
-          <div className="relative rounded-full border border-white/20 bg-zinc-950/65 px-3 py-2 shadow-[0_12px_45px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl">
-            <div className="grid h-12 grid-cols-5 items-center">
+          <div className="relative rounded-[2.6rem] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.13),rgba(255,255,255,0.035)_42%,rgba(0,0,0,0.2))] px-2.5 py-2 shadow-[0_16px_50px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px] sm:px-5">
+            <div className="grid h-[4.1rem] grid-cols-6 items-center sm:h-[4.5rem]">
               {([
                 { href: '/dashboard', label: locale === 'en' ? 'Home' : 'Início', icon: Home },
                 { href: '/dashboard/loyalty', label: locale === 'en' ? 'Loyalty' : 'Fidelização', icon: Heart },
-                { href: '/dashboard/agenda', label: locale === 'en' ? 'New appointment' : 'Nova marcação', icon: Plus },
-                { href: '/dashboard/clientes', label: locale === 'en' ? 'Clients' : 'Clientes', icon: Users },
+                { href: '/dashboard/agenda', label: locale === 'en' ? 'New appointment' : 'Nova marcação', icon: Plus, prominent: true },
+                { href: '/dashboard/clientes', label: locale === 'en' ? 'Clients' : 'Clientes', icon: UserRound },
                 { href: '/dashboard/comunicacao', label: locale === 'en' ? 'Notifications' : 'Notificações', icon: Bell },
-              ]).map((item, index) => {
+              ]).map((item) => {
                 const active = isActive(item);
                 const Icon = item.icon;
                 return (
@@ -374,23 +375,55 @@ export function DashboardSidebar() {
                         href={item.href}
                         aria-label={item.label}
                         aria-current={active ? 'page' : undefined}
-                        className={cn(
-                          'relative mx-auto flex size-12 items-center justify-center rounded-full text-zinc-300 transition-[color,background-color,transform] duration-200 active:scale-95 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
-                          active && 'z-10 -translate-y-3 border border-emerald-200/30 bg-emerald-950/90 text-white shadow-[0_0_0_5px_rgba(16,185,129,0.08),0_8px_24px_rgba(0,0,0,0.35)]',
-                          index === 2 && !active && 'text-white hover:bg-white/10',
-                          !active && index !== 2 && 'hover:bg-white/10 hover:text-white',
-                        )}
+                        className="relative mx-auto flex size-12 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:size-[3.6rem]"
                       >
-                        <Icon className={cn('size-[1.35rem]', active && 'text-emerald-100')} aria-hidden="true" />
-                        {active ? <span className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-300" aria-hidden="true" /> : null}
+                        {active ? (
+                          <motion.span
+                            layoutId="silentra-dock-active"
+                            className="absolute inset-0 rounded-full border border-emerald-100/25 bg-[linear-gradient(145deg,rgba(16,185,129,0.34),rgba(6,78,59,0.56))] shadow-[0_0_22px_rgba(16,185,129,0.16),inset_0_1px_0_rgba(255,255,255,0.24)]"
+                            transition={motionEnabled ? { type: 'spring', stiffness: 420, damping: 32, mass: 0.7 } : { duration: 0 }}
+                          />
+                        ) : null}
+                        {item.prominent ? (
+                          <span className="absolute inset-0 rounded-full bg-white/[0.045] transition-colors hover:bg-white/[0.11]" />
+                        ) : null}
+                        <Icon className={cn('relative z-10 size-[1.65rem] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover:scale-105', active && 'text-white')} aria-hidden="true" />
                       </Link>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={14} className="border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl">
+                    <TooltipContent side="top" sideOffset={14} className="border border-white/15 bg-zinc-900/90 text-zinc-100 shadow-xl backdrop-blur-xl">
                       {item.label}
                     </TooltipContent>
                   </Tooltip>
                 );
               })}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    ref={moreTriggerRef}
+                    type="button"
+                    onClick={() => setMoreOpen(true)}
+                    aria-label={locale === 'en' ? 'More dashboard sections' : 'Mais secções da dashboard'}
+                    aria-expanded={moreOpen}
+                    aria-controls="dashboard-more-panel"
+                    className={cn(
+                      'relative mx-auto flex size-12 items-center justify-center rounded-full text-white outline-none transition-colors duration-200 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-emerald-300 sm:size-[3.6rem]',
+                      moreOpen || moreActive ? 'bg-white/10' : '',
+                    )}
+                  >
+                    {moreOpen || moreActive ? (
+                      <motion.span
+                        layoutId="silentra-dock-active"
+                        className="absolute inset-0 rounded-full border border-emerald-100/20 bg-[linear-gradient(145deg,rgba(16,185,129,0.24),rgba(6,78,59,0.42))]"
+                        transition={motionEnabled ? { type: 'spring', stiffness: 420, damping: 32, mass: 0.7 } : { duration: 0 }}
+                      />
+                    ) : null}
+                    <MoreHorizontal className="relative z-10 size-[1.7rem]" aria-hidden="true" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={14} className="border border-white/15 bg-zinc-900/90 text-zinc-100 shadow-xl backdrop-blur-xl">
+                  {locale === 'en' ? 'More' : 'Mais'}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </nav>
