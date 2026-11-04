@@ -63,6 +63,11 @@ assert.doesNotMatch(
   'A navegação deve apresentar apenas secções; as badges pertencem às funcionalidades.',
 );
 assert.match(
+  source,
+  /if \(\(FREE_FEATURES as readonly string\[\]\)\.includes\(canonicalFeature\)\) \{\s*return null;/,
+  'Funcionalidades gratuitas não devem receber badges de upgrade.',
+);
+assert.match(
   directoryMigration,
   /alter column is_public_in_directory set default true/i,
   'A presença no diretório deve estar ativa por defeito.',
