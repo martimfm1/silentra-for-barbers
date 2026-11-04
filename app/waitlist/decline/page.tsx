@@ -1,5 +1,5 @@
 import WaitlistDeclineClient from './waitlist-decline-client';
-import { isSafePublicBookingDate, UUID_PATTERN } from '@/lib/validation';
+import { UUID_PATTERN } from '@/lib/validation';
 
 type SearchParams = {
   shop?: string;
