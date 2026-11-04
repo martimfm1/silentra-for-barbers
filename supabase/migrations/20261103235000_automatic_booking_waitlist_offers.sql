@@ -185,7 +185,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 revoke all on function public.sync_booking_waitlist_offer_status() from public, anon, authenticated;
 
