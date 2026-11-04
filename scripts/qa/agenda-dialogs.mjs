@@ -31,6 +31,8 @@ assert.ok(bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'
 assert.ok(bookingForm.includes('type="search"'));
 assert.ok(bookingForm.includes('role="combobox"'));
 assert.ok(bookingForm.includes('matchingClients'));
+assert.ok(bookingForm.includes('replace(/\\D/g'));
+assert.ok(bookingForm.includes("addEventListener('pointerdown'"));
 assert.ok(bookingForm.includes('singleProfessional'));
 assert.ok(bookingForm.includes('services.length === 1'));
 assert.ok(bookingForm.includes('type="date"'));
