@@ -86,8 +86,20 @@ for (const route of [
 // Navigation density, fixed bottom placement and the More sheet must stay consistent.
 assert.match(
   sidebar,
-  /const primaryItems:[\s\S]*?\/dashboard\/agenda[\s\S]*?\/dashboard\/clientes[\s\S]*?\/dashboard\/servicos/,
+  /const primaryItems:[\s\S]*?href: '\/dashboard'[\s\S]*?href: '\/dashboard\/agenda'[\s\S]*?href: '\/dashboard\/analytics'/,
+  'Dock order must be Home, Agenda and Reports around the central create action.',
 );
+assert.match(sidebar, /primaryItems\.slice\(0, 2\)\.map\(renderDockItem\)/);
+assert.match(sidebar, /href="\/dashboard\/agenda\?create=1"/);
+assert.match(sidebar, /primaryItems\.slice\(2\)\.map\(renderDockItem\)/);
+assert.match(sidebar, /silentra:open-create-booking/);
+assert.match(sidebar, /managementItems\.map\(renderItem\)/);
+assert.match(sidebar, /'Gestão', 'Management'/);
+assert.match(
+  agendaPage,
+  /window\.addEventListener\('silentra:open-create-booking'/,
+);
+assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
 assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);

@@ -12,6 +12,7 @@ const declineClient = read('app/waitlist/decline/waitlist-decline-client.tsx');
 const dashboardPage = read('app/dashboard/espera/page.tsx');
 const publicApi = read('app/api/shops/[id]/waitlist/route.ts');
 const dashboardApi = read('app/api/dashboard/waitlist/route.ts');
+const bookingDataApi = read('app/api/shops/[id]/booking-data/route.ts');
 const bookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
 const sidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
 
@@ -78,7 +79,18 @@ assert.match(dashboardApi, /withApiObservability/);
 assert.match(dashboardApi, /requireTenantAuthorization/);
 assert.match(dashboardApi, /barbershop_member_permissions/);
 assert.match(dashboardApi, /resolveAccessPlanForUser/);
+assert.match(dashboardApi, /hasPlanFeature\(plan, 'waitlist'\)/);
 assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/);
+assert.match(publicApi, /getAccessPlanForBarbershop/);
+assert.match(publicApi, /plan !== 'enterprise'/);
+assert.match(dashboardPage, /hasFeature\('waitlist'\)/);
+assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
+assert.match(sidebar, /feature: 'waitlist'/);
+assert.match(bookingDataApi, /get_effective_billing_plan_for_barbershop/);
+assert.match(bookingDataApi, /plan: resolvedPlan/);
+assert.match(bookingDrawer, /setShopPlan\(payload\.plan/);
+assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
+assert.match(offersWorker, /profile\.plan !== 'enterprise'/);
 assert.match(dashboardApi, /allowedStatuses/);
 assert.match(dashboardApi, /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/);
 

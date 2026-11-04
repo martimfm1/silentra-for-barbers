@@ -1,10 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
+  ArrowRight,
   CalendarDays,
   CheckCircle2,
   Clock3,
+  Lock,
   Mail,
   Phone,
   RefreshCw,
@@ -16,6 +19,8 @@ import {
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
+import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
 type WaitlistEntry = {
   id: string;
@@ -55,7 +60,9 @@ function dateLabel(value: string, locale: string) {
 
 export default function WaitlistPage() {
   const { locale } = useLanguage();
+  const { hasFeature, loading: planLoading } = useFeatureAccess();
   const en = locale === 'en';
+  const canAccessWaitlist = hasFeature('waitlist');
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -64,6 +71,12 @@ export default function WaitlistPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const load = useCallback(async (silent = false) => {
+    if (planLoading) return;
+    if (!canAccessWaitlist) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     if (silent) setRefreshing(true);
     else setLoading(true);
     try {
@@ -80,7 +93,7 @@ export default function WaitlistPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [en]);
+  }, [canAccessWaitlist, en, planLoading]);
 
   useEffect(() => {
     void load();
@@ -136,6 +149,42 @@ export default function WaitlistPage() {
       : { waiting: 'À espera', offered: 'Vaga proposta', booked: 'Reservado', cancelled: 'Cancelado', expired: 'Expirado' };
     return labels[status];
   };
+
+  if (!planLoading && !canAccessWaitlist) {
+    return (
+      <main className="silentra-page-shell dashboard-page">
+        <div className="silentra-page-grid" aria-hidden="true" />
+        <div className="relative z-10 mx-auto flex min-h-[65vh] w-full max-w-3xl items-center justify-center px-3 py-10 sm:px-5">
+          <section className="w-full rounded-3xl border border-white/10 bg-zinc-950/75 p-7 text-center shadow-2xl backdrop-blur-xl sm:p-10">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-400/10 text-violet-200">
+              <Lock className="size-6" aria-hidden="true" />
+            </div>
+            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              {en ? 'Enterprise feature' : 'Funcionalidade Enterprise'}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
+              {en ? 'Waitlist' : 'Lista de espera'}
+            </h1>
+            <div className="mt-4 flex justify-center">
+              <FeaturePlanBadge feature="waitlist" />
+            </div>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-zinc-400">
+              {en
+                ? 'Recover cancelled appointments automatically, notify customers about matching openings and manage every waitlist request in one place. This feature is exclusive to Barbers Enterprise.'
+                : 'Recupera automaticamente vagas de marcações canceladas, notifica clientes quando surge um horário compatível e gere todos os pedidos num só lugar. Esta funcionalidade é exclusiva do Barbers Enterprise.'}
+            </p>
+            <Link
+              href="/dashboard/billing"
+              className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+            >
+              {en ? 'Explore Enterprise' : 'Conhecer o Enterprise'}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="silentra-page-shell dashboard-page">

@@ -57,8 +57,8 @@ const FEATURE_GROUPS: ReadonlyArray<{
     ],
   },
   {
-    title: 'Crescimento e clientes',
-    features: ['advanced_crm', 'customer_segments', 'loyalty'],
+    title: 'Crescimento e retenção',
+    features: ['advanced_crm', 'customer_segments', 'loyalty', 'waitlist'],
   },
   {
     title: 'Analytics e relatórios',
@@ -77,8 +77,8 @@ const FEATURE_GROUPS: ReadonlyArray<{
     ],
   },
   {
-    title: 'Presença online',
-    features: ['landing_page', 'custom_website'],
+    title: 'Presença online e diretório',
+    features: ['directory_visibility', 'landing_page', 'custom_website'],
   },
 ];
 
@@ -129,15 +129,16 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
   enterprise_reports: 'Business reports',
   landing_page: 'Professional landing page included',
   custom_website: 'Custom website on the Silentra domain (one-time €50 setup)',
+  waitlist: 'Waitlist and automatic cancelled-slot recovery',
 };
 
 const GROUP_LABELS_EN: Record<string, string> = {
   'Gestão da barbearia': 'Barbershop management',
   'Comunicação e automação': 'Communication and automation',
-  'Crescimento e clientes': 'Growth and customers',
+  'Crescimento e retenção': 'Growth and customer retention',
   'Analytics e relatórios': 'Analytics and reporting',
   'Equipa e operação': 'Team and operations',
-  'Presença online': 'Online presence',
+  'Presença online e diretório': 'Online presence and directory',
   'Pagamentos e reservas': 'Payments and booking',
 };
 
@@ -202,8 +203,8 @@ export function PlanComparison() {
         </h2>
         <p className="mt-3 text-sm leading-6 text-zinc-400 sm:text-base">
           {english
-            ? 'Free includes everything you need to get started. Paid plans add tools to grow, automate and manage larger operations.'
-            : 'O Free já inclui tudo o que precisas para começar. Os planos pagos acrescentam ferramentas para crescer, automatizar e gerir operações maiores.'}
+            ? 'Free covers everyday bookings. Pro adds growth and automation tools; Enterprise unlocks advanced operations, multiple locations and automatic waitlist recovery.'
+            : 'O Free cobre as marcações do dia a dia. O Pro acrescenta ferramentas de crescimento e automação; o Enterprise desbloqueia operações avançadas, várias localizações e recuperação automática de vagas através da lista de espera.'}
         </p>
       </div>
 

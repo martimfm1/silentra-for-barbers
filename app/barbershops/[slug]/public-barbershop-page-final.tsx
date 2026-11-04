@@ -205,6 +205,7 @@ export default function BarbershopPublicPageFinal({
   const bookingShop = {
     id: shop.id,
     barbershop_id: targetId,
+    plan: shop.plan,
     name: shop.name,
     slug: shop.slug,
     city: shop.city || '',

@@ -45,6 +45,7 @@ export interface BookingSuccessData {
 }
 
 export interface MarketplaceBookingResponse {
+  plan?: 'free' | 'pro' | 'enterprise';
   services: MarketplaceService[];
   availableSlots: string[];
   isClosed: boolean;
