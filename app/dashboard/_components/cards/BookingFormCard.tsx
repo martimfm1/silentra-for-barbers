@@ -100,14 +100,14 @@ export function BookingForm({
     );
     if (query.length < 2 || selectedClient) return [];
 
-    const digits = query.replace(/\\D/g, '');
+    const digits = query.replace(/\D/g, '');
     return clients
       .filter((client) => {
         const name = client.name_complete.toLocaleLowerCase(
           locale === 'en' ? 'en-GB' : 'pt-PT',
         );
         const phone = (client.num_phone ?? '').toLocaleLowerCase();
-        const phoneDigits = phone.replace(/\\D/g, '');
+        const phoneDigits = phone.replace(/\D/g, '');
         return (
           name.includes(query) ||
           phone.includes(query) ||
@@ -194,7 +194,7 @@ export function BookingForm({
             variant="ghost"
             size="icon"
             aria-label={locale === 'en' ? 'Close booking form' : 'Fechar formulário de marcação'}
-            className="size-10 shrink-0 rounded-xl border border-white/10 bg-white/[0.035] text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+            className="size-11 shrink-0 rounded-xl border border-white/10 bg-white/[0.035] text-zinc-300 hover:bg-white/[0.08] hover:text-white"
           >
             <X className="size-5" aria-hidden="true" />
           </Button>
@@ -287,7 +287,7 @@ export function BookingForm({
                     type="button"
                     onClick={clearSelectedClient}
                     aria-label={locale === 'en' ? 'Clear selected customer' : 'Limpar cliente selecionado'}
-                    className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    className="absolute right-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                   >
                     <X className="size-4" aria-hidden="true" />
                   </button>
@@ -372,7 +372,7 @@ export function BookingForm({
             </div>
 
             <details className="group mt-3 rounded-xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
-              <summary className="flex min-h-6 cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-zinc-400 marker:hidden">
+              <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-zinc-400 marker:hidden">
                 <span>{locale === 'en' ? 'Customer details (optional)' : 'Detalhes do cliente (opcional)'}</span>
                 <span className="text-zinc-600 transition group-open:rotate-180">⌄</span>
               </summary>
@@ -530,7 +530,7 @@ export function BookingForm({
                     onClick={() => setQuickDate(0)}
                     aria-pressed={selectedDate === today}
                     className={cn(
-                      'min-h-9 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
+                      'min-h-10 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
                       selectedDate === today
                         ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
                         : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06]',
@@ -543,7 +543,7 @@ export function BookingForm({
                     onClick={() => setQuickDate(1)}
                     aria-pressed={selectedDate === tomorrow}
                     className={cn(
-                      'min-h-9 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
+                      'min-h-10 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
                       selectedDate === tomorrow
                         ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
                         : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06]',
