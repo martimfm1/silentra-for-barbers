@@ -67,6 +67,8 @@ export interface MarketplaceShop {
   closed_days?: string | null;
   closedDays?: string | null;
   off_days?: number[];
+  /** Resolved public subscription tier; required to expose Enterprise-only booking options. */
+  plan?: 'free' | 'pro' | 'enterprise' | null;
 }
 
 export interface MarketplaceService {
