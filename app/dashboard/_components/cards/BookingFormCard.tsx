@@ -225,15 +225,41 @@ export function BookingForm({
                   onFocus={() => setShowClientResults(true)}
                   onChange={(event) => {
                     setClientQuery(event.target.value);
-                    setFormData((previous) => ({ ...previous, clientId: undefined }));
+                    setFormData((previous) =>
+                      previous.clientId
+                        ? {
+                            ...previous,
+                            clientId: undefined,
+                            name_complete: '',
+                            num_phone: '',
+                            email: '',
+                            birth_date: '',
+                          }
+                        : previous,
+                    );
                     setShowClientResults(true);
                   }}
                   onKeyDown={(event) => {
                     if (event.key === 'Escape') setShowClientResults(false);
+                    if (event.key === 'ArrowDown' && matchingClients.length > 0) {
+                      event.preventDefault();
+                      document
+                        .getElementById('booking-client-results')
+                        ?.querySelector<HTMLButtonElement>('button')
+                        ?.focus();
+                    }
                     if (event.key === 'Enter' && matchingClients.length > 0) {
                       event.preventDefault();
                       chooseClient(matchingClients[0].id);
                     }
+                  }}
+                  onBlur={(event) => {
+                    const results = document.getElementById('booking-client-results');
+                    const nextTarget = event.relatedTarget;
+                    if (results && nextTarget instanceof Node && results.contains(nextTarget)) {
+                      return;
+                    }
+                    setShowClientResults(false);
                   }}
                   placeholder={t('bookingForm.searchCustomer')}
                   role="combobox"
