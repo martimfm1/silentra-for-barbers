@@ -35,7 +35,7 @@ type Props = {
   finalizeBooking: (id: string, paymentMethod: string) => void | Promise<void>;
   addCompletedAppointmentClient: (id: string) => void | Promise<void>;
   addingClientAppointmentId: string | null;
-  handleCancelBooking: (id: string, rejectPrepayment?: boolean) => void | Promise<void>;
+  handleCancelBooking: (id: string) => void | Promise<void>;
   compact?: boolean;
   onDetails?: () => void;
   locale?: string;
