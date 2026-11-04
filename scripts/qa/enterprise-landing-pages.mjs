@@ -47,7 +47,7 @@ assert.match(
 );
 assert.match(features, /'landing_page'/);
 assert.match(features, /landing_page: 'Landing page profissional incluída'/);
-assert.match(pricing, /Landing page profissional e domínio Silentra incluídos/);
+assert.match(pricing, /Landing page profissional e endereço no domínio Silentra incluídos/);
 assert.match(pricing, /Site próprio com ativação única de 50 €/);
 assert.match(
   comparison,
