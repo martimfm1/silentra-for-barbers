@@ -94,7 +94,7 @@ const toolsItems: SidebarItem[] = [
     href: '/dashboard/espera',
     label: 'Lista de espera',
     icon: Clock3,
-    feature: 'appointments',
+    feature: 'waitlist',
   },
   {
     href: '/dashboard/analytics',
