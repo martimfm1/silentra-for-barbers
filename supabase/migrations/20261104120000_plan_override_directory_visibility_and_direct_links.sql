@@ -10,7 +10,7 @@ create or replace function public.set_barbershop_directory_visibility(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   v_user_barbershop_id uuid;
@@ -67,7 +67,7 @@ create or replace function public.restore_directory_visibility_without_pro()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   v_user_id uuid;
@@ -117,12 +117,12 @@ end;
 $$;
 
 revoke all on function public.set_barbershop_directory_visibility(uuid, uuid, boolean)
-  from public, anon;
+  from public, anon, authenticated, service_role;
 grant execute on function public.set_barbershop_directory_visibility(uuid, uuid, boolean)
   to authenticated, service_role;
 
 revoke all on function public.restore_directory_visibility_without_pro()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 drop trigger if exists restore_directory_visibility_without_pro
   on public.subscriptions;
