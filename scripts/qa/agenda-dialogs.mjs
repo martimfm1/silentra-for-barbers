@@ -4,6 +4,9 @@ import fs from 'node:fs';
 const read = (path) => fs.readFileSync(path, 'utf8');
 const agenda = read('app/dashboard/agenda/page.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
+
+const bookingForm = read('app/dashboard/_components/cards/BookingFormCard.tsx');
+const appointmentsService = read('app/dashboard/_services/appointments.service.ts');
 const blockForm = read('app/dashboard/_components/cards/BlockFormCard.tsx');
 const popover = read('components/ui/popover.tsx');
 const select = read('components/ui/select.tsx');
@@ -21,7 +24,24 @@ assert.match(
 );
 assert.match(agenda, /onClick=\{\(\) => setBookingDialogOpen\(true\)\}/);
 assert.match(agenda, /onClick=\{\(\) => setBlockDialogOpen\(true\)\}/);
-assert.match(agenda, /max-w-5xl overflow-y-auto/);
+assert.match(agenda, /h-\\[100dvh\\] max-h-\\[100dvh\\] w-screen/);
+assert.match(agenda, /showCloseButton=\\{false\\}/);
+assert.match(bookingForm, /overflow-y-auto overscroll-contain/);
+assert.match(bookingForm, /pb-\\[calc\\(0\\.875rem\\+env\\(safe-area-inset-bottom\\)\\)\\]/);
+assert.match(bookingForm, /type="search"/);
+assert.match(bookingForm, /role="combobox"/);
+assert.match(bookingForm, /matchingClients/);
+assert.match(bookingForm, /singleProfessional/);
+assert.match(bookingForm, /services.length === 1/);
+assert.match(bookingForm, /type="date"/);
+assert.match(bookingForm, /type="time"/);
+assert.match(bookingForm, /Hoje/);
+assert.match(bookingForm, /Amanhã/);
+assert.match(agenda, /birth_date: client.birth_date \\?\\? ''/);
+assert.match(agenda, /birthDate: formData.birth_date \\?\\? ''/);
+assert.match(agenda, /setSelectedDate\\(getLocalDateInputValue\\(\\)\\)/);
+assert.match(hook, /!manualName\\?\\.trim\\(\\) \\|\\| !manualPhone\\?\\.trim\\(\\)/);
+assert.match(appointmentsService, /manual_birth_date: payload.manual_birth_date/);
 assert.doesNotMatch(
   agenda,
   /\{bookingDialogOpen && \(/,
