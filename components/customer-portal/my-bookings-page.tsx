@@ -57,8 +57,8 @@ const statusLabel = (value: string) =>
     completed: 'Concluída',
   })[value] ?? value;
 
-export function MyBookingsPage() {
-  const [email, setEmail] = useState('');
+export function MyBookingsPage({ initialEmail = '' }: { initialEmail?: string }) {
+  const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);

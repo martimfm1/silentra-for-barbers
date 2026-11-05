@@ -109,6 +109,8 @@ export async function sendBookingConfirmationEmail(
         location: 'Location',
         addCalendar: 'Add to calendar',
         openLocation: 'Open location',
+        manageBooking: 'Manage my booking',
+        manageHint: 'Need to change your plans? Reschedule or cancel your booking from your client area.',
         footer: 'Keep this email as confirmation of your booking.',
         description: `Booking for ${payload.serviceName} for ${payload.clientName}.`,
         textTitle: 'Booking confirmed',
@@ -124,6 +126,8 @@ export async function sendBookingConfirmationEmail(
         location: 'Local',
         addCalendar: 'Adicionar ao calendário',
         openLocation: 'Abrir localização',
+        manageBooking: 'Gerir a minha marcação',
+        manageHint: 'Precisas de alterar os teus planos? Podes remarcar ou cancelar a marcação na tua área de cliente.',
         footer: 'Guarda este email como confirmação da tua marcação.',
         description: `Agendamento de ${payload.serviceName} para ${payload.clientName}.`,
         textTitle: 'Agendamento confirmado',
@@ -134,6 +138,7 @@ export async function sendBookingConfirmationEmail(
     timeZone: 'Europe/Lisbon',
   }).format(new Date(`${payload.date}T12:00:00`));
   const avatarUrl = getBarbershopAvatarUrl(payload.barbershopId);
+  const customerPortalUrl = `${getPublicAppUrl()}/my-bookings?email=${encodeURIComponent(payload.to.trim().toLowerCase())}`;
   const title = `${payload.serviceName} — ${payload.barbershopName}`;
   const description = copy.description;
   const location = [payload.barbershopName, payload.barbershopAddress]
@@ -163,6 +168,8 @@ ${avatarMarkup}
 <p style="font-size:14px;line-height:1.6;color:#a1a1aa;margin:0 0 20px;">${copy.greeting}</p>
 <table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(formattedDate)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
 <div style="height:1px;background:#27272a;margin:20px 0;"></div>
+<p style="font-size:13px;line-height:1.6;color:#a1a1aa;margin:0 0 12px;">${copy.manageHint}</p>
+<a href="${customerPortalUrl}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:14px 16px;font-size:14px;font-weight:700;margin-bottom:22px;">${copy.manageBooking}</a>
 <p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.addCalendar}</p>
 <a href="${google}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:10px;">Google Calendar</a>
 <a href="${apple}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:18px;">Apple Calendar (.ics)</a>
@@ -185,7 +192,7 @@ ${avatarMarkup}
         to: [{ email: payload.to, name: payload.clientName }],
         subject: copy.subject,
         htmlContent,
-        textContent: `${copy.textTitle}\n${payload.serviceName}\n${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {
