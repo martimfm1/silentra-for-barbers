@@ -15,7 +15,7 @@ const DEFAULT_QR_TEXT =
 const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
 const PUBLIC_ORIGIN = (
   process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://barbers.silentra.me'
-).replace(/\\/$/, '');
+).replace(/\/$/, '');
 
 function getQrPublicUrl(barbershopId: string, slug: string) {
   const path =
