@@ -983,7 +983,7 @@ const checks = [
   },
   {
     name: 'Barbershop deletion migration detaches user profiles and restricts verification RPCs to service role',
-    file: 'supabase/migrations/20261103000000_secure_barbershop_deletion.sql',
+    file: 'supabase/migrations/20261103010515_secure_barbershop_deletion.sql',
     test: (source) =>
       source.includes('on delete set null') &&
       source.includes('barbershop_deletion_verifications') &&
