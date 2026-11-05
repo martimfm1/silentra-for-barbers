@@ -266,7 +266,7 @@ assert.match(
 );
 assert.match(
   appointmentClientRpcHardening,
-  /revoke all on function public\.add_client_from_completed_appointment\(uuid, uuid\)[\s\S]*grant execute on function public\.add_client_from_completed_appointment\(uuid, uuid\) to authenticated/i,
+  /revoke all on function public\\.add_client_from_completed_appointment\\(uuid, uuid\\)[\\s\\S]*grant execute on function public\\.add_client_from_completed_appointment\\(uuid, uuid\\)\\s*to authenticated/i,
   'The appointment-to-CRM RPC must remain authenticated-only.',
 );
 assert.match(
