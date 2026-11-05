@@ -39,7 +39,7 @@ const directoryMigration = fs.readFileSync(
     root,
     'supabase',
     'migrations',
-    '20261104120000_plan_override_directory_visibility_and_direct_links.sql',
+    '20261105000312_plan_override_directory_visibility_and_direct_links.sql',
   ),
   'utf8',
 );
