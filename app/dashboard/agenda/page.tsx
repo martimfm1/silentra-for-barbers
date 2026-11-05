@@ -126,7 +126,7 @@ export default function AgendaPage() {
     finalizeBooking,
     addCompletedAppointmentClient,
     handleCreateBlock,
-    handleDeleteBooking,
+    handleCancelBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
   const [formData, setFormData] = useState<BookingFormData>({
@@ -283,7 +283,7 @@ export default function AgendaPage() {
     finalizeBooking,
     addCompletedAppointmentClient,
     addingClientAppointmentId,
-    handleDeleteBooking,
+    handleCancelBooking,
   };
 
   return (

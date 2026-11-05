@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Loader2, Trash2, UserPlus } from 'lucide-react';
+import { CalendarX2, Check, Loader2, UserPlus } from 'lucide-react';
 import type { Appointment } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,6 +8,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -34,7 +35,7 @@ type Props = {
   finalizeBooking: (id: string, paymentMethod: string) => void | Promise<void>;
   addCompletedAppointmentClient: (id: string) => void | Promise<void>;
   addingClientAppointmentId: string | null;
-  handleDeleteBooking: (id: string, rejectPrepayment?: boolean) => void | Promise<void>;
+  handleCancelBooking: (id: string) => void | Promise<void>;
   compact?: boolean;
   onDetails?: () => void;
   locale?: string;
@@ -52,7 +53,7 @@ export function AppointmentActions({
   finalizeBooking,
   addCompletedAppointmentClient,
   addingClientAppointmentId,
-  handleDeleteBooking,
+  handleCancelBooking,
   compact = false,
   onDetails,
   locale = 'pt',
@@ -246,31 +247,56 @@ export function AppointmentActions({
               size="icon"
               aria-label={
                 appointment.payment_status === 'awaiting_review'
-                  ? isEnglish ? `Reject prepayment from ${name}` : `Rejeitar pré-pagamento de ${name}`
-                  : isEnglish ? `Delete booking for ${name}` : `Eliminar agendamento de ${name}`
+                  ? isEnglish
+                    ? 'Reject prepayment from ' + name
+                    : 'Rejeitar pré-pagamento de ' + name
+                  : isEnglish
+                    ? 'Cancel booking for ' + name
+                    : 'Cancelar marcação de ' + name
               }
-              className={`${compact ? 'h-8 w-8' : 'min-h-[44px] min-w-[44px]'} rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20`}
+              className={compact
+                ? 'h-8 w-8 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                : 'min-h-[44px] min-w-[44px] rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'}
             >
-              <Trash2 className="size-4" aria-hidden="true" />
+              <CalendarX2 className="size-4" aria-hidden="true" />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="w-[92vw] max-w-[400px] rounded-xl border-white/10 bg-zinc-950">
+          <AlertDialogContent className="w-[92vw] max-w-[420px] rounded-xl border-white/10 bg-zinc-950">
             <AlertDialogHeader>
-              <AlertDialogTitle>{appointment.payment_status === 'awaiting_review'
-                ? isEnglish ? 'Reject this prepayment?' : 'Rejeitar este pré-pagamento?'
-                : isEnglish ? 'Delete this booking?' : 'Eliminar esta marcação?'}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {appointment.payment_status === 'awaiting_review'
+                  ? isEnglish
+                    ? 'Reject this prepayment and cancel the booking?'
+                    : 'Rejeitar o pré-pagamento e cancelar a marcação?'
+                  : isEnglish
+                    ? 'Cancel this booking?'
+                    : 'Cancelar esta marcação?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-6 text-zinc-400">
+                {appointment.payment_status === 'awaiting_review'
+                  ? isEnglish
+                    ? 'The prepayment will be rejected, the booking will be cancelled and the customer will receive an email explaining that the barbershop cancelled it.'
+                    : 'O pré-pagamento será rejeitado, a marcação será cancelada e o cliente receberá um email a informar que a barbearia a cancelou.'
+                  : isEnglish
+                    ? 'The booking will be cancelled and the customer will receive an email explaining that the barbershop cancelled it.'
+                    : 'A marcação será cancelada e o cliente receberá um email a informar que a barbearia a cancelou.'}
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-row justify-end gap-2">
               <AlertDialogCancel className="m-0 min-h-[44px] flex-1 border-white/10 bg-transparent text-white">
-                {isEnglish ? 'Keep booking' : 'Manter'}
+                {isEnglish ? 'Keep booking' : 'Manter marcação'}
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => handleDeleteBooking(appointment.id, appointment.payment_status === 'awaiting_review')}
+                onClick={() => handleCancelBooking(appointment.id)}
                 className="m-0 min-h-[44px] flex-1 bg-red-600 text-white hover:bg-red-500"
               >
                 {appointment.payment_status === 'awaiting_review'
-                  ? isEnglish ? 'Reject request' : 'Rejeitar pedido'
-                  : isEnglish ? 'Delete' : 'Eliminar'}
+                  ? isEnglish
+                    ? 'Reject and cancel'
+                    : 'Rejeitar e cancelar'
+                  : isEnglish
+                    ? 'Cancel booking'
+                    : 'Cancelar marcação'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
