@@ -2,7 +2,13 @@ import Link from 'next/link';
 import { SiteNavbar } from '@/components/site-navbar';
 import { MyBookingsPage } from '@/components/customer-portal/my-bookings-page';
 
-export default async function CustomerBookingsPage({\n  searchParams,\n}: {\n  searchParams: Promise<{ email?: string | string[] }>;\n}) {\n  const params = await searchParams;\n  const initialEmail = Array.isArray(params.email) ? params.email[0] : params.email;
+export default async function CustomerBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const initialEmail = Array.isArray(params.email) ? params.email[0] : params.email;
   return (
     <div className="silentra-page-shell min-h-screen text-foreground">
       <SiteNavbar />
