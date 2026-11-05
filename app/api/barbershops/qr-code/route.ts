@@ -185,6 +185,7 @@ async function PATCH__unobserved(request: Request) {
     return NextResponse.json(
       {
         slug,
+        publicUrl: getQrPublicUrl(tenant.barbershopId, slug),
         text: text || DEFAULT_QR_TEXT,
         canCustomize: true,
       },
