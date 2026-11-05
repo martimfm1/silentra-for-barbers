@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
 
-const migration = read('supabase/migrations/20261103233000_customer_booking_waitlist.sql');
-const offersMigration = read('supabase/migrations/20261103235000_automatic_booking_waitlist_offers.sql');
+const migration = read('supabase/migrations/20261104133918_customer_booking_waitlist.sql');
+const offersMigration = read('supabase/migrations/20261104133930_automatic_booking_waitlist_offers.sql');
 const offersWorker = read('app/api/cron/booking-waitlist-offers/route.ts');
 const declineApi = read('app/api/shops/[id]/waitlist/decline/route.ts');
 const declinePage = read('app/waitlist/decline/page.tsx');
