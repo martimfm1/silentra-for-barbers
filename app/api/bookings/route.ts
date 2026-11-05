@@ -292,7 +292,7 @@ async function POST__unobserved(request: Request) {
     if (existingCustomerId && !birthDateInput) {
       // The client already has a birth date stored in the barbershop profile.
       // No need to expose that value back to the browser.
-    } else if (existingCustomerId && birthDateInput) {
+    } else if (existingCustomerId && birthDateInput && birthDate) {
       const { error: birthDateUpdateError } = await admin
         .from('users')
         .update({ birth_date: birthDate })
