@@ -9,7 +9,7 @@ const [worker, provider, route, testRoute, panel, bookingNotification, migration
   read('app/api/notifications/push/test/route.ts'),
   read('components/dashboard/settings-push-notifications-panel.tsx'),
   read('lib/brevo/barber-booking-notification.ts'),
-  read('supabase/migrations/20261103100000_web_push_subscriptions.sql'),
+  read('supabase/migrations/20261103012254_web_push_subscriptions.sql'),
   read('docs/WEB_PUSH.md'),
   read('package.json'),
 ]);
