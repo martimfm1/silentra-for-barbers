@@ -41,6 +41,8 @@ export type ProBookingPageProps = {
   openingTime: string | null;
   closingTime: string | null;
   closedDays?: string | null;
+  hideClosedDays?: boolean;
+  requireBirthDate?: boolean;
 };
 
 function getCoverUrl(value: string | null, barbershopId: string): string | null {
@@ -62,6 +64,8 @@ export default function ProBookingPage({
   openingTime,
   closingTime,
   closedDays,
+  hideClosedDays = false,
+  requireBirthDate = true,
 }: ProBookingPageProps) {
   const { t, locale } = useLanguage();
   const [activeBookingOffer, setActiveBookingOffer] = useState(bookingOffer);
@@ -223,6 +227,8 @@ export default function ProBookingPage({
         selectedTime={activeBookingOffer?.time}
         selectedProfessionalId={activeBookingOffer?.professionalId}
         appearance="agenda"
+        hideClosedDays={hideClosedDays}
+        requireBirthDate={requireBirthDate}
         onSuccess={() => {
           setBookingOpen(false);
           setActiveBookingOffer(null);
