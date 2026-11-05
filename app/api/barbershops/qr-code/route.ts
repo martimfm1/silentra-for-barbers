@@ -12,6 +12,18 @@ import {
 const QR_MANAGE_ROLES = ['owner', 'admin'] as const;
 const DEFAULT_QR_TEXT =
   'Scaneia para conhecer a nossa barbearia e marcar o teu proximo servico.';
+const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
+const PUBLIC_ORIGIN = (
+  process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://barbers.silentra.me'
+).replace(/\/$/, '');
+
+function getQrPublicUrl(barbershopId: string, slug: string) {
+  const path =
+    barbershopId === AGENDA_DO_VICTOR_BARBERSHOP_ID
+      ? '/agendadovictor'
+      : `/barbershops/${encodeURIComponent(slug)}`;
+  return `${PUBLIC_ORIGIN}${path}`;
+}
 
 function jsonError(message: string, status: number) {
   return NextResponse.json(
@@ -55,6 +67,9 @@ async function GET__unobserved(request: Request) {
         slug: canCustomize
           ? shopResult.data.custom_slug || shopResult.data.slug
           : shopResult.data.slug,
+        publicUrl: getQrPublicUrl(tenant.barbershopId, canCustomize
+          ? shopResult.data.custom_slug || shopResult.data.slug
+          : shopResult.data.slug),
         name: barbershopResult.data?.name || 'Barbearia',
         text: barbershopResult.data?.qr_code_text || DEFAULT_QR_TEXT,
         plan,
@@ -170,6 +185,7 @@ async function PATCH__unobserved(request: Request) {
     return NextResponse.json(
       {
         slug,
+        publicUrl: getQrPublicUrl(tenant.barbershopId, slug),
         text: text || DEFAULT_QR_TEXT,
         canCustomize: true,
       },
