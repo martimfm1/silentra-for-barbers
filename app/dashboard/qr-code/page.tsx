@@ -97,6 +97,7 @@ export default function QrCodePage() {
       const data = (await response.json().catch(() => ({}))) as {
         slug?: string;
         text?: string;
+        publicUrl?: string;
         error?: string;
       };
       if (!response.ok || !data.slug || !data.text)
