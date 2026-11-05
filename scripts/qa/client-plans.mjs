@@ -17,7 +17,7 @@ const [
   read('components/dashboard/client-details-dialog.tsx'),
   read('app/api/crm/clients/[clientId]/plans/route.ts'),
   read('components/dashboard/client-plans-manager.tsx'),
-  read('supabase/migrations/20261101162000_client_membership_plans.sql'),
+  read('supabase/migrations/20261101162620_client_membership_plans.sql'),
   read('supabase/migrations/20261101181241_api_hot_path_optimizations.sql'),
   read('app/locales/pt-copy.ts'),
   read('app/locales/en-copy.ts'),
