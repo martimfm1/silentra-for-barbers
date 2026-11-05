@@ -34,6 +34,10 @@ export interface BookingDrawerProps {
   selectedTime?: string | null;
   selectedProfessionalId?: string | null;
   appearance?: 'default' | 'agenda';
+  /** Hide configured weekly days off from the selectable calendar. */
+  hideClosedDays?: boolean;
+  /** Whether public booking requires the customer's date of birth. */
+  requireBirthDate?: boolean;
 }
 
 export interface BookingSuccessData {
