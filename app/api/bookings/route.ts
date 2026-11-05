@@ -34,6 +34,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BIRTH_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const PUBLIC_BOOKING_RATE_LIMIT = 20;
 const PUBLIC_BOOKING_RATE_WINDOW_SECONDS = 10 * 60;
+const AGENDA_DO_VICTOR_BARBERSHOP_ID = 'f9cf1bca-22ec-4782-87ca-c338d51fc30d';
 function isValidBirthDate(value: string): boolean {
   if (!BIRTH_DATE_PATTERN.test(value)) return false;
   const parsed = new Date(`${value}T12:00:00`);
@@ -213,6 +214,7 @@ async function POST__unobserved(request: Request) {
       );
     }
     const barbershopId = shop.barbershop_id;
+    const requiresBirthDate = barbershopId !== AGENDA_DO_VICTOR_BARBERSHOP_ID;
     const shopRelation = Array.isArray(shop.barbershops)
       ? shop.barbershops[0]
       : shop.barbershops;
@@ -249,7 +251,7 @@ async function POST__unobserved(request: Request) {
       prepaymentSettings = { mbwayPhone, whatsappPhone };
     }
 
-    let birthDate = '';
+    let birthDate: string | null = null;
     let existingCustomerId: string | null = null;
     try {
       const existingCustomer = await findPublicBookingCustomer({
@@ -258,7 +260,7 @@ async function POST__unobserved(request: Request) {
         phone,
       });
       existingCustomerId = existingCustomer?.id ?? null;
-      if (existingCustomer?.birthDate) {
+      if (existingCustomer?.birthDate && isValidBirthDate(existingCustomer.birthDate)) {
         birthDate = existingCustomer.birthDate;
       } else if (birthDateInput && isValidBirthDate(birthDateInput)) {
         birthDate = birthDateInput;
@@ -277,7 +279,7 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    if (!birthDate || !isValidBirthDate(birthDate))
+    if (requiresBirthDate && (!birthDate || !isValidBirthDate(birthDate)))
       return NextResponse.json(
         {
           success: false,
