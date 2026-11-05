@@ -15,6 +15,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
+      position="top-right"
+      duration={4500}
+      visibleToasts={4}
+      closeButton
       theme={theme as ToasterProps['theme']}
       className="toaster group"
       icons={{
@@ -34,10 +38,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: 'glassmorphism cn-toast',
-          description: 'text-zinc-400',
-          title: 'text-zinc-100 font-medium',
-          closeButton: 'border-white/10 bg-white/[.04] hover:bg-white/[.08]',
+          toast: 'silentra-toast group',
+          success: 'silentra-toast-success',
+          error: 'silentra-toast-error',
+          warning: 'silentra-toast-warning',
+          info: 'silentra-toast-info',
+          loading: 'silentra-toast-loading',
+          title: 'silentra-toast-title',
+          description: 'silentra-toast-description',
+          actionButton: 'silentra-toast-action',
+          cancelButton: 'silentra-toast-cancel',
+          closeButton: 'silentra-toast-close',
         },
       }}
       {...props}
