@@ -32,6 +32,8 @@ export default function AgendaDoVictorPage({
       openingTime={shop.opening_time}
       closingTime={shop.closing_time}
       closedDays={shop.closed_days}
+      hideClosedDays
+      requireBirthDate={false}
     />
   );
 }
