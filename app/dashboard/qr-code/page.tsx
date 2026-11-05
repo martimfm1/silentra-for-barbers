@@ -30,6 +30,7 @@ export default function QrCodePage() {
   const defaultText = t('qrCodePage.defaultText');
   const [slug, setSlug] = useState('');
   const [savedSlug, setSavedSlug] = useState('');
+  const [resolvedPublicUrl, setResolvedPublicUrl] = useState('');
   const [canCustomize, setCanCustomize] = useState(false);
   const [name, setName] = useState('Barbearia');
   const [text, setText] = useState(defaultText);
@@ -39,15 +40,9 @@ export default function QrCodePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const normalizedSlug = useMemo(() => normalizePublicProfileSlug(slug), [slug]);
-  const publicUrl = useMemo(() => {
-    const origin =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (typeof window === 'undefined' ? '' : window.location.origin);
-    return normalizedSlug && origin
-      ? `${origin.replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
-      : '';
-  }, [normalizedSlug]);
+  const publicUrl = resolvedPublicUrl || (normalizedSlug
+    ? `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (typeof window === 'undefined' ? '' : window.location.origin)).replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
+    : '');
   useEffect(() => {
     fetch('/api/barbershops/qr-code', { cache: 'no-store' })
       .then(async (response) => {
@@ -57,12 +52,14 @@ export default function QrCodePage() {
           name: string;
           text: string;
           canCustomize: boolean;
+          publicUrl?: string;
         }>;
       })
       .then((data) => {
         setSlug(data.slug);
         setSavedSlug(data.slug);
         setCanCustomize(data.canCustomize);
+        setResolvedPublicUrl(data.publicUrl || '');
         setName(data.name);
         setText(data.text);
         setSavedText(data.text);
@@ -106,6 +103,7 @@ export default function QrCodePage() {
         throw new Error(data.error || t('qrCodePage.saveError'));
       setSlug(data.slug);
       setSavedSlug(data.slug);
+      if (typeof data.publicUrl === 'string') setResolvedPublicUrl(data.publicUrl);
       setText(data.text);
       setSavedText(data.text);
       toast.success(t('qrCodePage.saveSuccess'));
