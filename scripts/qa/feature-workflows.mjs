@@ -70,10 +70,10 @@ const bookingOutboxWorker = read(
   'app/api/cron/booking-automation-outbox/route.ts',
 );
 const appointmentReminderMigration = read(
-  'supabase/migrations/20261103090000_automatic_appointment_reminders.sql',
+  'supabase/migrations/20261103012145_automatic_appointment_reminders.sql',
 );
 const appointmentReminderSchedule = read(
-  'supabase/migrations/20261103090100_schedule_appointment_reminders.sql',
+  'supabase/migrations/20261103012147_schedule_appointment_reminders.sql',
 );
 const appointmentReminderWorker = read(
   'app/api/cron/appointment-reminders/route.ts',
