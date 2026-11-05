@@ -155,6 +155,8 @@ export function BookingDrawerCanonical({
   selectedTime = null,
   selectedProfessionalId = null,
   appearance = 'default',
+  hideClosedDays = false,
+  requireBirthDate = true,
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
   const days = useMemo(() => buildDays(locale), [locale]);
@@ -200,13 +202,27 @@ export function BookingDrawerCanonical({
   }, [isOpen, step]);
 
   const service = services.find((item) => item.id === serviceId) ?? null;
-  const closedDays = useMemo(
+  const configuredClosedDays = useMemo(
     () =>
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  // Keep days off visible for context, but never allow them to be selected.
-  const availableDays = days;
+  const closedDays = hideClosedDays
+    ? new Set<number>()
+    : configuredClosedDays;
+  // Some booking pages should omit weekly days off entirely, not display disabled dates.
+  const availableDays = useMemo(
+    () =>
+      hideClosedDays
+        ? days.filter(
+            (day) =>
+              !configuredClosedDays.has(
+                new Date(day.dateStr + 'T12:00:00').getDay(),
+              ),
+          )
+        : days,
+    [configuredClosedDays, days, hideClosedDays],
+  );
   const firstOpenDayIndex = availableDays.findIndex(
     (day) => !closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay()),
   );
@@ -227,7 +243,7 @@ export function BookingDrawerCanonical({
   useEffect(() => {
     if (!isOpen) return;
     const requestedDayIndex = selectedDate
-      ? days.findIndex((day) => day.dateStr === selectedDate)
+      ? availableDays.findIndex((day) => day.dateStr === selectedDate)
       : -1;
     const hasCompleteOffer = Boolean(
       selectedServiceId && selectedDate && selectedTime,
@@ -265,7 +281,7 @@ export function BookingDrawerCanonical({
     customerControllerRef.current?.abort();
     cacheRef.current.clear();
   }, [
-    days,
+    availableDays,
     firstOpenDayIndex,
     isOpen,
     shop?.id,
@@ -476,7 +492,8 @@ export function BookingDrawerCanonical({
     if (waitlistOnly && !waitlistConsent)
       return toast.error(locale === 'en' ? 'Please accept the waitlist contact notice.' : 'Aceita o aviso de contacto para entrares na lista de espera.');
     const birthDateIso = birthDateToIso(birthDate);
-    if (!waitlistOnly && !birthDateIso) return toast.error(t('bookingDrawer.validBirthDate'));
+    if (!waitlistOnly && requireBirthDate && !birthDateIso)
+      return toast.error(t('bookingDrawer.validBirthDate'));
     setSubmitting(true);
     setError('');
     try {
@@ -505,7 +522,7 @@ export function BookingDrawerCanonical({
                   customerName: name.trim(),
                   customerPhone: phone.trim(),
                   customerEmail: email.trim(),
-                  customerBirthDate: birthDateIso ?? '',
+                  ...(birthDateIso ? { customerBirthDate: birthDateIso } : {}),
                   prepayment: prepaymentSelected,
                 },
           ),
@@ -1018,7 +1035,7 @@ export function BookingDrawerCanonical({
                     />
                   </div>
                 </label>
-                {!waitlistOnly && (
+                {!waitlistOnly && requireBirthDate && (
                   <label className="grid gap-1.5 text-xs text-zinc-400">
                     <span>{t('bookingDrawer.birthDate')} *</span>
                     <Input
