@@ -190,6 +190,25 @@ const checks = [
       !source.includes('SUPPORTED_IMAGE_TYPES.has(file.type)'),
   },
   {
+    name: 'Branding uploads use an authenticated server-side WebP fallback when browser encoding is unavailable',
+    file: 'lib/utils/upload-image.ts',
+    test: (source) =>
+      source.includes("'/api/barbershops/image-convert'") &&
+      source.includes('MAX_SERVER_CONVERSION_BYTES') &&
+      source.includes("encodeCanvas(canvas, 'image/png', 1)") &&
+      /encodeCanvas\(\s*jpegCanvas,\s*'image\/jpeg',\s*candidate,?\s*\)/.test(source),
+  },
+  {
+    name: 'Server-side branding conversion validates tenant access, payload size and image signatures before using Sharp',
+    file: 'app/api/barbershops/image-convert/route.ts',
+    test: (source) =>
+      source.includes("requireTenantAuthorization(request, ['owner', 'admin'])") &&
+      source.includes('consumePublicRateLimit') &&
+      source.includes('MAX_IMAGE_BYTES') &&
+      source.includes('metadata.format !== expectedFormat') &&
+      source.includes(".webp({ quality: 85, effort: 4 })"),
+  },
+  {
     name: 'Dashboard branding uploads show actionable errors and always reset upload state',
     file: 'app/dashboard/settings/settings-page.tsx',
     test: (source) =>
