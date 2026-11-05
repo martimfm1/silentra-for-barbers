@@ -180,7 +180,8 @@ export function useSubscription() {
     },
   });
 
-  const isAdministrativePlan = planSource === 'admin';
+  const isAdministrativePlan =
+    planSource === 'admin' || planSource === 'subscription_override';
   const isPro =
     plan === 'pro' &&
     (isAdministrativePlan || hasActivePaidSubscription(subscription));

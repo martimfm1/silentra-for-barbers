@@ -8,7 +8,7 @@ import {
   type CheckoutInterval,
   type CheckoutPlan,
 } from '@/lib/stripe/constants';
-import { PLAN_ACCESS_STATUSES, resolvePlan } from '@/lib/billing/plan-access';
+import { PLAN_ACCESS_STATUSES } from '@/lib/billing/plan-access';
 import {
   BillingError,
   type BillingPlan,
@@ -421,17 +421,19 @@ export class BarbershopStripeService {
 
   static async getEffectivePlan(userId: string): Promise<BillingPlan> {
     const database = createAdminClient();
-    const tenant = await database
+    const { data: tenant, error: tenantError } = await database
       .from('users')
       .select('barbershop_id')
       .eq('id', userId)
       .maybeSingle();
-    if (tenant.error)
+
+    if (tenantError)
       throw new BillingError(
         'Could not resolve SaaS account.',
         'DB_READ_FAILED',
       );
-    const barbershopId = tenant.data?.barbershop_id;
+
+    const barbershopId = tenant?.barbershop_id;
     if (!barbershopId) return PLANS.FREE;
 
     const { data: assignment, error: assignmentError } = await database
@@ -439,23 +441,50 @@ export class BarbershopStripeService {
       .select('plan, expires_at')
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
+
     if (assignmentError)
       throw new BillingError(
         'Could not load barbershop plan assignment.',
         'DB_READ_FAILED',
       );
+
     if (
       assignment &&
       (!assignment.expires_at ||
         new Date(assignment.expires_at).getTime() > Date.now())
-    )
+    ) {
       return assignment.plan as BillingPlan;
+    }
 
-    const subscription = await this.reconcileSubscription(
-      barbershopId,
-      await this.getSubscriptionForBarbershop(barbershopId),
+    const subscription = await this.getSubscriptionForBarbershop(barbershopId);
+
+    // Explicit subscription overrides, including Free, take precedence over
+    // Stripe state and must not be rewritten by reconciliation.
+    const subscriptionOverride = subscription?.plan_override ?? null;
+    if (subscriptionOverride !== null) {
+      return subscriptionOverride;
+    }
+
+    // Preserve the existing Stripe reconciliation for normal subscriptions.
+    await this.reconcileSubscription(barbershopId, subscription);
+
+    // Resolve again through the database's canonical plan function so every
+    // server feature gate uses the same plan calculation as quotas and APIs.
+    const { data: effectivePlan, error: planError } = await database.rpc(
+      'get_effective_billing_plan_for_barbershop',
+      { p_barbershop_id: barbershopId },
     );
-    return resolvePlan(subscription);
+
+    if (planError)
+      throw new BillingError(
+        'Could not resolve the effective barbershop plan.',
+        'DB_READ_FAILED',
+      );
+
+    const normalizedPlan = String(effectivePlan ?? PLANS.FREE).toLowerCase();
+    if (normalizedPlan === PLANS.PRO) return PLANS.PRO;
+    if (normalizedPlan === PLANS.ENTERPRISE) return PLANS.ENTERPRISE;
+    return PLANS.FREE;
   }
 
   static async createElementsCheckout(
