@@ -128,3 +128,21 @@ Este documento é o bloco de notas persistente da auditoria. A issue contém os 
 3. Rever os fluxos existentes para evitar regressões legítimas.
 4. Confirmar estado de produção e atualizar a issue e este documento.
 5. Só marcar concluído com evidência verificável.
+
+
+## Revalidação live — 5 de novembro de 2026
+
+Consulta realizada diretamente aos Supabase advisors do projeto de produção (`ACTIVE_HEALTHY`, PostgreSQL 17, `eu-west-1`). Esta fotografia complementa — não substitui — a auditoria de 1 de novembro.
+
+### Findings atuais
+- [ ] Auth: leaked-password protection continua desativada. Ativar em Supabase Auth > Password Security; requer configuração no dashboard, não migration.
+- [ ] Performance: advisor reporta 50 foreign keys sem índice de cobertura. Priorizar por volume, consultas e ações de cascade; não criar índices em massa sem medir.
+- [ ] Segurança: advisor reporta 14 funções `SECURITY DEFINER` executáveis por `authenticated`. A revisão anterior documenta validações internas e `search_path` fixo; revalidar grants e definições atuais antes de alterar.
+- [ ] Segurança: advisor reporta 37 tabelas com RLS ativo e sem policies. Muitas são server-only/intencionais; confirmar grants de `anon`/`authenticated` e acesso `service_role` tabela a tabela. Não adicionar policies genéricas.
+- [ ] Performance: rever índices assinalados como não utilizados apenas após período representativo de tráfego; estatísticas isoladas não justificam remoção.
+
+### Interpretação e próximos passos
+- Os findings do advisor são sinais para revisão, não prova automática de vulnerabilidade ou de lentidão.
+- Não foi aplicada nenhuma alteração à produção durante esta revalidação.
+- Próxima ação segura: exportar inventário de constraints, índices, grants e definições das 14 funções; cruzar com migrations e contratos QA antes de preparar uma migration.
+- Validar leaked-password protection no dashboard e depois confirmar o estado no advisor.
