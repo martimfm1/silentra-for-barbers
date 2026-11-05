@@ -29,6 +29,9 @@ const appointmentReferenceIndexes = await read(
 const rlsPolicyPerformance = await read(
   'supabase/migrations/20261101235220_optimize_rls_policy_initplans.sql',
 );
+const appointmentClientRpcHardening = await read(
+  'supabase/migrations/20261105001000_enforce_client_permission_in_appointment_rpc.sql',
+);
 const bookingApi = await read('app/api/bookings/route.ts');
 const bookingRpcHardening = await read(
   'supabase/migrations/20260830190000_harden_security_definer_function_privileges.sql',
@@ -254,6 +257,22 @@ assert.match(
   bookingRpcHardening,
   /grant execute[\s\S]*to service_role/i,
   'Atomic booking RPC must remain service-role-only.',
+);
+
+assert.match(
+  appointmentClientRpcHardening,
+  /private\.has_barbershop_permission\([\s\S]*array\['clients'\]::text\[\]/i,
+  'The SECURITY DEFINER appointment-to-CRM RPC must enforce the tenant clients permission internally.',
+);
+assert.match(
+  appointmentClientRpcHardening,
+  /revoke all on function public\.add_client_from_completed_appointment\(uuid, uuid\)[\s\S]*grant execute on function public\.add_client_from_completed_appointment\(uuid, uuid\) to authenticated/i,
+  'The appointment-to-CRM RPC must remain authenticated-only.',
+);
+assert.match(
+  appointmentClientRpcHardening,
+  /set search_path = ''/i,
+  'The SECURITY DEFINER appointment-to-CRM RPC must use an empty search_path.',
 );
 
 console.log(
