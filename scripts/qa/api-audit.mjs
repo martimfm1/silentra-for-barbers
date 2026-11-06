@@ -81,23 +81,6 @@ const routeSecurityChecks = [
     ],
   },
   {
-    pattern: /\/barbershops\/\[slug\]\/review\/claim\/route\.ts$/,
-    markers: [
-      'getPublicProfileBySlug',
-      'consumePublicRateLimit',
-      "'public-review-claim'",
-      'REVIEW_TOKEN_PATTERN',
-      'reviewTokenCookieName',
-      'reviewAccessCookieName',
-      "path: '/api/public/reviews'",
-      'httpOnly: true',
-      "sameSite: 'lax'",
-      'status: 429',
-      "Referrer-Policy', 'no-referrer'",
-      "'Cache-Control', 'no-store'",
-    ],
-  },
-  {
     pattern: /\/marketplace\/orders\/track\/route\.ts$/,
     markers: [
       'consumePublicRateLimit',
