@@ -81,7 +81,7 @@ const routeSecurityChecks = [
     ],
   },
   {
-    pattern: /\\/barbershops\\/\\[slug\\]\\/review\\/claim\\/route\\.ts$/,
+    pattern: /\/barbershops\/\[slug\]\/review\/claim\/route\.ts$/,
     markers: [
       'getPublicProfileBySlug',
       'REVIEW_TOKEN_PATTERN',
