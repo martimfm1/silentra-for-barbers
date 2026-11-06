@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import { dispatchMarketingEvent } from '@/lib/marketing/dispatcher';
+import { isReviewRequestContent } from '@/lib/reviews/is-review-request';
 
 type Trigger = 'booking_created' | 'booking_completed' | 'booking_cancelled';
 
@@ -21,12 +22,6 @@ function token(value: string, vars: { nome: string; barbearia: string }) {
       '{{booking_url}}',
       `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://barbers.silentra.me'}/barbershops`,
     );
-}
-
-function isReviewRequest(subject: string, body: string): boolean {
-  return /\b(avalia[cç][aã]o|avaliar|classificar|opini[aã]o|review|feedback|rate\s+(?:your|us)|leave\s+a\s+review)\b/i.test(
-    `${subject}\n${body}`,
-  );
 }
 
 function html(value: string) {
@@ -116,7 +111,7 @@ export async function dispatchAppointmentAutomations(
 
       // Review requests are sent by the dedicated, single-use review flow.
       // Skip legacy booking-completed rules that would send a second request.
-      if (trigger === 'booking_completed' && isReviewRequest(subject, body)) {
+      if (trigger === 'booking_completed' && isReviewRequestContent(subject, body)) {
         continue;
       }
 
