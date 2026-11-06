@@ -562,6 +562,7 @@ async function POST__unobserved(request: Request) {
         customerPhone: phone,
         customerEmail: email,
         serviceName: selectedService.name || 'Serviço',
+        servicePrice: Number(selectedService.price),
         date: bookingDate,
         time: bookingTime,
         durationMinutes,
