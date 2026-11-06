@@ -34,6 +34,7 @@ export default function AgendaDoVictorPage({
       closedDays={shop.closed_days}
       hideClosedDays
       requireBirthDate={false}
+      agendaHeroLayout
     />
   );
 }

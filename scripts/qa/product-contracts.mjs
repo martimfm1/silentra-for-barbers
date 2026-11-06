@@ -816,6 +816,28 @@ const checks = [
       source.includes('closedDays={shop.closed_days}'),
   },
   {
+    name: 'Agenda do Victor enables the dedicated OG-inspired banner booking hero',
+    file: 'app/agendadovictor/agenda-do-victor-page.tsx',
+    test: (source) =>
+      source.includes('agendaHeroLayout') &&
+      source.includes('hideClosedDays') &&
+      source.includes('requireBirthDate={false}'),
+  },
+  {
+    name: 'Agenda do Victor desktop hero darkens the uploaded banner and places services beside the title',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
+    test: (source) =>
+      source.includes('agendaHeroLayout?: boolean') &&
+      source.includes('agendaHeroLayout = false') &&
+      source.includes('bg-cover bg-center') &&
+      source.includes('rgba(0,0,0,.84)') &&
+      source.includes('lg:grid-cols-[minmax(0,.88fr)_minmax(520px,1.12fr)]') &&
+      source.includes('Escolhe o teu serviço') &&
+      source.includes('Choose your service') &&
+      source.includes('onClick={() => openBooking(service.id)}') &&
+      source.includes('<BookingDrawer'),
+  },
+  {
     name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
     file: 'app/barbershops/[slug]/page.tsx',
     test: (source) =>
