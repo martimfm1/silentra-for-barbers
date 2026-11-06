@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
-import { Loader2, Navigation } from 'lucide-react';
+import { Navigation } from 'lucide-react';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import type { MapPreviewProps } from '@/types/marketplace/components';
 
 const MapInner = dynamic(() => import('./map-inner'), {
@@ -13,13 +14,7 @@ const MapInner = dynamic(() => import('./map-inner'), {
       aria-label="A carregar o mapa"
       role="status"
     >
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <Loader2
-          className="size-5 animate-spin text-emerald-300"
-          aria-hidden="true"
-        />
-        <span>A carregar o mapa…</span>
-      </div>
+      <SilentraLoading variant="compact" message="A carregar o mapa…" />
     </div>
   ),
 });
