@@ -20,12 +20,14 @@ export const metadata: Metadata = {
 
 type ReviewPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ review?: string }>;
 };
 
 export default async function BarbershopReviewPage({
   params,
+  searchParams,
 }: ReviewPageProps) {
-  const { slug } = await params;
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
   const profile = await getPublicProfileBySlug(slug);
 
   if (!profile) notFound();
@@ -41,13 +43,17 @@ export default async function BarbershopReviewPage({
     reviewAccessCookieName(profile.id),
   )?.value;
   const hasReviewAccess = reviewAccess === '1';
+  const reviewStatus = ['already-used', 'expired', 'invalid', 'unavailable'].includes(query.review ?? '')
+    ? (query.review as 'already-used' | 'expired' | 'invalid' | 'unavailable')
+    : null;
 
   return (
     <PublicReviewForm
       barbershopId={profile.id}
       barbershopName={profile.name}
       slug={profile.slug}
-      hasReviewAccess={hasReviewAccess}
+      hasReviewAccess={hasReviewAccess && !reviewStatus}
+      reviewStatus={reviewStatus}
     />
   );
 }
