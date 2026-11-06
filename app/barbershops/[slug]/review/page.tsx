@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
-import { reviewTokenCookieName } from '@/lib/reviews/review-token-cookie';
+import { reviewAccessCookieName } from '@/lib/reviews/review-token-cookie';
 import { PublicReviewForm } from './ReviewForm';
 
 export const dynamic = 'force-dynamic';
@@ -37,12 +37,10 @@ export default async function BarbershopReviewPage({
   }
 
   const cookieStore = await cookies();
-  const reviewCookie = cookieStore.get(
-    reviewTokenCookieName(profile.id),
+  const reviewAccess = cookieStore.get(
+    reviewAccessCookieName(profile.id),
   )?.value;
-  const hasReviewAccess = Boolean(
-    reviewCookie && /^[A-Za-z0-9_-]{43}$/.test(reviewCookie),
-  );
+  const hasReviewAccess = reviewAccess === '1';
 
   return (
     <PublicReviewForm
