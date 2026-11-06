@@ -56,6 +56,7 @@ export function SilentraLoader({
           className="sl-scissors"
           viewBox="-40 -100 80 220"
           focusable="false"
+          aria-hidden="true"
         >
           <g className="sl-blade sl-blade-a">
             <path d="M0 -78 L9 -6 L7 16 L0 16 Z M0 10 L9 10 L14 52 L7 52 Z" />
@@ -314,13 +315,16 @@ export function SilentraLoading({
   fullscreen,
   className,
 }: SilentraLoadingProps) {
+  const { locale } = useLanguage();
   const compact = variant === 'compact';
   const resolvedLabel =
     label ??
     message ??
     (variant === 'dashboard'
-      ? undefined
-      : undefined);
+      ? locale === 'en' ? 'Preparing your dashboard' : 'A preparar a tua dashboard'
+      : compact
+        ? locale === 'en' ? 'Loading…' : 'A carregar…'
+        : locale === 'en' ? 'Preparing your experience' : 'A preparar a experiência');
 
   return (
     <SilentraLoader
