@@ -23,7 +23,7 @@ export async function sendBookingReviewRequestEmail(
   payload: BookingReviewRequestEmailPayload,
 ): Promise<ReviewEmailResponse> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.SENDER_EMAIL;
+  const senderEmail = process.env.SENDER_EMAIL ?? process.env.BREVO_FROM_EMAIL;
   if (!apiKey || !senderEmail) {
     console.error('[BREVO_REVIEW_ERROR] Variáveis BREVO_API_KEY ou SENDER_EMAIL ausentes.');
     return { success: false, error: 'Configuração do servidor de e-mail incompleta.' };

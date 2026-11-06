@@ -82,7 +82,7 @@ export async function sendBookingConfirmationEmail(
   payload: BookingEmailPayload,
 ): Promise<SendEmailResponse> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.SENDER_EMAIL;
+  const senderEmail = process.env.SENDER_EMAIL ?? process.env.BREVO_FROM_EMAIL;
 
   if (!apiKey || !senderEmail) {
     console.error(
