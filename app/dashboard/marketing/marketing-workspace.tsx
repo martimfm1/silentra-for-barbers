@@ -1,6 +1,7 @@
 'use client';
 
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
