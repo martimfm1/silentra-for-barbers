@@ -88,6 +88,8 @@ const routeSecurityChecks = [
       "'public-review-claim'",
       'REVIEW_TOKEN_PATTERN',
       'reviewTokenCookieName',
+      'reviewAccessCookieName',
+      "path: '/api/public/reviews'",
       'httpOnly: true',
       "sameSite: 'lax'",
       'status: 429',
