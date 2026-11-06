@@ -208,6 +208,28 @@ export async function processQueuedCampaignRecipients(limit = BATCH_SIZE) {
 
     try {
       const campaign = await getCampaign(recipient.campaign_id);
+      // Also discard review requests that were queued before this safeguard
+      // was deployed, so an old event cannot send a second review email later.
+      if (
+        campaign.trigger_type === 'event' &&
+        campaign.event_name === 'booking_completed' &&
+        campaign.channel === 'email' &&
+        isReviewRequestContent(
+          campaign.subject?.trim() || campaign.name || '',
+          campaign.body || '',
+        )
+      ) {
+        await admin
+          .from('marketing_campaign_recipients')
+          .update({
+            status: 'skipped',
+            error_message: null,
+            next_attempt_at: null,
+          })
+          .eq('id', recipient.id);
+        continue;
+      }
+
       const [{ data: client }, { data: shop }] = await Promise.all([
         admin
           .from('users')
