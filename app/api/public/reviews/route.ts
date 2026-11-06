@@ -7,7 +7,10 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { UUID_PATTERN } from '@/lib/validation';
 import { assertSameOrigin } from '@/services/billing/http';
-import { reviewTokenCookieName } from '@/lib/reviews/review-token-cookie';
+import {
+  reviewAccessCookieName,
+  reviewTokenCookieName,
+} from '@/lib/reviews/review-token-cookie';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,11 +19,7 @@ const MAX_COMMENT_LENGTH = 1000;
 const REVIEW_RATE_LIMIT = 5;
 const REVIEW_RATE_WINDOW_SECONDS = 60 * 60;
 
-function jsonError(
-  message: string,
-  status: number,
-  clearCookieName?: string,
-) {
+function jsonError(message: string, status: number, clearShopId?: string) {
   const response = NextResponse.json(
     { error: message },
     {
@@ -32,13 +31,20 @@ function jsonError(
     },
   );
 
-  if (clearCookieName) {
-    response.cookies.set(clearCookieName, '', {
+  if (clearShopId) {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      sameSite: 'lax' as const,
       maxAge: 0,
+    };
+    response.cookies.set(reviewTokenCookieName(clearShopId), '', {
+      ...cookieOptions,
+      path: '/api/public/reviews',
+    });
+    response.cookies.set(reviewAccessCookieName(clearShopId), '', {
+      ...cookieOptions,
+      path: '/',
     });
   }
   return response;
@@ -89,15 +95,15 @@ async function POST__unobserved(request: Request) {
       return jsonError('Barbearia inválida.', 400);
     }
 
-    const cookieName = reviewTokenCookieName(shopId);
     const cookieStore = await cookies();
-    const reviewToken = cookieStore.get(cookieName)?.value ?? '';
+    const reviewToken =
+      cookieStore.get(reviewTokenCookieName(shopId))?.value ?? '';
 
     if (!/^[A-Za-z0-9_-]{43}$/.test(reviewToken)) {
       return jsonError(
         'Utiliza a ligação segura recebida por email após o atendimento.',
         403,
-        cookieName,
+        shopId,
       );
     }
 
@@ -141,13 +147,13 @@ async function POST__unobserved(request: Request) {
       .maybeSingle();
 
     if (shopError || !shop) {
-      return jsonError('Barbearia não encontrada.', 404, cookieName);
+      return jsonError('Barbearia não encontrada.', 404, shopId);
     }
     if (shop.is_active === false || shop.public_profile_enabled === false) {
       return jsonError(
         'Esta barbearia não aceita avaliações públicas.',
         403,
-        cookieName,
+        shopId,
       );
     }
 
@@ -171,7 +177,7 @@ async function POST__unobserved(request: Request) {
         return jsonError(
           'O link de avaliação é inválido, expirou ou já foi utilizado.',
           403,
-          cookieName,
+          shopId,
         );
       }
       if (error.code === '22023') {
@@ -190,12 +196,19 @@ async function POST__unobserved(request: Request) {
         },
       },
     );
-    response.cookies.set(cookieName, '', {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      sameSite: 'lax' as const,
       maxAge: 0,
+    };
+    response.cookies.set(reviewTokenCookieName(shopId), '', {
+      ...cookieOptions,
+      path: '/api/public/reviews',
+    });
+    response.cookies.set(reviewAccessCookieName(shopId), '', {
+      ...cookieOptions,
+      path: '/',
     });
     return response;
   } catch (error) {
