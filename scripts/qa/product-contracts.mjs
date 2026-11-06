@@ -629,6 +629,33 @@ const checks = [
       source.includes("response.headers.set('Referrer-Policy', 'no-referrer')"),
   },
   {
+    name: 'Legacy booking-completed automations cannot send a duplicate review request',
+    file: 'lib/automations/dispatch-appointment.ts',
+    test: (source) =>
+      source.includes('function isReviewRequest(') &&
+      source.includes("trigger === 'booking_completed' && isReviewRequest(subject, body)") &&
+      source.includes('dedicated, single-use review flow'),
+  },
+  {
+    name: 'Marketplace cards link to a dedicated reviews page',
+    file: 'app/barbershops/components/shop-card.tsx',
+    test: (source) =>
+      source.includes('/reviews`)') &&
+      source.includes('directory.viewReviews') &&
+      source.includes('MessageSquareText'),
+  },
+  {
+    name: 'Public reviews page supports search, rating filters and sorting',
+    file: 'app/barbershops/[slug]/reviews/public-reviews-page.tsx',
+    test: (source) =>
+      source.includes('ratingFilter') &&
+      source.includes('withCommentOnly') &&
+      source.includes("sort === 'highest'") &&
+      source.includes("sort === 'lowest'") &&
+      source.includes('reviews.filter(') &&
+      source.includes('distribution'),
+  },
+  {
     name: 'Anonymous review form only accepts a 1-5 star rating and optional comment',
     file: 'app/barbershops/[slug]/review/ReviewForm.tsx',
     test: (source) =>
