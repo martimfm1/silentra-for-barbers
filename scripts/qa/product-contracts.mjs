@@ -632,9 +632,17 @@ const checks = [
     name: 'Legacy booking-completed automations cannot send a duplicate review request',
     file: 'lib/automations/dispatch-appointment.ts',
     test: (source) =>
-      source.includes('function isReviewRequest(') &&
-      source.includes("trigger === 'booking_completed' && isReviewRequest(subject, body)") &&
+      source.includes("import { isReviewRequestContent } from '@/lib/reviews/is-review-request'") &&
+      source.includes("trigger === 'booking_completed' && isReviewRequestContent(subject, body)") &&
       source.includes('dedicated, single-use review flow'),
+  },
+  {
+    name: 'Event marketing campaigns cannot send duplicate review emails',
+    file: 'lib/marketing/dispatcher.ts',
+    test: (source) =>
+      source.includes('isReviewRequestContent(') &&
+      source.includes("campaign.channel === 'email'") &&
+      source.includes('dedicated review email'),
   },
   {
     name: 'Marketplace cards link to a dedicated reviews page',
