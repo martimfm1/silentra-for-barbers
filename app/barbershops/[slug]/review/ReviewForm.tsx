@@ -17,6 +17,7 @@ type PublicReviewFormProps = {
   barbershopName: string;
   slug: string;
   hasReviewAccess: boolean;
+  reviewStatus: 'already-used' | 'expired' | 'invalid' | 'unavailable' | null;
 };
 
 type ReviewResponse = {
@@ -30,6 +31,7 @@ export function PublicReviewForm({
   barbershopName,
   slug,
   hasReviewAccess,
+  reviewStatus,
 }: PublicReviewFormProps) {
   const { locale } = useLanguage();
   const isEnglish = locale === 'en';
@@ -59,6 +61,14 @@ export function PublicReviewForm({
         noAccessDescription:
           'To keep reviews genuine, you can only submit a review using the secure link sent by email after a completed appointment. You do not need an account.',
         stars: (value: number) => `${value} out of 5 stars`,
+        usedTitle: 'This review has already been submitted',
+        usedDescription: 'This personal review link has already been used. Each appointment can only receive one review.',
+        expiredTitle: 'This review link has expired',
+        expiredDescription: 'This personal review link is no longer valid. Please contact the barbershop if you need help.',
+        invalidTitle: 'This review link is not valid',
+        invalidDescription: 'We could not validate this personal review link. Open the original email or contact the barbershop.',
+        unavailableTitle: 'We could not verify this link',
+        unavailableDescription: 'The review service is temporarily unavailable. Please try again in a few minutes.',
       }
     : {
         eyebrow: 'A tua experiência importa',
@@ -78,6 +88,14 @@ export function PublicReviewForm({
         noAccessDescription:
           'Para manter as avaliações genuínas, só podes enviar uma avaliação através da ligação segura recebida por email após um atendimento concluído. Não precisas de criar conta.',
         stars: (value: number) => `${value} de 5 estrelas`,
+        usedTitle: 'Esta avaliação já foi enviada',
+        usedDescription: 'Esta ligação pessoal já foi utilizada. Cada atendimento só pode receber uma avaliação.',
+        expiredTitle: 'Esta ligação de avaliação expirou',
+        expiredDescription: 'Esta ligação pessoal já não é válida. Contacta a barbearia se precisares de ajuda.',
+        invalidTitle: 'Esta ligação de avaliação não é válida',
+        invalidDescription: 'Não foi possível validar esta ligação pessoal. Abre o email original ou contacta a barbearia.',
+        unavailableTitle: 'Não foi possível verificar a ligação',
+        unavailableDescription: 'O serviço de avaliações está temporariamente indisponível. Tenta novamente dentro de alguns minutos.',
       };
 
   async function submitReview(event: React.FormEvent<HTMLFormElement>) {
@@ -169,7 +187,22 @@ export function PublicReviewForm({
           </div>
 
           <div className="px-6 py-7 sm:px-8 sm:py-8">
-            {submitted ? (
+            {reviewStatus ? (
+              <div className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5" role="status" aria-live="polite">
+                <div className="flex size-11 items-center justify-center rounded-xl border border-amber-300/20 bg-amber-300/10 text-amber-200">
+                  <ShieldCheck className="size-5" aria-hidden="true" />
+                </div>
+                <h2 className="mt-4 text-base font-semibold text-zinc-100">
+                  {reviewStatus === 'already-used' ? copy.usedTitle : reviewStatus === 'expired' ? copy.expiredTitle : reviewStatus === 'unavailable' ? copy.unavailableTitle : copy.invalidTitle}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  {reviewStatus === 'already-used' ? copy.usedDescription : reviewStatus === 'expired' ? copy.expiredDescription : reviewStatus === 'unavailable' ? copy.unavailableDescription : copy.invalidDescription}
+                </p>
+                <Link href={'/barbershops/' + encodeURIComponent(slug)} className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-200 hover:text-emerald-100">
+                  {copy.back}
+                </Link>
+              </div>
+            ) : submitted ? (
               <div className="py-5 text-center" role="status" aria-live="polite">
                 <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-300/10 text-emerald-200">
                   <CheckCircle2 className="size-7" aria-hidden="true" />
