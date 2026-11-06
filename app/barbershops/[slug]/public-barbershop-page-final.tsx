@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Accessibility,
   Armchair,
@@ -28,7 +28,6 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
-import { publicBarbershopService } from './services/public-barbershop.service';
 import { formatClosedDays } from '@/lib/utils/format-closed-days';
 import {
   DEFAULT_BARBERSHOP_AVATAR,
@@ -129,36 +128,8 @@ export default function BarbershopPublicPageFinal({
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     bookingOffer?.serviceId ?? null,
   );
-  const [reviewToken, setReviewToken] = useState('');
-  const [reviewName, setReviewName] = useState('');
-  const [reviewText, setReviewText] = useState('');
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewLoading, setReviewLoading] = useState(false);
-  const [reviewError, setReviewError] = useState('');
-  const [reviewSent, setReviewSent] = useState(false);
   const [avatarImageError, setAvatarImageError] = useState(false);
   const [bannerImageError, setBannerImageError] = useState(false);
-
-  useEffect(() => {
-    const browserWindow = window as Window & {
-      __SILENTRA_REVIEW_TOKEN__?: string | null;
-    };
-    const url = new URL(window.location.href);
-    const token =
-      browserWindow.__SILENTRA_REVIEW_TOKEN__ ||
-      url.searchParams.get('review_token') ||
-      '';
-    browserWindow.__SILENTRA_REVIEW_TOKEN__ = null;
-    if (/^[A-Za-z0-9_-]{43}$/.test(token)) setReviewToken(token);
-    if (url.searchParams.has('review_token')) {
-      url.searchParams.delete('review_token');
-      window.history.replaceState(
-        window.history.state,
-        '',
-        `${url.pathname}${url.search}${url.hash}`,
-      );
-    }
-  }, []);
 
   const targetId = shop.barbershop_id || shop.id;
   const avatarUrl = storageUrl('avatar', shop.avatar_url, targetId);
@@ -169,38 +140,6 @@ export default function BarbershopPublicPageFinal({
     bannerImageError || !bannerUrl ? DEFAULT_BARBERSHOP_BANNER : bannerUrl;
   const amenities = shop.amenities;
   const rating = Number(shop.rating ?? 0);
-
-  async function submitReview(event: React.FormEvent) {
-    event.preventDefault();
-    setReviewError('');
-    setReviewSent(false);
-    if (!reviewName.trim() || reviewRating < 1) {
-      setReviewError(
-        'Indica o teu nome e uma classificação de 1 a 5 estrelas.',
-      );
-      return;
-    }
-    setReviewLoading(true);
-    const result = await publicBarbershopService.submitReview({
-      barbershop_id: shop.id,
-      client_name: reviewName.trim(),
-      rating: reviewRating,
-      comment: reviewText.trim(),
-      review_token: reviewToken,
-    });
-    setReviewLoading(false);
-    if (result.error || !result.data) {
-      setReviewError(
-        result.error?.message || 'Não foi possível enviar a avaliação.',
-      );
-      return;
-    }
-    setReviewName('');
-    setReviewText('');
-    setReviewRating(0);
-    setReviewToken('');
-    setReviewSent(true);
-  }
 
   const bookingShop = {
     id: shop.id,
@@ -457,104 +396,58 @@ export default function BarbershopPublicPageFinal({
           aria-labelledby="reviews-heading"
         >
           <p className="silentra-eyebrow">Confiança</p>
-          <h2
-            id="reviews-heading"
-            className="silentra-page-title !text-2xl sm:!text-3xl"
-          >
-            Avaliações
-          </h2>
-          {reviewSent ? (
-            <p className="mt-5 text-sm text-emerald-300" role="status">
-              Avaliação enviada. Obrigado por partilhares a tua experiência.
-            </p>
-          ) : reviewToken ? (
-            <form
-              onSubmit={submitReview}
-              className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.018] p-4 sm:grid-cols-2"
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2
+                id="reviews-heading"
+                className="silentra-page-title !text-2xl sm:!text-3xl"
+              >
+                Avaliações
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                As avaliações ajudam outros clientes a conhecer a experiência nesta barbearia.
+              </p>
+            </div>
+            <Link
+              href={`/barbershops/${encodeURIComponent(shop.slug)}/review`}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              <label className="grid gap-1 text-xs text-zinc-500">
-                Nome
-                <input
-                  value={reviewName}
-                  onChange={(e) => setReviewName(e.target.value)}
-                  autoComplete="name"
-                  required
-                  className="min-h-11 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
-                />
-              </label>
-              <div>
-                <span className="text-xs text-zinc-500">Classificação</span>
-                <div
-                  className="mt-1 flex"
-                  aria-label="Classificação de 1 a 5 estrelas"
+              <Star className="size-4 text-amber-300" aria-hidden="true" />
+              Deixar avaliação
+            </Link>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-zinc-500">
+            Só podes avaliar através da ligação segura enviada por email após um atendimento concluído. Não precisas de criar conta.
+          </p>
+          <div className="mt-5 grid gap-3">
+            {shop.reviews.length ? (
+              shop.reviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-2xl border border-white/[0.07] bg-white/[0.014] p-4"
                 >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-label={`${value} estrelas`}
-                      aria-pressed={reviewRating === value}
-                      onClick={() => setReviewRating(value)}
-                      className="flex size-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                    >
+                  <div className="flex items-center justify-between">
+                    <strong className="text-sm">{review.client_name}</strong>
+                    <span className="inline-flex items-center gap-1 text-xs text-zinc-400">
                       <Star
-                        className={`size-5 ${value <= reviewRating ? 'fill-amber-300 text-amber-300' : 'text-zinc-600'}`}
+                        className="size-3.5 fill-amber-300 text-amber-300"
                         aria-hidden="true"
                       />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <label className="grid gap-1 text-xs text-zinc-500 sm:col-span-2">
-                Comentário
-                <textarea
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  className="min-h-24 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-sm text-zinc-100 outline-none focus-visible:border-emerald-400/45 focus-visible:ring-2 focus-visible:ring-emerald-400"
-                />
-              </label>
-              {reviewError && (
-                <p className="text-xs text-red-300 sm:col-span-2" role="alert">
-                  {reviewError}
-                </p>
-              )}
-              <Button
-                type="submit"
-                disabled={reviewLoading}
-                className="min-h-11 sm:col-span-2 sm:w-fit"
-              >
-                {reviewLoading ? 'A enviar…' : 'Enviar avaliação'}
-              </Button>
-            </form>
-          ) : (
-            <p className="mt-4 text-sm leading-6 text-zinc-500">
-              Só é possível enviar uma avaliação através do link recebido por
-              email após um atendimento concluído.
-            </p>
-          )}
-          <div className="mt-5 grid gap-3">
-            {shop.reviews.map((review) => (
-              <article
-                key={review.id}
-                className="rounded-2xl border border-white/[0.07] bg-white/[0.014] p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <strong className="text-sm">{review.client_name}</strong>
-                  <span className="inline-flex items-center gap-1 text-xs text-zinc-400">
-                    <Star
-                      className="size-3.5 fill-amber-300 text-amber-300"
-                      aria-hidden="true"
-                    />
-                    {review.rating}/5
-                  </span>
-                </div>
-                {review.comment && (
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    {review.comment}
-                  </p>
-                )}
-              </article>
-            ))}
+                      {review.rating}/5
+                    </span>
+                  </div>
+                  {review.comment && (
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">
+                      {review.comment}
+                    </p>
+                  )}
+                </article>
+              ))
+            ) : (
+              <p className="rounded-2xl border border-white/[0.07] bg-white/[0.014] p-4 text-sm text-zinc-500">
+                Ainda não existem avaliações para esta barbearia.
+              </p>
+            )}
           </div>
         </section>
 
