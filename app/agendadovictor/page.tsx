@@ -8,17 +8,26 @@ const SLUG = 'silveira-salon-6f1e9637';
 
 export const dynamic = 'force-dynamic';
 
+const SEO_TITLE = 'Agenda do Victor';
+const SEO_DESCRIPTION =
+  'Faz a tua marcação online na Agenda do Victor. Escolhe o serviço e encontra o melhor horário para ti.';
+
 export const metadata: Metadata = {
-  title: 'Agenda do Victor | SILVEIRA SALON',
-  description: 'Marca o teu próximo serviço na SILVEIRA SALON.',
+  title: SEO_TITLE,
+  description: SEO_DESCRIPTION,
   alternates: { canonical: 'https://barbers.silentra.me/agendadovictor' },
   openGraph: {
     type: 'website',
-    title: 'Agenda do Victor | SILVEIRA SALON',
-    description: 'Marca o teu próximo serviço na SILVEIRA SALON.',
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
     url: 'https://barbers.silentra.me/agendadovictor',
-    siteName: 'SILENTRA',
+    siteName: SEO_TITLE,
     locale: 'pt_PT',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };
