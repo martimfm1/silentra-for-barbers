@@ -692,7 +692,7 @@ const checks = [
   },
   {
     name: 'Review RPC derives the display name from the completed appointment and works for hidden directory listings',
-    file: 'supabase/migrations/20261106110000_harden_dedicated_public_reviews.sql',
+    file: 'supabase/migrations/20261106001846_20261106110000_harden_dedicated_public_reviews.sql',
     test: (source) =>
       source.includes("a.status = 'completed'::public.appointment_status") &&
       source.includes('t.consumed_at is null') &&
@@ -851,7 +851,8 @@ const checks = [
     test: (source) => {
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
-        normalized.includes('const availableDays = days;') &&
+        normalized.includes('const availableDays = useMemo(') &&
+        normalized.includes('hideClosedDays ? days.filter(') &&
         normalized.includes('availableDays.map((day, index)') &&
         normalized.includes('disabled={isDayOff}') &&
         normalized.includes('if (isDayOff) return;') &&
