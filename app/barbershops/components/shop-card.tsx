@@ -259,7 +259,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
           className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.035] px-3 text-xs font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:col-span-2"
         >
           <MessageSquareText className="size-3.5 text-emerald-300" aria-hidden="true" />
-          {locale === 'pt' ? `Ver avaliações (${totalReviews})` : `Read reviews (${totalReviews})`}
+          {t('directory.viewReviews', { count: totalReviews })}
         </Link>
       </div>
     </article>
