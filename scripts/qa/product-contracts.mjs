@@ -629,6 +629,43 @@ const checks = [
       source.includes("response.headers.set('Referrer-Policy', 'no-referrer')"),
   },
   {
+    name: 'Legacy booking-completed automations cannot send a duplicate review request',
+    file: 'lib/automations/dispatch-appointment.ts',
+    test: (source) =>
+      source.includes("import { isReviewRequestContent } from '@/lib/reviews/is-review-request'") &&
+      source.includes("trigger === 'booking_completed' && isReviewRequestContent(subject, body)") &&
+      source.includes('dedicated, single-use review flow'),
+  },
+  {
+    name: 'Event marketing campaigns cannot send duplicate review emails',
+    file: 'lib/marketing/dispatcher.ts',
+    test: (source) =>
+      source.includes('isReviewRequestContent(') &&
+      source.includes("campaign.channel === 'email'") &&
+      source.includes("campaign.event_name === 'booking_completed'") &&
+      source.includes("status: 'skipped'") &&
+      source.includes('dedicated review email'),
+  },
+  {
+    name: 'Marketplace cards link to a dedicated reviews page',
+    file: 'app/barbershops/components/shop-card.tsx',
+    test: (source) =>
+      source.includes('/reviews') &&
+      source.includes('directory.viewReviews') &&
+      source.includes('MessageSquareText'),
+  },
+  {
+    name: 'Public reviews page supports search, rating filters and sorting',
+    file: 'app/barbershops/[slug]/reviews/public-reviews-page.tsx',
+    test: (source) =>
+      source.includes('ratingFilter') &&
+      source.includes('withCommentOnly') &&
+      source.includes("sort === 'highest'") &&
+      source.includes("sort === 'lowest'") &&
+      source.includes('reviews.filter(') &&
+      source.includes('distribution'),
+  },
+  {
     name: 'Anonymous review form only accepts a 1-5 star rating and optional comment',
     file: 'app/barbershops/[slug]/review/ReviewForm.tsx',
     test: (source) =>
@@ -657,7 +694,7 @@ const checks = [
   },
   {
     name: 'Review RPC derives the display name from the completed appointment and works for hidden directory listings',
-    file: 'supabase/migrations/20261106110000_harden_dedicated_public_reviews.sql',
+    file: 'supabase/migrations/20261106001846_20261106110000_harden_dedicated_public_reviews.sql',
     test: (source) =>
       source.includes("a.status = 'completed'::public.appointment_status") &&
       source.includes('t.consumed_at is null') &&
@@ -816,7 +853,8 @@ const checks = [
     test: (source) => {
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
-        normalized.includes('const availableDays = days;') &&
+        normalized.includes('const availableDays = useMemo(') &&
+        normalized.includes('hideClosedDays ? days.filter(') &&
         normalized.includes('availableDays.map((day, index)') &&
         normalized.includes('disabled={isDayOff}') &&
         normalized.includes('if (isDayOff) return;') &&

@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import React, { useState, useMemo } from 'react';
-import { MapPin, Clock, Star, ArrowRight, Eye } from 'lucide-react';
+import { MapPin, Clock, Star, ArrowRight, Eye, MessageSquareText } from 'lucide-react';
 import type { ShopCardProps } from '@/types/marketplace/components';
 import { useLanguage } from '@/context/LanguageContext';
 import type { BarbershopPublicDetails } from '@/app/barbershops/[slug]/services/public-barbershop.service';
@@ -252,6 +253,14 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
+        <Link
+          href={`/barbershops/${encodeURIComponent(shop.slug)}/reviews`}
+          onClick={(event) => event.stopPropagation()}
+          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.035] px-3 text-xs font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:col-span-2"
+        >
+          <MessageSquareText className="size-3.5 text-emerald-300" aria-hidden="true" />
+          {t('directory.viewReviews', { count: totalReviews })}
+        </Link>
       </div>
     </article>
   );

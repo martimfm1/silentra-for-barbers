@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendMarketingEmail, sendBrevoSms } from '@/lib/marketing/brevo';
+import { isReviewRequestContent } from '@/lib/reviews/is-review-request';
 
 const BATCH_SIZE = 100;
 const MAX_ATTEMPTS = 3;
@@ -207,6 +208,29 @@ export async function processQueuedCampaignRecipients(limit = BATCH_SIZE) {
 
     try {
       const campaign = await getCampaign(recipient.campaign_id);
+      // Also discard review requests that were queued before this safeguard
+      // was deployed, so an old event cannot send a second review email later.
+      if (
+        campaign.trigger_type === 'event' &&
+        campaign.event_name === 'booking_completed' &&
+        campaign.channel === 'email' &&
+        isReviewRequestContent(
+          campaign.subject?.trim() || campaign.name || '',
+          campaign.body || '',
+        )
+      ) {
+        const { error: skipError } = await admin
+          .from('marketing_campaign_recipients')
+          .update({
+            status: 'skipped',
+            error_message: null,
+            next_attempt_at: null,
+          })
+          .eq('id', recipient.id);
+        if (skipError) throw skipError;
+        continue;
+      }
+
       const [{ data: client }, { data: shop }] = await Promise.all([
         admin
           .from('users')
@@ -368,7 +392,7 @@ export async function dispatchMarketingEvent(input: {
   const admin = createAdminClient();
   const { data: campaigns, error } = await admin
     .from('marketing_campaigns')
-    .select('id')
+    .select('id,channel,subject,body,name')
     .eq('barbershop_id', input.barbershopId)
     .eq('active', true)
     .eq('trigger_type', 'event')
@@ -377,6 +401,17 @@ export async function dispatchMarketingEvent(input: {
   if (error) throw error;
   let triggered = 0;
   for (const campaign of campaigns ?? []) {
+    // The dedicated review email is the only review request sent on completion.
+    if (
+      input.eventName === 'booking_completed' &&
+      campaign.channel === 'email' &&
+      isReviewRequestContent(
+        campaign.subject?.trim() || campaign.name || '',
+        campaign.body || '',
+      )
+    ) {
+      continue;
+    }
     await queueCampaign(
       campaign.id,
       `event:${input.eventName}:${input.clientId}:${crypto.randomUUID()}`,
