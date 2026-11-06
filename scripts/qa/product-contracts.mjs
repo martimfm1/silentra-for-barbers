@@ -642,6 +642,8 @@ const checks = [
     test: (source) =>
       source.includes('isReviewRequestContent(') &&
       source.includes("campaign.channel === 'email'") &&
+      source.includes("campaign.event_name === 'booking_completed'") &&
+      source.includes("status: 'skipped'") &&
       source.includes('dedicated review email'),
   },
   {
