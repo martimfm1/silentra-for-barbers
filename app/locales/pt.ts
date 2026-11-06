@@ -691,6 +691,7 @@ export const pt = {
     nearMeShort: 'Perto de mim',
     noLocation: 'Ativa a localização para encontrar barbearias próximas.',
     shopLogo: 'Logótipo de {shop}',
+    viewReviews: 'Ver avaliações ({count})',
   },
   storefront: {
     marketplace: 'Marketplace',
