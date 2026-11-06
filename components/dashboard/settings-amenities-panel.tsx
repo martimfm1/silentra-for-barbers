@@ -28,6 +28,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   DEFAULT_BARBERSHOP_AMENITIES,
   normalizeBarbershopAmenities,
@@ -237,7 +238,7 @@ export function SettingsAmenitiesPanel({
     return (
       <Card className="mt-6 border-white/10 bg-black/30">
         <CardContent className="flex min-h-40 items-center justify-center">
-          <Spinner className="size-6" />
+          <SilentraLoading variant="compact" message="A carregar as informações…" />
         </CardContent>
       </Card>
     );
