@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   ArrowRight,
@@ -788,10 +789,7 @@ export default function LoyaltyPage() {
           </Dialog>
 
           {loading && rewards.length === 0 ? (
-            <div className="flex min-h-40 items-center justify-center text-sm text-muted-foreground" aria-live="polite">
-              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
-              {t('loyaltyPage.loadingRewards')}
-            </div>
+            <SilentraLoading variant="compact" message={t('loyaltyPage.loadingRewards')} />
           ) : rewards.length === 0 ? (
             <Card className="border-dashed border-white/15">
               <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
