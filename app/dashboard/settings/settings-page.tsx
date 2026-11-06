@@ -460,9 +460,34 @@ export default function SettingsPageOrganized() {
       : null;
   if (loading || planLoading)
     return (
-      <div className="flex min-h-[70vh] items-center justify-center">
-        <Spinner className="size-7" />
-      </div>
+      <main
+        className="min-h-screen bg-zinc-950 px-4 py-6 text-zinc-50"
+        aria-busy="true"
+        aria-label={t('settingsPage.title')}
+      >
+        <div className="mx-auto max-w-7xl space-y-6 sm:px-2">
+          <div className="flex items-center justify-between border-b border-white/10 pb-5">
+            <div className="space-y-2">
+              <div className="h-6 w-36 animate-pulse rounded-lg bg-white/10" />
+              <div className="h-3 w-52 animate-pulse rounded bg-white/[.06]" />
+            </div>
+            <div className="h-10 w-10 animate-pulse rounded-xl bg-white/10" />
+          </div>
+          <div className="grid gap-5 lg:grid-cols-2">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div
+                key={index}
+                className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-5"
+              >
+                <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
+                <div className="h-10 w-full animate-pulse rounded-xl bg-white/[.06]" />
+                <div className="h-10 w-4/5 animate-pulse rounded-xl bg-white/[.06]" />
+                <div className="h-10 w-3/5 animate-pulse rounded-xl bg-white/[.06]" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
     );
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-50">
