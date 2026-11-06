@@ -102,7 +102,7 @@ async function POST__unobserved(
       appointment.service_id
         ? admin
             .from('services')
-            .select('name')
+            .select('name,price')
             .eq('id', appointment.service_id)
             .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
@@ -197,6 +197,7 @@ async function POST__unobserved(
           to: recipientEmail,
           clientName: recipientName,
           serviceName: service?.name || 'Serviço',
+          servicePrice: Number(service?.price),
           date: localDate,
           time: localTime,
           durationMinutes: Number(appointment.duration_minutes ?? 45),
