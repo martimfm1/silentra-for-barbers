@@ -23,6 +23,12 @@ function token(value: string, vars: { nome: string; barbearia: string }) {
     );
 }
 
+function isReviewRequest(subject: string, body: string): boolean {
+  return /\b(avalia[cç][aã]o|avaliar|classificar|opini[aã]o|review|feedback|rate\s+(?:your|us)|leave\s+a\s+review)\b/i.test(
+    `${subject}\n${body}`,
+  );
+}
+
 function html(value: string) {
   return value
     .replace(
@@ -152,6 +158,13 @@ export async function dispatchAppointmentAutomations(
           ? token(action.subject, variables)
           : `${rule.name} — ${variables.barbearia}`;
       const body = token(action.body, variables);
+
+      // Review requests are sent by the dedicated, single-use review flow.
+      // Skip legacy booking-completed rules that would send a second request.
+      if (trigger === 'booking_completed' && isReviewRequest(subject, body)) {
+        continue;
+      }
+
       const result = await sendBrevoEmail({
         to: email,
         toName: name,
