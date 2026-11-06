@@ -15,6 +15,7 @@ import { useLanguage } from '@/context/LanguageContext';
 type PublicReviewFormProps = {
   barbershopId: string;
   barbershopName: string;
+  slug: string;
   hasReviewAccess: boolean;
 };
 
@@ -27,6 +28,7 @@ type ReviewResponse = {
 export function PublicReviewForm({
   barbershopId,
   barbershopName,
+  slug,
   hasReviewAccess,
 }: PublicReviewFormProps) {
   const { locale } = useLanguage();
@@ -143,7 +145,7 @@ export function PublicReviewForm({
     <main className="min-h-screen bg-[#09090b] px-4 py-10 text-zinc-100 sm:px-6 sm:py-16">
       <div className="mx-auto w-full max-w-xl">
         <Link
-          href={`/barbershops/${encodeURIComponent(barbershopId)}`}
+          href={`/barbershops/${encodeURIComponent(slug)}`}
           className="mb-7 inline-flex min-h-10 items-center gap-2 text-sm text-zinc-400 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
