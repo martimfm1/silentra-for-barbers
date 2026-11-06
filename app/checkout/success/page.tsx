@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { trackMarketingEvent } from '@/lib/analytics/marketing';
 import { useEffect, useState } from 'react';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   ArrowRight,
   BadgePercent,
   Building2,
   CheckCircle2,
-  Loader2,
   ShieldCheck,
 } from 'lucide-react';
 
@@ -194,23 +194,9 @@ export default function CheckoutSuccessPage() {
 
   if (loading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-zinc-950 px-4 text-white">
-        <div className="text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-200">
-            <Loader2 className="size-5 animate-spin" />
-          </div>
-          <h1 className="mt-5 text-xl font-semibold">
-            {english
-              ? 'Confirming your subscription…'
-              : 'A confirmar a tua subscrição…'}
-          </h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            {english
-              ? 'Syncing Stripe and Supabase.'
-              : 'Estamos a sincronizar Stripe e Supabase.'}
-          </p>
-        </div>
-      </main>
+      <SilentraLoading
+        message={english ? 'Confirming your subscription…' : 'A confirmar a tua subscrição…'}
+      />
     );
   }
 
