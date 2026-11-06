@@ -7,6 +7,7 @@ export interface BookingEmailPayload {
   to: string;
   clientName: string;
   serviceName: string;
+  servicePrice?: number;
   date: string;
   time: string;
   durationMinutes?: number;
@@ -104,6 +105,7 @@ export async function sendBookingConfirmationEmail(
         title: 'Booking confirmed',
         greeting: `Hello <strong style="color:#fff;">${safeClientName}</strong>, your booking has been confirmed.`,
         service: 'Service',
+        price: 'Price',
         date: 'Date',
         time: 'Time',
         location: 'Location',
@@ -121,6 +123,7 @@ export async function sendBookingConfirmationEmail(
         title: 'Agendamento confirmado',
         greeting: `Olá <strong style="color:#fff;">${safeClientName}</strong>, a tua marcação ficou confirmada.`,
         service: 'Serviço',
+        price: 'Preço',
         date: 'Data',
         time: 'Hora',
         location: 'Local',
@@ -133,6 +136,9 @@ export async function sendBookingConfirmationEmail(
         textTitle: 'Agendamento confirmado',
         textAt: 'às',
       };
+  const formattedPrice = typeof payload.servicePrice === 'number' && Number.isFinite(payload.servicePrice) && payload.servicePrice >= 0
+    ? new Intl.NumberFormat(isEnglish ? 'en-IE' : 'pt-PT', { style: 'currency', currency: 'EUR' }).format(payload.servicePrice)
+    : null;
   const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', {
     dateStyle: 'long',
     timeZone: 'Europe/Lisbon',
@@ -166,7 +172,7 @@ ${avatarMarkup}
 <p style="font-size:12px;color:#a1a1aa;margin:16px 0 0;">${safeBarbershopName}</p>
 <h1 style="font-size:24px;color:#fff;margin:8px 0;">${copy.title}</h1>
 <p style="font-size:14px;line-height:1.6;color:#a1a1aa;margin:0 0 20px;">${copy.greeting}</p>
-<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(formattedDate)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
+<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.service}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:600;">${safeServiceName}</td></tr>${formattedPrice ? `<tr><td style="padding:8px 0;color:#a1a1aa;">${copy.price}</td><td style="padding:8px 0;color:#fff;text-align:right;font-weight:700;">${escapeHtml(formattedPrice)}</td></tr>` : ''}<tr><td style="padding:8px 0;color:#a1a1aa;">${copy.date}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(formattedDate)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.time}</td><td style="padding:8px 0;color:#fff;text-align:right;">${escapeHtml(payload.time)}</td></tr><tr><td style="padding:8px 0;color:#a1a1aa;">${copy.location}</td><td style="padding:8px 0;color:#fff;text-align:right;">${safeBarbershopAddress}</td></tr></table>
 <div style="height:1px;background:#27272a;margin:20px 0;"></div>
 <p style="font-size:13px;line-height:1.6;color:#a1a1aa;margin:0 0 12px;">${copy.manageHint}</p>
 <a href="${customerPortalUrl}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:14px 16px;font-size:14px;font-weight:700;margin-bottom:22px;">${copy.manageBooking}</a>
@@ -192,7 +198,7 @@ ${avatarMarkup}
         to: [{ email: payload.to, name: payload.clientName }],
         subject: copy.subject,
         htmlContent,
-        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedPrice ? `${copy.price}: ${formattedPrice}\n` : ''}${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {
