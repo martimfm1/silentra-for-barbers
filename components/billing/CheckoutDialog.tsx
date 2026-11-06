@@ -73,7 +73,7 @@ export function CheckoutDialog({
             </StripeProvider>
           ) : (
             <div className="flex min-h-48 items-center justify-center">
-              <SilentraLoading variant="compact" message="A preparar o pagamento…" />
+              <SilentraLoading variant="compact" />
             </div>
           )}
         </div>
