@@ -520,7 +520,7 @@ export function BillingHub() {
         <div className="mt-5 space-y-2">
           {loadingInvoices ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-3">
-              <SilentraLoading variant="compact" message={t('billingHub.loadingInvoices')} />
+              <SilentraLoading variant="compact" />
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
