@@ -295,10 +295,10 @@ async function POST__unobserved(
           process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
           new URL(request.url).origin;
         const reviewUrlObject = new URL(
-          `/barbershops/${encodeURIComponent(shop.slug)}`,
+          `/barbershops/${encodeURIComponent(shop.slug)}/review/claim`,
           siteUrl,
         );
-        reviewUrlObject.searchParams.set('review_token', reviewToken);
+        reviewUrlObject.searchParams.set('token', reviewToken);
         const serviceName = serviceRelation?.name || 'o teu atendimento';
         try {
           const emailResult = await sendBookingReviewRequestEmail({
