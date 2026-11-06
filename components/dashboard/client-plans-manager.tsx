@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   Card,
   CardContent,
@@ -300,7 +301,7 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
               role="status"
               aria-label={t('clientsPage.planLoading')}
             >
-              <Spinner className="size-5" />
+              <SilentraLoading variant="compact" message={t('clientsPage.planLoading')} />
             </div>
           ) : activePlan ? (
             <>
