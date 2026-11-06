@@ -18,6 +18,7 @@ import { clientsService } from '@/app/dashboard/_services/clients.service';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   Dialog,
   DialogContent,
@@ -236,7 +237,7 @@ export function ClientProfileDialog({
 
                   {loading ? (
                     <div className="flex min-h-28 items-center justify-center">
-                      <Spinner className="size-5" />
+                      <SilentraLoading variant="compact" message={t('clientsPage.loading')} />
                     </div>
                   ) : history.length === 0 ? (
                     <p className="py-8 text-center text-sm text-zinc-500">
