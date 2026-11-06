@@ -238,7 +238,7 @@ export function SettingsAmenitiesPanel({
     return (
       <Card className="mt-6 border-white/10 bg-black/30">
         <CardContent className="flex min-h-40 items-center justify-center">
-          <SilentraLoading variant="compact" message="A carregar as informações…" />
+          <SilentraLoading variant="compact" />
         </CardContent>
       </Card>
     );
