@@ -186,14 +186,14 @@ export function PublicReviewForm({
                   {copy.noAccessDescription}
                 </p>
                 <Link
-                  href={`/barbershops/${encodeURIComponent(barbershopId)}`}
+                  href={`/barbershops/${encodeURIComponent(slug)}`}
                   className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-200 hover:text-emerald-100"
                 >
                   {copy.back}
                 </Link>
               </div>
             ) : (
-              <form onSubmit={submitReview} className="space-y-6">
+              <form onSubmit={submitReview} className="relative space-y-6">
                 <fieldset>
                   <legend className="text-sm font-semibold">{copy.rating}</legend>
                   <div
