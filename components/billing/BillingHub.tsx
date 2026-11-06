@@ -4,6 +4,7 @@ import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-pr
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -518,8 +519,8 @@ export function BillingHub() {
         </div>
         <div className="mt-5 space-y-2">
           {loadingInvoices ? (
-            <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 py-10 text-zinc-500">
-              <Loader2 className="size-5 animate-spin" />
+            <div className="rounded-2xl border border-white/8 bg-black/20 p-3">
+              <SilentraLoading variant="compact" message={t('billingHub.loadingInvoices')} />
             </div>
           ) : invoices.length === 0 ? (
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-500">
