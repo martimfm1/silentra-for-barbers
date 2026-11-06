@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import {
   REVIEW_TOKEN_COOKIE_MAX_AGE,
   reviewTokenCookieName,
@@ -32,6 +33,28 @@ export async function GET(
         headers: {
           'Cache-Control': 'no-store',
           'Referrer-Policy': 'no-referrer',
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
+      },
+    );
+  }
+
+  const allowed = await consumePublicRateLimit(
+    request,
+    'public-review-claim',
+    profile.id,
+    30,
+    60 * 60,
+  );
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Este link foi aberto demasiadas vezes. Tenta novamente mais tarde.' },
+      {
+        status: 429,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Referrer-Policy': 'no-referrer',
+          'Retry-After': String(60 * 60),
           'X-Robots-Tag': 'noindex, nofollow',
         },
       },
