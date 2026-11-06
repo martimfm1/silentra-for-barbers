@@ -26,7 +26,7 @@ const MapPreview = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-full min-h-64 items-center justify-center bg-white/[0.02] px-3">
-        <SilentraLoading variant="compact" message="A carregar o mapa…" />
+        <SilentraLoading variant="compact" />
       </div>
     ),
   },
