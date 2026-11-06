@@ -1,4 +1,6 @@
+import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import {
@@ -63,14 +65,42 @@ export async function GET(
   }
 
   const token = request.nextUrl.searchParams.get('token') ?? '';
-  const response = NextResponse.redirect(
-    cleanRedirect(request, profile.slug),
-    303,
-  );
+  const redirectUrl = cleanRedirect(request, profile.slug);
   const tokenCookieName = reviewTokenCookieName(profile.id);
   const accessCookieName = reviewAccessCookieName(profile.id);
+  let claimStatus: 'already-used' | 'expired' | 'invalid' | 'unavailable' | null = null;
 
-  if (REVIEW_TOKEN_PATTERN.test(token)) {
+  if (!REVIEW_TOKEN_PATTERN.test(token)) {
+    claimStatus = 'invalid';
+  } else {
+    const database = createAdminClient();
+    const { data: tokenRecord, error } = await database
+      .from('review_submission_tokens')
+      .select('consumed_at, expires_at')
+      .eq('shop_id', profile.id)
+      .eq('token_hash', createHash('sha256').update(token).digest('hex'))
+      .maybeSingle();
+
+    if (error) {
+      console.error('[PUBLIC_REVIEW_CLAIM_CHECK_FAILED]', error.code ?? 'UNKNOWN');
+      claimStatus = 'unavailable';
+    } else if (!tokenRecord) {
+      claimStatus = 'invalid';
+    } else if (tokenRecord.consumed_at) {
+      claimStatus = 'already-used';
+    } else if (new Date(tokenRecord.expires_at).getTime() <= Date.now()) {
+      claimStatus = 'expired';
+    }
+  }
+
+  if (claimStatus) redirectUrl.searchParams.set('review', claimStatus);
+  const response = NextResponse.redirect(redirectUrl, 303);
+
+  if (claimStatus) {
+    const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' as const, maxAge: 0 };
+    response.cookies.set(tokenCookieName, '', { ...cookieOptions, path: '/api/public/reviews' });
+    response.cookies.set(accessCookieName, '', { ...cookieOptions, path: '/' });
+  } else {
     response.cookies.set(tokenCookieName, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -84,21 +114,6 @@ export async function GET(
       sameSite: 'lax',
       path: '/',
       maxAge: REVIEW_TOKEN_COOKIE_MAX_AGE,
-    });
-  } else {
-    response.cookies.set(tokenCookieName, '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/api/public/reviews',
-      maxAge: 0,
-    });
-    response.cookies.set(accessCookieName, '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 0,
     });
   }
 
