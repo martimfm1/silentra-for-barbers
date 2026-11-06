@@ -3,7 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, Loader2, MapPin, Search, Tag, X } from 'lucide-react';
+import { AlertTriangle, MapPin, Search, Tag, X } from 'lucide-react';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { SiteNavbar } from '@/components/site-navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { SearchFilterBar } from './components/search-filter-bar';
@@ -24,11 +25,8 @@ const MapPreview = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-64 items-center justify-center bg-white/[0.02] text-sm text-zinc-500">
-        <div className="flex items-center gap-2">
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />A
-          carregar mapa…
-        </div>
+      <div className="flex h-full min-h-64 items-center justify-center bg-white/[0.02] px-3">
+        <SilentraLoading variant="compact" message="A carregar o mapa…" />
       </div>
     ),
   },
@@ -288,13 +286,7 @@ export default function BarbershopsDirectoryPage() {
                   className="silentra-section-block flex min-h-64 items-center justify-center rounded-3xl"
                   aria-live="polite"
                 >
-                  <div className="flex flex-col items-center gap-3 text-sm text-zinc-500">
-                    <Loader2
-                      className="size-6 animate-spin text-emerald-300"
-                      aria-hidden="true"
-                    />
-                    <span>{t('directory.loadingShops')}</span>
-                  </div>
+                  <SilentraLoading variant="compact" message={t('directory.loadingShops')} />
                 </div>
               ) : loadError ? (
                 <div
