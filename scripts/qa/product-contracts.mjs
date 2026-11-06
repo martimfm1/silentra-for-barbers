@@ -601,17 +601,72 @@ const checks = [
       source.includes("randomBytes(32).toString('base64url')") &&
       source.includes("createHash('sha256')") &&
       source.includes("from('review_submission_tokens')") &&
-      source.includes("searchParams.set('review_token', reviewToken)") &&
+      source.includes("searchParams.set('token', reviewToken)") &&
+      source.includes('/review/claim') &&
       source.includes('expires_at'),
   },
   {
-    name: 'Public review UI is only available from a review email capability',
-    file: 'app/barbershops/[slug]/public-barbershop-page-final.tsx',
+    name: 'Every public barbershop has a dedicated no-index review page',
+    file: 'app/barbershops/[slug]/review/page.tsx',
     test: (source) =>
-      source.includes("searchParams.get('review_token')") &&
-      source.includes("searchParams.delete('review_token')") &&
-      source.includes('reviewToken ? (') &&
-      source.includes('review_token: reviewToken'),
+      source.includes('getPublicProfileBySlug') &&
+      source.includes('PublicReviewForm') &&
+      source.includes('reviewAccessCookieName') &&
+      source.includes('index: false') &&
+      source.includes('follow: false'),
+  },
+  {
+    name: 'Public review links are exchanged for shop-scoped HttpOnly cookies',
+    file: 'app/barbershops/[slug]/review/claim/route.ts',
+    test: (source) =>
+      source.includes('getPublicProfileBySlug') &&
+      source.includes('REVIEW_TOKEN_PATTERN') &&
+      source.includes('httpOnly: true') &&
+      source.includes("sameSite: 'lax'") &&
+      source.includes('reviewTokenCookieName') &&
+      source.includes('reviewAccessCookieName') &&
+      source.includes("path: '/api/public/reviews'") &&
+      source.includes("response.headers.set('Referrer-Policy', 'no-referrer')"),
+  },
+  {
+    name: 'Anonymous review form only accepts a 1-5 star rating and optional comment',
+    file: 'app/barbershops/[slug]/review/ReviewForm.tsx',
+    test: (source) =>
+      source.includes('[1, 2, 3, 4, 5]') &&
+      source.includes('hasReviewAccess') &&
+      source.includes('credentials: \'same-origin\'') &&
+      source.includes('No account required') &&
+      source.includes('review') &&
+      !source.includes('reviewToken:'),
+  },
+  {
+    name: 'Public review submission uses same-origin, an HttpOnly token, rate limits and a honeypot',
+    file: 'app/api/public/reviews/route.ts',
+    test: (source) =>
+      source.includes('assertSameOrigin(request)') &&
+      source.includes('await cookies()') &&
+      source.includes('reviewTokenCookieName') &&
+      source.includes('consumePublicRateLimit(') &&
+      source.includes('REVIEW_RATE_LIMIT = 5') &&
+      source.includes('database.rpc(') &&
+      source.includes("'submit_public_review_with_token'") &&
+      source.includes("createHash('sha256')") &&
+      source.includes('body.website') &&
+      !source.includes('clientName') &&
+      !source.includes("from('reviews')"),
+  },
+  {
+    name: 'Review RPC derives the display name from the completed appointment and works for hidden directory listings',
+    file: 'supabase/migrations/20261106110000_harden_dedicated_public_reviews.sql',
+    test: (source) =>
+      source.includes("a.status = 'completed'::public.appointment_status") &&
+      source.includes('t.consumed_at is null') &&
+      source.includes('t.expires_at > now()') &&
+      source.includes('for update of t') &&
+      source.includes('a.manual_name') &&
+      source.includes('u.name_complete') &&
+      source.includes('s.public_profile_enabled') &&
+      !source.includes('is_public_in_directory'),
   },
   {
     name: 'Public review inserts are restricted to the validated RPC',
