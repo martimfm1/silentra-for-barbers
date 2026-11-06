@@ -14,7 +14,7 @@ const MapInner = dynamic(() => import('./map-inner'), {
       aria-label="A carregar o mapa"
       role="status"
     >
-      <SilentraLoading variant="compact" message="A carregar o mapa…" />
+      <SilentraLoading variant="compact" />
     </div>
   ),
 });
