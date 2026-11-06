@@ -578,24 +578,32 @@ async function POST__unobserved(request: Request) {
     }
 
     if (appointment.status === 'scheduled') {
-      void sendBookingConfirmationEmail({
-        to: email,
-        clientName: name,
-        serviceName: selectedService.name || 'Serviço',
-        servicePrice: Number(selectedService.price),
-        date: bookingDate,
-        time: bookingTime,
-        durationMinutes,
-        appointmentId: appointment.id,
-        barbershopId,
-        barbershopName,
-        barbershopAddress,
-      }).catch((err) =>
-        console.error(
-          '[BACKGROUND_EMAIL_ERROR]',
-          err instanceof Error ? err.name : 'UNKNOWN',
-        ),
-      );
+      try {
+        const emailResult = await sendBookingConfirmationEmail({
+          to: email,
+          clientName: name,
+          serviceName: selectedService.name || 'Serviço',
+          servicePrice: Number(selectedService.price),
+          date: bookingDate,
+          time: bookingTime,
+          durationMinutes,
+          appointmentId: appointment.id,
+          barbershopId,
+          barbershopName,
+          barbershopAddress,
+        });
+        if (!emailResult.success) {
+          console.error('[BOOKING_CONFIRMATION_EMAIL_FAILED]', {
+            appointmentId: appointment.id,
+            error: emailResult.error,
+          });
+        }
+      } catch (error) {
+        console.error('[BOOKING_CONFIRMATION_EMAIL_ERROR]', {
+          appointmentId: appointment.id,
+          error: error instanceof Error ? error.message : 'UNKNOWN',
+        });
+      }
     } else if (!isPrepayment) {
       const escapeEmailHtml = (value: string) =>
         value.replace(
@@ -609,18 +617,26 @@ async function POST__unobserved(request: Request) {
               "'": '&#39;',
             })[character] ?? character,
         );
-      void sendBrevoEmail({
-        to: email,
-        toName: name,
-        senderName: barbershopName,
-        subject: `Pedido de marcação recebido — ${barbershopName}`,
-        htmlContent: `<!doctype html><html lang="pt"><body style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b"><h1>Recebemos o teu pedido de marcação</h1><p>Olá ${escapeEmailHtml(name)},</p><p>Recebemos o teu pedido para <strong>${escapeEmailHtml(selectedService.name || 'Serviço')}</strong> no dia <strong>${escapeEmailHtml(bookingDate)}</strong> às <strong>${escapeEmailHtml(bookingTime)}</strong>.</p><p>A marcação ainda não está confirmada. A barbearia irá analisar o pedido e receberás a confirmação quando for aceite.</p><p>Obrigado,<br>${escapeEmailHtml(barbershopName)}</p></body></html>`,
-      }).catch((err) =>
-        console.error(
-          '[BACKGROUND_BOOKING_REQUEST_EMAIL_ERROR]',
-          err instanceof Error ? err.name : 'UNKNOWN',
-        ),
-      );
+      try {
+        const emailResult = await sendBrevoEmail({
+          to: email,
+          toName: name,
+          senderName: barbershopName,
+          subject: `Pedido de marcação recebido — ${barbershopName}`,
+          htmlContent: `<!doctype html><html lang="pt"><body style="font-family:Arial,sans-serif;line-height:1.6;color:#18181b"><h1>Recebemos o teu pedido de marcação</h1><p>Olá ${escapeEmailHtml(name)},</p><p>Recebemos o teu pedido para <strong>${escapeEmailHtml(selectedService.name || 'Serviço')}</strong> no dia <strong>${escapeEmailHtml(bookingDate)}</strong> às <strong>${escapeEmailHtml(bookingTime)}</strong>.</p><p>A marcação ainda não está confirmada. A barbearia irá analisar o pedido e receberás a confirmação quando for aceite.</p><p>Obrigado,<br>${escapeEmailHtml(barbershopName)}</p></body></html>`,
+        });
+        if (!emailResult.success) {
+          console.error('[BOOKING_REQUEST_EMAIL_FAILED]', {
+            appointmentId: appointment.id,
+            error: emailResult.error,
+          });
+        }
+      } catch (error) {
+        console.error('[BOOKING_REQUEST_EMAIL_ERROR]', {
+          appointmentId: appointment.id,
+          error: error instanceof Error ? error.message : 'UNKNOWN',
+        });
+      }
     }
     if (!isPrepayment) {
       void dispatchAppointmentAutomations('booking_created', {
