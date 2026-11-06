@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { StripeProvider } from '@/components/providers/StripeProvider';
 import { PaymentForm } from './PaymentForm';
-import { ShieldCheck, Loader2 } from 'lucide-react';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
+import { ShieldCheck } from 'lucide-react';
 
 interface CheckoutDialogProps {
   clientSecret: string;
@@ -71,8 +72,8 @@ export function CheckoutDialog({
               />
             </StripeProvider>
           ) : (
-            <div className="flex h-48 items-center justify-center">
-              <Loader2 className="size-6 animate-spin text-zinc-500" />
+            <div className="flex min-h-48 items-center justify-center">
+              <SilentraLoading variant="compact" message="A preparar o pagamento…" />
             </div>
           )}
         </div>
