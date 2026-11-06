@@ -104,6 +104,22 @@ export async function dispatchAppointmentAutomations(
         : null;
       if (!action || typeof action.body !== 'string' || !email) continue;
 
+      const variables = {
+        nome: name || 'Cliente',
+        barbearia: shop?.name?.trim() || 'A tua barbearia',
+      };
+      const subject =
+        typeof action.subject === 'string'
+          ? token(action.subject, variables)
+          : `${rule.name} — ${variables.barbearia}`;
+      const body = token(action.body, variables);
+
+      // Review requests are sent by the dedicated, single-use review flow.
+      // Skip legacy booking-completed rules that would send a second request.
+      if (trigger === 'booking_completed' && isReviewRequest(subject, body)) {
+        continue;
+      }
+
       const { data: existing, error: existingError } = await admin
         .from('automation_runs')
         .select('id,status')
@@ -146,22 +162,6 @@ export async function dispatchAppointmentAutomations(
       const run = runResult.data;
       if (runResult.error || !run) {
         hadFailure = true;
-        continue;
-      }
-
-      const variables = {
-        nome: name || 'Cliente',
-        barbearia: shop?.name?.trim() || 'A tua barbearia',
-      };
-      const subject =
-        typeof action.subject === 'string'
-          ? token(action.subject, variables)
-          : `${rule.name} — ${variables.barbearia}`;
-      const body = token(action.body, variables);
-
-      // Review requests are sent by the dedicated, single-use review flow.
-      // Skip legacy booking-completed rules that would send a second request.
-      if (trigger === 'booking_completed' && isReviewRequest(subject, body)) {
         continue;
       }
 
