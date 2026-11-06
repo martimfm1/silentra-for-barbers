@@ -88,7 +88,7 @@ export function SettingsAutomaticBookingPanel({
   if (planLoading || loading) {
     return (
       <div className="flex min-h-36 items-center justify-center">
-        <SilentraLoading variant="compact" message={t('automaticBookingSettings.loading')} />
+        <SilentraLoading variant="compact" />
       </div>
     );
   }
