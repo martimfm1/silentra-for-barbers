@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   MessageSquareText,
@@ -52,7 +52,7 @@ export function PublicReviewsPage({
   const [sort, setSort] = useState<SortMode>('newest');
   const [withCommentOnly, setWithCommentOnly] = useState(false);
 
-  async function loadReviews(signal?: AbortSignal) {
+  const loadReviews = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setHasError(false);
     try {
@@ -80,13 +80,13 @@ export function PublicReviewsPage({
     } finally {
       if (!signal?.aborted) setIsLoading(false);
     }
-  }
+  }, [slug]);
 
   useEffect(() => {
     const controller = new AbortController();
     void loadReviews(controller.signal);
     return () => controller.abort();
-  }, [slug]);
+  }, [loadReviews]);
 
   const filteredReviews = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -97,7 +97,7 @@ export function PublicReviewsPage({
       if (withCommentOnly && !review.comment?.trim()) return false;
       if (!normalizedQuery) return true;
       return (
-        review.client_name.toLocaleLowerCase().includes(normalizedQuery) ||
+        (review.client_name || '').toLocaleLowerCase().includes(normalizedQuery) ||
         (review.comment || '').toLocaleLowerCase().includes(normalizedQuery)
       );
     });
