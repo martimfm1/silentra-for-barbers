@@ -4,7 +4,7 @@ import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-pr
 import { useLanguage } from '@/context/LanguageContext';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Check, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
