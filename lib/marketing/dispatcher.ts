@@ -380,6 +380,7 @@ export async function dispatchMarketingEvent(input: {
   for (const campaign of campaigns ?? []) {
     // The dedicated review email is the only review request sent on completion.
     if (
+      input.eventName === 'booking_completed' &&
       campaign.channel === 'email' &&
       isReviewRequestContent(
         campaign.subject?.trim() || campaign.name || '',
