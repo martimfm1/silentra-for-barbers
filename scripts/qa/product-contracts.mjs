@@ -611,7 +611,7 @@ const checks = [
     test: (source) =>
       source.includes('getPublicProfileBySlug') &&
       source.includes('PublicReviewForm') &&
-      source.includes('reviewTokenCookieName') &&
+      source.includes('reviewAccessCookieName') &&
       source.includes('index: false') &&
       source.includes('follow: false'),
   },
@@ -624,6 +624,8 @@ const checks = [
       source.includes('httpOnly: true') &&
       source.includes("sameSite: 'lax'") &&
       source.includes('reviewTokenCookieName') &&
+      source.includes('reviewAccessCookieName') &&
+      source.includes("path: '/api/public/reviews'") &&
       source.includes("response.headers.set('Referrer-Policy', 'no-referrer')"),
   },
   {
