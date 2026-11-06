@@ -3,6 +3,7 @@ import { getPublicProfileBySlug } from '@/lib/barbershops/public-profile';
 import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import {
   REVIEW_TOKEN_COOKIE_MAX_AGE,
+  reviewAccessCookieName,
   reviewTokenCookieName,
 } from '@/lib/reviews/review-token-cookie';
 
@@ -66,10 +67,18 @@ export async function GET(
     cleanRedirect(request, profile.slug),
     303,
   );
-  const cookieName = reviewTokenCookieName(profile.id);
+  const tokenCookieName = reviewTokenCookieName(profile.id);
+  const accessCookieName = reviewAccessCookieName(profile.id);
 
   if (REVIEW_TOKEN_PATTERN.test(token)) {
-    response.cookies.set(cookieName, token, {
+    response.cookies.set(tokenCookieName, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/public/reviews',
+      maxAge: REVIEW_TOKEN_COOKIE_MAX_AGE,
+    });
+    response.cookies.set(accessCookieName, '1', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -77,7 +86,14 @@ export async function GET(
       maxAge: REVIEW_TOKEN_COOKIE_MAX_AGE,
     });
   } else {
-    response.cookies.set(cookieName, '', {
+    response.cookies.set(tokenCookieName, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/public/reviews',
+      maxAge: 0,
+    });
+    response.cookies.set(accessCookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
