@@ -92,42 +92,5 @@ export const publicBarbershopService = {
     }
   },
 
-  async submitReview(payload: {
-    barbershop_id: string;
-    client_name: string;
-    rating: number;
-    comment?: string;
-    review_token: string;
-  }) {
-    const response = await fetch('/api/public/reviews', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        barbershopId: payload.barbershop_id,
-        clientName: payload.client_name,
-        rating: payload.rating,
-        comment: payload.comment ?? '',
-        reviewToken: payload.review_token,
-      }),
-    });
 
-    let body: { data?: ReviewItem; error?: string } = {};
-    try {
-      body = (await response.json()) as { data?: ReviewItem; error?: string };
-    } catch {
-      body = {};
-    }
-
-    if (!response.ok || !body.data) {
-      return {
-        data: null,
-        error: new Error(body.error || 'Não foi possível enviar a avaliação.'),
-      };
-    }
-
-    return { data: body.data, error: null };
-  },
 };
