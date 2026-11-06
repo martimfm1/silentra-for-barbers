@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Check, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -192,10 +193,7 @@ export function EarningRulesCard() {
         </div>
 
         {loading ? (
-          <div className="flex min-h-24 items-center justify-center text-sm text-muted-foreground">
-            <Loader2 className="mr-2 size-4 animate-spin" />
-            {t('common.loading')}
-          </div>
+          <SilentraLoading variant="compact" message={t('common.loading')} />
         ) : rules.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
             <p className="font-medium">{t('earningRules.noRules')}</p>
