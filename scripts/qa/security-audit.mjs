@@ -280,7 +280,7 @@ const requestValidationChecks = [
     file: 'app/api/public/reviews/route.ts',
     markers: [
       'readJsonObject(request',
-      "'barbershopId', 'clientName', 'rating', 'comment', 'reviewToken'",
+      "allowedKeys: ['barbershopId', 'rating', 'comment', 'website']",
       'submit_public_review_with_token',
       'createHash',
     ],
