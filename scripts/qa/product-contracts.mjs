@@ -640,7 +640,7 @@ const checks = [
     name: 'Marketplace cards link to a dedicated reviews page',
     file: 'app/barbershops/components/shop-card.tsx',
     test: (source) =>
-      source.includes('/reviews`)') &&
+      source.includes('/reviews') &&
       source.includes('directory.viewReviews') &&
       source.includes('MessageSquareText'),
   },
