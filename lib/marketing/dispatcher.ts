@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendMarketingEmail, sendBrevoSms } from '@/lib/marketing/brevo';
+import { isReviewRequestContent } from '@/lib/reviews/is-review-request';
 
 const BATCH_SIZE = 100;
 const MAX_ATTEMPTS = 3;
@@ -368,7 +369,7 @@ export async function dispatchMarketingEvent(input: {
   const admin = createAdminClient();
   const { data: campaigns, error } = await admin
     .from('marketing_campaigns')
-    .select('id')
+    .select('id,channel,subject,body,name')
     .eq('barbershop_id', input.barbershopId)
     .eq('active', true)
     .eq('trigger_type', 'event')
@@ -377,6 +378,16 @@ export async function dispatchMarketingEvent(input: {
   if (error) throw error;
   let triggered = 0;
   for (const campaign of campaigns ?? []) {
+    // The dedicated review email is the only review request sent on completion.
+    if (
+      campaign.channel === 'email' &&
+      isReviewRequestContent(
+        campaign.subject?.trim() || campaign.name || '',
+        campaign.body || '',
+      )
+    ) {
+      continue;
+    }
     await queueCampaign(
       campaign.id,
       `event:${input.eventName}:${input.clientId}:${crypto.randomUUID()}`,
