@@ -219,7 +219,7 @@ export async function processQueuedCampaignRecipients(limit = BATCH_SIZE) {
           campaign.body || '',
         )
       ) {
-        await admin
+        const { error: skipError } = await admin
           .from('marketing_campaign_recipients')
           .update({
             status: 'skipped',
@@ -227,6 +227,7 @@ export async function processQueuedCampaignRecipients(limit = BATCH_SIZE) {
             next_attempt_at: null,
           })
           .eq('id', recipient.id);
+        if (skipError) throw skipError;
         continue;
       }
 
