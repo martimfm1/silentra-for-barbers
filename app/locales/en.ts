@@ -689,6 +689,7 @@ export const en = {
     nearMeShort: 'Near me',
     noLocation: 'Enable location to find nearby barbershops.',
     shopLogo: 'Logo for {shop}',
+    viewReviews: 'Read reviews ({count})',
   },
   storefront: {
     marketplace: 'Marketplace',
