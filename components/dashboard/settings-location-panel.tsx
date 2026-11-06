@@ -90,7 +90,7 @@ export function SettingsLocationPanel({
     return (
       <Card className="border-white/10 bg-black/40">
         <CardContent className="flex min-h-32 items-center justify-center">
-          <SilentraLoading variant="compact" message="A carregar a localização…" />
+          <SilentraLoading variant="compact" />
         </CardContent>
       </Card>
     );
