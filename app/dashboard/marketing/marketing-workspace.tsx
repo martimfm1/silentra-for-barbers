@@ -1,6 +1,7 @@
 'use client';
 
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -737,12 +738,8 @@ export function MarketingWorkspace({
             </div>
             {loading && campaigns.length === 0 ? (
               <Card className="border-white/10 bg-white/[0.02]">
-                <CardContent className="flex flex-col items-center py-16 text-sm text-muted-foreground">
-                  <Loader2
-                    className="mb-3 size-5 animate-spin"
-                    aria-hidden="true"
-                  />
-                  A carregar…
+                <CardContent className="py-6">
+                  <SilentraLoading variant="compact" message="A carregar campanhas…" />
                 </CardContent>
               </Card>
             ) : filtered.length === 0 ? (

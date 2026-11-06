@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client'; // 👈 Alterado para o cliente de browser!
-import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 
 export default function OnboardingLayout({
   children,
@@ -46,9 +46,7 @@ export default function OnboardingLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Spinner className="size-8 text-zinc-50" />
-      </div>
+      <SilentraLoading />
     );
   }
 

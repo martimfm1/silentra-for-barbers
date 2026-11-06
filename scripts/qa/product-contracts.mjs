@@ -1022,25 +1022,26 @@ const checks = [
       source.includes('SILENTRA'),
   },
   {
-    name: 'Shared Silentra loading combines Light Tunnel and Stroke Text with localization',
+    name: 'Shared Silentra loading uses the responsive scissors animation and reduced-motion support',
     file: 'components/ui/silentra-loading.tsx',
     test: (source) =>
-      source.includes('<LightTunnel') &&
-      source.includes('<StrokeWordmark') &&
-      source.includes('Preparing your experience') &&
-      source.includes('A preparar a experiência') &&
-      source.includes('dpr={0.85}') &&
+      source.includes('sl-scissors') &&
+      source.includes('sl-cut-a') &&
+      source.includes('sl-compact') &&
+      source.includes('prefers-reduced-motion: reduce') &&
+      source.includes('SILENTRA') &&
+      source.includes('FOR BARBERS') &&
       source.includes('aria-busy="true"'),
   },
   {
-    name: 'Global route loading uses the shared Light Tunnel and Stroke Text animation',
+    name: 'Global route loading uses the shared Silentra scissors animation',
     file: 'app/loading.tsx',
     test: (source) =>
       source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
       source.includes('<SilentraLoading />'),
   },
   {
-    name: 'Dashboard loading skeletons reuse the compact Light Tunnel and Stroke Text animation',
+    name: 'Dashboard loading skeletons reuse the compact Silentra scissors animation',
     file: 'app/dashboard/_components/dashboard-skeleton.tsx',
     test: (source) =>
       source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
@@ -1053,6 +1054,22 @@ const checks = [
     test: (source) =>
       source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
       source.includes('<SilentraLoading variant="dashboard" />'),
+  },
+  {
+    name: 'Onboarding route loading uses the shared Silentra scissors loader',
+    file: 'app/api/onboarding/layout.tsx',
+    test: (source) =>
+      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes('<SilentraLoading />') &&
+      !source.includes('<Spinner'),
+  },
+  {
+    name: 'POS loading screens use the shared Silentra scissors loader',
+    file: 'app/dashboard/pos/overview/page.tsx',
+    test: (source) =>
+      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes('<SilentraLoading variant="dashboard" />') &&
+      !source.includes('<Spinner'),
   },
   {
     name: 'Barbershop deletion requires password and a one-time email code on the server',

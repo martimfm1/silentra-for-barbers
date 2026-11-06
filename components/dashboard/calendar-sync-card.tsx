@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 
 type CalendarFeedResponse = {
   enabled?: boolean;
@@ -171,10 +172,7 @@ export function CalendarSyncCard() {
         </CardHeader>
         <CardContent className="space-y-4">
           {loading ? (
-            <div className="flex min-h-10 items-center gap-2 text-sm text-zinc-400">
-              <Spinner className="size-4" />
-              {t('agenda.calendarSyncLoading')}
-            </div>
+            <SilentraLoading variant="compact" message={t('agenda.calendarSyncLoading')} />
           ) : loadFailed ? (
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm text-rose-300">

@@ -15,7 +15,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -177,9 +177,7 @@ export default function SalesOverviewPage() {
 
   if (accessLoading || loading) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <Spinner className="size-7" />
-      </main>
+      <SilentraLoading variant="dashboard" />
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -213,12 +214,7 @@ export default function CustomWebsiteDashboardPage() {
 
   if (planLoading || loading) {
     return (
-      <main className="dashboard-page mx-auto w-full max-w-5xl p-4 sm:p-8">
-        <div className="flex min-h-64 items-center justify-center text-zinc-500">
-          <Loader2 className="mr-2 size-5 animate-spin" />
-          {pt ? 'A carregar os teus sites…' : 'Loading your websites…'}
-        </div>
-      </main>
+      <SilentraLoading variant="dashboard" message={pt ? 'A carregar os teus sites…' : 'Loading your websites…'} />
     );
   }
 

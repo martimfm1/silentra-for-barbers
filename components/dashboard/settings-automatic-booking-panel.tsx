@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { Switch } from '@/components/ui/switch';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
@@ -87,7 +88,7 @@ export function SettingsAutomaticBookingPanel({
   if (planLoading || loading) {
     return (
       <div className="flex min-h-36 items-center justify-center">
-        <Spinner className="size-6" />
+        <SilentraLoading variant="compact" />
       </div>
     );
   }

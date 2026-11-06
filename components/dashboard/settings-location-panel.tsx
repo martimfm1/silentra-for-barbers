@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
 import { toast } from 'sonner';
 
@@ -89,7 +90,7 @@ export function SettingsLocationPanel({
     return (
       <Card className="border-white/10 bg-black/40">
         <CardContent className="flex min-h-32 items-center justify-center">
-          <Spinner className="size-6" />
+          <SilentraLoading variant="compact" />
         </CardContent>
       </Card>
     );

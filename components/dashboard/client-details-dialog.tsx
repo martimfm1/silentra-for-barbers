@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ClientPlansManager } from '@/components/dashboard/client-plans-manager';
 import { Spinner } from '@/components/ui/spinner';
+import { SilentraLoading } from '@/components/ui/silentra-loading';
 import {
   Dialog,
   DialogContent,
@@ -332,7 +333,7 @@ export function ClientDetailsDialog({
             role="status"
             aria-label={t('crmDetail.loadingClient')}
           >
-            <Spinner className="size-6" />
+            <SilentraLoading variant="compact" message={t('crmDetail.loadingClient')} />
           </div>
         ) : error ? (
           <div
