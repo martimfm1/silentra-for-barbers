@@ -824,18 +824,37 @@ const checks = [
       source.includes('requireBirthDate={false}'),
   },
   {
-    name: 'Agenda do Victor desktop hero darkens the uploaded banner and places services beside the title',
+    name: 'Agenda do Victor desktop hero darkens the uploaded banner and places services beside the title without a booking badge',
     file: 'app/barbershops/[slug]/pro-booking-page.tsx',
     test: (source) =>
       source.includes('agendaHeroLayout?: boolean') &&
       source.includes('agendaHeroLayout = false') &&
+      source.includes('hidden min-h-dvh') &&
       source.includes('bg-cover bg-center') &&
       source.includes('rgba(0,0,0,.84)') &&
-      source.includes('lg:grid-cols-[minmax(0,.88fr)_minmax(520px,1.12fr)]') &&
+      source.includes('grid-cols-[minmax(0,.88fr)_minmax(520px,1.12fr)]') &&
       source.includes('Escolhe o teu serviço') &&
       source.includes('Choose your service') &&
+      !source.includes('Agendamento online') &&
+      !source.includes('Online booking') &&
       source.includes('onClick={() => openBooking(service.id)}') &&
       source.includes('<BookingDrawer'),
+  },
+  {
+    name: 'Agenda do Victor mobile restores the centered banner and light overlapping services card',
+    file: 'app/barbershops/[slug]/pro-booking-page.tsx',
+    test: (source) =>
+      source.includes('lg:bg-[#09090b]') &&
+      source.includes('lg:hidden') &&
+      source.includes('min-h-[250px]') &&
+      source.includes('items-center justify-center') &&
+      source.includes('text-center') &&
+      source.includes('max-w-3xl') &&
+      source.includes('-mt-7') &&
+      source.includes('bg-white') &&
+      source.includes("t('proBookingPage.eyebrow')") &&
+      source.includes("t('proBookingPage.title')") &&
+      source.includes("t('proBookingPage.services')"),
   },
   {
     name: 'Agenda do Victor is the canonical public page for the Silveira Salon account',
