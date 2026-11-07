@@ -154,25 +154,37 @@ export const appointmentService = {
       })),
     ] as const;
 
-    let lastError: { message: string; code?: string } | null = null;
-    for (const variant of variants) {
-      const { data, error } = await supabase
-        .from('appointments')
-        .insert(variant)
-        .select();
+    const [primaryVariant, legacyVariant] = variants;
+    const primaryResult = await supabase
+      .from('appointments')
+      .insert(primaryVariant)
+      .select();
 
-      if (!error) {
-        return { data: (data ?? []) as Appointment[], error: null };
-      }
-      lastError = error;
+    if (!primaryResult.error) {
+      return {
+        data: (primaryResult.data ?? []) as Appointment[],
+        error: null,
+      };
     }
 
-    const error = Object.assign(
-      new Error(
-        lastError?.message ?? 'Não foi possível criar as marcações recorrentes.',
-      ),
-      { code: lastError?.code },
-    );
+    const isSchemaCompatibilityError =
+      primaryResult.error.code === '42703' ||
+      primaryResult.error.code === 'PGRST204';
+
+    const finalError = isSchemaCompatibilityError
+      ? await supabase
+          .from('appointments')
+          .insert(legacyVariant)
+          .select()
+      : primaryResult;
+
+    if (!finalError.error) {
+      return { data: (finalError.data ?? []) as Appointment[], error: null };
+    }
+
+    const error = Object.assign(new Error(finalError.error.message), {
+      code: finalError.error.code,
+    });
     console.error('[Appointment Series Create Error]:', error.message);
     return { data: null, error };
   },
