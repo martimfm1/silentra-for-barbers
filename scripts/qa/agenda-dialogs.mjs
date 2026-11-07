@@ -56,7 +56,7 @@ assert.ok(hook.includes("frequency === 'biweekly' ? 14 : 21"));
 assert.ok(hook.includes("frequency === 'monthly'"));
 assert.ok(hook.includes('appointmentService.createMany(createPayloads)'));
 assert.ok(appointmentsService.includes('async createMany('));
-assert.ok(appointmentsService.includes('.insert(primaryVariant)'));
+assert.ok(appointmentsService.includes('.insert(primaryVariant as never[])'));
 assert.ok(appointmentsService.includes('A single INSERT keeps the whole recurring series atomic'));
 for (const key of [
   'recurrence',
