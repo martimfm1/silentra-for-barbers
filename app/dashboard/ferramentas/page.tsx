@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
-  Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
