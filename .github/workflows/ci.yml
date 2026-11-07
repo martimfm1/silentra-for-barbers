@@ -106,6 +106,9 @@ jobs:
       - name: Agenda dialog contracts
         run: pnpm qa:agenda-dialogs
 
+      - name: Communication and growth contracts
+        run: pnpm qa:communication-growth
+
       - name: Closed-day localization contracts
         run: pnpm qa:closed-days
 
