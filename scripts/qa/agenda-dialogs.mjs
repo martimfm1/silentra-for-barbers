@@ -13,6 +13,9 @@ const select = read('components/ui/select.tsx');
 const combobox = read('components/ui/combobox.tsx');
 const pt = read('app/locales/pt.ts');
 const en = read('app/locales/en.ts');
+const ptCopy = read('app/locales/pt-copy.ts');
+const enCopy = read('app/locales/en-copy.ts');
+const bookingTypes = read('types/dashboard/forms.ts');
 
 assert.match(
   agenda,
@@ -37,6 +40,39 @@ assert.ok(bookingForm.includes('singleProfessional'));
 assert.ok(bookingForm.includes('services.length === 1'));
 assert.ok(bookingForm.includes('type="date"'));
 assert.ok(bookingForm.includes('type="time"'));
+assert.ok(bookingForm.includes('booking-recurrence'));
+assert.ok(bookingForm.includes('booking-recurrence-end'));
+assert.ok(bookingForm.includes('max-w-full'));
+assert.ok(bookingForm.includes('box-border'));
+assert.ok(bookingForm.includes('min-w-0'));
+assert.ok(bookingForm.includes('setRecurrenceEndDate'));
+assert.ok(agenda.includes('frequency: bookingRecurrence'));
+assert.ok(agenda.includes('endDate: recurrenceEndDate'));
+assert.ok(agenda.includes('addMonthsToDateValue(selectedDate, 6)'));
+assert.ok(bookingTypes.includes("'everyThreeWeeks'"));
+assert.ok(hook.includes('MAX_RECURRING_APPOINTMENTS = 52'));
+assert.ok(hook.includes('generateRecurringBookingDates'));
+assert.ok(hook.includes("frequency === 'biweekly' ? 14 : 21"));
+assert.ok(hook.includes("frequency === 'monthly'"));
+assert.ok(hook.includes('appointmentService.createMany(createPayloads)'));
+assert.ok(appointmentsService.includes('async createMany('));
+assert.ok(appointmentsService.includes('.insert(primaryVariant)'));
+assert.ok(appointmentsService.includes('A single INSERT keeps the whole recurring series atomic'));
+for (const key of [
+  'recurrence',
+  'noRecurrence',
+  'everyWeek',
+  'everyTwoWeeks',
+  'everyThreeWeeks',
+  'everyMonth',
+  'repeatUntil',
+  'recurrenceHint',
+  'recurringConflict',
+  'recurringCreated',
+]) {
+  assert.match(ptCopy, new RegExp(key + ':'));
+  assert.match(enCopy, new RegExp(key + ':'));
+}
 assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes("Hoje"));
 assert.ok(bookingForm.includes('Amanhã'));
 assert.ok(agenda.includes('birth_date: client.birth_date ??'));
