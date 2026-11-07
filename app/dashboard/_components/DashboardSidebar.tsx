@@ -26,6 +26,7 @@ import {
   ScanLine,
   X,
   Zap,
+  LayoutGrid,
   type LucideIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -77,7 +78,7 @@ const teamItems: SidebarItem[] = [
 ];
 
 const communicationItems: SidebarItem[] = [
-  { href: '/dashboard/comunicacao', label: 'Comunicação', icon: Megaphone },
+  { href: '/dashboard/comunicacao', label: 'Visão geral', icon: Megaphone },
   {
     href: '/dashboard/mensagens',
     label: 'Mensagens',
@@ -98,34 +99,27 @@ const communicationItems: SidebarItem[] = [
   },
 ];
 
-const toolsItems: SidebarItem[] = [
+const toolsOverviewItems: SidebarItem[] = [
+  { href: '/dashboard/ferramentas', label: 'Visão geral', icon: LayoutGrid },
+];
+
+const customerExperienceItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
-  {
-    href: '/dashboard/espera',
-    label: 'Lista de espera',
-    icon: Clock3,
-    feature: 'waitlist',
-  },
-  {
-    href: '/dashboard/loyalty',
-    label: 'Fidelização',
-    icon: Heart,
-    feature: 'loyalty',
-  },
-  {
-    href: '/dashboard/loyalty/points',
-    label: 'Regras de pontos',
-    icon: Sparkles,
-    feature: 'loyalty',
-  },
-  {
-    href: '/dashboard/loyalty/validate',
-    label: 'Validar recompensa',
-    icon: ScanLine,
-    feature: 'loyalty',
-  },
+  { href: '/dashboard/espera', label: 'Lista de espera', icon: Clock3, feature: 'waitlist' },
+  { href: '/dashboard/loyalty', label: 'Fidelização', icon: Heart, feature: 'loyalty' },
+  { href: '/dashboard/loyalty/points', label: 'Regras de pontos', icon: Sparkles, feature: 'loyalty' },
+  { href: '/dashboard/loyalty/validate', label: 'Validar recompensa', icon: ScanLine, feature: 'loyalty' },
+];
+
+const businessGrowthItems: SidebarItem[] = [
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
+];
+
+const toolsItems: SidebarItem[] = [
+  ...toolsOverviewItems,
+  ...customerExperienceItems,
+  ...businessGrowthItems,
 ];
 
 const secondaryItems: SidebarItem[] = [
@@ -141,6 +135,7 @@ const englishLabels: Record<string, string> = {
   Serviços: 'Services',
   Equipa: 'Team',
   Comunicação: 'Communication',
+  'Visão geral': 'Overview',
   Mensagens: 'Messages',
   Campanhas: 'Campaigns',
   Automações: 'Automations',
@@ -483,7 +478,15 @@ export function DashboardSidebar() {
             </section>
             <section>
               {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
-              <div className="grid gap-1">{toolsItems.map(renderItem)}</div>
+              <div className="grid gap-1">{toolsOverviewItems.map(renderItem)}</div>
+              <div className="mt-3">
+                {sectionTitle('Experiência do cliente', 'Customer experience')}
+                <div className="grid gap-1">{customerExperienceItems.map(renderItem)}</div>
+              </div>
+              <div className="mt-3">
+                {sectionTitle('Vendas e presença digital', 'Sales & online presence')}
+                <div className="grid gap-1">{businessGrowthItems.map(renderItem)}</div>
+              </div>
             </section>
           </nav>
         </div>
@@ -676,12 +679,15 @@ export function DashboardSidebar() {
                     </div>
                   </section>
                   <section>
-                    {sectionTitle(
-                      'Ferramentas e crescimento',
-                      'Tools & growth',
-                    )}
-                    <div className="grid gap-1.5">
-                      {toolsItems.map(renderItem)}
+                    {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
+                    <div className="grid gap-1.5">{toolsOverviewItems.map(renderItem)}</div>
+                    <div className="mt-5">
+                      {sectionTitle('Experiência do cliente', 'Customer experience')}
+                      <div className="grid gap-1.5">{customerExperienceItems.map(renderItem)}</div>
+                    </div>
+                    <div className="mt-5">
+                      {sectionTitle('Vendas e presença digital', 'Sales & online presence')}
+                      <div className="grid gap-1.5">{businessGrowthItems.map(renderItem)}</div>
                     </div>
                   </section>
                   <section>
