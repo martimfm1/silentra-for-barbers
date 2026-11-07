@@ -16,6 +16,9 @@ const en = read('app/locales/en.ts');
 const ptCopy = read('app/locales/pt-copy.ts');
 const enCopy = read('app/locales/en-copy.ts');
 const bookingTypes = read('types/dashboard/forms.ts');
+const calendarSync = read('components/dashboard/calendar-sync-card.tsx');
+const settings = read('app/dashboard/settings/settings-page.tsx');
+const selectComponent = read('components/ui/select.tsx');
 
 assert.match(
   agenda,
@@ -44,6 +47,17 @@ assert.ok(bookingForm.includes('booking-recurrence'));
 assert.ok(bookingForm.includes('booking-recurrence-end'));
 assert.ok(bookingForm.includes('max-w-full'));
 assert.ok(bookingForm.includes('box-border'));
+assert.match(calendarSync, /onClick=\{\(\) => setDialogOpen\(true\)\}/);
+assert.match(calendarSync, /<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>/);
+assert.ok(!calendarSync.includes('showInstructions'));
+assert.ok(calendarSync.includes('max-h-[min(90dvh,54rem)]'));
+assert.ok(selectComponent.includes('w-fit min-w-0 max-w-full'));
+assert.ok(selectComponent.includes('max-w-[calc(100vw-2rem)]'));
+assert.ok(bookingForm.includes('min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900'));
+assert.ok(settings.includes('box-border block min-h-11 w-full min-w-0 max-w-full'));
+assert.ok(settings.includes("cn(INPUT_CLASS, 'color-scheme-dark')"));
+assert.ok(settings.includes('w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm'));
+
 assert.ok(bookingForm.includes('min-w-0'));
 assert.ok(bookingForm.includes('setRecurrenceEndDate'));
 assert.ok(agenda.includes('frequency: bookingRecurrence'));

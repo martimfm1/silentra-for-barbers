@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   CalendarPlus,
   Check,
+  ChevronRight,
   Copy,
   Info,
   RefreshCw,
@@ -13,13 +14,6 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -44,7 +38,7 @@ export function CalendarSyncCard() {
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [feedUrl, setFeedUrl] = useState('');
-  const [showInstructions, setShowInstructions] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
 
   const load = useCallback(async () => {
@@ -116,7 +110,6 @@ export function CalendarSyncCard() {
       }
       setEnabled(false);
       setFeedUrl('');
-      setShowInstructions(false);
       toast.success(t('agenda.calendarSyncDisabled'));
     } catch (error) {
       toast.error(
@@ -160,111 +153,43 @@ export function CalendarSyncCard() {
 
   return (
     <>
-      <Card className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[.025]">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base text-zinc-100">
-            <CalendarPlus className="size-4 text-emerald-300" aria-hidden="true" />
-            {t('agenda.calendarSyncTitle')}
-          </CardTitle>
-          <CardDescription className="max-w-3xl text-sm leading-6 text-zinc-400">
-            {t('agenda.calendarSyncDescription')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setDialogOpen(true)}
+        className="mt-5 flex min-h-14 w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] px-4 text-left text-zinc-100 hover:bg-white/[.06] sm:w-auto sm:min-w-[20rem]"
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-200">
+            <CalendarPlus className="size-4" aria-hidden="true" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">
+              {t('agenda.calendarSyncTitle')}
+            </span>
+            <span className="mt-0.5 block truncate text-xs font-normal text-zinc-500">
+              {t('agenda.calendarSyncDescription')}
+            </span>
+          </span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2 text-xs text-zinc-400">
           {loading ? (
-            <SilentraLoading variant="compact" message={t('agenda.calendarSyncLoading')} />
-          ) : loadFailed ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm text-rose-300">
-                {t('agenda.calendarSyncLoadFailed')}
-              </p>
-              <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
-                {t('agenda.calendarSyncRetry')}
-              </Button>
-            </div>
-          ) : !enabled ? (
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-zinc-400">
-                {t('agenda.calendarSyncDisabledDescription')}
-              </p>
-              <Button
-                type="button"
-                onClick={() => void activate()}
-                disabled={saving}
-                className="min-h-10 shrink-0 bg-white text-zinc-950 hover:bg-zinc-200"
-              >
-                {saving ? <Spinner className="mr-2 size-4" /> : <CalendarPlus className="mr-2 size-4" />}
-                {saving
-                  ? t('agenda.calendarSyncActivating')
-                  : t('agenda.calendarSyncEnable')}
-              </Button>
-            </div>
+            <Spinner className="size-4" />
+          ) : enabled ? (
+            <span className="flex items-center gap-1.5 text-emerald-300">
+              <Check className="size-3.5" aria-hidden="true" />
+              {t('agenda.calendarSyncActive')}
+            </span>
           ) : (
-            <>
-              <div className="flex items-center gap-2 text-sm text-emerald-300">
-                <Check className="size-4" aria-hidden="true" />
-                {t('agenda.calendarSyncActive')}
-              </div>
-              <p className="text-xs leading-5 text-amber-200/80">
-                {t('agenda.calendarSyncPrivacyNotice')}
-              </p>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Input
-                  readOnly
-                  value={feedUrl}
-                  aria-label={t('agenda.calendarSyncUrlLabel')}
-                  className="min-h-11 min-w-0 border-white/10 bg-black/20 text-xs text-zinc-300"
-                  onFocus={(event) => event.currentTarget.select()}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void copyLink()}
-                  className="min-h-11 shrink-0 border-white/10"
-                >
-                  <Copy className="mr-2 size-4" aria-hidden="true" />
-                  {t('agenda.calendarSyncCopy')}
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowInstructions(true)}
-                  className="min-h-10 border-white/10"
-                >
-                  <Smartphone className="mr-2 size-4" aria-hidden="true" />
-                  {t('agenda.calendarSyncInstructions')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => void rotate()}
-                  disabled={saving}
-                  className="min-h-10 text-zinc-400 hover:text-zinc-100"
-                >
-                  {saving ? <Spinner className="mr-2 size-4" /> : <RefreshCw className="mr-2 size-4" aria-hidden="true" />}
-                  {t('agenda.calendarSyncRotate')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => void disable()}
-                  disabled={saving}
-                  className="min-h-10 text-rose-300 hover:bg-rose-400/10 hover:text-rose-200"
-                >
-                  <Unplug className="mr-2 size-4" aria-hidden="true" />
-                  {t('agenda.calendarSyncDisable')}
-                </Button>
-              </div>
-            </>
+            t('agenda.calendarSyncEnable')
           )}
-        </CardContent>
-      </Card>
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </span>
+      </Button>
 
-      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
-        <DialogContent className="max-h-[min(88dvh,48rem)] w-[calc(100%-1.5rem)] overflow-y-auto border border-white/10 bg-zinc-950 p-0 text-zinc-100 shadow-2xl sm:max-w-xl">
-          <div className="border-b border-white/8 bg-gradient-to-br from-emerald-400/[.08] via-transparent to-transparent px-5 pb-5 pt-6 sm:px-6">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-h-[min(90dvh,54rem)] w-[calc(100%-1rem)] min-w-0 max-w-xl overflow-x-hidden overflow-y-auto border border-white/10 bg-zinc-950 p-0 text-zinc-100 shadow-2xl">
+          <div className="border-b border-white/8 bg-gradient-to-br from-emerald-400/[.08] via-transparent to-transparent px-4 pb-5 pt-6 sm:px-6">
             <DialogHeader className="gap-2 text-left">
               <div className="mb-1 flex items-center gap-2">
                 <span className="flex size-9 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-200">
@@ -275,80 +200,164 @@ export function CalendarSyncCard() {
                 </span>
               </div>
               <DialogTitle className="text-xl font-semibold tracking-tight text-zinc-50">
-                {t('agenda.calendarSyncHowTo')}
+                {t('agenda.calendarSyncTitle')}
               </DialogTitle>
               <DialogDescription className="text-sm leading-6 text-zinc-400">
-                {t('agenda.calendarSyncDialogDescription')}
+                {t('agenda.calendarSyncDescription')}
               </DialogDescription>
             </DialogHeader>
-
-            <div className="mt-5 flex flex-col gap-3 rounded-xl border border-white/10 bg-black/25 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-zinc-100">
-                  {t('agenda.calendarSyncCopyBeforeStart')}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-zinc-400">
-                  {t('agenda.calendarSyncCopyBeforeStartDescription')}
-                </p>
-              </div>
-              <Button
-                type="button"
-                onClick={() => void copyLink()}
-                className="min-h-10 shrink-0 bg-white text-zinc-950 hover:bg-zinc-200"
-              >
-                <Copy className="mr-2 size-4" aria-hidden="true" />
-                {t('agenda.calendarSyncCopy')}
-              </Button>
-            </div>
           </div>
 
-          <div className="space-y-4 px-5 py-5 sm:px-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                {t('agenda.calendarSyncStepsLabel')}
-              </p>
-              <ol className="mt-3 space-y-3">
-                {tutorialSteps.map((step, index) => (
-                  <li
-                    key={step.title}
-                    className="flex gap-3 rounded-xl border border-white/[.07] bg-white/[.025] p-3.5 sm:p-4"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-300/10 text-xs font-semibold tabular-nums text-emerald-200">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0 pt-0.5">
-                      <p className="text-sm font-medium text-zinc-100">
-                        {step.title}
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-zinc-400">
-                        {step.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <div className="space-y-3 rounded-xl border border-sky-300/10 bg-sky-300/[.045] p-4">
-              <div className="flex items-start gap-2.5">
-                <Info className="mt-0.5 size-4 shrink-0 text-sky-200" aria-hidden="true" />
-                <p className="text-sm leading-6 text-sky-50/90">
-                  {t('agenda.calendarSyncICloudNote')}
+          <div className="min-w-0 space-y-5 px-4 py-5 sm:px-6">
+            {loading ? (
+              <SilentraLoading variant="compact" message={t('agenda.calendarSyncLoading')} />
+            ) : loadFailed ? (
+              <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-rose-400/15 bg-rose-400/[.04] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="min-w-0 text-sm leading-5 text-rose-300">
+                  {t('agenda.calendarSyncLoadFailed')}
                 </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void load()}
+                  className="min-h-10 shrink-0 border-white/10"
+                >
+                  {t('agenda.calendarSyncRetry')}
+                </Button>
               </div>
-              <p className="border-t border-white/[.07] pt-3 text-xs leading-5 text-zinc-400">
-                {t('agenda.calendarSyncVerifyNotice')}
-              </p>
-              <p className="text-xs leading-5 text-zinc-500">
-                {t('agenda.calendarSyncReadOnlyNotice')}
-              </p>
-            </div>
+            ) : !enabled ? (
+              <div className="flex min-w-0 flex-col gap-4 rounded-xl border border-white/10 bg-white/[.025] p-4">
+                <p className="text-sm leading-6 text-zinc-400">
+                  {t('agenda.calendarSyncDisabledDescription')}
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => void activate()}
+                  disabled={saving}
+                  className="min-h-11 w-full bg-white text-zinc-950 hover:bg-zinc-200 sm:w-auto sm:self-start"
+                >
+                  {saving ? (
+                    <Spinner className="mr-2 size-4" />
+                  ) : (
+                    <CalendarPlus className="mr-2 size-4" aria-hidden="true" />
+                  )}
+                  {saving
+                    ? t('agenda.calendarSyncActivating')
+                    : t('agenda.calendarSyncEnable')}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[.045] p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-emerald-300">
+                    <Check className="size-4" aria-hidden="true" />
+                    {t('agenda.calendarSyncActive')}
+                  </div>
+                  <p className="text-xs leading-5 text-amber-200/80">
+                    {t('agenda.calendarSyncPrivacyNotice')}
+                  </p>
+                </div>
 
-            <div className="flex justify-end pb-1">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+                  <Input
+                    readOnly
+                    value={feedUrl}
+                    aria-label={t('agenda.calendarSyncUrlLabel')}
+                    className="box-border min-h-11 w-full min-w-0 max-w-full border-white/10 bg-black/20 text-xs text-zinc-300"
+                    onFocus={(event) => event.currentTarget.select()}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void copyLink()}
+                    className="min-h-11 w-full shrink-0 border-white/10 sm:w-auto"
+                  >
+                    <Copy className="mr-2 size-4" aria-hidden="true" />
+                    {t('agenda.calendarSyncCopy')}
+                  </Button>
+                </div>
+
+                <section className="min-w-0 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                      {t('agenda.calendarSyncStepsLabel')}
+                    </p>
+                    <p className="mt-1 text-sm leading-5 text-zinc-400">
+                      {t('agenda.calendarSyncHowTo')}
+                    </p>
+                  </div>
+                  <ol className="space-y-3">
+                    {tutorialSteps.map((step, index) => (
+                      <li
+                        key={step.title}
+                        className="flex min-w-0 gap-3 rounded-xl border border-white/[.07] bg-white/[.025] p-3.5 sm:p-4"
+                      >
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-300/10 text-xs font-semibold tabular-nums text-emerald-200">
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0 pt-0.5">
+                          <p className="text-sm font-medium text-zinc-100">
+                            {step.title}
+                          </p>
+                          <p className="mt-1 break-words text-sm leading-6 text-zinc-400">
+                            {step.description}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+
+                <div className="min-w-0 space-y-3 rounded-xl border border-sky-300/10 bg-sky-300/[.045] p-4">
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <Info className="mt-0.5 size-4 shrink-0 text-sky-200" aria-hidden="true" />
+                    <p className="min-w-0 text-sm leading-6 text-sky-50/90">
+                      {t('agenda.calendarSyncICloudNote')}
+                    </p>
+                  </div>
+                  <p className="border-t border-white/[.07] pt-3 text-xs leading-5 text-zinc-400">
+                    {t('agenda.calendarSyncVerifyNotice')}
+                  </p>
+                  <p className="text-xs leading-5 text-zinc-500">
+                    {t('agenda.calendarSyncReadOnlyNotice')}
+                  </p>
+                </div>
+
+                <div className="flex min-w-0 flex-col gap-2 border-t border-white/[.07] pt-4 sm:flex-row sm:flex-wrap">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void rotate()}
+                    disabled={saving}
+                    className="min-h-10 w-full border-white/10 sm:w-auto"
+                  >
+                    {saving ? (
+                      <Spinner className="mr-2 size-4" />
+                    ) : (
+                      <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                    )}
+                    {t('agenda.calendarSyncRotate')}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => void disable()}
+                    disabled={saving}
+                    className="min-h-10 w-full text-rose-300 hover:bg-rose-400/10 hover:text-rose-200 sm:w-auto"
+                  >
+                    <Unplug className="mr-2 size-4" aria-hidden="true" />
+                    {t('agenda.calendarSyncDisable')}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end border-t border-white/[.07] pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setShowInstructions(false)}
+                onClick={() => setDialogOpen(false)}
                 className="min-h-10 border-white/10"
               >
                 {t('common.done')}

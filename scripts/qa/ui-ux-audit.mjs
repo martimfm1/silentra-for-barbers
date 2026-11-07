@@ -164,7 +164,7 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
-assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
+assert.match(settingsPage, /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/);
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.match(settingsPage, /sticky top-0/);
@@ -216,7 +216,7 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
 assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
-assert.match(settingsPage, /const INPUT_CLASS = 'min-h-11 max-w-sm/);
+assert.match(settingsPage, /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/);
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.doesNotMatch(

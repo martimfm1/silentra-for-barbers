@@ -64,7 +64,7 @@ import {
   type BarbershopAmenities,
 } from '@/lib/barbershops/amenities';
 
-const INPUT_CLASS = 'min-h-11 max-w-sm rounded-xl border-white/10 bg-white/5 text-sm';
+const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-white/5 text-sm sm:max-w-sm';
 const CARD_CLASS = 'border border-white/10 bg-white/[.02] text-zinc-50';
 type PublicProfileSetup = {
   city: string;
@@ -598,11 +598,11 @@ export default function SettingsPageOrganized() {
                     >
                       <SelectTrigger
                         id="settings-default-language"
-                        className="h-11 w-full max-w-sm rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                        className="box-border h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200 sm:max-w-sm"
                       >
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent position="popper" className="w-[var(--radix-select-trigger-width)]">
+                      <SelectContent position="popper" className="w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
                         <SelectItem value="pt">Português (Portugal)</SelectItem>
                         <SelectItem value="en">English</SelectItem>
                       </SelectContent>
@@ -797,7 +797,7 @@ export default function SettingsPageOrganized() {
                 </div>
                 <Card className={CARD_CLASS}>
                   <CardContent className="space-y-6 ">
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                     <div className="grid gap-2">
                       <label
                         htmlFor="settings-opening-time"
@@ -811,7 +811,7 @@ export default function SettingsPageOrganized() {
                         aria-label={t('settingsPage.openingTime')}
                         value={config.opening_time}
                         onChange={(e) => set({ opening_time: e.target.value })}
-                        className={INPUT_CLASS}
+                        className={cn(INPUT_CLASS, 'color-scheme-dark')}
                       />
                     </div>
                     <div className="grid gap-2">
@@ -827,7 +827,7 @@ export default function SettingsPageOrganized() {
                         aria-label={t('settingsPage.closingTime')}
                         value={config.closing_time}
                         onChange={(e) => set({ closing_time: e.target.value })}
-                        className={INPUT_CLASS}
+                        className={cn(INPUT_CLASS, 'color-scheme-dark')}
                       />
                     </div>
                   </div>
@@ -835,7 +835,7 @@ export default function SettingsPageOrganized() {
                     <h3 className="text-sm font-medium text-zinc-200">
                       {t('settingsPage.lunchBreak')}
                     </h3>
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                       <div className="grid gap-2">
                         <label
                           htmlFor="settings-lunch-start"
@@ -849,7 +849,7 @@ export default function SettingsPageOrganized() {
                           aria-label={t('settingsPage.lunchStart')}
                           value={config.lunch_start}
                           onChange={(e) => set({ lunch_start: e.target.value })}
-                          className={INPUT_CLASS}
+                          className={cn(INPUT_CLASS, 'color-scheme-dark')}
                         />
                       </div>
                       <div className="grid gap-2">
@@ -865,7 +865,7 @@ export default function SettingsPageOrganized() {
                           aria-label={t('settingsPage.lunchEnd')}
                           value={config.lunch_end}
                           onChange={(e) => set({ lunch_end: e.target.value })}
-                          className={INPUT_CLASS}
+                          className={cn(INPUT_CLASS, 'color-scheme-dark')}
                         />
                       </div>
                     </div>
@@ -891,7 +891,7 @@ export default function SettingsPageOrganized() {
                               });
                             }}
                             className={cn(
-                              'min-h-12 rounded-xl border px-3 text-left text-sm',
+                              'box-border min-h-12 w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm',
                               active
                                 ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
                                 : 'border-white/10 bg-white/[.02] text-zinc-400',

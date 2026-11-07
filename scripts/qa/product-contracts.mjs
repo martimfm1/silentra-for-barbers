@@ -1000,7 +1000,8 @@ const checks = [
     test: (source) =>
       source.includes('/api/calendar/feed/settings') &&
       source.includes('navigator.clipboard.writeText') &&
-      source.includes('<Dialog open={showInstructions}') &&
+      source.includes('onClick={() => setDialogOpen(true)}') &&
+      source.includes('<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>') &&
       source.includes('tutorialSteps.map') &&
       source.includes('calendarSyncStepFourDescription') &&
       source.includes('calendarSyncRotate') &&
