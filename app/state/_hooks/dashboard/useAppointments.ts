@@ -7,14 +7,97 @@ import {
 } from '@/app/dashboard/_services/schedule-blocks.service';
 import { combineDatetime } from '@/app/dashboard/_lib/date-utils';
 import { getErrorMessage } from '@/app/dashboard/_lib/error-utils';
-import type { BlockFormData } from '@/types';
+import type { BookingRecurrence, BlockFormData } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
+
+const MAX_RECURRING_APPOINTMENTS = 52;
+
+type RecurrenceGenerationError = 'invalid-range' | 'no-repeats' | 'too-many';
+
+function isValidDateValue(value: string) {
+  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value);
+  if (!match) return false;
+  const [, year, month, day] = match.map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+function formatUtcDate(date: Date) {
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+    String(date.getUTCDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+function getRecurringOccurrenceDate(
+  startDate: string,
+  frequency: Exclude<BookingRecurrence, 'none'>,
+  occurrence: number,
+) {
+  const [year, month, day] = startDate.split('-').map(Number);
+
+  if (frequency === 'monthly') {
+    const targetMonth = new Date(Date.UTC(year, month - 1 + occurrence, 1));
+    const lastDay = new Date(
+      Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0),
+    ).getUTCDate();
+    targetMonth.setUTCDate(Math.min(day, lastDay));
+    return formatUtcDate(targetMonth);
+  }
+
+  const intervalDays =
+    frequency === 'weekly' ? 7 : frequency === 'biweekly' ? 14 : 21;
+  return formatUtcDate(
+    new Date(Date.UTC(year, month - 1, day + intervalDays * occurrence)),
+  );
+}
+
+function generateRecurringBookingDates(
+  startDate: string,
+  endDate: string,
+  frequency: BookingRecurrence,
+): { dates: string[]; error: RecurrenceGenerationError | null } {
+  if (frequency === 'none') return { dates: [startDate], error: null };
+  if (
+    !isValidDateValue(startDate) ||
+    !isValidDateValue(endDate) ||
+    endDate <= startDate
+  ) {
+    return { dates: [], error: 'invalid-range' };
+  }
+
+  const dates = [startDate];
+  for (
+    let occurrence = 1;
+    occurrence <= MAX_RECURRING_APPOINTMENTS;
+    occurrence += 1
+  ) {
+    const nextDate = getRecurringOccurrenceDate(
+      startDate,
+      frequency,
+      occurrence,
+    );
+    if (nextDate > endDate) break;
+    dates.push(nextDate);
+    if (dates.length > MAX_RECURRING_APPOINTMENTS) {
+      return { dates: [], error: 'too-many' };
+    }
+  }
+
+  if (dates.length < 2) return { dates: [], error: 'no-repeats' };
+  return { dates, error: null };
+}
 
 export function useAppointments(
   barbershopId: string | null,
   onRefreshData: () => Promise<void>,
 ) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const [loadingAppointments, setLoading] = useState(false);
   const [finishingBookingId, setFinishingBookingId] = useState<string | null>(
     null,
@@ -70,7 +153,13 @@ export function useAppointments(
   );
 
   const handleCreateBooking = useCallback(
-    async (e?: React.SyntheticEvent) => {
+    async (
+      e?: React.SyntheticEvent,
+      recurrenceOptions: {
+        frequency?: BookingRecurrence;
+        endDate?: string;
+      } = {},
+    ) => {
       if (e && 'preventDefault' in e) e.preventDefault();
       if (!barbershopId) return false;
       setLoading(true);
@@ -85,6 +174,22 @@ export function useAppointments(
           manualPhone,
           birthDate,
         } = bookingFormData;
+        const recurrence = recurrenceOptions.frequency ?? 'none';
+        const generatedDates = generateRecurringBookingDates(
+          date,
+          recurrenceOptions.endDate ?? '',
+          recurrence,
+        );
+        if (generatedDates.error) {
+          const message =
+            generatedDates.error === 'too-many'
+              ? t('bookingForm.recurringLimit')
+              : generatedDates.error === 'no-repeats'
+                ? t('bookingForm.recurringAtLeastOne')
+                : t('bookingForm.recurringEndAfterStart');
+          toast.error(message);
+          return false;
+        }
         if (!manualName?.trim() || !manualPhone?.trim()) {
           toast.error(
             locale === 'en'
@@ -101,20 +206,47 @@ export function useAppointments(
           );
           return false;
         }
-        const { error } = await appointmentService.create({
+        const createPayloads = generatedDates.dates.map((bookingDate) => ({
           barbershop_id: barbershopId,
-          date_hour: combineDatetime(date, time),
-          status: 'pending',
+          date_hour: combineDatetime(bookingDate, time),
+          status: 'pending' as const,
           client_id: clientId || null,
           service_id: serviceId,
           professional_id: professionalId,
           manual_name: manualName || null,
           manual_phone: manualPhone || null,
           manual_birth_date: birthDate || null,
-        });
-        if (error) throw error;
+        }));
+        const result =
+          createPayloads.length === 1
+            ? await appointmentService.create(createPayloads[0])
+            : await appointmentService.createMany(createPayloads);
+        if (result.error) {
+          const databaseError = result.error as Error & { code?: string };
+          if (
+            databaseError.code === '23P01' ||
+            databaseError.code === '23505' ||
+            databaseError.message.includes('BOOKING_CONFLICT')
+          ) {
+            toast.error(
+              recurrence === 'none'
+                ? locale === 'en'
+                  ? 'This time slot is no longer available.'
+                  : 'Este horário já não está disponível.'
+                : t('bookingForm.recurringConflict'),
+            );
+            return false;
+          }
+          throw result.error;
+        }
         toast.success(
-          locale === 'en' ? 'Booking created successfully.' : 'Marcação criada com sucesso.',
+          recurrence === 'none'
+            ? locale === 'en'
+              ? 'Booking created successfully.'
+              : 'Marcação criada com sucesso.'
+            : t('bookingForm.recurringCreated', {
+                count: generatedDates.dates.length,
+              }),
         );
         setBookingFormData({
           clientId: '',
@@ -136,7 +268,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [barbershopId, bookingFormData, locale, onRefreshData],
+    [barbershopId, bookingFormData, locale, onRefreshData, t],
   );
 
   const confirmBooking = useCallback(
