@@ -2,6 +2,13 @@ import type { Dispatch, FormEvent, SetStateAction } from 'react';
 import type { Client, Professional, Service } from './entities';
 
 /** Data and callbacks accepted by dashboard form cards. */
+export type BookingRecurrence =
+  | 'none'
+  | 'weekly'
+  | 'biweekly'
+  | 'everyThreeWeeks'
+  | 'monthly';
+
 export interface BookingFormData {
   /** Explicitly present so React state setters remain assignable across the form. */
   clientId: string | undefined;
@@ -28,6 +35,10 @@ export interface BookingFormProps {
   setSelectedDate: (date: string) => void;
   selectedTime: string;
   setSelectedTime: (time: string) => void;
+  recurrence: BookingRecurrence;
+  setRecurrence: (recurrence: BookingRecurrence) => void;
+  recurrenceEndDate: string;
+  setRecurrenceEndDate: (date: string) => void;
   onSubmit: (event: FormEvent) => void;
 }
 

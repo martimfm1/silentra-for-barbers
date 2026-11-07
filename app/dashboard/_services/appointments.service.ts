@@ -115,6 +115,80 @@ export const appointmentService = {
     return { data: null, error: lastError };
   },
 
+  async createMany(
+    payloads: Array<{
+      barbershop_id: string;
+      date_hour: string;
+      status: Appointment['status'];
+      client_id: string | null;
+      service_id: string;
+      professional_id: string;
+      manual_name: string | null;
+      manual_phone: string | null;
+      manual_birth_date: string | null;
+      manual_email?: string | null;
+    }>,
+  ) {
+    if (payloads.length === 0) {
+      return { data: [] as Appointment[], error: null };
+    }
+
+    // A single INSERT keeps the whole recurring series atomic: either every
+    // occurrence is created or none is, including when a slot conflicts.
+    const variants = [
+      payloads.map((payload) => ({
+        ...payload,
+        client_id: payload.client_id || null,
+        manual_email: payload.manual_email?.trim().toLowerCase() || null,
+      })),
+      payloads.map((payload) => ({
+        barbershop_id: payload.barbershop_id,
+        date: payload.date_hour,
+        status: payload.status,
+        service_id: payload.service_id,
+        barber_id: payload.professional_id,
+        client_name: payload.manual_name ?? '',
+        client_phone: payload.manual_phone ?? '',
+        manual_email: payload.manual_email?.trim().toLowerCase() || null,
+        manual_birth_date: payload.manual_birth_date,
+      })),
+    ] as const;
+
+    const [primaryVariant, legacyVariant] = variants;
+    const primaryResult = await supabase
+      .from('appointments')
+      .insert(primaryVariant as never[])
+      .select();
+
+    if (!primaryResult.error) {
+      return {
+        data: (primaryResult.data ?? []) as Appointment[],
+        error: null,
+      };
+    }
+
+    const isSchemaCompatibilityError =
+      primaryResult.error.code === '42703' ||
+      primaryResult.error.code === 'PGRST204';
+
+    const finalError = isSchemaCompatibilityError
+      ? await supabase
+          .from('appointments')
+          .insert(legacyVariant as never[])
+          .select()
+      : primaryResult;
+
+    if (!finalError.error) {
+      return { data: (finalError.data ?? []) as Appointment[], error: null };
+    }
+
+    const error = Object.assign(new Error(finalError.error.message), {
+      code: finalError.error.code,
+    });
+    console.error('[Appointment Series Create Error]:', error.message);
+    return { data: null, error };
+  },
+
   async update(id: string, updates: Partial<Appointment>) {
     return updateRecord<Appointment>(supabase, 'appointments', id, updates);
   },
