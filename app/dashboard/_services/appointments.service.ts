@@ -154,7 +154,7 @@ export const appointmentService = {
       })),
     ] as const;
 
-    let lastError: { message: string } | null = null;
+    let lastError: { message: string; code?: string } | null = null;
     for (const variant of variants) {
       const { data, error } = await supabase
         .from('appointments')
@@ -167,8 +167,11 @@ export const appointmentService = {
       lastError = error;
     }
 
-    const error = new Error(
-      lastError?.message ?? 'Não foi possível criar as marcações recorrentes.',
+    const error = Object.assign(
+      new Error(
+        lastError?.message ?? 'Não foi possível criar as marcações recorrentes.',
+      ),
+      { code: lastError?.code },
     );
     console.error('[Appointment Series Create Error]:', error.message);
     return { data: null, error };
