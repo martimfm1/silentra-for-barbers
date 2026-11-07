@@ -157,7 +157,7 @@ export const appointmentService = {
     const [primaryVariant, legacyVariant] = variants;
     const primaryResult = await supabase
       .from('appointments')
-      .insert(primaryVariant)
+      .insert(primaryVariant as never[])
       .select();
 
     if (!primaryResult.error) {
@@ -174,7 +174,7 @@ export const appointmentService = {
     const finalError = isSchemaCompatibilityError
       ? await supabase
           .from('appointments')
-          .insert(legacyVariant)
+          .insert(legacyVariant as never[])
           .select()
       : primaryResult;
 
