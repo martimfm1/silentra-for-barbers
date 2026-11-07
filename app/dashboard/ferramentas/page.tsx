@@ -329,7 +329,6 @@ export default function ToolsGrowthPage() {
                 hasFeature={hasFeature}
                 upgradeLabel={copy.upgrade}
                 openLabel={copy.open}
-                pointsEnabledLabel={copy.noFeature}
               />
             ))}
           </div>
