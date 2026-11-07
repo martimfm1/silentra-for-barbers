@@ -272,6 +272,62 @@ export default function AgendaPage() {
     [appointments, locale, now, search, statusFilter, todayOnly],
   );
 
+  const handleRescheduleAppointment = useCallback(
+    async (appointmentId: string, date: string, time: string) => {
+      try {
+        const response = await fetch(
+          `/api/appointments/${encodeURIComponent(appointmentId)}/reschedule`,
+          {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date, time }),
+          },
+        );
+        const payload = (await response.json().catch(() => ({}))) as {
+          success?: boolean;
+          error?: string;
+          notificationSent?: boolean;
+        };
+        if (!response.ok || payload.success !== true) {
+          throw new Error(
+            payload.error ||
+              (locale === 'en'
+                ? 'Could not change this booking. Try again.'
+                : 'Não foi possível alterar esta marcação. Tenta novamente.'),
+          );
+        }
+
+        await fetchInitialData();
+        setSelectedAppointment(null);
+        if (payload.notificationSent) {
+          toast.success(
+            locale === 'en'
+              ? 'Booking updated and email sent to the customer.'
+              : 'Marcação alterada e email enviado ao cliente.',
+          );
+        } else {
+          toast.warning(
+            locale === 'en'
+              ? 'Booking updated, but the email could not be sent. Check the customer email and Brevo configuration.'
+              : 'Marcação alterada, mas não foi possível enviar o email. Confirma o email do cliente e a configuração do Brevo.',
+          );
+        }
+        return true;
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : locale === 'en'
+              ? 'Could not change this booking.'
+              : 'Não foi possível alterar esta marcação.',
+        );
+        return false;
+      }
+    },
+    [fetchInitialData, locale],
+  );
+
   const actionProps = {
     finishingBookingId,
     setFinishingBookingId,
@@ -598,6 +654,8 @@ export default function AgendaPage() {
       <AppointmentDetailDialog
         appointment={selectedAppointment}
         open={Boolean(selectedAppointment)}
+        locale={locale}
+        onReschedule={handleRescheduleAppointment}
         onOpenChange={(open) => {
           if (!open) setSelectedAppointment(null);
         }}
