@@ -174,22 +174,6 @@ export function useAppointments(
           manualPhone,
           birthDate,
         } = bookingFormData;
-        const recurrence = recurrenceOptions.frequency ?? 'none';
-        const generatedDates = generateRecurringBookingDates(
-          date,
-          recurrenceOptions.endDate ?? '',
-          recurrence,
-        );
-        if (generatedDates.error) {
-          const message =
-            generatedDates.error === 'too-many'
-              ? t('bookingForm.recurringLimit')
-              : generatedDates.error === 'no-repeats'
-                ? t('bookingForm.recurringAtLeastOne')
-                : t('bookingForm.recurringEndAfterStart');
-          toast.error(message);
-          return false;
-        }
         if (!manualName?.trim() || !manualPhone?.trim()) {
           toast.error(
             locale === 'en'
@@ -204,6 +188,22 @@ export function useAppointments(
               ? 'Choose a service, barber, date and time.'
               : 'Escolhe o serviço, o barbeiro, a data e a hora.',
           );
+          return false;
+        }
+        const recurrence = recurrenceOptions.frequency ?? 'none';
+        const generatedDates = generateRecurringBookingDates(
+          date,
+          recurrenceOptions.endDate ?? '',
+          recurrence,
+        );
+        if (generatedDates.error) {
+          const message =
+            generatedDates.error === 'too-many'
+              ? t('bookingForm.recurringLimit')
+              : generatedDates.error === 'no-repeats'
+                ? t('bookingForm.recurringAtLeastOne')
+                : t('bookingForm.recurringEndAfterStart');
+          toast.error(message);
           return false;
         }
         const createPayloads = generatedDates.dates.map((bookingDate) => ({
