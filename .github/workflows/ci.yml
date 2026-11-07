@@ -94,6 +94,9 @@ jobs:
       - name: Barber booking email contracts
         run: pnpm qa:barber-booking-email
 
+      - name: Appointment rescheduling contracts
+        run: pnpm qa:appointment-rescheduling
+
       - name: UI copy audit
         run: pnpm qa:copy
 

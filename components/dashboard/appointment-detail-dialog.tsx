@@ -1,9 +1,11 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import {
+  CalendarClock,
   CalendarDays,
   Clock3,
+  Loader2,
   Mail,
   Phone,
   UserRound,
@@ -17,12 +19,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
+import { Button } from '@/components/ui/button';
 import type { Appointment } from '@/types';
 
 type Props = {
   appointment: Appointment | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onReschedule: (appointmentId: string, date: string, time: string) => Promise<boolean>;
+  locale?: string;
 };
 
 function DetailItem({
@@ -144,11 +149,42 @@ function PaymentSummary({
   );
 }
 
+function toLocalDateInputValue(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function toLocalTimeInputValue(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 export function AppointmentDetailDialog({
   appointment,
   open,
   onOpenChange,
+  onReschedule,
+  locale = 'pt',
 }: Props) {
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+
+  useEffect(() => {
+    if (!appointment) return;
+    setEditDate(toLocalDateInputValue(appointment.date_hour));
+    setEditTime(toLocalTimeInputValue(appointment.date_hour));
+    setIsEditingSchedule(false);
+  }, [appointment?.id, appointment?.date_hour, open]);
+
   if (!appointment) return null;
   const date = new Date(appointment.date_hour);
   const clientName =
@@ -162,11 +198,37 @@ export function AppointmentDetailDialog({
   const extra = Number(appointment.value_products ?? 0);
   const servicePrice = Number(appointment.services?.price ?? 0);
   const total = servicePrice + extra;
+  const isEnglish = locale === 'en';
+  const canReschedule =
+    appointment.status === 'pending' || appointment.status === 'scheduled';
+  const originalDate = toLocalDateInputValue(appointment.date_hour);
+  const originalTime = toLocalTimeInputValue(appointment.date_hour);
+  const today = toLocalDateInputValue(new Date());
+  const scheduleStatusHint =
+    appointment.status === 'scheduled'
+      ? isEnglish
+        ? 'This booking will stay confirmed. The customer will receive an email with the updated time.'
+        : 'A marcação continuará confirmada. O cliente receberá um email com o novo horário.'
+      : isEnglish
+        ? 'This booking will remain pending confirmation. The customer will receive the updated time without an automatic confirmation.'
+        : 'A marcação continuará pendente de confirmação. O cliente receberá o novo horário, sem confirmação automática.';
   const dateLabel = date.toLocaleDateString('pt-PT', { dateStyle: 'full' });
   const timeLabel = date.toLocaleTimeString('pt-PT', {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const handleScheduleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canReschedule || !editDate || !editTime) return;
+    setIsSavingSchedule(true);
+    try {
+      const completed = await onReschedule(appointment.id, editDate, editTime);
+      if (completed) setIsEditingSchedule(false);
+    } finally {
+      setIsSavingSchedule(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -240,6 +302,105 @@ export function AppointmentDetailDialog({
                   </DetailItem>
                 </div>
               </Section>
+              {canReschedule ? (
+                <Section title={isEnglish ? 'Change booking' : 'Alterar marcação'}>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                    {!isEditingSchedule ? (
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-zinc-100">
+                            {isEnglish ? 'Need to change this time?' : 'Precisas de alterar este horário?'}
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-zinc-400">
+                            {scheduleStatusHint}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditingSchedule(true)}
+                          className="min-h-11 shrink-0 border-white/10 bg-white/[0.04] text-zinc-100 hover:bg-white/[0.08]"
+                        >
+                          <CalendarClock className="mr-2 size-4" aria-hidden="true" />
+                          {isEnglish ? 'Change date and time' : 'Alterar data e hora'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleScheduleSubmit} className="space-y-4">
+                        <p className="text-xs leading-5 text-zinc-400">
+                          {isEnglish
+                            ? 'Choose a new date and time. Availability is checked before the change is saved.'
+                            : 'Escolhe uma nova data e hora. A disponibilidade é validada antes de guardar a alteração.'}
+                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="min-w-0 space-y-1.5">
+                            <label htmlFor={`reschedule-date-${appointment.id}`} className="text-xs font-medium text-zinc-300">
+                              {isEnglish ? 'New date' : 'Nova data'}
+                            </label>
+                            <input
+                              id={`reschedule-date-${appointment.id}`}
+                              type="date"
+                              required
+                              min={today}
+                              value={editDate}
+                              onChange={(event) => setEditDate(event.target.value)}
+                              className="min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10"
+                            />
+                          </div>
+                          <div className="min-w-0 space-y-1.5">
+                            <label htmlFor={`reschedule-time-${appointment.id}`} className="text-xs font-medium text-zinc-300">
+                              {isEnglish ? 'New time' : 'Nova hora'}
+                            </label>
+                            <input
+                              id={`reschedule-time-${appointment.id}`}
+                              type="time"
+                              required
+                              step={300}
+                              value={editTime}
+                              onChange={(event) => setEditTime(event.target.value)}
+                              className="min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={isSavingSchedule}
+                            onClick={() => {
+                              setEditDate(originalDate);
+                              setEditTime(originalTime);
+                              setIsEditingSchedule(false);
+                            }}
+                            className="min-h-11 border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.05]"
+                          >
+                            {isEnglish ? 'Cancel' : 'Cancelar'}
+                          </Button>
+                          <Button
+                            type="submit"
+                            disabled={
+                              isSavingSchedule ||
+                              !editDate ||
+                              !editTime ||
+                              (editDate === originalDate && editTime === originalTime)
+                            }
+                            className="min-h-11 bg-emerald-300 text-zinc-950 hover:bg-emerald-200 disabled:opacity-50"
+                          >
+                            {isSavingSchedule ? (
+                              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <CalendarClock className="mr-2 size-4" aria-hidden="true" />
+                            )}
+                            {isSavingSchedule
+                              ? isEnglish ? 'Saving…' : 'A guardar…'
+                              : isEnglish ? 'Save new time' : 'Guardar novo horário'}
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                </Section>
+              ) : null}
               <Section title="Cliente">
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   <DetailItem
