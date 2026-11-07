@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
-import type { Appointment, BookingFormData, Client, Professional, Service } from '@/types';
+import type { Appointment, BookingFormData, BookingRecurrence, Client, Professional, Service } from '@/types';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
@@ -50,6 +50,20 @@ function getLocalDateInputValue(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function addMonthsToDateValue(value: string, months: number) {
+  const [year, month, day] = value.split('-').map(Number);
+  const targetMonth = new Date(Date.UTC(year, month - 1 + months, 1));
+  const lastDay = new Date(
+    Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  targetMonth.setUTCDate(Math.min(day, lastDay));
+  return [
+    targetMonth.getUTCFullYear(),
+    String(targetMonth.getUTCMonth() + 1).padStart(2, '0'),
+    String(targetMonth.getUTCDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 function sameLocalDay(value: string, reference: Date) {
@@ -140,6 +154,30 @@ export default function AgendaPage() {
   const [selectedProfessionalId, setSelectedProfessionalId] = useState('');
   const [selectedDate, setSelectedDate] = useState(getLocalDateInputValue);
   const [selectedTime, setSelectedTime] = useState('');
+  const [bookingRecurrence, setBookingRecurrence] =
+    useState<BookingRecurrence>('none');
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
+
+  const handleBookingRecurrenceChange = (frequency: BookingRecurrence) => {
+    setBookingRecurrence(frequency);
+    if (frequency === 'none') {
+      setRecurrenceEndDate('');
+      return;
+    }
+    setRecurrenceEndDate((current) =>
+      current > selectedDate
+        ? current
+        : addMonthsToDateValue(selectedDate, 6),
+    );
+  };
+
+  useEffect(() => {
+    if (bookingRecurrence === 'none') return;
+    if (!recurrenceEndDate || recurrenceEndDate <= selectedDate) {
+      setRecurrenceEndDate(addMonthsToDateValue(selectedDate, 6));
+    }
+  }, [bookingRecurrence, recurrenceEndDate, selectedDate]);
+
 
   useEffect(() => {
     const openCreateBooking = () => setBookingDialogOpen(true);
@@ -558,8 +596,15 @@ export default function AgendaPage() {
             setSelectedDate={setSelectedDate}
             selectedTime={selectedTime}
             setSelectedTime={setSelectedTime}
+            recurrence={bookingRecurrence}
+            setRecurrence={handleBookingRecurrenceChange}
+            recurrenceEndDate={recurrenceEndDate}
+            setRecurrenceEndDate={setRecurrenceEndDate}
             onSubmit={async (event) => {
-              const created = await handleCreateBooking(event);
+              const created = await handleCreateBooking(event, {
+                frequency: bookingRecurrence,
+                endDate: recurrenceEndDate,
+              });
               if (!created) return;
               setBookingDialogOpen(false);
               setFormData({
@@ -573,6 +618,8 @@ export default function AgendaPage() {
               setSelectedProfessionalId('');
               setSelectedDate(getLocalDateInputValue());
               setSelectedTime('');
+              setBookingRecurrence('none');
+              setRecurrenceEndDate('');
             }}
           />
         </DialogContent>
