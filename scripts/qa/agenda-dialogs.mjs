@@ -92,7 +92,7 @@ assert.doesNotMatch(
 );
 assert.match(
   agenda,
-  /const created = await handleCreateBooking\(event\);\s*if \(!created\) return;/,
+  /const created = await handleCreateBooking\(event, \{\s*frequency: bookingRecurrence,\s*endDate: recurrenceEndDate,\s*\}\);\s*if \(!created\) return;/,
 );
 assert.match(
   agenda,
