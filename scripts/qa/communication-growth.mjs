@@ -50,8 +50,8 @@ assert.ok(tools.includes("hasFeature(tool.feature)"), 'Tool cards must respect p
 assert.ok(tools.includes("href={locked ? '/dashboard/billing' : tool.href}"), 'Locked tools must route to plans');
 assert.ok(tools.includes('secondaryLinks'), 'Loyalty shortcuts should remain grouped with the loyalty tool');
 assert.ok(metadata.includes("title: 'Ferramentas e crescimento'"));
-assert.ok(pt.includes('Visão geral:') || pt.includes("'Visão geral':"), 'PT copy should contain a localized overview label');
-assert.ok(en.includes("'Visão geral': 'Overview'"), 'EN copy should contain a localized overview label');
+assert.ok(sidebar.includes("label: 'Visão geral'"), 'PT navigation should contain a localized overview label');
+assert.ok(sidebar.includes("'Visão geral': 'Overview'"), 'EN navigation should contain a localized overview label');
 assert.ok(packageJson.includes('qa:communication-growth'), 'The new contracts must be part of the QA pipeline');
 
 console.log('[COMMUNICATION_GROWTH_QA] Communication and tools navigation, feature access and bilingual overview contracts passed.');
