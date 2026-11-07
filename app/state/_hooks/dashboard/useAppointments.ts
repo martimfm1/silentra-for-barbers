@@ -17,7 +17,9 @@ type RecurrenceGenerationError = 'invalid-range' | 'no-repeats' | 'too-many';
 function isValidDateValue(value: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
-  const [, year, month, day] = match.map(Number);
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
   return (
     date.getUTCFullYear() === year &&
@@ -39,7 +41,9 @@ function getRecurringOccurrenceDate(
   frequency: Exclude<BookingRecurrence, 'none'>,
   occurrence: number,
 ) {
-  const [year, month, day] = startDate.split('-').map(Number);
+  const year = Number(startDate.slice(0, 4));
+  const month = Number(startDate.slice(5, 7));
+  const day = Number(startDate.slice(8, 10));
 
   if (frequency === 'monthly') {
     const targetMonth = new Date(Date.UTC(year, month - 1 + occurrence, 1));
