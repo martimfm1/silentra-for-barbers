@@ -53,7 +53,9 @@ function getLocalDateInputValue(date = new Date()) {
 }
 
 function addMonthsToDateValue(value: string, months: number) {
-  const [year, month, day] = value.split('-').map(Number);
+  const year = Number(value.slice(0, 4));
+  const month = Number(value.slice(5, 7));
+  const day = Number(value.slice(8, 10));
   const targetMonth = new Date(Date.UTC(year, month - 1 + months, 1));
   const lastDay = new Date(
     Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0),
