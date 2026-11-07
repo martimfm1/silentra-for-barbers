@@ -115,6 +115,65 @@ export const appointmentService = {
     return { data: null, error: lastError };
   },
 
+  async createMany(
+    payloads: Array<{
+      barbershop_id: string;
+      date_hour: string;
+      status: Appointment['status'];
+      client_id: string | null;
+      service_id: string;
+      professional_id: string;
+      manual_name: string | null;
+      manual_phone: string | null;
+      manual_birth_date: string | null;
+      manual_email?: string | null;
+    }>,
+  ) {
+    if (payloads.length === 0) {
+      return { data: [] as Appointment[], error: null };
+    }
+
+    // A single INSERT keeps the whole recurring series atomic: either every
+    // occurrence is created or none is, including when a slot conflicts.
+    const variants = [
+      payloads.map((payload) => ({
+        ...payload,
+        client_id: payload.client_id || null,
+        manual_email: payload.manual_email?.trim().toLowerCase() || null,
+      })),
+      payloads.map((payload) => ({
+        barbershop_id: payload.barbershop_id,
+        date: payload.date_hour,
+        status: payload.status,
+        service_id: payload.service_id,
+        barber_id: payload.professional_id,
+        client_name: payload.manual_name ?? '',
+        client_phone: payload.manual_phone ?? '',
+        manual_email: payload.manual_email?.trim().toLowerCase() || null,
+        manual_birth_date: payload.manual_birth_date,
+      })),
+    ] as const;
+
+    let lastError: { message: string } | null = null;
+    for (const variant of variants) {
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert(variant)
+        .select();
+
+      if (!error) {
+        return { data: (data ?? []) as Appointment[], error: null };
+      }
+      lastError = error;
+    }
+
+    const error = new Error(
+      lastError?.message ?? 'Não foi possível criar as marcações recorrentes.',
+    );
+    console.error('[Appointment Series Create Error]:', error.message);
+    return { data: null, error };
+  },
+
   async update(id: string, updates: Partial<Appointment>) {
     return updateRecord<Appointment>(supabase, 'appointments', id, updates);
   },
