@@ -20,6 +20,7 @@ import {
   Check,
   Clock3,
   Plus,
+  Repeat,
   Search,
   Scissors,
   UserRound,
@@ -46,6 +47,10 @@ export function BookingForm({
   setSelectedDate,
   selectedTime,
   setSelectedTime,
+  recurrence,
+  setRecurrence,
+  recurrenceEndDate,
+  setRecurrenceEndDate,
   onSubmit,
 }: BookingFormProps) {
   const { t, locale } = useLanguage();
@@ -521,8 +526,8 @@ export function BookingForm({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="grid min-w-0 gap-1.5">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
+              <div className="grid min-w-0 max-w-full gap-1.5">
                 <label htmlFor="booking-date" className="text-xs font-medium text-zinc-400">
                   {t('bookingForm.date')}
                 </label>
@@ -533,7 +538,7 @@ export function BookingForm({
                   required
                   value={selectedDate}
                   onChange={(event) => setSelectedDate(event.target.value)}
-                  className="color-scheme-dark min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08]"
+                  className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/[0.035] px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
                 />
                 <div className="mt-1 flex flex-wrap gap-2">
                   <button
@@ -564,7 +569,7 @@ export function BookingForm({
                   </button>
                 </div>
               </div>
-              <div className="grid min-w-0 content-start gap-1.5">
+              <div className="grid min-w-0 max-w-full content-start gap-1.5">
                 <label htmlFor="booking-time" className="text-xs font-medium text-zinc-400">
                   {t('bookingForm.time')}
                 </label>
@@ -576,13 +581,70 @@ export function BookingForm({
                   step={300}
                   value={selectedTime}
                   onChange={(event) => setSelectedTime(event.target.value)}
-                  className="color-scheme-dark min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08]"
+                  className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/[0.035] px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
                 />
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-600">
-                  <Clock3 className="size-3.5" aria-hidden="true" />
+                  <Clock3 className="size-3.5 shrink-0" aria-hidden="true" />
                   {locale === 'en' ? 'Uses your device time picker' : 'Usa o seletor de horas do teu dispositivo'}
                 </p>
               </div>
+            </div>
+
+            <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-1.5">
+                <label htmlFor="booking-recurrence" className="text-xs font-medium text-zinc-400">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Repeat className="size-3.5 text-emerald-300" aria-hidden="true" />
+                    {t('bookingForm.recurrence')}
+                  </span>
+                </label>
+                <Select
+                  value={recurrence}
+                  onValueChange={(value) =>
+                    setRecurrence(value as typeof recurrence)
+                  }
+                >
+                  <SelectTrigger
+                    id="booking-recurrence"
+                    className="min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3 text-sm text-white sm:text-base"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72 border-white/10 bg-zinc-900 text-white">
+                    <SelectGroup>
+                      <SelectItem value="none">{t('bookingForm.noRecurrence')}</SelectItem>
+                      <SelectItem value="weekly">{t('bookingForm.everyWeek')}</SelectItem>
+                      <SelectItem value="biweekly">{t('bookingForm.everyTwoWeeks')}</SelectItem>
+                      <SelectItem value="everyThreeWeeks">{t('bookingForm.everyThreeWeeks')}</SelectItem>
+                      <SelectItem value="monthly">{t('bookingForm.everyMonth')}</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              {recurrence !== 'none' ? (
+                <div className="grid min-w-0 gap-1.5">
+                  <label htmlFor="booking-recurrence-end" className="text-xs font-medium text-zinc-400">
+                    {t('bookingForm.repeatUntil')}
+                  </label>
+                  <input
+                    id="booking-recurrence-end"
+                    name="recurrenceEndDate"
+                    type="date"
+                    required
+                    min={selectedDate}
+                    value={recurrenceEndDate}
+                    onChange={(event) => setRecurrenceEndDate(event.target.value)}
+                    className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-zinc-900 px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
+                  />
+                  <p className="text-[11px] leading-4 text-zinc-600">
+                    {t('bookingForm.recurrenceHint')}
+                  </p>
+                </div>
+              ) : (
+                <p className="flex min-w-0 items-center text-xs leading-5 text-zinc-600">
+                  {t('bookingForm.recurrenceOffHint')}
+                </p>
+              )}
             </div>
           </section>
         </div>
