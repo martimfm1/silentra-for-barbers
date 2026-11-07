@@ -438,11 +438,11 @@ export function BookingForm({
                 >
                   <SelectTrigger
                     id="booking-service"
-                    className="min-h-12 w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
+                    className="box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
                   >
                     <SelectValue placeholder={t('bookingForm.chooseService')} />
                   </SelectTrigger>
-                  <SelectContent className="max-h-72 border-white/10 bg-zinc-900 text-white">
+                  <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
                       {services.map((service) => (
                         <SelectItem key={service.id} value={service.id} className="min-h-11 rounded-lg py-2.5">
@@ -482,11 +482,11 @@ export function BookingForm({
                   <Select value={selectedProfessionalId} onValueChange={setSelectedProfessionalId}>
                     <SelectTrigger
                       id="booking-barber"
-                      className="min-h-12 w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
+                      className="box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
                     >
                       <SelectValue placeholder={t('bookingForm.chooseProfessional')} />
                     </SelectTrigger>
-                    <SelectContent className="max-h-72 border-white/10 bg-zinc-900 text-white">
+                    <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                       <SelectGroup>
                         {professionals.map((professional) => (
                           <SelectItem key={professional.id} value={professional.id} className="min-h-11 rounded-lg py-2.5">
@@ -610,7 +610,7 @@ export function BookingForm({
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-72 border-white/10 bg-zinc-900 text-white">
+                  <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
                       <SelectItem value="none">{t('bookingForm.noRecurrence')}</SelectItem>
                       <SelectItem value="weekly">{t('bookingForm.everyWeek')}</SelectItem>
