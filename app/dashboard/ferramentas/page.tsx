@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -128,14 +127,12 @@ function ToolCard({
   hasFeature,
   upgradeLabel,
   openLabel,
-  pointsEnabledLabel,
 }: {
   tool: ToolLink;
   english: boolean;
   hasFeature: (feature: FeatureKey) => boolean;
   upgradeLabel: string;
   openLabel: string;
-  pointsEnabledLabel: string;
 }) {
   const Icon = tool.icon;
   const locked = tool.feature ? !hasFeature(tool.feature) : false;
@@ -149,11 +146,7 @@ function ToolCard({
           <span className={'flex size-11 shrink-0 items-center justify-center rounded-2xl border ' + tool.iconSurface + ' ' + tool.accent}>
             <Icon className="size-5" aria-hidden="true" />
           </span>
-          {tool.feature ? <FeaturePlanBadge feature={tool.feature} /> : (
-            <Badge variant="outline" className="border-white/[.08] bg-white/[.025] text-zinc-500">
-              {pointsEnabledLabel}
-            </Badge>
-          )}
+          {tool.feature ? <FeaturePlanBadge feature={tool.feature} /> : null}
         </div>
         <CardTitle className="mt-4 text-base text-zinc-100 sm:text-lg">{title}</CardTitle>
         <CardDescription className="text-sm leading-6 text-zinc-400">{description}</CardDescription>
@@ -224,7 +217,6 @@ export default function ToolsGrowthPage() {
         quickActions: 'Quick access',
         bookingPage: 'Booking page',
         reports: 'Business reports',
-        noFeature: 'Ready to use',
         returnToDashboard: 'Back to dashboard',
       }
     : {
@@ -243,7 +235,6 @@ export default function ToolsGrowthPage() {
         quickActions: 'Acesso rápido',
         bookingPage: 'Página de marcação',
         reports: 'Relatórios do negócio',
-        noFeature: 'Pronto a usar',
         returnToDashboard: 'Voltar à dashboard',
       };
 
@@ -315,7 +306,6 @@ export default function ToolsGrowthPage() {
                 hasFeature={hasFeature}
                 upgradeLabel={copy.upgrade}
                 openLabel={copy.open}
-                pointsEnabledLabel={copy.noFeature}
               />
             ))}
           </div>
