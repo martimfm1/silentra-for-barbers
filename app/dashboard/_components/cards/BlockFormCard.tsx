@@ -45,7 +45,7 @@ export function BlockScheduleForm({
       <CardContent>
         <form
           onSubmit={onSubmit}
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 items-end"
+          className="grid min-w-0 gap-6 md:grid-cols-2 lg:grid-cols-5 items-end"
         >
           {/* Who is absent */}
           <div className="grid gap-2">
@@ -58,10 +58,10 @@ export function BlockScheduleForm({
                 setBlockFormData({ ...blockFormData, professional_id: val })
               }
             >
-              <SelectTrigger className="bg-zinc-900 border-white/10 text-white cursor-pointer">
+              <SelectTrigger className="box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl bg-zinc-900 border-white/10 text-white cursor-pointer">
                 <SelectValue placeholder={t('agenda.selectProfessional')} />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-white/10 text-white">
+              <SelectContent className="min-w-0 max-w-[calc(100vw-2rem)] bg-zinc-900 border-white/10 text-white">
                 <SelectGroup>
                   {professionals.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
@@ -124,7 +124,7 @@ export function BlockScheduleForm({
             <input
               type="time"
               required
-              className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white color-scheme-dark cursor-pointer"
+              className="color-scheme-dark box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white cursor-pointer"
               value={blockFormData.start_time}
               onChange={(e) =>
                 setBlockFormData({
@@ -143,7 +143,7 @@ export function BlockScheduleForm({
             <input
               type="time"
               required
-              className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white color-scheme-dark cursor-pointer"
+              className="color-scheme-dark box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white cursor-pointer"
               value={blockFormData.end_time}
               onChange={(e) =>
                 setBlockFormData({ ...blockFormData, end_time: e.target.value })
