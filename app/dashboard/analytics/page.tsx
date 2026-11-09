@@ -743,7 +743,7 @@ export default function AnalyticsPage() {
                     value={data.overview.productRevenue}
                     total={data.overview.revenue}
                     locale={locale}
-                    accent="bg-sky-500"
+                    accent="bg-primary/75"
                   />
                   <div className="rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
                     <p className="text-xs text-muted-foreground">{copy(locale, 'Total registado', 'Recorded total')}</p>
