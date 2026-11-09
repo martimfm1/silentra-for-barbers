@@ -209,6 +209,7 @@ export function MarketingWorkspace({
         campaign.status !== 'cancelled',
     ) ?? null;
   const canManage = (campaign: Campaign) =>
+    campaign.channel === 'email' &&
     EDITABLE_STATUSES.includes(
       campaign.status as (typeof EDITABLE_STATUSES)[number],
     );
@@ -710,7 +711,6 @@ export function MarketingWorkspace({
                 >
                   <option value="all">Todos os canais</option>
                   <option value="email">Email</option>
-                  <option value="sms">SMS</option>
                 </select>
               </div>
               <Button
@@ -866,7 +866,7 @@ export function MarketingWorkspace({
                         <Button
                           size="sm"
                           onClick={() => void sendCampaign(campaign)}
-                          disabled={!editable || sendingId === campaign.id}
+                          disabled={!editable || campaign.channel === 'sms' || sendingId === campaign.id}
                         >
                           {sendingId === campaign.id ? (
                             <Loader2
@@ -876,9 +876,11 @@ export function MarketingWorkspace({
                           ) : (
                             <Send className="mr-2 size-4" aria-hidden="true" />
                           )}
-                          {sendingId === campaign.id
-                            ? 'A iniciar…'
-                            : 'Enviar agora'}
+                          {campaign.channel === 'sms'
+                            ? 'Canal indisponível'
+                            : sendingId === campaign.id
+                              ? 'A iniciar…'
+                              : 'Enviar agora'}
                         </Button>
                       </div>
                       {!editable && (
@@ -1506,9 +1508,6 @@ export function MarketingWorkspace({
                   >
                     <option value="email" className="bg-zinc-900 text-zinc-100">
                       Email
-                    </option>
-                    <option value="sms" className="bg-zinc-900 text-zinc-100">
-                      SMS
                     </option>
                   </select>
                 </div>
