@@ -48,11 +48,12 @@ assert.match(settings, /settingsPage\.autoConfirm/);
 assert.match(settings, /settingsPage\.autoComplete/);
 assert.match(settings, /settingsPage\.cancellationWindow/);
 assert.match(service, /minimum_booking_notice_minutes/);
-assert.match(settings, /settingsPage\\.requireBirthDate/);
+assert.ok(settings.includes('settingsPage.requireBirthDate'));
 assert.match(service, /require_birth_date/);
-assert.match(booking, /shopRelation\\?\\.require_birth_date !== false/);
+assert.ok(booking.includes('shopRelation?.require_birth_date !== false'));
 assert.match(birthDateMigration, /add column if not exists require_birth_date boolean not null default true/i);
-assert.match(birthDateMigration, /require_birth_date = case[\\s\\S]*?p_config \\? 'require_birth_date'/);
+assert.ok(birthDateMigration.includes('require_birth_date = case'));
+assert.ok(birthDateMigration.includes("p_config ? 'require_birth_date'"));
 assert.match(
   migration,
   /add column if not exists minimum_booking_notice_minutes integer not null default 0/i,
