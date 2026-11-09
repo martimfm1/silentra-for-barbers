@@ -140,6 +140,7 @@ export async function updateBarbershopConfig(
       payload.minimum_booking_notice_minutes !== undefined
         ? Number(payload.minimum_booking_notice_minutes)
         : undefined;
+    const expectedRequireBirthDate = payload.require_birth_date;
 
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
@@ -265,6 +266,13 @@ export async function updateBarbershopConfig(
       (result.data.mbway_phone ?? '') !== (mbwayPhone ?? '')
     ) {
       throw new Error('O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.');
+    }
+    if (
+      expectedRequireBirthDate !== undefined &&
+      result.data &&
+      result.data.require_birth_date !== expectedRequireBirthDate
+    ) {
+      throw new Error('A preferência da data de nascimento não foi guardada. Atualiza as migrations e tenta novamente.');
     }
     if (
       expectedNoticeMinutes !== undefined &&
