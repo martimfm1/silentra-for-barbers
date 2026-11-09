@@ -8,7 +8,6 @@ import {
   Eye,
   ShieldCheck,
 } from 'lucide-react';
-import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -296,26 +295,13 @@ export default function MensagensPage() {
               {copy.intro}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              asChild
-              variant="outline"
-              className="min-h-11 border-emerald-500/20 bg-emerald-500/5 text-emerald-300 hover:bg-emerald-500/10"
-            >
-              <Link href="/dashboard/mensagens/birthdays">
-                <Cake className="mr-2 size-4" />
-                {copy.birthdays}
-                <ArrowUpRight className="ml-1 size-3.5" />
-              </Link>
-            </Button>
-            <Badge
-              variant="secondary"
-              className="w-fit gap-1.5 border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-            >
-              <ShieldCheck className="size-3.5" aria-hidden="true" />
-              {copy.secureEmail}
-            </Badge>
-          </div>
+          <Badge
+            variant="secondary"
+            className="w-fit gap-1.5 border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+          >
+            <ShieldCheck className="size-3.5" aria-hidden="true" />
+            {copy.secureEmail}
+          </Badge>
         </header>
 
 
