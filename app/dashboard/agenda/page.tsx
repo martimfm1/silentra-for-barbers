@@ -34,6 +34,7 @@ import { AppointmentMobileCard } from '@/components/dashboard/appointment-mobile
 import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
 import { CalendarSyncCard } from '@/components/dashboard/calendar-sync-card';
+import { AgendaCalendarView } from './agenda-calendar-view';
 
 const STATUS_FILTERS = [
   { id: 'all', label: 'agenda.all' },
@@ -429,6 +430,10 @@ export default function AgendaPage() {
         </header>
 
         <CalendarSyncCard />
+
+        <section className="mt-4" aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}>
+          <AgendaCalendarView onAppointmentClick={setSelectedAppointment} />
+        </section>
 
         {loadingInitial ? (
           <div className="mt-5">
