@@ -1179,6 +1179,8 @@ export const en = {
       'New bookings are confirmed without manual intervention.',
     autoComplete: 'Automatically complete',
     autoCompleteDescription: 'Complete the booking after its scheduled time.',
+    requireBirthDate: 'Require date of birth when booking',
+    requireBirthDateDescription: 'When disabled, customers can book without providing their date of birth. Birthday details will not be available for new customers who do not provide them.',
     cancellationWindow: 'Cancellation window',
     cancellationWindowHelp: 'Customers can cancel online up to {hours} h before their appointment. During the final {hours} h, they must contact the barbershop.',
     cancellationWindowNoLimit: 'With 0 hours, customers can cancel online until the appointment start time.',

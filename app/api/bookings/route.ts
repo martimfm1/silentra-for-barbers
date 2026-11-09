@@ -155,6 +155,11 @@ async function POST__unobserved(request: Request) {
     const email = normalizeText(customerEmail, 254)?.toLowerCase();
     const birthDateInput =
       typeof customerBirthDate === 'string' ? customerBirthDate.trim() : '';
+    if (birthDateInput && !isValidBirthDate(birthDateInput))
+      return NextResponse.json(
+        { success: false, error: 'Introduz uma data de nascimento válida.' },
+        { status: 400 },
+      );
     const bookingDate =
       typeof date === 'string' ? date : new Date().toISOString().slice(0, 10);
     const bookingTime = typeof slot === 'string' ? slot.slice(0, 5) : '';
@@ -202,7 +207,7 @@ async function POST__unobserved(request: Request) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select(
-        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes,phone,mbway_enabled,mbway_phone)`,
+        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes,require_birth_date,phone,mbway_enabled,mbway_phone)`,
       )
       .eq('id', shopId)
       .maybeSingle();
@@ -214,10 +219,12 @@ async function POST__unobserved(request: Request) {
       );
     }
     const barbershopId = shop.barbershop_id;
-    const requiresBirthDate = barbershopId !== AGENDA_DO_VICTOR_BARBERSHOP_ID;
     const shopRelation = Array.isArray(shop.barbershops)
       ? shop.barbershops[0]
       : shop.barbershops;
+    const requiresBirthDate =
+      barbershopId !== AGENDA_DO_VICTOR_BARBERSHOP_ID &&
+      shopRelation?.require_birth_date !== false;
     let prepaymentSettings: { mbwayPhone: string; whatsappPhone: string } | null = null;
     if (isPrepayment) {
       const { data: effectivePlan, error: planError } = await admin.rpc(

@@ -507,6 +507,7 @@ export default function BarbershopPublicPageFinal({
         selectedDate={activeBookingOffer?.date}
         selectedTime={activeBookingOffer?.time}
         selectedProfessionalId={activeBookingOffer?.professionalId}
+        requireBirthDate={shop.require_birth_date !== false}
       />
     </main>
   );

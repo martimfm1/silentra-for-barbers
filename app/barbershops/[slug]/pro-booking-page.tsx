@@ -66,8 +66,8 @@ export default function ProBookingPage({
   openingTime,
   closingTime,
   closedDays,
-  hideClosedDays = false,
   requireBirthDate = true,
+  hideClosedDays = false,
   agendaHeroLayout = false,
 }: ProBookingPageProps) {
   const { t, locale } = useLanguage();

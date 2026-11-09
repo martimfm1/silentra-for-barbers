@@ -18,6 +18,7 @@ export interface BarbershopConfigPayload {
   is_public_in_directory?: boolean;
   time_limit_cancellation_hours?: number;
   minimum_booking_notice_minutes?: number;
+  require_birth_date?: boolean;
   default_language: 'pt' | 'en';
   mbway_enabled?: boolean;
   mbway_phone?: string;
@@ -33,7 +34,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language, mbway_enabled, mbway_phone',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled, mbway_phone',
       )
       .eq('id', barbershopId)
       .single();
@@ -80,6 +81,7 @@ export async function getBarbershopConfig(
             Number(barberData.minimum_booking_notice_minutes ?? 0),
           ),
         ),
+        require_birth_date: barberData.require_birth_date !== false,
         popular_service_id: shopData?.popular_service_id ?? null,
       },
       error: null,
@@ -138,6 +140,7 @@ export async function updateBarbershopConfig(
       payload.minimum_booking_notice_minutes !== undefined
         ? Number(payload.minimum_booking_notice_minutes)
         : undefined;
+    const expectedRequireBirthDate = payload.require_birth_date;
 
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
@@ -263,6 +266,13 @@ export async function updateBarbershopConfig(
       (result.data.mbway_phone ?? '') !== (mbwayPhone ?? '')
     ) {
       throw new Error('O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.');
+    }
+    if (
+      expectedRequireBirthDate !== undefined &&
+      result.data &&
+      result.data.require_birth_date !== expectedRequireBirthDate
+    ) {
+      throw new Error('A preferência da data de nascimento não foi guardada. Atualiza as migrations e tenta novamente.');
     }
     if (
       expectedNoticeMinutes !== undefined &&

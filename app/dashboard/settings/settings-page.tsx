@@ -82,6 +82,7 @@ type Config = {
   lunch_end: string;
   closed_days: string;
   minimum_booking_notice_minutes: number;
+  require_birth_date: boolean;
   allow_online_bookings: boolean;
   is_public_in_directory: boolean;
   time_limit_cancellation_hours: number;
@@ -131,6 +132,7 @@ const normalize = (v: Partial<Config>): Config => ({
     0,
     Math.min(43200, Math.round(Number(v.minimum_booking_notice_minutes ?? 0))),
   ),
+  require_birth_date: v.require_birth_date !== false,
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
   time_limit_cancellation_hours: Math.max(
@@ -1042,6 +1044,17 @@ export default function SettingsPageOrganized() {
                         }
                       />
                     </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-5">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-zinc-200">{t('settingsPage.requireBirthDate')}</p>
+                      <p className="mt-1 max-w-xl text-xs leading-5 text-zinc-500">{t('settingsPage.requireBirthDateDescription')}</p>
+                    </div>
+                    <Switch
+                      checked={config.require_birth_date}
+                      onCheckedChange={(value) => set({ require_birth_date: value })}
+                      aria-label={t('settingsPage.requireBirthDate')}
+                    />
                   </div>
                   <div className="border-t border-white/10 pt-5">
                     <div className="flex items-center gap-2">
