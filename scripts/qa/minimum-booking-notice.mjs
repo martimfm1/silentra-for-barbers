@@ -10,6 +10,7 @@ const [
   portal,
   helper,
   migration,
+  birthDateMigration,
   pt,
   en,
   pkg,
@@ -29,6 +30,10 @@ const [
     'supabase/migrations/20261029190459_minimum_booking_notice_minutes.sql',
     'utf8',
   ),
+  readFile(
+    'supabase/migrations/20261109130000_configurable_booking_birth_date.sql',
+    'utf8',
+  ),
   readFile('app/locales/pt.ts', 'utf8'),
   readFile('app/locales/en.ts', 'utf8'),
   readFile('package.json', 'utf8').then(JSON.parse),
@@ -43,6 +48,11 @@ assert.match(settings, /settingsPage\.autoConfirm/);
 assert.match(settings, /settingsPage\.autoComplete/);
 assert.match(settings, /settingsPage\.cancellationWindow/);
 assert.match(service, /minimum_booking_notice_minutes/);
+assert.match(settings, /settingsPage\\.requireBirthDate/);
+assert.match(service, /require_birth_date/);
+assert.match(booking, /shopRelation\\?\\.require_birth_date !== false/);
+assert.match(birthDateMigration, /add column if not exists require_birth_date boolean not null default true/i);
+assert.match(birthDateMigration, /require_birth_date = case[\\s\\S]*?p_config \\? 'require_birth_date'/);
 assert.match(
   migration,
   /add column if not exists minimum_booking_notice_minutes integer not null default 0/i,
@@ -69,6 +79,8 @@ for (const key of [
   'noticeUnit:',
   'noticeMinutes:',
   'noticeHours:',
+  'requireBirthDate:',
+  'requireBirthDateDescription:',
 ]) {
   assert.ok(pt.includes(key), `Portuguese locale is missing ${key}`);
   assert.ok(en.includes(key), `English locale is missing ${key}`);
