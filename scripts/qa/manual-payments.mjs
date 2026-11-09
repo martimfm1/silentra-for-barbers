@@ -10,6 +10,7 @@ function read(relative) {
 const requiredFiles = [
   'supabase/migrations/20261001190000_manual_payment_mode.sql',
   'supabase/migrations/20261003120000_harden_manual_payment_confirmation.sql',
+  'supabase/migrations/20261109150000_allow_manual_renewal_after_expiry.sql',
   'services/billing/payment-mode.service.ts',
   'services/billing/manual-payment.service.ts',
   'lib/billing/manual-pricing.ts',
@@ -36,6 +37,9 @@ const migration = read(
 );
 const confirmationMigration = read(
   'supabase/migrations/20261003120000_harden_manual_payment_confirmation.sql',
+);
+const renewalMigration = read(
+  'supabase/migrations/20261109150000_allow_manual_renewal_after_expiry.sql',
 );
 const subscribe = read('app/api/billing/subscribe/route.ts');
 const embedded = read('app/api/stripe/embedded-checkout/route.ts');
@@ -144,6 +148,13 @@ const checks = [
     'Manual confirmation RPC hardening is tracked',
     confirmationMigration.includes('USER_SUBSCRIPTION_TENANT_CONFLICT') &&
       confirmationMigration.includes("notify pgrst, 'reload schema'"),
+  ],
+  [
+    'Expired manual subscriptions can be renewed without relaxing plan changes',
+    renewalMigration.includes("v_request.request_type = 'RENEWAL'") &&
+      renewalMigration.includes("v_request.request_type = 'CHANGE'") &&
+      renewalMigration.includes("v_subscription.payment_method <> 'MANUAL'") &&
+      renewalMigration.includes("v_subscription.plan = 'free'::public.subscription_plan"),
   ],
   [
     'Manual payment documents are idempotent',
