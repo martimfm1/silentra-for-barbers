@@ -21,13 +21,23 @@ for (const route of [
 for (const key of [
   'communicationPage.title',
   'communicationPage.description',
-  'communicationPage.emailAvailable',
-  'communicationPage.pushOperational',
-  'communicationPage.smsUnavailable',
   'communicationPage.privacyNote',
+  '/api/messages/status',
+  '/api/notifications/push',
+  '/api/marketing/campaigns',
 ]) {
-  assert.ok(communication.includes(key), 'Communication page should use ' + key);
+  assert.ok(communication.includes(key), 'Communication workspace should use ' + key);
 }
+const messages = read('app/dashboard/mensagens/page.tsx');
+const marketing = read('app/dashboard/marketing/marketing-workspace.tsx');
+const messageStatus = read('app/api/messages/status/route.ts');
+assert.ok(messages.includes('client-search'), 'Direct messages should support finding a client quickly');
+assert.ok(!messages.includes('copy.smsDescription'), 'Do not show an inactive SMS composer');
+assert.ok(!messages.includes('copy.birthdayAutomation'), 'Birthday automation should have one home');
+assert.ok(marketing.includes("campaign.channel === 'email'"), 'Only supported email campaigns should be editable');
+assert.ok(!marketing.includes('<option value="sms"'), 'Do not offer SMS as a new campaign channel');
+assert.ok(marketing.includes("campaign.channel === 'sms' || sendingId === campaign.id"), 'Legacy SMS campaigns must not be sent from the UI');
+assert.ok(messageStatus.includes('contactsWithEmail'), 'Communication overview should show usable email audience size');
 assert.ok(communication.includes('hasFeature(workflow.feature)'), 'Communication tools must respect plan access');
 assert.ok(communication.includes('FeaturePlanBadge'), 'Communication feature badges must remain visible');
 
