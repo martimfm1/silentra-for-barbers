@@ -743,7 +743,7 @@ export default function AnalyticsPage() {
                     value={data.overview.productRevenue}
                     total={data.overview.revenue}
                     locale={locale}
-                    accent="bg-sky-500"
+                    accent="bg-primary/75"
                   />
                   <div className="rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
                     <p className="text-xs text-muted-foreground">{copy(locale, 'Total registado', 'Recorded total')}</p>
@@ -920,7 +920,7 @@ export default function AnalyticsPage() {
                           <span className="shrink-0 font-semibold tabular-nums">{money(item.revenue, locale)}</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-sky-500" style={{ width: Math.max((item.revenue / maxPaymentRevenue) * 100, 2) + '%' }} />
+                          <div className="h-full rounded-full bg-primary/75" style={{ width: Math.max((item.revenue / maxPaymentRevenue) * 100, 2) + '%' }} />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {item.transactions + ' ' + copy(locale, 'marcações', 'bookings')}
