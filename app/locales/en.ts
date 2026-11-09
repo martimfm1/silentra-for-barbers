@@ -1173,6 +1173,8 @@ export const en = {
     allowOnlineDescription: 'Accept new bookings through the public page.',
     automationPlanRequired: 'Automatic confirmations and completions are available on Pro and Enterprise plans.',
     autoConfirm: 'Automatically confirm',
+    autoConfirmManual: 'Automatically confirm manually created bookings',
+    autoConfirmManualDescription: 'Appointments created directly in the calendar are confirmed as soon as they are saved. You can turn this off at any time.',
     autoConfirmDescription:
       'New bookings are confirmed without manual intervention.',
     autoComplete: 'Automatically complete',
