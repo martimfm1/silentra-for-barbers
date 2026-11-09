@@ -4,15 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Mail,
-  Phone,
   Send,
-  Smartphone,
   Eye,
   ShieldCheck,
-  Cake,
-  ArrowUpRight,
 } from 'lucide-react';
-import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -88,16 +83,12 @@ const pageCopy = {
     title: 'Mensagens',
     intro:
       'Envia emails personalizados aos teus clientes sem complicar o processo.',
-    birthdays: 'Aniversários',
     secureEmail: 'Email seguro',
-    birthdayAutomation: 'Automação de aniversários',
-    birthdayDescription:
-      'Transforma uma data importante numa oportunidade de voltar a contactar o cliente.',
-    manageAutomation: 'Gerir automação',
     newMessage: 'Nova mensagem',
     newMessageDescription:
       'Escolhe um cliente, usa um modelo e ajusta apenas o necessário.',
     recipient: 'Destinatário',
+    searchClients: 'Pesquisar por nome ou email…',
     loadingClients: 'A carregar clientes…',
     chooseClient: 'Selecionar cliente',
     customer: 'Cliente',
@@ -105,8 +96,6 @@ const pageCopy = {
     subjectHint: 'Um assunto curto torna a mensagem mais fácil de compreender.',
     message: 'Mensagem',
     availableVariables: 'Variáveis disponíveis:',
-    clientMissingEmail:
-      'Este cliente não tem email registado. Escolhe outro cliente ou atualiza o contacto primeiro.',
     sending: 'A enviar…',
     sendEmail: 'Enviar email',
     previewAria: 'Pré-visualização da mensagem',
@@ -116,12 +105,6 @@ const pageCopy = {
     sampleEmail: 'cliente@exemplo.pt',
     noSubject: 'Sem assunto',
     messagePlaceholder: 'A tua mensagem aparecerá aqui.',
-    phone: 'Telemóvel',
-    smsDescription: 'O envio manual por SMS está temporariamente desativado.',
-    disabled: 'Desativado',
-    smsEnableDescription:
-      'Quando o serviço SMS for ativado, esta área poderá ser disponibilizada sem alterar o compositor de email.',
-    sendSms: 'Enviar SMS',
     fallbackShop: 'a tua barbearia',
     customerName: 'Nome do cliente',
     selectClient: 'Seleciona um cliente.',
@@ -144,16 +127,12 @@ const pageCopy = {
     title: 'Messages',
     intro:
       'Send personalised emails to your clients without making the process complicated.',
-    birthdays: 'Birthdays',
     secureEmail: 'Secure email',
-    birthdayAutomation: 'Birthday automation',
-    birthdayDescription:
-      'Turn an important date into an opportunity to reconnect with a client.',
-    manageAutomation: 'Manage automation',
     newMessage: 'New message',
     newMessageDescription:
       'Choose a client, use a template and adjust only what you need.',
     recipient: 'Recipient',
+    searchClients: 'Search by name or email…',
     loadingClients: 'Loading clients…',
     chooseClient: 'Select a client',
     customer: 'Client',
@@ -161,8 +140,6 @@ const pageCopy = {
     subjectHint: 'A short subject makes your message easier to understand.',
     message: 'Message',
     availableVariables: 'Available variables:',
-    clientMissingEmail:
-      'This client has no email address on record. Choose another client or update the contact first.',
     sending: 'Sending…',
     sendEmail: 'Send email',
     previewAria: 'Message preview',
@@ -172,12 +149,6 @@ const pageCopy = {
     sampleEmail: 'client@example.com',
     noSubject: 'No subject',
     messagePlaceholder: 'Your message will appear here.',
-    phone: 'Mobile phone',
-    smsDescription: 'Manual SMS sending is temporarily disabled.',
-    disabled: 'Disabled',
-    smsEnableDescription:
-      'When SMS service is enabled, this area can be made available without changing the email composer.',
-    sendSms: 'Send SMS',
     fallbackShop: 'your barbershop',
     customerName: 'Client name',
     selectClient: 'Select a client.',
@@ -204,6 +175,7 @@ export default function MensagensPage() {
   const copy = pageCopy[english ? 'en' : 'pt'];
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
   const [template, setTemplate] = useState<TemplateKey>('reminder');
   const [subject, setSubject] = useState<string>(templates.reminder.subject);
   const [body, setBody] = useState<string>(templates.reminder.body);
@@ -310,7 +282,7 @@ export default function MensagensPage() {
   return (
     <main className="dashboard-page min-h-screen px-4 pb-24 pt-24 text-foreground sm:px-6 lg:px-8 lg:pt-10">
       <div className="mx-auto max-w-6xl space-y-7">
-        <header className="dashboard-page-header border-b border-white/10 pb-6">
+        <header className="dashboard-page-header rounded-3xl border border-white/[.08] bg-white/[.025] p-5 sm:p-7">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
               <Mail className="size-4" aria-hidden="true" />{' '}
@@ -323,58 +295,19 @@ export default function MensagensPage() {
               {copy.intro}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              asChild
-              variant="outline"
-              className="min-h-11 border-emerald-500/20 bg-emerald-500/5 text-emerald-300 hover:bg-emerald-500/10"
-            >
-              <Link href="/dashboard/mensagens/birthdays">
-                <Cake className="mr-2 size-4" />
-                {copy.birthdays}
-                <ArrowUpRight className="ml-1 size-3.5" />
-              </Link>
-            </Button>
-            <Badge
-              variant="secondary"
-              className="w-fit gap-1.5 border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-            >
-              <ShieldCheck className="size-3.5" aria-hidden="true" />
-              {copy.secureEmail}
-            </Badge>
-          </div>
+          <Badge
+            variant="secondary"
+            className="w-fit gap-1.5 border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+          >
+            <ShieldCheck className="size-3.5" aria-hidden="true" />
+            {copy.secureEmail}
+          </Badge>
         </header>
 
-        <Card className="overflow-hidden border-amber-500/15 bg-amber-500/[0.04]">
-          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-300">
-                <Cake className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-100">
-                  {copy.birthdayAutomation}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-zinc-400">
-                  {copy.birthdayDescription}
-                </p>
-              </div>
-            </div>
-            <Button
-              asChild
-              variant="outline"
-              className="shrink-0 border-white/10 bg-white/[0.03] text-zinc-200 hover:bg-white/[0.07]"
-            >
-              <Link href="/dashboard/mensagens/birthdays">
-                {copy.manageAutomation}
-                <ArrowUpRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+
 
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-          <Card className="dashboard-card min-w-0 border-white/10 bg-white/[0.03]">
+          <Card className="dashboard-card min-w-0 rounded-2xl border-white/[.08] bg-white/[.025] shadow-none">
             <CardHeader className="border-b border-white/10 pb-5">
               <CardTitle className="flex items-center gap-2 text-zinc-100">
                 <Mail className="size-5 text-emerald-400" aria-hidden="true" />
@@ -384,7 +317,14 @@ export default function MensagensPage() {
             </CardHeader>
             <CardContent className="space-y-5 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="client">{copy.recipient}</Label>
+                <Label htmlFor="client-search">{copy.recipient}</Label>
+                <Input
+                  id="client-search"
+                  value={clientSearch}
+                  onChange={(event) => setClientSearch(event.target.value)}
+                  placeholder={copy.searchClients}
+                  className="min-h-11 bg-black/20"
+                />
                 <Select
                   value={clientId}
                   onValueChange={setClientId}
@@ -402,7 +342,12 @@ export default function MensagensPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {clients
-                      .filter((client) => client.email)
+                      .filter((client) => {
+                        if (!client.email) return false;
+                        const query = clientSearch.trim().toLocaleLowerCase('pt-PT');
+                        const name = client.name_complete || client.name || '';
+                        return !query || `${name} ${client.email}`.toLocaleLowerCase('pt-PT').includes(query);
+                      })
                       .map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name_complete || client.name || copy.customer}{' '}
@@ -488,14 +433,7 @@ export default function MensagensPage() {
                   </div>
                 </div>
               </div>
-              {selectedClient && !selectedClient.email && (
-                <div
-                  role="alert"
-                  className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300"
-                >
-                  {copy.clientMissingEmail}
-                </div>
-              )}
+
               <Button
                 type="button"
                 onClick={sendEmail}
@@ -509,7 +447,7 @@ export default function MensagensPage() {
           </Card>
 
           <aside className="space-y-5" aria-label={copy.previewAria}>
-            <Card className="dashboard-card overflow-hidden border-white/10 bg-white/[0.03]">
+            <Card className="dashboard-card overflow-hidden rounded-2xl border-white/[.08] bg-white/[.025] shadow-none">
               <CardHeader className="border-b border-white/10 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Eye className="size-4 text-emerald-400" aria-hidden="true" />
@@ -545,33 +483,7 @@ export default function MensagensPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="dashboard-card border-white/10 bg-white/[0.03]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Smartphone className="size-4" aria-hidden="true" />
-                  {copy.phone}
-                </CardTitle>
-                <CardDescription>{copy.smsDescription}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border border-dashed border-white/10 bg-zinc-950/60 p-4">
-                  <Badge variant="secondary" className="mb-3">
-                    {copy.disabled}
-                  </Badge>
-                  <p className="text-sm leading-6 text-zinc-400">
-                    {copy.smsEnableDescription}
-                  </p>
-                  <Button
-                    type="button"
-                    disabled
-                    className="mt-4 min-h-11 w-full"
-                  >
-                    <Phone className="mr-2 size-4" aria-hidden="true" />
-                    {copy.sendSms}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
           </aside>
         </div>
       </div>
