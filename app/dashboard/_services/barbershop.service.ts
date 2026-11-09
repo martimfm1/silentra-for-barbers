@@ -10,6 +10,7 @@ export interface BarbershopConfigPayload {
   allow_online_bookings?: boolean;
   auto_reminders?: boolean;
   auto_confirm_bookings?: boolean;
+  auto_confirm_manual_bookings?: boolean;
   auto_complete_bookings?: boolean;
   popular_service_id?: string | null;
   lunch_start?: string;
@@ -32,7 +33,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language, mbway_enabled, mbway_phone',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, default_language, mbway_enabled, mbway_phone',
       )
       .eq('id', barbershopId)
       .single();
@@ -64,6 +65,7 @@ export async function getBarbershopConfig(
         allow_online_bookings: barberData.allow_online_bookings ?? undefined,
         auto_reminders: barberData.auto_reminders ?? undefined,
         auto_confirm_bookings: barberData.auto_confirm_bookings ?? undefined,
+        auto_confirm_manual_bookings: barberData.auto_confirm_manual_bookings !== false,
         auto_complete_bookings: barberData.auto_complete_bookings ?? undefined,
         is_public_in_directory: barberData.is_public_in_directory ?? undefined,
         default_language: barberData.default_language === 'en' ? 'en' : 'pt',
@@ -124,6 +126,7 @@ export async function updateBarbershopConfig(
     }
 
     const directoryVisibility = payload.is_public_in_directory;
+    const manualAutoConfirm = payload.auto_confirm_manual_bookings;
     const mbwayEnabled = payload.mbway_enabled;
     const mbwayPhone = payload.mbway_phone?.trim() ?? payload.mbway_phone;
     const popularServiceId = payload.popular_service_id;
@@ -139,8 +142,17 @@ export async function updateBarbershopConfig(
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
     delete barbershopPayload.is_public_in_directory;
+    delete barbershopPayload.auto_confirm_manual_bookings;
     delete barbershopPayload.mbway_enabled;
     delete barbershopPayload.mbway_phone;
+
+    if (manualAutoConfirm !== undefined) {
+      const { error } = await supabase.rpc('set_manual_booking_auto_confirmation', {
+        p_barbershop_id: barbershopId,
+        p_enabled: manualAutoConfirm,
+      });
+      if (error) throw error;
+    }
 
     if (directoryVisibility !== undefined) {
       const {
