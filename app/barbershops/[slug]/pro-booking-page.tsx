@@ -41,6 +41,7 @@ export type ProBookingPageProps = {
   openingTime: string | null;
   closingTime: string | null;
   closedDays?: string | null;
+  requireBirthDate?: boolean;
   hideClosedDays?: boolean;
   requireBirthDate?: boolean;
   /** Desktop split hero used by the dedicated Agenda do Victor page. */
@@ -66,8 +67,8 @@ export default function ProBookingPage({
   openingTime,
   closingTime,
   closedDays,
-  hideClosedDays = false,
   requireBirthDate = true,
+  hideClosedDays = false,
   agendaHeroLayout = false,
 }: ProBookingPageProps) {
   const { t, locale } = useLanguage();
