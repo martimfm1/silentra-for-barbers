@@ -344,7 +344,7 @@ export function MarketingWorkspace({
   function openEdit(campaign: Campaign) {
     if (!canManage(campaign)) {
       toast.error(
-        'Esta campanha já começou a enviar e já não pode ser editada.',
+        'Esta campanha já começou a enviar ou utiliza um canal que não está disponível.',
       );
       return;
     }
@@ -583,7 +583,7 @@ export function MarketingWorkspace({
             <h1 className="text-2xl font-semibold">Marketing avançado</h1>
             <FeaturePlanBadge feature="marketing_campaigns" />
             <p className="text-muted-foreground">
-              Campanhas de email e SMS, automações e delivery num só lugar.
+              Campanhas de email, automações e resultados de entrega num só lugar.
             </p>
             <Button asChild>
               <Link href="/dashboard/billing">Ver plano</Link>
@@ -788,10 +788,7 @@ export function MarketingWorkspace({
                             aria-label="Email"
                           />
                         ) : (
-                          <MessageSquare
-                            className="size-4 shrink-0 text-emerald-300"
-                            aria-label="SMS"
-                          />
+                          <span className="rounded-full border border-amber-300/15 bg-amber-300/[.06] px-2 py-1 text-[10px] font-medium text-amber-200">SMS · suspenso</span>
                         )}
                       </div>
                       <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-white/10 bg-black/10 p-3 text-xs sm:grid-cols-4">
