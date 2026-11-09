@@ -1184,6 +1184,8 @@ export const pt = {
       'As novas reservas ficam confirmadas sem intervenção manual.',
     autoComplete: 'Concluir automaticamente',
     autoCompleteDescription: 'Conclui a reserva depois da hora prevista.',
+    requireBirthDate: 'Pedir data de nascimento na marcação',
+    requireBirthDateDescription: 'Quando desativado, os clientes podem marcar sem fornecer a data de nascimento. Os aniversários deixam de ficar disponíveis para novos clientes que não a indiquem.',
     cancellationWindow: 'Prazo de cancelamento',
     cancellationWindowHelp: 'Os clientes podem cancelar online até {hours} h antes da marcação. Nas últimas {hours} h, têm de contactar a barbearia.',
     cancellationWindowNoLimit: 'Com 0 horas, os clientes podem cancelar online até à hora de início da marcação.',
