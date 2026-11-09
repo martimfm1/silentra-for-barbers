@@ -16,6 +16,22 @@ import {
 } from '@/app/dashboard/_components/DashboardCustomization';
 
 const dashboardSurfaceStyles = `
+  /* The selected dashboard preset controls every shared semantic color token. */
+  .silentra-dashboard-shell {
+    --primary: var(--dashboard-accent, #34d399);
+    --color-primary: var(--dashboard-accent, #34d399);
+    --primary-foreground: #07110d;
+    --color-primary-foreground: #07110d;
+    --accent: color-mix(in srgb, var(--dashboard-accent, #34d399) 14%, transparent);
+    --color-accent: color-mix(in srgb, var(--dashboard-accent, #34d399) 14%, transparent);
+    --ring: color-mix(in srgb, var(--dashboard-accent, #34d399) 68%, transparent);
+    --color-ring: color-mix(in srgb, var(--dashboard-accent, #34d399) 68%, transparent);
+    --sidebar-primary: var(--dashboard-accent, #34d399);
+    --color-sidebar-primary: var(--dashboard-accent, #34d399);
+    --sidebar-ring: color-mix(in srgb, var(--dashboard-accent, #34d399) 68%, transparent);
+    --color-sidebar-ring: color-mix(in srgb, var(--dashboard-accent, #34d399) 68%, transparent);
+  }
+
   .silentra-dashboard-shell .dashboard-page {
     position: relative;
     background: transparent;
@@ -47,6 +63,24 @@ const dashboardSurfaceStyles = `
 
   .silentra-dashboard-shell .dashboard-page [data-slot="card"] [data-slot="card-header"] {
     border-color: rgb(255 255 255 / 0.04) !important;
+  }
+
+  /* Route headers, filters, nested panels and export tiles share the same light glass surface. */
+  .silentra-dashboard-shell .dashboard-page [class*="bg-card"],
+  .silentra-dashboard-shell .dashboard-page [class*="bg-background"],
+  .silentra-dashboard-shell .dashboard-page [class*="bg-muted/"] {
+    background-color: rgb(255 255 255 / 0.018) !important;
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+  }
+
+  .silentra-dashboard-shell .dashboard-page [class*="border-border"],
+  .silentra-dashboard-shell .dashboard-page [class*="border-white/"] {
+    border-color: rgb(255 255 255 / 0.055) !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page :focus-visible {
+    outline-color: var(--dashboard-accent, #34d399);
   }
 
   /* Common hand-built dashboard panels. */
