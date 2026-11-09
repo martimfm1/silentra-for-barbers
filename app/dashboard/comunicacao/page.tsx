@@ -70,19 +70,18 @@ export default function CommunicationPage() {
           setEmailContacts(Number(data.contactsWithEmail ?? 0));
         } catch { setEmailState('error'); }
       })());
-      jobs.push((async () => {
-        try {
-          const response = await fetch('/api/notifications/push', { cache: 'no-store' });
-          const data = await response.json();
-          if (!response.ok) throw new Error('push_status');
-          setPushState(data.configured ? 'ready' : 'setup');
-        } catch { setPushState('error'); }
-      })());
     } else {
       setEmailState('locked');
       setEmailContacts(null);
-      setPushState('unavailable');
     }
+    jobs.push((async () => {
+      try {
+        const response = await fetch('/api/notifications/push', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error('push_status');
+        setPushState(data.configured ? 'ready' : 'setup');
+      } catch { setPushState('error'); }
+    })());
     if (marketingAllowed) {
       jobs.push((async () => {
         try {
