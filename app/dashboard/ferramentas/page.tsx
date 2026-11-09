@@ -425,13 +425,13 @@ export default function ToolsGrowthPage() {
               ? [
                   { step: '01', icon: QrCode, title: 'Make booking self-service', description: 'Put your booking link and QR code where customers already find you. Keep the path short and do not require an account.', action: 'Set up QR code', href: '/dashboard/qr-code' },
                   { step: '02', icon: CalendarCheck2, title: 'Set clear booking rules', description: 'Choose how far ahead customers can book and how late they can cancel. Show expectations before a problem happens.', action: 'Review booking settings', href: '/dashboard/settings' },
-                  { step: '03', icon: Clock3, title: 'Recover cancelled slots', description: 'Use the waitlist to keep track of customers interested in an earlier opening instead of handling every request in DMs.', action: 'Manage waitlist', href: '/dashboard/espera' },
+                  { step: '03', icon: Clock3, title: 'Recover cancelled slots', description: 'Use the waitlist to keep track of customers interested in an earlier opening instead of handling every request in DMs.', action: 'Manage waitlist', href: hasFeature('waitlist') ? '/dashboard/espera' : '/dashboard/billing' },
                   { step: '04', icon: Users, title: 'Keep customers informed', description: 'Review your email communication and make sure booking confirmations and changes are clear and useful.', action: 'Open communication', href: '/dashboard/comunicacao' },
                 ]
               : [
                   { step: '01', icon: QrCode, title: 'Facilita a marcação autónoma', description: 'Coloca o link de marcação e o QR Code onde os clientes já te encontram. Mantém o percurso curto e sem obrigar a criar conta.', action: 'Configurar QR Code', href: '/dashboard/qr-code' },
                   { step: '02', icon: CalendarCheck2, title: 'Define regras claras', description: 'Escolhe a antecedência mínima e o limite para cancelar. Explica as expectativas antes de surgir um problema.', action: 'Rever regras de marcação', href: '/dashboard/settings' },
-                  { step: '03', icon: Clock3, title: 'Recupera horários cancelados', description: 'Usa a lista de espera para acompanhar quem quer uma vaga mais cedo, sem gerir todos os pedidos por mensagens.', action: 'Gerir lista de espera', href: '/dashboard/espera' },
+                  { step: '03', icon: Clock3, title: 'Recupera horários cancelados', description: 'Usa a lista de espera para acompanhar quem quer uma vaga mais cedo, sem gerir todos os pedidos por mensagens.', action: 'Gerir lista de espera', href: hasFeature('waitlist') ? '/dashboard/espera' : '/dashboard/billing' },
                   { step: '04', icon: Users, title: 'Mantém os clientes informados', description: 'Revê a comunicação por email e garante que as confirmações e alterações de marcação são claras e úteis.', action: 'Abrir comunicação', href: '/dashboard/comunicacao' },
                 ]).map((item) => {
               const Icon = item.icon;
