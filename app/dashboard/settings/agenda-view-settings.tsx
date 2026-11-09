@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CalendarDays, List } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,7 @@ const STORAGE_KEY = 'silentra:agenda-view';
 const CHANGE_EVENT = 'silentra:agenda-view-change';
 
 export function useAgendaViewPreference() {
-  const [view, setView] = React.useState<AgendaViewPreference>('lines');
+  const [view, setView] = useState<AgendaViewPreference>('lines');
 
   useEffect(() => {
     const readPreference = () => {
