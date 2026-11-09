@@ -12,7 +12,8 @@ async function GET__unobserved(request: Request) {
       .select('id', { count: 'exact', head: true })
       .eq('barbershop_id', barbershopId)
       .eq('role', 'client')
-      .not('email', 'is', null);
+      .not('email', 'is', null)
+      .neq('email', '');
     if (error) throw error;
     return NextResponse.json({
       success: true,
