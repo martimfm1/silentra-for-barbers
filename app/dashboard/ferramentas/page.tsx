@@ -405,6 +405,56 @@ export default function ToolsGrowthPage() {
           </div>
         </section>
 
+
+        <section className="space-y-4" aria-labelledby="experience-playbook-heading">
+          <div className="max-w-2xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[.17em] text-amber-300">
+              {english ? 'Practical recommendations' : 'Recomendações práticas'}
+            </p>
+            <h2 id="experience-playbook-heading" className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+              {english ? 'Small details that make customers come back' : 'Pequenos detalhes que fazem os clientes regressar'}
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-zinc-500">
+              {english
+                ? 'A practical setup inspired by real conversations between barbers and customers: less back-and-forth, clearer expectations and fewer empty slots.'
+                : 'Uma configuração prática inspirada em conversas reais entre barbeiros e clientes: menos mensagens, expectativas claras e menos horários por preencher.'}
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {(english
+              ? [
+                  { step: '01', icon: QrCode, title: 'Make booking self-service', description: 'Put your booking link and QR code where customers already find you. Keep the path short and do not require an account.', action: 'Set up QR code', href: '/dashboard/qr-code' },
+                  { step: '02', icon: CalendarCheck2, title: 'Set clear booking rules', description: 'Choose how far ahead customers can book and how late they can cancel. Show expectations before a problem happens.', action: 'Review booking settings', href: '/dashboard/settings' },
+                  { step: '03', icon: Clock3, title: 'Recover cancelled slots', description: 'Use the waitlist to keep track of customers interested in an earlier opening instead of handling every request in DMs.', action: 'Manage waitlist', href: '/dashboard/espera' },
+                  { step: '04', icon: Users, title: 'Keep customers informed', description: 'Review your email communication and make sure booking confirmations and changes are clear and useful.', action: 'Open communication', href: '/dashboard/comunicacao' },
+                ]
+              : [
+                  { step: '01', icon: QrCode, title: 'Facilita a marcação autónoma', description: 'Coloca o link de marcação e o QR Code onde os clientes já te encontram. Mantém o percurso curto e sem obrigar a criar conta.', action: 'Configurar QR Code', href: '/dashboard/qr-code' },
+                  { step: '02', icon: CalendarCheck2, title: 'Define regras claras', description: 'Escolhe a antecedência mínima e o limite para cancelar. Explica as expectativas antes de surgir um problema.', action: 'Rever regras de marcação', href: '/dashboard/settings' },
+                  { step: '03', icon: Clock3, title: 'Recupera horários cancelados', description: 'Usa a lista de espera para acompanhar quem quer uma vaga mais cedo, sem gerir todos os pedidos por mensagens.', action: 'Gerir lista de espera', href: '/dashboard/espera' },
+                  { step: '04', icon: Users, title: 'Mantém os clientes informados', description: 'Revê a comunicação por email e garante que as confirmações e alterações de marcação são claras e úteis.', action: 'Abrir comunicação', href: '/dashboard/comunicacao' },
+                ]).map((item) => {
+              const Icon = item.icon;
+              return (
+                <article key={item.step} className="flex min-w-0 flex-col rounded-2xl border border-white/[.08] bg-white/[.025] p-4 transition-colors hover:border-amber-300/20 hover:bg-white/[.04]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold tracking-[.16em] text-zinc-600">{item.step}</span>
+                    <span className="flex size-9 items-center justify-center rounded-xl border border-amber-300/15 bg-amber-300/[.06] text-amber-200">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-sm font-semibold text-zinc-100">{item.title}</h3>
+                  <p className="mt-2 flex-1 text-xs leading-5 text-zinc-500">{item.description}</p>
+                  <Link href={item.href} className="mt-4 inline-flex min-h-10 items-center gap-2 border-t border-white/[.07] pt-3 text-xs font-semibold text-zinc-300 transition-colors hover:text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+                    {item.action}
+                    <ArrowRight className="size-3.5" aria-hidden="true" />
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
         <footer className="flex flex-col gap-3 border-t border-white/[.07] pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-2 text-xs leading-5 text-zinc-600">
             <Users className="size-3.5 shrink-0 text-emerald-300" aria-hidden="true" />
