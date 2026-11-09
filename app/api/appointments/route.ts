@@ -447,7 +447,7 @@ async function POST__unobserved(request: Request) {
         p_manual_phone: clientPhone,
         p_manual_email: clientEmail || null,
         p_manual_birth_date: null,
-        p_status: autoConfirmManual ? 'scheduled' : 'pending',
+        p_status: 'manual',
       },
     );
 
