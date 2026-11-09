@@ -182,7 +182,7 @@ async function getInitialPublicDetails(
       .order('created_at', { ascending: false }),
     database
       .from('barbershops')
-      .select('opening_time, closing_time, lunch_start, lunch_end, closed_days')
+      .select('opening_time, closing_time, lunch_start, lunch_end, closed_days, require_birth_date')
       .eq('id', barbershopId)
       .maybeSingle(),
     database
@@ -237,6 +237,7 @@ async function getInitialPublicDetails(
     lunch_start: barbershop?.lunch_start ?? null,
     lunch_end: barbershop?.lunch_end ?? null,
     closed_days: barbershop?.closed_days ?? null,
+    require_birth_date: barbershop?.require_birth_date !== false,
   } as BarbershopPublicDetails;
 }
 
@@ -380,6 +381,7 @@ export default async function BarbershopPage({
           openingTime={initialData.opening_time ?? null}
           closingTime={initialData.closing_time ?? null}
           closedDays={initialData.closed_days ?? null}
+          requireBirthDate={initialData.require_birth_date !== false}
         />
       </>
     );
