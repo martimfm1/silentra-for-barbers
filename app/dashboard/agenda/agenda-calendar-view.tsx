@@ -123,7 +123,11 @@ function appointmentName(appointment: Appointment, t: (key: string) => string) {
   );
 }
 
-export function AgendaCalendarView() {
+export function AgendaCalendarView({
+  onAppointmentClick,
+}: {
+  onAppointmentClick?: (appointment: Appointment) => void;
+}) {
   const { t, locale } = useLanguage();
   const weekdayLabels =
     locale === 'pt'
@@ -357,7 +361,7 @@ export function AgendaCalendarView() {
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl bg-white/[0.055]">
+          <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl bg-white/[0.055] sm:rounded-3xl">
             {calendarDays.map((date) => {
               const key = dayKey(date);
               const dayAppointments = appointmentsByDay.get(key) ?? [];
@@ -605,9 +609,13 @@ export function AgendaCalendarView() {
               ) : (
                 <>
                   {selectedAppointments.map((appointment) => (
-                    <div
+                    <button
                       key={appointment.id}
-                      className="rounded-xl border border-white/10 bg-white/[0.025] p-3"
+                      type="button"
+                      onClick={() => onAppointmentClick?.(appointment)}
+                      disabled={!onAppointmentClick}
+                      aria-label={`${format(new Date(appointment.date_hour), 'HH:mm')} · ${appointmentName(appointment, t)} · ${appointment.services?.name ?? t('agendaCalendar.service')}`}
+                      className="block w-full rounded-xl border border-white/10 bg-white/[0.025] p-3 text-left transition hover:border-emerald-300/25 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60 disabled:cursor-default"
                     >
                       <div className="flex items-center gap-2">
                         <span
@@ -636,7 +644,12 @@ export function AgendaCalendarView() {
                         {appointment.professionals?.name ??
                           t('agendaCalendar.team')}
                       </p>
-                    </div>
+                      {onAppointmentClick ? (
+                        <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-300/80">
+                          Ver detalhes <ChevronRight className="size-3" aria-hidden="true" />
+                        </span>
+                      ) : null}
+                    </button>
                   ))}
                   {selectedBlocks.map((block) => (
                     <div
