@@ -4,13 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Mail,
-  Phone,
   Send,
-  Smartphone,
   Eye,
   ShieldCheck,
-  Cake,
-  ArrowUpRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -98,6 +94,7 @@ const pageCopy = {
     newMessageDescription:
       'Escolhe um cliente, usa um modelo e ajusta apenas o necessário.',
     recipient: 'Destinatário',
+    searchClients: 'Pesquisar por nome ou email…',
     loadingClients: 'A carregar clientes…',
     chooseClient: 'Selecionar cliente',
     customer: 'Cliente',
@@ -154,6 +151,7 @@ const pageCopy = {
     newMessageDescription:
       'Choose a client, use a template and adjust only what you need.',
     recipient: 'Recipient',
+    searchClients: 'Search by name or email…',
     loadingClients: 'Loading clients…',
     chooseClient: 'Select a client',
     customer: 'Client',
@@ -204,6 +202,7 @@ export default function MensagensPage() {
   const copy = pageCopy[english ? 'en' : 'pt'];
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
   const [template, setTemplate] = useState<TemplateKey>('reminder');
   const [subject, setSubject] = useState<string>(templates.reminder.subject);
   const [body, setBody] = useState<string>(templates.reminder.body);
@@ -345,33 +344,7 @@ export default function MensagensPage() {
           </div>
         </header>
 
-        <Card className="overflow-hidden border-amber-500/15 bg-amber-500/[0.04]">
-          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-300">
-                <Cake className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-100">
-                  {copy.birthdayAutomation}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-zinc-400">
-                  {copy.birthdayDescription}
-                </p>
-              </div>
-            </div>
-            <Button
-              asChild
-              variant="outline"
-              className="shrink-0 border-white/10 bg-white/[0.03] text-zinc-200 hover:bg-white/[0.07]"
-            >
-              <Link href="/dashboard/mensagens/birthdays">
-                {copy.manageAutomation}
-                <ArrowUpRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+
 
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
           <Card className="dashboard-card min-w-0 border-white/10 bg-white/[0.03]">
@@ -384,7 +357,14 @@ export default function MensagensPage() {
             </CardHeader>
             <CardContent className="space-y-5 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="client">{copy.recipient}</Label>
+                <Label htmlFor="client-search">{copy.recipient}</Label>
+                <Input
+                  id="client-search"
+                  value={clientSearch}
+                  onChange={(event) => setClientSearch(event.target.value)}
+                  placeholder={copy.searchClients}
+                  className="min-h-11 bg-black/20"
+                />
                 <Select
                   value={clientId}
                   onValueChange={setClientId}
@@ -402,7 +382,12 @@ export default function MensagensPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {clients
-                      .filter((client) => client.email)
+                      .filter((client) => {
+                        if (!client.email) return false;
+                        const query = clientSearch.trim().toLocaleLowerCase('pt-PT');
+                        const name = client.name_complete || client.name || '';
+                        return !query || `${name} ${client.email}`.toLocaleLowerCase('pt-PT').includes(query);
+                      })
                       .map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name_complete || client.name || copy.customer}{' '}
@@ -545,33 +530,7 @@ export default function MensagensPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="dashboard-card border-white/10 bg-white/[0.03]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Smartphone className="size-4" aria-hidden="true" />
-                  {copy.phone}
-                </CardTitle>
-                <CardDescription>{copy.smsDescription}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border border-dashed border-white/10 bg-zinc-950/60 p-4">
-                  <Badge variant="secondary" className="mb-3">
-                    {copy.disabled}
-                  </Badge>
-                  <p className="text-sm leading-6 text-zinc-400">
-                    {copy.smsEnableDescription}
-                  </p>
-                  <Button
-                    type="button"
-                    disabled
-                    className="mt-4 min-h-11 w-full"
-                  >
-                    <Phone className="mr-2 size-4" aria-hidden="true" />
-                    {copy.sendSms}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
           </aside>
         </div>
       </div>
