@@ -1178,6 +1178,8 @@ export const pt = {
     allowOnlineDescription: 'Aceita novas reservas através da página pública.',
     automationPlanRequired: 'As confirmações e conclusões automáticas estão disponíveis nos planos Pro e Enterprise.',
     autoConfirm: 'Confirmar automaticamente',
+    autoConfirmManual: 'Confirmar automaticamente as marcações manuais',
+    autoConfirmManualDescription: 'As marcações criadas diretamente na agenda ficam confirmadas assim que são guardadas. Podes desativar esta opção quando quiseres.',
     autoConfirmDescription:
       'As novas reservas ficam confirmadas sem intervenção manual.',
     autoComplete: 'Concluir automaticamente',

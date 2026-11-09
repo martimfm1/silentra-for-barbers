@@ -86,6 +86,7 @@ type Config = {
   is_public_in_directory: boolean;
   time_limit_cancellation_hours: number;
   auto_confirm_bookings: boolean;
+  auto_confirm_manual_bookings: boolean;
   auto_complete_bookings: boolean;
   default_language: 'pt' | 'en';
   mbway_enabled: boolean;
@@ -137,6 +138,7 @@ const normalize = (v: Partial<Config>): Config => ({
     Math.min(720, Number(v.time_limit_cancellation_hours ?? 24)),
   ),
   auto_confirm_bookings: v.auto_confirm_bookings === true,
+  auto_confirm_manual_bookings: v.auto_confirm_manual_bookings !== false,
   auto_complete_bookings: v.auto_complete_bookings === true,
   default_language: v.default_language === 'en' ? 'en' : 'pt',
   mbway_enabled: v.mbway_enabled === true,
@@ -988,6 +990,17 @@ export default function SettingsPageOrganized() {
                         onCheckedChange={(v) =>
                           set({ allow_online_bookings: v })
                         }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{t('settingsPage.autoConfirmManual')}</p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-500">{t('settingsPage.autoConfirmManualDescription')}</p>
+                      </div>
+                      <Switch
+                        checked={config.auto_confirm_manual_bookings}
+                        onCheckedChange={(v) => set({ auto_confirm_manual_bookings: v })}
+                        aria-label={t('settingsPage.autoConfirmManual')}
                       />
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
