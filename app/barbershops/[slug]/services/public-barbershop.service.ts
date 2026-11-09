@@ -30,6 +30,7 @@ export interface BarbershopPublicDetails extends PublicProfileRecord {
   lunch_start?: string | null;
   lunch_end?: string | null;
   closed_days?: string | null;
+  require_birth_date?: boolean;
   off_days?: number[];
   price?: number | string | null;
   rating_avg?: number;
