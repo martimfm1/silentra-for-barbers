@@ -391,6 +391,18 @@ async function POST__unobserved(request: Request) {
         { status: 404 },
       );
 
+    const { data: bookingSettings, error: bookingSettingsError } = await admin
+      .from('barbershops')
+      .select('auto_confirm_manual_bookings')
+      .eq('id', barbershopId)
+      .single();
+    if (bookingSettingsError || !bookingSettings)
+      return NextResponse.json(
+        { error: 'Não foi possível carregar as definições da agenda.' },
+        { status: 503 },
+      );
+    const autoConfirmManual = bookingSettings.auto_confirm_manual_bookings !== false;
+
     const { data: service } = await admin
       .from('services')
       .select('id,duration,name')
@@ -435,7 +447,7 @@ async function POST__unobserved(request: Request) {
         p_manual_phone: clientPhone,
         p_manual_email: clientEmail || null,
         p_manual_birth_date: null,
-        p_status: 'scheduled',
+        p_status: autoConfirmManual ? 'scheduled' : 'pending',
       },
     );
 
@@ -468,7 +480,7 @@ async function POST__unobserved(request: Request) {
       date,
       time: dateHour.slice(0, 5),
       durationMinutes,
-      status: 'confirmed',
+      status: autoConfirmManual ? 'confirmed' : 'pending',
     }, { sendEmail: false }).catch((notificationError) =>
       console.error('[APPOINTMENT_PUSH_NOTIFICATION_ERROR]',
         notificationError instanceof Error ? notificationError.name : 'UNKNOWN'),
