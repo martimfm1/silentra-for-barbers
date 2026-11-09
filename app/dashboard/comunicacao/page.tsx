@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import {
   ArrowRight, ArrowUpRight, Bell, CheckCircle2, CircleAlert, Clock3,
@@ -26,7 +27,7 @@ type Campaign = {
 };
 type ChannelState = 'loading' | 'ready' | 'setup' | 'unavailable' | 'locked' | 'error';
 
-function Metric({ label, value, hint, icon: Icon }: { label: string; value: string | number; hint: string; icon: typeof Mail }) {
+function Metric({ label, value, hint, icon: Icon }: { label: string; value: string | number; hint: string; icon: LucideIcon }) {
   return (
     <Card className="min-w-0 rounded-2xl border-white/[.08] bg-white/[.025] shadow-none">
       <CardContent className="flex items-start justify-between gap-3 p-4 sm:p-5">
@@ -152,7 +153,7 @@ export default function CommunicationPage() {
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">{t('communicationPage.description')}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button asChild className="min-h-11 bg-emerald-400 px-5 font-semibold text-zinc-950 hover:bg-emerald-300" disabled={!messagingAllowed}><Link href={messagingAllowed ? '/dashboard/mensagens' : '/dashboard/billing'}><Send className="mr-2 size-4" />{english ? 'Send an email' : 'Enviar email'}<ArrowRight className="ml-2 size-4" /></Link></Button>
+              <Button asChild className="min-h-11 bg-emerald-400 px-5 font-semibold text-zinc-950 hover:bg-emerald-300" ><Link href={messagingAllowed ? '/dashboard/mensagens' : '/dashboard/billing'}><Send className="mr-2 size-4" />{english ? 'Send an email' : 'Enviar email'}<ArrowRight className="ml-2 size-4" /></Link></Button>
               <Button type="button" variant="outline" className="min-h-11 border-white/10 bg-white/[.025]" onClick={() => void refresh()} disabled={refreshing}><RefreshCw className={`mr-2 size-4 ${refreshing ? 'animate-spin' : ''}`} />{english ? 'Refresh' : 'Atualizar'}</Button>
             </div>
           </div>
@@ -173,7 +174,7 @@ export default function CommunicationPage() {
         )}
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={english ? 'Communication overview' : 'Resumo da comunicação'}>
-          <Metric label={english ? 'Active campaigns' : 'Campanhas ativas'} value={marketingAllowed ? stats.active : '—'} hint={english ? 'Drafts, scheduled and running' : 'Rascunhos, agendadas e em curso'} icon={Megaphone} />
+          <Metric label={english ? 'Open campaigns' : 'Campanhas abertas'} value={marketingAllowed ? stats.active : '—'} hint={english ? 'Drafts, scheduled and running' : 'Rascunhos, agendadas e em curso'} icon={Megaphone} />
           <Metric label={english ? 'Automations' : 'Automações'} value={marketingAllowed ? stats.automated : '—'} hint={english ? 'Event and time-based flows' : 'Fluxos por evento e data'} icon={Zap} />
           <Metric label={english ? 'Emails sent' : 'Emails enviados'} value={marketingAllowed ? stats.sent : '—'} hint={english ? 'Campaign delivery total' : 'Total de envios das campanhas'} icon={Send} />
           <Metric label={english ? 'Client email contacts' : 'Clientes com email'} value={emailContacts === null ? '—' : emailContacts.toLocaleString(english ? 'en-GB' : 'pt-PT')} hint={english ? 'Reachable from direct messages' : 'Contactáveis por mensagem direta'} icon={Users} />
