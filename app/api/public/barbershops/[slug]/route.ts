@@ -36,6 +36,7 @@ async function GET__unobserved(
       { data: services, error: servicesError },
       { data: reviews, error: reviewsError },
       { data: shop, error: shopError },
+      { data: barbershop, error: barbershopError },
     ] = await Promise.all([
       database
         .from('services')
@@ -54,13 +55,19 @@ async function GET__unobserved(
         .select('amenities')
         .eq('barbershop_id', barbershopId)
         .maybeSingle(),
+      database
+        .from('barbershops')
+        .select('require_birth_date')
+        .eq('id', barbershopId)
+        .maybeSingle(),
     ]);
 
-    if (servicesError || reviewsError || shopError) {
+    if (servicesError || reviewsError || shopError || barbershopError) {
       console.error('[PUBLIC_BARBERSHOP_API_ERROR]', {
         services: servicesError?.code ?? null,
         reviews: reviewsError?.code ?? null,
         shop: shopError?.code ?? null,
+        barbershop: barbershopError?.code ?? null,
       });
       return NextResponse.json(
         { error: 'Não foi possível carregar os dados da barbearia.' },
@@ -105,6 +112,7 @@ async function GET__unobserved(
               ? '/site/' + encodeURIComponent(profile.slug)
               : null,
           amenities: normalizeBarbershopAmenities(shop?.amenities),
+          require_birth_date: barbershop?.require_birth_date !== false,
           services: (services ?? []).map((service) => ({
             ...service,
             popular: profile.plan !== 'free' && service.popular === true,
