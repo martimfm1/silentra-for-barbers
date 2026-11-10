@@ -563,7 +563,7 @@ export function AgendaCalendarView({
           </div>
         </CardHeader>
         <CardContent className="space-y-5 p-4 sm:p-5">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
                 {t('agendaCalendar.appointments')}
@@ -578,6 +578,14 @@ export function AgendaCalendarView({
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedBlocks.length}
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+              <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
+                Canceladas
+              </p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-rose-300">
+                {selectedAppointments.filter((item) => item.status === 'cancelled').length}
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
