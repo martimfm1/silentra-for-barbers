@@ -58,8 +58,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-
 const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-white/5 text-sm sm:max-w-sm';
 const CARD_CLASS = 'border border-white/10 bg-white/[.02] text-zinc-50';
 
