@@ -35,6 +35,7 @@ import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
 import { CalendarSyncCard } from '@/components/dashboard/calendar-sync-card';
 import { AgendaCalendarView } from './agenda-calendar-view';
+import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
 
 const STATUS_FILTERS = [
   { id: 'all', label: 'agenda.all' },
@@ -635,6 +636,7 @@ export default function AgendaPage() {
           </>
         )}
       </div>
+      <div className="mx-auto mt-8 w-full max-w-7xl px-1"><AgendaViewSettings /></div>
       <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
         <DialogContent
           showCloseButton={false}
