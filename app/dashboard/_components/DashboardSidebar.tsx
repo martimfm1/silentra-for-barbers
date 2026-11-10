@@ -114,6 +114,7 @@ const customerExperienceItems: SidebarItem[] = [
 const businessGrowthItems: SidebarItem[] = [
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
+  { href: '/dashboard/settings/public-profile', label: 'Perfil público', icon: Globe2 },
 ];
 
 const toolsItems: SidebarItem[] = [
@@ -147,6 +148,7 @@ const englishLabels: Record<string, string> = {
   'Validar recompensa': 'Validate reward',
   Vendas: 'Sales',
   'Site próprio': 'Website',
+  'Perfil público': 'Public profile',
   'Suporte Silentra': 'Silentra Support',
   'Plano e pagamentos': 'Plan and billing',
   Definições: 'Settings',
