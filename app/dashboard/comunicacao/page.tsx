@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { useLanguage } from '@/context/LanguageContext';
+import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
 
 type Campaign = {
   id: string;
@@ -218,6 +219,7 @@ export default function CommunicationPage() {
           </Card>
         </section>
       </div>
+      <div className="mx-auto mt-6 w-full max-w-7xl"><SettingsPushNotificationsPanel /></div>
     </main>
   );
 }
