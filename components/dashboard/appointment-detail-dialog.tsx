@@ -451,6 +451,40 @@ export function AppointmentDetailDialog({
                   </DetailItem>
                 </div>
               </Section>
+              {appointment.status === 'cancelled' ? (
+                <Section title={isEnglish ? 'Cancellation history' : 'Histórico de cancelamento'}>
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    <DetailItem
+                      icon={<Clock3 className="size-3.5" />}
+                      label={isEnglish ? 'Cancelled at' : 'Cancelada em'}
+                    >
+                      {appointment.cancelled_at
+                        ? new Date(appointment.cancelled_at).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })
+                        : (isEnglish ? 'Date not recorded' : 'Data não registada')}
+                    </DetailItem>
+                    <DetailItem
+                      icon={<UserRound className="size-3.5" />}
+                      label={isEnglish ? 'Cancelled by' : 'Cancelada por'}
+                    >
+                      {appointment.cancellation_actor_name ||
+                        (appointment.cancellation_actor === 'customer'
+                          ? (isEnglish ? 'Customer' : 'Cliente')
+                          : appointment.cancellation_actor === 'staff'
+                            ? (isEnglish ? 'Barbershop team' : 'Equipa da barbearia')
+                            : (isEnglish ? 'Not recorded' : 'Não registado'))}
+                    </DetailItem>
+                    <div className="sm:col-span-2">
+                      <DetailItem
+                        icon={<CalendarClock className="size-3.5" />}
+                        label={isEnglish ? 'Cancellation reason' : 'Motivo do cancelamento'}
+                      >
+                        {appointment.cancellation_reason ||
+                          (isEnglish ? 'No reason provided.' : 'Não foi indicado um motivo.')}
+                      </DetailItem>
+                    </div>
+                  </div>
+                </Section>
+              ) : null}
               {appointment.users?.style_notes ||
               appointment.description_products ? (
                 <Section title="Notas">
