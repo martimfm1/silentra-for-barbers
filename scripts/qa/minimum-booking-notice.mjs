@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 
 const [
   settings,
-  agendaPolicy,
   service,
   booking,
   availability,
@@ -18,7 +17,6 @@ const [
   workflow,
 ] = await Promise.all([
   readFile('app/dashboard/settings/settings-page.tsx', 'utf8'),
-  readFile('components/dashboard/agenda-cancellation-policy-panel.tsx', 'utf8'),
   readFile('app/dashboard/_services/barbershop.service.ts', 'utf8'),
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('app/api/shops/[id]/booking-data/route.ts', 'utf8'),
@@ -48,7 +46,7 @@ assert.match(settings, /settingsPage\.minimumBookingNotice/);
 assert.match(settings, /settingsPage\.allowOnline/);
 assert.match(settings, /settingsPage\.autoConfirm/);
 assert.match(settings, /settingsPage\.autoComplete/);
-assert.match(agendaPolicy, /minimum_booking_notice_minutes/);
+assert.doesNotMatch(settings, /settingsPage\.cancellationWindow/);
 assert.match(service, /minimum_booking_notice_minutes/);
 assert.ok(settings.includes('settingsPage.requireBirthDate'));
 assert.match(service, /require_birth_date/);
