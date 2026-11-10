@@ -11,6 +11,7 @@ const [
   automationPage,
   marketingWorkspace,
   settingsPage,
+  agendaCancellationPolicy,
 ] = await Promise.all([
   read('components/dashboard/dashboard-confirm-provider.tsx'),
   read('app/dashboard/page.tsx'),
@@ -19,6 +20,7 @@ const [
   read('app/dashboard/automations/page.tsx'),
   read('app/dashboard/marketing/marketing-workspace.tsx'),
   read('app/dashboard/settings/settings-page.tsx'),
+  read('components/dashboard/agenda-cancellation-policy-panel.tsx'),
 ]);
 const confirmationTargets = await Promise.all(
   [
@@ -162,8 +164,8 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
   );
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
-assert.match(settingsPage, /settingsPage\.cancellationWindowHelp/);
-assert.match(settingsPage, /settingsPage\.cancellationWindowNoLimit/);
+assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
+assert.match(agendaCancellationPolicy, /Cancellation policy/);
 assert.match(settingsPage, /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/);
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
