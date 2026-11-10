@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  CalendarCheck2,
   Camera,
   Check,
   ImageIcon,
@@ -58,19 +57,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DEFAULT_BARBERSHOP_AMENITIES,
-  normalizeBarbershopAmenities,
-  type BarbershopAmenities,
-} from '@/lib/barbershops/amenities';
-
 const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-white/5 text-sm sm:max-w-sm';
 const CARD_CLASS = 'border border-white/10 bg-white/[.02] text-zinc-50';
-type PublicProfileSetup = {
-  city: string;
-  price: number;
-  tags: string[];
-};
 
 type Config = {
   name: string;
@@ -85,7 +73,6 @@ type Config = {
   require_birth_date: boolean;
   allow_online_bookings: boolean;
   is_public_in_directory: boolean;
-  time_limit_cancellation_hours: number;
   auto_confirm_bookings: boolean;
   auto_confirm_manual_bookings: boolean;
   auto_complete_bookings: boolean;
@@ -103,22 +90,6 @@ const days = [
   ['Saturday', 'Saturday', 'Sábado'],
   ['Sunday', 'Sunday', 'Domingo'],
 ] as const;
-const amenitiesKeys = [
-  'wifi',
-  'wheelchair_accessible',
-  'accessible_entrance',
-  'accessible_toilet',
-  'kids_friendly',
-  'waiting_area',
-  'restroom',
-  'air_conditioning',
-  'card_payments',
-  'walk_ins',
-  'coffee',
-  'water',
-  'pet_friendly',
-  'appointment_required',
-] as const;
 const normalize = (v: Partial<Config>): Config => ({
   name: v.name ?? '',
   phone: v.phone ?? '',
@@ -135,21 +106,12 @@ const normalize = (v: Partial<Config>): Config => ({
   require_birth_date: v.require_birth_date !== false,
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
-  time_limit_cancellation_hours: Math.max(
-    0,
-    Math.min(720, Number(v.time_limit_cancellation_hours ?? 24)),
-  ),
   auto_confirm_bookings: v.auto_confirm_bookings === true,
   auto_confirm_manual_bookings: v.auto_confirm_manual_bookings !== false,
   auto_complete_bookings: v.auto_complete_bookings === true,
   default_language: v.default_language === 'en' ? 'en' : 'pt',
   mbway_enabled: v.mbway_enabled === true,
   mbway_phone: v.mbway_phone ?? '',
-});
-const normalizePublicProfile = (value: Partial<PublicProfileSetup> | null | undefined): PublicProfileSetup => ({
-  city: value?.city ?? '',
-  price: Math.max(0, Math.min(10000, Number(value?.price ?? 15))),
-  tags: Array.isArray(value?.tags) ? value.tags.filter((tag): tag is string => typeof tag === 'string').slice(0, 12) : [],
 });
 const closedList = (v: string) =>
   !v || v === 'None'
@@ -178,14 +140,6 @@ export default function SettingsPageOrganized() {
   const [config, setConfig] = useState<Config>(normalize({}));
   const [noticeUnit, setNoticeUnit] = useState<'minutes' | 'hours'>('minutes');
   const [initial, setInitial] = useState<Config | null>(null);
-  const [profileSetup, setProfileSetup] = useState<PublicProfileSetup>({ city: '', price: 15, tags: ['Corte', 'Barba'] });
-  const [initialProfileSetup, setInitialProfileSetup] = useState<PublicProfileSetup | null>(null);
-  const [amenities, setAmenities] = useState<BarbershopAmenities>(
-    DEFAULT_BARBERSHOP_AMENITIES,
-  );
-  const [initialAmenities, setInitialAmenities] = useState(
-    DEFAULT_BARBERSHOP_AMENITIES,
-  );
   const [suggestion, setSuggestion] = useState<AddressSuggestion | null>(null);
   const [avatarTick, setAvatarTick] = useState(0);
   const [bannerTick, setBannerTick] = useState(0);
@@ -197,13 +151,7 @@ export default function SettingsPageOrganized() {
   const load = useCallback(async () => {
     if (!barbershopId) return;
     setLoading(true);
-    const [c, p] = await Promise.all([
-      barbershopService.getConfig(barbershopId),
-      fetch('/api/barbershops/public-profile', {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' },
-      }),
-    ]);
+    const c = await barbershopService.getConfig(barbershopId);
     if (c.error) toast.error(t('settingsPage.loadFailed'));
     if (c.data) {
       const n = normalize(c.data);
@@ -216,19 +164,6 @@ export default function SettingsPageOrganized() {
           : 'minutes',
       );
     }
-    try {
-      const body = await p.json();
-      if (p.ok) {
-        const n = normalizeBarbershopAmenities(body.data?.amenities);
-        const profile = normalizePublicProfile(body.data);
-        setProfileSetup(profile);
-        setInitialProfileSetup(profile);
-        setAmenities(n);
-        setInitialAmenities(n);
-      }
-    } catch {
-      toast.error(t('settingsPage.publicLoadFailed'));
-    }
     setLoading(false);
   }, [barbershopId, t]);
   useEffect(() => {
@@ -236,11 +171,8 @@ export default function SettingsPageOrganized() {
   }, [load]);
   const dirty = useMemo(
     () =>
-      JSON.stringify(config) !== JSON.stringify(initial) ||
-      JSON.stringify(amenities) !== JSON.stringify(initialAmenities) ||
-      JSON.stringify(profileSetup) !== JSON.stringify(initialProfileSetup) ||
-      suggestion !== null,
-    [config, initial, amenities, initialAmenities, profileSetup, initialProfileSetup, suggestion],
+      JSON.stringify(config) !== JSON.stringify(initial) || suggestion !== null,
+    [config, initial, suggestion],
   );
   const closed = useMemo(
     () => closedList(config.closed_days),
@@ -295,31 +227,9 @@ export default function SettingsPageOrganized() {
         const b = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(t('settingsPage.locationUpdateFailed'));
       }
-      if (
-        JSON.stringify(amenities) !== JSON.stringify(initialAmenities) ||
-        JSON.stringify(profileSetup) !== JSON.stringify(initialProfileSetup)
-      ) {
-        const r = await fetch('/api/barbershops/public-profile', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            amenities,
-            city: profileSetup.city,
-            price: profileSetup.price,
-            tags: profileSetup.tags,
-          }),
-        });
-        const b = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(typeof b.error === 'string' ? b.error : t('settingsPage.amenitiesSaveFailed'));
-      }
       const n = normalize(c.data ?? config);
       setConfig(n);
       setInitial(n);
-      setInitialAmenities(amenities);
-      setInitialProfileSetup(profileSetup);
       setLocale(n.default_language);
       setSuggestion(null);
       toast.success(t('settingsPage.saved'));
@@ -331,8 +241,6 @@ export default function SettingsPageOrganized() {
   }
   function reset() {
     if (initial) setConfig(initial);
-    setAmenities(initialAmenities);
-    if (initialProfileSetup) setProfileSetup(initialProfileSetup);
     setSuggestion(null);
   }
   async function upload(type: 'avatar' | 'banner', file: File) {
@@ -679,32 +587,6 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-            <section id="settings-public-basics" className="scroll-mt-24">
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h2 className="text-lg font-semibold">{t('settingsPage.publicBasicsTitle')}</h2>
-                  <p className="text-sm leading-5 text-zinc-500">{t('settingsPage.publicBasicsDescription')}</p>
-                </div>
-                <Card className={CARD_CLASS}>
-                  <CardContent className="grid gap-5 p-5 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                      <label htmlFor="settings-profile-city" className="text-sm font-medium text-zinc-200">{t('settingsPage.profileCity')}</label>
-                      <Input id="settings-profile-city" value={profileSetup.city} onChange={(event) => setProfileSetup((current) => ({ ...current, city: event.target.value }))} className={INPUT_CLASS} />
-                    </div>
-                    <div className="grid gap-2">
-                      <label htmlFor="settings-profile-price" className="text-sm font-medium text-zinc-200">{t('settingsPage.profilePrice')}</label>
-                      <Input id="settings-profile-price" type="number" min="0" max="10000" step="0.5" value={profileSetup.price} onChange={(event) => setProfileSetup((current) => ({ ...current, price: event.target.value === '' ? 0 : Number(event.target.value) }))} className={INPUT_CLASS} />
-                      <p className="text-xs text-zinc-600">{t('settingsPage.profilePriceHint')}</p>
-                    </div>
-                    <div className="grid gap-2 sm:col-span-2">
-                      <label htmlFor="settings-profile-tags" className="text-sm font-medium text-zinc-200">{t('settingsPage.profileTags')}</label>
-                      <Input id="settings-profile-tags" value={profileSetup.tags.join(', ')} onChange={(event) => setProfileSetup((current) => ({ ...current, tags: event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean).slice(0, 12) }))} placeholder="Corte, Barba, Degradê" className={INPUT_CLASS} />
-                      <p className="text-xs text-zinc-600">{t('settingsPage.profileTagsHint')}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
             <section id="settings-location" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="space-y-1">
@@ -736,59 +618,6 @@ export default function SettingsPageOrganized() {
                       })}
                     </p>
                   )}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {amenitiesKeys.map((k) => (
-                      <button
-                        key={k}
-                        type="button"
-                        aria-pressed={amenities[k]}
-                        onClick={() =>
-                          setAmenities((a) => ({ ...a, [k]: !a[k] }))
-                        }
-                        className={cn(
-                          'flex min-h-12 items-center justify-between rounded-xl border px-4 text-left text-sm',
-                          amenities[k]
-                            ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
-                            : 'border-white/10 bg-white/[.02] text-zinc-400',
-                        )}
-                      >
-                        {t(`settingsPage.amenities.${k}`)}
-                        {amenities[k] && <Check className="size-4" />}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="grid gap-2 sm:max-w-md">
-                    <p className="text-sm font-medium">
-                      {t('settingsPage.parking')}
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(
-                        [
-                          ['none', t('settingsPage.noParking')],
-                          ['free', t('settingsPage.freeParking')],
-                          ['paid', t('settingsPage.paidParking')],
-                        ] as const
-                      ).map(([v, l]) => (
-                        <button
-                          key={v}
-                          type="button"
-                          role="radio"
-                          aria-checked={amenities.parking === v}
-                          onClick={() =>
-                            setAmenities((a) => ({ ...a, parking: v }))
-                          }
-                          className={cn(
-                            'min-h-11 rounded-xl border text-sm',
-                            amenities.parking === v
-                              ? 'border-emerald-400/30 bg-emerald-400/[.08] text-emerald-200'
-                              : 'border-white/10 bg-white/[.02] text-zinc-400',
-                          )}
-                        >
-                          {l}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                   </CardContent>
                 </Card>
               </div>
@@ -1055,36 +884,6 @@ export default function SettingsPageOrganized() {
                       onCheckedChange={(value) => set({ require_birth_date: value })}
                       aria-label={t('settingsPage.requireBirthDate')}
                     />
-                  </div>
-                  <div className="border-t border-white/10 pt-5">
-                    <div className="flex items-center gap-2">
-                      <CalendarCheck2 className="size-4 text-amber-300" />
-                      <label htmlFor="settings-cancellation-window" className="text-sm font-medium">
-                        {t('settingsPage.cancellationWindow')}
-                      </label>
-                    </div>
-                    <Input
-                      id="settings-cancellation-window"
-                      type="number"
-                      min={0}
-                      max={720}
-                      step={1}
-                      value={config.time_limit_cancellation_hours}
-                      aria-label={t('settingsPage.cancellationWindow')}
-                      onChange={(e) =>
-                        set({
-                          time_limit_cancellation_hours: Number(e.target.value),
-                        })
-                      }
-                      className={`${INPUT_CLASS} mt-4 max-w-48`}
-                    />
-                    <p className="mt-2 max-w-xl text-xs leading-5 text-zinc-500">
-                      {config.time_limit_cancellation_hours === 0
-                        ? t('settingsPage.cancellationWindowNoLimit')
-                        : t('settingsPage.cancellationWindowHelp', {
-                            hours: config.time_limit_cancellation_hours,
-                          })}
-                    </p>
                   </div>
                   </CardContent>
                 </Card>

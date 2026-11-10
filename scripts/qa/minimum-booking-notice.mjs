@@ -46,7 +46,7 @@ assert.match(settings, /settingsPage\.minimumBookingNotice/);
 assert.match(settings, /settingsPage\.allowOnline/);
 assert.match(settings, /settingsPage\.autoConfirm/);
 assert.match(settings, /settingsPage\.autoComplete/);
-assert.match(settings, /settingsPage\.cancellationWindow/);
+assert.doesNotMatch(settings, /settingsPage\.cancellationWindow/);
 assert.match(service, /minimum_booking_notice_minutes/);
 assert.ok(settings.includes('settingsPage.requireBirthDate'));
 assert.match(service, /require_birth_date/);
