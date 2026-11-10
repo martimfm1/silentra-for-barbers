@@ -549,6 +549,8 @@ async function POST__unobserved(request: Request) {
         .update({
           status: 'cancelled',
           cancellation_reason: 'Metadados de pré-pagamento MB WAY não foram preparados.',
+          cancellation_actor: 'system',
+          cancellation_actor_name: 'Sistema',
         })
         .eq('id', appointment.id)
         .eq('barbershop_id', barbershopId)
