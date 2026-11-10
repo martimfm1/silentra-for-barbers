@@ -70,7 +70,7 @@ export function AgendaCancellationPolicyPanel() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {PRESETS.map((preset) => <button key={preset} type="button" disabled={loading || saving} onClick={() => setHours(preset)} aria-pressed={hours === preset} className={`min-h-10 rounded-xl border px-3 text-sm transition-colors ${hours === preset ? 'border-amber-400/30 bg-amber-400/10 text-amber-100' : 'border-white/10 bg-white/[.03] text-zinc-400 hover:bg-white/[.06]'}`}>{preset === 0 ? (english ? 'No limit' : 'Sem limite') : english ? `${preset}h` : `${preset}h`}</button>)}
+          {PRESETS.map((preset) => <button key={preset} type="button" disabled={loading || saving} onClick={() => setHours(preset)} aria-label={english ? `Set cancellation notice to ${preset} hours` : `Definir antecedência de cancelamento para ${preset} horas`} aria-pressed={hours === preset} className={`min-h-10 rounded-xl border px-3 text-sm transition-colors ${hours === preset ? 'border-amber-400/30 bg-amber-400/10 text-amber-100' : 'border-white/10 bg-white/[.03] text-zinc-400 hover:bg-white/[.06]'}`}>{preset === 0 ? (english ? 'No limit' : 'Sem limite') : english ? `${preset}h` : `${preset}h`}</button>)}
         </div>
         {invalid ? <p className="text-xs text-red-300">{english ? 'Enter an integer between 0 and 720.' : 'Introduz um número inteiro entre 0 e 720.'}</p> : null}
         <div className="flex justify-end">
