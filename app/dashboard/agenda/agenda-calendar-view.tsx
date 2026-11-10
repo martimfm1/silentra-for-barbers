@@ -373,6 +373,9 @@ export function AgendaCalendarView({
               const activeCount = dayAppointments.filter(
                 (item) => item.status !== 'cancelled',
               ).length;
+              const cancelledCount = dayAppointments.filter(
+                (item) => item.status === 'cancelled',
+              ).length;
               const preview = dayAppointments.slice(0, 2);
 
               return (
@@ -404,11 +407,18 @@ export function AgendaCalendarView({
                     >
                       {format(date, 'd')}
                     </span>
-                    {activeCount > 0 ? (
-                      <span className="text-[9px] font-semibold tabular-nums text-zinc-600 sm:text-[10px]">
-                        {activeCount}
-                      </span>
-                    ) : null}
+                    <div className="flex items-center gap-1">
+                      {activeCount > 0 ? (
+                        <span className="text-[9px] font-semibold tabular-nums text-zinc-600 sm:text-[10px]">
+                          {activeCount}
+                        </span>
+                      ) : null}
+                      {cancelledCount > 0 ? (
+                        <span className="rounded-md bg-rose-400/10 px-1 py-0.5 text-[8px] font-semibold tabular-nums text-rose-300 sm:text-[9px]" title={`${cancelledCount} canceladas`}>
+                          −{cancelledCount}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.05] sm:mt-3 sm:h-1.5">
@@ -432,7 +442,28 @@ export function AgendaCalendarView({
                     {preview.map((appointment) => (
                       <div
                         key={appointment.id}
-                        className="flex min-w-0 items-center gap-1 rounded-md border border-white/[0.04] bg-white/[0.02] px-1 py-1 sm:gap-1.5 sm:px-1.5"
+                        role="button"
+                        tabIndex={0}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelectedDate(date);
+                          onAppointmentClick?.(appointment);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setSelectedDate(date);
+                            onAppointmentClick?.(appointment);
+                          }
+                        }}
+                        aria-label={`Ver marcação de ${appointmentName(appointment, t)} às ${format(new Date(appointment.date_hour), 'HH:mm')}${appointment.status === 'cancelled' ? ', cancelada' : ''}`}
+                        className={cn(
+                          'flex min-w-0 cursor-pointer items-center gap-1 rounded-md border px-1 py-1 transition hover:border-emerald-300/30 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300/70 sm:gap-1.5 sm:px-1.5',
+                          appointment.status === 'cancelled'
+                            ? 'border-rose-400/15 bg-rose-400/[0.06]'
+                            : 'border-white/[0.04] bg-white/[0.02]',
+                        )}
                       >
                         <span
                           className={cn(
@@ -441,11 +472,17 @@ export function AgendaCalendarView({
                           )}
                           aria-hidden="true"
                         />
-                        <span className="hidden truncate text-[9px] text-zinc-500 sm:block">
+                        <span className={cn(
+                          'hidden truncate text-[9px] sm:block',
+                          appointment.status === 'cancelled' ? 'text-rose-200/80 line-through' : 'text-zinc-500',
+                        )}>
                           {format(new Date(appointment.date_hour), 'HH:mm')} ·{' '}
                           {appointmentName(appointment, t)}
                         </span>
-                        <span className="block truncate text-[8px] text-zinc-600 sm:hidden">
+                        <span className={cn(
+                          'block truncate text-[8px] sm:hidden',
+                          appointment.status === 'cancelled' ? 'text-rose-300/80' : 'text-zinc-600',
+                        )}>
                           {format(new Date(appointment.date_hour), 'HH:mm')}
                         </span>
                       </div>
