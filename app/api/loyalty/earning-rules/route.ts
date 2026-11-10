@@ -1,7 +1,10 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
-import { requireModuleContext, moduleErrorResponse } from '@/services/modules/authorization';
+import {
+  requireModuleContext,
+  moduleErrorResponse,
+} from '@/services/modules/authorization';
 
 function uuid(value: unknown): string | null {
   return typeof value === 'string' &&
@@ -68,7 +71,10 @@ async function POST__unobserved(request: Request) {
     const points = Math.floor(Number(body.points));
     const activeValue = body.active;
     if (activeValue !== undefined && typeof activeValue !== 'boolean')
-      return NextResponse.json({ error: 'Estado da regra inválido.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Estado da regra inválido.' },
+        { status: 400 },
+      );
     const active = activeValue ?? true;
     if (
       !name ||
@@ -88,7 +94,10 @@ async function POST__unobserved(request: Request) {
       .eq('is_active', true)
       .maybeSingle();
     if (serviceError)
-      return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Não foi possível validar o serviço.' },
+        { status: 503 },
+      );
     if (!service)
       return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
 
@@ -134,20 +143,33 @@ async function PATCH__unobserved(request: Request) {
       updated_at: new Date().toISOString(),
     };
     if (body.name !== undefined) {
-      if (typeof body.name !== 'string' || !body.name.trim() || body.name.trim().length > 120)
-        return NextResponse.json({ error: 'Nome da regra inválido.' }, { status: 400 });
+      if (
+        typeof body.name !== 'string' ||
+        !body.name.trim() ||
+        body.name.trim().length > 120
+      )
+        return NextResponse.json(
+          { error: 'Nome da regra inválido.' },
+          { status: 400 },
+        );
       patch.name = body.name.trim();
     }
     if (body.points !== undefined) patch.points = Number(body.points);
     if (body.active !== undefined) {
       if (typeof body.active !== 'boolean')
-        return NextResponse.json({ error: 'Estado da regra inválido.' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Estado da regra inválido.' },
+          { status: 400 },
+        );
       patch.active = body.active;
     }
     if (body.serviceId !== undefined) {
       patch.service_id = uuid(body.serviceId);
       if (!patch.service_id)
-        return NextResponse.json({ error: 'Serviço inválido.' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Serviço inválido.' },
+          { status: 400 },
+        );
     }
     if (
       typeof patch.points === 'number' &&
@@ -166,7 +188,10 @@ async function PATCH__unobserved(request: Request) {
         .eq('is_active', true)
         .maybeSingle();
       if (serviceError)
-        return NextResponse.json({ error: 'Não foi possível validar o serviço.' }, { status: 503 });
+        return NextResponse.json(
+          { error: 'Não foi possível validar o serviço.' },
+          { status: 503 },
+        );
       if (!service)
         return NextResponse.json(
           { error: 'Serviço inválido.' },

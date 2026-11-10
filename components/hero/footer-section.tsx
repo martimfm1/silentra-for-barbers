@@ -76,9 +76,30 @@ export function FooterSection() {
               >
                 contact.silentra@gmail.com
               </a>
-              <a href="https://instagram.com/silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">Instagram</a>
-              <a href="https://tiktok.com/@silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">TikTok</a>
-              <a href="https://facebook.com/silentra.dev" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-zinc-50">Facebook</a>
+              <a
+                href="https://instagram.com/silentra.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-zinc-50"
+              >
+                Instagram
+              </a>
+              <a
+                href="https://tiktok.com/@silentra.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-zinc-50"
+              >
+                TikTok
+              </a>
+              <a
+                href="https://facebook.com/silentra.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-zinc-50"
+              >
+                Facebook
+              </a>
               <a
                 href="https://discord.gg/PwHWWyrGxe"
                 target="_blank"
@@ -124,7 +145,10 @@ export function FooterSection() {
           >
             {pt ? 'Privacidade' : 'Privacy'}
           </Link>
-          <Link href="/status" className="transition-colors hover:text-zinc-300">
+          <Link
+            href="/status"
+            className="transition-colors hover:text-zinc-300"
+          >
             {pt ? 'Estado da plataforma' : 'Platform status'}
           </Link>
           <Link

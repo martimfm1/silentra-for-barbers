@@ -21,12 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -236,7 +231,9 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
       await loadPlans();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('clientsPage.planActionError'),
+        error instanceof Error
+          ? error.message
+          : t('clientsPage.planActionError'),
       );
     } finally {
       setSaving(false);
@@ -266,7 +263,9 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
     const names = plan.service_ids
       .map((id) => services.find((service) => service.id === id)?.name)
       .filter((name): name is string => Boolean(name));
-    return names.length ? names.join(', ') : t('clientsPage.planSelectedServices');
+    return names.length
+      ? names.join(', ')
+      : t('clientsPage.planSelectedServices');
   }
 
   const used = activePlan?.used_appointments ?? 0;
@@ -274,11 +273,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
   const usagePercent = quota > 0 ? Math.min(100, (used / quota) * 100) : 0;
   const currentPayment = activePlan?.current_payment ?? null;
   const isPaid = currentPayment?.status === 'paid';
-  const isFutureStart =
-    activePlan?.start_date
-      ? new Date(`${activePlan.start_date}T00:00:00`).getTime() >
-        new Date(new Date().toDateString()).getTime()
-      : false;
+  const isFutureStart = activePlan?.start_date
+    ? new Date(`${activePlan.start_date}T00:00:00`).getTime() >
+      new Date(new Date().toDateString()).getTime()
+    : false;
 
   return (
     <>
@@ -301,13 +299,18 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
               role="status"
               aria-label={t('clientsPage.planLoading')}
             >
-              <SilentraLoading variant="compact" message={t('clientsPage.planLoading')} />
+              <SilentraLoading
+                variant="compact"
+                message={t('clientsPage.planLoading')}
+              />
             </div>
           ) : activePlan ? (
             <>
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-semibold text-zinc-100">{activePlan.name}</p>
+                  <p className="font-semibold text-zinc-100">
+                    {activePlan.name}
+                  </p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {t('clientsPage.planMonthlyPrice')}
                   </p>
@@ -350,9 +353,28 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
               </div>
 
               <div className="space-y-1 text-xs text-zinc-500">
-                <p>{t('clientsPage.planServices')}: <span className="text-zinc-300">{serviceNames(activePlan)}</span></p>
                 <p>
-                  {t('clientsPage.planCycle')}: <span className="text-zinc-300">{formatDate(activePlan.period_start)} — {activePlan.period_end ? formatDate(new Date(new Date(`${activePlan.period_end}T00:00:00`).getTime() - 86400000).toISOString().slice(0, 10)) : '—'}</span>
+                  {t('clientsPage.planServices')}:{' '}
+                  <span className="text-zinc-300">
+                    {serviceNames(activePlan)}
+                  </span>
+                </p>
+                <p>
+                  {t('clientsPage.planCycle')}:{' '}
+                  <span className="text-zinc-300">
+                    {formatDate(activePlan.period_start)} —{' '}
+                    {activePlan.period_end
+                      ? formatDate(
+                          new Date(
+                            new Date(
+                              `${activePlan.period_end}T00:00:00`,
+                            ).getTime() - 86400000,
+                          )
+                            .toISOString()
+                            .slice(0, 10),
+                        )
+                      : '—'}
+                  </span>
                 </p>
               </div>
 
@@ -391,14 +413,20 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                     >
                       <option value="mbway">MB WAY</option>
                       <option value="cash">{t('clientsPage.planCash')}</option>
-                      <option value="transfer">{t('clientsPage.planTransfer')}</option>
+                      <option value="transfer">
+                        {t('clientsPage.planTransfer')}
+                      </option>
                       <option value="card">{t('clientsPage.planCard')}</option>
-                      <option value="other">{t('clientsPage.planOther')}</option>
+                      <option value="other">
+                        {t('clientsPage.planOther')}
+                      </option>
                     </select>
                     <Button
                       type="button"
                       disabled={saving}
-                      onClick={() => void updatePlanAction(activePlan, 'mark-paid')}
+                      onClick={() =>
+                        void updatePlanAction(activePlan, 'mark-paid')
+                      }
                       className="min-h-10"
                     >
                       <BadgeCheck className="mr-2 size-4" />
@@ -410,7 +438,9 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                     type="button"
                     variant="ghost"
                     disabled={saving}
-                    onClick={() => void updatePlanAction(activePlan, 'mark-pending')}
+                    onClick={() =>
+                      void updatePlanAction(activePlan, 'mark-pending')
+                    }
                     className="mt-2 min-h-9 px-2 text-xs text-zinc-400"
                   >
                     {t('clientsPage.planUndoPayment')}
@@ -466,7 +496,13 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                       <span className="tabular-nums text-zinc-300">
                         {formatCurrency(payment.amount)}
                       </span>
-                      <span className={payment.status === 'paid' ? 'text-emerald-300' : 'text-amber-300'}>
+                      <span
+                        className={
+                          payment.status === 'paid'
+                            ? 'text-emerald-300'
+                            : 'text-amber-300'
+                        }
+                      >
                         {payment.status === 'paid'
                           ? t('clientsPage.planPaid')
                           : t('clientsPage.planUnpaid')}
@@ -507,9 +543,12 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 p-3"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-zinc-200">{plan.name}</p>
+                    <p className="truncate text-sm text-zinc-200">
+                      {plan.name}
+                    </p>
                     <p className="text-xs text-zinc-500">
-                      {formatCurrency(plan.monthly_price)} / {t('clientsPage.planMonth')}
+                      {formatCurrency(plan.monthly_price)} /{' '}
+                      {t('clientsPage.planMonth')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -552,7 +591,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
           </DialogHeader>
           <form onSubmit={savePlan} className="space-y-4">
             <div className="grid gap-2">
-              <label htmlFor="client-plan-name" className="text-xs text-zinc-400">
+              <label
+                htmlFor="client-plan-name"
+                className="text-xs text-zinc-400"
+              >
                 {t('clientsPage.planName')}
               </label>
               <Input
@@ -561,7 +603,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                 maxLength={100}
                 value={form.name}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, name: event.target.value }))
+                  setForm((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
                 }
                 placeholder={t('clientsPage.planNamePlaceholder')}
               />
@@ -569,7 +614,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-2">
-                <label htmlFor="client-plan-price" className="text-xs text-zinc-400">
+                <label
+                  htmlFor="client-plan-price"
+                  className="text-xs text-zinc-400"
+                >
                   {t('clientsPage.planMonthlyPrice')}
                 </label>
                 <div className="relative">
@@ -592,7 +640,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                 </div>
               </div>
               <div className="grid gap-2">
-                <label htmlFor="client-plan-quota" className="text-xs text-zinc-400">
+                <label
+                  htmlFor="client-plan-quota"
+                  className="text-xs text-zinc-400"
+                >
                   {t('clientsPage.planIncluded')}
                 </label>
                 <Input
@@ -614,7 +665,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="client-plan-start" className="text-xs text-zinc-400">
+              <label
+                htmlFor="client-plan-start"
+                className="text-xs text-zinc-400"
+              >
                 {t('clientsPage.planStartDate')}
               </label>
               <Input
@@ -655,7 +709,9 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                               ...current,
                               service_ids: event.target.checked
                                 ? [...current.service_ids, service.id]
-                                : current.service_ids.filter((id) => id !== service.id),
+                                : current.service_ids.filter(
+                                    (id) => id !== service.id,
+                                  ),
                             }))
                           }
                           className="size-4 rounded border-white/20 bg-zinc-900 accent-blue-500"
@@ -673,7 +729,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
             </fieldset>
 
             <div className="grid gap-2">
-              <label htmlFor="client-plan-notes" className="text-xs text-zinc-400">
+              <label
+                htmlFor="client-plan-notes"
+                className="text-xs text-zinc-400"
+              >
                 {t('clientsPage.planNotes')}
               </label>
               <Textarea
@@ -682,7 +741,10 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                 maxLength={2000}
                 value={form.notes}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, notes: event.target.value }))
+                  setForm((current) => ({
+                    ...current,
+                    notes: event.target.value,
+                  }))
                 }
                 placeholder={t('clientsPage.planNotesPlaceholder')}
               />
@@ -699,7 +761,11 @@ export function ClientPlansManager({ clientId }: { clientId: string }) {
                 {t('clientsPage.planCancel')}
               </Button>
               <Button type="submit" disabled={saving} className="min-h-11">
-                {saving ? <Spinner className="mr-2 size-4" /> : <RefreshCw className="mr-2 size-4" />}
+                {saving ? (
+                  <Spinner className="mr-2 size-4" />
+                ) : (
+                  <RefreshCw className="mr-2 size-4" />
+                )}
                 {editingPlan
                   ? t('clientsPage.planSave')
                   : t('clientsPage.planCreate')}

@@ -57,24 +57,52 @@ export function ServicesListCard({
   const { t, locale } = useLanguage();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'duration'>('name');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all');
   const filteredServices = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
+    const query = search
+      .trim()
+      .toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB');
     return [...services]
-      .filter((service) => service.name.toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB').includes(query))
-      .filter((service) => statusFilter === 'all' || (statusFilter === 'active' ? service.is_active !== false : service.is_active === false))
-      .sort((a, b) => sortBy === 'name'
-        ? a.name.localeCompare(b.name, locale === 'pt' ? 'pt-PT' : 'en-GB')
-        : sortBy === 'price'
-          ? Number(a.price) - Number(b.price)
-          : Number(a.duration ?? (a as any).min_duration ?? 0) - Number(b.duration ?? (b as any).min_duration ?? 0));
+      .filter((service) =>
+        service.name
+          .toLocaleLowerCase(locale === 'pt' ? 'pt-PT' : 'en-GB')
+          .includes(query),
+      )
+      .filter(
+        (service) =>
+          statusFilter === 'all' ||
+          (statusFilter === 'active'
+            ? service.is_active !== false
+            : service.is_active === false),
+      )
+      .sort((a, b) =>
+        sortBy === 'name'
+          ? a.name.localeCompare(b.name, locale === 'pt' ? 'pt-PT' : 'en-GB')
+          : sortBy === 'price'
+            ? Number(a.price) - Number(b.price)
+            : Number(a.duration ?? (a as any).min_duration ?? 0) -
+              Number(b.duration ?? (b as any).min_duration ?? 0),
+      );
   }, [services, search, sortBy, locale, statusFilter]);
-  const activeServices = services.filter((service) => service.is_active !== false);
+  const activeServices = services.filter(
+    (service) => service.is_active !== false,
+  );
   const averagePrice = activeServices.length
-    ? activeServices.reduce((total, service) => total + Number(service.price || 0), 0) / activeServices.length
+    ? activeServices.reduce(
+        (total, service) => total + Number(service.price || 0),
+        0,
+      ) / activeServices.length
     : null;
   const averageDuration = activeServices.length
-    ? Math.round(activeServices.reduce((total, service) => total + Number(service.duration ?? service.min_duration ?? 0), 0) / activeServices.length)
+    ? Math.round(
+        activeServices.reduce(
+          (total, service) =>
+            total + Number(service.duration ?? service.min_duration ?? 0),
+          0,
+        ) / activeServices.length,
+      )
     : null;
   const duplicateService = (service: Service) => {
     setStatusFilter('all');
@@ -101,9 +129,19 @@ export function ServicesListCard({
                 {servicesCount === 0
                   ? t('servicesListCard.emptyDescription')
                   : `${servicesCount} ${servicesCount === 1 ? t('servicesListCard.configuredSingular') : t('servicesListCard.configuredPlural')}.`}
-              </p>              {servicesCount > 0 ? (
+              </p>{' '}
+              {servicesCount > 0 ? (
                 <p className="mt-1 text-xs text-zinc-500">
-                  {activeServices.length} {locale === 'pt' ? 'ativos' : 'active'} · {locale === 'pt' ? 'média' : 'avg.'} {averagePrice === null ? '—' : new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(averagePrice)} · {averageDuration === null ? '—' : `${averageDuration} min`}
+                  {activeServices.length}{' '}
+                  {locale === 'pt' ? 'ativos' : 'active'} ·{' '}
+                  {locale === 'pt' ? 'média' : 'avg.'}{' '}
+                  {averagePrice === null
+                    ? '—'
+                    : new Intl.NumberFormat(
+                        locale === 'pt' ? 'pt-PT' : 'en-GB',
+                        { style: 'currency', currency: 'EUR' },
+                      ).format(averagePrice)}{' '}
+                  · {averageDuration === null ? '—' : `${averageDuration} min`}
                 </p>
               ) : null}
             </div>
@@ -159,34 +197,83 @@ export function ServicesListCard({
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={locale === 'pt' ? 'Pesquisar serviços…' : 'Search services…'} aria-label={locale === 'pt' ? 'Pesquisar serviços' : 'Search services'} className="min-h-11 bg-zinc-950/70 pl-9" />
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
+                  aria-hidden="true"
+                />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={
+                    locale === 'pt' ? 'Pesquisar serviços…' : 'Search services…'
+                  }
+                  aria-label={
+                    locale === 'pt' ? 'Pesquisar serviços' : 'Search services'
+                  }
+                  className="min-h-11 bg-zinc-950/70 pl-9"
+                />
               </div>
-              <select aria-label={locale === 'pt' ? 'Filtrar estado dos serviços' : 'Filter service status'} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
-                <option value="all">{locale === 'pt' ? 'Todos os estados' : 'All statuses'}</option>
-                <option value="active">{locale === 'pt' ? 'Ativos' : 'Active'}</option>
-                <option value="inactive">{locale === 'pt' ? 'Inativos' : 'Inactive'}</option>
+              <select
+                aria-label={
+                  locale === 'pt'
+                    ? 'Filtrar estado dos serviços'
+                    : 'Filter service status'
+                }
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as typeof statusFilter)
+                }
+                className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
+              >
+                <option value="all">
+                  {locale === 'pt' ? 'Todos os estados' : 'All statuses'}
+                </option>
+                <option value="active">
+                  {locale === 'pt' ? 'Ativos' : 'Active'}
+                </option>
+                <option value="inactive">
+                  {locale === 'pt' ? 'Inativos' : 'Inactive'}
+                </option>
               </select>
-              <select aria-label={locale === 'pt' ? 'Ordenar serviços' : 'Sort services'} value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
-                <option value="name">{locale === 'pt' ? 'Nome' : 'Name'}</option>
-                <option value="price">{locale === 'pt' ? 'Preço' : 'Price'}</option>
-                <option value="duration">{locale === 'pt' ? 'Duração' : 'Duration'}</option>
+              <select
+                aria-label={
+                  locale === 'pt' ? 'Ordenar serviços' : 'Sort services'
+                }
+                value={sortBy}
+                onChange={(event) =>
+                  setSortBy(event.target.value as typeof sortBy)
+                }
+                className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
+              >
+                <option value="name">
+                  {locale === 'pt' ? 'Nome' : 'Name'}
+                </option>
+                <option value="price">
+                  {locale === 'pt' ? 'Preço' : 'Price'}
+                </option>
+                <option value="duration">
+                  {locale === 'pt' ? 'Duração' : 'Duration'}
+                </option>
               </select>
             </div>
             {filteredServices.length === 0 ? (
-              <p className="rounded-xl border border-white/10 p-6 text-center text-sm text-zinc-500">{locale === 'pt' ? 'Não foram encontrados serviços.' : 'No services found.'}</p>
+              <p className="rounded-xl border border-white/10 p-6 text-center text-sm text-zinc-500">
+                {locale === 'pt'
+                  ? 'Não foram encontrados serviços.'
+                  : 'No services found.'}
+              </p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredServices.map((service) => (
-              <ServiceItemCard
-                key={service.id}
-                service={service}
-                setEditingService={setEditingService}
-                handleDeleteService={handleDeleteService}
-                handleToggleServiceActive={handleToggleServiceActive}
-                loading={loading}
-                onDuplicate={duplicateService}
-              />
+                  <ServiceItemCard
+                    key={service.id}
+                    service={service}
+                    setEditingService={setEditingService}
+                    handleDeleteService={handleDeleteService}
+                    handleToggleServiceActive={handleToggleServiceActive}
+                    loading={loading}
+                    onDuplicate={duplicateService}
+                  />
                 ))}
               </div>
             )}
@@ -365,8 +452,16 @@ function ServiceItemCard({
             {Number(service.price).toFixed(2).replace('.', ',')} €
           </span>
         </div>
-        <span className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-medium ${service.is_active === false ? 'bg-zinc-700/50 text-zinc-400' : 'bg-emerald-500/10 text-emerald-300'}`}>
-          {service.is_active === false ? (locale === 'pt' ? 'Inativo' : 'Inactive') : (locale === 'pt' ? 'Ativo' : 'Active')}
+        <span
+          className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-medium ${service.is_active === false ? 'bg-zinc-700/50 text-zinc-400' : 'bg-emerald-500/10 text-emerald-300'}`}
+        >
+          {service.is_active === false
+            ? locale === 'pt'
+              ? 'Inativo'
+              : 'Inactive'
+            : locale === 'pt'
+              ? 'Ativo'
+              : 'Active'}
         </span>
         <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
           <Clock3 className="size-3.5" />
@@ -384,11 +479,40 @@ function ServiceItemCard({
           <Pencil className="mr-2 size-4" />
           {t('common.edit')}
         </Button>
-        <Button disabled={loading} variant="ghost" onClick={() => handleToggleServiceActive(service)} className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label={service.is_active === false ? (locale === 'pt' ? `Ativar ${service.name}` : `Activate ${service.name}`) : (locale === 'pt' ? `Desativar ${service.name}` : `Deactivate ${service.name}`)}>
+        <Button
+          disabled={loading}
+          variant="ghost"
+          onClick={() => handleToggleServiceActive(service)}
+          className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white"
+          aria-label={
+            service.is_active === false
+              ? locale === 'pt'
+                ? `Ativar ${service.name}`
+                : `Activate ${service.name}`
+              : locale === 'pt'
+                ? `Desativar ${service.name}`
+                : `Deactivate ${service.name}`
+          }
+        >
           <Power className="mr-2 size-4" />
-          {service.is_active === false ? (locale === 'pt' ? 'Ativar' : 'Activate') : (locale === 'pt' ? 'Desativar' : 'Deactivate')}
+          {service.is_active === false
+            ? locale === 'pt'
+              ? 'Ativar'
+              : 'Activate'
+            : locale === 'pt'
+              ? 'Desativar'
+              : 'Deactivate'}
         </Button>
-        <Button variant="ghost" onClick={() => onDuplicate(service)} className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label={locale === 'pt' ? `Duplicar ${service.name}` : `Duplicate ${service.name}`}>
+        <Button
+          variant="ghost"
+          onClick={() => onDuplicate(service)}
+          className="min-h-11 rounded-lg px-3 text-zinc-400 hover:bg-white/10 hover:text-white"
+          aria-label={
+            locale === 'pt'
+              ? `Duplicar ${service.name}`
+              : `Duplicate ${service.name}`
+          }
+        >
           <Copy className="mr-2 size-4" />
           {locale === 'pt' ? 'Duplicar' : 'Duplicate'}
         </Button>

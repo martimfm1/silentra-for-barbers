@@ -26,7 +26,11 @@ type Props = {
   appointment: Appointment | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onReschedule: (appointmentId: string, date: string, time: string) => Promise<boolean>;
+  onReschedule: (
+    appointmentId: string,
+    date: string,
+    time: string,
+  ) => Promise<boolean>;
   locale?: string;
 };
 
@@ -136,11 +140,18 @@ function PaymentSummary({
                     ? 'Pré-pagamento expirado'
                     : 'Pré-pagamento rejeitado'}
             </p>
-            {appointment.payment_amount !== null && appointment.payment_amount !== undefined && (
-              <p className="mt-1 text-sm font-semibold tabular-nums text-zinc-100">{Number(appointment.payment_amount).toFixed(2)} €</p>
-            )}
+            {appointment.payment_amount !== null &&
+              appointment.payment_amount !== undefined && (
+                <p className="mt-1 text-sm font-semibold tabular-nums text-zinc-100">
+                  {Number(appointment.payment_amount).toFixed(2)} €
+                </p>
+              )}
             {appointment.payment_status === 'awaiting_review' && (
-              <p className="mt-2 text-xs leading-5 text-zinc-400">Confirma a marcação apenas depois de verificares a entrada do pagamento na tua conta MB WAY. O horário é libertado quando termina o prazo de 15 minutos.</p>
+              <p className="mt-2 text-xs leading-5 text-zinc-400">
+                Confirma a marcação apenas depois de verificares a entrada do
+                pagamento na tua conta MB WAY. O horário é libertado quando
+                termina o prazo de 15 minutos.
+              </p>
             )}
           </div>
         )}
@@ -303,13 +314,17 @@ export function AppointmentDetailDialog({
                 </div>
               </Section>
               {canReschedule ? (
-                <Section title={isEnglish ? 'Change booking' : 'Alterar marcação'}>
+                <Section
+                  title={isEnglish ? 'Change booking' : 'Alterar marcação'}
+                >
                   <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                     {!isEditingSchedule ? (
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-zinc-100">
-                            {isEnglish ? 'Need to change this time?' : 'Precisas de alterar este horário?'}
+                            {isEnglish
+                              ? 'Need to change this time?'
+                              : 'Precisas de alterar este horário?'}
                           </p>
                           <p className="mt-1 text-xs leading-5 text-zinc-400">
                             {scheduleStatusHint}
@@ -321,12 +336,20 @@ export function AppointmentDetailDialog({
                           onClick={() => setIsEditingSchedule(true)}
                           className="min-h-11 shrink-0 border-white/10 bg-white/[0.04] text-zinc-100 hover:bg-white/[0.08]"
                         >
-                          <CalendarClock className="mr-2 size-4" aria-hidden="true" />
-                          {isEnglish ? 'Change date and time' : 'Alterar data e hora'}
+                          <CalendarClock
+                            className="mr-2 size-4"
+                            aria-hidden="true"
+                          />
+                          {isEnglish
+                            ? 'Change date and time'
+                            : 'Alterar data e hora'}
                         </Button>
                       </div>
                     ) : (
-                      <form onSubmit={handleScheduleSubmit} className="space-y-4">
+                      <form
+                        onSubmit={handleScheduleSubmit}
+                        className="space-y-4"
+                      >
                         <p className="text-xs leading-5 text-zinc-400">
                           {isEnglish
                             ? 'Choose a new date and time. Availability is checked before the change is saved.'
@@ -334,7 +357,10 @@ export function AppointmentDetailDialog({
                         </p>
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="min-w-0 space-y-1.5">
-                            <label htmlFor={`reschedule-date-${appointment.id}`} className="text-xs font-medium text-zinc-300">
+                            <label
+                              htmlFor={`reschedule-date-${appointment.id}`}
+                              className="text-xs font-medium text-zinc-300"
+                            >
                               {isEnglish ? 'New date' : 'Nova data'}
                             </label>
                             <input
@@ -343,12 +369,17 @@ export function AppointmentDetailDialog({
                               required
                               min={today}
                               value={editDate}
-                              onChange={(event) => setEditDate(event.target.value)}
+                              onChange={(event) =>
+                                setEditDate(event.target.value)
+                              }
                               className="min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10"
                             />
                           </div>
                           <div className="min-w-0 space-y-1.5">
-                            <label htmlFor={`reschedule-time-${appointment.id}`} className="text-xs font-medium text-zinc-300">
+                            <label
+                              htmlFor={`reschedule-time-${appointment.id}`}
+                              className="text-xs font-medium text-zinc-300"
+                            >
                               {isEnglish ? 'New time' : 'Nova hora'}
                             </label>
                             <input
@@ -357,7 +388,9 @@ export function AppointmentDetailDialog({
                               required
                               step={300}
                               value={editTime}
-                              onChange={(event) => setEditTime(event.target.value)}
+                              onChange={(event) =>
+                                setEditTime(event.target.value)
+                              }
                               className="min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10"
                             />
                           </div>
@@ -382,18 +415,29 @@ export function AppointmentDetailDialog({
                               isSavingSchedule ||
                               !editDate ||
                               !editTime ||
-                              (editDate === originalDate && editTime === originalTime)
+                              (editDate === originalDate &&
+                                editTime === originalTime)
                             }
                             className="min-h-11 bg-emerald-300 text-zinc-950 hover:bg-emerald-200 disabled:opacity-50"
                           >
                             {isSavingSchedule ? (
-                              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                              <Loader2
+                                className="mr-2 size-4 animate-spin"
+                                aria-hidden="true"
+                              />
                             ) : (
-                              <CalendarClock className="mr-2 size-4" aria-hidden="true" />
+                              <CalendarClock
+                                className="mr-2 size-4"
+                                aria-hidden="true"
+                              />
                             )}
                             {isSavingSchedule
-                              ? isEnglish ? 'Saving…' : 'A guardar…'
-                              : isEnglish ? 'Save new time' : 'Guardar novo horário'}
+                              ? isEnglish
+                                ? 'Saving…'
+                                : 'A guardar…'
+                              : isEnglish
+                                ? 'Save new time'
+                                : 'Guardar novo horário'}
                           </Button>
                         </div>
                       </form>
@@ -452,15 +496,26 @@ export function AppointmentDetailDialog({
                 </div>
               </Section>
               {appointment.status === 'cancelled' ? (
-                <Section title={isEnglish ? 'Cancellation history' : 'Histórico de cancelamento'}>
+                <Section
+                  title={
+                    isEnglish
+                      ? 'Cancellation history'
+                      : 'Histórico de cancelamento'
+                  }
+                >
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     <DetailItem
                       icon={<Clock3 className="size-3.5" />}
                       label={isEnglish ? 'Cancelled at' : 'Cancelada em'}
                     >
                       {appointment.cancelled_at
-                        ? new Date(appointment.cancelled_at).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })
-                        : (isEnglish ? 'Date not recorded' : 'Data não registada')}
+                        ? new Date(appointment.cancelled_at).toLocaleString(
+                            isEnglish ? 'en-GB' : 'pt-PT',
+                            { dateStyle: 'medium', timeStyle: 'short' },
+                          )
+                        : isEnglish
+                          ? 'Date not recorded'
+                          : 'Data não registada'}
                     </DetailItem>
                     <DetailItem
                       icon={<UserRound className="size-3.5" />}
@@ -468,18 +523,30 @@ export function AppointmentDetailDialog({
                     >
                       {appointment.cancellation_actor_name ||
                         (appointment.cancellation_actor === 'customer'
-                          ? (isEnglish ? 'Customer' : 'Cliente')
+                          ? isEnglish
+                            ? 'Customer'
+                            : 'Cliente'
                           : appointment.cancellation_actor === 'staff'
-                            ? (isEnglish ? 'Barbershop team' : 'Equipa da barbearia')
-                            : (isEnglish ? 'Not recorded' : 'Não registado'))}
+                            ? isEnglish
+                              ? 'Barbershop team'
+                              : 'Equipa da barbearia'
+                            : isEnglish
+                              ? 'Not recorded'
+                              : 'Não registado')}
                     </DetailItem>
                     <div className="sm:col-span-2">
                       <DetailItem
                         icon={<CalendarClock className="size-3.5" />}
-                        label={isEnglish ? 'Cancellation reason' : 'Motivo do cancelamento'}
+                        label={
+                          isEnglish
+                            ? 'Cancellation reason'
+                            : 'Motivo do cancelamento'
+                        }
                       >
                         {appointment.cancellation_reason ||
-                          (isEnglish ? 'No reason provided.' : 'Não foi indicado um motivo.')}
+                          (isEnglish
+                            ? 'No reason provided.'
+                            : 'Não foi indicado um motivo.')}
                       </DetailItem>
                     </div>
                   </div>

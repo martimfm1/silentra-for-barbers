@@ -2,7 +2,17 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
-const [worker, provider, route, testRoute, panel, bookingNotification, migration, docs, packageJson] = await Promise.all([
+const [
+  worker,
+  provider,
+  route,
+  testRoute,
+  panel,
+  bookingNotification,
+  migration,
+  docs,
+  packageJson,
+] = await Promise.all([
   read('public/sw.js'),
   read('lib/notifications/providers/push.ts'),
   read('app/api/notifications/push/route.ts'),
@@ -29,8 +39,16 @@ assert.match(panel, /isIosHomeScreenApp/);
 assert.match(panel, /Safari tabs cannot receive iPhone web push/);
 assert.match(bookingNotification, /sendWebPushToUsers/);
 assert.match(migration, /enable row level security/i);
-assert.match(migration, /revoke all on table public\.notification_subscriptions/i);
+assert.match(
+  migration,
+  /revoke all on table public\.notification_subscriptions/i,
+);
 assert.match(docs, /VAPID_PRIVATE_KEY/);
-assert.equal(JSON.parse(packageJson).scripts['qa:push'], 'node scripts/qa/web-push.mjs');
+assert.equal(
+  JSON.parse(packageJson).scripts['qa:push'],
+  'node scripts/qa/web-push.mjs',
+);
 
-console.log('[WEB_PUSH_QA] worker, VAPID delivery, tenant APIs, subscription UI and migration contracts passed');
+console.log(
+  '[WEB_PUSH_QA] worker, VAPID delivery, tenant APIs, subscription UI and migration contracts passed',
+);

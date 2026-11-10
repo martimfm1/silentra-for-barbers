@@ -26,12 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type Relation<T> = T | T[] | null | undefined;
 
@@ -122,7 +117,10 @@ function formatDate(value: string | null | undefined, locale: string) {
   }).format(date);
 }
 
-function formatCurrency(value: number | string | null | undefined, locale: string) {
+function formatCurrency(
+  value: number | string | null | undefined,
+  locale: string,
+) {
   if (value === null || value === undefined || value === '') return '—';
   const amount = Number(value);
   if (!Number.isFinite(amount)) return '—';
@@ -205,7 +203,9 @@ export function ClientDetailsDialog({
             });
             if (tagsResponse.ok) {
               const tagsPayload = await tagsResponse.json();
-              setAvailableTags(Array.isArray(tagsPayload.tags) ? tagsPayload.tags : []);
+              setAvailableTags(
+                Array.isArray(tagsPayload.tags) ? tagsPayload.tags : [],
+              );
             }
           } catch {
             if (!controller.signal.aborted) setAvailableTags([]);
@@ -230,7 +230,10 @@ export function ClientDetailsDialog({
     if (!clientId || !tagId || savingTag) return;
     setSavingTag(true);
     try {
-      const headers = await authHeaders(action === 'add', t('crm.sessionExpired'));
+      const headers = await authHeaders(
+        action === 'add',
+        t('crm.sessionExpired'),
+      );
       const response = await fetch(
         `/api/crm/clients/${clientId}/tags${action === 'remove' ? `?tagId=${encodeURIComponent(tagId)}` : ''}`,
         {
@@ -240,17 +243,40 @@ export function ClientDetailsDialog({
         },
       );
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error ?? (locale === 'pt' ? 'Não foi possível atualizar as etiquetas.' : 'Could not update tags.'));
+      if (!response.ok)
+        throw new Error(
+          payload.error ??
+            (locale === 'pt'
+              ? 'Não foi possível atualizar as etiquetas.'
+              : 'Could not update tags.'),
+        );
       const tag = availableTags.find((item) => item.id === tagId);
-      setDetails((current) => current
-        ? { ...current, tags: action === 'add'
-            ? [...current.tags.filter((item) => item.id !== tagId), ...(tag ? [tag] : [])]
-            : current.tags.filter((item) => item.id !== tagId) }
-        : current);
+      setDetails((current) =>
+        current
+          ? {
+              ...current,
+              tags:
+                action === 'add'
+                  ? [
+                      ...current.tags.filter((item) => item.id !== tagId),
+                      ...(tag ? [tag] : []),
+                    ]
+                  : current.tags.filter((item) => item.id !== tagId),
+            }
+          : current,
+      );
       setSelectedTagId('');
-      toast.success(locale === 'pt' ? 'Etiquetas atualizadas.' : 'Tags updated.');
+      toast.success(
+        locale === 'pt' ? 'Etiquetas atualizadas.' : 'Tags updated.',
+      );
     } catch (tagError) {
-      toast.error(tagError instanceof Error ? tagError.message : (locale === 'pt' ? 'Erro ao atualizar etiquetas.' : 'Could not update tags.'));
+      toast.error(
+        tagError instanceof Error
+          ? tagError.message
+          : locale === 'pt'
+            ? 'Erro ao atualizar etiquetas.'
+            : 'Could not update tags.',
+      );
     } finally {
       setSavingTag(false);
     }
@@ -263,14 +289,11 @@ export function ClientDetailsDialog({
 
     setSavingNote(true);
     try {
-      const response = await fetch(
-        `/api/crm/clients/${clientId}/notes`,
-        {
-          method: 'POST',
-          headers: await authHeaders(true, t('crm.sessionExpired')),
-          body: JSON.stringify({ content }),
-        },
-      );
+      const response = await fetch(`/api/crm/clients/${clientId}/notes`, {
+        method: 'POST',
+        headers: await authHeaders(true, t('crm.sessionExpired')),
+        body: JSON.stringify({ content }),
+      });
       const json = await response.json();
 
       if (!response.ok || !json.note) {
@@ -333,7 +356,10 @@ export function ClientDetailsDialog({
             role="status"
             aria-label={t('crmDetail.loadingClient')}
           >
-            <SilentraLoading variant="compact" message={t('crmDetail.loadingClient')} />
+            <SilentraLoading
+              variant="compact"
+              message={t('crmDetail.loadingClient')}
+            />
           </div>
         ) : error ? (
           <div
@@ -378,9 +404,13 @@ export function ClientDetailsDialog({
                 </Card>
                 <Card className="border-white/10 bg-white/[0.03]">
                   <CardContent className="p-4">
-                    <p className="text-xs text-zinc-500">{locale === 'pt' ? 'Última visita' : 'Last visit'}</p>
+                    <p className="text-xs text-zinc-500">
+                      {locale === 'pt' ? 'Última visita' : 'Last visit'}
+                    </p>
                     <p className="mt-1 text-sm font-semibold tabular-nums">
-                      {completedAppointments[0] ? formatDate(completedAppointments[0].date_hour, locale) : '—'}
+                      {completedAppointments[0]
+                        ? formatDate(completedAppointments[0].date_hour, locale)
+                        : '—'}
                     </p>
                   </CardContent>
                 </Card>
@@ -402,7 +432,9 @@ export function ClientDetailsDialog({
                     <div className="space-y-2">
                       {upcomingAppointments.map((appointment) => {
                         const service = firstRelation(appointment.services);
-                        const professional = firstRelation(appointment.professionals);
+                        const professional = firstRelation(
+                          appointment.professionals,
+                        );
                         return (
                           <article
                             key={appointment.id}
@@ -413,7 +445,10 @@ export function ClientDetailsDialog({
                                 {formatDate(appointment.date_hour, locale)}
                               </p>
                               <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
-                                <span>{service?.name || t('clientsPage.unknownService')}</span>
+                                <span>
+                                  {service?.name ||
+                                    t('clientsPage.unknownService')}
+                                </span>
                                 {professional?.name ? (
                                   <>
                                     <span aria-hidden="true">·</span>
@@ -421,7 +456,9 @@ export function ClientDetailsDialog({
                                   </>
                                 ) : null}
                                 <span aria-hidden="true">·</span>
-                                <span>{statusLabel(appointment.status, t)}</span>
+                                <span>
+                                  {statusLabel(appointment.status, t)}
+                                </span>
                               </p>
                             </div>
                             <p className="shrink-0 text-sm font-medium tabular-nums text-zinc-200">
@@ -476,7 +513,9 @@ export function ClientDetailsDialog({
                                   </>
                                 ) : null}
                                 <span aria-hidden="true">·</span>
-                                <span>{statusLabel(appointment.status, t)}</span>
+                                <span>
+                                  {statusLabel(appointment.status, t)}
+                                </span>
                               </p>
                               {appointment.payment_method ? (
                                 <p className="mt-1 text-xs text-zinc-600">
@@ -497,7 +536,10 @@ export function ClientDetailsDialog({
                                 <p className="mt-1 text-[11px] text-zinc-500">
                                   {t('clientsPage.serviceAndProducts', {
                                     service: formatCurrency(
-                                      Number(appointment.service_price ?? service?.price) || 0,
+                                      Number(
+                                        appointment.service_price ??
+                                          service?.price,
+                                      ) || 0,
                                       locale,
                                     ),
                                     products: formatCurrency(
@@ -529,21 +571,29 @@ export function ClientDetailsDialog({
                   <div className="flex min-w-0 items-start gap-2.5">
                     <Mail className="mt-0.5 size-4 shrink-0 text-zinc-500" />
                     <div className="min-w-0">
-                      <p className="text-xs text-zinc-500">{t('crmDetail.email')}</p>
-                      <p className="break-all">{client.email || t('crmDetail.noEmail')}</p>
+                      <p className="text-xs text-zinc-500">
+                        {t('crmDetail.email')}
+                      </p>
+                      <p className="break-all">
+                        {client.email || t('crmDetail.noEmail')}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <Phone className="mt-0.5 size-4 shrink-0 text-zinc-500" />
                     <div className="min-w-0">
-                      <p className="text-xs text-zinc-500">{t('crmDetail.phone')}</p>
+                      <p className="text-xs text-zinc-500">
+                        {t('crmDetail.phone')}
+                      </p>
                       <p>{client.num_phone || t('crmDetail.noPhone')}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <CalendarDays className="mt-0.5 size-4 shrink-0 text-zinc-500" />
                     <div className="min-w-0">
-                      <p className="text-xs text-zinc-500">{t('crmDetail.customerSince')}</p>
+                      <p className="text-xs text-zinc-500">
+                        {t('crmDetail.customerSince')}
+                      </p>
                       <p>{formatDate(client.created_at, locale)}</p>
                     </div>
                   </div>
@@ -551,7 +601,9 @@ export function ClientDetailsDialog({
                     <div className="flex items-start gap-2.5">
                       <CalendarDays className="mt-0.5 size-4 shrink-0 text-zinc-500" />
                       <div className="min-w-0">
-                        <p className="text-xs text-zinc-500">{t('crmDetail.birthDate')}</p>
+                        <p className="text-xs text-zinc-500">
+                          {t('crmDetail.birthDate')}
+                        </p>
                         <p>{formatDate(client.birth_date, locale)}</p>
                       </div>
                     </div>
@@ -586,25 +638,92 @@ export function ClientDetailsDialog({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap gap-2">
-                    {tags.length ? tags.map((tag) => (
-                      <span key={tag.id} className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/[0.08] px-3 py-1.5 text-xs text-blue-100">
-                        {tag.name}
-                        {availableTags.some((availableTag) => availableTag.id === tag.id) ? (
-                          <button type="button" disabled={savingTag} onClick={() => void updateClientTag(tag.id, 'remove')} aria-label={locale === 'pt' ? `Remover etiqueta ${tag.name}` : `Remove tag ${tag.name}`} className="rounded-full p-0.5 text-blue-200/70 hover:bg-white/10 hover:text-white">×</button>
-                        ) : null}
-                      </span>
-                    )) : <p className="text-xs text-zinc-500">{locale === 'pt' ? 'Ainda não existem etiquetas associadas.' : 'No tags assigned yet.'}</p>}
+                    {tags.length ? (
+                      tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/[0.08] px-3 py-1.5 text-xs text-blue-100"
+                        >
+                          {tag.name}
+                          {availableTags.some(
+                            (availableTag) => availableTag.id === tag.id,
+                          ) ? (
+                            <button
+                              type="button"
+                              disabled={savingTag}
+                              onClick={() =>
+                                void updateClientTag(tag.id, 'remove')
+                              }
+                              aria-label={
+                                locale === 'pt'
+                                  ? `Remover etiqueta ${tag.name}`
+                                  : `Remove tag ${tag.name}`
+                              }
+                              className="rounded-full p-0.5 text-blue-200/70 hover:bg-white/10 hover:text-white"
+                            >
+                              ×
+                            </button>
+                          ) : null}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-xs text-zinc-500">
+                        {locale === 'pt'
+                          ? 'Ainda não existem etiquetas associadas.'
+                          : 'No tags assigned yet.'}
+                      </p>
+                    )}
                   </div>
-                  {availableTags.filter((tag) => !tags.some((assigned) => assigned.id === tag.id)).length ? (
+                  {availableTags.filter(
+                    (tag) => !tags.some((assigned) => assigned.id === tag.id),
+                  ).length ? (
                     <div className="flex flex-col gap-2 sm:flex-row">
-                      <select value={selectedTagId} onChange={(event) => setSelectedTagId(event.target.value)} disabled={savingTag} aria-label={locale === 'pt' ? 'Escolher etiqueta' : 'Choose tag'} className="min-h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
-                        <option value="">{locale === 'pt' ? 'Selecionar etiqueta…' : 'Select a tag…'}</option>
-                        {availableTags.filter((tag) => !tags.some((assigned) => assigned.id === tag.id)).map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+                      <select
+                        value={selectedTagId}
+                        onChange={(event) =>
+                          setSelectedTagId(event.target.value)
+                        }
+                        disabled={savingTag}
+                        aria-label={
+                          locale === 'pt' ? 'Escolher etiqueta' : 'Choose tag'
+                        }
+                        className="min-h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
+                      >
+                        <option value="">
+                          {locale === 'pt'
+                            ? 'Selecionar etiqueta…'
+                            : 'Select a tag…'}
+                        </option>
+                        {availableTags
+                          .filter(
+                            (tag) =>
+                              !tags.some((assigned) => assigned.id === tag.id),
+                          )
+                          .map((tag) => (
+                            <option key={tag.id} value={tag.id}>
+                              {tag.name}
+                            </option>
+                          ))}
                       </select>
-                      <Button type="button" disabled={!selectedTagId || savingTag} onClick={() => void updateClientTag(selectedTagId, 'add')} className="min-h-10">{locale === 'pt' ? 'Adicionar etiqueta' : 'Add tag'}</Button>
+                      <Button
+                        type="button"
+                        disabled={!selectedTagId || savingTag}
+                        onClick={() =>
+                          void updateClientTag(selectedTagId, 'add')
+                        }
+                        className="min-h-10"
+                      >
+                        {locale === 'pt' ? 'Adicionar etiqueta' : 'Add tag'}
+                      </Button>
                     </div>
                   ) : null}
-                  {availableTags.length === 0 ? <p className="text-xs text-zinc-500">{locale === 'pt' ? 'As etiquetas avançadas não estão disponíveis neste plano ou ainda não foram criadas.' : 'Advanced tags are unavailable on this plan or have not been created yet.'}</p> : null}
+                  {availableTags.length === 0 ? (
+                    <p className="text-xs text-zinc-500">
+                      {locale === 'pt'
+                        ? 'As etiquetas avançadas não estão disponíveis neste plano ou ainda não foram criadas.'
+                        : 'Advanced tags are unavailable on this plan or have not been created yet.'}
+                    </p>
+                  ) : null}
                 </CardContent>
               </Card>
               <Card className="border-white/10 bg-white/[0.03]">
@@ -629,9 +748,7 @@ export function ClientDetailsDialog({
                       disabled={savingNote || !noteDraft.trim()}
                       className="min-h-10 w-full"
                     >
-                      {savingNote ? (
-                        <Spinner className="mr-2 size-4" />
-                      ) : null}
+                      {savingNote ? <Spinner className="mr-2 size-4" /> : null}
                       {t('crmDetail.saveNote')}
                     </Button>
                   </form>

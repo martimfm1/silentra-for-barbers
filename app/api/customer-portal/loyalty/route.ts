@@ -46,27 +46,26 @@ async function GET__unobserved() {
     { data: shop, error: shopError },
     { data: publicShop, error: publicShopError },
     { data: rewards, error: rewardsError },
-  ] =
-    await Promise.all([
-      admin
-        .from('barbershops')
-        .select('id, name')
-        .eq('id', member.barbershop_id)
-        .maybeSingle(),
-      admin
-        .from('shops')
-        .select('slug')
-        .eq('barbershop_id', member.barbershop_id)
-        .maybeSingle(),
-      admin
-        .from('loyalty_rewards')
-        .select(
-          'id, name, description, points_cost, reward_type, reward_value, active',
-        )
-        .eq('barbershop_id', member.barbershop_id)
-        .eq('active', true)
-        .order('points_cost', { ascending: true }),
-    ]);
+  ] = await Promise.all([
+    admin
+      .from('barbershops')
+      .select('id, name')
+      .eq('id', member.barbershop_id)
+      .maybeSingle(),
+    admin
+      .from('shops')
+      .select('slug')
+      .eq('barbershop_id', member.barbershop_id)
+      .maybeSingle(),
+    admin
+      .from('loyalty_rewards')
+      .select(
+        'id, name, description, points_cost, reward_type, reward_value, active',
+      )
+      .eq('barbershop_id', member.barbershop_id)
+      .eq('active', true)
+      .order('points_cost', { ascending: true }),
+  ]);
 
   if (shopError || publicShopError || rewardsError) {
     console.error('[CUSTOMER_PORTAL_LOYALTY_CONTEXT]', {

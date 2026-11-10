@@ -41,15 +41,16 @@ const checks = [
     name: 'Enterprise landing-page booking CTA opens the direct booking variant',
     file: 'app/site/[slug]/page.tsx',
     test: (source) =>
-      source.includes("?booking=1") &&
-      source.includes("'/barbershops/' + encodeURIComponent(website.booking_slug)"),
+      source.includes('?booking=1') &&
+      source.includes(
+        "'/barbershops/' + encodeURIComponent(website.booking_slug)",
+      ),
   },
   {
     name: 'Enterprise custom website includes Silentra domain and a one-time €50 fee',
     file: 'app/api/dashboard/custom-website/route.ts',
     test: (source) =>
-      source.includes('setupFee: 50') &&
-      source.includes('monthlyFee: 0'),
+      source.includes('setupFee: 50') && source.includes('monthlyFee: 0'),
   },
   {
     name: 'Enterprise website request displays the included Silentra domain and one-time activation',
@@ -196,24 +197,28 @@ const checks = [
       source.includes("'/api/barbershops/image-convert'") &&
       source.includes('MAX_SERVER_CONVERSION_BYTES') &&
       source.includes("encodeCanvas(canvas, 'image/png', 1)") &&
-      /encodeCanvas\(\s*jpegCanvas,\s*'image\/jpeg',\s*candidate,?\s*\)/.test(source),
+      /encodeCanvas\(\s*jpegCanvas,\s*'image\/jpeg',\s*candidate,?\s*\)/.test(
+        source,
+      ),
   },
   {
     name: 'Server-side branding conversion validates tenant access, payload size and image signatures before using Sharp',
     file: 'app/api/barbershops/image-convert/route.ts',
     test: (source) =>
-      source.includes("requireTenantAuthorization(request, ['owner', 'admin'])") &&
+      source.includes(
+        "requireTenantAuthorization(request, ['owner', 'admin'])",
+      ) &&
       source.includes('consumePublicRateLimit') &&
       source.includes('MAX_IMAGE_BYTES') &&
       source.includes('metadata.format !== expectedFormat') &&
-      source.includes(".webp({ quality: 85, effort: 4 })"),
+      source.includes('.webp({ quality: 85, effort: 4 })'),
   },
   {
     name: 'Dashboard branding uploads show actionable errors and always reset upload state',
     file: 'app/dashboard/settings/settings-page.tsx',
     test: (source) =>
       source.includes('result.error.message') &&
-      source.includes('fileType: file.type || \'unknown\'') &&
+      source.includes("fileType: file.type || 'unknown'") &&
       source.includes('finally {\n      setUploading(null);') &&
       source.includes('disabled={uploading !== null}'),
   },
@@ -226,7 +231,7 @@ const checks = [
       source.includes('data.overview.rebookingRate') &&
       source.includes('buildRevenueSeries') &&
       source.includes('aria-pressed={preset === value}') &&
-      source.includes('title={t(\'analyticsPage.bookingsReport\')}') &&
+      source.includes("title={t('analyticsPage.bookingsReport')}") &&
       !source.includes('title="{t(\'analyticsPage.bookingsReport\')}"'),
   },
   {
@@ -632,8 +637,12 @@ const checks = [
     name: 'Legacy booking-completed automations cannot send a duplicate review request',
     file: 'lib/automations/dispatch-appointment.ts',
     test: (source) =>
-      source.includes("import { isReviewRequestContent } from '@/lib/reviews/is-review-request'") &&
-      source.includes("trigger === 'booking_completed' && isReviewRequestContent(subject, body)") &&
+      source.includes(
+        "import { isReviewRequestContent } from '@/lib/reviews/is-review-request'",
+      ) &&
+      source.includes(
+        "trigger === 'booking_completed' && isReviewRequestContent(subject, body)",
+      ) &&
       source.includes('dedicated, single-use review flow'),
   },
   {
@@ -671,7 +680,7 @@ const checks = [
     test: (source) =>
       source.includes('[1, 2, 3, 4, 5]') &&
       source.includes('hasReviewAccess') &&
-      source.includes('credentials: \'same-origin\'') &&
+      source.includes("credentials: 'same-origin'") &&
       source.includes('No account required') &&
       source.includes('review') &&
       !source.includes('reviewToken:'),
@@ -721,7 +730,9 @@ const checks = [
     name: 'Public booking creation respects automatic confirmation instead of confirming every booking',
     file: 'app/api/bookings/route.ts',
     test: (source) =>
-      source.includes("p_status: isPrepayment ? 'prepayment_pending' : 'pending'") &&
+      source.includes(
+        "p_status: isPrepayment ? 'prepayment_pending' : 'pending'",
+      ) &&
       source.includes("if (appointment.status === 'scheduled')") &&
       source.includes('else if (!isPrepayment)') &&
       source.includes('prepaymentReview') &&
@@ -930,8 +941,10 @@ const checks = [
       source.includes('.range(offset, offset + appointmentPageSize - 1)') &&
       source.includes("'Referrer-Policy': 'no-referrer'") &&
       source.includes("'X-Robots-Tag': 'noindex, nofollow'") &&
-      source.includes("manual_name,users(name_complete,style_notes),services(name)") &&
-      source.includes("const summary = `${clientName} - ${serviceName}`;") &&
+      source.includes(
+        'manual_name,users(name_complete,style_notes),services(name)',
+      ) &&
+      source.includes('const summary = `${clientName} - ${serviceName}`;') &&
       source.includes('notes:${clientNotes}') &&
       !source.includes('manual_phone') &&
       !source.includes('manual_email') &&
@@ -955,7 +968,9 @@ const checks = [
       source.includes('@keyframes silentra-dialog-enter') &&
       source.includes('@keyframes silentra-dialog-exit') &&
       source.includes("[data-slot='dialog-content'][data-state='open']") &&
-      source.includes("[data-slot='alert-dialog-content'][data-state='open']") &&
+      source.includes(
+        "[data-slot='alert-dialog-content'][data-state='open']",
+      ) &&
       source.includes('prefers-reduced-motion: reduce'),
   },
   {
@@ -972,9 +987,13 @@ const checks = [
     test: (source) =>
       source.includes('@keyframes silentra-floating-enter') &&
       source.includes("[data-slot='popover-content'][data-state='open']") &&
-      source.includes("[data-slot='dropdown-menu-content'][data-state='open']") &&
+      source.includes(
+        "[data-slot='dropdown-menu-content'][data-state='open']",
+      ) &&
       source.includes("[data-slot='select-content'][data-state='open']") &&
-      source.includes("[data-slot='tooltip-content'][data-state='delayed-open']"),
+      source.includes(
+        "[data-slot='tooltip-content'][data-state='delayed-open']",
+      ),
   },
   {
     name: 'Contextual cursor-follow hint is spring animated, opt-in and touch-safe',
@@ -1001,7 +1020,9 @@ const checks = [
       source.includes('/api/calendar/feed/settings') &&
       source.includes('navigator.clipboard.writeText') &&
       source.includes('onClick={() => setDialogOpen(true)}') &&
-      source.includes('<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>') &&
+      source.includes(
+        '<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>',
+      ) &&
       source.includes('tutorialSteps.map') &&
       source.includes('calendarSyncStepFourDescription') &&
       source.includes('calendarSyncRotate') &&
@@ -1022,7 +1043,9 @@ const checks = [
       source.includes('bookingDemo') &&
       source.includes("setLocale('pt')") &&
       source.includes("setLocale('en')") &&
-      source.includes('fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))]') &&
+      source.includes(
+        'fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))]',
+      ) &&
       source.includes('grid-cols-[1.02fr_0.98fr]') &&
       source.includes('aspect-[4/4.7]') &&
       source.includes('group-hover:scale-[1.04]') &&
@@ -1033,10 +1056,14 @@ const checks = [
     name: 'Silentra demo barbershop is rendered by its public barbershop route with canonical metadata',
     file: 'app/site/[slug]/page.tsx',
     test: (source) =>
-      source.includes("SILENTRA_DEMO_PUBLIC_SLUG = 'barbearia-silentra-ecf1da6c'") &&
+      source.includes(
+        "SILENTRA_DEMO_PUBLIC_SLUG = 'barbearia-silentra-ecf1da6c'",
+      ) &&
       source.includes('if (slug === SILENTRA_DEMO_PUBLIC_SLUG)') &&
       source.includes('return <SilentraDemoBarbershop />') &&
-      source.includes('alternates: { canonical: SITE_ORIGIN + canonicalPath }') &&
+      source.includes(
+        'alternates: { canonical: SITE_ORIGIN + canonicalPath }',
+      ) &&
       source.includes('robots: { index: true, follow: true }'),
   },
   {
@@ -1050,7 +1077,7 @@ const checks = [
     name: 'Light Tunnel background uses a capped WebGL2 render loop with React Bits attribution',
     file: 'components/ui/light-tunnel.tsx',
     test: (source) =>
-      source.includes('getContext(\'webgl2\'') &&
+      source.includes("getContext('webgl2'") &&
       source.includes('1000 / 30') &&
       source.includes('David Haz') &&
       source.includes('loseContext'),
@@ -1079,14 +1106,17 @@ const checks = [
     name: 'Global route loading uses the shared Silentra scissors animation',
     file: 'app/loading.tsx',
     test: (source) =>
-      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
-      source.includes('<SilentraLoading />'),
+      source.includes(
+        "import { SilentraLoading } from '@/components/ui/silentra-loading'",
+      ) && source.includes('<SilentraLoading />'),
   },
   {
     name: 'Dashboard loading skeletons reuse the compact Silentra scissors animation',
     file: 'app/dashboard/_components/dashboard-skeleton.tsx',
     test: (source) =>
-      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes(
+        "import { SilentraLoading } from '@/components/ui/silentra-loading'",
+      ) &&
       source.includes('<SilentraLoading variant="compact" />') &&
       source.includes('<HeaderSkeleton />'),
   },
@@ -1094,14 +1124,17 @@ const checks = [
     name: 'Dashboard route loading uses the full-screen Silentra animation',
     file: 'app/dashboard/loading.tsx',
     test: (source) =>
-      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
-      source.includes('<SilentraLoading variant="dashboard" />'),
+      source.includes(
+        "import { SilentraLoading } from '@/components/ui/silentra-loading'",
+      ) && source.includes('<SilentraLoading variant="dashboard" />'),
   },
   {
     name: 'Onboarding route loading uses the shared Silentra scissors loader',
     file: 'app/api/onboarding/layout.tsx',
     test: (source) =>
-      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes(
+        "import { SilentraLoading } from '@/components/ui/silentra-loading'",
+      ) &&
       source.includes('<SilentraLoading />') &&
       !source.includes('<Spinner'),
   },
@@ -1109,7 +1142,9 @@ const checks = [
     name: 'POS loading screens use the shared Silentra scissors loader',
     file: 'app/dashboard/pos/overview/page.tsx',
     test: (source) =>
-      source.includes("import { SilentraLoading } from '@/components/ui/silentra-loading'") &&
+      source.includes(
+        "import { SilentraLoading } from '@/components/ui/silentra-loading'",
+      ) &&
       source.includes('<SilentraLoading variant="dashboard" />') &&
       !source.includes('<Spinner'),
   },
@@ -1143,7 +1178,9 @@ const checks = [
       source.includes('delete from public.client_plan_payments') &&
       source.includes('delete from public.notification_queue') &&
       source.includes('delete from public.subscriptions') &&
-      source.includes('revoke all on function public.delete_barbershop_after_verification') &&
+      source.includes(
+        'revoke all on function public.delete_barbershop_after_verification',
+      ) &&
       source.includes('to service_role'),
   },
 ];

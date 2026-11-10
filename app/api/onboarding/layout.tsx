@@ -45,9 +45,7 @@ export default function OnboardingLayout({
   }, [router]);
 
   if (loading) {
-    return (
-      <SilentraLoading />
-    );
+    return <SilentraLoading />;
   }
 
   return <>{children}</>;

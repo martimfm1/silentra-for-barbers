@@ -556,79 +556,80 @@ export default function DashboardPage() {
               </section>
             )}
 
-          {customization.config.sections.metrics && visibleMetrics.length > 0 && (
-            <section className="pt-1" aria-labelledby="business-overview">
-              <div className="mb-3 flex items-center justify-between">
-                <h2
-                  id="business-overview"
-                  className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400"
-                >
-                  {t('dashboard.businessSummary')}
-                </h2>
-                {!loadingInitial && (
-                  <span className="text-xs text-zinc-500">
-                    {services.length} {t('dashboard.services')} ·{' '}
-                    {professionals.length} {t('dashboard.professionals')}
-                  </span>
-                )}
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {loadingInitial
-                  ? [...Array(visibleMetrics.length)].map((_, i) => (
-                      <Card
-                        key={i}
-                        className="border border-white/10 bg-white/[0.04]"
-                      >
-                        <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0">
-                          <div className="space-y-2">
-                            <Skeleton className="h-3 w-24 bg-white/10" />
-                            <Skeleton className="h-7 w-16 bg-white/10" />
-                          </div>
-                          <Skeleton className="size-10 rounded-full bg-white/10" />
-                        </CardHeader>
-                      </Card>
-                    ))
-                  : visibleMetrics.map((metric) => (
-                      <Link
-                        key={metric.key}
-                        href="/dashboard/analytics"
-                        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                      >
+          {customization.config.sections.metrics &&
+            visibleMetrics.length > 0 && (
+              <section className="pt-1" aria-labelledby="business-overview">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2
+                    id="business-overview"
+                    className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400"
+                  >
+                    {t('dashboard.businessSummary')}
+                  </h2>
+                  {!loadingInitial && (
+                    <span className="text-xs text-zinc-500">
+                      {services.length} {t('dashboard.services')} ·{' '}
+                      {professionals.length} {t('dashboard.professionals')}
+                    </span>
+                  )}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {loadingInitial
+                    ? [...Array(visibleMetrics.length)].map((_, i) => (
                         <Card
-                          className={cn(
-                            'glassmorphism cursor-pointer border border-white/10 bg-white/[0.04] transition-all duration-200',
-                            cardHoverVariants[metric.variant],
-                          )}
+                          key={i}
+                          className="border border-white/10 bg-white/[0.04]"
                         >
-                          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                            <div className="min-w-0 space-y-1">
-                              <CardDescription className="truncate text-xs font-medium text-zinc-400">
-                                {metric.label}
-                              </CardDescription>
-                              <CardTitle className="truncate text-2xl font-bold tracking-tight text-zinc-50">
-                                {metric.value}
-                              </CardTitle>
+                          <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0">
+                            <div className="space-y-2">
+                              <Skeleton className="h-3 w-24 bg-white/10" />
+                              <Skeleton className="h-7 w-16 bg-white/10" />
                             </div>
-                            <span
-                              className={cn(
-                                'flex size-10 shrink-0 items-center justify-center rounded-full',
-                                iconVariants.default,
-                              )}
-                              style={{
-                                backgroundColor:
-                                  'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)',
-                                color: 'var(--dashboard-accent)',
-                              }}
-                            >
-                              <metric.icon className="size-5" />
-                            </span>
+                            <Skeleton className="size-10 rounded-full bg-white/10" />
                           </CardHeader>
                         </Card>
-                      </Link>
-                    ))}
-              </div>
-            </section>
-          )}
+                      ))
+                    : visibleMetrics.map((metric) => (
+                        <Link
+                          key={metric.key}
+                          href="/dashboard/analytics"
+                          className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                        >
+                          <Card
+                            className={cn(
+                              'glassmorphism cursor-pointer border border-white/10 bg-white/[0.04] transition-all duration-200',
+                              cardHoverVariants[metric.variant],
+                            )}
+                          >
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                              <div className="min-w-0 space-y-1">
+                                <CardDescription className="truncate text-xs font-medium text-zinc-400">
+                                  {metric.label}
+                                </CardDescription>
+                                <CardTitle className="truncate text-2xl font-bold tracking-tight text-zinc-50">
+                                  {metric.value}
+                                </CardTitle>
+                              </div>
+                              <span
+                                className={cn(
+                                  'flex size-10 shrink-0 items-center justify-center rounded-full',
+                                  iconVariants.default,
+                                )}
+                                style={{
+                                  backgroundColor:
+                                    'color-mix(in srgb, var(--dashboard-accent) 18%, transparent)',
+                                  color: 'var(--dashboard-accent)',
+                                }}
+                              >
+                                <metric.icon className="size-5" />
+                              </span>
+                            </CardHeader>
+                          </Card>
+                        </Link>
+                      ))}
+                </div>
+              </section>
+            )}
 
           {(customization.config.sections.activityChart ||
             customization.config.sections.upcomingAppointments) && (
@@ -722,7 +723,8 @@ export default function DashboardPage() {
                                       }
                                       className="w-full max-w-10 rounded-t-md transition-[height,filter] hover:brightness-125"
                                       style={{
-                                        backgroundColor: 'var(--dashboard-accent)',
+                                        backgroundColor:
+                                          'var(--dashboard-accent)',
                                         boxShadow:
                                           '0 0 18px color-mix(in srgb, var(--dashboard-accent) 20%, transparent)',
                                         height: `${barHeight}%`,
@@ -823,7 +825,10 @@ export default function DashboardPage() {
                                     t('dashboard.service')}
                                 </p>
                                 <p className="mt-1 truncate text-xs text-zinc-500">
-                                  {t('dashboard.upcomingAppointmentProfessional')}:{' '}
+                                  {t(
+                                    'dashboard.upcomingAppointmentProfessional',
+                                  )}
+                                  :{' '}
                                   {appointment.professionals?.name ||
                                     t('dashboard.noBarberAssigned')}
                                 </p>

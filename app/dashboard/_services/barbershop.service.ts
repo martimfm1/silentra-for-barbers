@@ -66,7 +66,8 @@ export async function getBarbershopConfig(
         allow_online_bookings: barberData.allow_online_bookings ?? undefined,
         auto_reminders: barberData.auto_reminders ?? undefined,
         auto_confirm_bookings: barberData.auto_confirm_bookings ?? undefined,
-        auto_confirm_manual_bookings: barberData.auto_confirm_manual_bookings !== false,
+        auto_confirm_manual_bookings:
+          barberData.auto_confirm_manual_bookings !== false,
         auto_complete_bookings: barberData.auto_complete_bookings ?? undefined,
         is_public_in_directory: barberData.is_public_in_directory ?? undefined,
         default_language: barberData.default_language === 'en' ? 'en' : 'pt',
@@ -150,10 +151,13 @@ export async function updateBarbershopConfig(
     delete barbershopPayload.mbway_phone;
 
     if (manualAutoConfirm !== undefined) {
-      const { error } = await supabase.rpc('set_manual_booking_auto_confirmation', {
-        p_barbershop_id: barbershopId,
-        p_enabled: manualAutoConfirm,
-      });
+      const { error } = await supabase.rpc(
+        'set_manual_booking_auto_confirmation',
+        {
+          p_barbershop_id: barbershopId,
+          p_enabled: manualAutoConfirm,
+        },
+      );
       if (error) throw error;
     }
 
@@ -258,21 +262,27 @@ export async function updateBarbershopConfig(
       result.data &&
       result.data.mbway_enabled !== mbwayEnabled
     ) {
-      throw new Error('A configuração MB WAY não foi guardada. Atualiza as migrations e tenta novamente.');
+      throw new Error(
+        'A configuração MB WAY não foi guardada. Atualiza as migrations e tenta novamente.',
+      );
     }
     if (
       mbwayPhone !== undefined &&
       result.data &&
       (result.data.mbway_phone ?? '') !== (mbwayPhone ?? '')
     ) {
-      throw new Error('O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.');
+      throw new Error(
+        'O número MB WAY não foi guardado. Atualiza as migrations e tenta novamente.',
+      );
     }
     if (
       expectedRequireBirthDate !== undefined &&
       result.data &&
       result.data.require_birth_date !== expectedRequireBirthDate
     ) {
-      throw new Error('A preferência da data de nascimento não foi guardada. Atualiza as migrations e tenta novamente.');
+      throw new Error(
+        'A preferência da data de nascimento não foi guardada. Atualiza as migrations e tenta novamente.',
+      );
     }
     if (
       expectedNoticeMinutes !== undefined &&

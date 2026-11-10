@@ -405,7 +405,8 @@ export default function BarbershopPublicPageFinal({
                 Avaliações
               </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                As avaliações ajudam outros clientes a conhecer a experiência nesta barbearia.
+                As avaliações ajudam outros clientes a conhecer a experiência
+                nesta barbearia.
               </p>
             </div>
             <Link
@@ -417,7 +418,8 @@ export default function BarbershopPublicPageFinal({
             </Link>
           </div>
           <p className="mt-3 text-xs leading-5 text-zinc-500">
-            Só podes avaliar através da ligação segura enviada por email após um atendimento concluído. Não precisas de criar conta.
+            Só podes avaliar através da ligação segura enviada por email após um
+            atendimento concluído. Não precisas de criar conta.
           </p>
           <div className="mt-5 grid gap-3">
             {shop.reviews.length ? (

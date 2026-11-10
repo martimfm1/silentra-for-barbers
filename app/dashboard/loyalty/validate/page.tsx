@@ -15,7 +15,13 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 type RedemptionResult = {
@@ -199,9 +205,7 @@ export default function LoyaltyValidationPage() {
     }
   }
 
-  const maskedEmail = result?.memberEmail
-    ? maskEmail(result.memberEmail)
-    : '';
+  const maskedEmail = result?.memberEmail ? maskEmail(result.memberEmail) : '';
 
   return (
     <main
@@ -211,7 +215,11 @@ export default function LoyaltyValidationPage() {
       <a className="skip-link" href="#validation-content">
         {t('loyaltyValidation.skip')}
       </a>
-      <div id="validation-content" className="mx-auto w-full max-w-4xl" tabIndex={-1}>
+      <div
+        id="validation-content"
+        className="mx-auto w-full max-w-4xl"
+        tabIndex={-1}
+      >
         <Link
           href="/dashboard/loyalty"
           className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-sm text-zinc-400 transition hover:border-white/20 hover:text-white"
@@ -231,7 +239,11 @@ export default function LoyaltyValidationPage() {
           <p className="mt-3 text-sm leading-6 text-zinc-400">
             {t('loyaltyValidation.description')}
           </p>
-          <p className="sr-announcer mt-2" aria-live="polite" aria-atomic="true">
+          <p
+            className="sr-announcer mt-2"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {status}
           </p>
         </header>
@@ -279,13 +291,18 @@ export default function LoyaltyValidationPage() {
             </CardContent>
           </Card>
         ) : (
-          <section className="mt-8 grid gap-4 lg:grid-cols-2" aria-label={t('loyaltyValidation.methods')}>
+          <section
+            className="mt-8 grid gap-4 lg:grid-cols-2"
+            aria-label={t('loyaltyValidation.methods')}
+          >
             <Card className="border-white/10 bg-white/[0.025]">
               <CardHeader>
                 <div className="flex size-11 items-center justify-center rounded-2xl border border-emerald-400/15 bg-emerald-400/10 text-emerald-200">
                   <ScanLine className="size-5" aria-hidden="true" />
                 </div>
-                <CardTitle className="pt-2">{t('loyaltyValidation.readQr')}</CardTitle>
+                <CardTitle className="pt-2">
+                  {t('loyaltyValidation.readQr')}
+                </CardTitle>
                 <CardDescription>
                   {t('loyaltyValidation.mobileRecommended')}
                 </CardDescription>
@@ -332,7 +349,9 @@ export default function LoyaltyValidationPage() {
                 <div className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-300">
                   <Gift className="size-5" aria-hidden="true" />
                 </div>
-                <CardTitle className="pt-2">{t('loyaltyValidation.enterCode')}</CardTitle>
+                <CardTitle className="pt-2">
+                  {t('loyaltyValidation.enterCode')}
+                </CardTitle>
                 <CardDescription>
                   {t('loyaltyValidation.codeHelp')}
                 </CardDescription>
@@ -346,7 +365,10 @@ export default function LoyaltyValidationPage() {
                   }}
                   aria-busy={busy}
                 >
-                  <label htmlFor="loyalty-validation-code" className="text-sm font-medium">
+                  <label
+                    htmlFor="loyalty-validation-code"
+                    className="text-sm font-medium"
+                  >
                     {t('loyaltyValidation.rewardCode')}
                   </label>
                   <Input
@@ -369,7 +391,10 @@ export default function LoyaltyValidationPage() {
                     className="h-12 border-white/10 bg-black/20 text-center font-mono text-lg tracking-[0.24em]"
                     aria-describedby="loyalty-validation-help"
                   />
-                  <p id="loyalty-validation-help" className="text-xs text-zinc-500">
+                  <p
+                    id="loyalty-validation-help"
+                    className="text-xs text-zinc-500"
+                  >
                     {t('loyaltyValidation.manualCodeHint')}
                   </p>
                   <Button
@@ -378,7 +403,10 @@ export default function LoyaltyValidationPage() {
                     className="min-h-12 w-full"
                   >
                     {busy ? (
-                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                      <Loader2
+                        className="size-4 animate-spin"
+                        aria-hidden="true"
+                      />
                     ) : (
                       <ShieldCheck className="size-4" aria-hidden="true" />
                     )}

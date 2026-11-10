@@ -414,7 +414,10 @@ export function AgendaCalendarView({
                         </span>
                       ) : null}
                       {cancelledCount > 0 ? (
-                        <span className="rounded-md bg-rose-400/10 px-1 py-0.5 text-[8px] font-semibold tabular-nums text-rose-300 sm:text-[9px]" title={`${cancelledCount} canceladas`}>
+                        <span
+                          className="rounded-md bg-rose-400/10 px-1 py-0.5 text-[8px] font-semibold tabular-nums text-rose-300 sm:text-[9px]"
+                          title={`${cancelledCount} canceladas`}
+                        >
                           −{cancelledCount}
                         </span>
                       ) : null}
@@ -472,17 +475,25 @@ export function AgendaCalendarView({
                           )}
                           aria-hidden="true"
                         />
-                        <span className={cn(
-                          'hidden truncate text-[9px] sm:block',
-                          appointment.status === 'cancelled' ? 'text-rose-200/80 line-through' : 'text-zinc-500',
-                        )}>
+                        <span
+                          className={cn(
+                            'hidden truncate text-[9px] sm:block',
+                            appointment.status === 'cancelled'
+                              ? 'text-rose-200/80 line-through'
+                              : 'text-zinc-500',
+                          )}
+                        >
                           {format(new Date(appointment.date_hour), 'HH:mm')} ·{' '}
                           {appointmentName(appointment, t)}
                         </span>
-                        <span className={cn(
-                          'block truncate text-[8px] sm:hidden',
-                          appointment.status === 'cancelled' ? 'text-rose-300/80' : 'text-zinc-600',
-                        )}>
+                        <span
+                          className={cn(
+                            'block truncate text-[8px] sm:hidden',
+                            appointment.status === 'cancelled'
+                              ? 'text-rose-300/80'
+                              : 'text-zinc-600',
+                          )}
+                        >
                           {format(new Date(appointment.date_hour), 'HH:mm')}
                         </span>
                       </div>
@@ -585,7 +596,11 @@ export function AgendaCalendarView({
                 Canceladas
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-rose-300">
-                {selectedAppointments.filter((item) => item.status === 'cancelled').length}
+                {
+                  selectedAppointments.filter(
+                    (item) => item.status === 'cancelled',
+                  ).length
+                }
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
@@ -691,7 +706,8 @@ export function AgendaCalendarView({
                       </p>
                       {onAppointmentClick ? (
                         <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-300/80">
-                          Ver detalhes <ChevronRight className="size-3" aria-hidden="true" />
+                          Ver detalhes{' '}
+                          <ChevronRight className="size-3" aria-hidden="true" />
                         </span>
                       ) : null}
                     </button>

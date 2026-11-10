@@ -4,7 +4,12 @@ import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SubscriptionService } from '@/services/billing/subscription.service';
-import { isSafePublicBookingDate, isValidTime, normalizeText, UUID_PATTERN } from '@/lib/validation';
+import {
+  isSafePublicBookingDate,
+  isValidTime,
+  normalizeText,
+  UUID_PATTERN,
+} from '@/lib/validation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RATE_LIMIT = 8;
@@ -16,7 +21,9 @@ function isWithinPublicBookingWindow(date: string) {
     timeZone: 'Europe/Lisbon',
   });
   const lastAllowed = new Date(`${today}T12:00:00Z`);
-  lastAllowed.setUTCDate(lastAllowed.getUTCDate() + PUBLIC_BOOKING_WINDOW_DAYS - 1);
+  lastAllowed.setUTCDate(
+    lastAllowed.getUTCDate() + PUBLIC_BOOKING_WINDOW_DAYS - 1,
+  );
   return date >= today && date <= lastAllowed.toISOString().slice(0, 10);
 }
 
@@ -32,7 +39,6 @@ type WaitlistBody = {
   consent?: unknown;
 };
 
-
 async function POST__unobserved(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -40,7 +46,10 @@ async function POST__unobserved(
   try {
     const { id: shopId } = await context.params;
     if (!UUID_PATTERN.test(shopId))
-      return NextResponse.json({ success: false, error: 'Barbearia inválida.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Barbearia inválida.' },
+        { status: 400 },
+      );
 
     const payload = await readJsonObject(request, {
       maxBytes: 8 * 1024,
@@ -66,9 +75,13 @@ async function POST__unobserved(
         : null;
     const date = typeof body.date === 'string' ? body.date : '';
     const timeStart =
-      typeof body.preferredTimeStart === 'string' ? body.preferredTimeStart.slice(0, 5) : null;
+      typeof body.preferredTimeStart === 'string'
+        ? body.preferredTimeStart.slice(0, 5)
+        : null;
     const timeEnd =
-      typeof body.preferredTimeEnd === 'string' ? body.preferredTimeEnd.slice(0, 5) : null;
+      typeof body.preferredTimeEnd === 'string'
+        ? body.preferredTimeEnd.slice(0, 5)
+        : null;
     const name = normalizeText(body.customerName, 120);
     const email = normalizeText(body.customerEmail, 254)?.toLowerCase();
     const phone = normalizeText(body.customerPhone, 30);
@@ -91,7 +104,11 @@ async function POST__unobserved(
       (timeStart && timeEnd && timeStart >= timeEnd)
     ) {
       return NextResponse.json(
-        { success: false, error: 'Verifica os teus dados e aceita o aviso para entrar na lista de espera.' },
+        {
+          success: false,
+          error:
+            'Verifica os teus dados e aceita o aviso para entrar na lista de espera.',
+        },
         { status: 400 },
       );
     }
@@ -105,8 +122,14 @@ async function POST__unobserved(
     );
     if (!allowed)
       return NextResponse.json(
-        { success: false, error: 'Demasiados pedidos. Tenta novamente mais tarde.' },
-        { status: 429, headers: { 'Retry-After': String(RATE_WINDOW_SECONDS) } },
+        {
+          success: false,
+          error: 'Demasiados pedidos. Tenta novamente mais tarde.',
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(RATE_WINDOW_SECONDS) },
+        },
       );
 
     const admin = createAdminClient();
@@ -117,12 +140,21 @@ async function POST__unobserved(
       .eq('id', shopId)
       .maybeSingle();
     if (shopError || !shop || shop.is_active !== true || !shop.barbershop_id)
-      return NextResponse.json({ success: false, error: 'Barbearia indisponível.' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'Barbearia indisponível.' },
+        { status: 404 },
+      );
 
-    const plan = await SubscriptionService.getAccessPlanForBarbershop(shop.barbershop_id);
+    const plan = await SubscriptionService.getAccessPlanForBarbershop(
+      shop.barbershop_id,
+    );
     if (plan !== 'enterprise')
       return NextResponse.json(
-        { success: false, error: 'A lista de espera está disponível apenas no plano Enterprise.' },
+        {
+          success: false,
+          error:
+            'A lista de espera está disponível apenas no plano Enterprise.',
+        },
         { status: 403, headers: { 'Cache-Control': 'no-store' } },
       );
 
@@ -150,7 +182,10 @@ async function POST__unobserved(
       serviceExists = Boolean(legacyServiceQuery.data);
     }
     if (!serviceExists)
-      return NextResponse.json({ success: false, error: 'Serviço indisponível.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Serviço indisponível.' },
+        { status: 400 },
+      );
 
     if (professionalId) {
       const { data: professional, error: professionalError } = await admin
@@ -161,7 +196,10 @@ async function POST__unobserved(
         .eq('active', true)
         .maybeSingle();
       if (professionalError || !professional)
-        return NextResponse.json({ success: false, error: 'Profissional indisponível.' }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: 'Profissional indisponível.' },
+          { status: 400 },
+        );
     }
 
     let duplicateQuery = admin
@@ -175,12 +213,15 @@ async function POST__unobserved(
     duplicateQuery = professionalId
       ? duplicateQuery.eq('professional_id', professionalId)
       : duplicateQuery.is('professional_id', null);
-    const { data: existing, error: duplicateError } = await duplicateQuery.maybeSingle();
-    if (duplicateError)
-      throw new Error('WAITLIST_DUPLICATE_CHECK_FAILED');
+    const { data: existing, error: duplicateError } =
+      await duplicateQuery.maybeSingle();
+    if (duplicateError) throw new Error('WAITLIST_DUPLICATE_CHECK_FAILED');
     if (existing)
       return NextResponse.json(
-        { success: false, error: 'Já estás na lista de espera para este serviço e dia.' },
+        {
+          success: false,
+          error: 'Já estás na lista de espera para este serviço e dia.',
+        },
         { status: 409 },
       );
 
@@ -205,7 +246,10 @@ async function POST__unobserved(
     if (insertError) {
       if (insertError.code === '23505')
         return NextResponse.json(
-          { success: false, error: 'Já estás na lista de espera para este serviço e dia.' },
+          {
+            success: false,
+            error: 'Já estás na lista de espera para este serviço e dia.',
+          },
           { status: 409 },
         );
       throw new Error('WAITLIST_INSERT_FAILED');
@@ -226,7 +270,6 @@ async function POST__unobserved(
     );
   }
 }
-
 
 export const POST = withApiObservability(
   '/api/shops/[id]/waitlist',

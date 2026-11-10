@@ -212,7 +212,9 @@ export const appointmentService = {
     } = await supabase.auth.getUser();
     let query = supabase
       .from('users')
-      .select('id, name_complete, num_phone, email, birth_date, style_notes, created_at')
+      .select(
+        'id, name_complete, num_phone, email, birth_date, style_notes, created_at',
+      )
       .eq('barbershop_id', barbershopId)
       .eq('role', 'client')
       .order('name_complete', { ascending: true });

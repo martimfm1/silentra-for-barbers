@@ -71,11 +71,15 @@ export const ptCopy = {
     everyMonth: 'Mensalmente',
     repeatUntil: 'Repetir até',
     recurrenceHint: 'As marcações serão criadas até esta data.',
-    recurrenceOffHint: 'Repete o mesmo serviço, dia e hora numa série de marcações.',
-    recurringEndAfterStart: 'A data final tem de ser posterior à primeira marcação.',
-    recurringAtLeastOne: 'Escolhe uma data final que inclua pelo menos uma repetição.',
+    recurrenceOffHint:
+      'Repete o mesmo serviço, dia e hora numa série de marcações.',
+    recurringEndAfterStart:
+      'A data final tem de ser posterior à primeira marcação.',
+    recurringAtLeastOne:
+      'Escolhe uma data final que inclua pelo menos uma repetição.',
     recurringLimit: 'Uma série pode ter no máximo 52 marcações.',
-    recurringConflict: 'Um dos horários já está ocupado. Nenhuma marcação da série foi criada.',
+    recurringConflict:
+      'Um dos horários já está ocupado. Nenhuma marcação da série foi criada.',
     recurringCreated: '{count} marcações recorrentes criadas com sucesso.',
   },
   inviteCode: {
@@ -239,48 +243,65 @@ export const ptCopy = {
 
   communicationPage: {
     messagesTitle: 'Mensagens individuais',
-    messagesDescription: 'Contacta um cliente diretamente com uma mensagem personalizada e uma pré-visualização antes do envio.',
+    messagesDescription:
+      'Contacta um cliente diretamente com uma mensagem personalizada e uma pré-visualização antes do envio.',
     messagesAction: 'Enviar mensagem',
-    messagesDetail: 'Ideal para confirmações pontuais, agradecimentos e contactos individuais.',
+    messagesDetail:
+      'Ideal para confirmações pontuais, agradecimentos e contactos individuais.',
     campaignsTitle: 'Campanhas',
-    campaignsDescription: 'Prepara uma comunicação para vários clientes, revê o conteúdo e acompanha o envio.',
+    campaignsDescription:
+      'Prepara uma comunicação para vários clientes, revê o conteúdo e acompanha o envio.',
     campaignsAction: 'Gerir campanhas',
-    campaignsDetail: 'Usa campanhas para novidades, avisos gerais e iniciativas de fidelização.',
+    campaignsDetail:
+      'Usa campanhas para novidades, avisos gerais e iniciativas de fidelização.',
     automationsTitle: 'Automações',
-    automationsDescription: 'Define quando a plataforma deve contactar clientes sem teres de repetir tarefas.',
+    automationsDescription:
+      'Define quando a plataforma deve contactar clientes sem teres de repetir tarefas.',
     automationsAction: 'Configurar automações',
-    automationsDetail: 'Inclui aniversários e contactos associados a momentos da relação com o cliente.',
+    automationsDetail:
+      'Inclui aniversários e contactos associados a momentos da relação com o cliente.',
     eyebrow: 'Comunicação da barbearia',
     title: 'Mantém a tua barbearia em contacto com os clientes.',
-    description: 'Escolhe a ferramenta certa para cada situação. Menos mensagens perdidas, menos tarefas repetidas e uma relação mais próxima com quem visita a tua barbearia.',
+    description:
+      'Escolhe a ferramenta certa para cada situação. Menos mensagens perdidas, menos tarefas repetidas e uma relação mais próxima com quem visita a tua barbearia.',
     primaryAction: 'Enviar uma mensagem',
     emailAvailable: 'Email disponível',
     smsUnavailable: 'SMS manual indisponível',
     pushOperational: 'Push para avisos operacionais',
     workspaceEyebrow: 'Ferramentas',
     workspaceTitle: 'O que precisas de fazer?',
-    workspaceDescription: 'Cada ferramenta tem um objetivo claro e abre diretamente o fluxo de trabalho.',
+    workspaceDescription:
+      'Cada ferramenta tem um objetivo claro e abre diretamente o fluxo de trabalho.',
     threeTools: '3 ferramentas',
     viewPlans: 'Ver planos',
     playbookEyebrow: 'Boas práticas',
     playbookTitle: 'Uma comunicação útil em três momentos',
-    playbookDescription: 'Pequenos contactos no momento certo ajudam a reduzir faltas e a manter clientes habituais.',
+    playbookDescription:
+      'Pequenos contactos no momento certo ajudam a reduzir faltas e a manter clientes habituais.',
     beforeVisitTitle: 'Antes da visita',
-    beforeVisitDescription: 'Envia um lembrete claro antes da marcação e facilita o contacto caso o cliente precise de alterar a hora.',
+    beforeVisitDescription:
+      'Envia um lembrete claro antes da marcação e facilita o contacto caso o cliente precise de alterar a hora.',
     afterVisitTitle: 'Depois da visita',
-    afterVisitDescription: 'Agradece a visita e convida o cliente a voltar, sem mensagens insistentes.',
+    afterVisitDescription:
+      'Agradece a visita e convida o cliente a voltar, sem mensagens insistentes.',
     winBackTitle: 'Manter a relação',
-    winBackDescription: 'Usa aniversários e automações com critério para voltar a contactar clientes que já conhecem a barbearia.',
+    winBackDescription:
+      'Usa aniversários e automações com critério para voltar a contactar clientes que já conhecem a barbearia.',
     channelEyebrow: 'Canais disponíveis',
     channelTitle: 'Sabe o que está ativo',
-    channelDescription: 'A plataforma mostra apenas capacidades que existem hoje.',
+    channelDescription:
+      'A plataforma mostra apenas capacidades que existem hoje.',
     emailTitle: 'Email',
-    emailDescription: 'Disponível para mensagens individuais e campanhas, conforme o plano e a configuração.',
+    emailDescription:
+      'Disponível para mensagens individuais e campanhas, conforme o plano e a configuração.',
     pushTitle: 'Notificações push',
-    pushDescription: 'Usadas para alertas operacionais dirigidos aos barbeiros, como novas marcações.',
+    pushDescription:
+      'Usadas para alertas operacionais dirigidos aos barbeiros, como novas marcações.',
     smsTitle: 'SMS e WhatsApp',
-    smsDescription: 'O envio direto por estes canais ainda não está disponível nesta área. Não prometemos envios que não estão configurados.',
-    privacyNote: 'Envia comunicações promocionais apenas quando tens uma base legal adequada. Respeita as preferências e pedidos de não contacto dos clientes e evita mensagens excessivas.',
+    smsDescription:
+      'O envio direto por estes canais ainda não está disponível nesta área. Não prometemos envios que não estão configurados.',
+    privacyNote:
+      'Envia comunicações promocionais apenas quando tens uma base legal adequada. Respeita as preferências e pedidos de não contacto dos clientes e evita mensagens excessivas.',
   },
 
   dashboard: {
@@ -321,7 +342,8 @@ export const ptCopy = {
     statusScheduled: 'Confirmada',
     statusPending: 'Pendente',
     statusCancelled: 'Cancelada',
-    detailDescription: 'Histórico, preferências e informação de contacto deste cliente.',
+    detailDescription:
+      'Histórico, preferências e informação de contacto deste cliente.',
     totalBookings: 'Total de marcações',
     completedVisits: 'Visitas concluídas',
     lastVisit: 'Última visita',
@@ -330,14 +352,16 @@ export const ptCopy = {
     unknownService: 'Serviço não identificado',
     noProfessional: 'Sem profissional atribuído',
     internalNotes: 'Notas internas',
-    notePlaceholder: 'Regista preferências, observações ou informações importantes...',
+    notePlaceholder:
+      'Regista preferências, observações ou informações importantes...',
     addNote: 'Adicionar nota',
     noNotes: 'Ainda não existem notas para este cliente.',
     clientDetails: 'Dados do cliente',
     email: 'Email',
     clientSince: 'Cliente desde',
     preferences: 'Preferências',
-    preferencesDescription: 'Notas sobre o estilo, cortes e preferências do cliente.',
+    preferencesDescription:
+      'Notas sobre o estilo, cortes e preferências do cliente.',
     noPreferences: 'Ainda não foram registadas preferências.',
     upcomingAppointments: 'Próximas marcações',
     noUpcomingAppointments: 'Não existem próximas marcações.',
@@ -380,7 +404,8 @@ export const ptCopy = {
     planEnd: 'Terminar',
     planPaymentHistory: 'Histórico de mensalidades',
     planEmptyTitle: 'Este cliente ainda não tem um plano.',
-    planEmptyDescription: 'Cria uma mensalidade personalizada e acompanha as utilizações e pagamentos diretamente nesta ficha.',
+    planEmptyDescription:
+      'Cria uma mensalidade personalizada e acompanha as utilizações e pagamentos diretamente nesta ficha.',
     planAdd: 'Adicionar plano',
     planPrevious: 'Planos anteriores',
     planPausedStatus: 'Pausado',
@@ -388,15 +413,18 @@ export const ptCopy = {
     planResume: 'Retomar',
     planEditTitle: 'Editar plano',
     planCreateTitle: 'Criar plano personalizado',
-    planFormDescription: 'Define a mensalidade, as utilizações incluídas e os serviços abrangidos.',
+    planFormDescription:
+      'Define a mensalidade, as utilizações incluídas e os serviços abrangidos.',
     planName: 'Nome do plano',
     planNamePlaceholder: 'Ex.: Plano mensal — 2 cortes',
     planIncluded: 'Marcações incluídas por mês',
     planStartDate: 'Data de início',
-    planServicesHint: 'Não seleciones nenhum serviço para incluir todos. Caso contrário, só contam as marcações dos serviços escolhidos.',
+    planServicesHint:
+      'Não seleciones nenhum serviço para incluir todos. Caso contrário, só contam as marcações dos serviços escolhidos.',
     planNoServices: 'Ainda não existem serviços configurados.',
     planNotes: 'Notas',
-    planNotesPlaceholder: 'Condições especiais ou detalhes acordados com o cliente…',
+    planNotesPlaceholder:
+      'Condições especiais ou detalhes acordados com o cliente…',
     planCancel: 'Cancelar',
     planSave: 'Guardar alterações',
     planCreate: 'Criar plano',
@@ -676,33 +704,45 @@ export const ptCopy = {
     subtitle:
       'Configura como os clientes acumulam pontos, o que podem resgatar e valida as recompensas no balcão.',
     refresh: 'Atualizar fidelização',
-    invalidSettings: 'Confirma os valores: pontos por euro têm de ser superiores a 0 e os pontos extra não podem ser negativos.',
-    invalidRewardName: 'Introduz um nome para a recompensa (máximo de 120 caracteres).',
-    invalidRewardPoints: 'Os pontos necessários têm de ser um número inteiro superior a 0.',
-    invalidRewardValue: 'O valor da recompensa tem de ser um número igual ou superior a 0.',
+    invalidSettings:
+      'Confirma os valores: pontos por euro têm de ser superiores a 0 e os pontos extra não podem ser negativos.',
+    invalidRewardName:
+      'Introduz um nome para a recompensa (máximo de 120 caracteres).',
+    invalidRewardPoints:
+      'Os pontos necessários têm de ser um número inteiro superior a 0.',
+    invalidRewardValue:
+      'O valor da recompensa tem de ser um número igual ou superior a 0.',
     rewardStatusError: 'Não foi possível atualizar o estado da recompensa.',
     rewardReactivated: 'Recompensa reativada.',
-    deactivateRewardDescription: 'A recompensa deixa de estar disponível para novos resgates. Podes reativá-la mais tarde.',
+    deactivateRewardDescription:
+      'A recompensa deixa de estar disponível para novos resgates. Podes reativá-la mais tarde.',
     deactivateRewardAction: 'Desativar recompensa',
     deactivateRewardConfirm: 'Desativar esta recompensa?',
-    validateShortcutDescription: 'Lê o QR privado do voucher ou introduz o código de utilização.',
-    pointsShortcutDescription: 'Define quantos pontos cada serviço concluído atribui.',
-    programSetupDescription: 'Define como os clientes acumulam pontos e os bónus de adesão e recomendação.',
-    activeProgramDescription: 'Os clientes podem aderir, acumular pontos e resgatar as recompensas disponíveis.',
+    validateShortcutDescription:
+      'Lê o QR privado do voucher ou introduz o código de utilização.',
+    pointsShortcutDescription:
+      'Define quantos pontos cada serviço concluído atribui.',
+    programSetupDescription:
+      'Define como os clientes acumulam pontos e os bónus de adesão e recomendação.',
+    activeProgramDescription:
+      'Os clientes podem aderir, acumular pontos e resgatar as recompensas disponíveis.',
     pointsRateHint: 'Pontos atribuídos por cada euro elegível.',
     unsavedSettings: 'Tens alterações por guardar.',
     settingsUpToDate: 'As regras estão guardadas.',
-    programSummaryDescription: 'Um resumo rápido das regras e recompensas configuradas.',
+    programSummaryDescription:
+      'Um resumo rápido das regras e recompensas configuradas.',
     activeRewardsLabel: 'Recompensas ativas',
     welcomePointsLabel: 'Pontos de boas-vindas',
     welcomePointsHint: 'Pontos atribuídos quando um cliente adere ao programa.',
     rewardCatalogueEyebrow: 'Catálogo',
     rewardsTitle: 'Recompensas disponíveis',
-    rewardsManagementDescription: 'Mantém as recompensas simples e fáceis de perceber. Os clientes veem os pontos necessários antes de resgatar.',
+    rewardsManagementDescription:
+      'Mantém as recompensas simples e fáceis de perceber. Os clientes veem os pontos necessários antes de resgatar.',
     rewardValueHint: 'Ex.: 5',
     inactiveRewardsLabel: 'Recompensas inativas',
     noActiveRewards: 'Não tens recompensas ativas.',
-    noActiveRewardsHint: 'Cria uma recompensa ou reativa uma que já tenhas configurado.',
+    noActiveRewardsHint:
+      'Cria uma recompensa ou reativa uma que já tenhas configurado.',
     editReward: 'Editar',
     deactivate: 'Desativar',
     reactivate: 'Reativar',
@@ -905,7 +945,8 @@ export const ptCopy = {
     saveError: 'Não foi possível guardar estas opções.',
     saved: 'Alterações guardadas.',
     autoRemindersTitle: 'Enviar lembrete automático 24 horas antes',
-    autoRemindersDescription: 'Envia um email ao cliente no dia anterior à marcação. Só é enviado para marcações confirmadas e pode ser desativado a qualquer momento.',
+    autoRemindersDescription:
+      'Envia um email ao cliente no dia anterior à marcação. Só é enviado para marcações confirmadas e pode ser desativado a qualquer momento.',
     autoRemindersAria: 'Ativar lembretes automáticos por email',
     autoConfirmTitle: 'Confirmar novas marcações automaticamente',
     autoConfirmDescription:
@@ -927,7 +968,8 @@ export const ptCopy = {
     description:
       'Define quantos pontos cada serviço gera quando a marcação fica concluída.',
     validateReward: 'Validar recompensa',
-    earningHint: 'Os pontos são atribuídos quando uma marcação do serviço configurado fica concluída. Cada marcação só pode gerar pontos uma vez.',
+    earningHint:
+      'Os pontos são atribuídos quando uma marcação do serviço configurado fica concluída. Cada marcação só pode gerar pontos uma vez.',
     manageRewards: 'Gerir recompensas',
   },
   earningRules: {
@@ -1025,7 +1067,8 @@ export const ptCopy = {
     publicSlug: 'URL público personalizado',
     slugPlaceholder: 'nome-da-barbearia',
     slugHint: 'Usa entre 3 e 60 caracteres. Letras, números e hífenes.',
-    proFeatureHint: 'A personalização do URL e da legenda está disponível nos planos Pro e Enterprise.',
+    proFeatureHint:
+      'A personalização do URL e da legenda está disponível nos planos Pro e Enterprise.',
     saveSettings: 'Guardar alterações',
     popupError: 'Permite pop-ups para imprimir.',
     documentTitle: '{name} — Código QR',
@@ -1158,16 +1201,22 @@ export const ptCopy = {
     bookingSuccess: 'Marcação efetuada com sucesso!',
     prepaymentOption: 'Pré-pagar por MB WAY',
     requestPrepayment: 'Pedir pré-pagamento',
-    prepaymentOptionDescription: 'Dá prioridade ao teu horário. O pedido só fica confirmado depois de a barbearia validar o pagamento.',
+    prepaymentOptionDescription:
+      'Dá prioridade ao teu horário. O pedido só fica confirmado depois de a barbearia validar o pagamento.',
     prepaymentAmount: 'Valor a pagar',
     prepaymentNumber: 'Número MB WAY',
     prepaymentPendingTitle: 'Pedido de pré-pagamento criado',
-    prepaymentPendingDescription: 'O teu horário fica reservado durante 15 minutos enquanto envias o comprovativo. A marcação só é confirmada depois de a barbearia validar o pagamento.',
+    prepaymentPendingDescription:
+      'O teu horário fica reservado durante 15 minutos enquanto envias o comprovativo. A marcação só é confirmada depois de a barbearia validar o pagamento.',
     sendProofWhatsApp: 'Enviar comprovativo pelo WhatsApp',
-    prepaymentEmailNotice: 'Assim que o barbeiro confirmar que recebeu o pagamento, vais receber um email com a confirmação da marcação.',
-    prepaymentExpiry: 'Envia o comprovativo até às {time}. Se o pagamento não for validado dentro deste prazo, o horário é libertado.',
-    prepaymentSubmitted: 'Pedido de pré-pagamento criado. Envia o comprovativo pelo WhatsApp.',
-    whatsappProofMessage: 'Olá! Segue o comprovativo do meu pré-pagamento MB WAY.',
+    prepaymentEmailNotice:
+      'Assim que o barbeiro confirmar que recebeu o pagamento, vais receber um email com a confirmação da marcação.',
+    prepaymentExpiry:
+      'Envia o comprovativo até às {time}. Se o pagamento não for validado dentro deste prazo, o horário é libertado.',
+    prepaymentSubmitted:
+      'Pedido de pré-pagamento criado. Envia o comprovativo pelo WhatsApp.',
+    whatsappProofMessage:
+      'Olá! Segue o comprovativo do meu pré-pagamento MB WAY.',
     chooseBarberDayService: 'Escolhe o barbeiro, o dia e o serviço.',
     closeBooking: 'Fechar marcação',
     retry: 'Tentar novamente',
@@ -1325,14 +1374,18 @@ export const ptCopy = {
   barbershopDeletion: {
     dangerZone: 'Zona de perigo',
     title: 'Apagar barbearia permanentemente',
-    description: 'Esta ação elimina a barbearia, marcações, equipa, serviços, clientes associados, configurações, ficheiros e restantes dados do negócio. A tua conta Silentra mantém-se ativa, mas ficará sem uma barbearia associada.',
+    description:
+      'Esta ação elimina a barbearia, marcações, equipa, serviços, clientes associados, configurações, ficheiros e restantes dados do negócio. A tua conta Silentra mantém-se ativa, mas ficará sem uma barbearia associada.',
     openButton: 'Apagar barbearia',
     confirmTitle: 'Tens a certeza de que queres apagar a barbearia?',
-    confirmDescription: 'Para proteger a tua conta, confirma primeiro a palavra-passe. Enviaremos depois um código de segurança para o email da tua conta.',
-    codeDescription: 'Introduz o código de 6 dígitos enviado para o email da tua conta. A palavra-passe também será validada antes da eliminação.',
+    confirmDescription:
+      'Para proteger a tua conta, confirma primeiro a palavra-passe. Enviaremos depois um código de segurança para o email da tua conta.',
+    codeDescription:
+      'Introduz o código de 6 dígitos enviado para o email da tua conta. A palavra-passe também será validada antes da eliminação.',
     password: 'Palavra-passe da conta',
     emailCode: 'Código enviado por email',
-    codeExpiry: 'O código é válido durante 10 minutos e só pode ser utilizado uma vez.',
+    codeExpiry:
+      'O código é válido durante 10 minutos e só pode ser utilizado uma vez.',
     sendCode: 'Enviar código',
     sending: 'A enviar código…',
     codeSent: 'Código de segurança enviado para o teu email.',

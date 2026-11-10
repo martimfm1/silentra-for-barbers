@@ -43,7 +43,12 @@ export default async function BarbershopReviewPage({
     reviewAccessCookieName(profile.id),
   )?.value;
   const hasReviewAccess = reviewAccess === '1';
-  const reviewStatus = ['already-used', 'expired', 'invalid', 'unavailable'].includes(query.review ?? '')
+  const reviewStatus = [
+    'already-used',
+    'expired',
+    'invalid',
+    'unavailable',
+  ].includes(query.review ?? '')
     ? (query.review as 'already-used' | 'expired' | 'invalid' | 'unavailable')
     : null;
 

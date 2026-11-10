@@ -477,9 +477,7 @@ export default function POSStorePage() {
   }
 
   if (accessLoading || loading) {
-    return (
-      <SilentraLoading variant="dashboard" />
-    );
+    return <SilentraLoading variant="dashboard" />;
   }
 
   if (!allowed) {

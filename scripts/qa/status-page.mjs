@@ -25,10 +25,19 @@ assert.match(endpoint, /rest\/v1\/barbershops/);
 assert.match(endpoint, /AbortSignal\.timeout\(4500\)/);
 assert.match(endpoint, /id: 'api'/);
 assert.match(endpoint, /id: 'database'/);
-assert.doesNotMatch(endpoint, /status\.(stripe|brevo|supabase)\.com|vercel-status\.com/);
-assert.doesNotMatch(client, /Stripe|Brevo|Supabase|Vercel|incidentes ativos|scheduled maintenance/i);
+assert.doesNotMatch(
+  endpoint,
+  /status\.(stripe|brevo|supabase)\.com|vercel-status\.com/,
+);
+assert.doesNotMatch(
+  client,
+  /Stripe|Brevo|Supabase|Vercel|incidentes ativos|scheduled maintenance/i,
+);
 assert.match(types, /id: 'api' \| 'database'/);
-assert.doesNotMatch(types, /StatusIncident|StatusMaintenance|incidents|maintenances/);
+assert.doesNotMatch(
+  types,
+  /StatusIncident|StatusMaintenance|incidents|maintenances/,
+);
 assert.match(endpoint, /Cache-Control/);
 assert.match(footer, /href="\/status"/);
 assert.match(sitemap, /\$\{SITE_URL\}\/status/);

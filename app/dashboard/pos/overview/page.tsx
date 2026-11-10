@@ -176,9 +176,7 @@ export default function SalesOverviewPage() {
   }, [completed]);
 
   if (accessLoading || loading) {
-    return (
-      <SilentraLoading variant="dashboard" />
-    );
+    return <SilentraLoading variant="dashboard" />;
   }
 
   if (!allowed) {

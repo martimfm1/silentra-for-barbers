@@ -1,10 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const read = (path) => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+const read = (path) =>
+  readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
 
-const migration = read('supabase/migrations/20261104133918_customer_booking_waitlist.sql');
-const offersMigration = read('supabase/migrations/20261104133930_automatic_booking_waitlist_offers.sql');
+const migration = read(
+  'supabase/migrations/20261104133918_customer_booking_waitlist.sql',
+);
+const offersMigration = read(
+  'supabase/migrations/20261104133930_automatic_booking_waitlist_offers.sql',
+);
 const offersWorker = read('app/api/cron/booking-waitlist-offers/route.ts');
 const declineApi = read('app/api/shops/[id]/waitlist/decline/route.ts');
 const declinePage = read('app/waitlist/decline/page.tsx');
@@ -13,19 +18,33 @@ const dashboardPage = read('app/dashboard/espera/page.tsx');
 const publicApi = read('app/api/shops/[id]/waitlist/route.ts');
 const dashboardApi = read('app/api/dashboard/waitlist/route.ts');
 const bookingDataApi = read('app/api/shops/[id]/booking-data/route.ts');
-const bookingDrawer = read('app/barbershops/components/booking-drawer-canonical.tsx');
+const bookingDrawer = read(
+  'app/barbershops/components/booking-drawer-canonical.tsx',
+);
 const sidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
 
 assert.match(migration, /create table if not exists public\.booking_waitlist/i);
-assert.match(migration, /barbershop_id uuid not null references public\.barbershops/i);
+assert.match(
+  migration,
+  /barbershop_id uuid not null references public\.barbershops/i,
+);
 assert.match(migration, /enable row level security/i);
-assert.match(migration, /revoke all on table public\.booking_waitlist from public, anon, authenticated/i);
-assert.match(migration, /grant all on table public\.booking_waitlist to service_role/i);
+assert.match(
+  migration,
+  /revoke all on table public\.booking_waitlist from public, anon, authenticated/i,
+);
+assert.match(
+  migration,
+  /grant all on table public\.booking_waitlist to service_role/i,
+);
 assert.match(migration, /booking_waitlist_active_duplicate_uidx/i);
 assert.match(migration, /offered_date date/i);
 assert.match(migration, /offered_time time/i);
 
-assert.match(offersMigration, /create table if not exists public\.booking_waitlist_vacancies/i);
+assert.match(
+  offersMigration,
+  /create table if not exists public\.booking_waitlist_vacancies/i,
+);
 assert.match(offersMigration, /appointments_enqueue_waitlist_vacancy/i);
 assert.match(offersMigration, /appointments_sync_booking_waitlist_vacancies/i);
 assert.match(offersMigration, /new\.date_hour at time zone 'UTC'/i);
@@ -39,14 +58,22 @@ assert.match(offersMigration, /release_booking_waitlist_offer/i);
 assert.match(offersMigration, /complete_booking_waitlist_offer_delivery/i);
 assert.match(offersMigration, /silentra-booking-waitlist-offers/i);
 assert.match(offersMigration, /for update skip locked/i);
-assert.match(offersMigration, /slot_time < v_vacancy\.slot_time \+ make_interval/i);
+assert.match(
+  offersMigration,
+  /slot_time < v_vacancy\.slot_time \+ make_interval/i,
+);
 assert.match(offersMigration, /other\.professional_id is null/i);
 assert.match(offersMigration, /An overlapping offer is still active/i);
 assert.match(offersMigration, /interval '20 minutes'/i);
-const sqlFunctionLines = offersMigration.split(String.fromCharCode(10)).map((line) => line.trim());
+const sqlFunctionLines = offersMigration
+  .split(String.fromCharCode(10))
+  .map((line) => line.trim());
 assert.equal(sqlFunctionLines.filter((line) => line === 'as $$').length, 8);
 assert.equal(sqlFunctionLines.filter((line) => line === '$$;').length, 8);
-assert.equal(sqlFunctionLines.some((line) => line === 'as $' || line === '$;'), false);
+assert.equal(
+  sqlFunctionLines.some((line) => line === 'as $' || line === '$;'),
+  false,
+);
 
 assert.match(offersWorker, /const BATCH_SIZE = 10/);
 assert.match(offersWorker, /withApiObservability/);
@@ -80,7 +107,10 @@ assert.match(dashboardApi, /requireTenantAuthorization/);
 assert.match(dashboardApi, /barbershop_member_permissions/);
 assert.match(dashboardApi, /resolveAccessPlanForUser/);
 assert.match(dashboardApi, /hasPlanFeature\(plan, 'waitlist'\)/);
-assert.match(dashboardApi, /eq\('barbershop_id', access\.tenant\.barbershopId\)/);
+assert.match(
+  dashboardApi,
+  /eq\('barbershop_id', access\.tenant\.barbershopId\)/,
+);
 assert.match(publicApi, /getAccessPlanForBarbershop/);
 assert.match(publicApi, /plan !== 'enterprise'/);
 assert.match(dashboardPage, /hasFeature\('waitlist'\)/);
@@ -92,7 +122,10 @@ assert.match(bookingDrawer, /setShopPlan\(payload\.plan/);
 assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
 assert.match(offersWorker, /profile\.plan !== 'enterprise'/);
 assert.match(dashboardApi, /allowedStatuses/);
-assert.match(dashboardApi, /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/);
+assert.match(
+  dashboardApi,
+  /!\['booked', 'cancelled', 'expired'\]\.includes\(status\)/,
+);
 
 assert.match(bookingDrawer, /\/api\/shops\/\$\{shop\.id\}\/waitlist/);
 assert.match(bookingDrawer, /selectedDate/);

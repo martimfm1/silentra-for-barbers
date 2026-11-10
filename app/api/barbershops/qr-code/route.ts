@@ -67,9 +67,12 @@ async function GET__unobserved(request: Request) {
         slug: canCustomize
           ? shopResult.data.custom_slug || shopResult.data.slug
           : shopResult.data.slug,
-        publicUrl: getQrPublicUrl(tenant.barbershopId, canCustomize
-          ? shopResult.data.custom_slug || shopResult.data.slug
-          : shopResult.data.slug),
+        publicUrl: getQrPublicUrl(
+          tenant.barbershopId,
+          canCustomize
+            ? shopResult.data.custom_slug || shopResult.data.slug
+            : shopResult.data.slug,
+        ),
         name: barbershopResult.data?.name || 'Barbearia',
         text: barbershopResult.data?.qr_code_text || DEFAULT_QR_TEXT,
         plan,
@@ -109,10 +112,7 @@ async function PATCH__unobserved(request: Request) {
 
   const text = body.text.trim();
   if (text.length > 160)
-    return jsonError(
-      'A legenda pode ter no máximo 160 caracteres.',
-      400,
-    );
+    return jsonError('A legenda pode ter no máximo 160 caracteres.', 400);
 
   try {
     const plan = await BarbershopStripeService.getEffectivePlan(tenant.userId);
@@ -179,7 +179,10 @@ async function PATCH__unobserved(request: Request) {
         shop: shopUpdateError?.code ?? null,
         text: textUpdateError?.code ?? null,
       });
-      return jsonError('Nao foi possivel guardar as definicoes do QR code.', 500);
+      return jsonError(
+        'Nao foi possivel guardar as definicoes do QR code.',
+        500,
+      );
     }
 
     return NextResponse.json(

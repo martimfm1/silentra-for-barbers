@@ -2,7 +2,10 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { getAccessPlanForRequest } from '@/services/billing/plan-access.guard';
 import { assertFeature } from '@/lib/billing/entitlements';
-import { requireModuleContext, moduleErrorResponse } from '@/services/modules/authorization';
+import {
+  requireModuleContext,
+  moduleErrorResponse,
+} from '@/services/modules/authorization';
 import { readJsonObject } from '@/lib/security/request-validation';
 
 function parseNumber(value: unknown, fallback: number) {
@@ -76,7 +79,10 @@ async function GET__unobserved() {
   } catch (error) {
     const moduleResponse = moduleErrorResponse(error);
     if (moduleResponse) return moduleResponse;
-    console.error('[LOYALTY_GET]', error instanceof Error ? error.name : 'UnknownError');
+    console.error(
+      '[LOYALTY_GET]',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
     return NextResponse.json(
       { error: 'Unable to load loyalty data' },
       { status: 500 },
@@ -197,7 +203,10 @@ async function PATCH__unobserved(request: Request) {
   } catch (error) {
     const moduleResponse = moduleErrorResponse(error);
     if (moduleResponse) return moduleResponse;
-    console.error('[LOYALTY_PATCH]', error instanceof Error ? error.name : 'UnknownError');
+    console.error(
+      '[LOYALTY_PATCH]',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
     return NextResponse.json(
       { error: 'Unable to save loyalty settings' },
       { status: 500 },

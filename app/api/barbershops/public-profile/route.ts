@@ -170,21 +170,37 @@ async function PATCH__unobserved(request: Request) {
 
     if (body.city !== undefined) {
       const city = cleanText(body.city, 100);
-      if (!city) return jsonError('Indica uma cidade ou localidade válida.', 400);
+      if (!city)
+        return jsonError('Indica uma cidade ou localidade válida.', 400);
       updates.city = city;
     }
 
     if (body.price !== undefined) {
-      const price = typeof body.price === 'number' ? body.price : Number(body.price);
+      const price =
+        typeof body.price === 'number' ? body.price : Number(body.price);
       if (!Number.isFinite(price) || price < 0 || price > 10000)
-        return jsonError('O preço de referência tem de estar entre 0 € e 10 000 €.', 400);
+        return jsonError(
+          'O preço de referência tem de estar entre 0 € e 10 000 €.',
+          400,
+        );
       updates.price = Math.round(price * 100) / 100;
     }
 
     if (body.tags !== undefined) {
-      if (!Array.isArray(body.tags) || body.tags.length > 12 || body.tags.some((tag) => typeof tag !== 'string'))
-        return jsonError('A lista de serviços e características é inválida.', 400);
-      updates.tags = [...new Set(body.tags.map((tag) => tag.trim().slice(0, 60)).filter(Boolean))];
+      if (
+        !Array.isArray(body.tags) ||
+        body.tags.length > 12 ||
+        body.tags.some((tag) => typeof tag !== 'string')
+      )
+        return jsonError(
+          'A lista de serviços e características é inválida.',
+          400,
+        );
+      updates.tags = [
+        ...new Set(
+          body.tags.map((tag) => tag.trim().slice(0, 60)).filter(Boolean),
+        ),
+      ];
     }
 
     if (body.amenities !== undefined) {

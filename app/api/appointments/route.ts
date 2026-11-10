@@ -401,7 +401,8 @@ async function POST__unobserved(request: Request) {
         { error: 'Não foi possível carregar as definições da agenda.' },
         { status: 503 },
       );
-    const autoConfirmManual = bookingSettings.auto_confirm_manual_bookings !== false;
+    const autoConfirmManual =
+      bookingSettings.auto_confirm_manual_bookings !== false;
 
     const { data: service } = await admin
       .from('services')
@@ -469,21 +470,26 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    void notifyBarbersOfNewBooking({
-      appointmentId: appointment.id,
-      barbershopId,
-      professionalId,
-      customerName: clientName || 'Cliente',
-      customerPhone: clientPhone,
-      customerEmail: clientEmail,
-      serviceName: service.name || 'Serviço',
-      date,
-      time: dateHour.slice(0, 5),
-      durationMinutes,
-      status: autoConfirmManual ? 'confirmed' : 'pending',
-    }, { sendEmail: false }).catch((notificationError) =>
-      console.error('[APPOINTMENT_PUSH_NOTIFICATION_ERROR]',
-        notificationError instanceof Error ? notificationError.name : 'UNKNOWN'),
+    void notifyBarbersOfNewBooking(
+      {
+        appointmentId: appointment.id,
+        barbershopId,
+        professionalId,
+        customerName: clientName || 'Cliente',
+        customerPhone: clientPhone,
+        customerEmail: clientEmail,
+        serviceName: service.name || 'Serviço',
+        date,
+        time: dateHour.slice(0, 5),
+        durationMinutes,
+        status: autoConfirmManual ? 'confirmed' : 'pending',
+      },
+      { sendEmail: false },
+    ).catch((notificationError) =>
+      console.error(
+        '[APPOINTMENT_PUSH_NOTIFICATION_ERROR]',
+        notificationError instanceof Error ? notificationError.name : 'UNKNOWN',
+      ),
     );
 
     return NextResponse.json({ success: true, appointment }, { status: 201 });

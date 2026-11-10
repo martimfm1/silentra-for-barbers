@@ -583,7 +583,8 @@ export function MarketingWorkspace({
             <h1 className="text-2xl font-semibold">Marketing avançado</h1>
             <FeaturePlanBadge feature="marketing_campaigns" />
             <p className="text-muted-foreground">
-              Campanhas de email, automações e resultados de entrega num só lugar.
+              Campanhas de email, automações e resultados de entrega num só
+              lugar.
             </p>
             <Button asChild>
               <Link href="/dashboard/billing">Ver plano</Link>
@@ -739,7 +740,10 @@ export function MarketingWorkspace({
             {loading && campaigns.length === 0 ? (
               <Card className="border-white/10 bg-white/[0.02]">
                 <CardContent className="py-6">
-                  <SilentraLoading variant="compact" message="A carregar campanhas…" />
+                  <SilentraLoading
+                    variant="compact"
+                    message="A carregar campanhas…"
+                  />
                 </CardContent>
               </Card>
             ) : filtered.length === 0 ? (
@@ -788,7 +792,9 @@ export function MarketingWorkspace({
                             aria-label="Email"
                           />
                         ) : (
-                          <span className="rounded-full border border-amber-300/15 bg-amber-300/[.06] px-2 py-1 text-[10px] font-medium text-amber-200">SMS · suspenso</span>
+                          <span className="rounded-full border border-amber-300/15 bg-amber-300/[.06] px-2 py-1 text-[10px] font-medium text-amber-200">
+                            SMS · suspenso
+                          </span>
                         )}
                       </div>
                       <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-white/10 bg-black/10 p-3 text-xs sm:grid-cols-4">
@@ -863,7 +869,11 @@ export function MarketingWorkspace({
                         <Button
                           size="sm"
                           onClick={() => void sendCampaign(campaign)}
-                          disabled={!editable || campaign.channel === 'sms' || sendingId === campaign.id}
+                          disabled={
+                            !editable ||
+                            campaign.channel === 'sms' ||
+                            sendingId === campaign.id
+                          }
                         >
                           {sendingId === campaign.id ? (
                             <Loader2

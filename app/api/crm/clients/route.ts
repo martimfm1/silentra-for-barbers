@@ -21,7 +21,6 @@ type CrmClientPageRow = {
   last_visit: string | null;
 };
 
-
 async function GET__unobserved(req: Request) {
   try {
     const tenant = await requireModuleContext('clients', 'clients', req);
@@ -37,7 +36,9 @@ async function GET__unobserved(req: Request) {
       ? Math.min(Math.max(Math.trunc(parsedOffset), 0), 100_000)
       : 0;
 
-    const sort = ['name', 'visits', 'spent'].includes(url.searchParams.get('sort') ?? '')
+    const sort = ['name', 'visits', 'spent'].includes(
+      url.searchParams.get('sort') ?? '',
+    )
       ? url.searchParams.get('sort')!
       : 'recent';
     let countQuery = tenant.admin
@@ -63,7 +64,10 @@ async function GET__unobserved(req: Request) {
       }),
     ]);
     if (countError || error) {
-      console.error('[CRM_CLIENTS_LIST_ERROR]', countError?.code ?? error?.code ?? 'UNKNOWN');
+      console.error(
+        '[CRM_CLIENTS_LIST_ERROR]',
+        countError?.code ?? error?.code ?? 'UNKNOWN',
+      );
       return NextResponse.json(
         { error: 'Não foi possível carregar os clientes.' },
         { status: 503 },

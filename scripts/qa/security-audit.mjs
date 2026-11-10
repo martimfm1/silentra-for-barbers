@@ -552,7 +552,8 @@ const requestValidationChecks = [
       'const canCustomizeSlug = planSupportsCustomSlug(plan);',
       'planSupportsCustomSlug(plan)',
     ],
-    label: 'Public URL changes require server-verified Pro or Enterprise entitlement',
+    label:
+      'Public URL changes require server-verified Pro or Enterprise entitlement',
   },
   {
     file: 'app/api/silentra-admin/loyalty/points/route.ts',
@@ -572,7 +573,8 @@ const requestValidationChecks = [
       'grant execute on function public.admin_grant_loyalty_points_by_email',
       'to service_role;',
     ],
-    label: 'Admin loyalty grant RPC returns explicit types and is service-role-only',
+    label:
+      'Admin loyalty grant RPC returns explicit types and is service-role-only',
   },
   {
     file: 'app/api/loyalty/route.ts',

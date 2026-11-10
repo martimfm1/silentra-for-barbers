@@ -60,12 +60,24 @@ async function POST__unobserved(
     ) {
       await admin
         .from('appointments')
-        .update({ status: 'cancelled', payment_status: 'expired', cancelled_at: new Date().toISOString(), cancellation_reason: 'Pré-pagamento MB WAY não validado dentro do prazo.', cancellation_actor: 'system', cancellation_actor_name: 'Sistema' })
+        .update({
+          status: 'cancelled',
+          payment_status: 'expired',
+          cancelled_at: new Date().toISOString(),
+          cancellation_reason:
+            'Pré-pagamento MB WAY não validado dentro do prazo.',
+          cancellation_actor: 'system',
+          cancellation_actor_name: 'Sistema',
+        })
         .eq('id', appointmentId)
         .eq('barbershop_id', barbershopId)
         .eq('status', 'pending');
       return NextResponse.json(
-        { success: false, error: 'O prazo para validar este pré-pagamento terminou. O horário foi libertado.' },
+        {
+          success: false,
+          error:
+            'O prazo para validar este pré-pagamento terminou. O horário foi libertado.',
+        },
         { status: 409 },
       );
     }
@@ -144,7 +156,10 @@ async function POST__unobserved(
       .update({
         status: 'scheduled',
         ...(isPrepaymentReview
-          ? { payment_status: 'confirmed', payment_reviewed_at: new Date().toISOString() }
+          ? {
+              payment_status: 'confirmed',
+              payment_reviewed_at: new Date().toISOString(),
+            }
           : {}),
       })
       .eq('id', appointmentId)

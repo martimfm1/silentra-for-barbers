@@ -33,7 +33,9 @@ export default function ClientesPage() {
   const [totalClients, setTotalClients] = useState(0);
   const [searchClientQuery, setSearchClientQuery] = useState('');
   const [offset, setOffset] = useState(0);
-  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'visits' | 'spent'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'visits' | 'spent'>(
+    'recent',
+  );
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -183,11 +185,12 @@ export default function ClientesPage() {
             onViewClient={(client) => setSelectedClientId(client.id)}
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={(page) =>
-              setOffset((page - 1) * CLIENTS_PAGE_SIZE)
-            }
+            onPageChange={(page) => setOffset((page - 1) * CLIENTS_PAGE_SIZE)}
             sortBy={sortBy}
-            setSortBy={(value) => { setSortBy(value); setOffset(0); }}
+            setSortBy={(value) => {
+              setSortBy(value);
+              setOffset(0);
+            }}
             loading={loadingClients}
           />
         )}
@@ -257,7 +260,10 @@ function EditClientDialog({
         {editingClient && (
           <form onSubmit={onUpdate} className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <label htmlFor="edit-client-name" className="text-xs text-zinc-400">
+              <label
+                htmlFor="edit-client-name"
+                className="text-xs text-zinc-400"
+              >
                 {t('clientsPage.name')}
               </label>
               <input
@@ -273,7 +279,10 @@ function EditClientDialog({
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="edit-client-phone" className="text-xs text-zinc-400">
+              <label
+                htmlFor="edit-client-phone"
+                className="text-xs text-zinc-400"
+              >
                 {t('clientsPage.phone')}
               </label>
               <input
@@ -290,7 +299,10 @@ function EditClientDialog({
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="edit-client-email" className="text-xs text-zinc-400">
+              <label
+                htmlFor="edit-client-email"
+                className="text-xs text-zinc-400"
+              >
                 {t('auth.email')}
               </label>
               <input
@@ -311,7 +323,9 @@ function EditClientDialog({
                 className="text-xs text-zinc-400"
               >
                 {t('clientsPage.birthDate')}{' '}
-                <span className="text-zinc-600">{t('clientsPage.optional')}</span>
+                <span className="text-zinc-600">
+                  {t('clientsPage.optional')}
+                </span>
               </label>
               <input
                 id="edit-client-birth-date"
@@ -329,7 +343,10 @@ function EditClientDialog({
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="edit-client-style-notes" className="text-xs text-zinc-400">
+              <label
+                htmlFor="edit-client-style-notes"
+                className="text-xs text-zinc-400"
+              >
                 {t('crmDetail.styleNotes')}
               </label>
               <Textarea
@@ -352,7 +369,11 @@ function EditClientDialog({
                 disabled={loading}
                 className="min-h-11 w-full bg-blue-600 text-white hover:bg-blue-500"
               >
-                {loading ? <Spinner className="size-4" /> : t('clientsPage.saveChanges')}
+                {loading ? (
+                  <Spinner className="size-4" />
+                ) : (
+                  t('clientsPage.saveChanges')
+                )}
               </Button>
             </DialogFooter>
           </form>

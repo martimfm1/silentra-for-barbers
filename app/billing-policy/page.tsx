@@ -7,11 +7,13 @@ const CANONICAL_URL = 'https://barbers.silentra.me/billing-policy';
 
 export const metadata: Metadata = {
   title: 'Política de Faturação',
-  description: 'Regras de planos, pagamentos, renovações, cancelamentos, promoções e pedidos de reembolso da Silentra for Barbers.',
+  description:
+    'Regras de planos, pagamentos, renovações, cancelamentos, promoções e pedidos de reembolso da Silentra for Barbers.',
   alternates: { canonical: CANONICAL_URL },
   openGraph: {
     title: 'Política de Faturação | Silentra for Barbers',
-    description: 'Regras de planos, pagamentos, renovações, cancelamentos, promoções e pedidos de reembolso da Silentra for Barbers.',
+    description:
+      'Regras de planos, pagamentos, renovações, cancelamentos, promoções e pedidos de reembolso da Silentra for Barbers.',
     url: CANONICAL_URL,
     siteName: 'Silentra',
     locale: 'pt_PT',
@@ -33,17 +35,26 @@ export default function BillingPolicyPage() {
       highlights={[
         {
           label: { pt: 'Preço e periodicidade', en: 'Price and interval' },
-          value: { pt: 'Consulta o total e a data de renovação antes de confirmar no checkout.', en: 'Review the total and renewal date before confirming at checkout.' },
+          value: {
+            pt: 'Consulta o total e a data de renovação antes de confirmar no checkout.',
+            en: 'Review the total and renewal date before confirming at checkout.',
+          },
           icon: <Receipt className="size-4" />,
         },
         {
           label: { pt: 'Pagamento manual', en: 'Manual payment' },
-          value: { pt: 'O acesso pago só é ativado depois de a Silentra confirmar o recebimento.', en: 'Paid access is enabled only after Silentra confirms receipt.' },
+          value: {
+            pt: 'O acesso pago só é ativado depois de a Silentra confirmar o recebimento.',
+            en: 'Paid access is enabled only after Silentra confirms receipt.',
+          },
           icon: <CreditCard className="size-4" />,
         },
         {
           label: { pt: 'Cancelamento', en: 'Cancellation' },
-          value: { pt: 'Usa o fluxo da área de faturação e guarda a confirmação.', en: 'Use the billing area flow and keep the confirmation.' },
+          value: {
+            pt: 'Usa o fluxo da área de faturação e guarda a confirmação.',
+            en: 'Use the billing area flow and keep the confirmation.',
+          },
           icon: <RefreshCw className="size-4" />,
         },
       ]}

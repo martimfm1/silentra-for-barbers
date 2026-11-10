@@ -107,7 +107,10 @@ function parseConfig(value: unknown): DashboardConfig | null {
   const input = value as Record<string, unknown>;
   if (
     Object.keys(input).some(
-      (key) => !['shortcuts', 'visibleMetrics', 'sections', 'accentColor'].includes(key),
+      (key) =>
+        !['shortcuts', 'visibleMetrics', 'sections', 'accentColor'].includes(
+          key,
+        ),
     )
   )
     return null;
@@ -132,9 +135,7 @@ function parseConfig(value: unknown): DashboardConfig | null {
     return null;
   const visibleMetrics = [...new Set(visibleMetricsInput)];
   if (
-    visibleMetrics.some(
-      (id) => typeof id !== 'string' || !METRIC_IDS.has(id),
-    )
+    visibleMetrics.some((id) => typeof id !== 'string' || !METRIC_IDS.has(id))
   )
     return null;
 

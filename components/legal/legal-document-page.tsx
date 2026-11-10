@@ -52,7 +52,11 @@ const legalLinks = [
   { href: '/cookies', pt: 'Cookies', en: 'Cookies' },
   { href: '/booking-terms', pt: 'Reservas', en: 'Bookings' },
   { href: '/billing-policy', pt: 'Faturação', en: 'Billing' },
-  { href: '/dpa', pt: 'Adenda de tratamento (DPA)', en: 'Data Processing Addendum' },
+  {
+    href: '/dpa',
+    pt: 'Adenda de tratamento (DPA)',
+    en: 'Data Processing Addendum',
+  },
   { href: '/subprocessors', pt: 'Subprocessadores', en: 'Subprocessors' },
 ] as const;
 
@@ -74,8 +78,10 @@ const ui = {
     entityTaxId: 'NIF',
     entityRegistration: 'N.º de registo (se aplicável)',
     entityPhone: 'Telefone',
-    entityMissing: 'A identificação da entidade exploradora ainda não está configurada. Antes da publicação, adiciona a denominação legal, a morada geográfica e o NIF oficiais.',
-    supportHint: 'Para pedidos, esclarecimentos ou exercício de direitos, utiliza o contacto indicado. Não envies palavras-passe, códigos de autenticação ou dados de cartão por email.',
+    entityMissing:
+      'A identificação da entidade exploradora ainda não está configurada. Antes da publicação, adiciona a denominação legal, a morada geográfica e o NIF oficiais.',
+    supportHint:
+      'Para pedidos, esclarecimentos ou exercício de direitos, utiliza o contacto indicado. Não envies palavras-passe, códigos de autenticação ou dados de cartão por email.',
     allDocuments: 'Todos os documentos',
     goHome: 'Voltar ao site',
   },
@@ -96,8 +102,10 @@ const ui = {
     entityTaxId: 'Tax number',
     entityRegistration: 'Registration no. (if applicable)',
     entityPhone: 'Phone',
-    entityMissing: 'The platform operator’s legal identity is not configured yet. Add the official legal name, geographic address, and tax number before making the platform public.',
-    supportHint: 'For requests, questions, or to exercise your rights, use the contact below. Do not email passwords, authentication codes, or card details.',
+    entityMissing:
+      'The platform operator’s legal identity is not configured yet. Add the official legal name, geographic address, and tax number before making the platform public.',
+    supportHint:
+      'For requests, questions, or to exercise your rights, use the contact below. Do not email passwords, authentication codes, or card details.',
     allDocuments: 'All documents',
     goHome: 'Back to website',
   },
@@ -138,10 +146,15 @@ export function LegalDocumentPage({
   );
 
   const entityName = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME || '').trim();
-  const entityAddress =
-    (process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS || '').trim();
-  const entityTaxId = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID || '').trim();
-  const entityRegistration = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION || '').trim();
+  const entityAddress = (
+    process.env.NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS || ''
+  ).trim();
+  const entityTaxId = (
+    process.env.NEXT_PUBLIC_LEGAL_ENTITY_TAX_ID || ''
+  ).trim();
+  const entityRegistration = (
+    process.env.NEXT_PUBLIC_LEGAL_ENTITY_REGISTRATION || ''
+  ).trim();
   const entityPhone = (process.env.NEXT_PUBLIC_LEGAL_ENTITY_PHONE || '').trim();
   const hasLegalIdentity = Boolean(entityName && entityAddress && entityTaxId);
 
@@ -196,7 +209,10 @@ export function LegalDocumentPage({
           </div>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label={copy.summary}>
+        <section
+          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          aria-label={copy.summary}
+        >
           {highlights.map((highlight) => (
             <div
               key={highlight.label.pt}
@@ -224,7 +240,10 @@ export function LegalDocumentPage({
                 {document.intro}
               </p>
               <label className="mt-5 flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 focus-within:border-violet-400/60 focus-within:ring-2 focus-within:ring-violet-400/20">
-                <Search className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+                <Search
+                  className="size-4 shrink-0 text-zinc-500"
+                  aria-hidden="true"
+                />
                 <span className="sr-only">{copy.search}</span>
                 <input
                   type="search"
@@ -280,7 +299,10 @@ export function LegalDocumentPage({
               className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
             >
               <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <FileText className="size-4 text-violet-300" aria-hidden="true" />
+                <FileText
+                  className="size-4 text-violet-300"
+                  aria-hidden="true"
+                />
                 {copy.contents}
               </h2>
               <details className="mt-3 lg:hidden">
@@ -315,7 +337,9 @@ export function LegalDocumentPage({
             </nav>
 
             <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
-              <h2 className="text-sm font-semibold text-white">{copy.contact}</h2>
+              <h2 className="text-sm font-semibold text-white">
+                {copy.contact}
+              </h2>
               <p className="mt-2 text-xs leading-5 text-zinc-400">
                 {supportLabel[activeLocale]}
               </p>
@@ -326,11 +350,15 @@ export function LegalDocumentPage({
                 <Mail className="size-4" aria-hidden="true" />
                 {supportValue}
               </a>
-              <p className="mt-3 text-xs leading-5 text-zinc-500">{copy.supportHint}</p>
+              <p className="mt-3 text-xs leading-5 text-zinc-500">
+                {copy.supportHint}
+              </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
-              <h2 className="text-sm font-semibold text-white">{copy.entity}</h2>
+              <h2 className="text-sm font-semibold text-white">
+                {copy.entity}
+              </h2>
               {hasLegalIdentity ? (
                 <dl className="mt-3 space-y-3 text-xs">
                   <div>
@@ -347,8 +375,12 @@ export function LegalDocumentPage({
                   </div>
                   {entityRegistration ? (
                     <div>
-                      <dt className="text-zinc-500">{copy.entityRegistration}</dt>
-                      <dd className="mt-1 text-zinc-200">{entityRegistration}</dd>
+                      <dt className="text-zinc-500">
+                        {copy.entityRegistration}
+                      </dt>
+                      <dd className="mt-1 text-zinc-200">
+                        {entityRegistration}
+                      </dd>
                     </div>
                   ) : null}
                   {entityPhone ? (
@@ -359,14 +391,18 @@ export function LegalDocumentPage({
                   ) : null}
                 </dl>
               ) : (
-                <p className="mt-2 text-xs leading-5 text-amber-200/90">{copy.entityMissing}</p>
+                <p className="mt-2 text-xs leading-5 text-amber-200/90">
+                  {copy.entityMissing}
+                </p>
               )}
             </div>
           </aside>
         </div>
 
         <nav
-          aria-label={activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'}
+          aria-label={
+            activeLocale === 'pt' ? 'Documentos legais' : 'Legal documents'
+          }
           className="flex flex-wrap gap-2 border-t border-white/10 pt-5 text-xs text-zinc-400 print:hidden"
         >
           {legalLinks.map((link) => (

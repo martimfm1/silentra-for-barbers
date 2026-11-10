@@ -214,7 +214,10 @@ export default function CustomWebsiteDashboardPage() {
 
   if (planLoading || loading) {
     return (
-      <SilentraLoading variant="dashboard" message={pt ? 'A carregar os teus sites…' : 'Loading your websites…'} />
+      <SilentraLoading
+        variant="dashboard"
+        message={pt ? 'A carregar os teus sites…' : 'Loading your websites…'}
+      />
     );
   }
 
@@ -338,9 +341,7 @@ export default function CustomWebsiteDashboardPage() {
             {pt ? 'Site próprio' : 'Custom website'}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-            {pt
-              ? 'A ativação do site custa'
-              : 'Website activation costs'}{' '}
+            {pt ? 'A ativação do site custa' : 'Website activation costs'}{' '}
             <span className="font-medium text-zinc-100">
               {access.setupFee.toLocaleString(
                 locale === 'en' ? 'en-GB' : 'pt-PT',

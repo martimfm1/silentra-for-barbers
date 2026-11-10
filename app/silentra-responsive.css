@@ -462,7 +462,6 @@ body
   }
 }
 
-
 /* Dashboard viewport contract: every route stays within the viewport, with no
    document-level horizontal pan or artificial right-side gutter. */
 html:has(.silentra-dashboard-shell),

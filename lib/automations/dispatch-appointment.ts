@@ -111,7 +111,10 @@ export async function dispatchAppointmentAutomations(
 
       // Review requests are sent by the dedicated, single-use review flow.
       // Skip legacy booking-completed rules that would send a second request.
-      if (trigger === 'booking_completed' && isReviewRequestContent(subject, body)) {
+      if (
+        trigger === 'booking_completed' &&
+        isReviewRequestContent(subject, body)
+      ) {
         continue;
       }
 

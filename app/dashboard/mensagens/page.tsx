@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  Mail,
-  Send,
-  Eye,
-  ShieldCheck,
-} from 'lucide-react';
+import { Mail, Send, Eye, ShieldCheck } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -235,17 +230,25 @@ export default function MensagensPage() {
   const insertQuickReply = (kind: 'confirm' | 'reschedule' | 'directions') => {
     const replies = english
       ? {
-          confirm: 'Could you please confirm that you will be attending your appointment? Thank you!',
-          reschedule: 'If you need to reschedule, reply to this email and we will help you find another available time.',
-          directions: 'If you need help finding us, reply to this email and we will send you the directions.',
+          confirm:
+            'Could you please confirm that you will be attending your appointment? Thank you!',
+          reschedule:
+            'If you need to reschedule, reply to this email and we will help you find another available time.',
+          directions:
+            'If you need help finding us, reply to this email and we will send you the directions.',
         }
       : {
-          confirm: 'Pode, por favor, confirmar se vai conseguir comparecer à sua marcação? Obrigado!',
-          reschedule: 'Se precisar de reagendar, responda a este email e ajudamos a encontrar outro horário disponível.',
-          directions: 'Se precisar de ajuda para chegar até nós, responda a este email e enviamos as indicações.',
+          confirm:
+            'Pode, por favor, confirmar se vai conseguir comparecer à sua marcação? Obrigado!',
+          reschedule:
+            'Se precisar de reagendar, responda a este email e ajudamos a encontrar outro horário disponível.',
+          directions:
+            'Se precisar de ajuda para chegar até nós, responda a este email e enviamos as indicações.',
         };
     const reply = replies[kind];
-    setBody((current) => current.trim() ? `${current.trim()}\n\n${reply}` : reply);
+    setBody((current) =>
+      current.trim() ? `${current.trim()}\n\n${reply}` : reply,
+    );
     setTemplate('custom');
   };
 
@@ -304,8 +307,6 @@ export default function MensagensPage() {
           </Badge>
         </header>
 
-
-
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
           <Card className="dashboard-card min-w-0 rounded-2xl border-white/[.08] bg-white/[.025] shadow-none">
             <CardHeader className="border-b border-white/10 pb-5">
@@ -344,9 +345,16 @@ export default function MensagensPage() {
                     {clients
                       .filter((client) => {
                         if (!client.email) return false;
-                        const query = clientSearch.trim().toLocaleLowerCase('pt-PT');
+                        const query = clientSearch
+                          .trim()
+                          .toLocaleLowerCase('pt-PT');
                         const name = client.name_complete || client.name || '';
-                        return !query || `${name} ${client.email}`.toLocaleLowerCase('pt-PT').includes(query);
+                        return (
+                          !query ||
+                          `${name} ${client.email}`
+                            .toLocaleLowerCase('pt-PT')
+                            .includes(query)
+                        );
                       })
                       .map((client) => (
                         <SelectItem key={client.id} value={client.id}>
@@ -413,13 +421,38 @@ export default function MensagensPage() {
                   />
                   <div className="space-y-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
                     <div>
-                      <p className="text-sm font-medium text-zinc-200">{copy.quickReplies}</p>
-                      <p className="mt-0.5 text-xs text-zinc-500">{copy.quickReplyHint}</p>
+                      <p className="text-sm font-medium text-zinc-200">
+                        {copy.quickReplies}
+                      </p>
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        {copy.quickReplyHint}
+                      </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('confirm')}>{copy.quickReplyConfirm}</Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('reschedule')}>{copy.quickReplyReschedule}</Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => insertQuickReply('directions')}>{copy.quickReplyDirections}</Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => insertQuickReply('confirm')}
+                      >
+                        {copy.quickReplyConfirm}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => insertQuickReply('reschedule')}
+                      >
+                        {copy.quickReplyReschedule}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => insertQuickReply('directions')}
+                      >
+                        {copy.quickReplyDirections}
+                      </Button>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
@@ -483,7 +516,6 @@ export default function MensagensPage() {
                 </div>
               </CardContent>
             </Card>
-
           </aside>
         </div>
       </div>

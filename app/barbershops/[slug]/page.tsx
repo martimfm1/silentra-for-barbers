@@ -182,7 +182,9 @@ async function getInitialPublicDetails(
       .order('created_at', { ascending: false }),
     database
       .from('barbershops')
-      .select('opening_time, closing_time, lunch_start, lunch_end, closed_days, require_birth_date')
+      .select(
+        'opening_time, closing_time, lunch_start, lunch_end, closed_days, require_birth_date',
+      )
       .eq('id', barbershopId)
       .maybeSingle(),
     database
@@ -339,7 +341,11 @@ export default async function BarbershopPage({
   }
 
   const initialData = await getInitialPublicDetails(profile);
-  if (profile.plan === 'enterprise' && !initialData.landing_page_url && !bookingMode) {
+  if (
+    profile.plan === 'enterprise' &&
+    !initialData.landing_page_url &&
+    !bookingMode
+  ) {
     console.error('[PUBLIC_BARBERSHOP]', {
       event: 'enterprise_landing_page_not_active',
       slug: profile.slug,
@@ -354,7 +360,10 @@ export default async function BarbershopPage({
     permanentRedirect(initialData.landing_page_url);
   }
 
-  if (profile.plan === 'pro' || (profile.plan === 'enterprise' && bookingMode)) {
+  if (
+    profile.plan === 'pro' ||
+    (profile.plan === 'enterprise' && bookingMode)
+  ) {
     const canonicalPath =
       profile.plan === 'enterprise'
         ? `/site/${encodeURIComponent(profile.slug)}`

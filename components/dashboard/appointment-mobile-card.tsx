@@ -58,7 +58,9 @@ export function AppointmentMobileCard({
       }}
       tabIndex={onDetails ? 0 : undefined}
       role={onDetails ? 'button' : undefined}
-      data-cursor-label={onDetails ? (isEnglish ? 'Open booking' : 'Ver marcação') : undefined}
+      data-cursor-label={
+        onDetails ? (isEnglish ? 'Open booking' : 'Ver marcação') : undefined
+      }
       aria-label={
         onDetails
           ? isEnglish
@@ -90,9 +92,7 @@ export function AppointmentMobileCard({
               href={`tel:${phone}`}
               onClick={(event) => event.stopPropagation()}
               className="mt-1.5 block w-fit text-xs text-zinc-500 underline-offset-4 hover:text-emerald-300 hover:underline"
-              aria-label={
-                isEnglish ? `Call ${name}` : `Ligar a ${name}`
-              }
+              aria-label={isEnglish ? `Call ${name}` : `Ligar a ${name}`}
             >
               {phone}
             </a>
@@ -122,14 +122,16 @@ export function AppointmentMobileCard({
           <p className="mt-1 truncate text-sm font-medium text-zinc-200">
             {service}
           </p>
-
         </div>
         <div className="min-w-0 rounded-xl border border-white/[0.055] bg-black/10 p-3">
           <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
             {isEnglish ? 'Barber' : 'Barbeiro'}
           </span>
           <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-sm font-medium text-zinc-200">
-            <User className="size-3.5 shrink-0 text-zinc-500" aria-hidden="true" />
+            <User
+              className="size-3.5 shrink-0 text-zinc-500"
+              aria-hidden="true"
+            />
             <span className="truncate">{professional}</span>
           </p>
         </div>

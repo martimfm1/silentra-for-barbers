@@ -74,7 +74,10 @@ export async function notifyBarbersOfNewBooking(
       .eq('active', true)
       .maybeSingle();
     if (error) {
-      console.error('[BARBER_BOOKING_NOTIFICATION_PROFESSIONAL_LOOKUP_FAILED]', error.code ?? 'UNKNOWN');
+      console.error(
+        '[BARBER_BOOKING_NOTIFICATION_PROFESSIONAL_LOOKUP_FAILED]',
+        error.code ?? 'UNKNOWN',
+      );
     }
     if (professional?.user_id) {
       const { data: user, error: userError } = await admin
@@ -85,14 +88,25 @@ export async function notifyBarbersOfNewBooking(
         .eq('role', 'barber')
         .maybeSingle();
       if (userError) {
-        console.error('[BARBER_BOOKING_NOTIFICATION_USER_LOOKUP_FAILED]', userError.code ?? 'UNKNOWN');
+        console.error(
+          '[BARBER_BOOKING_NOTIFICATION_USER_LOOKUP_FAILED]',
+          userError.code ?? 'UNKNOWN',
+        );
       }
       if (user?.id) {
-        recipients = [{
-          userId: user.id,
-          email: typeof user.email === 'string' ? user.email.trim().toLowerCase() : null,
-          name: user.name_complete?.trim() || professional.name?.trim() || 'Barbeiro',
-        }];
+        recipients = [
+          {
+            userId: user.id,
+            email:
+              typeof user.email === 'string'
+                ? user.email.trim().toLowerCase()
+                : null,
+            name:
+              user.name_complete?.trim() ||
+              professional.name?.trim() ||
+              'Barbeiro',
+          },
+        ];
       }
     }
   }
@@ -104,18 +118,26 @@ export async function notifyBarbersOfNewBooking(
       .eq('barbershop_id', input.barbershopId)
       .in('role', ['barber', 'owner', 'admin']);
     if (error) {
-      console.error('[BARBER_BOOKING_NOTIFICATION_RECIPIENT_LOOKUP_FAILED]', error.code ?? 'UNKNOWN');
+      console.error(
+        '[BARBER_BOOKING_NOTIFICATION_RECIPIENT_LOOKUP_FAILED]',
+        error.code ?? 'UNKNOWN',
+      );
       return;
     }
     recipients = (barbers ?? []).map((barber) => ({
       userId: barber.id,
-      email: typeof barber.email === 'string' ? barber.email.trim().toLowerCase() : null,
+      email:
+        typeof barber.email === 'string'
+          ? barber.email.trim().toLowerCase()
+          : null,
       name: barber.name_complete?.trim() || 'Barbeiro',
     }));
   }
 
   const uniqueRecipients = [
-    ...new Map(recipients.map((recipient) => [recipient.userId, recipient])).values(),
+    ...new Map(
+      recipients.map((recipient) => [recipient.userId, recipient]),
+    ).values(),
   ];
   if (!uniqueRecipients.length) {
     console.warn('[BARBER_BOOKING_NOTIFICATION_NO_RECIPIENT]');
@@ -154,12 +176,21 @@ export async function notifyBarbersOfNewBooking(
     ...(input.prepaymentReview
       ? [
           [isEnglish ? 'Payment' : 'Pagamento', 'MB WAY'] as [string, string],
-          [isEnglish ? 'Amount to verify' : 'Valor a validar', `${input.prepaymentReview.amount.toFixed(2)} €`] as [string, string],
-          [isEnglish ? 'Review before' : 'Validar até', new Date(input.prepaymentReview.expiresAt).toLocaleTimeString(isEnglish ? 'en-GB' : 'pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' })] as [string, string],
+          [
+            isEnglish ? 'Amount to verify' : 'Valor a validar',
+            `${input.prepaymentReview.amount.toFixed(2)} €`,
+          ] as [string, string],
+          [
+            isEnglish ? 'Review before' : 'Validar até',
+            new Date(input.prepaymentReview.expiresAt).toLocaleTimeString(
+              isEnglish ? 'en-GB' : 'pt-PT',
+              { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' },
+            ),
+          ] as [string, string],
         ]
       : []),
   ];
-  const htmlContent = `<!doctype html><html lang="${isEnglish ? 'en' : 'pt-PT'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:24px 12px;background:#f4f4f5;font-family:Arial,sans-serif;color:#18181b"><main style="max-width:560px;margin:0 auto;padding:28px;background:#fff;border:1px solid #e4e4e7;border-radius:16px"><p style="margin:0 0 8px;color:#71717a;font-size:13px">${escapeHtml(shop.name)}</p><h1 style="margin:0 0 12px;font-size:24px">${isEnglish ? 'You have a new booking' : 'Tens uma nova marcação'}</h1><p style="margin:0 0 20px;line-height:1.6">${input.prepaymentReview ? (isEnglish ? 'A new booking with MB WAY prepayment is waiting for you to verify the transfer and confirm the appointment.' : 'Tens uma nova marcação com pré-pagamento MB WAY. Verifica a transferência e confirma a marcação na dashboard.') : (isEnglish ? 'A new appointment has been booked at your barbershop.' : 'Foi feita uma nova marcação na tua barbearia.')}</p><table role="presentation" style="width:100%;border-collapse:collapse">${rows.map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e4e4e7;color:#71717a;vertical-align:top">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e4e4e7;text-align:right;font-weight:600;overflow-wrap:anywhere">${escapeHtml(value)}</td></tr>`).join('')}</table><p style="margin:20px 0 0;color:#71717a;font-size:12px">${isEnglish ? 'Booking reference' : 'Referência da marcação'}: ${escapeHtml(input.appointmentId)}</p></main></body></html>`;
+  const htmlContent = `<!doctype html><html lang="${isEnglish ? 'en' : 'pt-PT'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:24px 12px;background:#f4f4f5;font-family:Arial,sans-serif;color:#18181b"><main style="max-width:560px;margin:0 auto;padding:28px;background:#fff;border:1px solid #e4e4e7;border-radius:16px"><p style="margin:0 0 8px;color:#71717a;font-size:13px">${escapeHtml(shop.name)}</p><h1 style="margin:0 0 12px;font-size:24px">${isEnglish ? 'You have a new booking' : 'Tens uma nova marcação'}</h1><p style="margin:0 0 20px;line-height:1.6">${input.prepaymentReview ? (isEnglish ? 'A new booking with MB WAY prepayment is waiting for you to verify the transfer and confirm the appointment.' : 'Tens uma nova marcação com pré-pagamento MB WAY. Verifica a transferência e confirma a marcação na dashboard.') : isEnglish ? 'A new appointment has been booked at your barbershop.' : 'Foi feita uma nova marcação na tua barbearia.'}</p><table role="presentation" style="width:100%;border-collapse:collapse">${rows.map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e4e4e7;color:#71717a;vertical-align:top">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e4e4e7;text-align:right;font-weight:600;overflow-wrap:anywhere">${escapeHtml(value)}</td></tr>`).join('')}</table><p style="margin:20px 0 0;color:#71717a;font-size:12px">${isEnglish ? 'Booking reference' : 'Referência da marcação'}: ${escapeHtml(input.appointmentId)}</p></main></body></html>`;
 
   if (options.sendEmail !== false) {
     const emailRecipients = [
@@ -172,17 +203,22 @@ export async function notifyBarbersOfNewBooking(
           .map((recipient) => [recipient.email, recipient]),
       ).values(),
     ];
-    const results = await Promise.all(emailRecipients.map(async (recipient) => {
-      const result = await sendBrevoEmail({
-        to: recipient.email,
-        toName: recipient.name,
-        senderName: shop.name || 'Silentra for Barbers',
-        subject,
-        htmlContent,
-      });
-      if (!result.success) console.error('[BARBER_BOOKING_NOTIFICATION_SEND_FAILED]', { reason: result.error });
-      return result.success;
-    }));
+    const results = await Promise.all(
+      emailRecipients.map(async (recipient) => {
+        const result = await sendBrevoEmail({
+          to: recipient.email,
+          toName: recipient.name,
+          senderName: shop.name || 'Silentra for Barbers',
+          subject,
+          htmlContent,
+        });
+        if (!result.success)
+          console.error('[BARBER_BOOKING_NOTIFICATION_SEND_FAILED]', {
+            reason: result.error,
+          });
+        return result.success;
+      }),
+    );
     if (results.some((success) => !success)) {
       console.error('[BARBER_BOOKING_NOTIFICATION_PARTIAL_FAILURE]', {
         attempted: results.length,
@@ -192,16 +228,27 @@ export async function notifyBarbersOfNewBooking(
   }
 
   try {
-    await sendWebPushToUsers(uniqueRecipients.map((recipient) => recipient.userId), {
-      title: input.prepaymentReview
-        ? (isEnglish ? 'MB WAY payment to review' : 'Pré-pagamento MB WAY por validar')
-        : (isEnglish ? 'New booking' : 'Nova marcação'),
-      body: [input.serviceName, `${date} · ${input.time}`].filter(Boolean).join(' · '),
-      url: '/dashboard/agenda',
-      tag: `booking-${input.appointmentId}`,
-    });
+    await sendWebPushToUsers(
+      uniqueRecipients.map((recipient) => recipient.userId),
+      {
+        title: input.prepaymentReview
+          ? isEnglish
+            ? 'MB WAY payment to review'
+            : 'Pré-pagamento MB WAY por validar'
+          : isEnglish
+            ? 'New booking'
+            : 'Nova marcação',
+        body: [input.serviceName, `${date} · ${input.time}`]
+          .filter(Boolean)
+          .join(' · '),
+        url: '/dashboard/agenda',
+        tag: `booking-${input.appointmentId}`,
+      },
+    );
   } catch (pushError) {
-    console.error('[BARBER_BOOKING_PUSH_NOTIFICATION_ERROR]',
-      pushError instanceof Error ? pushError.name : 'UNKNOWN');
+    console.error(
+      '[BARBER_BOOKING_PUSH_NOTIFICATION_ERROR]',
+      pushError instanceof Error ? pushError.name : 'UNKNOWN',
+    );
   }
 }

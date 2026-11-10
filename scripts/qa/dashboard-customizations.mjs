@@ -16,7 +16,10 @@ assert.match(dashboard, /useDashboardCustomization/);
 assert.match(dashboard, /customization\.config\.shortcuts/);
 assert.match(dashboard, /customization\.config\.sections\.quickActions/);
 assert.match(dashboard, /customization\.config\.sections\.metrics/);
-assert.match(dashboard, /customization\.config\.visibleMetrics\.includes\(metric\.key\)/);
+assert.match(
+  dashboard,
+  /customization\.config\.visibleMetrics\.includes\(metric\.key\)/,
+);
 assert.match(dashboard, /visibleMetrics\.length > 0/);
 assert.match(dashboard, /customization\.config\.sections\.activityChart/);
 assert.match(
@@ -93,8 +96,14 @@ assert.match(editor, /Move up/);
 assert.match(editor, /Move down/);
 assert.match(editor, /__new__/);
 
-const dashboardLayout = await readFile('app/dashboard/dashboard-content.tsx', 'utf8');
-const sidebar = await readFile('app/dashboard/_components/DashboardSidebar.tsx', 'utf8');
+const dashboardLayout = await readFile(
+  'app/dashboard/dashboard-content.tsx',
+  'utf8',
+);
+const sidebar = await readFile(
+  'app/dashboard/_components/DashboardSidebar.tsx',
+  'utf8',
+);
 const globalStyles = await readFile('app/globals.css', 'utf8');
 
 assert.match(dashboardLayout, /DashboardCustomizationProvider/);

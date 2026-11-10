@@ -1,7 +1,10 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
-import { requireModuleContext, moduleErrorResponse } from '@/services/modules/authorization';
+import {
+  requireModuleContext,
+  moduleErrorResponse,
+} from '@/services/modules/authorization';
 
 type RewardType = 'discount' | 'free_service' | 'custom';
 const REWARD_TYPES = new Set<RewardType>([
@@ -55,10 +58,15 @@ async function POST__unobserved(request: Request) {
         : Number(body.reward_value);
     const activeValue = body?.active;
     if (activeValue !== undefined && typeof activeValue !== 'boolean')
-      return NextResponse.json({ error: 'Invalid active flag' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid active flag' },
+        { status: 400 },
+      );
     const active = activeValue ?? true;
     if (
-      (body?.description !== undefined && body.description !== null && typeof body.description !== 'string') ||
+      (body?.description !== undefined &&
+        body.description !== null &&
+        typeof body.description !== 'string') ||
       !name ||
       name.length > 120 ||
       !Number.isInteger(pointsCost) ||
@@ -117,7 +125,10 @@ async function POST__unobserved(request: Request) {
   } catch (error) {
     const moduleResponse = moduleErrorResponse(error);
     if (moduleResponse) return moduleResponse;
-    console.error('[LOYALTY_REWARD_POST]', error instanceof Error ? error.name : 'UnknownError');
+    console.error(
+      '[LOYALTY_REWARD_POST]',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
     return NextResponse.json(
       { error: 'Unable to create reward' },
       { status: 500 },
@@ -153,27 +164,49 @@ async function PATCH__unobserved(request: Request) {
       updated_at: new Date().toISOString(),
     };
     if (body?.name !== undefined) {
-      if (typeof body.name !== 'string' || !body.name.trim() || body.name.trim().length > 120)
-        return NextResponse.json({ error: 'Invalid reward name' }, { status: 400 });
+      if (
+        typeof body.name !== 'string' ||
+        !body.name.trim() ||
+        body.name.trim().length > 120
+      )
+        return NextResponse.json(
+          { error: 'Invalid reward name' },
+          { status: 400 },
+        );
       patch.name = body.name.trim();
     }
     if (body?.description !== undefined) {
       if (body.description !== null && typeof body.description !== 'string')
-        return NextResponse.json({ error: 'Invalid reward description' }, { status: 400 });
-      patch.description = typeof body.description === 'string' ? body.description.trim().slice(0, 1000) : null;
+        return NextResponse.json(
+          { error: 'Invalid reward description' },
+          { status: 400 },
+        );
+      patch.description =
+        typeof body.description === 'string'
+          ? body.description.trim().slice(0, 1000)
+          : null;
     }
     if (body?.points_cost !== undefined || body?.pointsCost !== undefined)
       patch.points_cost = Number(body.points_cost ?? body.pointsCost);
     if (body?.reward_type !== undefined) patch.reward_type = body.reward_type;
     if (body?.reward_value !== undefined) {
-      const value = body.reward_value === null || body.reward_value === '' ? null : Number(body.reward_value);
+      const value =
+        body.reward_value === null || body.reward_value === ''
+          ? null
+          : Number(body.reward_value);
       if (value !== null && (!Number.isFinite(value) || value < 0))
-        return NextResponse.json({ error: 'Invalid reward value' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Invalid reward value' },
+          { status: 400 },
+        );
       patch.reward_value = value;
     }
     if (body?.active !== undefined) {
       if (typeof body.active !== 'boolean')
-        return NextResponse.json({ error: 'Invalid active flag' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Invalid active flag' },
+          { status: 400 },
+        );
       patch.active = body.active;
     }
     if (
@@ -210,7 +243,10 @@ async function PATCH__unobserved(request: Request) {
   } catch (error) {
     const moduleResponse = moduleErrorResponse(error);
     if (moduleResponse) return moduleResponse;
-    console.error('[LOYALTY_REWARD_PATCH]', error instanceof Error ? error.name : 'UnknownError');
+    console.error(
+      '[LOYALTY_REWARD_PATCH]',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
     return NextResponse.json(
       { error: 'Unable to update reward' },
       { status: 500 },
@@ -241,7 +277,10 @@ async function DELETE__unobserved(request: Request) {
   } catch (error) {
     const moduleResponse = moduleErrorResponse(error);
     if (moduleResponse) return moduleResponse;
-    console.error('[LOYALTY_REWARD_DELETE]', error instanceof Error ? error.name : 'UnknownError');
+    console.error(
+      '[LOYALTY_REWARD_DELETE]',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
     return NextResponse.json(
       { error: 'Unable to deactivate reward' },
       { status: 500 },

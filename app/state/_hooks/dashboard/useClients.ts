@@ -87,7 +87,11 @@ export function useClients(
     try {
       const { error } = await clientsService.deleteClient(id);
       if (error) throw error;
-      toast.success(isPortuguese ? 'Cliente removido com sucesso.' : 'Customer deleted successfully.');
+      toast.success(
+        isPortuguese
+          ? 'Cliente removido com sucesso.'
+          : 'Customer deleted successfully.',
+      );
       await onRefreshData();
     } catch (error) {
       console.error('[Delete Client Hook Error]:', error);

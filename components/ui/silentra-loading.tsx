@@ -31,7 +31,9 @@ export function SilentraLoader({
   const { locale } = useLanguage();
   const resolvedLabel =
     label ??
-    (locale === 'en' ? 'Preparing your experience' : 'A preparar a experiência');
+    (locale === 'en'
+      ? 'Preparing your experience'
+      : 'A preparar a experiência');
 
   const rootClassName = [
     'sl-root',
@@ -321,10 +323,16 @@ export function SilentraLoading({
     label ??
     message ??
     (variant === 'dashboard'
-      ? locale === 'en' ? 'Preparing your dashboard' : 'A preparar a tua dashboard'
+      ? locale === 'en'
+        ? 'Preparing your dashboard'
+        : 'A preparar a tua dashboard'
       : compact
-        ? locale === 'en' ? 'Loading…' : 'A carregar…'
-        : locale === 'en' ? 'Preparing your experience' : 'A preparar a experiência');
+        ? locale === 'en'
+          ? 'Loading…'
+          : 'A carregar…'
+        : locale === 'en'
+          ? 'Preparing your experience'
+          : 'A preparar a experiência');
 
   return (
     <SilentraLoader

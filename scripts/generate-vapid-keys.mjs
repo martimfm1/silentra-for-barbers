@@ -10,4 +10,6 @@ console.log(`NEXT_PUBLIC_VAPID_PUBLIC_KEY=${publicKey}`);
 console.log(`VAPID_PRIVATE_KEY=${privateKey}`);
 console.log('VAPID_SUBJECT=mailto:contact.silentra@gmail.com');
 console.log('');
-console.log('Keep VAPID_PRIVATE_KEY secret. Generate one pair and reuse it across deployments.');
+console.log(
+  'Keep VAPID_PRIVATE_KEY secret. Generate one pair and reuse it across deployments.',
+);

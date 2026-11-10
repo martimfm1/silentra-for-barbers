@@ -112,7 +112,8 @@ export async function sendBookingConfirmationEmail(
         addCalendar: 'Add to calendar',
         openLocation: 'Open location',
         manageBooking: 'Manage my booking',
-        manageHint: 'Need to change your plans? Reschedule or cancel your booking from your client area.',
+        manageHint:
+          'Need to change your plans? Reschedule or cancel your booking from your client area.',
         footer: 'Keep this email as confirmation of your booking.',
         description: `Booking for ${payload.serviceName} for ${payload.clientName}.`,
         textTitle: 'Booking confirmed',
@@ -130,15 +131,22 @@ export async function sendBookingConfirmationEmail(
         addCalendar: 'Adicionar ao calendário',
         openLocation: 'Abrir localização',
         manageBooking: 'Gerir a minha marcação',
-        manageHint: 'Precisas de alterar os teus planos? Podes remarcar ou cancelar a marcação na tua área de cliente.',
+        manageHint:
+          'Precisas de alterar os teus planos? Podes remarcar ou cancelar a marcação na tua área de cliente.',
         footer: 'Guarda este email como confirmação da tua marcação.',
         description: `Agendamento de ${payload.serviceName} para ${payload.clientName}.`,
         textTitle: 'Agendamento confirmado',
         textAt: 'às',
       };
-  const formattedPrice = typeof payload.servicePrice === 'number' && Number.isFinite(payload.servicePrice) && payload.servicePrice >= 0
-    ? new Intl.NumberFormat(isEnglish ? 'en-IE' : 'pt-PT', { style: 'currency', currency: 'EUR' }).format(payload.servicePrice)
-    : null;
+  const formattedPrice =
+    typeof payload.servicePrice === 'number' &&
+    Number.isFinite(payload.servicePrice) &&
+    payload.servicePrice >= 0
+      ? new Intl.NumberFormat(isEnglish ? 'en-IE' : 'pt-PT', {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(payload.servicePrice)
+      : null;
   const formattedDate = new Intl.DateTimeFormat(isEnglish ? 'en-GB' : 'pt-PT', {
     dateStyle: 'long',
     timeZone: 'Europe/Lisbon',

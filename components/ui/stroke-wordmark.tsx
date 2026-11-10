@@ -61,9 +61,7 @@ export function StrokeWordmark({
             <tspan
               key={letter + index}
               className="silentra-stroke-char"
-              style={
-                { '--stroke-index': index } as CSSProperties
-              }
+              style={{ '--stroke-index': index } as CSSProperties}
             >
               {letter}
             </tspan>

@@ -44,7 +44,8 @@ export interface Appointment {
   value_products?: number;
   description_products?: string;
   payment_method?: 'mbway' | 'card' | string;
-  payment_status?: 'awaiting_review' | 'confirmed' | 'rejected' | 'expired' | null;
+  payment_status?:
+    'awaiting_review' | 'confirmed' | 'rejected' | 'expired' | null;
   payment_amount?: number | null;
   payment_expires_at?: string | null;
   payment_reviewed_at?: string | null;

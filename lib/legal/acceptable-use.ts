@@ -1,13 +1,17 @@
 import type { LegalSection } from '@/lib/legal/terms-and-conditions';
 
-export const acceptableUsePolicy: Record<'pt' | 'en', {
-  lastUpdated: string;
-  intro: string;
-  sections: readonly LegalSection[];
-}> = {
+export const acceptableUsePolicy: Record<
+  'pt' | 'en',
+  {
+    lastUpdated: string;
+    intro: string;
+    sections: readonly LegalSection[];
+  }
+> = {
   pt: {
     lastUpdated: '1 de novembro de 2026',
-    intro: 'Esta política resume as regras de utilização aceitável da Silentra for Barbers. Aplica-se a titulares de contas, membros de equipas, integrações e pessoas que utilizem funcionalidades públicas ou autenticadas.',
+    intro:
+      'Esta política resume as regras de utilização aceitável da Silentra for Barbers. Aplica-se a titulares de contas, membros de equipas, integrações e pessoas que utilizem funcionalidades públicas ou autenticadas.',
     sections: [
       {
         title: '1. Utilização permitida',
@@ -64,7 +68,8 @@ export const acceptableUsePolicy: Record<'pt' | 'en', {
   },
   en: {
     lastUpdated: 'November 1, 2026',
-    intro: 'This policy summarizes the acceptable-use rules for Silentra for Barbers. It applies to account owners, team members, integrations, and people using public or authenticated features.',
+    intro:
+      'This policy summarizes the acceptable-use rules for Silentra for Barbers. It applies to account owners, team members, integrations, and people using public or authenticated features.',
     sections: [
       {
         title: '1. Permitted use',

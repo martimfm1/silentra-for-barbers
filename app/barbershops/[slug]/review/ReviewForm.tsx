@@ -54,7 +54,8 @@ export function PublicReviewForm({
         submit: 'Send review',
         sending: 'Sending review…',
         back: 'Back to barbershop',
-        secure: 'No account required. Each review link is unique, expires, and can only be used once.',
+        secure:
+          'No account required. Each review link is unique, expires, and can only be used once.',
         thankYou: 'Thank you for your feedback.',
         thankYouDescription: 'Your review has been submitted successfully.',
         noAccessTitle: 'A personal review link is required',
@@ -62,13 +63,17 @@ export function PublicReviewForm({
           'To keep reviews genuine, you can only submit a review using the secure link sent by email after a completed appointment. You do not need an account.',
         stars: (value: number) => `${value} out of 5 stars`,
         usedTitle: 'This review has already been submitted',
-        usedDescription: 'This personal review link has already been used. Each appointment can only receive one review.',
+        usedDescription:
+          'This personal review link has already been used. Each appointment can only receive one review.',
         expiredTitle: 'This review link has expired',
-        expiredDescription: 'This personal review link is no longer valid. Please contact the barbershop if you need help.',
+        expiredDescription:
+          'This personal review link is no longer valid. Please contact the barbershop if you need help.',
         invalidTitle: 'This review link is not valid',
-        invalidDescription: 'We could not validate this personal review link. Open the original email or contact the barbershop.',
+        invalidDescription:
+          'We could not validate this personal review link. Open the original email or contact the barbershop.',
         unavailableTitle: 'We could not verify this link',
-        unavailableDescription: 'The review service is temporarily unavailable. Please try again in a few minutes.',
+        unavailableDescription:
+          'The review service is temporarily unavailable. Please try again in a few minutes.',
       }
     : {
         eyebrow: 'A tua experiência importa',
@@ -81,7 +86,8 @@ export function PublicReviewForm({
         submit: 'Enviar avaliação',
         sending: 'A enviar avaliação…',
         back: 'Voltar à barbearia',
-        secure: 'Não precisas de criar conta. Cada ligação é única, expira e só pode ser utilizada uma vez.',
+        secure:
+          'Não precisas de criar conta. Cada ligação é única, expira e só pode ser utilizada uma vez.',
         thankYou: 'Obrigado pela tua opinião.',
         thankYouDescription: 'A tua avaliação foi enviada com sucesso.',
         noAccessTitle: 'É necessária uma ligação pessoal',
@@ -89,13 +95,17 @@ export function PublicReviewForm({
           'Para manter as avaliações genuínas, só podes enviar uma avaliação através da ligação segura recebida por email após um atendimento concluído. Não precisas de criar conta.',
         stars: (value: number) => `${value} de 5 estrelas`,
         usedTitle: 'Esta avaliação já foi enviada',
-        usedDescription: 'Esta ligação pessoal já foi utilizada. Cada atendimento só pode receber uma avaliação.',
+        usedDescription:
+          'Esta ligação pessoal já foi utilizada. Cada atendimento só pode receber uma avaliação.',
         expiredTitle: 'Esta ligação de avaliação expirou',
-        expiredDescription: 'Esta ligação pessoal já não é válida. Contacta a barbearia se precisares de ajuda.',
+        expiredDescription:
+          'Esta ligação pessoal já não é válida. Contacta a barbearia se precisares de ajuda.',
         invalidTitle: 'Esta ligação de avaliação não é válida',
-        invalidDescription: 'Não foi possível validar esta ligação pessoal. Abre o email original ou contacta a barbearia.',
+        invalidDescription:
+          'Não foi possível validar esta ligação pessoal. Abre o email original ou contacta a barbearia.',
         unavailableTitle: 'Não foi possível verificar a ligação',
-        unavailableDescription: 'O serviço de avaliações está temporariamente indisponível. Tenta novamente dentro de alguns minutos.',
+        unavailableDescription:
+          'O serviço de avaliações está temporariamente indisponível. Tenta novamente dentro de alguns minutos.',
       };
 
   async function submitReview(event: React.FormEvent<HTMLFormElement>) {
@@ -131,7 +141,9 @@ export function PublicReviewForm({
           website,
         }),
       });
-      const payload = (await response.json().catch(() => ({}))) as ReviewResponse;
+      const payload = (await response
+        .json()
+        .catch(() => ({}))) as ReviewResponse;
 
       if (!response.ok || (!payload.success && !payload.accepted)) {
         throw new Error(
@@ -188,22 +200,45 @@ export function PublicReviewForm({
 
           <div className="px-6 py-7 sm:px-8 sm:py-8">
             {reviewStatus ? (
-              <div className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5" role="status" aria-live="polite">
+              <div
+                className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="flex size-11 items-center justify-center rounded-xl border border-amber-300/20 bg-amber-300/10 text-amber-200">
                   <ShieldCheck className="size-5" aria-hidden="true" />
                 </div>
                 <h2 className="mt-4 text-base font-semibold text-zinc-100">
-                  {reviewStatus === 'already-used' ? copy.usedTitle : reviewStatus === 'expired' ? copy.expiredTitle : reviewStatus === 'unavailable' ? copy.unavailableTitle : copy.invalidTitle}
+                  {reviewStatus === 'already-used'
+                    ? copy.usedTitle
+                    : reviewStatus === 'expired'
+                      ? copy.expiredTitle
+                      : reviewStatus === 'unavailable'
+                        ? copy.unavailableTitle
+                        : copy.invalidTitle}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  {reviewStatus === 'already-used' ? copy.usedDescription : reviewStatus === 'expired' ? copy.expiredDescription : reviewStatus === 'unavailable' ? copy.unavailableDescription : copy.invalidDescription}
+                  {reviewStatus === 'already-used'
+                    ? copy.usedDescription
+                    : reviewStatus === 'expired'
+                      ? copy.expiredDescription
+                      : reviewStatus === 'unavailable'
+                        ? copy.unavailableDescription
+                        : copy.invalidDescription}
                 </p>
-                <Link href={'/barbershops/' + encodeURIComponent(slug)} className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-200 hover:text-emerald-100">
+                <Link
+                  href={'/barbershops/' + encodeURIComponent(slug)}
+                  className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-200 hover:text-emerald-100"
+                >
                   {copy.back}
                 </Link>
               </div>
             ) : submitted ? (
-              <div className="py-5 text-center" role="status" aria-live="polite">
+              <div
+                className="py-5 text-center"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-300/10 text-emerald-200">
                   <CheckCircle2 className="size-7" aria-hidden="true" />
                 </div>
@@ -214,7 +249,9 @@ export function PublicReviewForm({
               </div>
             ) : !hasReviewAccess ? (
               <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-                <h2 className="text-base font-semibold">{copy.noAccessTitle}</h2>
+                <h2 className="text-base font-semibold">
+                  {copy.noAccessTitle}
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">
                   {copy.noAccessDescription}
                 </p>
@@ -228,7 +265,9 @@ export function PublicReviewForm({
             ) : (
               <form onSubmit={submitReview} className="relative space-y-6">
                 <fieldset>
-                  <legend className="text-sm font-semibold">{copy.rating}</legend>
+                  <legend className="text-sm font-semibold">
+                    {copy.rating}
+                  </legend>
                   <div
                     className="mt-3 flex flex-wrap gap-1"
                     aria-label={copy.chooseRating}
@@ -250,9 +289,7 @@ export function PublicReviewForm({
                     ))}
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">
-                    {rating > 0
-                      ? copy.stars(rating)
-                      : copy.chooseRating}
+                    {rating > 0 ? copy.stars(rating) : copy.chooseRating}
                   </p>
                 </fieldset>
 
@@ -305,7 +342,10 @@ export function PublicReviewForm({
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                      <Loader2
+                        className="mr-2 size-4 animate-spin"
+                        aria-hidden="true"
+                      />
                       {copy.sending}
                     </>
                   ) : (
@@ -316,7 +356,10 @@ export function PublicReviewForm({
             )}
 
             <div className="mt-7 flex items-start gap-2 border-t border-white/[0.07] pt-5 text-xs leading-5 text-zinc-500">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300/70" aria-hidden="true" />
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0 text-emerald-300/70"
+                aria-hidden="true"
+              />
               <p>{copy.secure}</p>
             </div>
           </div>

@@ -3,7 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
-const mustExist = (file) => assert.ok(fs.existsSync(path.join(process.cwd(), file)), `Missing legal document: ${file}`);
+const mustExist = (file) =>
+  assert.ok(
+    fs.existsSync(path.join(process.cwd(), file)),
+    `Missing legal document: ${file}`,
+  );
 
 const requiredPages = [
   'app/legal/page.tsx',
@@ -42,14 +46,26 @@ assert.match(drawer, /currentTerms/);
 assert.doesNotMatch(drawer, /August 16, 2026/);
 
 for (const source of [privacy, cookies, extraPolicies, acceptableUse]) {
-  assert.ok(source.includes('pt: {'), 'Every policy must include Portuguese copy.');
-  assert.ok(source.includes('en: {'), 'Every policy must include English copy.');
+  assert.ok(
+    source.includes('pt: {'),
+    'Every policy must include Portuguese copy.',
+  );
+  assert.ok(
+    source.includes('en: {'),
+    'Every policy must include English copy.',
+  );
 }
 assert.match(privacy, /pedidos de direitos|data-subject requests/i);
 assert.match(privacy, /um mês|one-month period/i);
 assert.match(privacy, /CNPD/);
-assert.match(privacy, /decisões exclusivamente automatizadas|solely on automated processing/i);
-assert.match(privacy, /Não existe um único prazo de eliminação|There is no single deletion period/i);
+assert.match(
+  privacy,
+  /decisões exclusivamente automatizadas|solely on automated processing/i,
+);
+assert.match(
+  privacy,
+  /Não existe um único prazo de eliminação|There is no single deletion period/i,
+);
 
 assert.match(extraPolicies, /bookingPolicy/);
 assert.match(extraPolicies, /billingPolicy/);
@@ -116,4 +132,6 @@ for (const source of publicLegalSources) {
   assert.doesNotMatch(source, /silentra\.contact@gmail\.com/);
 }
 
-console.log('Legal policies, data protection, navigation, and revision contracts passed.');
+console.log(
+  'Legal policies, data protection, navigation, and revision contracts passed.',
+);

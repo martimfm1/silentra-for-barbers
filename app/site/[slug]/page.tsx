@@ -245,7 +245,8 @@ export async function generateMetadata({
       twitter: {
         card: 'summary',
         title,
-        description: 'Serviços, equipa, galeria e uma simulação de marcação online.',
+        description:
+          'Serviços, equipa, galeria e uma simulação de marcação online.',
       },
     };
   }
@@ -405,8 +406,7 @@ export default async function EnterpriseBarbershopLandingPage({
   }
 
   const profile = data.profile;
-  const canonicalProfileUrl =
-    '/site/' + encodeURIComponent(profile.slug);
+  const canonicalProfileUrl = '/site/' + encodeURIComponent(profile.slug);
   const bookingUrl =
     '/barbershops/' + encodeURIComponent(profile.slug) + '?booking=1';
   const heroBackground = data.coverUrl

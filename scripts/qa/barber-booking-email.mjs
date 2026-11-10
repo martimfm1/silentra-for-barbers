@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [bookingRoute, notification, packageJson, workflow, cancellationRoute, cancellationEmail, dashboardActions, appointmentsHook] = await Promise.all([
+const [
+  bookingRoute,
+  notification,
+  packageJson,
+  workflow,
+  cancellationRoute,
+  cancellationEmail,
+  dashboardActions,
+  appointmentsHook,
+] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
   readFile('package.json', 'utf8').then(JSON.parse),
@@ -30,11 +39,17 @@ assert.match(cancellationRoute, /cancelled_at: cancelledAt/);
 assert.match(cancellationRoute, /sendAppointmentCancellationEmail\(/);
 assert.match(cancellationRoute, /emailSent: emailResult\.success/);
 assert.match(cancellationEmail, /A tua marcação foi cancelada pela barbearia/);
-assert.match(cancellationEmail, /Your appointment was cancelled by the barbershop/);
+assert.match(
+  cancellationEmail,
+  /Your appointment was cancelled by the barbershop/,
+);
 assert.match(cancellationEmail, /sendBrevoEmail\(/);
 assert.match(dashboardActions, /Cancelar marcação/);
 assert.match(dashboardActions, /customer will receive an email/);
-assert.doesNotMatch(dashboardActions, /Eliminar esta marcação|Delete this booking|Trash2/);
+assert.doesNotMatch(
+  dashboardActions,
+  /Eliminar esta marcação|Delete this booking|Trash2/,
+);
 const cancelHandler = appointmentsHook.slice(
   appointmentsHook.indexOf('const handleCancelBooking'),
   appointmentsHook.indexOf('\n\n  return {'),

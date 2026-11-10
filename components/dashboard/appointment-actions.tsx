@@ -90,8 +90,12 @@ export function AppointmentActions({
         >
           <Check className="mr-1.5 size-4" aria-hidden="true" />
           {appointment.payment_status === 'awaiting_review'
-            ? isEnglish ? 'Review MB WAY' : 'Validar MB WAY'
-            : isEnglish ? 'Confirm' : 'Confirmar'}
+            ? isEnglish
+              ? 'Review MB WAY'
+              : 'Validar MB WAY'
+            : isEnglish
+              ? 'Confirm'
+              : 'Confirmar'}
         </Button>
       )}
 
@@ -138,13 +142,17 @@ export function AppointmentActions({
                   className="text-xs font-medium text-zinc-300"
                 >
                   {isEnglish ? 'Extra product ' : 'Produto extra '}{' '}
-                  <span className="text-zinc-500">({isEnglish ? 'optional' : 'opcional'})</span>
+                  <span className="text-zinc-500">
+                    ({isEnglish ? 'optional' : 'opcional'})
+                  </span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     id={`prod-desc-${appointment.id}`}
                     type="text"
-                    placeholder={isEnglish ? 'E.g. Styling clay' : 'Ex.: Pomada'}
+                    placeholder={
+                      isEnglish ? 'E.g. Styling clay' : 'Ex.: Pomada'
+                    }
                     className="min-h-[44px] flex-1 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={descriptionProducts}
                     onChange={(event) =>
@@ -157,7 +165,11 @@ export function AppointmentActions({
                     min="0"
                     step="0.01"
                     placeholder="0,00 €"
-                    aria-label={isEnglish ? 'Product price in euros' : 'Valor do produto em euros'}
+                    aria-label={
+                      isEnglish
+                        ? 'Product price in euros'
+                        : 'Valor do produto em euros'
+                    }
                     className="min-h-[44px] w-24 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={valueProducts}
                     onChange={(event) =>
@@ -200,8 +212,12 @@ export function AppointmentActions({
                     <UserPlus className="mr-2 size-4" />
                   )}
                   {appointment.client_id
-                    ? isEnglish ? 'Already in client list' : 'Cliente já está na lista'
-                    : isEnglish ? 'Add to client list' : 'Adicionar à lista de clientes'}
+                    ? isEnglish
+                      ? 'Already in client list'
+                      : 'Cliente já está na lista'
+                    : isEnglish
+                      ? 'Add to client list'
+                      : 'Adicionar à lista de clientes'}
                 </Button>
               </div>
 
@@ -254,9 +270,11 @@ export function AppointmentActions({
                     ? 'Cancel booking for ' + name
                     : 'Cancelar marcação de ' + name
               }
-              className={compact
-                ? 'h-8 w-8 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                : 'min-h-[44px] min-w-[44px] rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'}
+              className={
+                compact
+                  ? 'h-8 w-8 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                  : 'min-h-[44px] min-w-[44px] rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+              }
             >
               <CalendarX2 className="size-4" aria-hidden="true" />
             </Button>

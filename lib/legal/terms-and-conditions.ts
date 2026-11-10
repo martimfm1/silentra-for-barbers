@@ -182,7 +182,7 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           "Use of the Platform is subject to Silentra's Privacy Policy. The barbershop remains responsible for personal data relating to customers and professionals that it enters and for its applicable legal obligations.",
           'The barbershop must provide appropriate privacy information to customers and obtain consent where legally required.',
-          "Silentra may act as controller or processor depending on the purpose and operation. Where the barbershop determines the purposes and Silentra processes customer data on its behalf, the parties must formalize and accept the Data Processing Addendum (DPA), available at /dpa, before that processing begins.",
+          'Silentra may act as controller or processor depending on the purpose and operation. Where the barbershop determines the purposes and Silentra processes customer data on its behalf, the parties must formalize and accept the Data Processing Addendum (DPA), available at /dpa, before that processing begins.',
         ],
       },
       {

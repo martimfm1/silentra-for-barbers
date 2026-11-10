@@ -140,7 +140,11 @@ async function GET__unobserved(
       admin.rpc('get_effective_billing_plan_for_barbershop', {
         p_barbershop_id: barbershopId,
       }),
-      admin.from('services').select('*').eq('barbershop_id', barbershopId).eq('is_active', true),
+      admin
+        .from('services')
+        .select('*')
+        .eq('barbershop_id', barbershopId)
+        .eq('is_active', true),
       admin
         .from('professionals')
         .select('id, name, active')
@@ -155,7 +159,9 @@ async function GET__unobserved(
         .order('start_time', { ascending: true }),
       admin
         .from('appointments')
-        .select('date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at')
+        .select(
+          'date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at',
+        )
         .eq('barbershop_id', barbershopId)
         .gte('date_hour', dayStart)
         .lte('date_hour', dayEnd)
@@ -174,7 +180,9 @@ async function GET__unobserved(
     const manualPrepayment = {
       enabled:
         relation.mbway_enabled === true &&
-        ['pro', 'enterprise'].includes(String(effectivePlan ?? '').toLowerCase()) &&
+        ['pro', 'enterprise'].includes(
+          String(effectivePlan ?? '').toLowerCase(),
+        ) &&
         mbwayPhone.replace(/\D/g, '').length >= 9 &&
         whatsappPhone.replace(/\D/g, '').length >= 9,
       mbwayPhone,
@@ -306,7 +314,9 @@ async function GET__unobserved(
       Math.max(Number(selectedService?.durationMinutes ?? 30), 1),
       1440,
     );
-    const activeAppointments = ((appointments ?? []) as AppointmentRow[]).filter(
+    const activeAppointments = (
+      (appointments ?? []) as AppointmentRow[]
+    ).filter(
       (appointment) =>
         !(
           appointment.payment_status === 'awaiting_review' &&

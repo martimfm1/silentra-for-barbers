@@ -27,7 +27,9 @@ const [
   marketingApi,
   salesPage,
 ] = await Promise.all([
-  read('supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql'),
+  read(
+    'supabase/migrations/20261102114554_service_archiving_and_client_crm_metrics.sql',
+  ),
   read('app/dashboard/_components/cards/ServicesListCard.tsx'),
   read('app/dashboard/servicos/page.tsx'),
   read('app/state/_hooks/dashboard/useServices.ts'),
@@ -39,9 +41,15 @@ const [
   read('app/agendadovictor/page.tsx'),
   read('app/dashboard/pos/page.tsx'),
   read('types/dashboard/entities.ts'),
-  read('supabase/migrations/20261102115012_preserve_service_appointment_references.sql'),
-  read('supabase/migrations/20261102115559_preserve_service_linked_records.sql'),
-  read('supabase/migrations/20261102115639_client_service_history_fk_indexes.sql'),
+  read(
+    'supabase/migrations/20261102115012_preserve_service_appointment_references.sql',
+  ),
+  read(
+    'supabase/migrations/20261102115559_preserve_service_linked_records.sql',
+  ),
+  read(
+    'supabase/migrations/20261102115639_client_service_history_fk_indexes.sql',
+  ),
   read('supabase/migrations/20261102115816_validate_service_constraints.sql'),
   read('app/api/appointments/route.ts'),
   read('app/api/mobile/services/route.ts'),
@@ -51,7 +59,10 @@ const [
   read('app/barbershops/[slug]/vendas/page.tsx'),
 ]);
 
-assert.match(migration, /add column if not exists is_active boolean not null default true/i);
+assert.match(
+  migration,
+  /add column if not exists is_active boolean not null default true/i,
+);
 assert.match(migration, /services_price_non_negative/);
 assert.match(migration, /services_duration_valid/);
 assert.match(migration, /get_client_crm_metrics/);
@@ -59,14 +70,32 @@ assert.match(migration, /appointment_count/);
 assert.match(migration, /total_spent/);
 assert.match(migration, /last_visit/);
 assert.match(referenceMigration, /on delete restrict/i);
-assert.match(referenceMigration, /validate constraint appointments_service_id_fkey/i);
-assert.match(linkedRecordsMigration, /loyalty_earning_rules_service_id_fkey[\s\S]*?on delete restrict/i);
-assert.match(linkedRecordsMigration, /pos_transaction_items_service_id_fkey[\s\S]*?on delete restrict/i);
-assert.match(linkedRecordsMigration, /marketing_campaigns_birthday_reward_service_id_fkey[\s\S]*?on delete restrict/i);
+assert.match(
+  referenceMigration,
+  /validate constraint appointments_service_id_fkey/i,
+);
+assert.match(
+  linkedRecordsMigration,
+  /loyalty_earning_rules_service_id_fkey[\s\S]*?on delete restrict/i,
+);
+assert.match(
+  linkedRecordsMigration,
+  /pos_transaction_items_service_id_fkey[\s\S]*?on delete restrict/i,
+);
+assert.match(
+  linkedRecordsMigration,
+  /marketing_campaigns_birthday_reward_service_id_fkey[\s\S]*?on delete restrict/i,
+);
 assert.match(historyIndexesMigration, /loyalty_earning_rules_service_fk_idx/);
 assert.match(historyIndexesMigration, /pos_transaction_items_service_fk_idx/);
-assert.match(validateConstraintsMigration, /validate constraint services_price_non_negative/i);
-assert.match(validateConstraintsMigration, /validate constraint services_duration_valid/i);
+assert.match(
+  validateConstraintsMigration,
+  /validate constraint services_price_non_negative/i,
+);
+assert.match(
+  validateConstraintsMigration,
+  /validate constraint services_duration_valid/i,
+);
 
 assert.match(serviceCard, /statusFilter/);
 assert.match(serviceCard, /'active' \| 'inactive'/);
@@ -74,7 +103,10 @@ assert.match(serviceCard, /handleToggleServiceActive/);
 assert.match(serviceCard, /service\.is_active === false/);
 assert.match(serviceCard, /averagePrice/);
 assert.match(serviceCard, /averageDuration/);
-assert.match(servicePage, /handleToggleServiceActive=\{handleToggleServiceActive\}/);
+assert.match(
+  servicePage,
+  /handleToggleServiceActive=\{handleToggleServiceActive\}/,
+);
 assert.match(serviceHook, /price < 0/);
 assert.match(serviceHook, /duration > 1440/);
 assert.match(serviceHook, /is_active: service\.is_active === false/);
@@ -82,7 +114,19 @@ assert.match(serviceRepository, /linkedAppointments/);
 assert.match(serviceRepository, /SERVICE_HAS_BOOKINGS/);
 assert.match(serviceTypes, /is_active\?: boolean/);
 
-for (const source of [bookingApi, bookingDataApi, publicApi, publicV1Api, agendaPage, posPage, manualAppointmentsApi, crmPlansApi, loyaltyApi, marketingApi, salesPage]) {
+for (const source of [
+  bookingApi,
+  bookingDataApi,
+  publicApi,
+  publicV1Api,
+  agendaPage,
+  posPage,
+  manualAppointmentsApi,
+  crmPlansApi,
+  loyaltyApi,
+  marketingApi,
+  salesPage,
+]) {
   assert.match(source, /is_active/);
 }
 assert.match(bookingApi, /\.eq\('is_active', true\)/);
@@ -96,4 +140,6 @@ assert.match(marketingApi, /\.eq\('is_active', true\)/);
 assert.match(salesPage, /\.eq\('is_active', true\)/);
 assert.match(mobileServicesApi, /body\.is_active/);
 
-console.log('[SERVICE_MANAGEMENT_QA] archiving, filtering, validation and booking history protection passed');
+console.log(
+  '[SERVICE_MANAGEMENT_QA] archiving, filtering, validation and booking history protection passed',
+);

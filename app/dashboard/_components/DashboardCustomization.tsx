@@ -33,7 +33,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export type DashboardMetricKey = 'revenue' | 'appointments' | 'clients' | 'services';
+export type DashboardMetricKey =
+  'revenue' | 'appointments' | 'clients' | 'services';
 
 export type DashboardCustomizationConfig = {
   shortcuts: string[];
@@ -130,8 +131,14 @@ type DashboardCustomizationContextValue = {
   setConfig: Dispatch<SetStateAction<DashboardCustomizationConfig>>;
   loading: boolean;
   refresh: () => Promise<void>;
-  save: (name: string, nextConfig?: DashboardCustomizationConfig) => Promise<DashboardCustomizationPreset>;
-  create: (name: string, nextConfig?: DashboardCustomizationConfig) => Promise<DashboardCustomizationPreset>;
+  save: (
+    name: string,
+    nextConfig?: DashboardCustomizationConfig,
+  ) => Promise<DashboardCustomizationPreset>;
+  create: (
+    name: string,
+    nextConfig?: DashboardCustomizationConfig,
+  ) => Promise<DashboardCustomizationPreset>;
   activate: (id: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
@@ -639,25 +646,44 @@ export function DashboardCustomizationDialog({
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
-                {([
-                  { id: 'revenue', pt: 'Faturação', en: 'Revenue' },
-                  { id: 'appointments', pt: 'Marcações ativas', en: 'Active appointments' },
-                  { id: 'clients', pt: 'Clientes registados', en: 'Registered clients' },
-                  { id: 'services', pt: 'Serviços', en: 'Services' },
-                ] as const).map((metric) => (
+                {(
+                  [
+                    { id: 'revenue', pt: 'Faturação', en: 'Revenue' },
+                    {
+                      id: 'appointments',
+                      pt: 'Marcações ativas',
+                      en: 'Active appointments',
+                    },
+                    {
+                      id: 'clients',
+                      pt: 'Clientes registados',
+                      en: 'Registered clients',
+                    },
+                    { id: 'services', pt: 'Serviços', en: 'Services' },
+                  ] as const
+                ).map((metric) => (
                   <label
                     key={metric.id}
                     className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-sm"
                   >
                     <input
                       type="checkbox"
-                      checked={customization.config.visibleMetrics.includes(metric.id)}
+                      checked={customization.config.visibleMetrics.includes(
+                        metric.id,
+                      )}
                       onChange={(event) =>
                         customization.setConfig((current) => ({
                           ...current,
                           visibleMetrics: event.target.checked
-                            ? [...new Set([...current.visibleMetrics, metric.id])]
-                            : current.visibleMetrics.filter((key) => key !== metric.id),
+                            ? [
+                                ...new Set([
+                                  ...current.visibleMetrics,
+                                  metric.id,
+                                ]),
+                              ]
+                            : current.visibleMetrics.filter(
+                                (key) => key !== metric.id,
+                              ),
                         }))
                       }
                       className="size-4 accent-emerald-400"

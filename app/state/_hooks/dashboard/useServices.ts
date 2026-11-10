@@ -58,7 +58,11 @@ export function useServices(
 
         if (error) throw error;
 
-        toast.success(isPortuguese ? 'Serviço criado com sucesso!' : 'Service created successfully.');
+        toast.success(
+          isPortuguese
+            ? 'Serviço criado com sucesso!'
+            : 'Service created successfully.',
+        );
         setNewServiceData({ name: '', price: '', duration: '30' });
         await onRefreshData();
         return true;
@@ -78,7 +82,9 @@ export function useServices(
       e.preventDefault();
       if (!editingService) return;
       const price = Number(editingService.price);
-      const duration = Number(editingService.duration ?? editingService.min_duration);
+      const duration = Number(
+        editingService.duration ?? editingService.min_duration,
+      );
       if (
         !editingService.name.trim() ||
         editingService.price === '' ||
@@ -106,7 +112,11 @@ export function useServices(
 
         if (error) throw error;
 
-        toast.success(isPortuguese ? 'Serviço atualizado com sucesso!' : 'Service updated successfully.');
+        toast.success(
+          isPortuguese
+            ? 'Serviço atualizado com sucesso!'
+            : 'Service updated successfully.',
+        );
         setEditingService(null);
         await onRefreshData();
       } catch (error) {
@@ -129,8 +139,12 @@ export function useServices(
         if (error) throw error;
         toast.success(
           service.is_active === false
-            ? (isPortuguese ? 'Serviço ativado com sucesso.' : 'Service activated successfully.')
-            : (isPortuguese ? 'Serviço desativado. Continua disponível no histórico.' : 'Service deactivated. It remains available in booking history.'),
+            ? isPortuguese
+              ? 'Serviço ativado com sucesso.'
+              : 'Service activated successfully.'
+            : isPortuguese
+              ? 'Serviço desativado. Continua disponível no histórico.'
+              : 'Service deactivated. It remains available in booking history.',
         );
         await onRefreshData();
       } catch (error) {
@@ -161,9 +175,9 @@ export function useServices(
           errorCode === '23503' ||
           (error instanceof Error && error.message === 'SERVICE_HAS_BOOKINGS');
         const message = hasLinkedHistory
-          ? (isPortuguese
-              ? 'Não é possível remover um serviço com histórico associado. Desativa-o para o retirar do catálogo.'
-              : 'A service with linked history cannot be deleted. Deactivate it to remove it from the catalogue.')
+          ? isPortuguese
+            ? 'Não é possível remover um serviço com histórico associado. Desativa-o para o retirar do catálogo.'
+            : 'A service with linked history cannot be deleted. Deactivate it to remove it from the catalogue.'
           : getErrorMessage(error);
         toast.error(message);
       } finally {

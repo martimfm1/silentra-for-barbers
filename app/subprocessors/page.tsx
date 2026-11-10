@@ -7,11 +7,13 @@ const CANONICAL_URL = 'https://barbers.silentra.me/subprocessors';
 
 export const metadata: Metadata = {
   title: 'Lista de Subprocessadores',
-  description: 'Fornecedores tecnológicos conhecidos que podem tratar dados pessoais ao prestar serviços à Silentra for Barbers.',
+  description:
+    'Fornecedores tecnológicos conhecidos que podem tratar dados pessoais ao prestar serviços à Silentra for Barbers.',
   alternates: { canonical: CANONICAL_URL },
   openGraph: {
     title: 'Lista de Subprocessadores | Silentra for Barbers',
-    description: 'Fornecedores tecnológicos conhecidos que podem tratar dados pessoais ao prestar serviços à Silentra for Barbers.',
+    description:
+      'Fornecedores tecnológicos conhecidos que podem tratar dados pessoais ao prestar serviços à Silentra for Barbers.',
     url: CANONICAL_URL,
     siteName: 'Silentra',
     locale: 'pt_PT',
@@ -33,21 +35,33 @@ export default function SubprocessorsPage() {
       highlights={[
         {
           label: { pt: 'Serviços essenciais', en: 'Core providers' },
-          value: { pt: 'Vercel e Supabase suportam a plataforma; Mapbox pesquisa moradas e CARTO apresenta os mapas.', en: 'Vercel and Supabase run the platform; Mapbox searches addresses and CARTO displays maps.' },
+          value: {
+            pt: 'Vercel e Supabase suportam a plataforma; Mapbox pesquisa moradas e CARTO apresenta os mapas.',
+            en: 'Vercel and Supabase run the platform; Mapbox searches addresses and CARTO displays maps.',
+          },
           icon: <Cloud className="size-4" />,
         },
         {
           label: { pt: 'Pagamentos e email', en: 'Payments and email' },
-          value: { pt: 'Stripe processa faturação; Brevo envia email operacional.', en: 'Stripe handles billing; Brevo sends operational email.' },
+          value: {
+            pt: 'Stripe processa faturação; Brevo envia email operacional.',
+            en: 'Stripe handles billing; Brevo sends operational email.',
+          },
           icon: <CreditCard className="size-4" />,
         },
         {
           label: { pt: 'Consentimento', en: 'Consent' },
-          value: { pt: 'Estatísticas e marketing dependem das categorias de cookies escolhidas.', en: 'Analytics and marketing depend on the selected cookie categories.' },
+          value: {
+            pt: 'Estatísticas e marketing dependem das categorias de cookies escolhidas.',
+            en: 'Analytics and marketing depend on the selected cookie categories.',
+          },
           icon: <ShieldCheck className="size-4" />,
         },
       ]}
-      supportLabel={{ pt: 'Questões sobre fornecedores', en: 'Provider questions' }}
+      supportLabel={{
+        pt: 'Questões sobre fornecedores',
+        en: 'Provider questions',
+      }}
       supportValue="contact.silentra@gmail.com"
       backLabel={{ pt: 'Voltar ao centro legal', en: 'Back to legal centre' }}
     />

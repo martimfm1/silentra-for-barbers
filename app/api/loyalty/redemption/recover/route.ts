@@ -44,7 +44,9 @@ async function GET__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc(
+      'expire_loyalty_redemptions',
+    );
     if (expiryError) {
       console.error('[LOYALTY_REDEMPTION_RECOVER_EXPIRY_ERROR]', {
         requestId,
@@ -154,7 +156,10 @@ async function GET__unobserved(request: Request) {
         settingsCode: settingsError?.code ?? null,
       });
       return response(
-        { error: 'Não foi possível validar a barbearia e a recompensa.', requestId },
+        {
+          error: 'Não foi possível validar a barbearia e a recompensa.',
+          requestId,
+        },
         503,
       );
     }

@@ -215,7 +215,9 @@ export default function OnboardingPage() {
   async function handleCreateShop(event: React.FormEvent) {
     event.preventDefault();
     if (!shopName.trim() || !address.trim() || !city.trim()) {
-      toast.error('Indique o nome e a localização da sua barbearia para continuar.');
+      toast.error(
+        'Indique o nome e a localização da sua barbearia para continuar.',
+      );
       return;
     }
 
@@ -460,17 +462,41 @@ export default function OnboardingPage() {
                     <div className="space-y-5">
                       <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.035] p-4 sm:p-5">
                         <div className="mb-3">
-                          <h2 className="font-semibold text-zinc-100">{t('onboarding.workModeTitle')}</h2>
-                          <p className="mt-1 text-xs leading-5 text-zinc-500">{t('onboarding.workModeDescription')}</p>
+                          <h2 className="font-semibold text-zinc-100">
+                            {t('onboarding.workModeTitle')}
+                          </h2>
+                          <p className="mt-1 text-xs leading-5 text-zinc-500">
+                            {t('onboarding.workModeDescription')}
+                          </p>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <button type="button" aria-pressed={businessMode === 'solo'} onClick={() => setBusinessMode('solo')} className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'solo' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}>
-                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100"><UserPlus className="size-4 text-emerald-300" />{t('onboarding.soloMode')}</span>
-                            <span className="mt-2 block text-xs leading-5 text-zinc-500">{t('onboarding.soloModeDescription')}</span>
+                          <button
+                            type="button"
+                            aria-pressed={businessMode === 'solo'}
+                            onClick={() => setBusinessMode('solo')}
+                            className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'solo' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}
+                          >
+                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                              <UserPlus className="size-4 text-emerald-300" />
+                              {t('onboarding.soloMode')}
+                            </span>
+                            <span className="mt-2 block text-xs leading-5 text-zinc-500">
+                              {t('onboarding.soloModeDescription')}
+                            </span>
                           </button>
-                          <button type="button" aria-pressed={businessMode === 'team'} onClick={() => setBusinessMode('team')} className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'team' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}>
-                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100"><Users className="size-4 text-emerald-300" />{t('onboarding.teamMode')}</span>
-                            <span className="mt-2 block text-xs leading-5 text-zinc-500">{t('onboarding.teamModeDescription')}</span>
+                          <button
+                            type="button"
+                            aria-pressed={businessMode === 'team'}
+                            onClick={() => setBusinessMode('team')}
+                            className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'team' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}
+                          >
+                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                              <Users className="size-4 text-emerald-300" />
+                              {t('onboarding.teamMode')}
+                            </span>
+                            <span className="mt-2 block text-xs leading-5 text-zinc-500">
+                              {t('onboarding.teamModeDescription')}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -750,7 +776,8 @@ export default function OnboardingPage() {
                       <p className="mt-1 text-xs leading-5 text-zinc-500">
                         {businessMode === 'team'
                           ? t('onboarding.teamNextStep')
-                          : t('onboarding.soloNextStep')} {t('onboarding.editLater')}
+                          : t('onboarding.soloNextStep')}{' '}
+                        {t('onboarding.editLater')}
                       </p>
                     </div>
                     <Button

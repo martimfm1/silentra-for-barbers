@@ -225,10 +225,20 @@ async function PATCH__unobserved(request: Request) {
       .maybeSingle();
     if (error) {
       console.error('[MOBILE_SERVICES_STATUS_FAIL]', error.code ?? 'UNKNOWN');
-      return NextResponse.json({ error: 'Não foi possível alterar o estado do serviço.' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'Não foi possível alterar o estado do serviço.' },
+        { status: 409 },
+      );
     }
-    if (!data) return NextResponse.json({ error: 'Serviço não encontrado nesta barbearia.' }, { status: 404 });
-    return NextResponse.json({ success: true, service: data }, { headers: { 'Cache-Control': 'no-store' } });
+    if (!data)
+      return NextResponse.json(
+        { error: 'Serviço não encontrado nesta barbearia.' },
+        { status: 404 },
+      );
+    return NextResponse.json(
+      { success: true, service: data },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   }
 
   const validated = validateService(body);

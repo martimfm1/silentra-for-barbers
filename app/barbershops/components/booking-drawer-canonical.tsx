@@ -32,7 +32,13 @@ import type { MarketplaceService } from '@/types/marketplace/shops';
 
 type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
-type ManualPrepaymentInstructions = { bookingId: string; amount: number; mbwayPhone: string; whatsappPhone: string; expiresAt: string };
+type ManualPrepaymentInstructions = {
+  bookingId: string;
+  amount: number;
+  mbwayPhone: string;
+  whatsappPhone: string;
+  expiresAt: string;
+};
 function normalizeWhatsAppNumber(value: string): string {
   let digits = value.replace(/\D/g, '');
   if (digits.startsWith('00')) digits = digits.slice(2);
@@ -183,11 +189,14 @@ export function BookingDrawerCanonical({
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
-  const [manualPrepayment, setManualPrepayment] = useState<MarketplaceBookingResponse['manualPrepayment'] | null>(null);
+  const [manualPrepayment, setManualPrepayment] = useState<
+    MarketplaceBookingResponse['manualPrepayment'] | null
+  >(null);
   const [prepaymentSelected, setPrepaymentSelected] = useState(false);
   const [waitlistOnly, setWaitlistOnly] = useState(false);
   const [waitlistConsent, setWaitlistConsent] = useState(false);
-  const [paymentInstructions, setPaymentInstructions] = useState<ManualPrepaymentInstructions | null>(null);
+  const [paymentInstructions, setPaymentInstructions] =
+    useState<ManualPrepaymentInstructions | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const customerControllerRef = useRef<AbortController | null>(null);
   const cacheRef = useRef(
@@ -207,9 +216,7 @@ export function BookingDrawerCanonical({
       parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
     [shop],
   );
-  const closedDays = hideClosedDays
-    ? new Set<number>()
-    : configuredClosedDays;
+  const closedDays = hideClosedDays ? new Set<number>() : configuredClosedDays;
   // Some booking pages should omit weekly days off entirely, not display disabled dates.
   const availableDays = useMemo(
     () =>
@@ -313,7 +320,9 @@ export function BookingDrawerCanonical({
         setShopPlan(payload.plan ?? shop?.plan ?? 'free');
         setProfessionals(loadedProfessionals);
         const requestedProfessional = selectedProfessionalId
-          ? loadedProfessionals.find((item) => item.id === selectedProfessionalId)
+          ? loadedProfessionals.find(
+              (item) => item.id === selectedProfessionalId,
+            )
           : null;
         if (requestedProfessional) {
           setProfessional(requestedProfessional);
@@ -325,7 +334,9 @@ export function BookingDrawerCanonical({
           setStep(1);
         }
         setServices(payload.services ?? []);
-        setManualPrepayment(payload.manualPrepayment?.enabled ? payload.manualPrepayment : null);
+        setManualPrepayment(
+          payload.manualPrepayment?.enabled ? payload.manualPrepayment : null,
+        );
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError')
@@ -366,7 +377,9 @@ export function BookingDrawerCanonical({
       const cachedSlots = cached.data.availableSlots ?? [];
       setSlots(cachedSlots);
       setSelectedSlot(
-        selectedDate === currentDay.dateStr && selectedTime && cachedSlots.includes(selectedTime)
+        selectedDate === currentDay.dateStr &&
+          selectedTime &&
+          cachedSlots.includes(selectedTime)
           ? selectedTime
           : null,
       );
@@ -391,7 +404,9 @@ export function BookingDrawerCanonical({
         const availableSlots = payload.availableSlots ?? [];
         setSlots(availableSlots);
         setSelectedSlot(
-          selectedDate === currentDay.dateStr && selectedTime && availableSlots.includes(selectedTime)
+          selectedDate === currentDay.dateStr &&
+            selectedTime &&
+            availableSlots.includes(selectedTime)
             ? selectedTime
             : null,
         );
@@ -485,12 +500,22 @@ export function BookingDrawerCanonical({
   }
 
   async function submit() {
-    if (!shop || !professional || !service || !currentDay || (!waitlistOnly && !selectedSlot))
+    if (
+      !shop ||
+      !professional ||
+      !service ||
+      !currentDay ||
+      (!waitlistOnly && !selectedSlot)
+    )
       return;
     if (!name.trim() || !phone.trim() || !email.trim())
       return toast.error(t('bookingDrawer.requiredFields'));
     if (waitlistOnly && !waitlistConsent)
-      return toast.error(locale === 'en' ? 'Please accept the waitlist contact notice.' : 'Aceita o aviso de contacto para entrares na lista de espera.');
+      return toast.error(
+        locale === 'en'
+          ? 'Please accept the waitlist contact notice.'
+          : 'Aceita o aviso de contacto para entrares na lista de espera.',
+      );
     const birthDateIso = birthDateToIso(birthDate);
     if (!waitlistOnly && requireBirthDate && !birthDateIso)
       return toast.error(t('bookingDrawer.validBirthDate'));
@@ -534,7 +559,11 @@ export function BookingDrawerCanonical({
       cacheRef.current.clear();
       if (waitlistOnly) {
         setPaymentInstructions(null);
-        toast.success(locale === 'en' ? 'You are on the waitlist.' : 'Ficaste na lista de espera.');
+        toast.success(
+          locale === 'en'
+            ? 'You are on the waitlist.'
+            : 'Ficaste na lista de espera.',
+        );
         setStep(4);
         return;
       }
@@ -586,7 +615,6 @@ export function BookingDrawerCanonical({
         `Cliente: ${name.trim()}`,
         `Email: ${email.trim()}`,
         `Ref.: ${paymentInstructions.bookingId}`,
-
       ].join('\n')
     : '';
   const whatsappProofUrl = whatsappDigits
@@ -650,21 +678,37 @@ export function BookingDrawerCanonical({
                 {t('bookingDrawer.bookingTitle')}
               </p>
               <h2 className="mt-1 truncate text-lg font-semibold">
-                {step === 4 ? (paymentInstructions ? t('bookingDrawer.prepaymentPendingTitle') : waitlistOnly ? (locale === 'en' ? 'You are on the waitlist' : 'Estás na lista de espera') : t('bookingDrawer.bookingConfirmed')) : shop.name}
+                {step === 4
+                  ? paymentInstructions
+                    ? t('bookingDrawer.prepaymentPendingTitle')
+                    : waitlistOnly
+                      ? locale === 'en'
+                        ? 'You are on the waitlist'
+                        : 'Estás na lista de espera'
+                      : t('bookingDrawer.bookingConfirmed')
+                  : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
                 {step === 1
-                  ? appearance === 'agenda' ? (locale === 'pt' ? 'Escolhe o dia e o serviço' : 'Choose a day and service') : t('bookingDrawer.chooseBarberDayService')
+                  ? appearance === 'agenda'
+                    ? locale === 'pt'
+                      ? 'Escolhe o dia e o serviço'
+                      : 'Choose a day and service'
+                    : t('bookingDrawer.chooseBarberDayService')
                   : step === 2
                     ? t('bookingDrawer.nextChooseTime')
                     : step === 3
                       ? waitlistOnly
-                        ? (locale === 'en' ? 'Leave your contact details to be notified about an opening.' : 'Deixa os teus contactos para receberes um aviso quando surgir uma vaga.')
+                        ? locale === 'en'
+                          ? 'Leave your contact details to be notified about an opening.'
+                          : 'Deixa os teus contactos para receberes um aviso quando surgir uma vaga.'
                         : t('bookingDrawer.confirmYourDetails')
                       : paymentInstructions
                         ? t('bookingDrawer.prepaymentPendingDescription')
                         : waitlistOnly
-                          ? (locale === 'en' ? 'The barbershop may contact you if a suitable opening becomes available.' : 'A barbearia poderá contactar-te se surgir uma vaga adequada.')
+                          ? locale === 'en'
+                            ? 'The barbershop may contact you if a suitable opening becomes available.'
+                            : 'A barbearia poderá contactar-te se surgir uma vaga adequada.'
                           : t('bookingDrawer.slotReserved')}
               </p>
             </div>
@@ -721,18 +765,28 @@ export function BookingDrawerCanonical({
             </div>
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
-              {(appearance !== 'agenda' || professionals.length !== 1) && (
-                professionals.length === 1 ? (
+              {(appearance !== 'agenda' || professionals.length !== 1) &&
+                (professionals.length === 1 ? (
                   <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
                     <div className="mb-2 flex items-center gap-2">
-                      <UserRound className="size-4 text-emerald-300" aria-hidden="true" />
-                      <h3 id="booking-step-one" className="text-sm font-semibold">
+                      <UserRound
+                        className="size-4 text-emerald-300"
+                        aria-hidden="true"
+                      />
+                      <h3
+                        id="booking-step-one"
+                        className="text-sm font-semibold"
+                      >
                         {t('bookingDrawer.stepOneBarber')}
                       </h3>
                     </div>
-                    <p className="text-sm font-semibold">{professionals[0].name}</p>
+                    <p className="text-sm font-semibold">
+                      {professionals[0].name}
+                    </p>
                     {professionals[0].role ? (
-                      <p className="mt-0.5 text-xs text-zinc-500">{professionals[0].role}</p>
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        {professionals[0].role}
+                      </p>
                     ) : null}
                   </div>
                 ) : (
@@ -742,7 +796,10 @@ export function BookingDrawerCanonical({
                         className={`size-4 ${appearance === 'agenda' ? 'text-emerald-700' : 'text-emerald-300'}`}
                         aria-hidden="true"
                       />
-                      <h3 id="booking-step-one" className="text-sm font-semibold">
+                      <h3
+                        id="booking-step-one"
+                        className="text-sm font-semibold"
+                      >
                         {t('bookingDrawer.stepOneBarber')}
                       </h3>
                     </div>
@@ -753,14 +810,15 @@ export function BookingDrawerCanonical({
                           type="button"
                           aria-pressed={professional?.id === item.id}
                           onClick={() => setProfessional(item)}
-                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? appearance === 'agenda' ? 'border-emerald-500/35 bg-emerald-50 text-[#173d30]' : 'border-emerald-400/40 bg-emerald-400/[0.08]' : appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#292929] hover:border-[#c5c5bb]' : 'border-white/10 bg-white/[0.025] text-zinc-200 hover:border-white/20'}`}
+                          className={`flex min-h-16 items-center justify-between rounded-2xl border p-4 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${professional?.id === item.id ? (appearance === 'agenda' ? 'border-emerald-500/35 bg-emerald-50 text-[#173d30]' : 'border-emerald-400/40 bg-emerald-400/[0.08]') : appearance === 'agenda' ? 'border-[#e8e7e2] bg-white text-[#292929] hover:border-[#c5c5bb]' : 'border-white/10 bg-white/[0.025] text-zinc-200 hover:border-white/20'}`}
                         >
                           <span>
                             <span className="block text-sm font-semibold">
                               {item.name}
                             </span>
                             <span className="mt-0.5 block text-xs text-zinc-500">
-                              {item.role || t('bookingDrawer.professionalDefault')}
+                              {item.role ||
+                                t('bookingDrawer.professionalDefault')}
                             </span>
                           </span>
                           {professional?.id === item.id && (
@@ -773,13 +831,14 @@ export function BookingDrawerCanonical({
                       ))}
                     </div>
                     {!professionals.length && (
-                      <p className={`rounded-2xl border p-4 text-sm ${appearance === 'agenda' ? 'border-[#e8e7e2] text-[#73736c]' : 'border-white/10 text-zinc-500'}`}>
+                      <p
+                        className={`rounded-2xl border p-4 text-sm ${appearance === 'agenda' ? 'border-[#e8e7e2] text-[#73736c]' : 'border-white/10 text-zinc-500'}`}
+                      >
                         {t('bookingDrawer.noBarbers')}
                       </p>
                     )}
                   </div>
-                )
-              )}
+                ))}
 
               <div>
                 <div className="mb-3 flex items-center gap-2">
@@ -794,44 +853,67 @@ export function BookingDrawerCanonical({
                 {availableDays.length ? (
                   <>
                     <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {availableDays.map((day, index) => {
-                      const isDayOff = closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay());
-                      return (
-                      <button
-                        key={day.dateStr}
-                        type="button"
-                        aria-pressed={dayIndex === index}
-                        aria-label={day.fullDateFormatted + (isDayOff ? (locale === 'pt' ? ', folga' : ', day off') : '')}
-                        onClick={() => {
-                          if (isDayOff) return;
-                          setDayIndex(index);
-                          setSelectedSlot(null);
-                        }}
-                        disabled={isDayOff}
-                        className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isDayOff ? 'border-rose-400/35 bg-rose-400/[0.08] text-rose-200 hover:border-rose-300/50' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                      {availableDays.map((day, index) => {
+                        const isDayOff = closedDays.has(
+                          new Date(day.dateStr + 'T12:00:00').getDay(),
+                        );
+                        return (
+                          <button
+                            key={day.dateStr}
+                            type="button"
+                            aria-pressed={dayIndex === index}
+                            aria-label={
+                              day.fullDateFormatted +
+                              (isDayOff
+                                ? locale === 'pt'
+                                  ? ', folga'
+                                  : ', day off'
+                                : '')
+                            }
+                            onClick={() => {
+                              if (isDayOff) return;
+                              setDayIndex(index);
+                              setSelectedSlot(null);
+                            }}
+                            disabled={isDayOff}
+                            className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isDayOff ? 'border-rose-400/35 bg-rose-400/[0.08] text-rose-200 hover:border-rose-300/50' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                          >
+                            <span className="block text-[10px] font-semibold text-zinc-500">
+                              {day.isToday
+                                ? t('bookingDrawer.today').toLocaleUpperCase(
+                                    locale === 'pt' ? 'pt-PT' : 'en-GB',
+                                  )
+                                : day.weekdayShort}
+                            </span>
+                            <span className="mt-1 block text-xl font-black">
+                              {day.dayNumeric}
+                            </span>
+                            <span
+                              className={`mt-1 block text-[10px] ${isDayOff ? 'font-semibold text-rose-300' : 'text-zinc-500'}`}
+                            >
+                              {isDayOff
+                                ? locale === 'pt'
+                                  ? 'Folga'
+                                  : 'Day off'
+                                : (day.fullDateFormatted.split(' ')[2] ?? '')}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {closedDays.size > 0 && (
+                      <p
+                        className="mt-2 flex items-center gap-2 text-[11px] text-rose-300"
+                        role="note"
                       >
-                        <span className="block text-[10px] font-semibold text-zinc-500">
-                          {day.isToday
-                            ? t('bookingDrawer.today').toLocaleUpperCase(
-                                locale === 'pt' ? 'pt-PT' : 'en-GB',
-                              )
-                            : day.weekdayShort}
-                        </span>
-                        <span className="mt-1 block text-xl font-black">
-                          {day.dayNumeric}
-                        </span>
-                        <span className={`mt-1 block text-[10px] ${isDayOff ? 'font-semibold text-rose-300' : 'text-zinc-500'}`}>
-                          {isDayOff ? (locale === 'pt' ? 'Folga' : 'Day off') : (day.fullDateFormatted.split(' ')[2] ?? '')}
-                        </span>
-                      </button>
-                      );
-                    })}
-                  </div>
-                  {closedDays.size > 0 && (
-                    <p className="mt-2 flex items-center gap-2 text-[11px] text-rose-300" role="note">
-                      <span className="size-2 shrink-0 rounded-full bg-rose-400" aria-hidden="true" />
-                      {locale === 'pt' ? 'Dia de folga — indisponível para marcação' : 'Day off — unavailable for booking'}
-                    </p>
+                        <span
+                          className="size-2 shrink-0 rounded-full bg-rose-400"
+                          aria-hidden="true"
+                        />
+                        {locale === 'pt'
+                          ? 'Dia de folga — indisponível para marcação'
+                          : 'Day off — unavailable for booking'}
+                      </p>
                     )}
                   </>
                 ) : (
@@ -840,8 +922,13 @@ export function BookingDrawerCanonical({
                   </p>
                 )}
                 {currentDayClosed && currentDay && (
-                  <p role="status" className="mt-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-3 py-2.5 text-xs font-medium text-rose-200">
-                    {locale === 'pt' ? 'A barbearia está de folga neste dia. Escolhe outra data para continuar.' : 'The barbershop is closed on this day. Choose another date to continue.'}
+                  <p
+                    role="status"
+                    className="mt-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-3 py-2.5 text-xs font-medium text-rose-200"
+                  >
+                    {locale === 'pt'
+                      ? 'A barbearia está de folga neste dia. Escolhe outra data para continuar.'
+                      : 'The barbershop is closed on this day. Choose another date to continue.'}
                   </p>
                 )}
               </div>
@@ -948,7 +1035,9 @@ export function BookingDrawerCanonical({
                       }}
                     >
                       <Clock3 className="mr-2 size-4" aria-hidden="true" />
-                      {locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'}
+                      {locale === 'en'
+                        ? 'Join the waitlist'
+                        : 'Entrar na lista de espera'}
                     </Button>
                   ) : null}
                 </div>
@@ -969,12 +1058,18 @@ export function BookingDrawerCanonical({
                 <div>
                   <h3 id="booking-step-three" className="text-sm font-semibold">
                     {waitlistOnly
-                      ? locale === 'en' ? 'Join the waitlist' : 'Entrar na lista de espera'
+                      ? locale === 'en'
+                        ? 'Join the waitlist'
+                        : 'Entrar na lista de espera'
                       : t('bookingDrawer.stepThreeDetails')}
                   </h3>
                   <p className="mt-1 text-xs text-zinc-500">
                     {service?.name} · {currentDay?.fullDateFormatted} ·{' '}
-                    {waitlistOnly ? (locale === 'en' ? 'Any time' : 'Qualquer horário') : selectedSlot}
+                    {waitlistOnly
+                      ? locale === 'en'
+                        ? 'Any time'
+                        : 'Qualquer horário'
+                      : selectedSlot}
                   </p>
                 </div>
                 <Button
@@ -1056,7 +1151,9 @@ export function BookingDrawerCanonical({
                     <input
                       type="checkbox"
                       checked={waitlistConsent}
-                      onChange={(event) => setWaitlistConsent(event.target.checked)}
+                      onChange={(event) =>
+                        setWaitlistConsent(event.target.checked)
+                      }
                       className="mt-0.5 size-4 shrink-0 accent-emerald-400"
                     />
                     <span>
@@ -1067,7 +1164,7 @@ export function BookingDrawerCanonical({
                   </label>
                 )}
 
-                { !waitlistOnly && manualPrepayment?.enabled && (
+                {!waitlistOnly && manualPrepayment?.enabled && (
                   <div className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035]">
                     <button
                       type="button"
@@ -1075,24 +1172,42 @@ export function BookingDrawerCanonical({
                       onClick={() => setPrepaymentSelected((value) => !value)}
                       className={`flex min-h-14 w-full items-start gap-3 p-4 text-left transition-colors ${prepaymentSelected ? 'bg-emerald-400/[.08]' : 'hover:bg-white/[.025]'}`}
                     >
-                      <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border ${prepaymentSelected ? 'border-emerald-300 bg-emerald-300 text-zinc-950' : 'border-white/20 bg-white/[.03]'}`}>
-                        {prepaymentSelected && <Check className="size-3.5" aria-hidden="true" />}
+                      <span
+                        className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border ${prepaymentSelected ? 'border-emerald-300 bg-emerald-300 text-zinc-950' : 'border-white/20 bg-white/[.03]'}`}
+                      >
+                        {prepaymentSelected && (
+                          <Check className="size-3.5" aria-hidden="true" />
+                        )}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-zinc-100">{t('bookingDrawer.prepaymentOption')}</span>
-                        <span className="mt-1 block text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentOptionDescription')}</span>
+                        <span className="block text-sm font-semibold text-zinc-100">
+                          {t('bookingDrawer.prepaymentOption')}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-zinc-400">
+                          {t('bookingDrawer.prepaymentOptionDescription')}
+                        </span>
                       </span>
-                      <span className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">{Number(service?.price ?? 0).toFixed(2)} €</span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">
+                        {Number(service?.price ?? 0).toFixed(2)} €
+                      </span>
                     </button>
                     {prepaymentSelected && (
                       <div className="grid gap-2 border-t border-emerald-400/15 px-4 py-3 text-xs">
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentAmount')}</span>
-                          <strong className="text-zinc-100">{Number(service?.price ?? 0).toFixed(2)} €</strong>
+                          <span className="text-zinc-500">
+                            {t('bookingDrawer.prepaymentAmount')}
+                          </span>
+                          <strong className="text-zinc-100">
+                            {Number(service?.price ?? 0).toFixed(2)} €
+                          </strong>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-zinc-500">{t('bookingDrawer.prepaymentNumber')}</span>
-                          <strong className="text-zinc-100">{manualPrepayment.mbwayPhone}</strong>
+                          <span className="text-zinc-500">
+                            {t('bookingDrawer.prepaymentNumber')}
+                          </span>
+                          <strong className="text-zinc-100">
+                            {manualPrepayment.mbwayPhone}
+                          </strong>
                         </div>
                       </div>
                     )}
@@ -1100,41 +1215,41 @@ export function BookingDrawerCanonical({
                 )}
 
                 {!waitlistOnly && (
-                <div
-                  className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
-                  aria-live="polite"
-                >
-                  {customerState === 'checking' && (
-                    <p className="flex items-center gap-2 text-xs text-zinc-400">
-                      <Loader2
-                        className="size-3.5 animate-spin"
-                        aria-hidden="true"
-                      />
-                      {t('bookingDrawer.checkingDetails')}
-                    </p>
-                  )}
-                  {customerState === 'matched' && (
-                    <p className="flex items-center gap-2 text-xs text-emerald-300">
-                      <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                      {t('bookingDrawer.profileFound')}
-                    </p>
-                  )}
-                  {customerState === 'new' && (
-                    <p className="text-xs text-zinc-500">
-                      {t('bookingDrawer.profileNew')}
-                    </p>
-                  )}
-                  {customerState === 'error' && (
-                    <p className="text-xs text-amber-300">
-                      {t('bookingDrawer.profileError')}
-                    </p>
-                  )}
-                  {customerState === 'idle' && (
-                    <p className="text-xs text-zinc-600">
-                      {t('bookingDrawer.profileIdle')}
-                    </p>
-                  )}
-                </div>
+                  <div
+                    className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                    aria-live="polite"
+                  >
+                    {customerState === 'checking' && (
+                      <p className="flex items-center gap-2 text-xs text-zinc-400">
+                        <Loader2
+                          className="size-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
+                        {t('bookingDrawer.checkingDetails')}
+                      </p>
+                    )}
+                    {customerState === 'matched' && (
+                      <p className="flex items-center gap-2 text-xs text-emerald-300">
+                        <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                        {t('bookingDrawer.profileFound')}
+                      </p>
+                    )}
+                    {customerState === 'new' && (
+                      <p className="text-xs text-zinc-500">
+                        {t('bookingDrawer.profileNew')}
+                      </p>
+                    )}
+                    {customerState === 'error' && (
+                      <p className="text-xs text-amber-300">
+                        {t('bookingDrawer.profileError')}
+                      </p>
+                    )}
+                    {customerState === 'idle' && (
+                      <p className="text-xs text-zinc-600">
+                        {t('bookingDrawer.profileIdle')}
+                      </p>
+                    )}
+                  </div>
                 )}
 
                 <Button
@@ -1152,7 +1267,9 @@ export function BookingDrawerCanonical({
                   {submitting
                     ? t('bookingDrawer.reserving')
                     : waitlistOnly
-                      ? locale === 'en' ? 'Join waitlist' : 'Entrar na lista de espera'
+                      ? locale === 'en'
+                        ? 'Join waitlist'
+                        : 'Entrar na lista de espera'
                       : prepaymentSelected
                         ? t('bookingDrawer.requestPrepayment')
                         : t('bookingDrawer.confirmBooking')}
@@ -1164,7 +1281,9 @@ export function BookingDrawerCanonical({
               className="flex min-h-80 flex-col items-center justify-center text-center"
               aria-labelledby="booking-success-title"
             >
-              <div className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}>
+              <div
+                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
+              >
                 <CheckCircle2
                   className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
                   aria-hidden="true"
@@ -1177,38 +1296,72 @@ export function BookingDrawerCanonical({
                 {paymentInstructions
                   ? t('bookingDrawer.prepaymentPendingTitle')
                   : waitlistOnly
-                    ? locale === 'en' ? 'You are on the waitlist' : 'Estás na lista de espera'
+                    ? locale === 'en'
+                      ? 'You are on the waitlist'
+                      : 'Estás na lista de espera'
                     : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
-                {waitlistOnly
-                  ? locale === 'en'
-                    ? `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. The barbershop may contact you if a suitable opening becomes available.`
-                    : `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. A barbearia poderá contactar-te se surgir uma vaga adequada.`
-                  : <>
-                      {service?.name} {t('bookingDrawer.with')} {professional?.name},{' '}
-                      {currentDay?.fullDateFormatted}, {t('bookingDrawer.at')}{' '}
-                      {selectedSlot}.
-                    </>}
+                {waitlistOnly ? (
+                  locale === 'en' ? (
+                    `Your request for ${service?.name} on ${currentDay?.fullDateFormatted} has been saved. The barbershop may contact you if a suitable opening becomes available.`
+                  ) : (
+                    `O teu pedido para ${service?.name} em ${currentDay?.fullDateFormatted} ficou registado. A barbearia poderá contactar-te se surgir uma vaga adequada.`
+                  )
+                ) : (
+                  <>
+                    {service?.name} {t('bookingDrawer.with')}{' '}
+                    {professional?.name}, {currentDay?.fullDateFormatted},{' '}
+                    {t('bookingDrawer.at')} {selectedSlot}.
+                  </>
+                )}
               </p>
               {paymentInstructions && (
                 <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentAmount')}</span>
-                    <strong className="text-lg tabular-nums text-zinc-100">{paymentInstructions.amount.toFixed(2)} €</strong>
+                    <span className="text-zinc-400">
+                      {t('bookingDrawer.prepaymentAmount')}
+                    </span>
+                    <strong className="text-lg tabular-nums text-zinc-100">
+                      {paymentInstructions.amount.toFixed(2)} €
+                    </strong>
                   </div>
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-zinc-400">{t('bookingDrawer.prepaymentNumber')}</span>
-                    <strong className="text-zinc-100">{paymentInstructions.mbwayPhone}</strong>
+                    <span className="text-zinc-400">
+                      {t('bookingDrawer.prepaymentNumber')}
+                    </span>
+                    <strong className="text-zinc-100">
+                      {paymentInstructions.mbwayPhone}
+                    </strong>
                   </div>
-                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentExpiry', { time: new Date(paymentInstructions.expiresAt).toLocaleTimeString(locale === 'pt' ? 'pt-PT' : 'en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' }) })}</p>
+                  <p className="text-xs leading-5 text-zinc-400">
+                    {t('bookingDrawer.prepaymentExpiry', {
+                      time: new Date(
+                        paymentInstructions.expiresAt,
+                      ).toLocaleTimeString(
+                        locale === 'pt' ? 'pt-PT' : 'en-GB',
+                        {
+                          timeZone: 'Europe/Lisbon',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      ),
+                    })}
+                  </p>
                   {whatsappProofUrl ? (
-                    <a href={whatsappProofUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-300">
+                    <a
+                      href={whatsappProofUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-300"
+                    >
                       <MessageCircle className="size-4" aria-hidden="true" />
                       {t('bookingDrawer.sendProofWhatsApp')}
                     </a>
                   ) : null}
-                  <p className="text-xs leading-5 text-zinc-400">{t('bookingDrawer.prepaymentEmailNotice')}</p>
+                  <p className="text-xs leading-5 text-zinc-400">
+                    {t('bookingDrawer.prepaymentEmailNotice')}
+                  </p>
                 </div>
               )}
               <Button

@@ -106,7 +106,10 @@ assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
 assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
 assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
-assert.match(sidebar, /fixed left-1\/2 bottom-\[calc\(0\.75rem\+env\(safe-area-inset-bottom\)\)\]/);
+assert.match(
+  sidebar,
+  /fixed left-1\/2 bottom-\[calc\(0\.75rem\+env\(safe-area-inset-bottom\)\)\]/,
+);
 assert.match(sidebar, /w-\[min\(28rem,calc\(100vw-1\.5rem\)\)\]/);
 assert.match(sidebar, /rounded-\[1\.35rem\] border border-white\/10/);
 assert.match(sidebar, /active:scale-\[0\.96\]/);
@@ -122,12 +125,16 @@ assert.match(sidebar, /TooltipContent/);
 assert.match(sidebar, /side="top"/);
 assert.match(sidebar, /rotateX: -5/);
 assert.match(sidebar, /transformOrigin: 'bottom center'/);
-assert.doesNotMatch(sidebar, /lg:absolute lg:bottom-\[calc\(100%\+0\.85rem\)\]/);
+assert.doesNotMatch(
+  sidebar,
+  /lg:absolute lg:bottom-\[calc\(100%\+0\.85rem\)\]/,
+);
 assert.match(sidebar, /prefersReducedMotion/);
 assert.match(sidebar, /env\(safe-area-inset-bottom\)/);
-const mobileDashboardShellRule = responsiveCss.match(
-  /Mobile dashboard must behave[\s\S]*?\.silentra-dashboard-shell\s*\{([^}]*)\}/,
-)?.[1] ?? '';
+const mobileDashboardShellRule =
+  responsiveCss.match(
+    /Mobile dashboard must behave[\s\S]*?\.silentra-dashboard-shell\s*\{([^}]*)\}/,
+  )?.[1] ?? '';
 assert.ok(mobileDashboardShellRule, 'Mobile dashboard shell rule must exist');
 assert.match(mobileDashboardShellRule, /overflow-x:\s*clip/);
 assert.doesNotMatch(
@@ -151,11 +158,23 @@ assert.match(dashboardShell, /lg:pl-64/);
 assert.match(topBar, /lg:left-64/);
 
 // Settings stay on one page: no category switcher, modal editor, or shortcut step.
-assert.doesNotMatch(settingsPage, /const sectionGroups|navigationGroups|setSection|activeDialog|SettingsDialog/);
-assert.doesNotMatch(settingsPage, /<Dialog|<DialogContent|<DialogFooter|closeSettingsDialog/);
-assert.doesNotMatch(settingsPage, /<aside|settingsPage\.navigation|settingsPage\.section/);
+assert.doesNotMatch(
+  settingsPage,
+  /const sectionGroups|navigationGroups|setSection|activeDialog|SettingsDialog/,
+);
+assert.doesNotMatch(
+  settingsPage,
+  /<Dialog|<DialogContent|<DialogFooter|closeSettingsDialog/,
+);
+assert.doesNotMatch(
+  settingsPage,
+  /<aside|settingsPage\.navigation|settingsPage\.section/,
+);
 assert.doesNotMatch(settingsPage, /onClick=\{\(\) => go\(/);
-assert.doesNotMatch(settingsPage, /settingsPage\.overviewTitle|completedSetupSteps|role="progressbar"/);
+assert.doesNotMatch(
+  settingsPage,
+  /settingsPage\.overviewTitle|completedSetupSteps|role="progressbar"/,
+);
 for (const category of ['business', 'location', 'hours', 'rules']) {
   assert.match(
     settingsPage,
@@ -166,7 +185,10 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
-assert.match(settingsPage, /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/);
+assert.match(
+  settingsPage,
+  /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/,
+);
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.match(settingsPage, /sticky top-0/);
@@ -218,7 +240,10 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
-assert.match(settingsPage, /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/);
+assert.match(
+  settingsPage,
+  /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/,
+);
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.doesNotMatch(
@@ -242,17 +267,26 @@ assert.match(dashboardShell, /viewport\.content = previousViewportContent/);
 assert.match(navbar, /keepFocusInside/);
 assert.match(navbar, /aria-controls="site-navigation-overlay"/);
 assert.match(navbar, /lockBodyScroll\(\)/);
-assert.match(navbar, /min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain touch-pan-y/);
+assert.match(
+  navbar,
+  /min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain touch-pan-y/,
+);
 assert.match(sidebar, /lockBodyScroll\(\)/);
 assert.match(bodyScrollLock, /body\.style\.position = 'fixed'/);
 assert.match(bodyScrollLock, /root\.style\.overscrollBehavior = 'none'/);
 assert.match(bodyScrollLock, /window\.scrollTo\(0, scrollY\)/);
 assert.match(agendaPage, /Gerir marcações/);
-assert.match(agendaPage, /grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 xl:hidden/);
+assert.match(
+  agendaPage,
+  /grid gap-3 px-3 py-3 sm:grid-cols-2 sm:px-4 xl:hidden/,
+);
 assert.match(agendaPage, /className="hidden xl:block"/);
 assert.match(agendaPage, /locale=\{locale\}/);
 assert.match(appointmentMobileCard, /date\.toLocaleDateString\(languageTag/);
-assert.match(appointmentMobileCard, /AppointmentActions[\s\S]*?locale=\{locale\}/);
+assert.match(
+  appointmentMobileCard,
+  /AppointmentActions[\s\S]*?locale=\{locale\}/,
+);
 assert.match(appointmentsTable, /min-w-\[900px\]/);
 assert.match(appointmentsTable, /locale=\{locale\}/);
 assert.match(appointmentActions, /locale = 'pt'/);

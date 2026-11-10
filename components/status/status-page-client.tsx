@@ -22,7 +22,11 @@ type Locale = 'pt' | 'en';
 
 const SERVICE_DETAILS: Record<
   'api' | 'database',
-  { name: { pt: string; en: string }; icon: LucideIcon; description: { pt: string; en: string } }
+  {
+    name: { pt: string; en: string };
+    icon: LucideIcon;
+    description: { pt: string; en: string };
+  }
 > = {
   api: {
     name: { pt: 'APIs da Silentra', en: 'Silentra APIs' },
@@ -87,7 +91,10 @@ const STATUS_STYLES: Record<
 function overallCopy(status: ServiceStatus, locale: Locale) {
   const copy: Record<ServiceStatus, { title: string; description: string }> = {
     operational: {
-      title: locale === 'pt' ? 'Infraestrutura operacional.' : 'Everything is running normally.',
+      title:
+        locale === 'pt'
+          ? 'Infraestrutura operacional.'
+          : 'Everything is running normally.',
       description:
         locale === 'pt'
           ? 'As APIs e a base de dados da Silentra estão a funcionar normalmente.'
@@ -108,21 +115,24 @@ function overallCopy(status: ServiceStatus, locale: Locale) {
           : 'Some parts of the platform may be temporarily affected.',
     },
     major_outage: {
-      title: locale === 'pt' ? 'Falha na infraestrutura.' : 'Service disruption.',
+      title:
+        locale === 'pt' ? 'Falha na infraestrutura.' : 'Service disruption.',
       description:
         locale === 'pt'
           ? 'Foi detetada uma falha numa parte essencial da infraestrutura.'
           : 'A failure has been detected in a critical part of the platform.',
     },
     maintenance: {
-      title: locale === 'pt' ? 'Manutenção em curso.' : 'Maintenance in progress.',
+      title:
+        locale === 'pt' ? 'Manutenção em curso.' : 'Maintenance in progress.',
       description:
         locale === 'pt'
           ? 'Alguns componentes podem ter disponibilidade limitada.'
           : 'Some components may have limited availability.',
     },
     unknown: {
-      title: locale === 'pt' ? 'Estado não confirmado.' : 'Status not confirmed.',
+      title:
+        locale === 'pt' ? 'Estado não confirmado.' : 'Status not confirmed.',
       description:
         locale === 'pt'
           ? 'Não foi possível confirmar o estado de todos os componentes.'
@@ -264,7 +274,10 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
   const overall = data
     ? overallCopy(data.overall, locale)
     : {
-        title: locale === 'pt' ? 'A verificar a infraestrutura…' : 'Checking platform services…',
+        title:
+          locale === 'pt'
+            ? 'A verificar a infraestrutura…'
+            : 'Checking platform services…',
         description:
           locale === 'pt'
             ? 'Estamos a consultar o estado das APIs e da base de dados.'
@@ -272,19 +285,23 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
       };
   const updatedAt = data ? formatDate(data.generatedAt, locale) : null;
   const operationalCount =
-    data?.components.filter((item) => item.status === 'operational').length ?? 0;
+    data?.components.filter((item) => item.status === 'operational').length ??
+    0;
 
   return (
     <main className="min-h-screen overflow-x-clip bg-zinc-950 px-4 pb-16 pt-28 text-zinc-50 sm:px-6 sm:pt-32 lg:px-8">
       <div className="mx-auto w-full max-w-5xl">
         <header className="mb-8 border-b border-white/[0.08] pb-7 sm:mb-10 sm:pb-9">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300/80">
-            Silentra for Barbers · {locale === 'pt' ? 'Infraestrutura' : 'Platform services'}
+            Silentra for Barbers ·{' '}
+            {locale === 'pt' ? 'Infraestrutura' : 'Platform services'}
           </p>
           <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
               <h1 className="text-3xl font-semibold tracking-[-0.055em] text-white sm:text-4xl lg:text-5xl">
-                {locale === 'pt' ? 'Estado da infraestrutura' : 'Platform status'}
+                {locale === 'pt'
+                  ? 'Estado da infraestrutura'
+                  : 'Platform status'}
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
                 {locale === 'pt'
@@ -387,7 +404,9 @@ export function StatusPageClient({ locale }: { locale: Locale }) {
                 {locale === 'pt' ? 'Infraestrutura' : 'Platform services'}
               </p>
               <h2 className="mt-2 text-xl font-semibold tracking-[-0.035em] text-white sm:text-2xl">
-                {locale === 'pt' ? 'Componentes monitorizados' : 'Monitored components'}
+                {locale === 'pt'
+                  ? 'Componentes monitorizados'
+                  : 'Monitored components'}
               </h2>
             </div>
             <p className="text-xs text-zinc-500">

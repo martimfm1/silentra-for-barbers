@@ -52,35 +52,38 @@ export function PublicReviewsPage({
   const [sort, setSort] = useState<SortMode>('newest');
   const [withCommentOnly, setWithCommentOnly] = useState(false);
 
-  const loadReviews = useCallback(async (signal?: AbortSignal) => {
-    setIsLoading(true);
-    setHasError(false);
-    try {
-      const response = await fetch(
-        `/api/public/barbershops/${encodeURIComponent(slug)}`,
-        {
-          method: 'GET',
-          cache: 'no-store',
-          headers: { Accept: 'application/json' },
-          signal,
-        },
-      );
-      const payload = (await response.json()) as ReviewsPayload;
-      if (!response.ok || !payload.data) {
-        throw new Error(payload.error || 'Unable to load reviews');
+  const loadReviews = useCallback(
+    async (signal?: AbortSignal) => {
+      setIsLoading(true);
+      setHasError(false);
+      try {
+        const response = await fetch(
+          `/api/public/barbershops/${encodeURIComponent(slug)}`,
+          {
+            method: 'GET',
+            cache: 'no-store',
+            headers: { Accept: 'application/json' },
+            signal,
+          },
+        );
+        const payload = (await response.json()) as ReviewsPayload;
+        if (!response.ok || !payload.data) {
+          throw new Error(payload.error || 'Unable to load reviews');
+        }
+        const items = Array.isArray(payload.data.reviews)
+          ? payload.data.reviews
+          : [];
+        setReviews(items);
+        setAverage(Number(payload.data.rating || 0));
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        setHasError(true);
+      } finally {
+        if (!signal?.aborted) setIsLoading(false);
       }
-      const items = Array.isArray(payload.data.reviews)
-        ? payload.data.reviews
-        : [];
-      setReviews(items);
-      setAverage(Number(payload.data.rating || 0));
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
-      setHasError(true);
-    } finally {
-      if (!signal?.aborted) setIsLoading(false);
-    }
-  }, [slug]);
+    },
+    [slug],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -97,7 +100,9 @@ export function PublicReviewsPage({
       if (withCommentOnly && !review.comment?.trim()) return false;
       if (!normalizedQuery) return true;
       return (
-        (review.client_name || '').toLocaleLowerCase().includes(normalizedQuery) ||
+        (review.client_name || '')
+          .toLocaleLowerCase()
+          .includes(normalizedQuery) ||
         (review.comment || '').toLocaleLowerCase().includes(normalizedQuery)
       );
     });
@@ -152,7 +157,8 @@ export function PublicReviewsPage({
         results: 'Showing',
         of: 'of',
         noReviews: 'No reviews yet',
-        noReviewsHint: 'When customers share their experience, it will appear here.',
+        noReviewsHint:
+          'When customers share their experience, it will appear here.',
         noMatches: 'No reviews match these filters.',
         noMatchesHint: 'Try changing your search or clearing the filters.',
         clear: 'Clear filters',
@@ -179,7 +185,8 @@ export function PublicReviewsPage({
         results: 'A mostrar',
         of: 'de',
         noReviews: 'Ainda não existem avaliações',
-        noReviewsHint: 'Quando os clientes partilharem a sua experiência, ela aparecerá aqui.',
+        noReviewsHint:
+          'Quando os clientes partilharem a sua experiência, ela aparecerá aqui.',
         noMatches: 'Não existem avaliações com estes filtros.',
         noMatchesHint: 'Experimenta alterar a pesquisa ou limpar os filtros.',
         clear: 'Limpar filtros',
@@ -210,39 +217,63 @@ export function PublicReviewsPage({
                 {copy.title}
               </h1>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                {barbershopName}{city ? ` · ${city}` : ''}
+                {barbershopName}
+                {city ? ` · ${city}` : ''}
               </p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
                 {copy.intro}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-              <Star className="size-7 fill-amber-300 text-amber-300" aria-hidden="true" />
+              <Star
+                className="size-7 fill-amber-300 text-amber-300"
+                aria-hidden="true"
+              />
               <div>
-                <p className="text-2xl font-bold tabular-nums">{average.toFixed(1)}<span className="ml-1 text-sm font-medium text-zinc-500">/5</span></p>
+                <p className="text-2xl font-bold tabular-nums">
+                  {average.toFixed(1)}
+                  <span className="ml-1 text-sm font-medium text-zinc-500">
+                    /5
+                  </span>
+                </p>
                 <p className="text-[11px] text-zinc-500">{copy.average}</p>
               </div>
             </div>
           </div>
           <div className="mt-6 grid gap-5 border-t border-white/[0.07] pt-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
             <div className="flex flex-col justify-center">
-              <p className="text-3xl font-semibold tabular-nums">{reviews.length}</p>
+              <p className="text-3xl font-semibold tabular-nums">
+                {reviews.length}
+              </p>
               <p className="mt-1 text-sm text-zinc-400">{copy.total}</p>
             </div>
             <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">{copy.distribution}</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                {copy.distribution}
+              </p>
               <div className="space-y-2">
                 {distribution.map(({ rating, count }) => (
                   <div key={rating} className="flex items-center gap-2 text-xs">
-                    <span className="w-3 text-right tabular-nums text-zinc-400">{rating}</span>
-                    <Star className="size-3 fill-amber-300 text-amber-300" aria-hidden="true" />
+                    <span className="w-3 text-right tabular-nums text-zinc-400">
+                      {rating}
+                    </span>
+                    <Star
+                      className="size-3 fill-amber-300 text-amber-300"
+                      aria-hidden="true"
+                    />
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
                       <div
                         className="h-full rounded-full bg-amber-300 transition-[width] duration-500"
-                        style={{ width: reviews.length ? `${(count / reviews.length) * 100}%` : '0%' }}
+                        style={{
+                          width: reviews.length
+                            ? `${(count / reviews.length) * 100}%`
+                            : '0%',
+                        }}
                       />
                     </div>
-                    <span className="w-7 text-right tabular-nums text-zinc-500">{count}</span>
+                    <span className="w-7 text-right tabular-nums text-zinc-500">
+                      {count}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -250,10 +281,16 @@ export function PublicReviewsPage({
           </div>
         </header>
 
-        <section className="mt-5 rounded-3xl border border-white/[0.08] bg-zinc-950/55 p-4 backdrop-blur-2xl sm:p-5" aria-label={copy.title}>
+        <section
+          className="mt-5 rounded-3xl border border-white/[0.08] bg-zinc-950/55 p-4 backdrop-blur-2xl sm:p-5"
+          aria-label={copy.title}
+        >
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
             <label className="relative block">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+              <Search
+                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
+                aria-hidden="true"
+              />
               <input
                 type="search"
                 value={query}
@@ -264,7 +301,10 @@ export function PublicReviewsPage({
               />
             </label>
             <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.035] px-3">
-              <SlidersHorizontal className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+              <SlidersHorizontal
+                className="size-4 shrink-0 text-zinc-500"
+                aria-hidden="true"
+              />
               <span className="text-xs text-zinc-500">{copy.sort}</span>
               <select
                 value={sort}
@@ -272,9 +312,15 @@ export function PublicReviewsPage({
                 className="min-w-0 flex-1 bg-transparent text-sm text-zinc-100 outline-none"
                 aria-label={copy.sort}
               >
-                <option value="newest" className="bg-zinc-900">{copy.newest}</option>
-                <option value="highest" className="bg-zinc-900">{copy.highest}</option>
-                <option value="lowest" className="bg-zinc-900">{copy.lowest}</option>
+                <option value="newest" className="bg-zinc-900">
+                  {copy.newest}
+                </option>
+                <option value="highest" className="bg-zinc-900">
+                  {copy.highest}
+                </option>
+                <option value="lowest" className="bg-zinc-900">
+                  {copy.lowest}
+                </option>
               </select>
             </label>
           </div>
@@ -292,11 +338,14 @@ export function PublicReviewsPage({
               <button
                 key={rating}
                 type="button"
-                onClick={() => setRatingFilter(ratingFilter === rating ? 'all' : rating)}
+                onClick={() =>
+                  setRatingFilter(ratingFilter === rating ? 'all' : rating)
+                }
                 aria-pressed={ratingFilter === rating}
                 className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition ${ratingFilter === rating ? 'border-amber-300/40 bg-amber-300/10 text-amber-200' : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white'}`}
               >
-                {rating} <Star className="size-3 fill-current" aria-hidden="true" />
+                {rating}{' '}
+                <Star className="size-3 fill-current" aria-hidden="true" />
               </button>
             ))}
             <label className="ml-0 inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-white/10 px-3 text-xs text-zinc-400 sm:ml-auto">
@@ -312,7 +361,11 @@ export function PublicReviewsPage({
         </section>
 
         <div className="mb-3 mt-5 flex items-center justify-between gap-3 px-1 text-xs text-zinc-500">
-          <span>{copy.results} <strong className="text-zinc-200">{filteredReviews.length}</strong> {copy.of} {reviews.length}</span>
+          <span>
+            {copy.results}{' '}
+            <strong className="text-zinc-200">{filteredReviews.length}</strong>{' '}
+            {copy.of} {reviews.length}
+          </span>
           {(query || ratingFilter !== 'all' || withCommentOnly) && (
             <button
               type="button"
@@ -330,35 +383,64 @@ export function PublicReviewsPage({
 
         {isLoading ? (
           <div className="silentra-section-block flex min-h-48 items-center justify-center rounded-2xl text-sm text-zinc-500">
-            <span className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-emerald-300" aria-hidden="true" />
-            <span className="ml-3">{isEnglish ? 'Loading reviews…' : 'A carregar avaliações…'}</span>
+            <span
+              className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-emerald-300"
+              aria-hidden="true"
+            />
+            <span className="ml-3">
+              {isEnglish ? 'Loading reviews…' : 'A carregar avaliações…'}
+            </span>
           </div>
         ) : hasError ? (
           <div className="silentra-section-block rounded-2xl p-8 text-center">
             <p className="font-semibold text-zinc-200">{copy.error}</p>
-            <button type="button" onClick={() => void loadReviews()} className="mt-4 min-h-10 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950">{copy.retry}</button>
+            <button
+              type="button"
+              onClick={() => void loadReviews()}
+              className="mt-4 min-h-10 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950"
+            >
+              {copy.retry}
+            </button>
           </div>
         ) : filteredReviews.length ? (
           <div className="grid gap-3">
             {filteredReviews.map((review) => (
-              <article key={review.id} className="rounded-2xl border border-white/[0.08] bg-zinc-950/55 p-4 backdrop-blur-xl sm:p-5">
+              <article
+                key={review.id}
+                className="rounded-2xl border border-white/[0.08] bg-zinc-950/55 p-4 backdrop-blur-xl sm:p-5"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="truncate text-sm font-semibold text-zinc-100">{review.client_name || (isEnglish ? 'Customer' : 'Cliente')}</h2>
-                    <p className="mt-1 text-xs text-zinc-500">{dateLabel(review.created_at)}</p>
+                    <h2 className="truncate text-sm font-semibold text-zinc-100">
+                      {review.client_name ||
+                        (isEnglish ? 'Customer' : 'Cliente')}
+                    </h2>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {dateLabel(review.created_at)}
+                    </p>
                   </div>
                   <div className="inline-flex items-center gap-1 rounded-lg border border-amber-300/15 bg-amber-300/[0.06] px-2.5 py-1.5 text-xs font-semibold text-amber-200">
-                    <Star className="size-3.5 fill-current" aria-hidden="true" />
+                    <Star
+                      className="size-3.5 fill-current"
+                      aria-hidden="true"
+                    />
                     {review.rating}/5
                   </div>
                 </div>
                 {review.comment?.trim() ? (
-                  <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-zinc-300">{review.comment}</p>
+                  <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-zinc-300">
+                    {review.comment}
+                  </p>
                 ) : (
-                  <p className="mt-4 text-sm italic text-zinc-600">{copy.noComment}</p>
+                  <p className="mt-4 text-sm italic text-zinc-600">
+                    {copy.noComment}
+                  </p>
                 )}
                 <div className="mt-4 flex items-center gap-1.5 border-t border-white/[0.06] pt-3 text-[11px] text-zinc-500">
-                  <ThumbsUp className="size-3.5 text-emerald-300" aria-hidden="true" />
+                  <ThumbsUp
+                    className="size-3.5 text-emerald-300"
+                    aria-hidden="true"
+                  />
                   {copy.verified}
                 </div>
               </article>

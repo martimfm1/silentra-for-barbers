@@ -153,7 +153,6 @@ assert.doesNotMatch(
   'Availability probes should not run expensive exact row counts.',
 );
 
-
 assert.match(
   clientDetailApi,
   /get_client_completed_total_spent/,

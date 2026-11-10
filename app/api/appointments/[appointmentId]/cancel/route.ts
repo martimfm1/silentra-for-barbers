@@ -60,7 +60,10 @@ async function DELETE__unobserved(
           .maybeSingle();
         if (legacy.error)
           return NextResponse.json(
-            { success: false, error: 'Não foi possível validar as permissões.' },
+            {
+              success: false,
+              error: 'Não foi possível validar as permissões.',
+            },
             { status: 503 },
           );
         allowed = legacy.data?.allowed === true;
@@ -91,7 +94,10 @@ async function DELETE__unobserved(
 
     if (currentAppointmentError)
       return NextResponse.json(
-        { success: false, error: 'Não foi possível consultar o estado do pagamento.' },
+        {
+          success: false,
+          error: 'Não foi possível consultar o estado do pagamento.',
+        },
         { status: 503 },
       );
 
@@ -119,7 +125,8 @@ async function DELETE__unobserved(
         status: 'cancelled',
         cancelled_at: cancelledAt,
         cancellation_actor: 'staff',
-        cancellation_actor_name: cancellingUser?.name_complete?.trim() || tenant.role,
+        cancellation_actor_name:
+          cancellingUser?.name_complete?.trim() || tenant.role,
         ...paymentReviewUpdate,
       })
       .eq('id', appointmentId)
@@ -183,8 +190,7 @@ async function DELETE__unobserved(
       clientResult.data?.name_complete?.trim() ||
       'Cliente';
     const barbershopName = shopResult.data?.name?.trim() || 'A tua barbearia';
-    const language =
-      shopResult.data?.default_language === 'en' ? 'en' : 'pt';
+    const language = shopResult.data?.default_language === 'en' ? 'en' : 'pt';
 
     const emailResult = customerEmail
       ? await sendAppointmentCancellationEmail({

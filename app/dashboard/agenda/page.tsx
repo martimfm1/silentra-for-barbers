@@ -15,7 +15,14 @@ import {
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
-import type { Appointment, BookingFormData, BookingRecurrence, Client, Professional, Service } from '@/types';
+import type {
+  Appointment,
+  BookingFormData,
+  BookingRecurrence,
+  Client,
+  Professional,
+  Service,
+} from '@/types';
 import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
@@ -170,9 +177,7 @@ export default function AgendaPage() {
       return;
     }
     setRecurrenceEndDate((current) =>
-      current > selectedDate
-        ? current
-        : addMonthsToDateValue(selectedDate, 6),
+      current > selectedDate ? current : addMonthsToDateValue(selectedDate, 6),
     );
   };
 
@@ -182,7 +187,6 @@ export default function AgendaPage() {
       setRecurrenceEndDate(addMonthsToDateValue(selectedDate, 6));
     }
   }, [bookingRecurrence, recurrenceEndDate, selectedDate]);
-
 
   useEffect(() => {
     const openCreateBooking = () => setBookingDialogOpen(true);
@@ -200,11 +204,16 @@ export default function AgendaPage() {
     }
 
     return () =>
-      window.removeEventListener('silentra:open-create-booking', openCreateBooking);
+      window.removeEventListener(
+        'silentra:open-create-booking',
+        openCreateBooking,
+      );
   }, []);
 
   useEffect(() => {
-    const clientId = new URLSearchParams(window.location.search).get('clientId');
+    const clientId = new URLSearchParams(window.location.search).get(
+      'clientId',
+    );
     if (!clientId || clients.length === 0) return;
     const client = clients.find((item) => item.id === clientId);
     if (!client) return;
@@ -294,7 +303,9 @@ export default function AgendaPage() {
             return false;
           if (statusFilter !== 'all' && appointment.status !== statusFilter)
             return false;
-          const term = search.trim().toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
+          const term = search
+            .trim()
+            .toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
           if (!term) return true;
           const values = [
             appointment.manual_name,
@@ -404,9 +415,13 @@ export default function AgendaPage() {
             </p>
             {!loadingInitial && (
               <p className="mt-2 text-xs text-zinc-500">
-                <span className="font-semibold text-zinc-200">{metrics.today}</span>{' '}
+                <span className="font-semibold text-zinc-200">
+                  {metrics.today}
+                </span>{' '}
                 {locale === 'en' ? 'bookings today' : 'marcações hoje'} ·{' '}
-                <span className="font-semibold text-amber-200">{metrics.pending}</span>{' '}
+                <span className="font-semibold text-amber-200">
+                  {metrics.pending}
+                </span>{' '}
                 {locale === 'en' ? 'to confirm' : 'por confirmar'}
               </p>
             )}
@@ -433,7 +448,10 @@ export default function AgendaPage() {
 
         <CalendarSyncCard />
 
-        <section className="mt-4" aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}>
+        <section
+          className="mt-4"
+          aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}
+        >
           <AgendaCalendarView onAppointmentClick={setSelectedAppointment} />
         </section>
 
@@ -445,24 +463,41 @@ export default function AgendaPage() {
           <>
             <section
               className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-5"
-              aria-label={locale === 'en' ? 'Booking overview' : 'Resumo das marcações'}
+              aria-label={
+                locale === 'en' ? 'Booking overview' : 'Resumo das marcações'
+              }
             >
               {[
-                [locale === 'en' ? 'Today' : 'Hoje', metrics.today, CalendarDays, 'text-emerald-300'],
+                [
+                  locale === 'en' ? 'Today' : 'Hoje',
+                  metrics.today,
+                  CalendarDays,
+                  'text-emerald-300',
+                ],
                 [
                   t('agenda.upcomingToday'),
                   metrics.upcomingToday,
                   Clock3,
                   'text-sky-300',
                 ],
-                [locale === 'en' ? 'To confirm' : 'Por confirmar', metrics.pending, Clock3, 'text-amber-300'],
+                [
+                  locale === 'en' ? 'To confirm' : 'Por confirmar',
+                  metrics.pending,
+                  Clock3,
+                  'text-amber-300',
+                ],
                 [
                   locale === 'en' ? 'Completed' : 'Concluídas',
                   metrics.completed,
                   CheckCircle2,
                   'text-violet-300',
                 ],
-                [locale === 'en' ? 'Cancelled' : 'Canceladas', metrics.cancelled, XCircle, 'text-rose-300'],
+                [
+                  locale === 'en' ? 'Cancelled' : 'Canceladas',
+                  metrics.cancelled,
+                  XCircle,
+                  'text-rose-300',
+                ],
               ].map(([label, value, Icon, iconClass]) => {
                 const MetricIcon = Icon as typeof CalendarDays;
                 return (
@@ -498,7 +533,9 @@ export default function AgendaPage() {
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={t('agenda.searchPlaceholder')}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 text-sm text-zinc-100 outline-none focus:border-emerald-400/30"
-                  aria-label={locale === 'en' ? 'Search bookings' : 'Pesquisar marcações'}
+                  aria-label={
+                    locale === 'en' ? 'Search bookings' : 'Pesquisar marcações'
+                  }
                 />
               </div>
               <div
@@ -558,8 +595,12 @@ export default function AgendaPage() {
                   <span className="silentra-pill w-fit border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-medium text-zinc-400">
                     {orderedAppointments.length}{' '}
                     {locale === 'en'
-                      ? orderedAppointments.length === 1 ? 'result' : 'results'
-                      : orderedAppointments.length === 1 ? 'resultado' : 'resultados'}
+                      ? orderedAppointments.length === 1
+                        ? 'result'
+                        : 'results'
+                      : orderedAppointments.length === 1
+                        ? 'resultado'
+                        : 'resultados'}
                   </span>
                 </div>
                 {orderedAppointments.length === 0 ? (
@@ -637,7 +678,10 @@ export default function AgendaPage() {
           </>
         )}
       </div>
-      <div className="mx-auto mt-8 w-full max-w-7xl space-y-5 px-1"><AgendaViewSettings /><AgendaCancellationPolicyPanel /></div>
+      <div className="mx-auto mt-8 w-full max-w-7xl space-y-5 px-1">
+        <AgendaViewSettings />
+        <AgendaCancellationPolicyPanel />
+      </div>
       <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
         <DialogContent
           showCloseButton={false}

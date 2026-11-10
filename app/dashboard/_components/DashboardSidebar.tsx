@@ -105,16 +105,40 @@ const toolsOverviewItems: SidebarItem[] = [
 
 const customerExperienceItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
-  { href: '/dashboard/espera', label: 'Lista de espera', icon: Clock3, feature: 'waitlist' },
-  { href: '/dashboard/loyalty', label: 'Fidelização', icon: Heart, feature: 'loyalty' },
-  { href: '/dashboard/loyalty/points', label: 'Regras de pontos', icon: Sparkles, feature: 'loyalty' },
-  { href: '/dashboard/loyalty/validate', label: 'Validar recompensa', icon: ScanLine, feature: 'loyalty' },
+  {
+    href: '/dashboard/espera',
+    label: 'Lista de espera',
+    icon: Clock3,
+    feature: 'waitlist',
+  },
+  {
+    href: '/dashboard/loyalty',
+    label: 'Fidelização',
+    icon: Heart,
+    feature: 'loyalty',
+  },
+  {
+    href: '/dashboard/loyalty/points',
+    label: 'Regras de pontos',
+    icon: Sparkles,
+    feature: 'loyalty',
+  },
+  {
+    href: '/dashboard/loyalty/validate',
+    label: 'Validar recompensa',
+    icon: ScanLine,
+    feature: 'loyalty',
+  },
 ];
 
 const businessGrowthItems: SidebarItem[] = [
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
-  { href: '/dashboard/settings/public-profile', label: 'Perfil público', icon: Globe2 },
+  {
+    href: '/dashboard/settings/public-profile',
+    label: 'Perfil público',
+    icon: Globe2,
+  },
 ];
 
 const toolsItems: SidebarItem[] = [
@@ -427,18 +451,29 @@ export function DashboardSidebar() {
             <Sparkles className="size-[18px]" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-tight text-white">Silentra</p>
-            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.19em] text-zinc-500">Barbers · Dashboard</p>
+            <p className="truncate text-sm font-semibold tracking-tight text-white">
+              Silentra
+            </p>
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.19em] text-zinc-500">
+              Barbers · Dashboard
+            </p>
           </div>
         </div>
 
         <div className="mx-3 mt-4 flex shrink-0 items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.025] px-3 py-3">
           <BrandAvatar avatarUrl={barbershopAvatarUrl} />
           <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-zinc-200">{locale === 'en' ? 'Barbershop workspace' : 'Espaço da barbearia'}</p>
-            <p className="mt-0.5 truncate text-[11px] text-zinc-500">{locale === 'en' ? 'Manage your business' : 'Gere o teu negócio'}</p>
+            <p className="truncate text-xs font-medium text-zinc-200">
+              {locale === 'en' ? 'Barbershop workspace' : 'Espaço da barbearia'}
+            </p>
+            <p className="mt-0.5 truncate text-[11px] text-zinc-500">
+              {locale === 'en' ? 'Manage your business' : 'Gere o teu negócio'}
+            </p>
           </div>
-          <span className="ml-auto size-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.65)]" aria-hidden="true" />
+          <span
+            className="ml-auto size-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.65)]"
+            aria-hidden="true"
+          />
         </div>
 
         <div className="px-3 pb-4 pt-4">
@@ -452,20 +487,33 @@ export function DashboardSidebar() {
             }}
             className="group flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400 px-3 text-sm font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.14)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_28px_rgba(52,211,153,0.2)] active:translate-y-0 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
           >
-            <Plus className="size-[18px]" strokeWidth={2.5} aria-hidden="true" />
+            <Plus
+              className="size-[18px]"
+              strokeWidth={2.5}
+              aria-hidden="true"
+            />
             {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
           </Link>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4 [scrollbar-color:rgba(161,161,170,0.25)_transparent] [scrollbar-width:thin]">
-          <nav aria-label={locale === 'en' ? 'Dashboard sections' : 'Secções da dashboard'} className="space-y-5">
+          <nav
+            aria-label={
+              locale === 'en' ? 'Dashboard sections' : 'Secções da dashboard'
+            }
+            className="space-y-5"
+          >
             <section>
               {sectionTitle('Principal', 'Main')}
-              <div className="grid gap-1">{primaryItems.slice(0, 2).map(renderItem)}</div>
+              <div className="grid gap-1">
+                {primaryItems.slice(0, 2).map(renderItem)}
+              </div>
             </section>
             <section>
               {sectionTitle('Análise', 'Insights')}
-              <div className="grid gap-1">{primaryItems.slice(2).map(renderItem)}</div>
+              <div className="grid gap-1">
+                {primaryItems.slice(2).map(renderItem)}
+              </div>
             </section>
             <section>
               {sectionTitle('Gestão', 'Management')}
@@ -476,18 +524,29 @@ export function DashboardSidebar() {
             </section>
             <section>
               {sectionTitle('Comunicação', 'Communication')}
-              <div className="grid gap-1">{communicationItems.map(renderItem)}</div>
+              <div className="grid gap-1">
+                {communicationItems.map(renderItem)}
+              </div>
             </section>
             <section>
               {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
-              <div className="grid gap-1">{toolsOverviewItems.map(renderItem)}</div>
-              <div className="mt-3">
-                {sectionTitle('Experiência do cliente', 'Customer experience')}
-                <div className="grid gap-1">{customerExperienceItems.map(renderItem)}</div>
+              <div className="grid gap-1">
+                {toolsOverviewItems.map(renderItem)}
               </div>
               <div className="mt-3">
-                {sectionTitle('Vendas e presença digital', 'Sales & online presence')}
-                <div className="grid gap-1">{businessGrowthItems.map(renderItem)}</div>
+                {sectionTitle('Experiência do cliente', 'Customer experience')}
+                <div className="grid gap-1">
+                  {customerExperienceItems.map(renderItem)}
+                </div>
+              </div>
+              <div className="mt-3">
+                {sectionTitle(
+                  'Vendas e presença digital',
+                  'Sales & online presence',
+                )}
+                <div className="grid gap-1">
+                  {businessGrowthItems.map(renderItem)}
+                </div>
               </div>
             </section>
           </nav>
@@ -499,8 +558,14 @@ export function DashboardSidebar() {
           </p>
           <div className="grid gap-1">
             {secondaryItems.map(renderItem)}
-            <Link href="/documentation" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
-              <Globe2 className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+            <Link
+              href="/documentation"
+              className="flex min-h-10 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            >
+              <Globe2
+                className="size-4 shrink-0 text-zinc-500"
+                aria-hidden="true"
+              />
               <span>{locale === 'en' ? 'Documentation' : 'Documentação'}</span>
             </Link>
           </div>
@@ -508,87 +573,95 @@ export function DashboardSidebar() {
       </motion.aside>
 
       <TooltipProvider delayDuration={120}>
-      <nav
-        aria-label={
-          locale === 'en'
-            ? 'Dashboard quick navigation'
-            : 'Navegação rápida do painel'
-        }
-        className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5 lg:hidden"
-      >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
-          {primaryItems.slice(0, 2).map(renderDockItem)}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/dashboard/agenda?create=1"
-                onClick={(event) => {
-                  if (pathname === '/dashboard/agenda') {
-                    event.preventDefault();
-                    window.dispatchEvent(new Event('silentra:open-create-booking'));
+        <nav
+          aria-label={
+            locale === 'en'
+              ? 'Dashboard quick navigation'
+              : 'Navegação rápida do painel'
+          }
+          className="fixed left-1/2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 w-[min(28rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-[1.35rem] border border-white/10 bg-zinc-950/85 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:inset-x-auto lg:bottom-5 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:px-2.5 lg:hidden"
+        >
+          <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 lg:flex lg:max-w-none lg:items-end lg:gap-1">
+            {primaryItems.slice(0, 2).map(renderDockItem)}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/dashboard/agenda?create=1"
+                  onClick={(event) => {
+                    if (pathname === '/dashboard/agenda') {
+                      event.preventDefault();
+                      window.dispatchEvent(
+                        new Event('silentra:open-create-booking'),
+                      );
+                    }
+                  }}
+                  aria-label={
+                    locale === 'en' ? 'Create appointment' : 'Criar marcação'
                   }
-                }}
-                aria-label={locale === 'en' ? 'Create appointment' : 'Criar marcação'}
-                className="group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-xl border border-emerald-300/30 bg-emerald-400 px-2 text-[10px] font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.2)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_32px_rgba(52,211,153,0.28)] active:scale-[0.94] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:size-[3.65rem] lg:min-h-0 lg:-translate-y-1 lg:gap-0"
+                  className="group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-xl border border-emerald-300/30 bg-emerald-400 px-2 text-[10px] font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.2)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_32px_rgba(52,211,153,0.28)] active:scale-[0.94] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:size-[3.65rem] lg:min-h-0 lg:-translate-y-1 lg:gap-0"
+                >
+                  <Plus
+                    className="size-5 shrink-0"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  />
+                  <span className="max-w-full truncate text-[9px] sm:text-[10px] lg:hidden">
+                    {locale === 'en' ? 'Create' : 'Criar'}
+                  </span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={12}
+                className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
               >
-                <Plus className="size-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                <span className="max-w-full truncate text-[9px] sm:text-[10px] lg:hidden">
-                  {locale === 'en' ? 'Create' : 'Criar'}
-                </span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              sideOffset={12}
-              className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
-            >
-              {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
-            </TooltipContent>
-          </Tooltip>
-          {primaryItems.slice(2).map(renderDockItem)}
-          <span
-            aria-hidden="true"
-            className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                ref={moreTriggerRef}
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                aria-label={
-                  locale === 'en'
-                    ? 'Open more dashboard sections'
-                    : 'Abrir mais secções da dashboard'
-                }
-                aria-expanded={moreOpen}
-                aria-controls="dashboard-more-panel"
-                className={cn(
-                  'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
-                  moreOpen || moreActive
-                    ? 'bg-white/[0.09] text-white'
-                    : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
-                )}
+                {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
+              </TooltipContent>
+            </Tooltip>
+            {primaryItems.slice(2).map(renderDockItem)}
+            <span
+              aria-hidden="true"
+              className="mx-1 hidden h-8 w-px self-center bg-white/10 lg:block"
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  ref={moreTriggerRef}
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  aria-label={
+                    locale === 'en'
+                      ? 'Open more dashboard sections'
+                      : 'Abrir mais secções da dashboard'
+                  }
+                  aria-expanded={moreOpen}
+                  aria-controls="dashboard-more-panel"
+                  className={cn(
+                    'dashboard-dock-item group relative flex min-h-12 min-w-0 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-xs lg:size-[3.35rem] lg:min-h-0 lg:flex-none lg:gap-0 lg:px-0',
+                    moreOpen || moreActive
+                      ? 'bg-white/[0.09] text-white'
+                      : 'text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-100',
+                  )}
+                >
+                  <MoreHorizontal
+                    className="size-4 lg:size-5"
+                    aria-hidden="true"
+                  />
+                  <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
+                    {locale === 'en' ? 'More' : 'Mais'}
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={12}
+                className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
               >
-                <MoreHorizontal
-                  className="size-4 lg:size-5"
-                  aria-hidden="true"
-                />
-                <span className="max-w-full truncate text-[10px] sm:text-xs lg:hidden">
-                  {locale === 'en' ? 'More' : 'Mais'}
-                </span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              sideOffset={12}
-              className="hidden border border-white/10 bg-zinc-900/95 text-zinc-100 shadow-xl lg:inline-flex"
-            >
-              {locale === 'en' ? 'More' : 'Mais'}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </nav>
+                {locale === 'en' ? 'More' : 'Mais'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </nav>
       </TooltipProvider>
 
       <AnimatePresence>
@@ -616,10 +689,22 @@ export function DashboardSidebar() {
               aria-labelledby="dashboard-more-title"
               initial={
                 motionEnabled
-                  ? { opacity: 0, y: 40, scale: 0.94, rotateX: -5, filter: 'blur(8px)' }
+                  ? {
+                      opacity: 0,
+                      y: 40,
+                      scale: 0.94,
+                      rotateX: -5,
+                      filter: 'blur(8px)',
+                    }
                   : false
               }
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0, filter: 'blur(0px)' }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0,
+                filter: 'blur(0px)',
+              }}
               exit={
                 motionEnabled
                   ? { opacity: 0, y: 18, scale: 0.97, filter: 'blur(3px)' }
@@ -681,15 +766,30 @@ export function DashboardSidebar() {
                     </div>
                   </section>
                   <section>
-                    {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
-                    <div className="grid gap-1.5">{toolsOverviewItems.map(renderItem)}</div>
-                    <div className="mt-5">
-                      {sectionTitle('Experiência do cliente', 'Customer experience')}
-                      <div className="grid gap-1.5">{customerExperienceItems.map(renderItem)}</div>
+                    {sectionTitle(
+                      'Ferramentas e crescimento',
+                      'Tools & growth',
+                    )}
+                    <div className="grid gap-1.5">
+                      {toolsOverviewItems.map(renderItem)}
                     </div>
                     <div className="mt-5">
-                      {sectionTitle('Vendas e presença digital', 'Sales & online presence')}
-                      <div className="grid gap-1.5">{businessGrowthItems.map(renderItem)}</div>
+                      {sectionTitle(
+                        'Experiência do cliente',
+                        'Customer experience',
+                      )}
+                      <div className="grid gap-1.5">
+                        {customerExperienceItems.map(renderItem)}
+                      </div>
+                    </div>
+                    <div className="mt-5">
+                      {sectionTitle(
+                        'Vendas e presença digital',
+                        'Sales & online presence',
+                      )}
+                      <div className="grid gap-1.5">
+                        {businessGrowthItems.map(renderItem)}
+                      </div>
                     </div>
                   </section>
                   <section>

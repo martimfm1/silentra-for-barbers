@@ -51,7 +51,10 @@ export async function GET(
   );
   if (!allowed) {
     return NextResponse.json(
-      { error: 'Este link foi aberto demasiadas vezes. Tenta novamente mais tarde.' },
+      {
+        error:
+          'Este link foi aberto demasiadas vezes. Tenta novamente mais tarde.',
+      },
       {
         status: 429,
         headers: {
@@ -68,7 +71,8 @@ export async function GET(
   const redirectUrl = cleanRedirect(request, profile.slug);
   const tokenCookieName = reviewTokenCookieName(profile.id);
   const accessCookieName = reviewAccessCookieName(profile.id);
-  let claimStatus: 'already-used' | 'expired' | 'invalid' | 'unavailable' | null = null;
+  let claimStatus:
+    'already-used' | 'expired' | 'invalid' | 'unavailable' | null = null;
 
   if (!REVIEW_TOKEN_PATTERN.test(token)) {
     claimStatus = 'invalid';
@@ -82,7 +86,10 @@ export async function GET(
       .maybeSingle();
 
     if (error) {
-      console.error('[PUBLIC_REVIEW_CLAIM_CHECK_FAILED]', error.code ?? 'UNKNOWN');
+      console.error(
+        '[PUBLIC_REVIEW_CLAIM_CHECK_FAILED]',
+        error.code ?? 'UNKNOWN',
+      );
       claimStatus = 'unavailable';
     } else if (!tokenRecord) {
       claimStatus = 'invalid';
@@ -97,8 +104,16 @@ export async function GET(
   const response = NextResponse.redirect(redirectUrl, 303);
 
   if (claimStatus) {
-    const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' as const, maxAge: 0 };
-    response.cookies.set(tokenCookieName, '', { ...cookieOptions, path: '/api/public/reviews' });
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: 0,
+    };
+    response.cookies.set(tokenCookieName, '', {
+      ...cookieOptions,
+      path: '/api/public/reviews',
+    });
     response.cookies.set(accessCookieName, '', { ...cookieOptions, path: '/' });
   } else {
     response.cookies.set(tokenCookieName, token, {

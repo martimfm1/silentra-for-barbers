@@ -431,7 +431,9 @@ export function useAppointments(
         );
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || payload.success !== true) {
-          throw new Error(payload.error || 'Não foi possível cancelar a marcação.');
+          throw new Error(
+            payload.error || 'Não foi possível cancelar a marcação.',
+          );
         }
 
         if (payload.emailSent === true) {

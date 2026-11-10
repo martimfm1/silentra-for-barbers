@@ -54,7 +54,8 @@ export function CalendarSyncCard() {
         return;
       }
       const body = (await response.json()) as CalendarFeedResponse;
-      if (!response.ok) throw new Error(body.error || t('agenda.calendarSyncLoadFailed'));
+      if (!response.ok)
+        throw new Error(body.error || t('agenda.calendarSyncLoadFailed'));
       setEnabled(body.enabled === true);
       setFeedUrl(body.feedUrl ?? '');
     } catch {
@@ -84,7 +85,9 @@ export function CalendarSyncCard() {
       toast.success(t('agenda.calendarSyncEnabled'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('agenda.calendarSyncSaveFailed'),
+        error instanceof Error
+          ? error.message
+          : t('agenda.calendarSyncSaveFailed'),
       );
     } finally {
       setSaving(false);
@@ -113,7 +116,9 @@ export function CalendarSyncCard() {
       toast.success(t('agenda.calendarSyncDisabled'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('agenda.calendarSyncSaveFailed'),
+        error instanceof Error
+          ? error.message
+          : t('agenda.calendarSyncSaveFailed'),
       );
     } finally {
       setSaving(false);
@@ -210,7 +215,10 @@ export function CalendarSyncCard() {
 
           <div className="min-w-0 space-y-5 px-4 py-5 sm:px-6">
             {loading ? (
-              <SilentraLoading variant="compact" message={t('agenda.calendarSyncLoading')} />
+              <SilentraLoading
+                variant="compact"
+                message={t('agenda.calendarSyncLoading')}
+              />
             ) : loadFailed ? (
               <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-rose-400/15 bg-rose-400/[.04] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="min-w-0 text-sm leading-5 text-rose-300">
@@ -311,7 +319,10 @@ export function CalendarSyncCard() {
 
                 <div className="min-w-0 space-y-3 rounded-xl border border-sky-300/10 bg-sky-300/[.045] p-4">
                   <div className="flex min-w-0 items-start gap-2.5">
-                    <Info className="mt-0.5 size-4 shrink-0 text-sky-200" aria-hidden="true" />
+                    <Info
+                      className="mt-0.5 size-4 shrink-0 text-sky-200"
+                      aria-hidden="true"
+                    />
                     <p className="min-w-0 text-sm leading-6 text-sky-50/90">
                       {t('agenda.calendarSyncICloudNote')}
                     </p>

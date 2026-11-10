@@ -115,13 +115,23 @@ export function ClientsListCard({
             <select
               aria-label={locale === 'pt' ? 'Ordenar clientes' : 'Sort clients'}
               value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+              onChange={(event) =>
+                setSortBy(event.target.value as typeof sortBy)
+              }
               className="min-h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
             >
-              <option value="recent">{locale === 'pt' ? 'Mais recentes' : 'Most recent'}</option>
-              <option value="name">{locale === 'pt' ? 'Nome A–Z' : 'Name A–Z'}</option>
-              <option value="visits">{locale === 'pt' ? 'Mais visitas' : 'Most visits'}</option>
-              <option value="spent">{locale === 'pt' ? 'Maior valor gasto' : 'Highest spend'}</option>
+              <option value="recent">
+                {locale === 'pt' ? 'Mais recentes' : 'Most recent'}
+              </option>
+              <option value="name">
+                {locale === 'pt' ? 'Nome A–Z' : 'Name A–Z'}
+              </option>
+              <option value="visits">
+                {locale === 'pt' ? 'Mais visitas' : 'Most visits'}
+              </option>
+              <option value="spent">
+                {locale === 'pt' ? 'Maior valor gasto' : 'Highest spend'}
+              </option>
             </select>
             <Button
               onClick={() => setShowAddClientForm(true)}
@@ -137,9 +147,20 @@ export function ClientsListCard({
       <CardContent className="p-5 sm:p-6">
         {filteredClients.length > 1 && (
           <div className="mb-4 flex justify-end">
-            <select aria-label={locale === 'pt' ? 'Ordenar clientes' : 'Sort clients'} value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="min-h-11 max-w-full rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200">
-              <option value="recent">{locale === 'pt' ? 'Mais recentes' : 'Most recent'}</option>
-              <option value="name">{locale === 'pt' ? 'Nome (A–Z)' : 'Name (A–Z)'}</option>
+            <select
+              aria-label={locale === 'pt' ? 'Ordenar clientes' : 'Sort clients'}
+              value={sortBy}
+              onChange={(event) =>
+                setSortBy(event.target.value as typeof sortBy)
+              }
+              className="min-h-11 max-w-full rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-200"
+            >
+              <option value="recent">
+                {locale === 'pt' ? 'Mais recentes' : 'Most recent'}
+              </option>
+              <option value="name">
+                {locale === 'pt' ? 'Nome (A–Z)' : 'Name (A–Z)'}
+              </option>
             </select>
           </div>
         )}
@@ -403,7 +424,8 @@ function ClientItemCard({
 }: ClientItemCardProps) {
   const { t, locale } = useLanguage();
   const phoneDigits = client.num_phone?.replace(/\D/g, '') ?? '';
-  const whatsappNumber = phoneDigits.length === 9 ? `351${phoneDigits}` : phoneDigits;
+  const whatsappNumber =
+    phoneDigits.length === 9 ? `351${phoneDigits}` : phoneDigits;
   return (
     <article className="group flex min-h-[190px] flex-col justify-between rounded-xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-blue-500/30 hover:bg-white/[0.045]">
       <div>
@@ -419,10 +441,20 @@ function ClientItemCard({
               {t('clientsListCard.client')}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
-              {Number(client.appointment_count ?? 0)} {locale === 'pt' ? 'visitas' : 'visits'} · {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(Number(client.total_spent ?? 0))}
+              {Number(client.appointment_count ?? 0)}{' '}
+              {locale === 'pt' ? 'visitas' : 'visits'} ·{' '}
+              {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
+                style: 'currency',
+                currency: 'EUR',
+              }).format(Number(client.total_spent ?? 0))}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
-              {locale === 'pt' ? 'Última visita:' : 'Last visit:'} {client.last_visit ? new Date(client.last_visit).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-GB') : '—'}
+              {locale === 'pt' ? 'Última visita:' : 'Last visit:'}{' '}
+              {client.last_visit
+                ? new Date(client.last_visit).toLocaleDateString(
+                    locale === 'pt' ? 'pt-PT' : 'en-GB',
+                  )
+                : '—'}
             </p>
           </div>
         </div>
@@ -454,23 +486,57 @@ function ClientItemCard({
       <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
         {client.num_phone && phoneDigits.length >= 7 ? (
           <>
-            <a href={`tel:${client.num_phone.replace(/[^\d+]/g, '')}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Ligar a ${client.name_complete}` : `Call ${client.name_complete}`}>
-              <Phone className="size-4" aria-hidden="true" /> {locale === 'pt' ? 'Ligar' : 'Call'}
+            <a
+              href={`tel:${client.num_phone.replace(/[^\d+]/g, '')}`}
+              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]"
+              aria-label={
+                locale === 'pt'
+                  ? `Ligar a ${client.name_complete}`
+                  : `Call ${client.name_complete}`
+              }
+            >
+              <Phone className="size-4" aria-hidden="true" />{' '}
+              {locale === 'pt' ? 'Ligar' : 'Call'}
             </a>
-            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2 text-xs text-emerald-200 hover:bg-emerald-500/10" aria-label={locale === 'pt' ? `WhatsApp de ${client.name_complete}` : `${client.name_complete} on WhatsApp`}>
+            <a
+              href={`https://wa.me/${whatsappNumber}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2 text-xs text-emerald-200 hover:bg-emerald-500/10"
+              aria-label={
+                locale === 'pt'
+                  ? `WhatsApp de ${client.name_complete}`
+                  : `${client.name_complete} on WhatsApp`
+              }
+            >
               <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp
             </a>
           </>
         ) : null}
         {client.email ? (
-          <a href={`mailto:${client.email}`} className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]" aria-label={locale === 'pt' ? `Enviar email a ${client.name_complete}` : `Email ${client.name_complete}`}>
+          <a
+            href={`mailto:${client.email}`}
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]"
+            aria-label={
+              locale === 'pt'
+                ? `Enviar email a ${client.name_complete}`
+                : `Email ${client.name_complete}`
+            }
+          >
             <Mail className="size-4" aria-hidden="true" /> Email
           </a>
         ) : null}
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
-        <Button asChild type="button" variant="outline" className="min-h-10 flex-1 border-blue-500/20 bg-blue-500/[0.05] px-2 text-xs text-blue-200 hover:bg-blue-500/10">
-          <Link href={`/dashboard/agenda?clientId=${encodeURIComponent(client.id)}`}>
+        <Button
+          asChild
+          type="button"
+          variant="outline"
+          className="min-h-10 flex-1 border-blue-500/20 bg-blue-500/[0.05] px-2 text-xs text-blue-200 hover:bg-blue-500/10"
+        >
+          <Link
+            href={`/dashboard/agenda?clientId=${encodeURIComponent(client.id)}`}
+          >
             <UserPlus className="mr-1.5 size-4" aria-hidden="true" />
             {locale === 'pt' ? 'Marcar' : 'Book'}
           </Link>
@@ -480,10 +546,29 @@ function ClientItemCard({
           variant="outline"
           className="min-h-10 flex-1 border-white/10 bg-white/[0.03] px-2 text-xs text-zinc-300 hover:bg-white/[0.08]"
           onClick={() => {
-            const details = [client.name_complete, client.num_phone, client.email].filter(Boolean).join('\n');
-            void navigator.clipboard.writeText(details)
-              .then(() => toast.success(locale === 'pt' ? 'Dados do cliente copiados.' : 'Customer details copied.'))
-              .catch(() => toast.error(locale === 'pt' ? 'Não foi possível copiar os dados.' : 'Could not copy customer details.'));
+            const details = [
+              client.name_complete,
+              client.num_phone,
+              client.email,
+            ]
+              .filter(Boolean)
+              .join('\n');
+            void navigator.clipboard
+              .writeText(details)
+              .then(() =>
+                toast.success(
+                  locale === 'pt'
+                    ? 'Dados do cliente copiados.'
+                    : 'Customer details copied.',
+                ),
+              )
+              .catch(() =>
+                toast.error(
+                  locale === 'pt'
+                    ? 'Não foi possível copiar os dados.'
+                    : 'Could not copy customer details.',
+                ),
+              );
           }}
         >
           <Copy className="mr-1.5 size-4" aria-hidden="true" />
@@ -499,7 +584,9 @@ function ClientItemCard({
           className="col-span-2 min-h-11 w-full min-w-0 justify-center whitespace-nowrap rounded-xl border-blue-500/20 bg-blue-500/[0.06] px-3 text-blue-200 hover:bg-blue-500/10 hover:text-white"
         >
           <Eye className="mr-1.5 size-5 shrink-0" aria-hidden="true" />
-          <span className="whitespace-nowrap">{t('clientsListCard.viewProfile')}</span>
+          <span className="whitespace-nowrap">
+            {t('clientsListCard.viewProfile')}
+          </span>
         </Button>
         <Button
           type="button"

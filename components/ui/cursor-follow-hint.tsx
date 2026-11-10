@@ -75,7 +75,9 @@ export function CursorFollowHint() {
       if (!event.relatedTarget) hide();
     };
 
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, {
+      passive: true,
+    });
     window.addEventListener('pointerout', handlePointerOut, { passive: true });
     window.addEventListener('blur', hide);
 

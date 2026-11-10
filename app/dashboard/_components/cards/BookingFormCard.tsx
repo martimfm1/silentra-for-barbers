@@ -58,10 +58,15 @@ export function BookingForm({
   const tomorrowDate = new Date();
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrow = localDateValue(tomorrowDate);
-  const selectedClient = clients.find((client) => client.id === formData.clientId);
+  const selectedClient = clients.find(
+    (client) => client.id === formData.clientId,
+  );
   const selectedClientName = selectedClient?.name_complete ?? '';
-  const selectedService = services.find((service) => service.id === formData.service_id);
-  const singleProfessional = professionals.length === 1 ? professionals[0] : null;
+  const selectedService = services.find(
+    (service) => service.id === formData.service_id,
+  );
+  const singleProfessional =
+    professionals.length === 1 ? professionals[0] : null;
   const singleProfessionalId = singleProfessional?.id;
   const selectedProfessional = professionals.find(
     (professional) => professional.id === selectedProfessionalId,
@@ -95,7 +100,10 @@ export function BookingForm({
   }, [selectedClientName]);
 
   useEffect(() => {
-    if (singleProfessionalId && selectedProfessionalId !== singleProfessionalId) {
+    if (
+      singleProfessionalId &&
+      selectedProfessionalId !== singleProfessionalId
+    ) {
       setSelectedProfessionalId(singleProfessionalId);
     }
   }, [singleProfessionalId, selectedProfessionalId, setSelectedProfessionalId]);
@@ -107,9 +115,9 @@ export function BookingForm({
   }, [formData.service_id, services, setFormData]);
 
   const matchingClients = useMemo(() => {
-    const query = clientQuery.trim().toLocaleLowerCase(
-      locale === 'en' ? 'en-GB' : 'pt-PT',
-    );
+    const query = clientQuery
+      .trim()
+      .toLocaleLowerCase(locale === 'en' ? 'en-GB' : 'pt-PT');
     if (query.length < 2 || formData.clientId) return [];
 
     const digits = query.replace(/\D/g, '');
@@ -135,8 +143,7 @@ export function BookingForm({
   ) => {
     setFormData((previous) => ({
       ...previous,
-      clientId:
-        field === 'birth_date' ? previous.clientId : undefined,
+      clientId: field === 'birth_date' ? previous.clientId : undefined,
       [field]: value,
     }));
     if (field !== 'birth_date') setClientQuery('');
@@ -205,7 +212,11 @@ export function BookingForm({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label={locale === 'en' ? 'Close booking form' : 'Fechar formulário de marcação'}
+            aria-label={
+              locale === 'en'
+                ? 'Close booking form'
+                : 'Fechar formulário de marcação'
+            }
             className="size-11 shrink-0 rounded-xl border border-white/10 bg-white/[0.035] text-zinc-300 hover:bg-white/[0.08] hover:text-white"
           >
             <X className="size-5" aria-hidden="true" />
@@ -224,7 +235,10 @@ export function BookingForm({
                 <UserRound className="size-4" aria-hidden="true" />
               </span>
               <div className="min-w-0">
-                <h3 id="booking-client-section" className="text-sm font-semibold text-zinc-100">
+                <h3
+                  id="booking-client-section"
+                  className="text-sm font-semibold text-zinc-100"
+                >
                   {t('bookingForm.customer')}
                 </h3>
                 <p className="text-xs text-zinc-500">
@@ -242,11 +256,20 @@ export function BookingForm({
             </div>
 
             <div ref={clientSearchRef} className="relative mb-3 grid gap-2">
-              <label htmlFor="booking-client-search" className="text-xs font-medium text-zinc-400">
-                {t('bookingForm.existingCustomer')} <span className="font-normal text-zinc-600">({t('bookingForm.optional')})</span>
+              <label
+                htmlFor="booking-client-search"
+                className="text-xs font-medium text-zinc-400"
+              >
+                {t('bookingForm.existingCustomer')}{' '}
+                <span className="font-normal text-zinc-600">
+                  ({t('bookingForm.optional')})
+                </span>
               </label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+                <Search
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
+                  aria-hidden="true"
+                />
                 <input
                   id="booking-client-search"
                   type="search"
@@ -271,7 +294,10 @@ export function BookingForm({
                   }}
                   onKeyDown={(event) => {
                     if (event.key === 'Escape') setShowClientResults(false);
-                    if (event.key === 'ArrowDown' && matchingClients.length > 0) {
+                    if (
+                      event.key === 'ArrowDown' &&
+                      matchingClients.length > 0
+                    ) {
                       event.preventDefault();
                       document
                         .getElementById('booking-client-results')
@@ -290,7 +316,9 @@ export function BookingForm({
                   placeholder={t('bookingForm.searchCustomer')}
                   role="combobox"
                   aria-autocomplete="list"
-                  aria-expanded={showClientResults && matchingClients.length > 0}
+                  aria-expanded={
+                    showClientResults && matchingClients.length > 0
+                  }
                   aria-controls={
                     showClientResults && matchingClients.length > 0
                       ? 'booking-client-results'
@@ -302,7 +330,11 @@ export function BookingForm({
                   <button
                     type="button"
                     onClick={clearSelectedClient}
-                    aria-label={locale === 'en' ? 'Clear selected customer' : 'Limpar cliente selecionado'}
+                    aria-label={
+                      locale === 'en'
+                        ? 'Clear selected customer'
+                        : 'Limpar cliente selecionado'
+                    }
                     className="absolute right-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                   >
                     <X className="size-4" aria-hidden="true" />
@@ -314,7 +346,11 @@ export function BookingForm({
                 <div
                   id="booking-client-results"
                   role="listbox"
-                  aria-label={locale === 'en' ? 'Matching customers' : 'Clientes encontrados'}
+                  aria-label={
+                    locale === 'en'
+                      ? 'Matching customers'
+                      : 'Clientes encontrados'
+                  }
                   className="absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 shadow-2xl shadow-black/50"
                 >
                   {matchingClients.map((client) => (
@@ -328,28 +364,50 @@ export function BookingForm({
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
                         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-zinc-300">
-                          {client.name_complete.trim().slice(0, 1).toUpperCase()}
+                          {client.name_complete
+                            .trim()
+                            .slice(0, 1)
+                            .toUpperCase()}
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-zinc-100">{client.name_complete}</span>
-                          <span className="mt-0.5 block truncate text-xs text-zinc-500">{client.num_phone}</span>
+                          <span className="block truncate text-sm font-medium text-zinc-100">
+                            {client.name_complete}
+                          </span>
+                          <span className="mt-0.5 block truncate text-xs text-zinc-500">
+                            {client.num_phone}
+                          </span>
                         </span>
                       </span>
-                      <Plus className="size-4 shrink-0 text-emerald-300" aria-hidden="true" />
+                      <Plus
+                        className="size-4 shrink-0 text-emerald-300"
+                        aria-hidden="true"
+                      />
                     </button>
                   ))}
                 </div>
               ) : null}
-              {showClientResults && clientQuery.trim().length >= 2 && !selectedClient && matchingClients.length === 0 ? (
-                <p role="status" className="rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5 text-xs text-zinc-500">
-                  {t('bookingForm.noCustomerFound')} {locale === 'en' ? 'You can continue with a new customer below.' : 'Podes continuar com um novo cliente abaixo.'}
+              {showClientResults &&
+              clientQuery.trim().length >= 2 &&
+              !selectedClient &&
+              matchingClients.length === 0 ? (
+                <p
+                  role="status"
+                  className="rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5 text-xs text-zinc-500"
+                >
+                  {t('bookingForm.noCustomerFound')}{' '}
+                  {locale === 'en'
+                    ? 'You can continue with a new customer below.'
+                    : 'Podes continuar com um novo cliente abaixo.'}
                 </p>
               ) : null}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid min-w-0 gap-1.5">
-                <label htmlFor="booking-name" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-name"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   {t('bookingForm.fullName')}
                 </label>
                 <input
@@ -362,12 +420,17 @@ export function BookingForm({
                   placeholder={t('bookingForm.namePlaceholder')}
                   value={formData.name_complete}
                   onFocus={() => setShowClientResults(false)}
-                  onChange={(event) => updateCustomer('name_complete', event.target.value)}
+                  onChange={(event) =>
+                    updateCustomer('name_complete', event.target.value)
+                  }
                   className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
               </div>
               <div className="grid min-w-0 gap-1.5">
-                <label htmlFor="booking-phone" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-phone"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   {t('bookingForm.mobile')}
                 </label>
                 <input
@@ -381,7 +444,9 @@ export function BookingForm({
                   placeholder="912 345 678"
                   value={formData.num_phone}
                   onFocus={() => setShowClientResults(false)}
-                  onChange={(event) => updateCustomer('num_phone', event.target.value)}
+                  onChange={(event) =>
+                    updateCustomer('num_phone', event.target.value)
+                  }
                   className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
               </div>
@@ -389,12 +454,24 @@ export function BookingForm({
 
             <details className="group mt-3 rounded-xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
               <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-zinc-400 marker:hidden">
-                <span>{locale === 'en' ? 'Customer details (optional)' : 'Detalhes do cliente (opcional)'}</span>
-                <span className="text-zinc-600 transition group-open:rotate-180">⌄</span>
+                <span>
+                  {locale === 'en'
+                    ? 'Customer details (optional)'
+                    : 'Detalhes do cliente (opcional)'}
+                </span>
+                <span className="text-zinc-600 transition group-open:rotate-180">
+                  ⌄
+                </span>
               </summary>
               <div className="mt-3 grid gap-1.5">
-                <label htmlFor="booking-birth-date" className="text-xs font-medium text-zinc-400">
-                  {t('bookingForm.birthDate')} <span className="font-normal text-zinc-600">({t('bookingForm.optional')})</span>
+                <label
+                  htmlFor="booking-birth-date"
+                  className="text-xs font-medium text-zinc-400"
+                >
+                  {t('bookingForm.birthDate')}{' '}
+                  <span className="font-normal text-zinc-600">
+                    ({t('bookingForm.optional')})
+                  </span>
                 </label>
                 <input
                   id="booking-birth-date"
@@ -402,7 +479,9 @@ export function BookingForm({
                   type="date"
                   max={today}
                   value={formData.birth_date ?? ''}
-                  onChange={(event) => updateCustomer('birth_date', event.target.value)}
+                  onChange={(event) =>
+                    updateCustomer('birth_date', event.target.value)
+                  }
                   className="color-scheme-dark min-h-12 w-full rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08]"
                 />
               </div>
@@ -418,23 +497,36 @@ export function BookingForm({
                 <Scissors className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <h3 id="booking-service-section" className="text-sm font-semibold text-zinc-100">
+                <h3
+                  id="booking-service-section"
+                  className="text-sm font-semibold text-zinc-100"
+                >
                   {t('bookingForm.serviceAndProfessional')}
                 </h3>
                 <p className="text-xs text-zinc-500">
-                  {locale === 'en' ? 'Choose what is being booked and who will do it' : 'Escolhe o serviço e quem o vai realizar'}
+                  {locale === 'en'
+                    ? 'Choose what is being booked and who will do it'
+                    : 'Escolhe o serviço e quem o vai realizar'}
                 </p>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid min-w-0 gap-1.5">
-                <label htmlFor="booking-service" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-service"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   {t('bookingForm.service')}
                 </label>
                 <Select
                   value={formData.service_id}
-                  onValueChange={(value) => setFormData((previous) => ({ ...previous, service_id: value }))}
+                  onValueChange={(value) =>
+                    setFormData((previous) => ({
+                      ...previous,
+                      service_id: value,
+                    }))
+                  }
                 >
                   <SelectTrigger
                     id="booking-service"
@@ -445,10 +537,17 @@ export function BookingForm({
                   <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
                       {services.map((service) => (
-                        <SelectItem key={service.id} value={service.id} className="min-h-11 rounded-lg py-2.5">
-                          <span className="min-w-0 flex-1 truncate">{service.name}</span>
+                        <SelectItem
+                          key={service.id}
+                          value={service.id}
+                          className="min-h-11 rounded-lg py-2.5"
+                        >
+                          <span className="min-w-0 flex-1 truncate">
+                            {service.name}
+                          </span>
                           <span className="shrink-0 text-xs text-zinc-400">
-                            {formatPrice(service.price)} · {Number(service.duration)} min
+                            {formatPrice(service.price)} ·{' '}
+                            {Number(service.duration)} min
                           </span>
                         </SelectItem>
                       ))}
@@ -460,36 +559,60 @@ export function BookingForm({
                     <Clock3 className="size-3.5" aria-hidden="true" />
                     {Number(selectedService.duration)} min
                     <span className="text-zinc-700">·</span>
-                    <span className="font-medium text-zinc-300">{formatPrice(selectedService.price)}</span>
+                    <span className="font-medium text-zinc-300">
+                      {formatPrice(selectedService.price)}
+                    </span>
                   </p>
                 ) : null}
               </div>
 
               {singleProfessional ? (
                 <div className="grid min-w-0 gap-1.5">
-                  <label className="text-xs font-medium text-zinc-400">{t('bookingForm.barber')}</label>
+                  <label className="text-xs font-medium text-zinc-400">
+                    {t('bookingForm.barber')}
+                  </label>
                   <div className="flex min-h-12 items-center gap-2.5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.045] px-3.5">
-                    <UserRound className="size-4 shrink-0 text-emerald-300" aria-hidden="true" />
-                    <span className="truncate text-sm font-medium text-zinc-100">{singleProfessional.name}</span>
-                    <Check className="ml-auto size-4 shrink-0 text-emerald-300" aria-hidden="true" />
+                    <UserRound
+                      className="size-4 shrink-0 text-emerald-300"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate text-sm font-medium text-zinc-100">
+                      {singleProfessional.name}
+                    </span>
+                    <Check
+                      className="ml-auto size-4 shrink-0 text-emerald-300"
+                      aria-hidden="true"
+                    />
                   </div>
                 </div>
               ) : (
                 <div className="grid min-w-0 gap-1.5">
-                  <label htmlFor="booking-barber" className="text-xs font-medium text-zinc-400">
+                  <label
+                    htmlFor="booking-barber"
+                    className="text-xs font-medium text-zinc-400"
+                  >
                     {t('bookingForm.barber')}
                   </label>
-                  <Select value={selectedProfessionalId} onValueChange={setSelectedProfessionalId}>
+                  <Select
+                    value={selectedProfessionalId}
+                    onValueChange={setSelectedProfessionalId}
+                  >
                     <SelectTrigger
                       id="booking-barber"
                       className="box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
                     >
-                      <SelectValue placeholder={t('bookingForm.chooseProfessional')} />
+                      <SelectValue
+                        placeholder={t('bookingForm.chooseProfessional')}
+                      />
                     </SelectTrigger>
                     <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                       <SelectGroup>
                         {professionals.map((professional) => (
-                          <SelectItem key={professional.id} value={professional.id} className="min-h-11 rounded-lg py-2.5">
+                          <SelectItem
+                            key={professional.id}
+                            value={professional.id}
+                            className="min-h-11 rounded-lg py-2.5"
+                          >
                             {professional.name}
                           </SelectItem>
                         ))}
@@ -500,7 +623,10 @@ export function BookingForm({
               )}
             </div>
             {services.length === 0 || professionals.length === 0 ? (
-              <p role="status" className="mt-3 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] px-3 py-2.5 text-xs leading-5 text-amber-200/80">
+              <p
+                role="status"
+                className="mt-3 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] px-3 py-2.5 text-xs leading-5 text-amber-200/80"
+              >
                 {locale === 'en'
                   ? 'Add at least one active service and one barber before creating a booking.'
                   : 'Adiciona pelo menos um serviço ativo e um barbeiro antes de criares uma marcação.'}
@@ -517,18 +643,26 @@ export function BookingForm({
                 <CalendarClock className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <h3 id="booking-time-section" className="text-sm font-semibold text-zinc-100">
+                <h3
+                  id="booking-time-section"
+                  className="text-sm font-semibold text-zinc-100"
+                >
                   {t('bookingForm.dateTime')}
                 </h3>
                 <p className="text-xs text-zinc-500">
-                  {locale === 'en' ? 'Set the day and start time' : 'Define o dia e a hora de início'}
+                  {locale === 'en'
+                    ? 'Set the day and start time'
+                    : 'Define o dia e a hora de início'}
                 </p>
               </div>
             </div>
 
             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
               <div className="grid min-w-0 max-w-full gap-1.5">
-                <label htmlFor="booking-date" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-date"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   {t('bookingForm.date')}
                 </label>
                 <input
@@ -570,7 +704,10 @@ export function BookingForm({
                 </div>
               </div>
               <div className="grid min-w-0 max-w-full content-start gap-1.5">
-                <label htmlFor="booking-time" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-time"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   {t('bookingForm.time')}
                 </label>
                 <input
@@ -585,16 +722,24 @@ export function BookingForm({
                 />
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-600">
                   <Clock3 className="size-3.5 shrink-0" aria-hidden="true" />
-                  {locale === 'en' ? 'Uses your device time picker' : 'Usa o seletor de horas do teu dispositivo'}
+                  {locale === 'en'
+                    ? 'Uses your device time picker'
+                    : 'Usa o seletor de horas do teu dispositivo'}
                 </p>
               </div>
             </div>
 
             <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:grid-cols-2">
               <div className="grid min-w-0 gap-1.5">
-                <label htmlFor="booking-recurrence" className="text-xs font-medium text-zinc-400">
+                <label
+                  htmlFor="booking-recurrence"
+                  className="text-xs font-medium text-zinc-400"
+                >
                   <span className="inline-flex items-center gap-1.5">
-                    <Repeat className="size-3.5 text-emerald-300" aria-hidden="true" />
+                    <Repeat
+                      className="size-3.5 text-emerald-300"
+                      aria-hidden="true"
+                    />
                     {t('bookingForm.recurrence')}
                   </span>
                 </label>
@@ -612,18 +757,31 @@ export function BookingForm({
                   </SelectTrigger>
                   <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                     <SelectGroup>
-                      <SelectItem value="none">{t('bookingForm.noRecurrence')}</SelectItem>
-                      <SelectItem value="weekly">{t('bookingForm.everyWeek')}</SelectItem>
-                      <SelectItem value="biweekly">{t('bookingForm.everyTwoWeeks')}</SelectItem>
-                      <SelectItem value="everyThreeWeeks">{t('bookingForm.everyThreeWeeks')}</SelectItem>
-                      <SelectItem value="monthly">{t('bookingForm.everyMonth')}</SelectItem>
+                      <SelectItem value="none">
+                        {t('bookingForm.noRecurrence')}
+                      </SelectItem>
+                      <SelectItem value="weekly">
+                        {t('bookingForm.everyWeek')}
+                      </SelectItem>
+                      <SelectItem value="biweekly">
+                        {t('bookingForm.everyTwoWeeks')}
+                      </SelectItem>
+                      <SelectItem value="everyThreeWeeks">
+                        {t('bookingForm.everyThreeWeeks')}
+                      </SelectItem>
+                      <SelectItem value="monthly">
+                        {t('bookingForm.everyMonth')}
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
               {recurrence !== 'none' ? (
                 <div className="grid min-w-0 gap-1.5">
-                  <label htmlFor="booking-recurrence-end" className="text-xs font-medium text-zinc-400">
+                  <label
+                    htmlFor="booking-recurrence-end"
+                    className="text-xs font-medium text-zinc-400"
+                  >
                     {t('bookingForm.repeatUntil')}
                   </label>
                   <input
@@ -633,7 +791,9 @@ export function BookingForm({
                     required
                     min={selectedDate}
                     value={recurrenceEndDate}
-                    onChange={(event) => setRecurrenceEndDate(event.target.value)}
+                    onChange={(event) =>
+                      setRecurrenceEndDate(event.target.value)
+                    }
                     className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-zinc-900 px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
                   />
                   <p className="text-[11px] leading-4 text-zinc-600">
@@ -650,7 +810,10 @@ export function BookingForm({
         </div>
 
         <footer className="flex shrink-0 flex-col gap-3 border-t border-white/[0.08] bg-zinc-950/95 px-4 pb-[calc(0.875rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-          <div className="min-w-0 text-xs leading-5 text-zinc-500" aria-live="polite">
+          <div
+            className="min-w-0 text-xs leading-5 text-zinc-500"
+            aria-live="polite"
+          >
             {selectedService ? (
               <span className="block truncate font-medium text-zinc-300">
                 {selectedService.name} · {formatPrice(selectedService.price)}
@@ -661,13 +824,17 @@ export function BookingForm({
             {selectedProfessional ? (
               <span className="block truncate">
                 {selectedProfessional.name}
-                {selectedDate && selectedTime ? ` · ${selectedDateLabel} ${selectedTime}` : ''}
+                {selectedDate && selectedTime
+                  ? ` · ${selectedDateLabel} ${selectedTime}`
+                  : ''}
               </span>
             ) : null}
           </div>
           <Button
             type="submit"
-            disabled={loading || services.length === 0 || professionals.length === 0}
+            disabled={
+              loading || services.length === 0 || professionals.length === 0
+            }
             className="silentra-action-primary min-h-12 w-full shrink-0 rounded-xl bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.15)] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-48"
           >
             {loading ? (

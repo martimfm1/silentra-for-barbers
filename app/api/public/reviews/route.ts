@@ -88,8 +88,7 @@ async function POST__unobserved(request: Request) {
 
     const shopId = cleanString(body.barbershopId, 100);
     const comment = cleanString(body.comment, MAX_COMMENT_LENGTH);
-    const rating =
-      typeof body.rating === 'number' ? body.rating : Number.NaN;
+    const rating = typeof body.rating === 'number' ? body.rating : Number.NaN;
 
     if (!shopId || !UUID_PATTERN.test(shopId)) {
       return jsonError('Barbearia inválida.', 400);
@@ -111,7 +110,11 @@ async function POST__unobserved(request: Request) {
       return jsonError('A classificação deve estar entre 1 e 5.', 400);
     }
 
-    if (typeof body.comment !== 'undefined' && body.comment !== null && typeof body.comment !== 'string') {
+    if (
+      typeof body.comment !== 'undefined' &&
+      body.comment !== null &&
+      typeof body.comment !== 'string'
+    ) {
       return jsonError('O comentário não é válido.', 400);
     }
 
@@ -160,16 +163,13 @@ async function POST__unobserved(request: Request) {
     // The database RPC binds the review to a completed appointment, derives
     // the customer's display name from that appointment, and consumes the
     // capability atomically. Never insert directly with service_role.
-    const { error } = await database.rpc(
-      'submit_public_review_with_token',
-      {
-        p_shop_id: shop.id,
-        p_token_hash: createHash('sha256').update(reviewToken).digest('hex'),
-        p_client_name: '',
-        p_rating: rating,
-        p_comment: comment,
-      },
-    );
+    const { error } = await database.rpc('submit_public_review_with_token', {
+      p_shop_id: shop.id,
+      p_token_hash: createHash('sha256').update(reviewToken).digest('hex'),
+      p_client_name: '',
+      p_rating: rating,
+      p_comment: comment,
+    });
 
     if (error) {
       console.error('[PUBLIC_REVIEW_SUBMIT_FAILED]', error.code ?? 'UNKNOWN');

@@ -461,12 +461,15 @@ export const pt = {
     identity: 'Identidade',
     identityDescription: 'Como a tua barbearia será apresentada.',
     workModeTitle: 'Como trabalhas?',
-    workModeDescription: 'Vamos adaptar os próximos passos à forma como geres a barbearia.',
+    workModeDescription:
+      'Vamos adaptar os próximos passos à forma como geres a barbearia.',
     soloMode: 'Trabalho sozinho',
     soloModeDescription: 'Geres os serviços e as marcações por tua conta.',
     teamMode: 'Tenho uma equipa',
-    teamModeDescription: 'Quero organizar vários profissionais e os seus horários.',
-    soloNextStep: 'A seguir, configura os teus serviços e horários de trabalho.',
+    teamModeDescription:
+      'Quero organizar vários profissionais e os seus horários.',
+    soloNextStep:
+      'A seguir, configura os teus serviços e horários de trabalho.',
     teamNextStep: 'A seguir, adiciona os profissionais e organiza a equipa.',
 
     requiredError: 'Preenche os dados essenciais para criar a tua barbearia.',
@@ -1107,12 +1110,15 @@ export const pt = {
     business: 'Informações',
     businessDescription: 'Nome, contactos e preferências públicas',
     publicBasicsTitle: 'Informações da página pública',
-    publicBasicsDescription: 'Altera os dados que aparecem na descoberta e na apresentação da tua barbearia.',
+    publicBasicsDescription:
+      'Altera os dados que aparecem na descoberta e na apresentação da tua barbearia.',
     profileCity: 'Cidade / localidade',
     profilePrice: 'Preço de referência',
-    profilePriceHint: 'Valor indicativo apresentado aos clientes; não substitui os preços dos serviços.',
+    profilePriceHint:
+      'Valor indicativo apresentado aos clientes; não substitui os preços dos serviços.',
     profileTags: 'Serviços e características',
-    profileTagsHint: 'Separa cada termo com uma vírgula. Podes adicionar até 12.',
+    profileTagsHint:
+      'Separa cada termo com uma vírgula. Podes adicionar até 12.',
     location: 'Localização',
     locationDescription: 'Morada e informações do espaço',
     hours: 'Horários',
@@ -1133,11 +1139,16 @@ export const pt = {
     setupProgress: 'Progresso da configuração',
     notConfigured: 'Ainda não definido',
     closeDialog: 'Fechar',
-    saveAllHint: 'Podes guardar cada passo individualmente. As alterações ficam aplicadas assim que confirmares.',
-    businessDialogDescription: 'Define o nome, os contactos e as preferências que os clientes vão ver.',
-    locationDialogDescription: 'Adiciona a morada e destaca as comodidades disponíveis no espaço.',
-    hoursDialogDescription: 'Define o horário de abertura, a pausa e os dias em que a barbearia está fechada.',
-    rulesDialogDescription: 'Controla a antecedência das marcações e o prazo em que os clientes podem cancelar.',
+    saveAllHint:
+      'Podes guardar cada passo individualmente. As alterações ficam aplicadas assim que confirmares.',
+    businessDialogDescription:
+      'Define o nome, os contactos e as preferências que os clientes vão ver.',
+    locationDialogDescription:
+      'Adiciona a morada e destaca as comodidades disponíveis no espaço.',
+    hoursDialogDescription:
+      'Define o horário de abertura, a pausa e os dias em que a barbearia está fechada.',
+    rulesDialogDescription:
+      'Controla a antecedência das marcações e o prazo em que os clientes podem cancelar.',
     publicInfo: 'Informações públicas da tua barbearia.',
     shopName: 'Nome da barbearia',
     phone: 'Telefone / WhatsApp',
@@ -1146,7 +1157,8 @@ export const pt = {
     mbwayEnabled: 'Ativar pré-pagamento MB WAY',
     mbwayPhone: 'Número MB WAY para receber pagamentos',
     mbwayPhonePlaceholder: 'Ex.: 912 345 678',
-    mbwayWhatsappNotice: 'O botão para enviar o comprovativo utiliza o número de Telefone / WhatsApp definido acima nas informações da barbearia.',
+    mbwayWhatsappNotice:
+      'O botão para enviar o comprovativo utiliza o número de Telefone / WhatsApp definido acima nas informações da barbearia.',
     mbwayProRequired: 'Funcionalidade exclusiva dos planos Pro e Enterprise.',
     upgradePlan: 'Ver planos',
     directoryVisibility: 'Visibilidade no diretório',
@@ -1176,19 +1188,24 @@ export const pt = {
     noticeHours: 'Horas',
     allowOnline: 'Permitir marcações online',
     allowOnlineDescription: 'Aceita novas reservas através da página pública.',
-    automationPlanRequired: 'As confirmações e conclusões automáticas estão disponíveis nos planos Pro e Enterprise.',
+    automationPlanRequired:
+      'As confirmações e conclusões automáticas estão disponíveis nos planos Pro e Enterprise.',
     autoConfirm: 'Confirmar automaticamente',
     autoConfirmManual: 'Confirmar automaticamente as marcações manuais',
-    autoConfirmManualDescription: 'As marcações criadas diretamente na agenda ficam confirmadas assim que são guardadas. Podes desativar esta opção quando quiseres.',
+    autoConfirmManualDescription:
+      'As marcações criadas diretamente na agenda ficam confirmadas assim que são guardadas. Podes desativar esta opção quando quiseres.',
     autoConfirmDescription:
       'As novas reservas ficam confirmadas sem intervenção manual.',
     autoComplete: 'Concluir automaticamente',
     autoCompleteDescription: 'Conclui a reserva depois da hora prevista.',
     requireBirthDate: 'Pedir data de nascimento na marcação',
-    requireBirthDateDescription: 'Quando desativado, os clientes podem marcar sem fornecer a data de nascimento. Os aniversários deixam de ficar disponíveis para novos clientes que não a indiquem.',
+    requireBirthDateDescription:
+      'Quando desativado, os clientes podem marcar sem fornecer a data de nascimento. Os aniversários deixam de ficar disponíveis para novos clientes que não a indiquem.',
     cancellationWindow: 'Prazo de cancelamento',
-    cancellationWindowHelp: 'Os clientes podem cancelar online até {hours} h antes da marcação. Nas últimas {hours} h, têm de contactar a barbearia.',
-    cancellationWindowNoLimit: 'Com 0 horas, os clientes podem cancelar online até à hora de início da marcação.',
+    cancellationWindowHelp:
+      'Os clientes podem cancelar online até {hours} h antes da marcação. Nas últimas {hours} h, têm de contactar a barbearia.',
+    cancellationWindowNoLimit:
+      'Com 0 horas, os clientes podem cancelar online até à hora de início da marcação.',
     cancellationWindowSummary: 'Cancelamento online até {hours} h antes',
     cancellationWindowNoLimitShort: 'Até à hora da marcação',
     appearanceDescriptionLong: 'Imagens usadas na página pública.',

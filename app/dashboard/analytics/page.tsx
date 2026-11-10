@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  type ReactNode,
+} from 'react';
 import {
   Activity,
   ArrowDownRight,
@@ -75,7 +82,12 @@ type Analytics = {
 };
 
 type Preset = '7' | '30' | '90' | 'year' | 'custom';
-type RevenuePoint = { key: string; label: string; fullLabel: string; value: number };
+type RevenuePoint = {
+  key: string;
+  label: string;
+  fullLabel: string;
+  value: number;
+};
 
 function copy(locale: string, pt: string, en: string) {
   return locale === 'en' ? en : pt;
@@ -102,7 +114,11 @@ function shiftDate(date: Date, amount: number) {
   return next;
 }
 
-function humanDate(value: string, locale: string, style: 'short' | 'long' = 'short') {
+function humanDate(
+  value: string,
+  locale: string,
+  style: 'short' | 'long' = 'short',
+) {
   const date = new Date(value.slice(0, 10) + 'T00:00:00');
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
@@ -180,7 +196,11 @@ function paymentLabel(value: string, locale: string) {
   if (normalized === 'cash' || normalized === 'dinheiro') {
     return copy(locale, 'Dinheiro', 'Cash');
   }
-  if (normalized === 'card' || normalized === 'cartão' || normalized === 'cartao') {
+  if (
+    normalized === 'card' ||
+    normalized === 'cartão' ||
+    normalized === 'cartao'
+  ) {
     return copy(locale, 'Cartão', 'Card');
   }
   if (normalized === 'mbway' || normalized === 'mb way') return 'MB WAY';
@@ -217,7 +237,15 @@ function downloadUrl(
     format === 'excel'
       ? '/api/analytics/export-excel'
       : '/api/analytics/export';
-  return endpoint + '?type=' + type + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+  return (
+    endpoint +
+    '?type=' +
+    type +
+    '&from=' +
+    encodeURIComponent(from) +
+    '&to=' +
+    encodeURIComponent(to)
+  );
 }
 
 export default function AnalyticsPage() {
@@ -246,7 +274,10 @@ export default function AnalyticsPage() {
     setLoadError(false);
     try {
       const response = await fetch(
-        '/api/analytics?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to),
+        '/api/analytics?from=' +
+          encodeURIComponent(from) +
+          '&to=' +
+          encodeURIComponent(to),
         { cache: 'no-store', signal: controller.signal },
       );
       const json = await response.json();
@@ -334,23 +365,47 @@ export default function AnalyticsPage() {
     [data, from, to, locale],
   );
   const maxRevenue = Math.max(1, ...revenueSeries.map((item) => item.value));
-  const maxServiceRevenue = Math.max(1, ...(data?.topServices.map((item) => item.revenue) ?? []));
-  const maxProfessionalRevenue = Math.max(1, ...(data?.professionals.map((item) => item.revenue) ?? []));
-  const maxAgeGroup = Math.max(1, ...(data?.clientAgeGroups.map((item) => item.count) ?? []));
-  const maxPaymentRevenue = Math.max(1, ...(data?.paymentMethods.map((item) => item.revenue) ?? []));
+  const maxServiceRevenue = Math.max(
+    1,
+    ...(data?.topServices.map((item) => item.revenue) ?? []),
+  );
+  const maxProfessionalRevenue = Math.max(
+    1,
+    ...(data?.professionals.map((item) => item.revenue) ?? []),
+  );
+  const maxAgeGroup = Math.max(
+    1,
+    ...(data?.clientAgeGroups.map((item) => item.count) ?? []),
+  );
+  const maxPaymentRevenue = Math.max(
+    1,
+    ...(data?.paymentMethods.map((item) => item.revenue) ?? []),
+  );
 
   const insights = useMemo(() => {
-    if (!data) return [] as { title: string; description: string; positive?: boolean }[];
-    const items: { title: string; description: string; positive?: boolean }[] = [];
+    if (!data)
+      return [] as { title: string; description: string; positive?: boolean }[];
+    const items: { title: string; description: string; positive?: boolean }[] =
+      [];
     const revenueChange = data.overview.revenueChangePercent;
     if (revenueChange !== null) {
       items.push({
-        title: revenueChange >= 0
-          ? copy(locale, 'Faturação em crescimento', 'Revenue is growing')
-          : copy(locale, 'Faturação abaixo do período anterior', 'Revenue is below the previous period'),
-        description: t(revenueChange >= 0 ? 'analyticsPage.revenueUp' : 'analyticsPage.revenueDown', {
-          percent: Math.abs(revenueChange).toFixed(1),
-        }),
+        title:
+          revenueChange >= 0
+            ? copy(locale, 'Faturação em crescimento', 'Revenue is growing')
+            : copy(
+                locale,
+                'Faturação abaixo do período anterior',
+                'Revenue is below the previous period',
+              ),
+        description: t(
+          revenueChange >= 0
+            ? 'analyticsPage.revenueUp'
+            : 'analyticsPage.revenueDown',
+          {
+            percent: Math.abs(revenueChange).toFixed(1),
+          },
+        ),
         positive: revenueChange >= 0,
       });
     }
@@ -359,16 +414,35 @@ export default function AnalyticsPage() {
         title: copy(locale, 'Regresso de clientes', 'Customer rebooking'),
         description: copy(
           locale,
-          data.overview.rebookedClients + ' de ' + data.overview.activeClientsInPeriod + ' clientes com visita concluída já têm uma nova marcação futura (' + data.overview.rebookingRate.toFixed(1) + '%).',
-          data.overview.rebookedClients + ' of ' + data.overview.activeClientsInPeriod + ' customers with a completed visit already have a future booking (' + data.overview.rebookingRate.toFixed(1) + '%).',
+          data.overview.rebookedClients +
+            ' de ' +
+            data.overview.activeClientsInPeriod +
+            ' clientes com visita concluída já têm uma nova marcação futura (' +
+            data.overview.rebookingRate.toFixed(1) +
+            '%).',
+          data.overview.rebookedClients +
+            ' of ' +
+            data.overview.activeClientsInPeriod +
+            ' customers with a completed visit already have a future booking (' +
+            data.overview.rebookingRate.toFixed(1) +
+            '%).',
         ),
         positive: undefined,
       });
     }
     if (data.topServices[0]) {
       items.push({
-        title: copy(locale, 'Serviço com maior faturação', 'Top revenue service'),
-        description: data.topServices[0].name + ' · ' + money(data.topServices[0].revenue, locale) + ' · ' + t('analyticsPage.bookingCount', { count: data.topServices[0].count }),
+        title: copy(
+          locale,
+          'Serviço com maior faturação',
+          'Top revenue service',
+        ),
+        description:
+          data.topServices[0].name +
+          ' · ' +
+          money(data.topServices[0].revenue, locale) +
+          ' · ' +
+          t('analyticsPage.bookingCount', { count: data.topServices[0].count }),
       });
     }
     if (data.overview.cancelledAppointments > 0) {
@@ -376,16 +450,33 @@ export default function AnalyticsPage() {
         title: copy(locale, 'Marcações canceladas', 'Cancelled bookings'),
         description: copy(
           locale,
-          data.overview.cancelledAppointments + ' marcações foram canceladas (' + data.overview.cancellationRate.toFixed(1) + '% do total no período).',
-          data.overview.cancelledAppointments + ' bookings were cancelled (' + data.overview.cancellationRate.toFixed(1) + '% of the period total).',
+          data.overview.cancelledAppointments +
+            ' marcações foram canceladas (' +
+            data.overview.cancellationRate.toFixed(1) +
+            '% do total no período).',
+          data.overview.cancelledAppointments +
+            ' bookings were cancelled (' +
+            data.overview.cancellationRate.toFixed(1) +
+            '% of the period total).',
         ),
         positive: undefined,
       });
     }
     if (data.professionals[0]) {
       items.push({
-        title: copy(locale, 'Maior faturação por barbeiro', 'Top barber by revenue'),
-        description: data.professionals[0].name + ' · ' + money(data.professionals[0].revenue, locale) + ' · ' + t('analyticsPage.completedBookings', { count: data.professionals[0].appointments }),
+        title: copy(
+          locale,
+          'Maior faturação por barbeiro',
+          'Top barber by revenue',
+        ),
+        description:
+          data.professionals[0].name +
+          ' · ' +
+          money(data.professionals[0].revenue, locale) +
+          ' · ' +
+          t('analyticsPage.completedBookings', {
+            count: data.professionals[0].appointments,
+          }),
       });
     }
     return items.slice(0, 4);
@@ -422,7 +513,9 @@ export default function AnalyticsPage() {
                 {t('analyticsPage.upgradeDescription')}
               </p>
               <Button asChild className="min-h-11 w-full sm:w-auto">
-                <Link href="/dashboard/billing">{t('analyticsPage.upgrade')}</Link>
+                <Link href="/dashboard/billing">
+                  {t('analyticsPage.upgrade')}
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -432,9 +525,7 @@ export default function AnalyticsPage() {
   }
 
   const noBookings = Boolean(
-    data &&
-    data.overview.appointments === 0 &&
-    data.overview.revenue === 0,
+    data && data.overview.appointments === 0 && data.overview.revenue === 0,
   );
 
   return (
@@ -460,7 +551,10 @@ export default function AnalyticsPage() {
             disabled={loading}
             className="min-h-11 w-full shrink-0 gap-2 sm:w-auto"
           >
-            <RefreshCw className={cn('size-4', loading && 'animate-spin')} aria-hidden="true" />
+            <RefreshCw
+              className={cn('size-4', loading && 'animate-spin')}
+              aria-hidden="true"
+            />
             {t('analyticsPage.update')}
           </Button>
         </header>
@@ -472,11 +566,20 @@ export default function AnalyticsPage() {
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <CalendarDays className="size-4 text-primary" aria-hidden="true" />
+                <CalendarDays
+                  className="size-4 text-primary"
+                  aria-hidden="true"
+                />
                 {copy(locale, 'Período de análise', 'Reporting period')}
               </div>
               <span className="text-xs text-muted-foreground">
-                {data ? humanDate(data.period.from, locale, 'long') + ' — ' + humanDate(data.period.to, locale, 'long') : humanDate(from, locale, 'long') + ' — ' + humanDate(to, locale, 'long')}
+                {data
+                  ? humanDate(data.period.from, locale, 'long') +
+                    ' — ' +
+                    humanDate(data.period.to, locale, 'long')
+                  : humanDate(from, locale, 'long') +
+                    ' — ' +
+                    humanDate(to, locale, 'long')}
               </span>
             </div>
             <div
@@ -484,12 +587,14 @@ export default function AnalyticsPage() {
               aria-label={copy(locale, 'Períodos rápidos', 'Quick date ranges')}
               className="flex min-w-0 gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {([
-                ['7', copy(locale, '7 dias', '7 days')],
-                ['30', copy(locale, '30 dias', '30 days')],
-                ['90', copy(locale, '90 dias', '90 days')],
-                ['year', copy(locale, 'Este ano', 'Year to date')],
-              ] as const).map(([value, label]) => (
+              {(
+                [
+                  ['7', copy(locale, '7 dias', '7 days')],
+                  ['30', copy(locale, '30 dias', '30 days')],
+                  ['90', copy(locale, '90 dias', '90 days')],
+                  ['year', copy(locale, 'Este ano', 'Year to date')],
+                ] as const
+              ).map(([value, label]) => (
                 <button
                   key={value}
                   type="button"
@@ -513,7 +618,10 @@ export default function AnalyticsPage() {
             </div>
             <div className="grid min-w-0 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
               <div className="min-w-0">
-                <label htmlFor="analytics-from" className="text-xs font-medium text-muted-foreground">
+                <label
+                  htmlFor="analytics-from"
+                  className="text-xs font-medium text-muted-foreground"
+                >
                   {t('analyticsPage.from')}
                 </label>
                 <Input
@@ -529,7 +637,10 @@ export default function AnalyticsPage() {
                 />
               </div>
               <div className="min-w-0">
-                <label htmlFor="analytics-to" className="text-xs font-medium text-muted-foreground">
+                <label
+                  htmlFor="analytics-to"
+                  className="text-xs font-medium text-muted-foreground"
+                >
                   {t('analyticsPage.to')}
                 </label>
                 <Input
@@ -557,7 +668,11 @@ export default function AnalyticsPage() {
             </div>
             {!rangeIsValid ? (
               <p role="alert" className="text-xs text-destructive">
-                {copy(locale, 'Escolhe um intervalo válido, com um máximo de 366 dias.', 'Choose a valid date range of up to 366 days.')}
+                {copy(
+                  locale,
+                  'Escolhe um intervalo válido, com um máximo de 366 dias.',
+                  'Choose a valid date range of up to 366 days.',
+                )}
               </p>
             ) : null}
           </div>
@@ -581,7 +696,11 @@ export default function AnalyticsPage() {
               <p className="text-sm text-muted-foreground">
                 {t('analyticsPage.loadGenericError')}
               </p>
-              <Button type="button" onClick={() => void load()} className="min-h-11">
+              <Button
+                type="button"
+                onClick={() => void load()}
+                className="min-h-11"
+              >
                 <RefreshCw className="mr-2 size-4" aria-hidden="true" />
                 {copy(locale, 'Tentar novamente', 'Try again')}
               </Button>
@@ -591,7 +710,10 @@ export default function AnalyticsPage() {
           <>
             <section
               aria-label={copy(locale, 'Indicadores principais', 'Key metrics')}
-              className={cn('grid grid-cols-2 gap-3 xl:grid-cols-5', loading && 'opacity-60')}
+              className={cn(
+                'grid grid-cols-2 gap-3 xl:grid-cols-5',
+                loading && 'opacity-60',
+              )}
             >
               <Metric
                 featured
@@ -626,8 +748,16 @@ export default function AnalyticsPage() {
                 value={String(data.overview.completedAppointments)}
                 detail={
                   data.overview.appointments > 0
-                    ? data.overview.completedAppointments + ' / ' + data.overview.appointments + ' ' + copy(locale, 'marcações no período', 'bookings in period')
-                    : copy(locale, 'Sem marcações no período', 'No bookings in this period')
+                    ? data.overview.completedAppointments +
+                      ' / ' +
+                      data.overview.appointments +
+                      ' ' +
+                      copy(locale, 'marcações no período', 'bookings in period')
+                    : copy(
+                        locale,
+                        'Sem marcações no período',
+                        'No bookings in this period',
+                      )
                 }
                 icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
               />
@@ -640,14 +770,26 @@ export default function AnalyticsPage() {
                 }
                 detail={
                   data.overview.rebookingRate === null
-                    ? copy(locale, 'Sem clientes identificados suficientes', 'Not enough identified customers')
-                    : data.overview.rebookedClients + ' / ' + data.overview.activeClientsInPeriod + ' ' + copy(locale, 'clientes', 'customers')
+                    ? copy(
+                        locale,
+                        'Sem clientes identificados suficientes',
+                        'Not enough identified customers',
+                      )
+                    : data.overview.rebookedClients +
+                      ' / ' +
+                      data.overview.activeClientsInPeriod +
+                      ' ' +
+                      copy(locale, 'clientes', 'customers')
                 }
                 icon={<CalendarDays className="size-4" aria-hidden="true" />}
               />
               <Metric
                 title={t('analyticsPage.cancellationRate')}
-                value={data.overview.appointments > 0 ? data.overview.cancellationRate.toFixed(1) + '%' : '—'}
+                value={
+                  data.overview.appointments > 0
+                    ? data.overview.cancellationRate.toFixed(1) + '%'
+                    : '—'
+                }
                 detail={t('analyticsPage.cancellations', {
                   count: data.overview.cancelledAppointments,
                 })}
@@ -662,11 +804,18 @@ export default function AnalyticsPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <CardTitle className="flex items-center gap-2 text-base">
-                        <TrendingUp className="size-4 text-primary" aria-hidden="true" />
+                        <TrendingUp
+                          className="size-4 text-primary"
+                          aria-hidden="true"
+                        />
                         {t('analyticsPage.revenueOverTime')}
                       </CardTitle>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {copy(locale, 'Evolução da faturação concluída', 'Completed revenue over time')}
+                        {copy(
+                          locale,
+                          'Evolução da faturação concluída',
+                          'Completed revenue over time',
+                        )}
                       </p>
                     </div>
                     <span className="text-sm font-semibold tabular-nums">
@@ -680,14 +829,20 @@ export default function AnalyticsPage() {
                   ) : (
                     <div
                       role="img"
-                      aria-label={copy(locale, 'Gráfico da faturação ao longo do período selecionado', 'Revenue chart across the selected period')}
+                      aria-label={copy(
+                        locale,
+                        'Gráfico da faturação ao longo do período selecionado',
+                        'Revenue chart across the selected period',
+                      )}
                     >
                       <div className="flex h-40 min-w-0 items-end gap-1 sm:h-52 sm:gap-2">
                         {revenueSeries.map((item) => (
                           <div
                             key={item.key}
                             className="group flex h-full min-w-0 flex-1 flex-col justify-end"
-                            title={item.fullLabel + ' · ' + money(item.value, locale)}
+                            title={
+                              item.fullLabel + ' · ' + money(item.value, locale)
+                            }
                           >
                             <div
                               className={cn(
@@ -699,7 +854,10 @@ export default function AnalyticsPage() {
                               style={{
                                 height:
                                   item.value > 0
-                                    ? Math.max((item.value / maxRevenue) * 100, 3) + '%'
+                                    ? Math.max(
+                                        (item.value / maxRevenue) * 100,
+                                        3,
+                                      ) + '%'
                                     : '2px',
                               }}
                             />
@@ -709,13 +867,23 @@ export default function AnalyticsPage() {
                       <div className="mt-3 flex items-center justify-between gap-2 text-[10px] text-muted-foreground sm:text-xs">
                         <span>{revenueSeries[0]?.label}</span>
                         {revenueSeries.length > 2 ? (
-                          <span>{revenueSeries[Math.floor(revenueSeries.length / 2)]?.label}</span>
+                          <span>
+                            {
+                              revenueSeries[
+                                Math.floor(revenueSeries.length / 2)
+                              ]?.label
+                            }
+                          </span>
                         ) : null}
-                        <span>{revenueSeries[revenueSeries.length - 1]?.label}</span>
+                        <span>
+                          {revenueSeries[revenueSeries.length - 1]?.label}
+                        </span>
                       </div>
                       <ul className="sr-only">
                         {revenueSeries.map((item) => (
-                          <li key={item.key}>{item.fullLabel}: {money(item.value, locale)}</li>
+                          <li key={item.key}>
+                            {item.fullLabel}: {money(item.value, locale)}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -725,9 +893,19 @@ export default function AnalyticsPage() {
 
               <Card className="min-w-0">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{copy(locale, 'Composição da faturação', 'Revenue breakdown')}</CardTitle>
+                  <CardTitle className="text-base">
+                    {copy(
+                      locale,
+                      'Composição da faturação',
+                      'Revenue breakdown',
+                    )}
+                  </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {copy(locale, 'Serviços concluídos e produtos registados', 'Completed services and recorded products')}
+                    {copy(
+                      locale,
+                      'Serviços concluídos e produtos registados',
+                      'Completed services and recorded products',
+                    )}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-5">
@@ -746,7 +924,9 @@ export default function AnalyticsPage() {
                     accent="bg-primary/75"
                   />
                   <div className="rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
-                    <p className="text-xs text-muted-foreground">{copy(locale, 'Total registado', 'Recorded total')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {copy(locale, 'Total registado', 'Recorded total')}
+                    </p>
                     <p className="mt-1 text-xl font-semibold tabular-nums">
                       {money(data.overview.revenue, locale)}
                     </p>
@@ -759,29 +939,57 @@ export default function AnalyticsPage() {
               <Card className="min-w-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Activity className="size-4 text-primary" aria-hidden="true" />
+                    <Activity
+                      className="size-4 text-primary"
+                      aria-hidden="true"
+                    />
                     {t('analyticsPage.operationalSummary')}
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">{t('analyticsPage.operationQuality')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('analyticsPage.operationQuality')}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  <Stat label={t('analyticsPage.bookings')} value={data.overview.appointments} />
-                  <Stat label={t('analyticsPage.completed')} value={data.overview.completedAppointments} />
-                  <Stat label={t('analyticsPage.scheduled')} value={data.overview.scheduledAppointments} />
-                  <Stat label={t('analyticsPage.cancelled')} value={data.overview.cancelledAppointments} />
                   <Stat
-                    label={copy(locale, 'Média de marcações por dia', 'Average bookings per day')}
+                    label={t('analyticsPage.bookings')}
+                    value={data.overview.appointments}
+                  />
+                  <Stat
+                    label={t('analyticsPage.completed')}
+                    value={data.overview.completedAppointments}
+                  />
+                  <Stat
+                    label={t('analyticsPage.scheduled')}
+                    value={data.overview.scheduledAppointments}
+                  />
+                  <Stat
+                    label={t('analyticsPage.cancelled')}
+                    value={data.overview.cancelledAppointments}
+                  />
+                  <Stat
+                    label={copy(
+                      locale,
+                      'Média de marcações por dia',
+                      'Average bookings per day',
+                    )}
                     value={dailyAverage.toFixed(1)}
                   />
                   <div className="pt-3">
                     <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
-                      <span className="text-muted-foreground">{t('analyticsPage.completionRate')}</span>
-                      <span className="font-semibold tabular-nums">{completionRate.toFixed(1)}%</span>
+                      <span className="text-muted-foreground">
+                        {t('analyticsPage.completionRate')}
+                      </span>
+                      <span className="font-semibold tabular-nums">
+                        {completionRate.toFixed(1)}%
+                      </span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full rounded-full bg-emerald-500 transition-[width] duration-300"
-                        style={{ width: Math.min(100, Math.max(0, completionRate)) + '%' }}
+                        style={{
+                          width:
+                            Math.min(100, Math.max(0, completionRate)) + '%',
+                        }}
                       />
                     </div>
                   </div>
@@ -795,26 +1003,70 @@ export default function AnalyticsPage() {
                     {t('analyticsPage.customerHealth')}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {copy(locale, 'Clientes com visitas concluídas e respetivo regresso', 'Customers with completed visits and their return activity')}
+                    {copy(
+                      locale,
+                      'Clientes com visitas concluídas e respetivo regresso',
+                      'Customers with completed visits and their return activity',
+                    )}
                   </p>
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
-                  <MetricMini label={t('analyticsPage.activeClients')} value={String(data.overview.activeClientsInPeriod)} detail={copy(locale, 'Clientes únicos com marcação concluída', 'Unique customers with completed visits')} />
-                  <MetricMini label={copy(locale, 'Novos clientes registados', 'New customer records')} value={String(data.overview.newClients)} detail={copy(locale, 'Registos criados no período', 'Records created in this period')} />
                   <MetricMini
-                    label={copy(locale, 'Já têm nova marcação', 'Already rebooked')}
+                    label={t('analyticsPage.activeClients')}
+                    value={String(data.overview.activeClientsInPeriod)}
+                    detail={copy(
+                      locale,
+                      'Clientes únicos com marcação concluída',
+                      'Unique customers with completed visits',
+                    )}
+                  />
+                  <MetricMini
+                    label={copy(
+                      locale,
+                      'Novos clientes registados',
+                      'New customer records',
+                    )}
+                    value={String(data.overview.newClients)}
+                    detail={copy(
+                      locale,
+                      'Registos criados no período',
+                      'Records created in this period',
+                    )}
+                  />
+                  <MetricMini
+                    label={copy(
+                      locale,
+                      'Já têm nova marcação',
+                      'Already rebooked',
+                    )}
                     value={String(data.overview.rebookedClients)}
-                    detail={copy(locale, 'Marcações futuras pendentes ou confirmadas', 'Future pending or confirmed bookings')}
+                    detail={copy(
+                      locale,
+                      'Marcações futuras pendentes ou confirmadas',
+                      'Future pending or confirmed bookings',
+                    )}
                   />
                   <MetricMini
                     label={t('analyticsPage.totalClients')}
                     value={String(data.overview.totalClients)}
-                    detail={copy(locale, 'Base total registada', 'Total registered customer base')}
+                    detail={copy(
+                      locale,
+                      'Base total registada',
+                      'Total registered customer base',
+                    )}
                   />
                   <MetricMini
                     label={t('analyticsPage.revenuePerActiveClient')}
-                    value={data.overview.activeClientsInPeriod > 0 ? money(revenuePerClient, locale) : '—'}
-                    detail={copy(locale, 'Faturação por cliente identificado', 'Revenue per identified customer')}
+                    value={
+                      data.overview.activeClientsInPeriod > 0
+                        ? money(revenuePerClient, locale)
+                        : '—'
+                    }
+                    detail={copy(
+                      locale,
+                      'Faturação por cliente identificado',
+                      'Revenue per identified customer',
+                    )}
                   />
                 </CardContent>
               </Card>
@@ -824,11 +1076,18 @@ export default function AnalyticsPage() {
               <Card className="min-w-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Scissors className="size-4 text-primary" aria-hidden="true" />
+                    <Scissors
+                      className="size-4 text-primary"
+                      aria-hidden="true"
+                    />
                     {t('analyticsPage.bestSellingServices')}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {copy(locale, 'Ordenados pela faturação dos serviços, sem misturar vendas de produtos.', 'Ranked by service revenue, excluding product sales.')}
+                    {copy(
+                      locale,
+                      'Ordenados pela faturação dos serviços, sem misturar vendas de produtos.',
+                      'Ranked by service revenue, excluding product sales.',
+                    )}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -840,24 +1099,43 @@ export default function AnalyticsPage() {
                             <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-muted text-[10px] font-semibold text-muted-foreground">
                               {index + 1}
                             </span>
-                            <span className="truncate font-medium">{item.name}</span>
+                            <span className="truncate font-medium">
+                              {item.name}
+                            </span>
                           </span>
-                          <span className="shrink-0 font-semibold tabular-nums">{money(item.revenue, locale)}</span>
+                          <span className="shrink-0 font-semibold tabular-nums">
+                            {money(item.revenue, locale)}
+                          </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
                           <div
                             className="h-full rounded-full bg-primary transition-[width] duration-300"
-                            style={{ width: Math.max((item.revenue / maxServiceRevenue) * 100, 2) + '%' }}
+                            style={{
+                              width:
+                                Math.max(
+                                  (item.revenue / maxServiceRevenue) * 100,
+                                  2,
+                                ) + '%',
+                            }}
                           />
                         </div>
                         <p className="mt-1.5 text-xs text-muted-foreground">
-                          {t('analyticsPage.bookingCount', { count: item.count })}
+                          {t('analyticsPage.bookingCount', {
+                            count: item.count,
+                          })}
                           <span className="px-1.5 text-border">·</span>
-                          {copy(locale, 'Média', 'Average') + ' ' + money(item.count > 0 ? item.revenue / item.count : 0, locale)}
+                          {copy(locale, 'Média', 'Average') +
+                            ' ' +
+                            money(
+                              item.count > 0 ? item.revenue / item.count : 0,
+                              locale,
+                            )}
                         </p>
                       </div>
                     ))
-                  ) : <Empty />}
+                  ) : (
+                    <Empty />
+                  )}
                 </CardContent>
               </Card>
 
@@ -867,7 +1145,9 @@ export default function AnalyticsPage() {
                     <Users className="size-4 text-primary" aria-hidden="true" />
                     {t('analyticsPage.professionalPerformance')}
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">{t('analyticsPage.revenueAndBookings')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('analyticsPage.revenueAndBookings')}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {data.professionals.length ? (
@@ -878,24 +1158,49 @@ export default function AnalyticsPage() {
                             <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                               {item.name.trim().slice(0, 1).toUpperCase()}
                             </span>
-                            <span className="truncate font-medium">{item.name}</span>
+                            <span className="truncate font-medium">
+                              {item.name}
+                            </span>
                           </span>
-                          <span className="shrink-0 font-semibold tabular-nums">{money(item.revenue, locale)}</span>
+                          <span className="shrink-0 font-semibold tabular-nums">
+                            {money(item.revenue, locale)}
+                          </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
                           <div
                             className="h-full rounded-full bg-primary/75 transition-[width] duration-300"
-                            style={{ width: Math.max((item.revenue / maxProfessionalRevenue) * 100, 2) + '%' }}
+                            style={{
+                              width:
+                                Math.max(
+                                  (item.revenue / maxProfessionalRevenue) * 100,
+                                  2,
+                                ) + '%',
+                            }}
                           />
                         </div>
                         <p className="mt-1.5 text-xs text-muted-foreground">
-                          {t('analyticsPage.completedBookings', { count: item.appointments })}
+                          {t('analyticsPage.completedBookings', {
+                            count: item.appointments,
+                          })}
                           <span className="px-1.5 text-border">·</span>
-                          {copy(locale, 'Média por marcação', 'Average per booking') + ' ' + money(item.appointments > 0 ? item.revenue / item.appointments : 0, locale)}
+                          {copy(
+                            locale,
+                            'Média por marcação',
+                            'Average per booking',
+                          ) +
+                            ' ' +
+                            money(
+                              item.appointments > 0
+                                ? item.revenue / item.appointments
+                                : 0,
+                              locale,
+                            )}
                         </p>
                       </div>
                     ))
-                  ) : <Empty />}
+                  ) : (
+                    <Empty />
+                  )}
                 </CardContent>
               </Card>
             </section>
@@ -904,11 +1209,18 @@ export default function AnalyticsPage() {
               <Card className="min-w-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CreditCard className="size-4 text-primary" aria-hidden="true" />
+                    <CreditCard
+                      className="size-4 text-primary"
+                      aria-hidden="true"
+                    />
                     {copy(locale, 'Métodos de pagamento', 'Payment methods')}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {copy(locale, 'Valor das marcações concluídas por método registado', 'Completed booking value by recorded payment method')}
+                    {copy(
+                      locale,
+                      'Valor das marcações concluídas por método registado',
+                      'Completed booking value by recorded payment method',
+                    )}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -916,35 +1228,70 @@ export default function AnalyticsPage() {
                     data.paymentMethods.map((item) => (
                       <div key={item.name} className="min-w-0">
                         <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
-                          <span className="truncate font-medium">{paymentLabel(item.name, locale)}</span>
-                          <span className="shrink-0 font-semibold tabular-nums">{money(item.revenue, locale)}</span>
+                          <span className="truncate font-medium">
+                            {paymentLabel(item.name, locale)}
+                          </span>
+                          <span className="shrink-0 font-semibold tabular-nums">
+                            {money(item.revenue, locale)}
+                          </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary/75" style={{ width: Math.max((item.revenue / maxPaymentRevenue) * 100, 2) + '%' }} />
+                          <div
+                            className="h-full rounded-full bg-primary/75"
+                            style={{
+                              width:
+                                Math.max(
+                                  (item.revenue / maxPaymentRevenue) * 100,
+                                  2,
+                                ) + '%',
+                            }}
+                          />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.transactions + ' ' + copy(locale, 'marcações', 'bookings')}
+                          {item.transactions +
+                            ' ' +
+                            copy(locale, 'marcações', 'bookings')}
                         </p>
                       </div>
                     ))
-                  ) : <Empty />}
+                  ) : (
+                    <Empty />
+                  )}
                 </CardContent>
               </Card>
 
               {data.clientAgeGroups.length ? (
                 <Card className="min-w-0">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base">{t('analyticsPage.ageProfile')}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{t('analyticsPage.knownAges')}</p>
+                    <CardTitle className="text-base">
+                      {t('analyticsPage.ageProfile')}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      {t('analyticsPage.knownAges')}
+                    </p>
                   </CardHeader>
                   <CardContent className="space-y-3.5">
                     {data.clientAgeGroups.map((item) => (
-                      <div key={item.label} className="grid grid-cols-[5rem_1fr_2rem] items-center gap-2 text-xs">
-                        <span className="text-muted-foreground">{ageLabel(item.label, locale)}</span>
+                      <div
+                        key={item.label}
+                        className="grid grid-cols-[5rem_1fr_2rem] items-center gap-2 text-xs"
+                      >
+                        <span className="text-muted-foreground">
+                          {ageLabel(item.label, locale)}
+                        </span>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary/65" style={{ width: Math.max((item.count / maxAgeGroup) * 100, 2) + '%' }} />
+                          <div
+                            className="h-full rounded-full bg-primary/65"
+                            style={{
+                              width:
+                                Math.max((item.count / maxAgeGroup) * 100, 2) +
+                                '%',
+                            }}
+                          />
                         </div>
-                        <span className="text-right font-semibold tabular-nums">{item.count}</span>
+                        <span className="text-right font-semibold tabular-nums">
+                          {item.count}
+                        </span>
                       </div>
                     ))}
                   </CardContent>
@@ -955,26 +1302,50 @@ export default function AnalyticsPage() {
             {insights.length ? (
               <section aria-labelledby="analytics-insights-title">
                 <div className="mb-3 flex items-center gap-2">
-                  <Sparkles className="size-4 text-primary" aria-hidden="true" />
+                  <Sparkles
+                    className="size-4 text-primary"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <h2 id="analytics-insights-title" className="text-base font-semibold">{t('analyticsPage.automaticInsights')}</h2>
-                    <p className="text-xs text-muted-foreground">{t('analyticsPage.insightsDescription')}</p>
+                    <h2
+                      id="analytics-insights-title"
+                      className="text-base font-semibold"
+                    >
+                      {t('analyticsPage.automaticInsights')}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      {t('analyticsPage.insightsDescription')}
+                    </p>
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {insights.map((item, index) => (
-                    <div key={item.title + String(index)} className="rounded-2xl border border-border/70 bg-card p-4">
+                    <div
+                      key={item.title + String(index)}
+                      className="rounded-2xl border border-border/70 bg-card p-4"
+                    >
                       <div className="flex items-start gap-2">
                         {item.positive === undefined ? (
-                          <Activity className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                          <Activity
+                            className="mt-0.5 size-4 shrink-0 text-primary"
+                            aria-hidden="true"
+                          />
                         ) : item.positive ? (
-                          <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-emerald-500" aria-hidden="true" />
+                          <ArrowUpRight
+                            className="mt-0.5 size-4 shrink-0 text-emerald-500"
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <ArrowDownRight className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
+                          <ArrowDownRight
+                            className="mt-0.5 size-4 shrink-0 text-amber-500"
+                            aria-hidden="true"
+                          />
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-semibold">{item.title}</p>
-                          <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.description}</p>
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            {item.description}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -987,13 +1358,29 @@ export default function AnalyticsPage() {
               <section aria-labelledby="analytics-enterprise-title">
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle id="analytics-enterprise-title" className="text-base">{t('analyticsPage.enterpriseFinance')}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{t('analyticsPage.posCombined')}</p>
+                    <CardTitle
+                      id="analytics-enterprise-title"
+                      className="text-base"
+                    >
+                      {t('analyticsPage.enterpriseFinance')}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      {t('analyticsPage.posCombined')}
+                    </p>
                   </CardHeader>
                   <CardContent className="grid gap-3 sm:grid-cols-3">
-                    <MetricMini label={t('analyticsPage.posRevenue')} value={money(data.enterprise.posRevenue, locale)} />
-                    <MetricMini label={t('analyticsPage.posTransactions')} value={String(data.enterprise.posTransactions)} />
-                    <MetricMini label={t('analyticsPage.combinedRevenue')} value={money(data.enterprise.combinedRevenue, locale)} />
+                    <MetricMini
+                      label={t('analyticsPage.posRevenue')}
+                      value={money(data.enterprise.posRevenue, locale)}
+                    />
+                    <MetricMini
+                      label={t('analyticsPage.posTransactions')}
+                      value={String(data.enterprise.posTransactions)}
+                    />
+                    <MetricMini
+                      label={t('analyticsPage.combinedRevenue')}
+                      value={money(data.enterprise.combinedRevenue, locale)}
+                    />
                   </CardContent>
                 </Card>
               </section>
@@ -1002,13 +1389,28 @@ export default function AnalyticsPage() {
             {noBookings ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
-                  <CalendarDays className="size-8 text-muted-foreground" aria-hidden="true" />
-                  <h2 className="font-semibold">{copy(locale, 'Ainda não existem dados neste período', 'No data for this period yet')}</h2>
+                  <CalendarDays
+                    className="size-8 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <h2 className="font-semibold">
+                    {copy(
+                      locale,
+                      'Ainda não existem dados neste período',
+                      'No data for this period yet',
+                    )}
+                  </h2>
                   <p className="max-w-md text-sm text-muted-foreground">
-                    {copy(locale, 'Experimenta outro intervalo ou abre a agenda para registar as primeiras marcações.', 'Try another date range or open the calendar to record your first bookings.')}
+                    {copy(
+                      locale,
+                      'Experimenta outro intervalo ou abre a agenda para registar as primeiras marcações.',
+                      'Try another date range or open the calendar to record your first bookings.',
+                    )}
                   </p>
                   <Button asChild variant="outline" className="min-h-11">
-                    <Link href="/dashboard/agenda">{copy(locale, 'Abrir agenda', 'Open calendar')}</Link>
+                    <Link href="/dashboard/agenda">
+                      {copy(locale, 'Abrir agenda', 'Open calendar')}
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -1019,15 +1421,24 @@ export default function AnalyticsPage() {
                 <CardHeader className="border-b border-border/70 bg-muted/20 pb-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div className="min-w-0">
-                      <CardTitle id="analytics-exports-title" className="flex flex-wrap items-center gap-2 text-base">
-                        <Download className="size-4 text-primary" aria-hidden="true" />
+                      <CardTitle
+                        id="analytics-exports-title"
+                        className="flex flex-wrap items-center gap-2 text-base"
+                      >
+                        <Download
+                          className="size-4 text-primary"
+                          aria-hidden="true"
+                        />
                         {t('analyticsPage.exportData')}
                         <FeaturePlanBadge feature="advanced_reports" />
                       </CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">{t('analyticsPage.exportDescription')}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {t('analyticsPage.exportDescription')}
+                      </p>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {humanDate(from, locale, 'long')} — {humanDate(to, locale, 'long')}
+                      {humanDate(from, locale, 'long')} —{' '}
+                      {humanDate(to, locale, 'long')}
                     </span>
                   </div>
                 </CardHeader>
@@ -1049,7 +1460,9 @@ export default function AnalyticsPage() {
                   {plan === 'enterprise' ? (
                     <ExportCard
                       title={t('analyticsPage.financialReport')}
-                      description={t('analyticsPage.financialReportDescription')}
+                      description={t(
+                        'analyticsPage.financialReportDescription',
+                      )}
                       type="pos"
                       from={from}
                       to={to}
@@ -1058,13 +1471,23 @@ export default function AnalyticsPage() {
                     <div className="flex flex-col justify-between rounded-2xl border border-dashed border-border bg-muted/10 p-4">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold">{t('analyticsPage.financialReport')}</p>
+                          <p className="text-sm font-semibold">
+                            {t('analyticsPage.financialReport')}
+                          </p>
                           <FeaturePlanBadge minimumPlan="enterprise" />
                         </div>
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('analyticsPage.availableEnterprise')}</p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {t('analyticsPage.availableEnterprise')}
+                        </p>
                       </div>
-                      <Button asChild variant="outline" className="mt-4 min-h-11 w-full">
-                        <Link href="/plans">{t('analyticsPage.viewEnterprise')}</Link>
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="mt-4 min-h-11 w-full"
+                      >
+                        <Link href="/plans">
+                          {t('analyticsPage.viewEnterprise')}
+                        </Link>
                       </Button>
                     </div>
                   )}
@@ -1075,12 +1498,23 @@ export default function AnalyticsPage() {
         ) : null}
 
         {loadError && data ? (
-          <p role="status" className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
-            {copy(locale, 'Não foi possível atualizar os dados. Estás a ver a última versão carregada.', 'Could not refresh the data. You are viewing the last successfully loaded version.')}
+          <p
+            role="status"
+            className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300"
+          >
+            {copy(
+              locale,
+              'Não foi possível atualizar os dados. Estás a ver a última versão carregada.',
+              'Could not refresh the data. You are viewing the last successfully loaded version.',
+            )}
           </p>
         ) : null}
         {loading && data ? (
-          <p role="status" aria-live="polite" className="text-center text-xs text-muted-foreground">
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-center text-xs text-muted-foreground"
+          >
             {t('analyticsPage.updating')}
           </p>
         ) : null}
@@ -1105,23 +1539,42 @@ function Metric({
   featured?: boolean;
 }) {
   return (
-    <Card className={cn('min-w-0 overflow-hidden', featured && 'col-span-2 border-primary/25 bg-primary/[0.035] xl:col-span-1')}>
+    <Card
+      className={cn(
+        'min-w-0 overflow-hidden',
+        featured &&
+          'col-span-2 border-primary/25 bg-primary/[0.035] xl:col-span-1',
+      )}
+    >
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between gap-2 text-xs font-medium text-muted-foreground">
           <span className="min-w-0 truncate">{title}</span>
-          <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted/70', featured && 'bg-primary/10 text-primary')}>
+          <span
+            className={cn(
+              'flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted/70',
+              featured && 'bg-primary/10 text-primary',
+            )}
+          >
             {icon}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="break-words text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">{value}</p>
-        <p className={cn(
-          'mt-1 min-h-8 text-[11px] leading-4',
-          tone === 'positive' ? 'text-emerald-600 dark:text-emerald-400' :
-          tone === 'negative' ? 'text-amber-600 dark:text-amber-400' :
-          'text-muted-foreground',
-        )}>{detail}</p>
+        <p className="break-words text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
+          {value}
+        </p>
+        <p
+          className={cn(
+            'mt-1 min-h-8 text-[11px] leading-4',
+            tone === 'positive'
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : tone === 'negative'
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-muted-foreground',
+          )}
+        >
+          {detail}
+        </p>
       </CardContent>
     </Card>
   );
@@ -1139,8 +1592,14 @@ function MetricMini({
   return (
     <div className="min-w-0 rounded-xl border border-border/70 bg-muted/20 p-3.5">
       <p className="text-xs leading-4 text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words text-lg font-semibold tracking-tight tabular-nums">{value}</p>
-      {detail ? <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{detail}</p> : null}
+      <p className="mt-1 break-words text-lg font-semibold tracking-tight tabular-nums">
+        {value}
+      </p>
+      {detail ? (
+        <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+          {detail}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1172,12 +1631,22 @@ function RevenueMix({
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
         <span className="font-medium">{label}</span>
-        <span className="shrink-0 font-semibold tabular-nums">{money(value, locale)}</span>
+        <span className="shrink-0 font-semibold tabular-nums">
+          {money(value, locale)}
+        </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className={cn('h-full rounded-full transition-[width] duration-300', accent)} style={{ width: percent + '%' }} />
+        <div
+          className={cn(
+            'h-full rounded-full transition-[width] duration-300',
+            accent,
+          )}
+          style={{ width: percent + '%' }}
+        />
       </div>
-      <p className="mt-1 text-right text-[11px] text-muted-foreground">{percent.toFixed(1)}%</p>
+      <p className="mt-1 text-right text-[11px] text-muted-foreground">
+        {percent.toFixed(1)}%
+      </p>
     </div>
   );
 }
@@ -1186,8 +1655,13 @@ function Empty() {
   const { t } = useLanguage();
   return (
     <div className="flex min-h-36 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
-      <BarChart3 className="size-6 text-muted-foreground/60" aria-hidden="true" />
-      <p className="text-sm text-muted-foreground">{t('analyticsPage.noData')}</p>
+      <BarChart3
+        className="size-6 text-muted-foreground/60"
+        aria-hidden="true"
+      />
+      <p className="text-sm text-muted-foreground">
+        {t('analyticsPage.noData')}
+      </p>
     </div>
   );
 }
@@ -1214,7 +1688,9 @@ function ExportCard({
         </span>
         <div className="min-w-0">
           <h3 className="text-sm font-semibold">{title}</h3>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {description}
+          </p>
         </div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">

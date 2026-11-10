@@ -286,7 +286,10 @@ export default function BarbershopsDirectoryPage() {
                   className="silentra-section-block flex min-h-64 items-center justify-center rounded-3xl"
                   aria-live="polite"
                 >
-                  <SilentraLoading variant="compact" message={t('directory.loadingShops')} />
+                  <SilentraLoading
+                    variant="compact"
+                    message={t('directory.loadingShops')}
+                  />
                 </div>
               ) : loadError ? (
                 <div

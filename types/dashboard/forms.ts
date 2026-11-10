@@ -3,11 +3,7 @@ import type { Client, Professional, Service } from './entities';
 
 /** Data and callbacks accepted by dashboard form cards. */
 export type BookingRecurrence =
-  | 'none'
-  | 'weekly'
-  | 'biweekly'
-  | 'everyThreeWeeks'
-  | 'monthly';
+  'none' | 'weekly' | 'biweekly' | 'everyThreeWeeks' | 'monthly';
 
 export interface BookingFormData {
   /** Explicitly present so React state setters remain assignable across the form. */

@@ -8,7 +8,9 @@ export default async function CustomerBookingsPage({
   searchParams: Promise<{ email?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const initialEmail = Array.isArray(params.email) ? params.email[0] : params.email;
+  const initialEmail = Array.isArray(params.email)
+    ? params.email[0]
+    : params.email;
   return (
     <div className="silentra-page-shell min-h-screen text-foreground">
       <SiteNavbar />

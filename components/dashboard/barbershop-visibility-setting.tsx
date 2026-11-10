@@ -43,9 +43,7 @@ export function BarbershopVisibilitySetting() {
       );
     } else {
       setIsVisible(
-        canHideFromDirectory
-          ? (data?.is_public_in_directory ?? true)
-          : true,
+        canHideFromDirectory ? (data?.is_public_in_directory ?? true) : true,
       );
     }
 
@@ -145,7 +143,13 @@ export function BarbershopVisibilitySetting() {
           ) : null}
           <Switch
             checked={!canHideFromDirectory || isVisible}
-            disabled={loading || saving || planLoading || !barbershopId || !canHideFromDirectory}
+            disabled={
+              loading ||
+              saving ||
+              planLoading ||
+              !barbershopId ||
+              !canHideFromDirectory
+            }
             onCheckedChange={handleChange}
             aria-label={
               english

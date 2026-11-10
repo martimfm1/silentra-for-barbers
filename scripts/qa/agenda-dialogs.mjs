@@ -6,7 +6,9 @@ const agenda = read('app/dashboard/agenda/page.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 
 const bookingForm = read('app/dashboard/_components/cards/BookingFormCard.tsx');
-const appointmentsService = read('app/dashboard/_services/appointments.service.ts');
+const appointmentsService = read(
+  'app/dashboard/_services/appointments.service.ts',
+);
 const blockForm = read('app/dashboard/_components/cards/BlockFormCard.tsx');
 const popover = read('components/ui/popover.tsx');
 const select = read('components/ui/select.tsx');
@@ -33,7 +35,9 @@ assert.match(agenda, /onClick=\{\(\) => setBlockDialogOpen\(true\)\}/);
 assert.ok(agenda.includes('h-[100dvh] max-h-[100dvh] w-screen'));
 assert.ok(agenda.includes('showCloseButton={false}'));
 assert.ok(bookingForm.includes('overflow-y-auto overscroll-contain'));
-assert.ok(bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'));
+assert.ok(
+  bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'),
+);
 assert.ok(bookingForm.includes('type="search"'));
 assert.ok(bookingForm.includes('role="combobox"'));
 assert.ok(bookingForm.includes('matchingClients'));
@@ -48,15 +52,28 @@ assert.ok(bookingForm.includes('booking-recurrence-end'));
 assert.ok(bookingForm.includes('max-w-full'));
 assert.ok(bookingForm.includes('box-border'));
 assert.match(calendarSync, /onClick=\{\(\) => setDialogOpen\(true\)\}/);
-assert.match(calendarSync, /<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>/);
+assert.match(
+  calendarSync,
+  /<Dialog open=\{dialogOpen\} onOpenChange=\{setDialogOpen\}>/,
+);
 assert.ok(!calendarSync.includes('showInstructions'));
 assert.ok(calendarSync.includes('max-h-[min(90dvh,54rem)]'));
 assert.ok(selectComponent.includes('w-fit min-w-0 max-w-full'));
 assert.ok(selectComponent.includes('max-w-[calc(100vw-2rem)]'));
-assert.ok(bookingForm.includes('min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900'));
-assert.ok(settings.includes('box-border block min-h-11 w-full min-w-0 max-w-full'));
+assert.ok(
+  bookingForm.includes(
+    'min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900',
+  ),
+);
+assert.ok(
+  settings.includes('box-border block min-h-11 w-full min-w-0 max-w-full'),
+);
 assert.ok(settings.includes("cn(INPUT_CLASS, 'color-scheme-dark')"));
-assert.ok(settings.includes('w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm'));
+assert.ok(
+  settings.includes(
+    'w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm',
+  ),
+);
 
 assert.ok(bookingForm.includes('min-w-0'));
 assert.ok(bookingForm.includes('setRecurrenceEndDate'));
@@ -71,7 +88,11 @@ assert.ok(hook.includes("frequency === 'monthly'"));
 assert.ok(hook.includes('appointmentService.createMany(createPayloads)'));
 assert.ok(appointmentsService.includes('async createMany('));
 assert.ok(appointmentsService.includes('.insert(primaryVariant as never[])'));
-assert.ok(appointmentsService.includes('A single INSERT keeps the whole recurring series atomic'));
+assert.ok(
+  appointmentsService.includes(
+    'A single INSERT keeps the whole recurring series atomic',
+  ),
+);
 for (const key of [
   'recurrence',
   'noRecurrence',
@@ -87,13 +108,17 @@ for (const key of [
   assert.match(ptCopy, new RegExp(key + ':'));
   assert.match(enCopy, new RegExp(key + ':'));
 }
-assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes("Hoje"));
+assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes('Hoje'));
 assert.ok(bookingForm.includes('Amanhã'));
 assert.ok(agenda.includes('birth_date: client.birth_date ??'));
 assert.ok(agenda.includes('birthDate: formData.birth_date ??'));
 assert.ok(agenda.includes('setSelectedDate(getLocalDateInputValue())'));
-assert.ok(hook.includes('!manualName?.trim()') && hook.includes('!manualPhone?.trim()'));
-assert.ok(appointmentsService.includes('manual_birth_date: payload.manual_birth_date'));
+assert.ok(
+  hook.includes('!manualName?.trim()') && hook.includes('!manualPhone?.trim()'),
+);
+assert.ok(
+  appointmentsService.includes('manual_birth_date: payload.manual_birth_date'),
+);
 assert.doesNotMatch(
   agenda,
   /\{bookingDialogOpen && \(/,

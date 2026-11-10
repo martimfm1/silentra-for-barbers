@@ -225,7 +225,10 @@ async function POST__unobserved(request: Request) {
     const requiresBirthDate =
       barbershopId !== AGENDA_DO_VICTOR_BARBERSHOP_ID &&
       shopRelation?.require_birth_date !== false;
-    let prepaymentSettings: { mbwayPhone: string; whatsappPhone: string } | null = null;
+    let prepaymentSettings: {
+      mbwayPhone: string;
+      whatsappPhone: string;
+    } | null = null;
     if (isPrepayment) {
       const { data: effectivePlan, error: planError } = await admin.rpc(
         'get_effective_billing_plan_for_barbershop',
@@ -239,20 +242,34 @@ async function POST__unobserved(request: Request) {
       };
       if (
         planError ||
-        !['pro', 'enterprise'].includes(String(effectivePlan ?? '').toLowerCase())
+        !['pro', 'enterprise'].includes(
+          String(effectivePlan ?? '').toLowerCase(),
+        )
       )
         return NextResponse.json(
-          { success: false, error: 'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.' },
+          {
+            success: false,
+            error:
+              'O pré-pagamento MB WAY está disponível apenas nos planos Pro e Enterprise.',
+          },
           { status: 403 },
         );
       if (shopRelation?.mbway_enabled !== true || !validPhone(mbwayPhone))
         return NextResponse.json(
-          { success: false, error: 'O pré-pagamento MB WAY não está configurado nesta barbearia.' },
+          {
+            success: false,
+            error:
+              'O pré-pagamento MB WAY não está configurado nesta barbearia.',
+          },
           { status: 409 },
         );
       if (!validPhone(whatsappPhone))
         return NextResponse.json(
-          { success: false, error: 'A barbearia ainda não configurou o número de telefone/WhatsApp.' },
+          {
+            success: false,
+            error:
+              'A barbearia ainda não configurou o número de telefone/WhatsApp.',
+          },
           { status: 409 },
         );
       prepaymentSettings = { mbwayPhone, whatsappPhone };
@@ -267,7 +284,10 @@ async function POST__unobserved(request: Request) {
         phone,
       });
       existingCustomerId = existingCustomer?.id ?? null;
-      if (existingCustomer?.birthDate && isValidBirthDate(existingCustomer.birthDate)) {
+      if (
+        existingCustomer?.birthDate &&
+        isValidBirthDate(existingCustomer.birthDate)
+      ) {
         birthDate = existingCustomer.birthDate;
       } else if (birthDateInput && isValidBirthDate(birthDateInput)) {
         birthDate = birthDateInput;
@@ -324,7 +344,13 @@ async function POST__unobserved(request: Request) {
         Number(shopRelation?.minimum_booking_notice_minutes ?? 0),
       ),
     );
-    if (isBeforeMinimumBookingNotice(bookingDate, bookingTime, minimumNoticeMinutes))
+    if (
+      isBeforeMinimumBookingNotice(
+        bookingDate,
+        bookingTime,
+        minimumNoticeMinutes,
+      )
+    )
       return NextResponse.json(
         {
           success: false,
@@ -370,7 +396,10 @@ async function POST__unobserved(request: Request) {
         Number(selectedService.price) <= 0)
     )
       return NextResponse.json(
-        { success: false, error: 'Este serviço não tem um valor válido para pré-pagamento.' },
+        {
+          success: false,
+          error: 'Este serviço não tem um valor válido para pré-pagamento.',
+        },
         { status: 409 },
       );
     const durationMinutes = Math.min(
@@ -514,7 +543,8 @@ async function POST__unobserved(request: Request) {
         return NextResponse.json(
           {
             success: false,
-            error: 'Este serviço já não tem um valor válido para pré-pagamento.',
+            error:
+              'Este serviço já não tem um valor válido para pré-pagamento.',
           },
           { status: 409 },
         );
@@ -549,7 +579,8 @@ async function POST__unobserved(request: Request) {
         .update({
           status: 'cancelled',
           cancelled_at: new Date().toISOString(),
-          cancellation_reason: 'Metadados de pré-pagamento MB WAY não foram preparados.',
+          cancellation_reason:
+            'Metadados de pré-pagamento MB WAY não foram preparados.',
           cancellation_actor: 'system',
           cancellation_actor_name: 'Sistema',
         })
@@ -558,7 +589,10 @@ async function POST__unobserved(request: Request) {
         .eq('status', 'pending');
       console.error('[BOOKING_PREPAYMENT_METADATA_MISSING]');
       return NextResponse.json(
-        { success: false, error: 'Não foi possível preparar o pré-pagamento. Tenta novamente.' },
+        {
+          success: false,
+          error: 'Não foi possível preparar o pré-pagamento. Tenta novamente.',
+        },
         { status: 503 },
       );
     }
@@ -577,7 +611,11 @@ async function POST__unobserved(request: Request) {
         durationMinutes,
         status: appointment.status === 'scheduled' ? 'confirmed' : 'pending',
         prepaymentReview: isPrepayment
-          ? { amount: paymentAmount, expiresAt: paymentExpiresAt!, method: 'mbway' as const }
+          ? {
+              amount: paymentAmount,
+              expiresAt: paymentExpiresAt!,
+              method: 'mbway' as const,
+            }
           : undefined,
       });
     } catch (error) {

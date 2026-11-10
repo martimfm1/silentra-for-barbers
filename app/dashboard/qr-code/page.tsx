@@ -39,10 +39,15 @@ export default function QrCodePage() {
   const [svg, setSvg] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const normalizedSlug = useMemo(() => normalizePublicProfileSlug(slug), [slug]);
-  const publicUrl = resolvedPublicUrl || (normalizedSlug
-    ? `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (typeof window === 'undefined' ? '' : window.location.origin)).replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
-    : '');
+  const normalizedSlug = useMemo(
+    () => normalizePublicProfileSlug(slug),
+    [slug],
+  );
+  const publicUrl =
+    resolvedPublicUrl ||
+    (normalizedSlug
+      ? `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (typeof window === 'undefined' ? '' : window.location.origin)).replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
+      : '');
   useEffect(() => {
     fetch('/api/barbershops/qr-code', { cache: 'no-store' })
       .then(async (response) => {
@@ -104,7 +109,8 @@ export default function QrCodePage() {
         throw new Error(data.error || t('qrCodePage.saveError'));
       setSlug(data.slug);
       setSavedSlug(data.slug);
-      if (typeof data.publicUrl === 'string') setResolvedPublicUrl(data.publicUrl);
+      if (typeof data.publicUrl === 'string')
+        setResolvedPublicUrl(data.publicUrl);
       setText(data.text);
       setSavedText(data.text);
       toast.success(t('qrCodePage.saveSuccess'));
@@ -250,7 +256,9 @@ export default function QrCodePage() {
                     </div>
                   </div>
                   <div className="silentra-form-field">
-                    <label htmlFor="qr-slug">{t('qrCodePage.publicSlug')}</label>
+                    <label htmlFor="qr-slug">
+                      {t('qrCodePage.publicSlug')}
+                    </label>
                     <div className="flex min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] focus-within:border-emerald-400/30">
                       <span className="hidden shrink-0 items-center border-r border-white/10 px-3 text-xs text-zinc-500 sm:inline-flex">
                         barbers.silentra.me/barbershops/
@@ -266,7 +274,10 @@ export default function QrCodePage() {
                         aria-describedby="qr-slug-hint"
                       />
                     </div>
-                    <p id="qr-slug-hint" className="text-xs text-muted-foreground">
+                    <p
+                      id="qr-slug-hint"
+                      className="text-xs text-muted-foreground"
+                    >
                       {canCustomize
                         ? t('qrCodePage.slugHint')
                         : t('qrCodePage.proFeatureHint')}
@@ -285,7 +296,9 @@ export default function QrCodePage() {
                     />
                     <div className="flex justify-between gap-3 text-xs text-muted-foreground">
                       <span>{t('qrCodePage.previewPrintHint')}</span>
-                      <span className="shrink-0 tabular-nums">{text.length}/160</span>
+                      <span className="shrink-0 tabular-nums">
+                        {text.length}/160
+                      </span>
                     </div>
                   </div>
                   {!canCustomize ? (

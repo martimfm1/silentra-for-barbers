@@ -154,7 +154,9 @@ const checks = [
     renewalMigration.includes("v_request.request_type = 'RENEWAL'") &&
       renewalMigration.includes("v_request.request_type = 'CHANGE'") &&
       renewalMigration.includes("v_subscription.payment_method <> 'MANUAL'") &&
-      renewalMigration.includes("v_subscription.plan = 'free'::public.subscription_plan"),
+      renewalMigration.includes(
+        "v_subscription.plan = 'free'::public.subscription_plan",
+      ),
   ],
   [
     'Manual payment documents are idempotent',

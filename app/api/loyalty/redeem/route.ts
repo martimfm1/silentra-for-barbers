@@ -104,7 +104,9 @@ async function POST__unobserved(request: Request) {
         requestId,
       });
 
-    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
+    const { error: expiryError } = await admin.rpc(
+      'expire_loyalty_redemptions',
+    );
     if (expiryError) {
       console.error('[LOYALTY_REDEEM_EXPIRY_ERROR]', {
         requestId,
@@ -199,7 +201,10 @@ async function POST__unobserved(request: Request) {
           'Já tens uma recompensa reservada. Utiliza-a antes de criar outro resgate.',
           409,
         ],
-        LOYALTY_REDEMPTION_INVALID: ['Não foi possível validar os dados do resgate.', 400],
+        LOYALTY_REDEMPTION_INVALID: [
+          'Não foi possível validar os dados do resgate.',
+          400,
+        ],
       };
       const mapped = map[error.message];
       return mapped

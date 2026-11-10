@@ -35,7 +35,10 @@ async function POST__unobserved(request: Request) {
     );
     if (!allowed) {
       return NextResponse.json(
-        { error: 'Atingiste o limite de conversões. Tenta novamente mais tarde.' },
+        {
+          error:
+            'Atingiste o limite de conversões. Tenta novamente mais tarde.',
+        },
         { status: 429 },
       );
     }
@@ -79,7 +82,10 @@ async function POST__unobserved(request: Request) {
       metadata.width * metadata.height > MAX_IMAGE_PIXELS
     ) {
       return NextResponse.json(
-        { error: 'A imagem enviada não é válida ou tem dimensões demasiado grandes.' },
+        {
+          error:
+            'A imagem enviada não é válida ou tem dimensões demasiado grandes.',
+        },
         { status: 422 },
       );
     }
@@ -119,7 +125,10 @@ async function POST__unobserved(request: Request) {
       reason: error instanceof Error ? error.name : 'UNKNOWN',
     });
     return NextResponse.json(
-      { error: 'Não foi possível converter a imagem. Tenta usar uma imagem JPG ou PNG.' },
+      {
+        error:
+          'Não foi possível converter a imagem. Tenta usar uma imagem JPG ou PNG.',
+      },
       { status: 500 },
     );
   }

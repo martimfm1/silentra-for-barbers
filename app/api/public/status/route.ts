@@ -89,10 +89,7 @@ function getOverallStatus(
 
   if (statuses.includes('major_outage')) return 'major_outage';
   if (statuses.includes('maintenance')) return 'maintenance';
-  if (
-    statuses.includes('degraded') ||
-    statuses.includes('partial_outage')
-  ) {
+  if (statuses.includes('degraded') || statuses.includes('partial_outage')) {
     return 'degraded';
   }
   if (statuses.includes('unknown')) return 'unknown';
@@ -139,7 +136,4 @@ async function GET__unobserved(request: Request) {
   });
 }
 
-export const GET = withApiObservability(
-  '/api/public/status',
-  GET__unobserved,
-);
+export const GET = withApiObservability('/api/public/status', GET__unobserved);

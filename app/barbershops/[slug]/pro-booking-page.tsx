@@ -47,7 +47,10 @@ export type ProBookingPageProps = {
   agendaHeroLayout?: boolean;
 };
 
-function getCoverUrl(value: string | null, barbershopId: string): string | null {
+function getCoverUrl(
+  value: string | null,
+  barbershopId: string,
+): string | null {
   if (!value) return null;
   if (/^https?:\/\//i.test(value)) return value;
   const clean = value.replace(/^\/+/, '');
@@ -106,10 +109,10 @@ export default function ProBookingPage({
     nextSlot: '',
     tags: profile.tags ?? [],
   };
-  const currency = new Intl.NumberFormat(
-    locale === 'en' ? 'en-GB' : 'pt-PT',
-    { style: 'currency', currency: 'EUR' },
-  );
+  const currency = new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+    style: 'currency',
+    currency: 'EUR',
+  });
 
   const openBooking = (serviceId: string) => {
     setActiveBookingOffer(null);
@@ -170,7 +173,9 @@ export default function ProBookingPage({
                     id="agenda-service-heading"
                     className="text-2xl font-semibold tracking-tight text-white sm:text-3xl"
                   >
-                    {locale === 'en' ? 'Choose your service' : 'Escolhe o teu serviço'}
+                    {locale === 'en'
+                      ? 'Choose your service'
+                      : 'Escolhe o teu serviço'}
                   </h2>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-white/55">
                     {locale === 'en'
@@ -223,13 +228,17 @@ export default function ProBookingPage({
                       href="/booking-terms"
                       className="underline decoration-white/25 underline-offset-4 transition hover:text-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      {locale === 'en' ? 'Booking policy' : 'Política de reservas'}
+                      {locale === 'en'
+                        ? 'Booking policy'
+                        : 'Política de reservas'}
                     </Link>
                     <Link
                       href="/privacy"
                       className="underline decoration-white/25 underline-offset-4 transition hover:text-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      {locale === 'en' ? 'Privacy policy' : 'Política de privacidade'}
+                      {locale === 'en'
+                        ? 'Privacy policy'
+                        : 'Política de privacidade'}
                     </Link>
                   </div>
                   <span className="font-semibold tracking-[0.24em] text-white/60">
@@ -244,7 +253,10 @@ export default function ProBookingPage({
           <section
             className="relative flex min-h-[250px] items-center justify-center bg-[#d8d8d2] bg-cover bg-center px-5 py-12 text-center sm:min-h-[330px] sm:pb-16 lg:hidden"
             style={{
-              backgroundImage: 'linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.16)),url("' + cover + '")',
+              backgroundImage:
+                'linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.16)),url("' +
+                cover +
+                '")',
             }}
           >
             <div className="mx-auto w-full max-w-3xl">
@@ -320,13 +332,17 @@ export default function ProBookingPage({
                     href="/booking-terms"
                     className="underline underline-offset-4 hover:text-[#333]"
                   >
-                    {locale === 'en' ? 'Booking policy' : 'Política de reservas'}
+                    {locale === 'en'
+                      ? 'Booking policy'
+                      : 'Política de reservas'}
                   </Link>
                   <Link
                     href="/privacy"
                     className="underline underline-offset-4 hover:text-[#333]"
                   >
-                    {locale === 'en' ? 'Privacy policy' : 'Política de privacidade'}
+                    {locale === 'en'
+                      ? 'Privacy policy'
+                      : 'Política de privacidade'}
                   </Link>
                 </div>
                 <p className="mt-3">
@@ -344,7 +360,10 @@ export default function ProBookingPage({
           <section
             className="relative flex min-h-[250px] items-center justify-center bg-[#d8d8d2] bg-cover bg-center px-5 py-12 text-center sm:min-h-[330px] sm:pb-16"
             style={{
-              backgroundImage: 'linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.16)),url("' + cover + '")',
+              backgroundImage:
+                'linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.16)),url("' +
+                cover +
+                '")',
             }}
           >
             <div className="mx-auto w-full max-w-3xl">
@@ -420,13 +439,17 @@ export default function ProBookingPage({
                     href="/booking-terms"
                     className="underline underline-offset-4 hover:text-[#333]"
                   >
-                    {locale === 'en' ? 'Booking policy' : 'Política de reservas'}
+                    {locale === 'en'
+                      ? 'Booking policy'
+                      : 'Política de reservas'}
                   </Link>
                   <Link
                     href="/privacy"
                     className="underline underline-offset-4 hover:text-[#333]"
                   >
-                    {locale === 'en' ? 'Privacy policy' : 'Política de privacidade'}
+                    {locale === 'en'
+                      ? 'Privacy policy'
+                      : 'Política de privacidade'}
                   </Link>
                 </div>
                 <p className="mt-3">
@@ -440,7 +463,6 @@ export default function ProBookingPage({
           </section>
         </>
       )}
-
 
       <BookingDrawer
         shop={bookingShop}

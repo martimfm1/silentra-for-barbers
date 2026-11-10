@@ -26,7 +26,8 @@ export async function getOwnedBarbershopForDeletion(userId: string) {
   return {
     barbershopId: shop.id as string,
     barbershopName: shop.name as string,
-    language: shop.default_language === 'en' ? 'en' as const : 'pt' as const,
+    language:
+      shop.default_language === 'en' ? ('en' as const) : ('pt' as const),
   };
 }
 

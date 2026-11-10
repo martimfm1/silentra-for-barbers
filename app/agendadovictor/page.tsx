@@ -23,7 +23,14 @@ export const metadata: Metadata = {
     url: 'https://barbers.silentra.me/agendadovictor',
     siteName: SEO_TITLE,
     locale: 'pt_PT',
-    images: [{ url: '/images/agenda-do-victor-og.png', width: 1200, height: 630, alt: 'Agenda do Victor — marcações online' }],
+    images: [
+      {
+        url: '/images/agenda-do-victor-og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Agenda do Victor — marcações online',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',

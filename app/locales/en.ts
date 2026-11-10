@@ -461,11 +461,13 @@ export const en = {
     identity: 'Identity',
     identityDescription: 'How your barbershop will be presented.',
     workModeTitle: 'How do you work?',
-    workModeDescription: 'We will tailor the next steps to the way you run your barbershop.',
+    workModeDescription:
+      'We will tailor the next steps to the way you run your barbershop.',
     soloMode: 'I work alone',
     soloModeDescription: 'I manage services and bookings on my own.',
     teamMode: 'I have a team',
-    teamModeDescription: 'I want to organise several professionals and their schedules.',
+    teamModeDescription:
+      'I want to organise several professionals and their schedules.',
     soloNextStep: 'Next, set up your services and working hours.',
     teamNextStep: 'Next, add your professionals and organise your team.',
 
@@ -1103,10 +1105,12 @@ export const en = {
     business: 'Information',
     businessDescription: 'Name, contact details and public preferences',
     publicBasicsTitle: 'Public page information',
-    publicBasicsDescription: 'Edit the details shown in discovery and on your barbershop page.',
+    publicBasicsDescription:
+      'Edit the details shown in discovery and on your barbershop page.',
     profileCity: 'City / location',
     profilePrice: 'Reference price',
-    profilePriceHint: 'An indicative value shown to customers; it does not replace service prices.',
+    profilePriceHint:
+      'An indicative value shown to customers; it does not replace service prices.',
     profileTags: 'Services and features',
     profileTagsHint: 'Separate each term with a comma. You can add up to 12.',
     location: 'Location',
@@ -1129,11 +1133,16 @@ export const en = {
     setupProgress: 'Setup progress',
     notConfigured: 'Not set yet',
     closeDialog: 'Close',
-    saveAllHint: 'You can save each step individually. Changes take effect as soon as you confirm.',
-    businessDialogDescription: 'Set the name, contact details and preferences your customers will see.',
-    locationDialogDescription: 'Add the address and highlight the amenities available at your shop.',
-    hoursDialogDescription: 'Set opening hours, breaks and the days your barbershop is closed.',
-    rulesDialogDescription: 'Control booking notice periods and how close to an appointment customers can cancel.',
+    saveAllHint:
+      'You can save each step individually. Changes take effect as soon as you confirm.',
+    businessDialogDescription:
+      'Set the name, contact details and preferences your customers will see.',
+    locationDialogDescription:
+      'Add the address and highlight the amenities available at your shop.',
+    hoursDialogDescription:
+      'Set opening hours, breaks and the days your barbershop is closed.',
+    rulesDialogDescription:
+      'Control booking notice periods and how close to an appointment customers can cancel.',
     publicInfo: 'Public information about your barbershop.',
     shopName: 'Barbershop name',
     phone: 'Phone / WhatsApp',
@@ -1142,7 +1151,8 @@ export const en = {
     mbwayEnabled: 'Enable MB WAY prepayment',
     mbwayPhone: 'MB WAY number to receive payments',
     mbwayPhonePlaceholder: 'E.g. 912 345 678',
-    mbwayWhatsappNotice: 'The proof button uses the Phone / WhatsApp number configured above in the barbershop details.',
+    mbwayWhatsappNotice:
+      'The proof button uses the Phone / WhatsApp number configured above in the barbershop details.',
     mbwayProRequired: 'Available exclusively on Pro and Enterprise plans.',
     upgradePlan: 'View plans',
     directoryVisibility: 'Directory visibility',
@@ -1171,19 +1181,24 @@ export const en = {
     noticeHours: 'Hours',
     allowOnline: 'Allow online bookings',
     allowOnlineDescription: 'Accept new bookings through the public page.',
-    automationPlanRequired: 'Automatic confirmations and completions are available on Pro and Enterprise plans.',
+    automationPlanRequired:
+      'Automatic confirmations and completions are available on Pro and Enterprise plans.',
     autoConfirm: 'Automatically confirm',
     autoConfirmManual: 'Automatically confirm manually created bookings',
-    autoConfirmManualDescription: 'Appointments created directly in the calendar are confirmed as soon as they are saved. You can turn this off at any time.',
+    autoConfirmManualDescription:
+      'Appointments created directly in the calendar are confirmed as soon as they are saved. You can turn this off at any time.',
     autoConfirmDescription:
       'New bookings are confirmed without manual intervention.',
     autoComplete: 'Automatically complete',
     autoCompleteDescription: 'Complete the booking after its scheduled time.',
     requireBirthDate: 'Require date of birth when booking',
-    requireBirthDateDescription: 'When disabled, customers can book without providing their date of birth. Birthday details will not be available for new customers who do not provide them.',
+    requireBirthDateDescription:
+      'When disabled, customers can book without providing their date of birth. Birthday details will not be available for new customers who do not provide them.',
     cancellationWindow: 'Cancellation window',
-    cancellationWindowHelp: 'Customers can cancel online up to {hours} h before their appointment. During the final {hours} h, they must contact the barbershop.',
-    cancellationWindowNoLimit: 'With 0 hours, customers can cancel online until the appointment start time.',
+    cancellationWindowHelp:
+      'Customers can cancel online up to {hours} h before their appointment. During the final {hours} h, they must contact the barbershop.',
+    cancellationWindowNoLimit:
+      'With 0 hours, customers can cancel online until the appointment start time.',
     cancellationWindowSummary: 'Online cancellation until {hours} h before',
     cancellationWindowNoLimitShort: 'Until the appointment starts',
     appearanceDescriptionLong: 'Images used on the public page.',

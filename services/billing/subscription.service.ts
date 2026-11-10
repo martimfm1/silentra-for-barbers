@@ -25,7 +25,6 @@ type SubscriptionRow = Pick<
   barbershop_id?: string | null;
 };
 
-
 type RequestAccessContext = {
   barbershopId: string | null;
   role: string;
@@ -273,14 +272,12 @@ export class SubscriptionService {
         p_permission_keys: [...permissionKeys],
       },
     );
-    const row = (Array.isArray(data) ? data[0] : data) as
-      | {
-          barbershop_id?: string | null;
-          role?: string | null;
-          plan?: string | null;
-          permission_granted?: boolean | null;
-        }
-      | null;
+    const row = (Array.isArray(data) ? data[0] : data) as {
+      barbershop_id?: string | null;
+      role?: string | null;
+      plan?: string | null;
+      permission_granted?: boolean | null;
+    } | null;
     if (error || !row)
       throw new BillingError(
         'Could not load request access context.',

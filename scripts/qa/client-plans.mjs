@@ -25,10 +25,7 @@ const [
 
 // Customer lifetime spend is the sum of captured service and product prices,
 // calculated in a single tenant-scoped database aggregate over completed bookings.
-assert.match(
-  detailApi,
-  /get_client_completed_total_spent/,
-);
+assert.match(detailApi, /get_client_completed_total_spent/);
 assert.match(detailApi, /p_barbershop_id:\s*t\.barbershopId/);
 assert.match(detailApi, /p_client_id:\s*clientId/);
 assert.match(detailApi, /completedAppointmentsTotalResult\.error/);
@@ -42,7 +39,10 @@ assert.match(
 );
 assert.doesNotMatch(detailApi, /getCompletedAppointmentsTotal|\.range\(/);
 assert.equal(
-  (detailApi.match(/id, date_hour, status, service_price, value_products/g) ?? []).length,
+  (
+    detailApi.match(/id, date_hour, status, service_price, value_products/g) ??
+    []
+  ).length,
   2,
 );
 assert.match(
@@ -51,7 +51,10 @@ assert.match(
 );
 assert.match(apiHotPathMigration, /a\.status = 'completed'/i);
 assert.match(apiHotPathMigration, /a\.barbershop_id = p_barbershop_id/i);
-assert.match(migration, /add column if not exists service_price numeric\(10,2\)/i);
+assert.match(
+  migration,
+  /add column if not exists service_price numeric\(10,2\)/i,
+);
 assert.match(migration, /appointments_sync_service_price/);
 assert.match(migration, /set service_price = service\.price/i);
 assert.match(profile, /totalSpent: Number\(json\.totalSpent\) \|\| 0/);
@@ -80,10 +83,19 @@ assert.match(plansApi, /remaining_appointments/);
 
 // The database enforces one active plan per customer and protects both tables.
 assert.match(migration, /create table if not exists public\.client_plans/i);
-assert.match(migration, /create table if not exists public\.client_plan_payments/i);
+assert.match(
+  migration,
+  /create table if not exists public\.client_plan_payments/i,
+);
 assert.match(migration, /client_plans_one_active_per_client_idx/);
-assert.match(migration, /alter table public\.client_plans enable row level security/i);
-assert.match(migration, /alter table public\.client_plan_payments enable row level security/i);
+assert.match(
+  migration,
+  /alter table public\.client_plans enable row level security/i,
+);
+assert.match(
+  migration,
+  /alter table public\.client_plan_payments enable row level security/i,
+);
 assert.match(migration, /client_plans_tenant_select/);
 assert.match(migration, /client_plan_payments_tenant_select/);
 
@@ -97,4 +109,6 @@ assert.match(portuguese, /planPaymentHistory:/);
 assert.match(english, /upcomingAppointments:/);
 assert.match(english, /planPaymentHistory:/);
 
-console.log('[CLIENT_PLANS_QA] spend totals, upcoming bookings, client plans, usage and payment tracking passed');
+console.log(
+  '[CLIENT_PLANS_QA] spend totals, upcoming bookings, client plans, usage and payment tracking passed',
+);

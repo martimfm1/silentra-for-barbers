@@ -195,7 +195,11 @@ export default function CheckoutSuccessPage() {
   if (loading) {
     return (
       <SilentraLoading
-        message={english ? 'Confirming your subscription…' : 'A confirmar a tua subscrição…'}
+        message={
+          english
+            ? 'Confirming your subscription…'
+            : 'A confirmar a tua subscrição…'
+        }
       />
     );
   }

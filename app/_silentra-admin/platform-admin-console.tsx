@@ -169,15 +169,21 @@ const navigationGroups: { label: string; items: Tab[] }[] = [
 ];
 
 const tabDescriptions: Record<Tab, string> = {
-  overview: 'Uma visão consolidada do crescimento, receita, clientes e estado do SaaS.',
-  shops: 'Pesquisa e acompanha todas as barbearias e respetivos dados operacionais.',
+  overview:
+    'Uma visão consolidada do crescimento, receita, clientes e estado do SaaS.',
+  shops:
+    'Pesquisa e acompanha todas as barbearias e respetivos dados operacionais.',
   plans: 'Gere os planos efetivos, acessos especiais e respetivas condições.',
-  subscriptions: 'Acompanha pedidos, renovações, estados e histórico de subscrições.',
+  subscriptions:
+    'Acompanha pedidos, renovações, estados e histórico de subscrições.',
   payments: 'Configura o método de cobrança e acompanha a operação financeira.',
-  payment_requests: 'Trata pedidos de pagamento, confirma transferências e resolve pendências.',
-  support: 'Responde aos pedidos de ajuda e acompanha as conversas com clientes.',
+  payment_requests:
+    'Trata pedidos de pagamento, confirma transferências e resolve pendências.',
+  support:
+    'Responde aos pedidos de ajuda e acompanha as conversas com clientes.',
   api_health: 'Monitoriza disponibilidade, latência, erros e rotas da API.',
-  diagnostics: 'Executa verificações técnicas e consulta informação de segurança.',
+  diagnostics:
+    'Executa verificações técnicas e consulta informação de segurança.',
 };
 
 type PaymentMode = 'MANUAL' | 'STRIPE';
@@ -687,20 +693,33 @@ export default function PlatformAdminConsole() {
                   <ShieldCheck className="size-4 text-emerald-300" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold tracking-tight text-white">Silentra</p>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-600">Centro de controlo</p>
+                  <p className="text-sm font-semibold tracking-tight text-white">
+                    Silentra
+                  </p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+                    Centro de controlo
+                  </p>
                 </div>
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Administração</span>
+                <span className="ml-auto rounded-full border border-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Administração
+                </span>
               </div>
             </div>
 
-            <nav aria-label="Navegação de administração" className="mt-2 grid min-w-0 grid-cols-2 gap-3 pb-1 lg:flex lg:flex-col lg:overflow-visible">
+            <nav
+              aria-label="Navegação de administração"
+              className="mt-2 grid min-w-0 grid-cols-2 gap-3 pb-1 lg:flex lg:flex-col lg:overflow-visible"
+            >
               {navigationGroups.map((group) => (
                 <div key={group.label} className="min-w-0">
-                  <p className="mb-1 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600">{group.label}</p>
+                  <p className="mb-1 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+                    {group.label}
+                  </p>
                   <div className="flex min-w-0 flex-col gap-1">
                     {group.items.map((id) => {
-                      const item = tabs.find((candidate) => candidate.id === id);
+                      const item = tabs.find(
+                        (candidate) => candidate.id === id,
+                      );
                       if (!item) return null;
                       const Icon = item.icon;
                       const selected = tab === id;
@@ -710,15 +729,22 @@ export default function PlatformAdminConsole() {
                           type="button"
                           aria-current={selected ? 'page' : undefined}
                           onClick={() => {
-                            if (id === 'payment_requests') setManualRequestFilter('ALL');
+                            if (id === 'payment_requests')
+                              setManualRequestFilter('ALL');
                             setTab(id);
                             if (id === 'api_health') void loadObservability();
                           }}
                           className={`flex min-h-10 min-w-0 w-full items-center gap-2 rounded-xl border px-2.5 text-left text-[11px] font-medium transition sm:px-3 sm:text-xs ${selected ? 'border-emerald-400/20 bg-emerald-400/[0.09] text-emerald-100 shadow-sm' : 'border-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.035] hover:text-zinc-200'}`}
                         >
-                          <Icon className={`size-4 shrink-0 ${selected ? 'text-emerald-300' : 'text-zinc-600'}`} />
-                          <span className="min-w-0 whitespace-normal break-words leading-4">{item.label}</span>
-                          {selected ? <span className="ml-auto hidden size-1.5 rounded-full bg-emerald-300 lg:block" /> : null}
+                          <Icon
+                            className={`size-4 shrink-0 ${selected ? 'text-emerald-300' : 'text-zinc-600'}`}
+                          />
+                          <span className="min-w-0 whitespace-normal break-words leading-4">
+                            {item.label}
+                          </span>
+                          {selected ? (
+                            <span className="ml-auto hidden size-1.5 rounded-full bg-emerald-300 lg:block" />
+                          ) : null}
                         </button>
                       );
                     })}
@@ -728,17 +754,28 @@ export default function PlatformAdminConsole() {
             </nav>
 
             <div className="mt-4 border-t border-white/[0.07] pt-3">
-              <p className="mb-1 hidden px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600 lg:block">Ferramentas</p>
+              <p className="mb-1 hidden px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600 lg:block">
+                Ferramentas
+              </p>
               <div className="grid min-w-0 grid-cols-1 gap-1 sm:grid-cols-2 lg:flex lg:flex-col">
-                <Link href="/silentra-admin/reports" className="flex min-h-10 min-w-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                <Link
+                  href="/silentra-admin/reports"
+                  className="flex min-h-10 min-w-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100"
+                >
                   <BarChart3 className="size-4 text-zinc-600" /> Relatórios
                   <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
                 </Link>
-                <Link href="/silentra-admin/websites" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                <Link
+                  href="/silentra-admin/websites"
+                  className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100"
+                >
                   <Globe2 className="size-4 text-zinc-600" /> Sites Enterprise
                   <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
                 </Link>
-                <Link href="/silentra-admin/loyalty" className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100">
+                <Link
+                  href="/silentra-admin/loyalty"
+                  className="flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-xs font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-100"
+                >
                   <Gift className="size-4 text-zinc-600" /> Programa de pontos
                   <ArrowUpRight className="ml-auto hidden size-3 text-zinc-700 lg:block" />
                 </Link>
@@ -747,9 +784,13 @@ export default function PlatformAdminConsole() {
 
             <div className="mt-4 hidden rounded-2xl border border-white/[0.06] bg-black/20 p-3 lg:block">
               <div className="flex items-center gap-2 text-[10px] font-medium text-zinc-400">
-                <ShieldCheck className="size-3.5 text-emerald-300" /> Acesso restrito
+                <ShieldCheck className="size-3.5 text-emerald-300" /> Acesso
+                restrito
               </div>
-              <p className="mt-1.5 text-[10px] leading-4 text-zinc-600">Ferramentas internas da plataforma. As ações são validadas no servidor.</p>
+              <p className="mt-1.5 text-[10px] leading-4 text-zinc-600">
+                Ferramentas internas da plataforma. As ações são validadas no
+                servidor.
+              </p>
             </div>
           </aside>
 
@@ -758,329 +799,482 @@ export default function PlatformAdminConsole() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                   <span>Administração da plataforma</span>
-                  <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-1 text-[9px] text-emerald-200">Privado</span>
+                  <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-1 text-[9px] text-emerald-200">
+                    Privado
+                  </span>
                 </div>
-                <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">{activeTab.label}</h1>
-                <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">{tabDescriptions[tab]}</p>
+                <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                  {activeTab.label}
+                </h1>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                  {tabDescriptions[tab]}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
                   void load(query);
                   if (tab === 'api_health') void loadObservability();
-                  if (tab === 'payment_requests' || tab === 'subscriptions') setRequestsRefreshKey((value) => value + 1);
+                  if (tab === 'payment_requests' || tab === 'subscriptions')
+                    setRequestsRefreshKey((value) => value + 1);
                 }}
                 className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-4 text-xs font-semibold text-zinc-200 transition hover:bg-white/[0.08]"
               >
-                <RefreshCw className={`size-4 ${loading || observabilityLoading ? 'animate-spin' : ''}`} /> Atualizar dados
+                <RefreshCw
+                  className={`size-4 ${loading || observabilityLoading ? 'animate-spin' : ''}`}
+                />{' '}
+                Atualizar dados
               </button>
             </header>
 
             {message ? (
-              <div role="status" className="mb-4 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-sm text-emerald-200">{message}</div>
+              <div
+                role="status"
+                className="mb-4 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-sm text-emerald-200"
+              >
+                {message}
+              </div>
             ) : null}
             {error ? (
-              <div role="alert" className="mb-4 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">{error}</div>
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200"
+              >
+                {error}
+              </div>
             ) : null}
 
-        {tab === 'support' ? <SupportInbox /> : null}
+            {tab === 'support' ? <SupportInbox /> : null}
 
-        {tab === 'overview' && data ? (
-          <section className="min-w-0 space-y-5">
-            <div className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-emerald-400/[0.07] via-white/[0.025] to-transparent p-4 sm:p-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Resumo executivo</p>
-              <h2 className="mt-1 text-base font-semibold tracking-tight text-white sm:text-lg">A tua plataforma, num só lugar</h2>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-                Acompanha a utilização, o desempenho comercial e os pontos que precisam da tua atenção.
-              </p>
-            </div>
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Utilização da plataforma</h2>
-                <span className="text-[10px] text-zinc-600">Totais atuais</span>
-              </div>
-              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-              <StatCard
-                label="Barbearias"
-                value={data.stats.barbershops}
-                meta="barbearias"
-              />
-              <StatCard
-                label="Utilizadores"
-                value={data.stats.users}
-                meta={`${data.stats.owners} responsáveis · ${data.stats.barbers} barbeiros`}
-              />
-              <StatCard
-                label="Clientes"
-                value={data.stats.clients}
-                meta="CRM por barbearia"
-              />
-              <StatCard
-                label="Marcações"
-                value={data.stats.appointments}
-                meta={`${data.stats.upcomingAppointments} futuros`}
-                tone={data.stats.upcomingAppointments > 0 ? 'good' : 'default'}
-              />
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Distribuição de planos</h2>
-                <span className="text-[10px] text-zinc-600">Plano efetivo</span>
-              </div>
-              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-              <StatCard
-                label="Free"
-                value={data.plans.free}
-                meta="plano efetivo"
-              />
-              <StatCard
-                label="Pro"
-                value={data.plans.pro}
-                meta="plano efetivo"
-                tone="good"
-              />
-              <StatCard
-                label="Enterprise"
-                value={data.plans.enterprise}
-                meta="plano efetivo"
-                tone="good"
-              />
-              <StatCard
-                label="Subscrições ativas"
-                value={data.stats.activeSubscriptions}
-                meta={`${data.stats.planAssignments} overrides`}
-              />
-            </div>
-            </div>
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Desempenho financeiro</h2>
-                <span className="text-[10px] text-zinc-600">Últimos 30 dias</span>
-              </div>
-              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-              <StatCard
-                label="Receita manual · 30d"
-                value={formatMoney(data.operations.manualRevenue30d)}
-                meta={`${data.operations.paidManualRequests30d} pagamentos confirmados`}
-                tone="good"
-              />
-              <StatCard
-                label="Conversão manual · 30d"
-                value={`${data.operations.manualConversion30d}%`}
-                meta="pedidos → pagos"
-                tone={
-                  data.operations.manualConversion30d >= 50 ? 'good' : 'warn'
-                }
-              />
-              <button
-                aria-label="Ver pedidos de pagamento"
-                type="button"
-                onClick={() => {
-                  setManualRequestFilter('ALL');
-                  setTab('payment_requests');
-                }}
-                className="text-left"
-              >
-                <StatCard
-                  label="Pedidos por tratar"
-                  value={data.operations.openPaymentRequests}
-                  meta={`${data.operations.paymentSentRequests} com pagamento enviado`}
-                  tone={
-                    data.operations.openPaymentRequests > 0 ? 'warn' : 'good'
-                  }
-                />
-              </button>
-              <StatCard
-                label="Subscrições pagas"
-                value={data.stats.activePaidSubscriptions}
-                meta={`${data.operations.manualExpiring7d} manuais a expirar em 7d`}
-                tone={data.operations.manualExpiring7d > 0 ? 'warn' : 'good'}
-              />
-            </div>
-
-            </div>
-
-            <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
-              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="size-4 text-emerald-300" />
-                  <h2 className="font-semibold">Operação e crescimento</h2>
+            {tab === 'overview' && data ? (
+              <section className="min-w-0 space-y-5">
+                <div className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-emerald-400/[0.07] via-white/[0.025] to-transparent p-4 sm:p-5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">
+                    Resumo executivo
+                  </p>
+                  <h2 className="mt-1 text-base font-semibold tracking-tight text-white sm:text-lg">
+                    A tua plataforma, num só lugar
+                  </h2>
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                    Acompanha a utilização, o desempenho comercial e os pontos
+                    que precisam da tua atenção.
+                  </p>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">
-                      Novas barbearias
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">
-                      {data.operations.newShops7d}
-                    </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                      Utilização da plataforma
+                    </h2>
+                    <span className="text-[10px] text-zinc-600">
+                      Totais atuais
+                    </span>
                   </div>
-                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">
-                      Novos utilizadores
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">
-                      {data.operations.newUsers7d}
-                    </p>
-                    <p className="text-[11px] text-zinc-600">últimos 7 dias</p>
-                  </div>
-                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">
-                      Marcações próximas
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">
-                      {data.operations.appointmentsNext7d}
-                    </p>
-                    <p className="text-[11px] text-zinc-600">próximos 7 dias</p>
-                  </div>
-                  <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                    <p className="text-[10px] uppercase text-zinc-600">
-                      Cancelamentos
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">
-                      {data.operations.canceledSubscriptions30d}
-                    </p>
-                    <p className="text-[11px] text-zinc-600">últimos 30 dias</p>
+                  <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+                    <StatCard
+                      label="Barbearias"
+                      value={data.stats.barbershops}
+                      meta="barbearias"
+                    />
+                    <StatCard
+                      label="Utilizadores"
+                      value={data.stats.users}
+                      meta={`${data.stats.owners} responsáveis · ${data.stats.barbers} barbeiros`}
+                    />
+                    <StatCard
+                      label="Clientes"
+                      value={data.stats.clients}
+                      meta="CRM por barbearia"
+                    />
+                    <StatCard
+                      label="Marcações"
+                      value={data.stats.appointments}
+                      meta={`${data.stats.upcomingAppointments} futuros`}
+                      tone={
+                        data.stats.upcomingAppointments > 0 ? 'good' : 'default'
+                      }
+                    />
                   </div>
                 </div>
-              </section>
-
-              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="size-4 text-amber-300" />
-                  <h2 className="font-semibold">Atenção</h2>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setManualRequestFilter('PAYMENT_SENT');
-                      setTab('payment_requests');
-                    }}
-                    className="flex w-full items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3 text-left hover:border-white/15"
-                  >
-                    <span className="flex items-center gap-2 text-xs text-zinc-300">
-                      <WalletCards className="size-4 text-amber-300" />
-                      Pagamentos aguardam confirmação
-                    </span>
-                    <span className="font-semibold text-amber-200">
-                      {data.operations.paymentSentRequests}
-                    </span>
-                  </button>
-                  <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
-                    <span className="flex items-center gap-2 text-xs text-zinc-300">
-                      <TimerReset className="size-4 text-amber-300" />
-                      Manuais a expirar em 7d
-                    </span>
-                    <span className="font-semibold">
-                      {data.operations.manualExpiring7d}
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                      Distribuição de planos
+                    </h2>
+                    <span className="text-[10px] text-zinc-600">
+                      Plano efetivo
                     </span>
                   </div>
-                  <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
-                    <span className="flex items-center gap-2 text-xs text-zinc-300">
-                      <MailWarning className="size-4 text-red-300" />
-                      Pedidos com erro de email
-                    </span>
-                    <span className="font-semibold text-red-200">
-                      {data.operations.emailFailures}
-                    </span>
+                  <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+                    <StatCard
+                      label="Free"
+                      value={data.plans.free}
+                      meta="plano efetivo"
+                    />
+                    <StatCard
+                      label="Pro"
+                      value={data.plans.pro}
+                      meta="plano efetivo"
+                      tone="good"
+                    />
+                    <StatCard
+                      label="Enterprise"
+                      value={data.plans.enterprise}
+                      meta="plano efetivo"
+                      tone="good"
+                    />
+                    <StatCard
+                      label="Subscrições ativas"
+                      value={data.stats.activeSubscriptions}
+                      meta={`${data.stats.planAssignments} overrides`}
+                    />
                   </div>
                 </div>
-              </section>
-            </div>
-
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="font-semibold">Atividade recente</h2>
-                    <p className="mt-1 text-xs text-zinc-600">
-                      Últimas ações registadas na plataforma.
-                    </p>
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                      Desempenho financeiro
+                    </h2>
+                    <span className="text-[10px] text-zinc-600">
+                      Últimos 30 dias
+                    </span>
                   </div>
-                  <ServerCog className="size-4 text-zinc-600" />
-                </div>
-                <div className="mt-4 space-y-1">
-                  {data.activity.map((event) => (
-                    <div
-                      key={`${event.createdAt}-${event.action}`}
-                      className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]"
+                  <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+                    <StatCard
+                      label="Receita manual · 30d"
+                      value={formatMoney(data.operations.manualRevenue30d)}
+                      meta={`${data.operations.paidManualRequests30d} pagamentos confirmados`}
+                      tone="good"
+                    />
+                    <StatCard
+                      label="Conversão manual · 30d"
+                      value={`${data.operations.manualConversion30d}%`}
+                      meta="pedidos → pagos"
+                      tone={
+                        data.operations.manualConversion30d >= 50
+                          ? 'good'
+                          : 'warn'
+                      }
+                    />
+                    <button
+                      aria-label="Ver pedidos de pagamento"
+                      type="button"
+                      onClick={() => {
+                        setManualRequestFilter('ALL');
+                        setTab('payment_requests');
+                      }}
+                      className="text-left"
                     >
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-medium text-zinc-200">
-                          {event.label}
+                      <StatCard
+                        label="Pedidos por tratar"
+                        value={data.operations.openPaymentRequests}
+                        meta={`${data.operations.paymentSentRequests} com pagamento enviado`}
+                        tone={
+                          data.operations.openPaymentRequests > 0
+                            ? 'warn'
+                            : 'good'
+                        }
+                      />
+                    </button>
+                    <StatCard
+                      label="Subscrições pagas"
+                      value={data.stats.activePaidSubscriptions}
+                      meta={`${data.operations.manualExpiring7d} manuais a expirar em 7d`}
+                      tone={
+                        data.operations.manualExpiring7d > 0 ? 'warn' : 'good'
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
+                  <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="size-4 text-emerald-300" />
+                      <h2 className="font-semibold">Operação e crescimento</h2>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase text-zinc-600">
+                          Novas barbearias
                         </p>
-                        <p className="truncate text-[10px] text-zinc-600">
-                          {event.entityLabel}
-                          {event.detail ? ` · ${event.detail}` : ''}
+                        <p className="mt-1 text-lg font-semibold">
+                          {data.operations.newShops7d}
+                        </p>
+                        <p className="text-[11px] text-zinc-600">
+                          últimos 7 dias
                         </p>
                       </div>
-                      <span className="shrink-0 text-[10px] text-zinc-700">
-                        {formatDate(event.createdAt)}
-                      </span>
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase text-zinc-600">
+                          Novos utilizadores
+                        </p>
+                        <p className="mt-1 text-lg font-semibold">
+                          {data.operations.newUsers7d}
+                        </p>
+                        <p className="text-[11px] text-zinc-600">
+                          últimos 7 dias
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase text-zinc-600">
+                          Marcações próximas
+                        </p>
+                        <p className="mt-1 text-lg font-semibold">
+                          {data.operations.appointmentsNext7d}
+                        </p>
+                        <p className="text-[11px] text-zinc-600">
+                          próximos 7 dias
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                        <p className="text-[10px] uppercase text-zinc-600">
+                          Cancelamentos
+                        </p>
+                        <p className="mt-1 text-lg font-semibold">
+                          {data.operations.canceledSubscriptions30d}
+                        </p>
+                        <p className="text-[11px] text-zinc-600">
+                          últimos 30 dias
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                  {data.activity.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-zinc-700">
-                      Ainda não existem eventos.
-                    </p>
-                  ) : null}
-                </div>
-              </section>
+                  </section>
 
-              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="size-4 text-emerald-300" />
-                  <h2 className="font-semibold">Estado da plataforma</h2>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {[
-                    ['Identidade de administrador', data.system.adminIdentityConfigured],
-                    ['Serviço de email', data.system.emailConfigured],
-                    ['Stripe', data.system.stripeConfigured],
-                    ['Preços manuais', data.system.manualPricingConfigured],
-                    [
-                      'Allowlist de pagamentos',
-                      data.system.manualPaymentHostAllowlistConfigured,
-                    ],
-                  ].map(([label, ok]) => (
-                    <div
-                      key={String(label)}
-                      className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3"
-                    >
-                      <span className="text-xs text-zinc-400">{label}</span>
-                      <span
-                        className={`rounded-full px-2 py-1 text-[10px] font-semibold ${ok ? 'bg-emerald-400/10 text-emerald-200' : 'bg-red-400/10 text-red-200'}`}
+                  <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center gap-2">
+                      <ShieldAlert className="size-4 text-amber-300" />
+                      <h2 className="font-semibold">Atenção</h2>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setManualRequestFilter('PAYMENT_SENT');
+                          setTab('payment_requests');
+                        }}
+                        className="flex w-full items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3 text-left hover:border-white/15"
                       >
-                        {ok ? 'OK' : 'Atenção'}
-                      </span>
+                        <span className="flex items-center gap-2 text-xs text-zinc-300">
+                          <WalletCards className="size-4 text-amber-300" />
+                          Pagamentos aguardam confirmação
+                        </span>
+                        <span className="font-semibold text-amber-200">
+                          {data.operations.paymentSentRequests}
+                        </span>
+                      </button>
+                      <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                        <span className="flex items-center gap-2 text-xs text-zinc-300">
+                          <TimerReset className="size-4 text-amber-300" />
+                          Manuais a expirar em 7d
+                        </span>
+                        <span className="font-semibold">
+                          {data.operations.manualExpiring7d}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3">
+                        <span className="flex items-center gap-2 text-xs text-zinc-300">
+                          <MailWarning className="size-4 text-red-300" />
+                          Pedidos com erro de email
+                        </span>
+                        <span className="font-semibold text-red-200">
+                          {data.operations.emailFailures}
+                        </span>
+                      </div>
                     </div>
-                  ))}
+                  </section>
                 </div>
-              </section>
-            </div>
 
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="font-semibold">Barbearias recentes</h2>
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+                  <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="font-semibold">Atividade recente</h2>
+                        <p className="mt-1 text-xs text-zinc-600">
+                          Últimas ações registadas na plataforma.
+                        </p>
+                      </div>
+                      <ServerCog className="size-4 text-zinc-600" />
+                    </div>
+                    <div className="mt-4 space-y-1">
+                      {data.activity.map((event) => (
+                        <div
+                          key={`${event.createdAt}-${event.action}`}
+                          className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.02]"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-medium text-zinc-200">
+                              {event.label}
+                            </p>
+                            <p className="truncate text-[10px] text-zinc-600">
+                              {event.entityLabel}
+                              {event.detail ? ` · ${event.detail}` : ''}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-[10px] text-zinc-700">
+                            {formatDate(event.createdAt)}
+                          </span>
+                        </div>
+                      ))}
+                      {data.activity.length === 0 ? (
+                        <p className="py-6 text-center text-xs text-zinc-700">
+                          Ainda não existem eventos.
+                        </p>
+                      ) : null}
+                    </div>
+                  </section>
+
+                  <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="size-4 text-emerald-300" />
+                      <h2 className="font-semibold">Estado da plataforma</h2>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      {[
+                        [
+                          'Identidade de administrador',
+                          data.system.adminIdentityConfigured,
+                        ],
+                        ['Serviço de email', data.system.emailConfigured],
+                        ['Stripe', data.system.stripeConfigured],
+                        ['Preços manuais', data.system.manualPricingConfigured],
+                        [
+                          'Allowlist de pagamentos',
+                          data.system.manualPaymentHostAllowlistConfigured,
+                        ],
+                      ].map(([label, ok]) => (
+                        <div
+                          key={String(label)}
+                          className="flex items-center justify-between rounded-xl border border-white/8 bg-black/15 p-3"
+                        >
+                          <span className="text-xs text-zinc-400">{label}</span>
+                          <span
+                            className={`rounded-full px-2 py-1 text-[10px] font-semibold ${ok ? 'bg-emerald-400/10 text-emerald-200' : 'bg-red-400/10 text-red-200'}`}
+                          >
+                            {ok ? 'OK' : 'Atenção'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="font-semibold">Barbearias recentes</h2>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          Pesquisa por nome, endereço público ou ID.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTab('shops')}
+                        className="text-xs text-zinc-400 hover:text-white"
+                      >
+                        Ver todas <ChevronRight className="inline size-3" />
+                      </button>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      {data.recentShops.map((shop) => (
+                        <button
+                          key={shop.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedShop(shop);
+                            setTab('plans');
+                          }}
+                          className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/8 bg-black/15 px-3 py-3 text-left hover:border-white/15"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-zinc-200">
+                              {shop.name}
+                            </p>
+                            <p className="mt-1 truncate text-[11px] text-zinc-600">
+                              {shop.slug || shop.id}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase ${shop.plan === 'enterprise' ? 'bg-violet-400/10 text-violet-200' : shop.plan === 'pro' ? 'bg-emerald-400/10 text-emerald-200' : 'bg-white/5 text-zinc-500'}`}
+                          >
+                            {shop.plan}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center gap-2">
+                      <Database className="size-4 text-emerald-300" />
+                      <h2 className="font-semibold">Estado do sistema</h2>
+                    </div>
                     <p className="mt-1 text-xs text-zinc-500">
-                      Pesquisa por nome, endereço público ou ID.
+                      Health endpoint público de baixo risco.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void runHealth()}
+                      className="mt-4 min-h-10 w-full rounded-xl border border-white/10 bg-white/[0.04] text-sm hover:bg-white/[0.07]"
+                    >
+                      Testar /api/health
+                    </button>
+                    {health ? (
+                      <div className="mt-3 rounded-xl border border-white/8 bg-black/15 p-3 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={
+                              health.ok ? 'text-emerald-300' : 'text-red-300'
+                            }
+                          >
+                            {health.ok ? 'Operacional' : 'Erro'}
+                          </span>
+                          <span className="font-mono text-xs text-zinc-500">
+                            {health.status} · {health.latencyMs}ms
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="text-right text-[11px] text-zinc-700">
+                  Atualizado {formatDate(data.generatedAt)}
+                </p>
+              </section>
+            ) : null}
+
+            {tab === 'shops' ? (
+              <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold">Barbearias</h2>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Pesquisa operacional por tenant.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setTab('shops')}
-                    className="text-xs text-zinc-400 hover:text-white"
-                  >
-                    Ver todas <ChevronRight className="inline size-3" />
-                  </button>
+                  <div className="flex w-full gap-2 sm:max-w-xl">
+                    <div className="relative min-w-0 flex-1">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') void load(query);
+                        }}
+                        placeholder="Nome, endereço público ou ID…"
+                        className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-emerald-400/30"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void load(query)}
+                      className="min-h-11 shrink-0 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950"
+                    >
+                      Pesquisar
+                    </button>
+                  </div>
                 </div>
-                <div className="mt-4 space-y-2">
-                  {data.recentShops.map((shop) => (
+                <div className="mt-5 space-y-2">
+                  {searchResults.map((shop) => (
                     <button
                       key={shop.id}
                       type="button"
@@ -1088,413 +1282,712 @@ export default function PlatformAdminConsole() {
                         setSelectedShop(shop);
                         setTab('plans');
                       }}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/8 bg-black/15 px-3 py-3 text-left hover:border-white/15"
+                      className="flex w-full items-center justify-between gap-4 rounded-xl border border-white/8 bg-black/15 px-4 py-3 text-left hover:border-white/15"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-200">
-                          {shop.name}
-                        </p>
-                        <p className="mt-1 truncate text-[11px] text-zinc-600">
+                        <p className="truncate font-medium">{shop.name}</p>
+                        <p className="mt-1 truncate text-xs text-zinc-600">
                           {shop.slug || shop.id}
                         </p>
+                        <p className="mt-1 text-[11px] text-zinc-700">
+                          Criada {formatDate(shop.created_at)}
+                        </p>
                       </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase ${shop.plan === 'enterprise' ? 'bg-violet-400/10 text-violet-200' : shop.plan === 'pro' ? 'bg-emerald-400/10 text-emerald-200' : 'bg-white/5 text-zinc-500'}`}
-                      >
-                        {shop.plan}
-                      </span>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] uppercase text-zinc-400">
+                          {shop.plan}
+                        </span>
+                        <ChevronRight className="size-4 text-zinc-700" />
+                      </div>
                     </button>
                   ))}
+                  {!loading && searchResults.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-500">
+                      Nenhuma barbearia encontrada.
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center gap-2">
-                  <Database className="size-4 text-emerald-300" />
-                  <h2 className="font-semibold">Estado do sistema</h2>
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Health endpoint público de baixo risco.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void runHealth()}
-                  className="mt-4 min-h-10 w-full rounded-xl border border-white/10 bg-white/[0.04] text-sm hover:bg-white/[0.07]"
-                >
-                  Testar /api/health
-                </button>
-                {health ? (
-                  <div className="mt-3 rounded-xl border border-white/8 bg-black/15 p-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={
-                          health.ok ? 'text-emerald-300' : 'text-red-300'
-                        }
+              </section>
+            ) : null}
+
+            {tab === 'plans' ? (
+              <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="size-4 text-emerald-300" />
+                    <h2 className="font-semibold">Atribuição de plano</h2>
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    Concede acesso efetivo à barbearia sem alterar a subscrição
+                    Stripe. Pode ter expiração automática.
+                  </p>
+                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                    {(['free', 'pro', 'enterprise'] as Plan[]).map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setPlan(item)}
+                        className={`rounded-xl border px-4 py-4 text-left ${plan === item ? 'border-emerald-400/30 bg-emerald-400/[0.08]' : 'border-white/10 bg-black/15'}`}
                       >
-                        {health.ok ? 'Operacional' : 'Erro'}
+                        <div className="text-sm font-semibold uppercase">
+                          {item}
+                        </div>
+                        <div className="mt-1 text-xs text-zinc-600">
+                          {item === 'free'
+                            ? 'Acesso base'
+                            : item === 'pro'
+                              ? 'Funcionalidades Pro'
+                              : 'Acesso Enterprise'}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-xs font-medium text-zinc-400">
+                        Motivo
                       </span>
-                      <span className="font-mono text-xs text-zinc-500">
-                        {health.status} · {health.latencyMs}ms
+                      <input
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        maxLength={500}
+                        placeholder="Beta, compensação, suporte…"
+                        className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30"
+                      />
+                    </label>
+                    <label className="space-y-2">
+                      <span className="text-xs font-medium text-zinc-400">
+                        Expira em
                       </span>
-                    </div>
+                      <input
+                        type="datetime-local"
+                        value={expiresAt}
+                        onChange={(e) => setExpiresAt(e.target.value)}
+                        className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30"
+                      />
+                    </label>
                   </div>
-                ) : null}
-              </div>
-            </div>
-            <p className="text-right text-[11px] text-zinc-700">
-              Atualizado {formatDate(data.generatedAt)}
-            </p>
-          </section>
-        ) : null}
-
-        {tab === 'shops' ? (
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Barbearias</h2>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Pesquisa operacional por tenant.
-                </p>
-              </div>
-              <div className="flex w-full gap-2 sm:max-w-xl">
-                <div className="relative min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') void load(query);
-                    }}
-                    placeholder="Nome, endereço público ou ID…"
-                    className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-emerald-400/30"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void load(query)}
-                  className="min-h-11 shrink-0 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950"
-                >
-                  Pesquisar
-                </button>
-              </div>
-            </div>
-            <div className="mt-5 space-y-2">
-              {searchResults.map((shop) => (
-                <button
-                  key={shop.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedShop(shop);
-                    setTab('plans');
-                  }}
-                  className="flex w-full items-center justify-between gap-4 rounded-xl border border-white/8 bg-black/15 px-4 py-3 text-left hover:border-white/15"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{shop.name}</p>
-                    <p className="mt-1 truncate text-xs text-zinc-600">
-                      {shop.slug || shop.id}
-                    </p>
-                    <p className="mt-1 text-[11px] text-zinc-700">
-                      Criada {formatDate(shop.created_at)}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] uppercase text-zinc-400">
-                      {shop.plan}
-                    </span>
-                    <ChevronRight className="size-4 text-zinc-700" />
-                  </div>
-                </button>
-              ))}
-              {!loading && searchResults.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-500">
-                  Nenhuma barbearia encontrada.
-                </div>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {tab === 'plans' ? (
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex items-center gap-2">
-                <KeyRound className="size-4 text-emerald-300" />
-                <h2 className="font-semibold">Atribuição de plano</h2>
-              </div>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Concede acesso efetivo à barbearia sem alterar a subscrição
-                Stripe. Pode ter expiração automática.
-              </p>
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                {(['free', 'pro', 'enterprise'] as Plan[]).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setPlan(item)}
-                    className={`rounded-xl border px-4 py-4 text-left ${plan === item ? 'border-emerald-400/30 bg-emerald-400/[0.08]' : 'border-white/10 bg-black/15'}`}
-                  >
-                    <div className="text-sm font-semibold uppercase">
-                      {item}
-                    </div>
-                    <div className="mt-1 text-xs text-zinc-600">
-                      {item === 'free'
-                        ? 'Acesso base'
-                        : item === 'pro'
-                          ? 'Funcionalidades Pro'
-                          : 'Acesso Enterprise'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2">
-                  <span className="text-xs font-medium text-zinc-400">
-                    Motivo
-                  </span>
-                  <input
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    maxLength={500}
-                    placeholder="Beta, compensação, suporte…"
-                    className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30"
-                  />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-medium text-zinc-400">
-                    Expira em
-                  </span>
-                  <input
-                    type="datetime-local"
-                    value={expiresAt}
-                    onChange={(e) => setExpiresAt(e.target.value)}
-                    className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30"
-                  />
-                </label>
-              </div>
-              <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                <button
-                  type="button"
-                  disabled={!selectedShop || saving}
-                  onClick={() => void assignPlan()}
-                  className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {saving ? 'A guardar…' : 'Atribuir plano'}
-                </button>
-                <button
-                  type="button"
-                  disabled={!selectedShop || saving}
-                  onClick={() => void clearPlan()}
-                  className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Remover atribuição
-                </button>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <h2 className="font-semibold">Barbearia selecionada</h2>
-              {selectedShop ? (
-                <>
-                  <div className="mt-4 rounded-xl border border-white/8 bg-black/15 p-4">
-                    <p className="font-medium">{selectedShop.name}</p>
-                    <p className="mt-1 break-all text-xs text-zinc-600">
-                      {selectedShop.id}
-                    </p>
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      <div className="rounded-lg bg-white/[0.03] p-3">
-                        <p className="text-[10px] uppercase text-zinc-600">
-                          Plano efetivo
-                        </p>
-                        <p className="mt-1 text-sm font-semibold uppercase">
-                          {selectedShop.plan}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-white/[0.03] p-3">
-                        <p className="text-[10px] uppercase text-zinc-600">
-                          Override
-                        </p>
-                        <p className="mt-1 text-sm font-semibold">
-                          {selectedShop.assigned ? 'Ativo' : 'Não'}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="mt-5 flex flex-col gap-2 sm:flex-row">
                     <button
                       type="button"
-                      onClick={() => void copy(selectedShop.id)}
-                      className="mt-3 inline-flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-200"
+                      disabled={!selectedShop || saving}
+                      onClick={() => void assignPlan()}
+                      className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <Copy className="size-3.5" />
-                      Copiar ID
+                      {saving ? 'A guardar…' : 'Atribuir plano'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!selectedShop || saving}
+                      onClick={() => void clearPlan()}
+                      className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Remover atribuição
                     </button>
                   </div>
-                  <p className="mt-4 text-[11px] leading-5 text-zinc-600">
-                    A atribuição administrativa tem precedência enquanto estiver
-                    válida. Quando expirar ou for removida, a resolução volta
-                    para a subscrição normal.
-                  </p>
-                </>
-              ) : (
-                <div className="mt-4 rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-600">
-                  Seleciona uma barbearia em Overview ou Barbearias.
                 </div>
-              )}
-            </div>
-          </section>
-        ) : null}
-
-        {tab === 'payments' ? (
-          <section className="space-y-5">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="size-4 text-emerald-300" />
-                    <h2 className="text-lg font-semibold">
-                      Método de pagamento
-                    </h2>
-                  </div>
-                  <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-                    Controla qual método é usado por novas subscrições. Mudar
-                    esta opção não migra nem cancela subscrições existentes.
-                  </p>
-                </div>
-                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
-                  Atual: {paymentMode === 'MANUAL' ? 'Manual' : 'Stripe'}
-                </span>
-              </div>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {[
-                  {
-                    mode: 'MANUAL' as const,
-                    title: 'Manual',
-                    description:
-                      'Novos clientes criam um pedido. A equipa envia o link e confirma o pagamento manualmente.',
-                  },
-                  {
-                    mode: 'STRIPE' as const,
-                    title: 'Automático (Stripe)',
-                    description:
-                      'Novas subscrições utilizam o checkout Stripe que já existe no projeto.',
-                  },
-                ].map((item) => (
-                  <button
-                    key={item.mode}
-                    type="button"
-                    disabled={paymentModeLoading || changingPaymentMode}
-                    onClick={() => void changePaymentMode(item.mode)}
-                    className={`rounded-2xl border p-5 text-left transition ${
-                      paymentMode === item.mode
-                        ? 'border-emerald-400/30 bg-emerald-400/[0.07]'
-                        : 'border-white/10 bg-black/15 hover:border-white/20'
-                    } disabled:cursor-wait disabled:opacity-60`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`flex size-9 items-center justify-center rounded-xl border ${
-                            paymentMode === item.mode
-                              ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-                              : 'border-white/10 bg-white/[0.03] text-zinc-500'
-                          }`}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <h2 className="font-semibold">Barbearia selecionada</h2>
+                  {selectedShop ? (
+                    <>
+                      <div className="mt-4 rounded-xl border border-white/8 bg-black/15 p-4">
+                        <p className="font-medium">{selectedShop.name}</p>
+                        <p className="mt-1 break-all text-xs text-zinc-600">
+                          {selectedShop.id}
+                        </p>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          <div className="rounded-lg bg-white/[0.03] p-3">
+                            <p className="text-[10px] uppercase text-zinc-600">
+                              Plano efetivo
+                            </p>
+                            <p className="mt-1 text-sm font-semibold uppercase">
+                              {selectedShop.plan}
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-white/[0.03] p-3">
+                            <p className="text-[10px] uppercase text-zinc-600">
+                              Override
+                            </p>
+                            <p className="mt-1 text-sm font-semibold">
+                              {selectedShop.assigned ? 'Ativo' : 'Não'}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void copy(selectedShop.id)}
+                          className="mt-3 inline-flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-200"
                         >
-                          <CreditCard className="size-4" />
-                        </span>
-                        <div>
-                          <p className="text-sm font-semibold text-zinc-100">
-                            {item.title}
+                          <Copy className="size-3.5" />
+                          Copiar ID
+                        </button>
+                      </div>
+                      <p className="mt-4 text-[11px] leading-5 text-zinc-600">
+                        A atribuição administrativa tem precedência enquanto
+                        estiver válida. Quando expirar ou for removida, a
+                        resolução volta para a subscrição normal.
+                      </p>
+                    </>
+                  ) : (
+                    <div className="mt-4 rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-600">
+                      Seleciona uma barbearia em Overview ou Barbearias.
+                    </div>
+                  )}
+                </div>
+              </section>
+            ) : null}
+
+            {tab === 'payments' ? (
+              <section className="space-y-5">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="size-4 text-emerald-300" />
+                        <h2 className="text-lg font-semibold">
+                          Método de pagamento
+                        </h2>
+                      </div>
+                      <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                        Controla qual método é usado por novas subscrições.
+                        Mudar esta opção não migra nem cancela subscrições
+                        existentes.
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                      Atual: {paymentMode === 'MANUAL' ? 'Manual' : 'Stripe'}
+                    </span>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                    {[
+                      {
+                        mode: 'MANUAL' as const,
+                        title: 'Manual',
+                        description:
+                          'Novos clientes criam um pedido. A equipa envia o link e confirma o pagamento manualmente.',
+                      },
+                      {
+                        mode: 'STRIPE' as const,
+                        title: 'Automático (Stripe)',
+                        description:
+                          'Novas subscrições utilizam o checkout Stripe que já existe no projeto.',
+                      },
+                    ].map((item) => (
+                      <button
+                        key={item.mode}
+                        type="button"
+                        disabled={paymentModeLoading || changingPaymentMode}
+                        onClick={() => void changePaymentMode(item.mode)}
+                        className={`rounded-2xl border p-5 text-left transition ${
+                          paymentMode === item.mode
+                            ? 'border-emerald-400/30 bg-emerald-400/[0.07]'
+                            : 'border-white/10 bg-black/15 hover:border-white/20'
+                        } disabled:cursor-wait disabled:opacity-60`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`flex size-9 items-center justify-center rounded-xl border ${
+                                paymentMode === item.mode
+                                  ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
+                                  : 'border-white/10 bg-white/[0.03] text-zinc-500'
+                              }`}
+                            >
+                              <CreditCard className="size-4" />
+                            </span>
+                            <div>
+                              <p className="text-sm font-semibold text-zinc-100">
+                                {item.title}
+                              </p>
+                              <p className="mt-1 text-xs text-zinc-500">
+                                {paymentMode === item.mode
+                                  ? 'Método atual'
+                                  : 'Selecionar método'}
+                              </p>
+                            </div>
+                          </div>
+                          {paymentMode === item.mode ? (
+                            <CheckCircle2 className="size-4 text-emerald-300" />
+                          ) : null}
+                        </div>
+                        <p className="mt-4 text-xs leading-5 text-zinc-500">
+                          {item.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.025] p-4 text-xs leading-5 text-amber-100/70">
+                    O método é aplicado apenas a novas subscrições. Uma
+                    subscrição manual continua manual e uma subscrição Stripe
+                    continua Stripe, mesmo depois de esta opção mudar.
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {tab === 'payment_requests' ? (
+              <section className="space-y-5">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <MailCheck className="size-4 text-emerald-300" />
+                        <h2 className="text-lg font-semibold">
+                          Pedidos de pagamento abertos
+                        </h2>
+                      </div>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Define o link de pagamento e envia-o diretamente para o
+                        email do responsável pela barbearia.
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">
+                      {
+                        manualRequests.filter(
+                          (item) =>
+                            item.status === 'PENDING' ||
+                            item.status === 'PAYMENT_SENT',
+                        ).length
+                      }{' '}
+                      abertos
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold">Fila de pedidos</h3>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          Apenas pedidos que ainda precisam de tratamento.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setRequestsRefreshKey((value) => value + 1)
+                        }
+                        className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs text-zinc-300 hover:bg-white/[0.06]"
+                      >
+                        <RefreshCw className="size-3.5" />
+                        Atualizar
+                      </button>
+                    </div>
+
+                    <div className="mt-5 space-y-2">
+                      {manualRequests
+                        .filter(
+                          (request) =>
+                            request.status === 'PENDING' ||
+                            request.status === 'PAYMENT_SENT',
+                        )
+                        .map((request) => (
+                          <button
+                            key={request.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setPaymentLink(request.payment_link ?? '');
+                              setRejectReason('');
+                            }}
+                            className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
+                              selectedRequest?.id === request.id
+                                ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
+                                : 'border-white/8 bg-black/15 hover:border-white/15'
+                            }`}
+                          >
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-zinc-100">
+                                  {request.customer?.name_complete ||
+                                    request.customer?.email ||
+                                    'Cliente'}
+                                </p>
+                                <p className="mt-1 truncate text-xs text-zinc-500">
+                                  {request.barbershop?.name ||
+                                    request.barbershop_id}
+                                </p>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <span className="text-sm font-semibold text-zinc-200">
+                                  {formatMoney(request.price, request.currency)}
+                                </span>
+                                <span
+                                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                                    request.status === 'PAYMENT_SENT'
+                                      ? 'bg-blue-400/10 text-blue-200'
+                                      : 'bg-amber-400/10 text-amber-200'
+                                  }`}
+                                >
+                                  {request.status === 'PAYMENT_SENT'
+                                    ? 'LINK ENVIADO'
+                                    : 'AGUARDA LINK'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-600">
+                              <span>
+                                {request.plan === 'enterprise'
+                                  ? 'Enterprise'
+                                  : 'Pro'}
+                              </span>
+                              <span>·</span>
+                              <span>
+                                {request.billing_interval === 'year'
+                                  ? 'Anual'
+                                  : 'Mensal'}
+                              </span>
+                              <span>·</span>
+                              <span>{formatDate(request.created_at)}</span>
+                            </div>
+                          </button>
+                        ))}
+
+                      {manualRequests.filter(
+                        (request) =>
+                          request.status === 'PENDING' ||
+                          request.status === 'PAYMENT_SENT',
+                      ).length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
+                          <CheckCircle2 className="mx-auto size-8 text-emerald-300/60" />
+                          <p className="mt-3 text-sm font-medium text-zinc-300">
+                            Não existem pedidos de pagamento abertos.
                           </p>
-                          <p className="mt-1 text-xs text-zinc-500">
-                            {paymentMode === item.mode
-                              ? 'Método atual'
-                              : 'Selecionar método'}
+                          <p className="mt-1 text-xs text-zinc-600">
+                            Quando um cliente pedir uma subscrição manual, o
+                            pedido aparece aqui.
                           </p>
                         </div>
-                      </div>
-                      {paymentMode === item.mode ? (
-                        <CheckCircle2 className="size-4 text-emerald-300" />
                       ) : null}
                     </div>
-                    <p className="mt-4 text-xs leading-5 text-zinc-500">
-                      {item.description}
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.025] p-4 text-xs leading-5 text-amber-100/70">
-                O método é aplicado apenas a novas subscrições. Uma subscrição
-                manual continua manual e uma subscrição Stripe continua Stripe,
-                mesmo depois de esta opção mudar.
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {tab === 'payment_requests' ? (
-          <section className="space-y-5">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <MailCheck className="size-4 text-emerald-300" />
-                    <h2 className="text-lg font-semibold">
-                      Pedidos de pagamento abertos
-                    </h2>
                   </div>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    Define o link de pagamento e envia-o diretamente para o
-                    email do responsável pela barbearia.
-                  </p>
-                </div>
-                <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">
-                  {
-                    manualRequests.filter(
-                      (item) =>
-                        item.status === 'PENDING' ||
-                        item.status === 'PAYMENT_SENT',
-                    ).length
-                  }{' '}
-                  abertos
-                </span>
-              </div>
-            </div>
 
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold">Fila de pedidos</h3>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      Apenas pedidos que ainda precisam de tratamento.
-                    </p>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold">Enviar pagamento</h3>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          O email é enviado para o responsável associado ao
+                          pedido.
+                        </p>
+                      </div>
+                      {selectedRequest ? (
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] font-medium text-zinc-500">
+                          {selectedRequest.status}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {selectedRequest ? (
+                      <div className="mt-5 space-y-4">
+                        <div className="rounded-2xl border border-white/8 bg-black/15 p-4">
+                          <p className="text-sm font-semibold text-zinc-100">
+                            {selectedRequest.barbershop?.name ||
+                              'Barbearia sem nome'}
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {selectedRequest.customer?.name_complete ||
+                              'Responsável'}
+                          </p>
+                          <p className="mt-1 break-all text-xs text-zinc-600">
+                            {selectedRequest.customer?.email || 'Sem email'}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-emerald-400/10 bg-emerald-400/[0.025] p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold text-zinc-200">
+                                Dados enviados no checkout
+                              </p>
+                              <p className="mt-1 text-[11px] text-zinc-600">
+                                Snapshot preenchido pelo cliente no momento do
+                                pedido.
+                              </p>
+                            </div>
+                            {selectedRequest.submitted_at ? (
+                              <span className="text-[10px] text-zinc-600">
+                                {formatDate(selectedRequest.submitted_at)}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                                Faturação
+                              </p>
+                              <p className="mt-1 text-xs text-zinc-300">
+                                {selectedRequest.billing_name || '—'}
+                              </p>
+                              <p className="mt-0.5 break-all text-xs text-zinc-500">
+                                {selectedRequest.billing_email || '—'}
+                              </p>
+                              <p className="mt-0.5 text-xs text-zinc-500">
+                                {selectedRequest.tax_id || 'Sem NIF/VAT'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                                Contacto
+                              </p>
+                              <p className="mt-1 text-xs text-zinc-300">
+                                {selectedRequest.phone || '—'}
+                              </p>
+                              <p className="mt-0.5 break-all text-xs text-zinc-500">
+                                {selectedRequest.website || 'Sem website'}
+                              </p>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                                Morada
+                              </p>
+                              <p className="mt-1 text-xs text-zinc-300">
+                                {[
+                                  selectedRequest.address_line1,
+                                  selectedRequest.address_line2,
+                                ]
+                                  .filter(Boolean)
+                                  .join(', ') || '—'}
+                              </p>
+                              <p className="mt-0.5 text-xs text-zinc-500">
+                                {[
+                                  selectedRequest.postal_code,
+                                  selectedRequest.city,
+                                  selectedRequest.country,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ') || '—'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                                Operação
+                              </p>
+                              <p className="mt-1 text-xs text-zinc-300">
+                                {selectedRequest.business_type || '—'} ·{' '}
+                                {selectedRequest.location_count ?? '—'}{' '}
+                                localizações
+                              </p>
+                              <p className="mt-0.5 text-xs text-zinc-500">
+                                {selectedRequest.team_size ?? '—'} elementos na
+                                equipa
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+                                Mensagem
+                              </p>
+                              <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                                {selectedRequest.customer_message ||
+                                  'Sem mensagem adicional.'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                            <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                              Plano
+                            </p>
+                            <p className="mt-1 text-sm font-semibold uppercase text-zinc-200">
+                              {selectedRequest.plan}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                            <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                              Valor
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-zinc-200">
+                              {formatMoney(
+                                selectedRequest.price,
+                                selectedRequest.currency,
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <label className="block space-y-2">
+                          <span className="text-xs font-medium text-zinc-300">
+                            Link de pagamento
+                          </span>
+                          <input
+                            value={paymentLink}
+                            onChange={(event) =>
+                              setPaymentLink(event.target.value)
+                            }
+                            placeholder="https://..."
+                            inputMode="url"
+                            autoComplete="off"
+                            maxLength={2048}
+                            disabled={paymentAction}
+                            className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
+                          />
+                          <p className="text-[11px] leading-5 text-zinc-600">
+                            O servidor valida o URL antes de o guardar e enviar.
+                            O cliente nunca pode escolher o preço deste pedido.
+                          </p>
+                        </label>
+
+                        <label className="block space-y-2">
+                          <span className="text-xs font-medium text-zinc-300">
+                            Nota interna para rejeição (opcional)
+                          </span>
+                          <textarea
+                            value={rejectReason}
+                            onChange={(event) =>
+                              setRejectReason(event.target.value)
+                            }
+                            maxLength={500}
+                            rows={3}
+                            placeholder="Ex.: pagamento não identificado, dados incorretos…"
+                            disabled={paymentAction}
+                            className="w-full resize-none rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-red-400/30 disabled:opacity-50"
+                          />
+                        </label>
+
+                        {selectedRequest.last_email_error ? (
+                          <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
+                            Último erro de email:{' '}
+                            {selectedRequest.last_email_error}
+                          </div>
+                        ) : null}
+
+                        <button
+                          type="button"
+                          disabled={
+                            paymentAction ||
+                            !paymentLink.trim() ||
+                            !['PENDING', 'PAYMENT_SENT'].includes(
+                              selectedRequest.status,
+                            )
+                          }
+                          onClick={() =>
+                            void runManualRequestAction(
+                              selectedRequest,
+                              selectedRequest.status === 'PAYMENT_SENT'
+                                ? 'resend_payment'
+                                : 'send_payment',
+                            )
+                          }
+                          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <MailCheck className="size-4" />
+                          {selectedRequest.status === 'PAYMENT_SENT'
+                            ? 'Reenviar email com o link'
+                            : 'Enviar email com o link'}
+                        </button>
+
+                        {selectedRequest.payment_link ? (
+                          <a
+                            href={selectedRequest.payment_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block truncate text-xs text-zinc-600 hover:text-zinc-300"
+                          >
+                            Abrir link atual
+                          </a>
+                        ) : null}
+
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <button
+                            type="button"
+                            disabled={
+                              paymentAction ||
+                              selectedRequest.status !== 'PAYMENT_SENT'
+                            }
+                            onClick={() =>
+                              void runManualRequestAction(
+                                selectedRequest,
+                                'confirm_payment',
+                              )
+                            }
+                            className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Confirmar pagamento
+                          </button>
+                          <button
+                            type="button"
+                            disabled={
+                              paymentAction ||
+                              !['PENDING', 'PAYMENT_SENT'].includes(
+                                selectedRequest.status,
+                              )
+                            }
+                            onClick={() =>
+                              void runManualRequestAction(
+                                selectedRequest,
+                                'reject',
+                              )
+                            }
+                            className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 transition hover:bg-red-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Rejeitar pedido
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-12 text-center">
+                        <MailCheck className="mx-auto size-8 text-zinc-700" />
+                        <p className="mt-3 text-sm font-medium text-zinc-400">
+                          Seleciona um pedido na fila.
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-600">
+                          Depois cola o link de pagamento e envia o email.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setRequestsRefreshKey((value) => value + 1)}
-                    className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs text-zinc-300 hover:bg-white/[0.06]"
-                  >
-                    <RefreshCw className="size-3.5" />
-                    Atualizar
-                  </button>
                 </div>
+              </section>
+            ) : null}
 
-                <div className="mt-5 space-y-2">
-                  {manualRequests
-                    .filter(
-                      (request) =>
-                        request.status === 'PENDING' ||
-                        request.status === 'PAYMENT_SENT',
-                    )
-                    .map((request) => (
+            {tab === 'subscriptions' ? (
+              <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_390px]">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold">
+                        Pedidos de subscrição
+                      </h2>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Pedidos do fluxo de pagamento manual e respetivo
+                        histórico.
+                      </p>
+                    </div>
+                    <select
+                      value={manualRequestFilter}
+                      onChange={(event) =>
+                        setManualRequestFilter(
+                          event.target.value as 'ALL' | ManualRequest['status'],
+                        )
+                      }
+                      className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-200 outline-none"
+                    >
+                      <option value="ALL">Todos</option>
+                      <option value="PENDING">Pendentes</option>
+                      <option value="PAYMENT_SENT">Pagamento enviado</option>
+                      <option value="PAID">Pagos</option>
+                      <option value="TRIAL">Mês grátis (TRIALPRO)</option>
+                      <option value="REJECTED">Rejeitados</option>
+                      <option value="EXPIRED">Expirados</option>
+                      <option value="CANCELLED">Cancelados</option>
+                    </select>
+                  </div>
+
+                  <div className="mt-5 space-y-2">
+                    {manualRequests.map((request) => (
                       <button
                         key={request.id}
                         type="button"
                         onClick={() => {
                           setSelectedRequest(request);
                           setPaymentLink(request.payment_link ?? '');
-                          setRejectReason('');
                         }}
-                        className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
+                        className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
                           selectedRequest?.id === request.id
                             ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
                             : 'border-white/8 bg-black/15 hover:border-white/15'
@@ -1509,7 +2002,11 @@ export default function PlatformAdminConsole() {
                             </p>
                             <p className="mt-1 truncate text-xs text-zinc-500">
                               {request.barbershop?.name ||
-                                request.barbershop_id}
+                                request.barbershop_id}{' '}
+                              ·{' '}
+                              {request.plan === 'enterprise'
+                                ? 'Enterprise'
+                                : 'Pro'}
                             </p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
@@ -1518,977 +2015,616 @@ export default function PlatformAdminConsole() {
                             </span>
                             <span
                               className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                                request.status === 'PAYMENT_SENT'
-                                  ? 'bg-blue-400/10 text-blue-200'
-                                  : 'bg-amber-400/10 text-amber-200'
+                                request.status === 'PAID' ||
+                                request.status === 'TRIAL'
+                                  ? 'bg-emerald-400/10 text-emerald-200'
+                                  : request.status === 'REJECTED' ||
+                                      request.status === 'EXPIRED'
+                                    ? 'bg-red-400/10 text-red-200'
+                                    : 'bg-amber-400/10 text-amber-200'
                               }`}
                             >
-                              {request.status === 'PAYMENT_SENT'
-                                ? 'LINK ENVIADO'
-                                : 'AGUARDA LINK'}
+                              {request.status === 'TRIAL'
+                                ? 'TRIALPRO · MÊS GRÁTIS'
+                                : request.status.replace('_', ' ')}
                             </span>
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-600">
-                          <span>
-                            {request.plan === 'enterprise'
-                              ? 'Enterprise'
-                              : 'Pro'}
-                          </span>
-                          <span>·</span>
-                          <span>
-                            {request.billing_interval === 'year'
+                        <p className="mt-2 text-[11px] text-zinc-600">
+                          {request.request_type} ·{' '}
+                          {formatDate(request.created_at)}
+                        </p>
+                      </button>
+                    ))}
+                    {manualRequests.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
+                        Não existem pedidos neste filtro.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <h2 className="font-semibold">Detalhes</h2>
+                  {selectedRequest ? (
+                    <div className="mt-4 space-y-4">
+                      <div className="rounded-xl border border-white/8 bg-black/15 p-4">
+                        <p className="text-sm font-semibold text-zinc-100">
+                          {selectedRequest.customer?.name_complete || 'Cliente'}
+                        </p>
+                        <p className="mt-1 break-all text-xs text-zinc-500">
+                          {selectedRequest.customer?.email || 'Sem email'}
+                        </p>
+                        <p className="mt-3 text-xs text-zinc-500">
+                          {selectedRequest.barbershop?.name ||
+                            selectedRequest.barbershop_id}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                          <p className="text-[10px] uppercase text-zinc-600">
+                            Plano
+                          </p>
+                          <p className="mt-1 text-sm font-semibold uppercase">
+                            {selectedRequest.plan}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                          <p className="text-[10px] uppercase text-zinc-600">
+                            Estado
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedRequest.status}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                          <p className="text-[10px] uppercase text-zinc-600">
+                            Preço
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {formatMoney(
+                              selectedRequest.price,
+                              selectedRequest.currency,
+                            )}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-white/8 bg-black/15 p-3">
+                          <p className="text-[10px] uppercase text-zinc-600">
+                            Período
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedRequest.billing_interval === 'year'
                               ? 'Anual'
                               : 'Mensal'}
-                          </span>
-                          <span>·</span>
-                          <span>{formatDate(request.created_at)}</span>
-                        </div>
-                      </button>
-                    ))}
-
-                  {manualRequests.filter(
-                    (request) =>
-                      request.status === 'PENDING' ||
-                      request.status === 'PAYMENT_SENT',
-                  ).length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
-                      <CheckCircle2 className="mx-auto size-8 text-emerald-300/60" />
-                      <p className="mt-3 text-sm font-medium text-zinc-300">
-                        Não existem pedidos de pagamento abertos.
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-600">
-                        Quando um cliente pedir uma subscrição manual, o pedido
-                        aparece aqui.
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold">Enviar pagamento</h3>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      O email é enviado para o responsável associado ao pedido.
-                    </p>
-                  </div>
-                  {selectedRequest ? (
-                    <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] font-medium text-zinc-500">
-                      {selectedRequest.status}
-                    </span>
-                  ) : null}
-                </div>
-
-                {selectedRequest ? (
-                  <div className="mt-5 space-y-4">
-                    <div className="rounded-2xl border border-white/8 bg-black/15 p-4">
-                      <p className="text-sm font-semibold text-zinc-100">
-                        {selectedRequest.barbershop?.name ||
-                          'Barbearia sem nome'}
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {selectedRequest.customer?.name_complete ||
-                          'Responsável'}
-                      </p>
-                      <p className="mt-1 break-all text-xs text-zinc-600">
-                        {selectedRequest.customer?.email || 'Sem email'}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl border border-emerald-400/10 bg-emerald-400/[0.025] p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-semibold text-zinc-200">
-                            Dados enviados no checkout
-                          </p>
-                          <p className="mt-1 text-[11px] text-zinc-600">
-                            Snapshot preenchido pelo cliente no momento do
-                            pedido.
-                          </p>
-                        </div>
-                        {selectedRequest.submitted_at ? (
-                          <span className="text-[10px] text-zinc-600">
-                            {formatDate(selectedRequest.submitted_at)}
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-                            Faturação
-                          </p>
-                          <p className="mt-1 text-xs text-zinc-300">
-                            {selectedRequest.billing_name || '—'}
-                          </p>
-                          <p className="mt-0.5 break-all text-xs text-zinc-500">
-                            {selectedRequest.billing_email || '—'}
-                          </p>
-                          <p className="mt-0.5 text-xs text-zinc-500">
-                            {selectedRequest.tax_id || 'Sem NIF/VAT'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-                            Contacto
-                          </p>
-                          <p className="mt-1 text-xs text-zinc-300">
-                            {selectedRequest.phone || '—'}
-                          </p>
-                          <p className="mt-0.5 break-all text-xs text-zinc-500">
-                            {selectedRequest.website || 'Sem website'}
-                          </p>
-                        </div>
-                        <div className="sm:col-span-2">
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-                            Morada
-                          </p>
-                          <p className="mt-1 text-xs text-zinc-300">
-                            {[
-                              selectedRequest.address_line1,
-                              selectedRequest.address_line2,
-                            ]
-                              .filter(Boolean)
-                              .join(', ') || '—'}
-                          </p>
-                          <p className="mt-0.5 text-xs text-zinc-500">
-                            {[
-                              selectedRequest.postal_code,
-                              selectedRequest.city,
-                              selectedRequest.country,
-                            ]
-                              .filter(Boolean)
-                              .join(' · ') || '—'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-                            Operação
-                          </p>
-                          <p className="mt-1 text-xs text-zinc-300">
-                            {selectedRequest.business_type || '—'} ·{' '}
-                            {selectedRequest.location_count ?? '—'} localizações
-                          </p>
-                          <p className="mt-0.5 text-xs text-zinc-500">
-                            {selectedRequest.team_size ?? '—'} elementos na
-                            equipa
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-                            Mensagem
-                          </p>
-                          <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-400">
-                            {selectedRequest.customer_message ||
-                              'Sem mensagem adicional.'}
                           </p>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                        <p className="text-[10px] uppercase tracking-wide text-zinc-600">
-                          Plano
-                        </p>
-                        <p className="mt-1 text-sm font-semibold uppercase text-zinc-200">
-                          {selectedRequest.plan}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                        <p className="text-[10px] uppercase tracking-wide text-zinc-600">
-                          Valor
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-zinc-200">
-                          {formatMoney(
-                            selectedRequest.price,
-                            selectedRequest.currency,
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <label className="block space-y-2">
-                      <span className="text-xs font-medium text-zinc-300">
-                        Link de pagamento
-                      </span>
-                      <input
-                        value={paymentLink}
-                        onChange={(event) => setPaymentLink(event.target.value)}
-                        placeholder="https://..."
-                        inputMode="url"
-                        autoComplete="off"
-                        maxLength={2048}
-                        disabled={paymentAction}
-                        className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
-                      />
-                      <p className="text-[11px] leading-5 text-zinc-600">
-                        O servidor valida o URL antes de o guardar e enviar. O
-                        cliente nunca pode escolher o preço deste pedido.
-                      </p>
-                    </label>
-
-                    <label className="block space-y-2">
-                      <span className="text-xs font-medium text-zinc-300">
-                        Nota interna para rejeição (opcional)
-                      </span>
-                      <textarea
-                        value={rejectReason}
-                        onChange={(event) =>
-                          setRejectReason(event.target.value)
-                        }
-                        maxLength={500}
-                        rows={3}
-                        placeholder="Ex.: pagamento não identificado, dados incorretos…"
-                        disabled={paymentAction}
-                        className="w-full resize-none rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 focus:border-red-400/30 disabled:opacity-50"
-                      />
-                    </label>
-
-                    {selectedRequest.last_email_error ? (
-                      <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
-                        Último erro de email: {selectedRequest.last_email_error}
-                      </div>
-                    ) : null}
-
-                    <button
-                      type="button"
-                      disabled={
-                        paymentAction ||
-                        !paymentLink.trim() ||
-                        !['PENDING', 'PAYMENT_SENT'].includes(
-                          selectedRequest.status,
-                        )
-                      }
-                      onClick={() =>
-                        void runManualRequestAction(
-                          selectedRequest,
-                          selectedRequest.status === 'PAYMENT_SENT'
-                            ? 'resend_payment'
-                            : 'send_payment',
-                        )
-                      }
-                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <MailCheck className="size-4" />
-                      {selectedRequest.status === 'PAYMENT_SENT'
-                        ? 'Reenviar email com o link'
-                        : 'Enviar email com o link'}
-                    </button>
-
-                    {selectedRequest.payment_link ? (
-                      <a
-                        href={selectedRequest.payment_link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block truncate text-xs text-zinc-600 hover:text-zinc-300"
-                      >
-                        Abrir link atual
-                      </a>
-                    ) : null}
-
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <button
-                        type="button"
-                        disabled={
-                          paymentAction ||
-                          selectedRequest.status !== 'PAYMENT_SENT'
-                        }
-                        onClick={() =>
-                          void runManualRequestAction(
-                            selectedRequest,
-                            'confirm_payment',
-                          )
-                        }
-                        className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Confirmar pagamento
-                      </button>
-                      <button
-                        type="button"
-                        disabled={
-                          paymentAction ||
-                          !['PENDING', 'PAYMENT_SENT'].includes(
-                            selectedRequest.status,
-                          )
-                        }
-                        onClick={() =>
-                          void runManualRequestAction(selectedRequest, 'reject')
-                        }
-                        className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 transition hover:bg-red-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Rejeitar pedido
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-12 text-center">
-                    <MailCheck className="mx-auto size-8 text-zinc-700" />
-                    <p className="mt-3 text-sm font-medium text-zinc-400">
-                      Seleciona um pedido na fila.
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-600">
-                      Depois cola o link de pagamento e envia o email.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {tab === 'subscriptions' ? (
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_390px]">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    Pedidos de subscrição
-                  </h2>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    Pedidos do fluxo de pagamento manual e respetivo histórico.
-                  </p>
-                </div>
-                <select
-                  value={manualRequestFilter}
-                  onChange={(event) =>
-                    setManualRequestFilter(
-                      event.target.value as 'ALL' | ManualRequest['status'],
-                    )
-                  }
-                  className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-200 outline-none"
-                >
-                  <option value="ALL">Todos</option>
-                  <option value="PENDING">Pendentes</option>
-                  <option value="PAYMENT_SENT">Pagamento enviado</option>
-                  <option value="PAID">Pagos</option>
-                  <option value="TRIAL">Mês grátis (TRIALPRO)</option>
-                  <option value="REJECTED">Rejeitados</option>
-                  <option value="EXPIRED">Expirados</option>
-                  <option value="CANCELLED">Cancelados</option>
-                </select>
-              </div>
-
-              <div className="mt-5 space-y-2">
-                {manualRequests.map((request) => (
-                  <button
-                    key={request.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setPaymentLink(request.payment_link ?? '');
-                    }}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                      selectedRequest?.id === request.id
-                        ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
-                        : 'border-white/8 bg-black/15 hover:border-white/15'
-                    }`}
-                  >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-zinc-100">
-                          {request.customer?.name_complete ||
-                            request.customer?.email ||
-                            'Cliente'}
-                        </p>
-                        <p className="mt-1 truncate text-xs text-zinc-500">
-                          {request.barbershop?.name || request.barbershop_id} ·{' '}
-                          {request.plan === 'enterprise' ? 'Enterprise' : 'Pro'}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-sm font-semibold text-zinc-200">
-                          {formatMoney(request.price, request.currency)}
+                      <label className="block space-y-2">
+                        <span className="text-xs font-medium text-zinc-400">
+                          Link de pagamento
                         </span>
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                            request.status === 'PAID' ||
-                            request.status === 'TRIAL'
-                              ? 'bg-emerald-400/10 text-emerald-200'
-                              : request.status === 'REJECTED' ||
-                                  request.status === 'EXPIRED'
-                                ? 'bg-red-400/10 text-red-200'
-                                : 'bg-amber-400/10 text-amber-200'
-                          }`}
+                        <input
+                          value={paymentLink}
+                          onChange={(event) =>
+                            setPaymentLink(event.target.value)
+                          }
+                          placeholder="https://..."
+                          maxLength={2048}
+                          disabled={
+                            paymentAction ||
+                            !['PENDING', 'PAYMENT_SENT'].includes(
+                              selectedRequest.status,
+                            )
+                          }
+                          className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30 disabled:opacity-50"
+                        />
+                      </label>
+
+                      {selectedRequest.last_email_error ? (
+                        <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
+                          Último erro de email:{' '}
+                          {selectedRequest.last_email_error}
+                        </div>
+                      ) : null}
+
+                      {selectedRequest.payment_link ? (
+                        <a
+                          href={selectedRequest.payment_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block truncate text-xs text-zinc-500 hover:text-zinc-200"
                         >
-                          {request.status === 'TRIAL'
-                            ? 'TRIALPRO · MÊS GRÁTIS'
-                            : request.status.replace('_', ' ')}
-                        </span>
+                          {selectedRequest.payment_link}
+                        </a>
+                      ) : null}
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          disabled={
+                            paymentAction ||
+                            !['PENDING', 'PAYMENT_SENT'].includes(
+                              selectedRequest.status,
+                            ) ||
+                            !paymentLink.trim()
+                          }
+                          onClick={() =>
+                            void runManualRequestAction(
+                              selectedRequest,
+                              selectedRequest.status === 'PAYMENT_SENT'
+                                ? 'resend_payment'
+                                : 'send_payment',
+                            )
+                          }
+                          className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {selectedRequest.status === 'PAYMENT_SENT'
+                            ? 'Reenviar pagamento'
+                            : 'Enviar pagamento'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            paymentAction ||
+                            selectedRequest.status !== 'PAYMENT_SENT'
+                          }
+                          onClick={() =>
+                            void runManualRequestAction(
+                              selectedRequest,
+                              'confirm_payment',
+                            )
+                          }
+                          className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Confirmar pagamento
+                        </button>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          disabled={
+                            paymentAction ||
+                            !['PAID', 'EXPIRED'].includes(
+                              selectedRequest.status,
+                            )
+                          }
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                'Criar um novo pedido de renovação para este plano?',
+                              )
+                            )
+                              void runManualRequestAction(
+                                selectedRequest,
+                                'create_renewal',
+                              );
+                          }}
+                          className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Criar renovação
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            paymentAction ||
+                            !['PENDING', 'PAYMENT_SENT'].includes(
+                              selectedRequest.status,
+                            )
+                          }
+                          onClick={() =>
+                            void runManualRequestAction(
+                              selectedRequest,
+                              'reject',
+                            )
+                          }
+                          className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Rejeitar pedido
+                        </button>
                       </div>
                     </div>
-                    <p className="mt-2 text-[11px] text-zinc-600">
-                      {request.request_type} · {formatDate(request.created_at)}
-                    </p>
-                  </button>
-                ))}
-                {manualRequests.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
-                    Não existem pedidos neste filtro.
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <h2 className="font-semibold">Detalhes</h2>
-              {selectedRequest ? (
-                <div className="mt-4 space-y-4">
-                  <div className="rounded-xl border border-white/8 bg-black/15 p-4">
-                    <p className="text-sm font-semibold text-zinc-100">
-                      {selectedRequest.customer?.name_complete || 'Cliente'}
-                    </p>
-                    <p className="mt-1 break-all text-xs text-zinc-500">
-                      {selectedRequest.customer?.email || 'Sem email'}
-                    </p>
-                    <p className="mt-3 text-xs text-zinc-500">
-                      {selectedRequest.barbershop?.name ||
-                        selectedRequest.barbershop_id}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">
-                        Plano
-                      </p>
-                      <p className="mt-1 text-sm font-semibold uppercase">
-                        {selectedRequest.plan}
-                      </p>
+                  ) : (
+                    <div className="mt-4 rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
+                      Seleciona um pedido para gerir o pagamento.
                     </div>
-                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">
-                        Estado
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedRequest.status}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">
-                        Preço
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {formatMoney(
-                          selectedRequest.price,
-                          selectedRequest.currency,
-                        )}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/8 bg-black/15 p-3">
-                      <p className="text-[10px] uppercase text-zinc-600">
-                        Período
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedRequest.billing_interval === 'year'
-                          ? 'Anual'
-                          : 'Mensal'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <label className="block space-y-2">
-                    <span className="text-xs font-medium text-zinc-400">
-                      Link de pagamento
-                    </span>
-                    <input
-                      value={paymentLink}
-                      onChange={(event) => setPaymentLink(event.target.value)}
-                      placeholder="https://..."
-                      maxLength={2048}
-                      disabled={
-                        paymentAction ||
-                        !['PENDING', 'PAYMENT_SENT'].includes(
-                          selectedRequest.status,
-                        )
-                      }
-                      className="h-11 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm outline-none focus:border-emerald-400/30 disabled:opacity-50"
-                    />
-                  </label>
-
-                  {selectedRequest.last_email_error ? (
-                    <div className="rounded-xl border border-red-400/15 bg-red-400/[0.05] p-3 text-xs leading-5 text-red-200">
-                      Último erro de email: {selectedRequest.last_email_error}
-                    </div>
-                  ) : null}
-
-                  {selectedRequest.payment_link ? (
-                    <a
-                      href={selectedRequest.payment_link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block truncate text-xs text-zinc-500 hover:text-zinc-200"
-                    >
-                      {selectedRequest.payment_link}
-                    </a>
-                  ) : null}
-
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      disabled={
-                        paymentAction ||
-                        !['PENDING', 'PAYMENT_SENT'].includes(
-                          selectedRequest.status,
-                        ) ||
-                        !paymentLink.trim()
-                      }
-                      onClick={() =>
-                        void runManualRequestAction(
-                          selectedRequest,
-                          selectedRequest.status === 'PAYMENT_SENT'
-                            ? 'resend_payment'
-                            : 'send_payment',
-                        )
-                      }
-                      className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {selectedRequest.status === 'PAYMENT_SENT'
-                        ? 'Reenviar pagamento'
-                        : 'Enviar pagamento'}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={
-                        paymentAction ||
-                        selectedRequest.status !== 'PAYMENT_SENT'
-                      }
-                      onClick={() =>
-                        void runManualRequestAction(
-                          selectedRequest,
-                          'confirm_payment',
-                        )
-                      }
-                      className="min-h-11 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Confirmar pagamento
-                    </button>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      disabled={
-                        paymentAction ||
-                        !['PAID', 'EXPIRED'].includes(selectedRequest.status)
-                      }
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            'Criar um novo pedido de renovação para este plano?',
-                          )
-                        )
-                          void runManualRequestAction(
-                            selectedRequest,
-                            'create_renewal',
-                          );
-                      }}
-                      className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Criar renovação
-                    </button>
-                    <button
-                      type="button"
-                      disabled={
-                        paymentAction ||
-                        !['PENDING', 'PAYMENT_SENT'].includes(
-                          selectedRequest.status,
-                        )
-                      }
-                      onClick={() =>
-                        void runManualRequestAction(selectedRequest, 'reject')
-                      }
-                      className="min-h-11 rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Rejeitar pedido
-                    </button>
-                  </div>
+                  )}
                 </div>
-              ) : (
-                <div className="mt-4 rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-zinc-600">
-                  Seleciona um pedido para gerir o pagamento.
-                </div>
-              )}
-            </div>
-          </section>
-        ) : null}
-
-        {tab === 'api_health' ? (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Activity className="size-4 text-emerald-300" />
-                  <h2 className="text-lg font-semibold">
-                    Saúde operacional da API
-                  </h2>
-                  <span
-                    className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase ${observability?.overall === 'healthy' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : observability?.overall === 'unhealthy' ? 'border-red-400/20 bg-red-400/10 text-red-200' : 'border-amber-400/20 bg-amber-400/10 text-amber-200'}`}
-                  >
-                    {observability?.overall === 'healthy'
-                      ? 'Operacional'
-                      : observability?.overall === 'unhealthy'
-                        ? 'Indisponível'
-                        : 'Atenção'}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs leading-5 text-zinc-500">
-                  Tráfego, erros, latência, dependências e registos HTTP das
-                  últimas 24 horas.
-                </p>
-                {observability ? (
-                  <p className="mt-1 text-[11px] text-zinc-600">
-                    Atualizado: {formatDate(observability.generatedAt)} · modo
-                    de pagamentos:{' '}
-                    {observability.paymentMode === 'STRIPE'
-                      ? 'Stripe'
-                      : 'Manual'}
-                  </p>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={() => void loadObservability()}
-                disabled={observabilityLoading}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm hover:bg-white/[0.08] disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`size-4 ${observabilityLoading ? 'animate-spin' : ''}`}
-                />
-                Atualizar diagnóstico
-              </button>
-            </div>
-
-            {!observability && observabilityLoading ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-10 text-center text-sm text-zinc-500">
-                A recolher métricas e a testar os serviços…
-              </div>
+              </section>
             ) : null}
-            {observability ? (
-              <>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <StatCard
-                    label="Pedidos HTTP · 24h"
-                    value={observability.metrics.requests24h.toLocaleString(
-                      'pt-PT',
-                    )}
-                    meta={`${observability.metrics.logSampleCount.toLocaleString('pt-PT')} registos analisados`}
-                  />
-                  <StatCard
-                    label="Erros de servidor · 24h"
-                    value={observability.metrics.errors5xx24h.toLocaleString(
-                      'pt-PT',
-                    )}
-                    meta={`${observability.metrics.clientErrors24h.toLocaleString('pt-PT')} respostas 4xx`}
-                    tone={
-                      observability.metrics.errors5xx24h > 0 ? 'bad' : 'good'
-                    }
-                  />
-                  <StatCard
-                    label="Taxa de erro 5xx"
-                    value={`${observability.metrics.errorRate.toLocaleString('pt-PT', { maximumFractionDigits: 2 })}%`}
-                    meta="sobre pedidos HTTP registados"
-                    tone={
-                      observability.metrics.errorRate >= 5
-                        ? 'bad'
-                        : observability.metrics.errorRate > 0
-                          ? 'warn'
-                          : 'good'
-                    }
-                  />
-                  <StatCard
-                    label="Latência p95"
-                    value={`${observability.metrics.p95LatencyMs} ms`}
-                    meta={`média ${observability.metrics.avgLatencyMs} ms`}
-                    tone={
-                      observability.metrics.p95LatencyMs >= 1500
-                        ? 'warn'
-                        : 'good'
-                    }
-                  />
-                </div>
-                <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold">
-                        Verificações de serviços
-                      </h3>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        Testes reais de ligação à base de dados e aos
-                        fornecedores configurados. Não fazem alterações nem
-                        cobranças.
-                      </p>
-                    </div>
-                    <span className="text-xs text-zinc-500">
-                      {observability.checks.filter((check) => check.ok).length}/
-                      {observability.checks.length} verificações OK
-                    </span>
-                  </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                    {observability.checks.map((check) => (
-                      <div
-                        key={check.id}
-                        className={`rounded-xl border p-3 ${check.ok ? 'border-emerald-400/15 bg-emerald-400/[0.035]' : check.critical ? 'border-red-400/20 bg-red-400/[0.04]' : 'border-amber-400/15 bg-amber-400/[0.035]'}`}
+
+            {tab === 'api_health' ? (
+              <section className="space-y-5">
+                <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Activity className="size-4 text-emerald-300" />
+                      <h2 className="text-lg font-semibold">
+                        Saúde operacional da API
+                      </h2>
+                      <span
+                        className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase ${observability?.overall === 'healthy' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : observability?.overall === 'unhealthy' ? 'border-red-400/20 bg-red-400/10 text-red-200' : 'border-amber-400/20 bg-amber-400/10 text-amber-200'}`}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-zinc-200">
-                            {check.label}
-                          </p>
-                          <span
-                            className={`shrink-0 text-[10px] font-semibold uppercase ${check.ok ? 'text-emerald-300' : check.critical ? 'text-red-300' : 'text-amber-300'}`}
-                          >
-                            {check.status === 'not_configured'
-                              ? 'Não configurado'
-                              : check.ok
-                                ? 'OK'
-                                : 'Falha'}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs text-zinc-500">
-                          {check.detail ||
-                            (check.ok
-                              ? 'Ligação verificada.'
-                              : 'Verificação falhou.')}
-                        </p>
-                        <p className="mt-2 font-mono text-[10px] text-zinc-600">
-                          {check.durationMs} ms
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  {!observability.telemetryAvailable ? (
-                    <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3 text-xs text-amber-200">
-                      O armazenamento de logs API não está disponível. Confirma
-                      a migração da tabela de telemetria na base de dados.
+                        {observability?.overall === 'healthy'
+                          ? 'Operacional'
+                          : observability?.overall === 'unhealthy'
+                            ? 'Indisponível'
+                            : 'Atenção'}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-zinc-500">
+                      Tráfego, erros, latência, dependências e registos HTTP das
+                      últimas 24 horas.
                     </p>
-                  ) : null}
-                </section>
-                <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold">Endpoints com tráfego</h3>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        Agrupados pela rota e método, sem guardar query strings,
-                        corpos de pedidos ou identificadores dos clientes.
-                      </p>
-                    </div>
-                    <span className="text-xs text-zinc-600">
-                      {observability.routes.length} endpoints observados
-                    </span>
-                  </div>
-                  <div className="mt-4 overflow-x-auto">
-                    <table className="w-full min-w-[760px] text-left text-xs">
-                      <thead className="text-[10px] uppercase tracking-wider text-zinc-600">
-                        <tr>
-                          <th className="pb-3 pr-4">Endpoint</th>
-                          <th className="pb-3 pr-4">Pedidos</th>
-                          <th className="pb-3 pr-4">Erros 5xx</th>
-                          <th className="pb-3 pr-4">Taxa de erro</th>
-                          <th className="pb-3 pr-4">p95</th>
-                          <th className="pb-3">Último pedido</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {observability.routes.map((route) => (
-                          <tr
-                            key={`${route.method}-${route.route}`}
-                            className="border-t border-white/[0.06]"
-                          >
-                            <td className="py-3 pr-4">
-                              <span className="mr-2 rounded bg-white/[0.06] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
-                                {route.method}
-                              </span>
-                              <code className="text-zinc-200">
-                                {route.route}
-                              </code>
-                            </td>
-                            <td className="py-3 pr-4 tabular-nums">
-                              {route.requests}
-                            </td>
-                            <td
-                              className={`py-3 pr-4 tabular-nums ${route.errors ? 'text-red-300' : 'text-zinc-400'}`}
-                            >
-                              {route.errors}
-                            </td>
-                            <td
-                              className={`py-3 pr-4 tabular-nums ${route.errorRate > 0 ? 'text-amber-300' : 'text-emerald-300'}`}
-                            >
-                              {route.errorRate.toLocaleString('pt-PT', {
-                                maximumFractionDigits: 1,
-                              })}
-                              %
-                            </td>
-                            <td className="py-3 pr-4 font-mono text-zinc-400">
-                              {route.p95LatencyMs} ms
-                            </td>
-                            <td className="py-3 text-zinc-500">
-                              {formatDate(route.lastSeenAt)}
-                            </td>
-                          </tr>
-                        ))}
-                        {observability.routes.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={6}
-                              className="py-8 text-center text-zinc-600"
-                            >
-                              Ainda não existem pedidos registados no período.
-                            </td>
-                          </tr>
-                        ) : null}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-                <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <h3 className="font-semibold">Logs de pedidos HTTP</h3>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        Até 2.000 registos recentes, com data, endpoint, estado,
-                        duração, request ID e código de erro seguro.
-                      </p>
-                    </div>
-                    <span className="text-xs text-zinc-600">
-                      {visibleApiLogs.length} apresentados ·{' '}
-                      {observability.logs.length} carregados
-                    </span>
-                  </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_160px]">
-                    <input
-                      value={logSearch}
-                      onChange={(event) => setLogSearch(event.target.value)}
-                      placeholder="Pesquisar endpoint, request ID, estado ou código de erro"
-                      className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs outline-none focus:border-emerald-400/30"
-                    />
-                    <select
-                      value={logLevelFilter}
-                      onChange={(event) =>
-                        setLogLevelFilter(
-                          event.target.value as
-                            'ALL' | 'info' | 'warn' | 'error',
-                        )
-                      }
-                      className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-300 outline-none"
-                    >
-                      <option value="ALL">Todos os níveis</option>
-                      <option value="error">Erro</option>
-                      <option value="warn">Aviso</option>
-                      <option value="info">Informação</option>
-                    </select>
-                  </div>
-                  <div className="mt-4 max-h-[620px] space-y-2 overflow-auto pr-1">
-                    {visibleApiLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="rounded-xl border border-white/[0.07] bg-black/20 p-3"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`rounded px-1.5 py-1 font-mono text-[10px] ${log.statusCode >= 500 ? 'bg-red-400/10 text-red-200' : log.statusCode >= 400 ? 'bg-amber-400/10 text-amber-200' : 'bg-emerald-400/10 text-emerald-200'}`}
-                              >
-                                {log.statusCode}
-                              </span>
-                              <span className="rounded bg-white/[0.05] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
-                                {log.method}
-                              </span>
-                              <code className="break-all text-xs text-zinc-200">
-                                {log.route}
-                              </code>
-                            </div>
-                            <p className="mt-2 break-all font-mono text-[10px] text-zinc-600">
-                              ID: {log.requestId}
-                              {log.errorCode
-                                ? ` · Código: ${log.errorCode}`
-                                : ''}
-                              {log.region ? ` · Região: ${log.region}` : ''}
-                            </p>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p className="font-mono text-xs text-zinc-300">
-                              {log.durationMs} ms
-                            </p>
-                            <p className="mt-1 text-[10px] text-zinc-600">
-                              {formatDate(log.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {visibleApiLogs.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-white/10 py-10 text-center text-xs text-zinc-600">
-                        Não foram encontrados logs com estes filtros.
+                    {observability ? (
+                      <p className="mt-1 text-[11px] text-zinc-600">
+                        Atualizado: {formatDate(observability.generatedAt)} ·
+                        modo de pagamentos:{' '}
+                        {observability.paymentMode === 'STRIPE'
+                          ? 'Stripe'
+                          : 'Manual'}
                       </p>
                     ) : null}
                   </div>
-                </section>
-              </>
-            ) : null}
-          </section>
-        ) : null}
+                  <button
+                    type="button"
+                    onClick={() => void loadObservability()}
+                    disabled={observabilityLoading}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm hover:bg-white/[0.08] disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      className={`size-4 ${observabilityLoading ? 'animate-spin' : ''}`}
+                    />
+                    Atualizar diagnóstico
+                  </button>
+                </div>
 
-        {tab === 'diagnostics' ? (
-          <section className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex items-center gap-2">
-                <Activity className="size-4 text-emerald-300" />
-                <h2 className="font-semibold">Verificações rápidas</h2>
-              </div>
-              <div className="mt-4 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => void runHealth()}
-                  className="flex min-h-11 w-full items-center justify-between rounded-xl border border-white/10 bg-black/15 px-4 text-sm hover:bg-white/[0.04]"
-                >
-                  <span>GET /api/health</span>
-                  <span>
-                    {health
-                      ? `${health.status} · ${health.latencyMs}ms`
-                      : 'Executar'}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void load(query)}
-                  className="flex min-h-11 w-full items-center justify-between rounded-xl border border-white/10 bg-black/15 px-4 text-sm hover:bg-white/[0.04]"
-                >
-                  <span>Resumo administrativo</span>
-                  <span>{loading ? 'A executar…' : 'Executar'}</span>
-                </button>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-amber-400/10 bg-amber-400/[0.025] p-4 sm:p-5">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="size-4 text-amber-300" />
-                <h2 className="font-semibold">Segurança</h2>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-zinc-500">
-                Este painel não aparece na navbar, não é indexável e todas as
-                rotas internas repetem a validação do administrador no servidor.
-              </p>
-              <div className="mt-4 space-y-2 text-xs text-zinc-500">
-                <p>
-                  <span className="text-zinc-300">Autenticação:</span> sessão Supabase
-                  obrigatória
-                </p>
-                <p>
-                  <span className="text-zinc-300">Lista de permissões:</span>{' '}
-                  SILENTRA_PLATFORM_ADMIN_USER_ID / EMAIL
-                </p>
-                <p>
-                  <span className="text-zinc-300">Segredos:</span> nunca expostos
-                  ao browser
-                </p>
-                <p>
-                  <span className="text-zinc-300">Alterações:</span> apenas via
-                  API interna autenticada
-                </p>
-              </div>
-            </div>
-          </section>
-        ) : null}
+                {!observability && observabilityLoading ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-10 text-center text-sm text-zinc-500">
+                    A recolher métricas e a testar os serviços…
+                  </div>
+                ) : null}
+                {observability ? (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <StatCard
+                        label="Pedidos HTTP · 24h"
+                        value={observability.metrics.requests24h.toLocaleString(
+                          'pt-PT',
+                        )}
+                        meta={`${observability.metrics.logSampleCount.toLocaleString('pt-PT')} registos analisados`}
+                      />
+                      <StatCard
+                        label="Erros de servidor · 24h"
+                        value={observability.metrics.errors5xx24h.toLocaleString(
+                          'pt-PT',
+                        )}
+                        meta={`${observability.metrics.clientErrors24h.toLocaleString('pt-PT')} respostas 4xx`}
+                        tone={
+                          observability.metrics.errors5xx24h > 0
+                            ? 'bad'
+                            : 'good'
+                        }
+                      />
+                      <StatCard
+                        label="Taxa de erro 5xx"
+                        value={`${observability.metrics.errorRate.toLocaleString('pt-PT', { maximumFractionDigits: 2 })}%`}
+                        meta="sobre pedidos HTTP registados"
+                        tone={
+                          observability.metrics.errorRate >= 5
+                            ? 'bad'
+                            : observability.metrics.errorRate > 0
+                              ? 'warn'
+                              : 'good'
+                        }
+                      />
+                      <StatCard
+                        label="Latência p95"
+                        value={`${observability.metrics.p95LatencyMs} ms`}
+                        meta={`média ${observability.metrics.avgLatencyMs} ms`}
+                        tone={
+                          observability.metrics.p95LatencyMs >= 1500
+                            ? 'warn'
+                            : 'good'
+                        }
+                      />
+                    </div>
+                    <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h3 className="font-semibold">
+                            Verificações de serviços
+                          </h3>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            Testes reais de ligação à base de dados e aos
+                            fornecedores configurados. Não fazem alterações nem
+                            cobranças.
+                          </p>
+                        </div>
+                        <span className="text-xs text-zinc-500">
+                          {
+                            observability.checks.filter((check) => check.ok)
+                              .length
+                          }
+                          /{observability.checks.length} verificações OK
+                        </span>
+                      </div>
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        {observability.checks.map((check) => (
+                          <div
+                            key={check.id}
+                            className={`rounded-xl border p-3 ${check.ok ? 'border-emerald-400/15 bg-emerald-400/[0.035]' : check.critical ? 'border-red-400/20 bg-red-400/[0.04]' : 'border-amber-400/15 bg-amber-400/[0.035]'}`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-medium text-zinc-200">
+                                {check.label}
+                              </p>
+                              <span
+                                className={`shrink-0 text-[10px] font-semibold uppercase ${check.ok ? 'text-emerald-300' : check.critical ? 'text-red-300' : 'text-amber-300'}`}
+                              >
+                                {check.status === 'not_configured'
+                                  ? 'Não configurado'
+                                  : check.ok
+                                    ? 'OK'
+                                    : 'Falha'}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-xs text-zinc-500">
+                              {check.detail ||
+                                (check.ok
+                                  ? 'Ligação verificada.'
+                                  : 'Verificação falhou.')}
+                            </p>
+                            <p className="mt-2 font-mono text-[10px] text-zinc-600">
+                              {check.durationMs} ms
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      {!observability.telemetryAvailable ? (
+                        <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3 text-xs text-amber-200">
+                          O armazenamento de logs API não está disponível.
+                          Confirma a migração da tabela de telemetria na base de
+                          dados.
+                        </p>
+                      ) : null}
+                    </section>
+                    <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h3 className="font-semibold">
+                            Endpoints com tráfego
+                          </h3>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            Agrupados pela rota e método, sem guardar query
+                            strings, corpos de pedidos ou identificadores dos
+                            clientes.
+                          </p>
+                        </div>
+                        <span className="text-xs text-zinc-600">
+                          {observability.routes.length} endpoints observados
+                        </span>
+                      </div>
+                      <div className="mt-4 overflow-x-auto">
+                        <table className="w-full min-w-[760px] text-left text-xs">
+                          <thead className="text-[10px] uppercase tracking-wider text-zinc-600">
+                            <tr>
+                              <th className="pb-3 pr-4">Endpoint</th>
+                              <th className="pb-3 pr-4">Pedidos</th>
+                              <th className="pb-3 pr-4">Erros 5xx</th>
+                              <th className="pb-3 pr-4">Taxa de erro</th>
+                              <th className="pb-3 pr-4">p95</th>
+                              <th className="pb-3">Último pedido</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {observability.routes.map((route) => (
+                              <tr
+                                key={`${route.method}-${route.route}`}
+                                className="border-t border-white/[0.06]"
+                              >
+                                <td className="py-3 pr-4">
+                                  <span className="mr-2 rounded bg-white/[0.06] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
+                                    {route.method}
+                                  </span>
+                                  <code className="text-zinc-200">
+                                    {route.route}
+                                  </code>
+                                </td>
+                                <td className="py-3 pr-4 tabular-nums">
+                                  {route.requests}
+                                </td>
+                                <td
+                                  className={`py-3 pr-4 tabular-nums ${route.errors ? 'text-red-300' : 'text-zinc-400'}`}
+                                >
+                                  {route.errors}
+                                </td>
+                                <td
+                                  className={`py-3 pr-4 tabular-nums ${route.errorRate > 0 ? 'text-amber-300' : 'text-emerald-300'}`}
+                                >
+                                  {route.errorRate.toLocaleString('pt-PT', {
+                                    maximumFractionDigits: 1,
+                                  })}
+                                  %
+                                </td>
+                                <td className="py-3 pr-4 font-mono text-zinc-400">
+                                  {route.p95LatencyMs} ms
+                                </td>
+                                <td className="py-3 text-zinc-500">
+                                  {formatDate(route.lastSeenAt)}
+                                </td>
+                              </tr>
+                            ))}
+                            {observability.routes.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={6}
+                                  className="py-8 text-center text-zinc-600"
+                                >
+                                  Ainda não existem pedidos registados no
+                                  período.
+                                </td>
+                              </tr>
+                            ) : null}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                    <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          <h3 className="font-semibold">
+                            Logs de pedidos HTTP
+                          </h3>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            Até 2.000 registos recentes, com data, endpoint,
+                            estado, duração, request ID e código de erro seguro.
+                          </p>
+                        </div>
+                        <span className="text-xs text-zinc-600">
+                          {visibleApiLogs.length} apresentados ·{' '}
+                          {observability.logs.length} carregados
+                        </span>
+                      </div>
+                      <div className="mt-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_160px]">
+                        <input
+                          value={logSearch}
+                          onChange={(event) => setLogSearch(event.target.value)}
+                          placeholder="Pesquisar endpoint, request ID, estado ou código de erro"
+                          className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs outline-none focus:border-emerald-400/30"
+                        />
+                        <select
+                          value={logLevelFilter}
+                          onChange={(event) =>
+                            setLogLevelFilter(
+                              event.target.value as
+                                'ALL' | 'info' | 'warn' | 'error',
+                            )
+                          }
+                          className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-xs text-zinc-300 outline-none"
+                        >
+                          <option value="ALL">Todos os níveis</option>
+                          <option value="error">Erro</option>
+                          <option value="warn">Aviso</option>
+                          <option value="info">Informação</option>
+                        </select>
+                      </div>
+                      <div className="mt-4 max-h-[620px] space-y-2 overflow-auto pr-1">
+                        {visibleApiLogs.map((log) => (
+                          <div
+                            key={log.id}
+                            className="rounded-xl border border-white/[0.07] bg-black/20 p-3"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`rounded px-1.5 py-1 font-mono text-[10px] ${log.statusCode >= 500 ? 'bg-red-400/10 text-red-200' : log.statusCode >= 400 ? 'bg-amber-400/10 text-amber-200' : 'bg-emerald-400/10 text-emerald-200'}`}
+                                  >
+                                    {log.statusCode}
+                                  </span>
+                                  <span className="rounded bg-white/[0.05] px-1.5 py-1 font-mono text-[10px] text-zinc-400">
+                                    {log.method}
+                                  </span>
+                                  <code className="break-all text-xs text-zinc-200">
+                                    {log.route}
+                                  </code>
+                                </div>
+                                <p className="mt-2 break-all font-mono text-[10px] text-zinc-600">
+                                  ID: {log.requestId}
+                                  {log.errorCode
+                                    ? ` · Código: ${log.errorCode}`
+                                    : ''}
+                                  {log.region ? ` · Região: ${log.region}` : ''}
+                                </p>
+                              </div>
+                              <div className="shrink-0 text-right">
+                                <p className="font-mono text-xs text-zinc-300">
+                                  {log.durationMs} ms
+                                </p>
+                                <p className="mt-1 text-[10px] text-zinc-600">
+                                  {formatDate(log.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {visibleApiLogs.length === 0 ? (
+                          <p className="rounded-xl border border-dashed border-white/10 py-10 text-center text-xs text-zinc-600">
+                            Não foram encontrados logs com estes filtros.
+                          </p>
+                        ) : null}
+                      </div>
+                    </section>
+                  </>
+                ) : null}
+              </section>
+            ) : null}
+
+            {tab === 'diagnostics' ? (
+              <section className="grid gap-5 lg:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <div className="flex items-center gap-2">
+                    <Activity className="size-4 text-emerald-300" />
+                    <h2 className="font-semibold">Verificações rápidas</h2>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => void runHealth()}
+                      className="flex min-h-11 w-full items-center justify-between rounded-xl border border-white/10 bg-black/15 px-4 text-sm hover:bg-white/[0.04]"
+                    >
+                      <span>GET /api/health</span>
+                      <span>
+                        {health
+                          ? `${health.status} · ${health.latencyMs}ms`
+                          : 'Executar'}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void load(query)}
+                      className="flex min-h-11 w-full items-center justify-between rounded-xl border border-white/10 bg-black/15 px-4 text-sm hover:bg-white/[0.04]"
+                    >
+                      <span>Resumo administrativo</span>
+                      <span>{loading ? 'A executar…' : 'Executar'}</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-amber-400/10 bg-amber-400/[0.025] p-4 sm:p-5">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="size-4 text-amber-300" />
+                    <h2 className="font-semibold">Segurança</h2>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">
+                    Este painel não aparece na navbar, não é indexável e todas
+                    as rotas internas repetem a validação do administrador no
+                    servidor.
+                  </p>
+                  <div className="mt-4 space-y-2 text-xs text-zinc-500">
+                    <p>
+                      <span className="text-zinc-300">Autenticação:</span>{' '}
+                      sessão Supabase obrigatória
+                    </p>
+                    <p>
+                      <span className="text-zinc-300">
+                        Lista de permissões:
+                      </span>{' '}
+                      SILENTRA_PLATFORM_ADMIN_USER_ID / EMAIL
+                    </p>
+                    <p>
+                      <span className="text-zinc-300">Segredos:</span> nunca
+                      expostos ao browser
+                    </p>
+                    <p>
+                      <span className="text-zinc-300">Alterações:</span> apenas
+                      via API interna autenticada
+                    </p>
+                  </div>
+                </div>
+              </section>
+            ) : null}
           </section>
         </div>
       </div>

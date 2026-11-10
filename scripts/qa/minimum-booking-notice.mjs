@@ -51,7 +51,10 @@ assert.match(service, /minimum_booking_notice_minutes/);
 assert.ok(settings.includes('settingsPage.requireBirthDate'));
 assert.match(service, /require_birth_date/);
 assert.ok(booking.includes('shopRelation?.require_birth_date !== false'));
-assert.match(birthDateMigration, /add column if not exists require_birth_date boolean not null default true/i);
+assert.match(
+  birthDateMigration,
+  /add column if not exists require_birth_date boolean not null default true/i,
+);
 assert.ok(birthDateMigration.includes('require_birth_date = case'));
 assert.ok(birthDateMigration.includes("p_config ? 'require_birth_date'"));
 assert.match(

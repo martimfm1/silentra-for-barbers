@@ -222,4 +222,6 @@ assert.doesNotMatch(
   /barbershop\.is_public_in_directory === false\) return null/,
   'Ocultar a barbearia do diretório não pode quebrar o link direto.',
 );
-console.log('✓ Plan limits, feature badges e directory visibility contracts OK');
+console.log(
+  '✓ Plan limits, feature badges e directory visibility contracts OK',
+);

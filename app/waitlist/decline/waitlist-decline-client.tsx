@@ -13,12 +13,16 @@ type Offer = {
   signature: string;
 };
 
-export default function WaitlistDeclineClient({ offer }: { offer: Offer | null }) {
+export default function WaitlistDeclineClient({
+  offer,
+}: {
+  offer: Offer | null;
+}) {
   const { locale } = useLanguage();
   const en = locale === 'en';
-  const [state, setState] = useState<'ready' | 'submitting' | 'success' | 'error'>(
-    offer ? 'ready' : 'error',
-  );
+  const [state, setState] = useState<
+    'ready' | 'submitting' | 'success' | 'error'
+  >(offer ? 'ready' : 'error');
   const [message, setMessage] = useState(
     offer
       ? ''
@@ -32,36 +36,49 @@ export default function WaitlistDeclineClient({ offer }: { offer: Offer | null }
     setState('submitting');
     setMessage('');
     try {
-      const response = await fetch(`/api/shops/${offer.shopId}/waitlist/decline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vacancyId: offer.vacancyId,
-          waitlistId: offer.waitlistId,
-          expires: offer.expires,
-          signature: offer.signature,
-        }),
-      });
+      const response = await fetch(
+        `/api/shops/${offer.shopId}/waitlist/decline`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vacancyId: offer.vacancyId,
+            waitlistId: offer.waitlistId,
+            expires: offer.expires,
+            signature: offer.signature,
+          }),
+        },
+      );
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success) {
         const messages: Record<string, string> = en
           ? {
               INVALID_LINK: 'This confirmation link is invalid.',
-              SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Please try again later.',
+              SERVICE_UNAVAILABLE:
+                'The service is temporarily unavailable. Please try again later.',
               OFFER_EXPIRED: 'This offer has expired.',
               OFFER_UNAVAILABLE: 'This offer is no longer available.',
-              OFFER_ALREADY_UPDATED: 'This offer has already been updated or used.',
+              OFFER_ALREADY_UPDATED:
+                'This offer has already been updated or used.',
               RATE_LIMITED: 'Too many attempts. Please try again later.',
             }
           : {
               INVALID_LINK: 'Este link de confirmação não é válido.',
-              SERVICE_UNAVAILABLE: 'O serviço está temporariamente indisponível. Tenta novamente mais tarde.',
+              SERVICE_UNAVAILABLE:
+                'O serviço está temporariamente indisponível. Tenta novamente mais tarde.',
               OFFER_EXPIRED: 'Esta proposta já expirou.',
               OFFER_UNAVAILABLE: 'Esta proposta já não está disponível.',
-              OFFER_ALREADY_UPDATED: 'Esta proposta já foi atualizada ou utilizada.',
-              RATE_LIMITED: 'Demasiadas tentativas. Tenta novamente mais tarde.',
+              OFFER_ALREADY_UPDATED:
+                'Esta proposta já foi atualizada ou utilizada.',
+              RATE_LIMITED:
+                'Demasiadas tentativas. Tenta novamente mais tarde.',
             };
-        throw new Error(messages[String(payload.code)] || (en ? 'This offer could not be updated.' : 'Não foi possível atualizar esta proposta.'));
+        throw new Error(
+          messages[String(payload.code)] ||
+            (en
+              ? 'This offer could not be updated.'
+              : 'Não foi possível atualizar esta proposta.'),
+        );
       }
       setState('success');
     } catch (error) {
@@ -105,7 +122,10 @@ export default function WaitlistDeclineClient({ offer }: { offer: Offer | null }
           : 'Vamos retirar-te desta proposta para que a barbearia possa oferecer a vaga ao próximo cliente.'}
       </p>
       {state === 'error' && (
-        <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-3 text-sm text-amber-100" role="alert">
+        <p
+          className="mt-4 flex items-start gap-2 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-3 text-sm text-amber-100"
+          role="alert"
+        >
           <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           {message}
         </p>
@@ -120,8 +140,12 @@ export default function WaitlistDeclineClient({ offer }: { offer: Offer | null }
           <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
         ) : null}
         {state === 'submitting'
-          ? en ? 'Updating…' : 'A atualizar…'
-          : en ? 'Yes, decline this offer' : 'Sim, recusar esta vaga'}
+          ? en
+            ? 'Updating…'
+            : 'A atualizar…'
+          : en
+            ? 'Yes, decline this offer'
+            : 'Sim, recusar esta vaga'}
       </Button>
       <p className="mt-3 text-xs leading-5 text-zinc-600">
         {en

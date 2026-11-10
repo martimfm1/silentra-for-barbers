@@ -833,186 +833,192 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   }
 }
 
-  
 /* User-selected dashboard accent: applied to every dashboard route and portal layer. */
 body[data-dashboard-theme='true'] {
-  --dashboard-accent-soft: color-mix(in srgb, var(--dashboard-accent) 14%, transparent);
-  --dashboard-accent-muted: color-mix(in srgb, var(--dashboard-accent) 22%, transparent);
-  --dashboard-accent-border: color-mix(in srgb, var(--dashboard-accent) 36%, transparent);
-  --dashboard-accent-glow: color-mix(in srgb, var(--dashboard-accent) 18%, transparent);
+  --dashboard-accent-soft: color-mix(
+    in srgb,
+    var(--dashboard-accent) 14%,
+    transparent
+  );
+  --dashboard-accent-muted: color-mix(
+    in srgb,
+    var(--dashboard-accent) 22%,
+    transparent
+  );
+  --dashboard-accent-border: color-mix(
+    in srgb,
+    var(--dashboard-accent) 36%,
+    transparent
+  );
+  --dashboard-accent-glow: color-mix(
+    in srgb,
+    var(--dashboard-accent) 18%,
+    transparent
+  );
 }
 
 body[data-dashboard-theme='true'] :focus-visible {
   outline-color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(input[type='checkbox'], input[type='radio']) {
+body[data-dashboard-theme='true']
+  :is(input[type='checkbox'], input[type='radio']) {
   accent-color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  .text-emerald-300,
-  .text-emerald-400,
-  .text-emerald-500,
-  .text-green-300,
-  .text-green-400,
-  .text-green-500
-) {
+body[data-dashboard-theme='true']
+  :is(
+    .text-emerald-300,
+    .text-emerald-400,
+    .text-emerald-500,
+    .text-green-300,
+    .text-green-400,
+    .text-green-500
+  ) {
   color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='bg-emerald-400/10'],
-  [class~='bg-emerald-400/15'],
-  [class~='bg-emerald-400/20'],
-  [class~='bg-emerald-500/10'],
-  [class~='bg-emerald-500/15'],
-  [class~='bg-emerald-500/20'],
-  [class~='bg-green-400/10'],
-  [class~='bg-green-500/10']
-) {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='bg-emerald-400/10'],
+    [class~='bg-emerald-400/15'],
+    [class~='bg-emerald-400/20'],
+    [class~='bg-emerald-500/10'],
+    [class~='bg-emerald-500/15'],
+    [class~='bg-emerald-500/20'],
+    [class~='bg-green-400/10'],
+    [class~='bg-green-500/10']
+  ) {
   background-color: var(--dashboard-accent-soft) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='bg-emerald-400'],
-  [class~='bg-emerald-500'],
-  [class~='bg-emerald-600'],
-  [class~='bg-green-400'],
-  [class~='bg-green-500']
-) {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='bg-emerald-400'],
+    [class~='bg-emerald-500'],
+    [class~='bg-emerald-600'],
+    [class~='bg-green-400'],
+    [class~='bg-green-500']
+  ) {
   background-color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='border-emerald-400/20'],
-  [class~='border-emerald-400/30'],
-  [class~='border-emerald-500/20'],
-  [class~='border-emerald-500/30'],
-  [class~='border-emerald-500/40'],
-  [class~='border-emerald-400/40'],
-  [class~='border-green-400/20'],
-  [class~='border-green-500/20']
-) {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='border-emerald-400/20'],
+    [class~='border-emerald-400/30'],
+    [class~='border-emerald-500/20'],
+    [class~='border-emerald-500/30'],
+    [class~='border-emerald-500/40'],
+    [class~='border-emerald-400/40'],
+    [class~='border-green-400/20'],
+    [class~='border-green-500/20']
+  ) {
   border-color: var(--dashboard-accent-border) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='ring-emerald-400/20'],
-  [class~='ring-emerald-500/20'],
-  [class~='ring-emerald-500/30']
-) {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='ring-emerald-400/20'],
+    [class~='ring-emerald-500/20'],
+    [class~='ring-emerald-500/30']
+  ) {
   --tw-ring-color: var(--dashboard-accent-border) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='hover:bg-emerald-500/10'],
-  [class~='hover:bg-emerald-400/10']
-):hover {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='hover:bg-emerald-500/10'],
+    [class~='hover:bg-emerald-400/10']
+  ):hover {
   background-color: var(--dashboard-accent-soft) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='hover:border-emerald-500/40'],
-  [class~='hover:border-emerald-400/40']
-):hover {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='hover:border-emerald-500/40'],
+    [class~='hover:border-emerald-400/40']
+  ):hover {
   border-color: var(--dashboard-accent-border) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='hover:text-emerald-300'],
-  [class~='hover:text-emerald-400'],
-  [class~='hover:text-emerald-500']
-):hover {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='hover:text-emerald-300'],
+    [class~='hover:text-emerald-400'],
+    [class~='hover:text-emerald-500']
+  ):hover {
   color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='focus-visible:ring-emerald-400'],
-  [class~='focus-visible:ring-emerald-500']
-):focus-visible {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='focus-visible:ring-emerald-400'],
+    [class~='focus-visible:ring-emerald-500']
+  ):focus-visible {
   --tw-ring-color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='from-emerald-500'],
-  [class~='from-emerald-600']
-) {
+body[data-dashboard-theme='true']
+  :is([class~='from-emerald-500'], [class~='from-emerald-600']) {
   --tw-gradient-from: var(--dashboard-accent) var(--tw-gradient-from-position) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='via-emerald-500'],
-  [class~='via-emerald-600']
-) {
+body[data-dashboard-theme='true']
+  :is([class~='via-emerald-500'], [class~='via-emerald-600']) {
   --tw-gradient-via: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='to-emerald-500'],
-  [class~='to-emerald-600']
-) {
+body[data-dashboard-theme='true']
+  :is([class~='to-emerald-500'], [class~='to-emerald-600']) {
   --tw-gradient-to: var(--dashboard-accent) var(--tw-gradient-to-position) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='shadow-emerald-500/10'],
-  [class~='shadow-emerald-500/20']
-) {
+body[data-dashboard-theme='true']
+  :is([class~='shadow-emerald-500/10'], [class~='shadow-emerald-500/20']) {
   --tw-shadow-color: var(--dashboard-accent-glow);
 }
 
 /* Catch utility shades and opacity variants added by individual dashboard pages. */
-body[data-dashboard-theme='true'] :is(
-  [class*='text-emerald-'],
-  [class*='text-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='text-emerald-'], [class*='text-green-']) {
   color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class*='bg-emerald-'],
-  [class*='bg-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='bg-emerald-'], [class*='bg-green-']) {
   background-color: var(--dashboard-accent-soft) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class~='bg-emerald-400'],
-  [class~='bg-emerald-500'],
-  [class~='bg-emerald-600'],
-  [class~='bg-green-400'],
-  [class~='bg-green-500'],
-  [class~='bg-green-600']
-) {
+body[data-dashboard-theme='true']
+  :is(
+    [class~='bg-emerald-400'],
+    [class~='bg-emerald-500'],
+    [class~='bg-emerald-600'],
+    [class~='bg-green-400'],
+    [class~='bg-green-500'],
+    [class~='bg-green-600']
+  ) {
   background-color: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class*='border-emerald-'],
-  [class*='border-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='border-emerald-'], [class*='border-green-']) {
   border-color: var(--dashboard-accent-border) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class*='ring-emerald-'],
-  [class*='ring-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='ring-emerald-'], [class*='ring-green-']) {
   --tw-ring-color: var(--dashboard-accent-border) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class*='stroke-emerald-'],
-  [class*='stroke-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='stroke-emerald-'], [class*='stroke-green-']) {
   stroke: var(--dashboard-accent) !important;
 }
 
-body[data-dashboard-theme='true'] :is(
-  [class*='fill-emerald-'],
-  [class*='fill-green-']
-) {
+body[data-dashboard-theme='true']
+  :is([class*='fill-emerald-'], [class*='fill-green-']) {
   fill: var(--dashboard-accent) !important;
 }
 
@@ -1046,15 +1052,26 @@ body[data-dashboard-theme='true'] :is(
   }
 }
 
-
 /* Animate UI-inspired motion system for every shared Radix modal primitive. */
 @keyframes silentra-modal-overlay-in {
-  from { background-color: rgb(0 0 0 / 0); backdrop-filter: blur(0); }
-  to { background-color: rgb(0 0 0 / 0.65); backdrop-filter: blur(14px); }
+  from {
+    background-color: rgb(0 0 0 / 0);
+    backdrop-filter: blur(0);
+  }
+  to {
+    background-color: rgb(0 0 0 / 0.65);
+    backdrop-filter: blur(14px);
+  }
 }
 @keyframes silentra-modal-overlay-out {
-  from { background-color: rgb(0 0 0 / 0.65); backdrop-filter: blur(14px); }
-  to { background-color: rgb(0 0 0 / 0); backdrop-filter: blur(0); }
+  from {
+    background-color: rgb(0 0 0 / 0.65);
+    backdrop-filter: blur(14px);
+  }
+  to {
+    background-color: rgb(0 0 0 / 0);
+    backdrop-filter: blur(0);
+  }
 }
 @keyframes silentra-dialog-enter {
   0% {
@@ -1086,49 +1103,115 @@ body[data-dashboard-theme='true'] :is(
   }
 }
 @keyframes silentra-sheet-in-right {
-  from { opacity: 0; filter: blur(4px); transform: translate3d(1.5rem, 0, 0) scale(0.985); }
-  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(1.5rem, 0, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 @keyframes silentra-sheet-out-right {
-  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
-  to { opacity: 0; filter: blur(3px); transform: translate3d(1rem, 0, 0) scale(0.985); }
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(1rem, 0, 0) scale(0.985);
+  }
 }
 @keyframes silentra-sheet-in-left {
-  from { opacity: 0; filter: blur(4px); transform: translate3d(-1.5rem, 0, 0) scale(0.985); }
-  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(-1.5rem, 0, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 @keyframes silentra-sheet-out-left {
-  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
-  to { opacity: 0; filter: blur(3px); transform: translate3d(-1rem, 0, 0) scale(0.985); }
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(-1rem, 0, 0) scale(0.985);
+  }
 }
 @keyframes silentra-sheet-in-top {
-  from { opacity: 0; filter: blur(4px); transform: translate3d(0, -1.25rem, 0) scale(0.985); }
-  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, -1.25rem, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 @keyframes silentra-sheet-out-top {
-  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
-  to { opacity: 0; filter: blur(3px); transform: translate3d(0, -1rem, 0) scale(0.985); }
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(0, -1rem, 0) scale(0.985);
+  }
 }
 @keyframes silentra-sheet-in-bottom {
-  from { opacity: 0; filter: blur(4px); transform: translate3d(0, 1.25rem, 0) scale(0.985); }
-  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, 1.25rem, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 @keyframes silentra-sheet-out-bottom {
-  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
-  to { opacity: 0; filter: blur(3px); transform: translate3d(0, 1rem, 0) scale(0.985); }
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(0, 1rem, 0) scale(0.985);
+  }
 }
 
 [data-slot='dialog-overlay'][data-state='open'],
 [data-slot='alert-dialog-overlay'][data-state='open'],
 [data-slot='sheet-overlay'][data-state='open'],
 [data-slot='drawer-overlay'][data-state='open'] {
-  animation: silentra-modal-overlay-in 400ms cubic-bezier(0.215, 0.61, 0.355, 1) both;
+  animation: silentra-modal-overlay-in 400ms cubic-bezier(0.215, 0.61, 0.355, 1)
+    both;
 }
 [data-slot='dialog-overlay'][data-state='closed'],
 [data-slot='alert-dialog-overlay'][data-state='closed'],
 [data-slot='sheet-overlay'][data-state='closed'],
 [data-slot='drawer-overlay'][data-state='closed'] {
-  animation: silentra-modal-overlay-out 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-modal-overlay-out 200ms
+    cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
 }
 [data-slot='dialog-content'][data-state='open'],
 [data-slot='alert-dialog-content'][data-state='open'] {
@@ -1147,25 +1230,29 @@ body[data-dashboard-theme='true'] :is(
   animation: silentra-sheet-in-right 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 [data-slot='sheet-content'][data-side='right'][data-state='closed'] {
-  animation: silentra-sheet-out-right 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-sheet-out-right 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5)
+    both;
 }
 [data-slot='sheet-content'][data-side='left'][data-state='open'] {
   animation: silentra-sheet-in-left 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 [data-slot='sheet-content'][data-side='left'][data-state='closed'] {
-  animation: silentra-sheet-out-left 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-sheet-out-left 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5)
+    both;
 }
 [data-slot='sheet-content'][data-side='top'][data-state='open'] {
   animation: silentra-sheet-in-top 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 [data-slot='sheet-content'][data-side='top'][data-state='closed'] {
-  animation: silentra-sheet-out-top 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-sheet-out-top 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5)
+    both;
 }
 [data-slot='sheet-content'][data-side='bottom'][data-state='open'] {
   animation: silentra-sheet-in-bottom 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 [data-slot='sheet-content'][data-side='bottom'][data-state='closed'] {
-  animation: silentra-sheet-out-bottom 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-sheet-out-bottom 200ms cubic-bezier(0.33, 0.17, 0.67, 0.5)
+    both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1186,7 +1273,6 @@ body[data-dashboard-theme='true'] :is(
     transform: none !important;
   }
 }
-
 
 /* Lightweight, consistent motion for floating Radix surfaces and tooltips. */
 @keyframes silentra-floating-enter {
@@ -1230,7 +1316,8 @@ body[data-dashboard-theme='true'] :is(
 [data-slot='dropdown-menu-content'][data-state='closed'],
 [data-slot='select-content'][data-state='closed'],
 [data-slot='tooltip-content'][data-state='closed'] {
-  animation: silentra-floating-exit 140ms cubic-bezier(0.33, 0.17, 0.67, 0.5) both;
+  animation: silentra-floating-exit 140ms cubic-bezier(0.33, 0.17, 0.67, 0.5)
+    both;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot='popover-content'],
@@ -1242,7 +1329,6 @@ body[data-dashboard-theme='true'] :is(
     transform: none !important;
   }
 }
-
 
 /* React Bits Stroke Text adaptation for the Silentra loading wordmark. */
 @keyframes silentra-stroke-outline {
@@ -1286,15 +1372,30 @@ body[data-dashboard-theme='true'] :is(
   }
 }
 
-
 /* Silentra toast system — shared visual language for success, info, warnings and errors. */
 @keyframes silentra-toast-enter {
-  from { opacity: 0; transform: translate3d(0, -0.65rem, 0) scale(0.97); filter: blur(5px); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.65rem, 0) scale(0.97);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
 }
 @keyframes silentra-toast-exit {
-  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
-  to { opacity: 0; transform: translate3d(0, -0.35rem, 0) scale(0.98); filter: blur(3px); }
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -0.35rem, 0) scale(0.98);
+    filter: blur(3px);
+  }
 }
 [data-sonner-toaster] {
   --width: min(380px, calc(100vw - 2rem));
@@ -1313,10 +1414,16 @@ body[data-dashboard-theme='true'] :is(
   border: 1px solid rgb(255 255 255 / 0.105) !important;
   border-radius: 1.1rem !important;
   background:
-    radial-gradient(ellipse at 0% 0%, var(--toast-tint, rgb(255 255 255 / 0.07)), transparent 68%),
+    radial-gradient(
+      ellipse at 0% 0%,
+      var(--toast-tint, rgb(255 255 255 / 0.07)),
+      transparent 68%
+    ),
     linear-gradient(145deg, rgb(29 29 34 / 0.97), rgb(15 15 18 / 0.96)) !important;
   color: rgb(250 250 250) !important;
-  box-shadow: 0 18px 55px rgb(0 0 0 / 0.34), inset 0 1px 0 rgb(255 255 255 / 0.055) !important;
+  box-shadow:
+    0 18px 55px rgb(0 0 0 / 0.34),
+    inset 0 1px 0 rgb(255 255 255 / 0.055) !important;
   backdrop-filter: blur(24px) saturate(145%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(145%) !important;
   animation: silentra-toast-enter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1396,7 +1503,10 @@ body[data-dashboard-theme='true'] :is(
   border-radius: 0.6rem !important;
   background: rgb(255 255 255 / 0.045) !important;
   color: rgb(161 161 170) !important;
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 }
 .silentra-toast-close:hover {
   border-color: rgb(255 255 255 / 0.16) !important;

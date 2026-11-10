@@ -12,31 +12,99 @@ import { useLanguage } from '@/context/LanguageContext';
 const groups = [
   {
     title: { pt: 'Usar a plataforma', en: 'Using the platform' },
-    description: { pt: 'Regras gerais para contas, equipas e utilização do serviço.', en: 'General rules for accounts, teams, and use of the service.' },
+    description: {
+      pt: 'Regras gerais para contas, equipas e utilização do serviço.',
+      en: 'General rules for accounts, teams, and use of the service.',
+    },
     icon: BookOpen,
     links: [
-      { href: '/terms', title: { pt: 'Termos e Condições', en: 'Terms and Conditions' }, description: { pt: 'O contrato de utilização da Silentra for Barbers.', en: 'The agreement for using Silentra for Barbers.' } },
-      { href: '/acceptable-use', title: { pt: 'Utilização Aceitável', en: 'Acceptable Use' }, description: { pt: 'Segurança, acessos, dados, conteúdos e comportamentos proibidos.', en: 'Security, access, data, content, and prohibited conduct.' } },
-      { href: '/billing-policy', title: { pt: 'Política de Faturação', en: 'Billing Policy' }, description: { pt: 'Planos, pagamentos, renovação, cancelamento e reembolsos.', en: 'Plans, payments, renewals, cancellations, and refunds.' } },
+      {
+        href: '/terms',
+        title: { pt: 'Termos e Condições', en: 'Terms and Conditions' },
+        description: {
+          pt: 'O contrato de utilização da Silentra for Barbers.',
+          en: 'The agreement for using Silentra for Barbers.',
+        },
+      },
+      {
+        href: '/acceptable-use',
+        title: { pt: 'Utilização Aceitável', en: 'Acceptable Use' },
+        description: {
+          pt: 'Segurança, acessos, dados, conteúdos e comportamentos proibidos.',
+          en: 'Security, access, data, content, and prohibited conduct.',
+        },
+      },
+      {
+        href: '/billing-policy',
+        title: { pt: 'Política de Faturação', en: 'Billing Policy' },
+        description: {
+          pt: 'Planos, pagamentos, renovação, cancelamento e reembolsos.',
+          en: 'Plans, payments, renewals, cancellations, and refunds.',
+        },
+      },
     ],
   },
   {
     title: { pt: 'Fazer uma reserva', en: 'Making a booking' },
-    description: { pt: 'Informação para clientes que marcam um serviço numa barbearia.', en: 'Information for customers booking a service at a barbershop.' },
+    description: {
+      pt: 'Informação para clientes que marcam um serviço numa barbearia.',
+      en: 'Information for customers booking a service at a barbershop.',
+    },
     icon: CalendarDays,
     links: [
-      { href: '/booking-terms', title: { pt: 'Política de Reservas', en: 'Booking Policy' }, description: { pt: 'Confirmação, cancelamentos, MB WAY e responsabilidades da barbearia.', en: 'Confirmation, cancellations, MB WAY, and barbershop responsibilities.' } },
+      {
+        href: '/booking-terms',
+        title: { pt: 'Política de Reservas', en: 'Booking Policy' },
+        description: {
+          pt: 'Confirmação, cancelamentos, MB WAY e responsabilidades da barbearia.',
+          en: 'Confirmation, cancellations, MB WAY, and barbershop responsibilities.',
+        },
+      },
     ],
   },
   {
     title: { pt: 'Dados e privacidade', en: 'Data and privacy' },
-    description: { pt: 'Como são tratados dados pessoais e como podes gerir as tuas escolhas.', en: 'How personal data is processed and how you can manage your choices.' },
+    description: {
+      pt: 'Como são tratados dados pessoais e como podes gerir as tuas escolhas.',
+      en: 'How personal data is processed and how you can manage your choices.',
+    },
     icon: LockKeyhole,
     links: [
-      { href: '/privacy', title: { pt: 'Política de Privacidade', en: 'Privacy Policy' }, description: { pt: 'Dados tratados, finalidades, direitos e conservação.', en: 'Data processed, purposes, rights, and retention.' } },
-      { href: '/cookies', title: { pt: 'Política de Cookies', en: 'Cookie Policy' }, description: { pt: 'Tecnologias necessárias, estatísticas, marketing e preferências.', en: 'Necessary technologies, analytics, marketing, and preferences.' } },
-      { href: '/dpa', title: { pt: 'Adenda de Tratamento de Dados (DPA)', en: 'Data Processing Addendum (DPA)' }, description: { pt: 'Condições de tratamento quando a Silentra atua por conta da barbearia.', en: 'Processing terms when Silentra acts on behalf of a barbershop.' } },
-      { href: '/subprocessors', title: { pt: 'Lista de Subprocessadores', en: 'Subprocessor List' }, description: { pt: 'Fornecedores tecnológicos e finalidades do respetivo acesso a dados.', en: 'Technology providers and why they may access data.' } },
+      {
+        href: '/privacy',
+        title: { pt: 'Política de Privacidade', en: 'Privacy Policy' },
+        description: {
+          pt: 'Dados tratados, finalidades, direitos e conservação.',
+          en: 'Data processed, purposes, rights, and retention.',
+        },
+      },
+      {
+        href: '/cookies',
+        title: { pt: 'Política de Cookies', en: 'Cookie Policy' },
+        description: {
+          pt: 'Tecnologias necessárias, estatísticas, marketing e preferências.',
+          en: 'Necessary technologies, analytics, marketing, and preferences.',
+        },
+      },
+      {
+        href: '/dpa',
+        title: {
+          pt: 'Adenda de Tratamento de Dados (DPA)',
+          en: 'Data Processing Addendum (DPA)',
+        },
+        description: {
+          pt: 'Condições de tratamento quando a Silentra atua por conta da barbearia.',
+          en: 'Processing terms when Silentra acts on behalf of a barbershop.',
+        },
+      },
+      {
+        href: '/subprocessors',
+        title: { pt: 'Lista de Subprocessadores', en: 'Subprocessor List' },
+        description: {
+          pt: 'Fornecedores tecnológicos e finalidades do respetivo acesso a dados.',
+          en: 'Technology providers and why they may access data.',
+        },
+      },
     ],
   },
 ];
@@ -48,7 +116,10 @@ export function LegalCentrePage() {
   return (
     <main className="min-h-screen bg-[#09090b] px-4 pb-16 pt-8 text-zinc-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-300 hover:bg-white/[0.08] hover:text-white">
+        <Link
+          href="/"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+        >
           {active === 'pt' ? 'Voltar ao site' : 'Back to website'}
         </Link>
         <header className="mt-8 max-w-3xl">
@@ -69,14 +140,21 @@ export function LegalCentrePage() {
           {groups.map((group) => {
             const Icon = group.icon;
             return (
-              <section key={group.title.pt} className="rounded-3xl border border-white/10 bg-zinc-900/55 p-5 sm:p-7">
+              <section
+                key={group.title.pt}
+                className="rounded-3xl border border-white/10 bg-zinc-900/55 p-5 sm:p-7"
+              >
                 <div className="flex items-start gap-3">
                   <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/[0.07] text-violet-200">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">{group.title[active]}</h2>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">{group.description[active]}</p>
+                    <h2 className="text-lg font-semibold text-white">
+                      {group.title[active]}
+                    </h2>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      {group.description[active]}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -94,7 +172,10 @@ export function LegalCentrePage() {
                           {link.description[active]}
                         </span>
                       </span>
-                      <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-zinc-500 group-hover:text-violet-200" aria-hidden="true" />
+                      <ArrowUpRight
+                        className="mt-0.5 size-4 shrink-0 text-zinc-500 group-hover:text-violet-200"
+                        aria-hidden="true"
+                      />
                     </Link>
                   ))}
                 </div>
@@ -109,10 +190,15 @@ export function LegalCentrePage() {
               {active === 'pt' ? 'Precisas de ajuda?' : 'Need help?'}
             </h2>
             <p className="mt-1 text-sm leading-6 text-zinc-400">
-              {active === 'pt' ? 'Para dúvidas legais ou pedidos de privacidade, escreve-nos.' : 'For legal questions or privacy requests, contact us.'}
+              {active === 'pt'
+                ? 'Para dúvidas legais ou pedidos de privacidade, escreve-nos.'
+                : 'For legal questions or privacy requests, contact us.'}
             </p>
           </div>
-          <a href="mailto:contact.silentra@gmail.com" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white hover:bg-white/[0.1]">
+          <a
+            href="mailto:contact.silentra@gmail.com"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white hover:bg-white/[0.1]"
+          >
             contact.silentra@gmail.com
           </a>
         </section>

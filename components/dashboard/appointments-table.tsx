@@ -73,8 +73,7 @@ export function AppointmentsTable({
               appointment.manual_name ||
               (isEnglish ? 'Customer' : 'Cliente');
             const service =
-              appointment.services?.name ||
-              (isEnglish ? 'Service' : 'Serviço');
+              appointment.services?.name || (isEnglish ? 'Service' : 'Serviço');
             const professional =
               appointment.professionals?.name ||
               (isEnglish ? 'No barber assigned' : 'Sem barbeiro');

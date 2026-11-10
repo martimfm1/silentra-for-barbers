@@ -171,9 +171,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       directives.set('initial-scale', '1');
       directives.set('maximum-scale', '1');
       directives.set('user-scalable', 'no');
-      viewport.content = Array.from(
-        directives,
-        ([key, value]) => (value ? `${key}=${value}` : key),
+      viewport.content = Array.from(directives, ([key, value]) =>
+        value ? `${key}=${value}` : key,
       ).join(', ');
     }
 
@@ -237,7 +236,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }, [accentColor]);
 
   return (
-    <div className="silentra-dashboard-shell" style={{ "--dashboard-accent": accentColor } as React.CSSProperties}>
+    <div
+      className="silentra-dashboard-shell"
+      style={{ '--dashboard-accent': accentColor } as React.CSSProperties}
+    >
       <style dangerouslySetInnerHTML={{ __html: dashboardSurfaceStyles }} />
       <a
         href="#dashboard-main-content"

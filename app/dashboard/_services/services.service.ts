@@ -58,9 +58,7 @@ export const servicesService = {
     if (lookupError) return { error: lookupError };
     if (linkedAppointments?.length) {
       return {
-        error: new Error(
-          'SERVICE_HAS_BOOKINGS',
-        ),
+        error: new Error('SERVICE_HAS_BOOKINGS'),
       };
     }
     const { error } = await supabase.from('services').delete().eq('id', id);

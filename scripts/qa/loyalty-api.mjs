@@ -30,16 +30,13 @@ const checks = [
   },
   {
     file: 'lib/loyalty/session.ts',
-    markers: [
-      'if (error) throw error;',
-      'LOYALTY_SESSION_TOUCH_FAILED',
-    ],
+    markers: ['if (error) throw error;', 'LOYALTY_SESSION_TOUCH_FAILED'],
   },
   {
     file: 'app/api/loyalty/route.ts',
     markers: [
       'currentSettings',
-      'typeof body.enabled === \'boolean\'',
+      "typeof body.enabled === 'boolean'",
       'currentSettings?.points_per_euro ?? 1',
       'moduleErrorResponse',
     ],
@@ -48,8 +45,8 @@ const checks = [
     file: 'app/api/loyalty/validate/route.ts',
     markers: [
       "allowedKeys: ['identifier']",
-      "/^[a-f0-9]{64}$/i.test(rawIdentifier)",
-      "/^[A-HJ-NP-Z2-9]{8}$/i.test(rawIdentifier)",
+      '/^[a-f0-9]{64}$/i.test(rawIdentifier)',
+      '/^[A-HJ-NP-Z2-9]{8}$/i.test(rawIdentifier)',
       'hashLoyaltyToken(identifier)',
     ],
   },
@@ -85,31 +82,21 @@ const checks = [
     file: 'app/api/loyalty/rewards/route.ts',
     markers: [
       'moduleErrorResponse',
-      'typeof activeValue !== \'boolean\'',
+      "typeof activeValue !== 'boolean'",
       'Invalid reward value',
     ],
   },
   {
     file: 'app/api/loyalty/earning-rules/route.ts',
-    markers: [
-      'moduleErrorResponse',
-      'serviceError',
-      'Regra não encontrada.',
-    ],
+    markers: ['moduleErrorResponse', 'serviceError', 'Regra não encontrada.'],
   },
   {
     file: 'app/api/loyalty/redemption/qr/route.ts',
-    markers: [
-      'redemptionError',
-      "'Cache-Control': 'private, no-store'",
-    ],
+    markers: ['redemptionError', "'Cache-Control': 'private, no-store'"],
   },
   {
     file: 'app/api/loyalty/me/route.ts',
-    markers: [
-      'clearLoyaltyCookie()',
-      '{ authenticated: false }',
-    ],
+    markers: ['clearLoyaltyCookie()', '{ authenticated: false }'],
   },
   {
     file: 'app/api/loyalty/redeem/route.ts',
@@ -214,7 +201,7 @@ if (loyaltyValidationPage.includes('setIdentifier(value)')) {
     'app/dashboard/loyalty/validate/page.tsx: scanned QR tokens must not be placed in the manual redemption-code input.',
   );
 }
-if (loyaltyValidationPage.includes("body: JSON.stringify({ slug, identifier")) {
+if (loyaltyValidationPage.includes('body: JSON.stringify({ slug, identifier')) {
   failures.push(
     'app/dashboard/loyalty/validate/page.tsx: the validation API must not receive an unsupported public slug field.',
   );

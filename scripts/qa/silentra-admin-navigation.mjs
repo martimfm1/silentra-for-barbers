@@ -14,7 +14,10 @@ for (const category of [
   "label: 'Acompanhamento'",
   "label: 'Sistema'",
 ]) {
-  assert.ok(consoleSource.includes(category), `Missing navigation category: ${category}`);
+  assert.ok(
+    consoleSource.includes(category),
+    `Missing navigation category: ${category}`,
+  );
 }
 
 for (const route of [
@@ -36,7 +39,10 @@ for (const destination of [
   '/silentra-admin/websites',
   '/silentra-admin/loyalty',
 ]) {
-  assert.ok(consoleSource.includes(destination), `Missing admin tool: ${destination}`);
+  assert.ok(
+    consoleSource.includes(destination),
+    `Missing admin tool: ${destination}`,
+  );
 }
 
 // Responsive navigation, clear active state and section-specific guidance.
@@ -47,8 +53,16 @@ assert.match(consoleSource, /tabDescriptions\[tab\]/);
 assert.match(consoleSource, /Atualizar dados/);
 
 // The overview must group its metrics so the mobile layout is easy to scan.
-for (const heading of ['Resumo executivo', 'Utilização da plataforma', 'Distribuição de planos', 'Desempenho financeiro']) {
-  assert.ok(consoleSource.includes(heading), `Missing overview group: ${heading}`);
+for (const heading of [
+  'Resumo executivo',
+  'Utilização da plataforma',
+  'Distribuição de planos',
+  'Desempenho financeiro',
+]) {
+  assert.ok(
+    consoleSource.includes(heading),
+    `Missing overview group: ${heading}`,
+  );
 }
 
 // Core business and system signals remain visible in the overview.
@@ -65,7 +79,10 @@ for (const metric of [
   'adminIdentityConfigured',
   'stripeConfigured',
 ]) {
-  assert.ok(consoleSource.includes(metric), `Missing SaaS overview signal: ${metric}`);
+  assert.ok(
+    consoleSource.includes(metric),
+    `Missing SaaS overview signal: ${metric}`,
+  );
 }
 
 // Keep the admin authorization gate server-side and use one unified navigation.

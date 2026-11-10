@@ -229,7 +229,10 @@ export function ClientProfileDialog({
               <div className="min-w-0 space-y-4">
                 <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
                   <div className="flex items-center gap-2">
-                    <CalendarDays className="size-4 text-blue-300" aria-hidden="true" />
+                    <CalendarDays
+                      className="size-4 text-blue-300"
+                      aria-hidden="true"
+                    />
                     <h3 className="font-semibold text-white">
                       {t('clientsPage.appointmentHistory')}
                     </h3>
@@ -237,7 +240,10 @@ export function ClientProfileDialog({
 
                   {loading ? (
                     <div className="flex min-h-28 items-center justify-center">
-                      <SilentraLoading variant="compact" message={t('clientsPage.loading')} />
+                      <SilentraLoading
+                        variant="compact"
+                        message={t('clientsPage.loading')}
+                      />
                     </div>
                   ) : history.length === 0 ? (
                     <p className="py-8 text-center text-sm text-zinc-500">
@@ -256,10 +262,14 @@ export function ClientProfileDialog({
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <p className="font-medium text-zinc-100">
-                                  {appointment.services?.name || t('clientsPage.unknownService')}
+                                  {appointment.services?.name ||
+                                    t('clientsPage.unknownService')}
                                 </p>
                                 <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
-                                  <Clock3 className="size-3.5" aria-hidden="true" />
+                                  <Clock3
+                                    className="size-3.5"
+                                    aria-hidden="true"
+                                  />
                                   {formatDateTime(appointment.date_hour)}
                                 </p>
                               </div>
@@ -277,9 +287,13 @@ export function ClientProfileDialog({
                             </div>
                             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-3 text-xs text-zinc-500">
                               <span className="inline-flex min-w-0 items-center gap-1.5">
-                                <Scissors className="size-3.5 shrink-0" aria-hidden="true" />
+                                <Scissors
+                                  className="size-3.5 shrink-0"
+                                  aria-hidden="true"
+                                />
                                 <span className="truncate">
-                                  {appointment.professionals?.name || t('clientsPage.noProfessional')}
+                                  {appointment.professionals?.name ||
+                                    t('clientsPage.noProfessional')}
                                 </span>
                               </span>
                               <span className="flex items-center gap-3">
@@ -307,12 +321,18 @@ export function ClientProfileDialog({
 
                 <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
                   <div className="flex items-center gap-2">
-                    <MessageSquareText className="size-4 text-blue-300" aria-hidden="true" />
+                    <MessageSquareText
+                      className="size-4 text-blue-300"
+                      aria-hidden="true"
+                    />
                     <h3 className="font-semibold text-white">
                       {t('clientsPage.internalNotes')}
                     </h3>
                   </div>
-                  <form onSubmit={(event) => void addNote(event)} className="mt-4 space-y-3">
+                  <form
+                    onSubmit={(event) => void addNote(event)}
+                    className="mt-4 space-y-3"
+                  >
                     <Textarea
                       value={noteDraft}
                       onChange={(event) => setNoteDraft(event.target.value)}
@@ -326,8 +346,16 @@ export function ClientProfileDialog({
                       <span className="text-[11px] text-zinc-600">
                         {noteDraft.length}/5000
                       </span>
-                      <Button type="submit" disabled={savingNote || !noteDraft.trim()} className="min-h-11 gap-2">
-                        {savingNote ? <Spinner className="size-4" /> : <MessageSquareText className="size-4" />}
+                      <Button
+                        type="submit"
+                        disabled={savingNote || !noteDraft.trim()}
+                        className="min-h-11 gap-2"
+                      >
+                        {savingNote ? (
+                          <Spinner className="size-4" />
+                        ) : (
+                          <MessageSquareText className="size-4" />
+                        )}
                         {t('clientsPage.addNote')}
                       </Button>
                     </div>
@@ -340,7 +368,10 @@ export function ClientProfileDialog({
                   ) : (
                     <div className="mt-5 space-y-2">
                       {notes.map((item) => (
-                        <article key={item.id} className="rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:p-4">
+                        <article
+                          key={item.id}
+                          className="rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:p-4"
+                        >
                           <p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">
                             {item.content}
                           </p>
@@ -357,32 +388,51 @@ export function ClientProfileDialog({
               <aside className="min-w-0 space-y-4">
                 <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
                   <div className="flex items-center gap-2">
-                    <UserRound className="size-4 text-blue-300" aria-hidden="true" />
+                    <UserRound
+                      className="size-4 text-blue-300"
+                      aria-hidden="true"
+                    />
                     <h3 className="font-semibold text-white">
                       {t('clientsPage.clientDetails')}
                     </h3>
                   </div>
                   <dl className="mt-4 space-y-4 text-sm">
                     <div>
-                      <dt className="text-xs text-zinc-500">{t('clientsPage.name')}</dt>
-                      <dd className="mt-1 break-words text-zinc-100">{client.name_complete}</dd>
+                      <dt className="text-xs text-zinc-500">
+                        {t('clientsPage.name')}
+                      </dt>
+                      <dd className="mt-1 break-words text-zinc-100">
+                        {client.name_complete}
+                      </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-zinc-500">{t('clientsPage.phone')}</dt>
+                      <dt className="text-xs text-zinc-500">
+                        {t('clientsPage.phone')}
+                      </dt>
                       <dd className="mt-1 flex items-center gap-2 text-zinc-100">
-                        <Phone className="size-3.5 text-zinc-500" aria-hidden="true" />
+                        <Phone
+                          className="size-3.5 text-zinc-500"
+                          aria-hidden="true"
+                        />
                         {client.num_phone || '—'}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-zinc-500">{t('clientsPage.email')}</dt>
+                      <dt className="text-xs text-zinc-500">
+                        {t('clientsPage.email')}
+                      </dt>
                       <dd className="mt-1 flex min-w-0 items-center gap-2 text-zinc-100">
-                        <Mail className="size-3.5 shrink-0 text-zinc-500" aria-hidden="true" />
+                        <Mail
+                          className="size-3.5 shrink-0 text-zinc-500"
+                          aria-hidden="true"
+                        />
                         <span className="break-all">{client.email || '—'}</span>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-zinc-500">{t('clientsPage.birthDate')}</dt>
+                      <dt className="text-xs text-zinc-500">
+                        {t('clientsPage.birthDate')}
+                      </dt>
                       <dd className="mt-1 text-zinc-100">
                         {client.birth_date
                           ? formatDate(`${client.birth_date}T12:00:00`)
@@ -390,9 +440,13 @@ export function ClientProfileDialog({
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-zinc-500">{t('clientsPage.clientSince')}</dt>
+                      <dt className="text-xs text-zinc-500">
+                        {t('clientsPage.clientSince')}
+                      </dt>
                       <dd className="mt-1 text-zinc-100">
-                        {client.created_at ? formatDate(client.created_at) : '—'}
+                        {client.created_at
+                          ? formatDate(client.created_at)
+                          : '—'}
                       </dd>
                     </div>
                   </dl>
@@ -406,7 +460,8 @@ export function ClientProfileDialog({
                     {t('clientsPage.preferencesDescription')}
                   </p>
                   <p className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-black/20 p-3 text-sm leading-6 text-zinc-300">
-                    {client.style_notes?.trim() || t('clientsPage.noPreferences')}
+                    {client.style_notes?.trim() ||
+                      t('clientsPage.noPreferences')}
                   </p>
                 </section>
               </aside>

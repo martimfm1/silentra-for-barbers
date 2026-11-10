@@ -66,14 +66,16 @@ function authorized(request: Request) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) =>
-    ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    })[character] ?? character,
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[character] ?? character,
   );
 }
 
@@ -185,7 +187,8 @@ async function GET__unobserved(request: Request) {
             .eq('id', event.waitlist_id)
             .eq('shop_id', event.shop_id)
             .in('status', ['waiting', 'offered']);
-          if (entryError) throw new Error('WAITLIST_ENTERPRISE_ENTRY_EXPIRY_FAILED');
+          if (entryError)
+            throw new Error('WAITLIST_ENTERPRISE_ENTRY_EXPIRY_FAILED');
 
           // Expiring an already-offered request may reactivate its vacancy through
           // the database trigger, so explicitly close that vacancy afterwards.
@@ -202,7 +205,8 @@ async function GET__unobserved(request: Request) {
             })
             .eq('id', event.vacancy_id)
             .in('status', ['pending', 'dispatching', 'offered']);
-          if (vacancyError) throw new Error('WAITLIST_ENTERPRISE_VACANCY_CLOSE_FAILED');
+          if (vacancyError)
+            throw new Error('WAITLIST_ENTERPRISE_VACANCY_CLOSE_FAILED');
 
           skipped++;
           continue;
@@ -221,7 +225,10 @@ async function GET__unobserved(request: Request) {
           bookingUrl.searchParams.set('booking', '1');
         bookingUrl.searchParams.set('service', event.service_id);
         bookingUrl.searchParams.set('date', event.preferred_date);
-        bookingUrl.searchParams.set('time', formatOfferTime(event.offered_time));
+        bookingUrl.searchParams.set(
+          'time',
+          formatOfferTime(event.offered_time),
+        );
         if (event.professional_id)
           bookingUrl.searchParams.set('professional', event.professional_id);
 
@@ -245,9 +252,9 @@ async function GET__unobserved(request: Request) {
         declineUrl.searchParams.set('expires', String(declineExpires));
         declineUrl.searchParams.set('signature', declineSignature);
 
-        const language: 'pt' | 'en' = String(
-          event.default_language ?? '',
-        ).toLowerCase().startsWith('en')
+        const language: 'pt' | 'en' = String(event.default_language ?? '')
+          .toLowerCase()
+          .startsWith('en')
           ? 'en'
           : 'pt';
         const english = language === 'en';
@@ -255,7 +262,8 @@ async function GET__unobserved(request: Request) {
         const time = formatOfferTime(event.offered_time);
         const expiry = formatExpiry(event.offer_expires_at, language);
         const shopName = event.shop_name?.trim() || profile.name;
-        const serviceName = event.service_name?.trim() || (english ? 'Service' : 'Serviço');
+        const serviceName =
+          event.service_name?.trim() || (english ? 'Service' : 'Serviço');
         const professional = event.professional_name?.trim() || '';
         const subject = english
           ? `A time opened up at ${shopName}`
@@ -270,8 +278,12 @@ async function GET__unobserved(request: Request) {
         const expiryNote = english
           ? `Your priority offer expires at ${expiry} (Lisbon time). After that, the opening may be offered to someone else. You can still check current availability on the booking page.`
           : `A prioridade deste convite termina às ${expiry} (hora de Portugal continental). Depois disso, a vaga poderá ser proposta a outra pessoa. Podes continuar a consultar os horários disponíveis na página de marcação.`;
-        const button = english ? 'Open booking page' : 'Abrir página de marcação';
-        const declineLabel = english ? 'I am not interested in this opening' : 'Não tenho interesse nesta vaga';
+        const button = english
+          ? 'Open booking page'
+          : 'Abrir página de marcação';
+        const declineLabel = english
+          ? 'I am not interested in this opening'
+          : 'Não tenho interesse nesta vaga';
         const declineNote = english
           ? 'You can decline this offer and let the barbershop contact the next customer.'
           : 'Podes recusar esta proposta para que a barbearia contacte o próximo cliente.';
@@ -345,12 +357,18 @@ async function GET__unobserved(request: Request) {
         if (completed !== true) skipped += 1;
       } catch (error) {
         const rawReason =
-          error instanceof Error ? error.message : 'UNKNOWN_WAITLIST_OFFER_ERROR';
+          error instanceof Error
+            ? error.message
+            : 'UNKNOWN_WAITLIST_OFFER_ERROR';
         const reason = /^[A-Z0-9_]{1,80}$/.test(rawReason)
           ? rawReason
           : 'WAITLIST_OFFER_DELIVERY_FAILED';
         if (!deliveryAccepted) {
-          await releaseFailedOffer(admin, event, 'WAITLIST_OFFER_DELIVERY_FAILED');
+          await releaseFailedOffer(
+            admin,
+            event,
+            'WAITLIST_OFFER_DELIVERY_FAILED',
+          );
         }
         failed += 1;
         console.error('[BOOKING_WAITLIST_OFFER_FAILED]', {

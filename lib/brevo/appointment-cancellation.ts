@@ -25,10 +25,19 @@ export async function sendAppointmentCancellationEmail(
 ) {
   const isEnglish = payload.language === 'en';
   const locale = isEnglish ? 'en-GB' : 'pt-PT';
-  const safeClientName = escapeHtml(payload.clientName || (isEnglish ? 'Customer' : 'Cliente'));
-  const subjectShopName = payload.barbershopName.replace(/[\\r\\n]/g, ' ').slice(0, 100);
-  const safeShopName = escapeHtml(payload.barbershopName || (isEnglish ? 'Your barbershop' : 'A tua barbearia'));
-  const safeServiceName = escapeHtml(payload.serviceName || (isEnglish ? 'Service' : 'Serviço'));
+  const safeClientName = escapeHtml(
+    payload.clientName || (isEnglish ? 'Customer' : 'Cliente'),
+  );
+  const subjectShopName = payload.barbershopName
+    .replace(/[\\r\\n]/g, ' ')
+    .slice(0, 100);
+  const safeShopName = escapeHtml(
+    payload.barbershopName ||
+      (isEnglish ? 'Your barbershop' : 'A tua barbearia'),
+  );
+  const safeServiceName = escapeHtml(
+    payload.serviceName || (isEnglish ? 'Service' : 'Serviço'),
+  );
   const safeProfessionalName = payload.professionalName
     ? escapeHtml(payload.professionalName)
     : null;
@@ -47,7 +56,8 @@ export async function sendAppointmentCancellationEmail(
     ? {
         subject: 'Your appointment was cancelled — ' + subjectShopName,
         title: 'Your appointment was cancelled by the barbershop',
-        greeting: 'Hello <strong style="color:#fff;">' + safeClientName + '</strong>,',
+        greeting:
+          'Hello <strong style="color:#fff;">' + safeClientName + '</strong>,',
         message:
           'The barbershop has cancelled your appointment. This booking will no longer take place at the date and time shown below. We apologise for the inconvenience.',
         service: 'Service',
@@ -60,7 +70,8 @@ export async function sendAppointmentCancellationEmail(
     : {
         subject: 'A tua marcação foi cancelada — ' + subjectShopName,
         title: 'A tua marcação foi cancelada pela barbearia',
-        greeting: 'Olá <strong style="color:#fff;">' + safeClientName + '</strong>,',
+        greeting:
+          'Olá <strong style="color:#fff;">' + safeClientName + '</strong>,',
         message:
           'A barbearia cancelou a tua marcação. Este atendimento já não se vai realizar na data e hora indicadas abaixo. Pedimos desculpa pelo incómodo.',
         service: 'Serviço',
@@ -96,16 +107,34 @@ export async function sendAppointmentCancellationEmail(
   const htmlContent = [
     '<!doctype html>',
     '<html lang="' + (isEnglish ? 'en' : 'pt-PT') + '">',
-    '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + copy.title + '</title></head>',
+    '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
+      copy.title +
+      '</title></head>',
     '<body style="margin:0;padding:28px 14px;background:#0c0c0e;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">',
     '<main style="max-width:540px;margin:0 auto;padding:30px;background:#141417;border:1px solid #27272a;border-radius:16px;">',
-    '<p style="margin:0 0 8px;color:#a1a1aa;font-size:12px;">' + safeShopName + '</p>',
-    '<h1 style="margin:0 0 14px;color:#fff;font-size:23px;line-height:1.3;">' + copy.title + '</h1>',
-    '<p style="margin:0 0 12px;color:#e4e4e7;font-size:14px;line-height:1.7;">' + copy.greeting + '</p>',
-    '<p style="margin:0 0 22px;color:#a1a1aa;font-size:14px;line-height:1.7;">' + copy.message + '</p>',
-    '<table role="presentation" style="width:100%;border-collapse:collapse;">' + rows + '</table>',
-    '<p style="margin:22px 0 0;color:#71717a;font-size:11px;">' + copy.reference + ': ' + escapeHtml(payload.appointmentId) + '</p>',
-    '<p style="margin:16px 0 0;padding-top:16px;border-top:1px solid #27272a;color:#71717a;font-size:12px;line-height:1.6;">' + copy.footer + '</p>',
+    '<p style="margin:0 0 8px;color:#a1a1aa;font-size:12px;">' +
+      safeShopName +
+      '</p>',
+    '<h1 style="margin:0 0 14px;color:#fff;font-size:23px;line-height:1.3;">' +
+      copy.title +
+      '</h1>',
+    '<p style="margin:0 0 12px;color:#e4e4e7;font-size:14px;line-height:1.7;">' +
+      copy.greeting +
+      '</p>',
+    '<p style="margin:0 0 22px;color:#a1a1aa;font-size:14px;line-height:1.7;">' +
+      copy.message +
+      '</p>',
+    '<table role="presentation" style="width:100%;border-collapse:collapse;">' +
+      rows +
+      '</table>',
+    '<p style="margin:22px 0 0;color:#71717a;font-size:11px;">' +
+      copy.reference +
+      ': ' +
+      escapeHtml(payload.appointmentId) +
+      '</p>',
+    '<p style="margin:16px 0 0;padding-top:16px;border-top:1px solid #27272a;color:#71717a;font-size:12px;line-height:1.6;">' +
+      copy.footer +
+      '</p>',
     '</main></body></html>',
   ].join('\n');
 

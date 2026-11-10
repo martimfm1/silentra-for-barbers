@@ -257,9 +257,16 @@ async function detectImageMime(file: File): Promise<string | null> {
 
     if (
       brands.some((brand) =>
-        ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1'].includes(
-          brand,
-        ),
+        [
+          'heic',
+          'heix',
+          'hevc',
+          'hevx',
+          'heim',
+          'heis',
+          'mif1',
+          'msf1',
+        ].includes(brand),
       )
     ) {
       return 'image/heic';
@@ -386,13 +393,8 @@ function convertToWebp(
       }
 
       const convertedBlob = await response.blob();
-      if (
-        convertedBlob.type !== 'image/webp' ||
-        convertedBlob.size === 0
-      ) {
-        throw new Error(
-          'O servidor não devolveu uma imagem WebP válida.',
-        );
+      if (convertedBlob.type !== 'image/webp' || convertedBlob.size === 0) {
+        throw new Error('O servidor não devolveu uma imagem WebP válida.');
       }
 
       return convertedBlob;
@@ -450,10 +452,7 @@ function convertToWebp(
             normalizedQuality,
           );
 
-          if (
-            webpBlob?.type === 'image/webp' &&
-            webpBlob.size > 0
-          ) {
+          if (webpBlob?.type === 'image/webp' && webpBlob.size > 0) {
             finish(webpBlob);
             return;
           }

@@ -31,7 +31,7 @@ type CalendarBlockRow = {
 };
 
 function relation(value: Relation): NamedRelation | null {
-  return Array.isArray(value) ? value[0] ?? null : value;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
 function escapeIcs(value: string): string {
@@ -87,7 +87,10 @@ function getLisbonOffsetMinutes(instant: Date): number {
 }
 
 function lisbonLocalDateTime(date: string, time: string): Date | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !/^\d{2}:\d{2}(:\d{2})?$/.test(time)
+  ) {
     return null;
   }
 
@@ -97,9 +100,7 @@ function lisbonLocalDateTime(date: string, time: string): Date | null {
   const firstGuess = new Date(
     wallClockUtc - getLisbonOffsetMinutes(new Date(wallClockUtc)) * 60_000,
   );
-  return new Date(
-    wallClockUtc - getLisbonOffsetMinutes(firstGuess) * 60_000,
-  );
+  return new Date(wallClockUtc - getLisbonOffsetMinutes(firstGuess) * 60_000);
 }
 
 function lisbonDate(value: Date): string {
@@ -342,7 +343,4 @@ async function GET__unobserved(request: Request) {
   });
 }
 
-export const GET = withApiObservability(
-  '/api/calendar/feed',
-  GET__unobserved,
-);
+export const GET = withApiObservability('/api/calendar/feed', GET__unobserved);

@@ -88,7 +88,10 @@ type Settings = {
   dpr?: number;
 };
 
-type Program = { program: WebGLProgram; uniforms: Record<string, WebGLUniformLocation | null> };
+type Program = {
+  program: WebGLProgram;
+  uniforms: Record<string, WebGLUniformLocation | null>;
+};
 
 const INTRO_SECONDS = 1.8;
 
@@ -247,7 +250,8 @@ void main() {
   outColor = vec4(mapped, max(mapped.r, max(mapped.g, mapped.b)));
 }`;
 
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
 
 const compile = (gl: WebGL2RenderingContext, type: number, source: string) => {
   const shader = gl.createShader(type);
@@ -361,7 +365,7 @@ const LightTunnel = ({
     intro,
     variation,
     lightMode,
-    dpr
+    dpr,
   };
   const settingsRef = useRef(settings);
 
@@ -373,7 +377,7 @@ const LightTunnel = ({
       premultipliedAlpha: true,
       antialias: false,
       depth: false,
-      stencil: false
+      stencil: false,
     });
     if (!container || !canvas || !gl) return undefined;
 
@@ -385,11 +389,17 @@ const LightTunnel = ({
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 3, -1, -1, 3]),
+      gl.STATIC_DRAW,
+    );
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-    const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    const probe = document
+      .createElement('canvas')
+      .getContext('2d', { willReadFrequently: true });
     const cache = new Map<string, number[]>();
     const parse = (value: string | undefined, fallback: number[]): number[] => {
       if (!value) return fallback;
@@ -409,7 +419,8 @@ const LightTunnel = ({
       return rgb;
     };
 
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const reduce =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const pointer = { x: 0, y: 0, inside: false };
     const steer = { x: 0, y: 0 };
     const surge = { age: 10 };
@@ -431,7 +442,10 @@ const LightTunnel = ({
       const span = 3.4;
       const travel = surge.age * 2.6;
       const surgeDepth = flow > 0 ? span - travel : -0.6 + travel;
-      const surgeLevel = surge.age < 2.4 ? Math.min(1, surge.age / 0.12) * Math.exp(-surge.age * 1.1) : 0;
+      const surgeLevel =
+        surge.age < 2.4
+          ? Math.min(1, surge.age / 0.12) * Math.exp(-surge.age * 1.1)
+          : 0;
       const eased = reveal * reveal * (3 - 2 * reveal);
       gl.viewport(0, 0, width, height);
       gl.useProgram(program.program);
@@ -445,7 +459,10 @@ const LightTunnel = ({
       gl.uniform2f(u.uSteer, steer.x, steer.y);
       gl.uniform1f(u.uBend, s.bend * 0.45);
       gl.uniform1f(u.uCount, s.cableCount);
-      gl.uniform1f(u.uSwing, (Math.sin(drift * 0.9) * s.sway * 0.5) / (Math.PI * 2));
+      gl.uniform1f(
+        u.uSwing,
+        (Math.sin(drift * 0.9) * s.sway * 0.5) / (Math.PI * 2),
+      );
       gl.uniform1f(u.uWave, s.waviness * 0.15);
       gl.uniform1f(u.uWidth, (0.25 + s.thickness * 1.5) * ratio);
       gl.uniform1f(u.uPulseWidth, 0.6 + s.pulseWidth * 0.9);
@@ -490,7 +507,8 @@ const LightTunnel = ({
       time += dt * s.speed * motion;
       drift += dt * (s.speed + 0.2) * motion;
       surge.age += dt;
-      if (s.intro && !reduce && reveal < 1) reveal = Math.min(1, reveal + dt / INTRO_SECONDS);
+      if (s.intro && !reduce && reveal < 1)
+        reveal = Math.min(1, reveal + dt / INTRO_SECONDS);
       else if (!s.intro || reduce) reveal = 1;
 
       const engaged = s.mouseInteraction && pointer.inside && !reduce;
@@ -501,14 +519,17 @@ const LightTunnel = ({
       steer.y += (target[1] - steer.y) * follow;
 
       render();
-      const settled = Math.abs(target[0] - steer.x) < 0.0005 && Math.abs(target[1] - steer.y) < 0.0005;
+      const settled =
+        Math.abs(target[0] - steer.x) < 0.0005 &&
+        Math.abs(target[1] - steer.y) < 0.0005;
       const busy = motion > 0 || !settled || reveal < 1 || surge.age < 2.4;
       if (busy) raf = requestAnimationFrame(frame);
       else last = 0;
     };
 
     const wake = () => {
-      if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+      if (!raf && visible && !document.hidden)
+        raf = requestAnimationFrame(frame);
     };
 
     const resize = () => {
@@ -559,8 +580,8 @@ const LightTunnel = ({
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
-    const intersection = new IntersectionObserver(entries => {
-      visible = entries.some(entry => entry.isIntersecting);
+    const intersection = new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting);
       if (visible) {
         last = 0;
         wake();
@@ -596,7 +617,10 @@ const LightTunnel = ({
       window.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
-      document.documentElement.removeEventListener('pointerleave', onPointerLeave);
+      document.documentElement.removeEventListener(
+        'pointerleave',
+        onPointerLeave,
+      );
       document.removeEventListener('visibilitychange', onVisibility);
       gl.deleteProgram(program.program);
       gl.deleteBuffer(buffer);
@@ -613,11 +637,17 @@ const LightTunnel = ({
   return (
     <div
       ref={containerRef}
-      className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
+      className={['relative h-full w-full overflow-hidden', className]
+        .filter(Boolean)
+        .join(' ')}
       style={style}
       {...rest}
     >
-      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" aria-hidden="true" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 block h-full w-full"
+        aria-hidden="true"
+      />
     </div>
   );
 };

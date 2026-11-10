@@ -7,14 +7,23 @@ const [detailDialog, agendaPage, rescheduleRoute] = await Promise.all([
   readFile('app/api/appointments/[appointmentId]/reschedule/route.ts', 'utf8'),
 ]);
 
-assert.match(detailDialog, /appointment\.status === 'pending' \|\|\s*appointment\.status === 'scheduled'/);
+assert.match(
+  detailDialog,
+  /appointment\.status === 'pending' \|\|\s*appointment\.status === 'scheduled'/,
+);
 assert.match(detailDialog, /type="date"/);
 assert.match(detailDialog, /type="time"/);
-assert.match(detailDialog, /onReschedule\(appointment\.id, editDate, editTime\)/);
+assert.match(
+  detailDialog,
+  /onReschedule\(appointment\.id, editDate, editTime\)/,
+);
 assert.match(detailDialog, /A marcação continuará pendente de confirmação/);
 assert.match(detailDialog, /A marcação continuará confirmada/);
 
-assert.match(agendaPage, /\/api\/appointments\/\$\{encodeURIComponent\(appointmentId\)\}\/reschedule/);
+assert.match(
+  agendaPage,
+  /\/api\/appointments\/\$\{encodeURIComponent\(appointmentId\)\}\/reschedule/,
+);
 assert.match(agendaPage, /method: 'PATCH'/);
 assert.match(agendaPage, /payload\.notificationSent/);
 assert.match(agendaPage, /onReschedule={handleRescheduleAppointment}/);

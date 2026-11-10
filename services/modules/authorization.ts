@@ -64,8 +64,7 @@ export async function requireModuleContext(
     throw new ModuleAuthorizationError('FEATURE_NOT_INCLUDED');
   }
 
-  if (!access.barbershopId)
-    throw new ModuleAuthorizationError('FORBIDDEN');
+  if (!access.barbershopId) throw new ModuleAuthorizationError('FORBIDDEN');
 
   const role = String(access.role ?? 'barber').toLowerCase();
 

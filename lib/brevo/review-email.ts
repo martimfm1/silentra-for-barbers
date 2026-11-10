@@ -25,8 +25,13 @@ export async function sendBookingReviewRequestEmail(
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL ?? process.env.BREVO_FROM_EMAIL;
   if (!apiKey || !senderEmail) {
-    console.error('[BREVO_REVIEW_ERROR] Variáveis BREVO_API_KEY ou SENDER_EMAIL ausentes.');
-    return { success: false, error: 'Configuração do servidor de e-mail incompleta.' };
+    console.error(
+      '[BREVO_REVIEW_ERROR] Variáveis BREVO_API_KEY ou SENDER_EMAIL ausentes.',
+    );
+    return {
+      success: false,
+      error: 'Configuração do servidor de e-mail incompleta.',
+    };
   }
 
   const safeClientName = escapeHtml(payload.clientName);
@@ -34,31 +39,35 @@ export async function sendBookingReviewRequestEmail(
   const safeBarbershopName = escapeHtml(payload.barbershopName);
   const safeReviewUrl = escapeHtml(payload.reviewUrl);
   const isEnglish = payload.language === 'en';
-  const copy = isEnglish ? {
-    subject: `Your opinion matters — ${payload.barbershopName}`,
-    eyebrow: 'A MOMENT FOR YOUR FEEDBACK',
-    title: 'How was your experience?',
-    greeting: `Hi <strong style="color:#18181b;">${safeClientName}</strong>, thanks for visiting us. We hope you enjoyed your appointment.`,
-    prompt: 'Would you take a moment to tell us how it went?',
-    serviceLabel: 'YOUR SERVICE',
-    button: 'Rate my experience',
-    reassurance: 'It only takes a minute',
-    footer: 'Your review is completely optional and will only be shared publicly after you submit it.',
-    signature: 'Thank you for choosing us.',
-    textTitle: 'How was your experience?',
-  } : {
-    subject: `A tua opinião é importante — ${payload.barbershopName}`,
-    eyebrow: 'UM MOMENTO PARA A TUA OPINIÃO',
-    title: 'Como foi a tua experiência?',
-    greeting: `Olá <strong style="color:#18181b;">${safeClientName}</strong>, obrigado por teres escolhido os nossos serviços. Esperamos que tenhas gostado do atendimento.`,
-    prompt: 'Tens um minuto para nos dizer como correu?',
-    serviceLabel: 'O TEU SERVIÇO',
-    button: 'Avaliar a minha experiência',
-    reassurance: 'Demora apenas um minuto',
-    footer: 'A avaliação é totalmente opcional e só será partilhada publicamente depois de a submeteres.',
-    signature: 'Obrigado pela tua preferência.',
-    textTitle: 'Como foi a tua experiência?',
-  };
+  const copy = isEnglish
+    ? {
+        subject: `Your opinion matters — ${payload.barbershopName}`,
+        eyebrow: 'A MOMENT FOR YOUR FEEDBACK',
+        title: 'How was your experience?',
+        greeting: `Hi <strong style="color:#18181b;">${safeClientName}</strong>, thanks for visiting us. We hope you enjoyed your appointment.`,
+        prompt: 'Would you take a moment to tell us how it went?',
+        serviceLabel: 'YOUR SERVICE',
+        button: 'Rate my experience',
+        reassurance: 'It only takes a minute',
+        footer:
+          'Your review is completely optional and will only be shared publicly after you submit it.',
+        signature: 'Thank you for choosing us.',
+        textTitle: 'How was your experience?',
+      }
+    : {
+        subject: `A tua opinião é importante — ${payload.barbershopName}`,
+        eyebrow: 'UM MOMENTO PARA A TUA OPINIÃO',
+        title: 'Como foi a tua experiência?',
+        greeting: `Olá <strong style="color:#18181b;">${safeClientName}</strong>, obrigado por teres escolhido os nossos serviços. Esperamos que tenhas gostado do atendimento.`,
+        prompt: 'Tens um minuto para nos dizer como correu?',
+        serviceLabel: 'O TEU SERVIÇO',
+        button: 'Avaliar a minha experiência',
+        reassurance: 'Demora apenas um minuto',
+        footer:
+          'A avaliação é totalmente opcional e só será partilhada publicamente depois de a submeteres.',
+        signature: 'Obrigado pela tua preferência.',
+        textTitle: 'Como foi a tua experiência?',
+      };
 
   const htmlContent = `<!doctype html>
 <html lang="${isEnglish ? 'en' : 'pt-PT'}">
@@ -94,7 +103,11 @@ export async function sendBookingReviewRequestEmail(
   try {
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
-      headers: { accept: 'application/json', 'content-type': 'application/json', 'api-key': apiKey },
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'api-key': apiKey,
+      },
       body: JSON.stringify({
         sender: { name: payload.barbershopName, email: senderEmail },
         to: [{ email: payload.to, name: payload.clientName }],
@@ -103,14 +116,26 @@ export async function sendBookingReviewRequestEmail(
         textContent,
       }),
     });
-    const data = (await response.json()) as { messageId?: string; message?: string };
+    const data = (await response.json()) as {
+      messageId?: string;
+      message?: string;
+    };
     if (!response.ok) {
       console.error('[BREVO_REVIEW_API_ERROR]', data);
-      return { success: false, error: data.message || 'Falha ao enviar o pedido de avaliação.' };
+      return {
+        success: false,
+        error: data.message || 'Falha ao enviar o pedido de avaliação.',
+      };
     }
     return { success: true, messageId: data.messageId };
   } catch (error) {
     console.error('[BREVO_REVIEW_FETCH_ERROR]', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Erro ao comunicar com a API do Brevo.' };
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Erro ao comunicar com a API do Brevo.',
+    };
   }
 }

@@ -68,11 +68,14 @@ export const enCopy = {
     everyMonth: 'Every month',
     repeatUntil: 'Repeat until',
     recurrenceHint: 'Bookings will be created up to this date.',
-    recurrenceOffHint: 'Repeat the same service, day and time as a booking series.',
+    recurrenceOffHint:
+      'Repeat the same service, day and time as a booking series.',
     recurringEndAfterStart: 'The end date must be after the first booking.',
-    recurringAtLeastOne: 'Choose an end date that includes at least one repeat.',
+    recurringAtLeastOne:
+      'Choose an end date that includes at least one repeat.',
     recurringLimit: 'A series can contain up to 52 bookings.',
-    recurringConflict: 'One of the time slots is already taken. No bookings in the series were created.',
+    recurringConflict:
+      'One of the time slots is already taken. No bookings in the series were created.',
     recurringCreated: '{count} recurring bookings created successfully.',
   },
   inviteCode: {
@@ -237,48 +240,65 @@ export const enCopy = {
 
   communicationPage: {
     messagesTitle: 'One-to-one messages',
-    messagesDescription: 'Contact a customer directly with a personalised message and preview it before sending.',
+    messagesDescription:
+      'Contact a customer directly with a personalised message and preview it before sending.',
     messagesAction: 'Send a message',
-    messagesDetail: 'Best for individual confirmations, thank-yous and personal follow-ups.',
+    messagesDetail:
+      'Best for individual confirmations, thank-yous and personal follow-ups.',
     campaignsTitle: 'Campaigns',
-    campaignsDescription: 'Prepare a message for multiple customers, review the content and track delivery.',
+    campaignsDescription:
+      'Prepare a message for multiple customers, review the content and track delivery.',
     campaignsAction: 'Manage campaigns',
-    campaignsDetail: 'Use campaigns for news, general updates and loyalty initiatives.',
+    campaignsDetail:
+      'Use campaigns for news, general updates and loyalty initiatives.',
     automationsTitle: 'Automations',
-    automationsDescription: 'Choose when the platform should contact customers without repeating manual tasks.',
+    automationsDescription:
+      'Choose when the platform should contact customers without repeating manual tasks.',
     automationsAction: 'Set up automations',
-    automationsDetail: 'Includes birthdays and messages tied to important moments in the customer relationship.',
+    automationsDetail:
+      'Includes birthdays and messages tied to important moments in the customer relationship.',
     eyebrow: 'Barbershop communication',
     title: 'Keep your barbershop connected to its customers.',
-    description: 'Choose the right tool for each situation. Fewer missed messages, less repetitive work and stronger relationships with the people who visit your shop.',
+    description:
+      'Choose the right tool for each situation. Fewer missed messages, less repetitive work and stronger relationships with the people who visit your shop.',
     primaryAction: 'Send a message',
     emailAvailable: 'Email available',
     smsUnavailable: 'Manual SMS unavailable',
     pushOperational: 'Push for operational alerts',
     workspaceEyebrow: 'Tools',
     workspaceTitle: 'What do you need to do?',
-    workspaceDescription: 'Each tool has a clear purpose and opens the relevant workflow directly.',
+    workspaceDescription:
+      'Each tool has a clear purpose and opens the relevant workflow directly.',
     threeTools: '3 tools',
     viewPlans: 'View plans',
     playbookEyebrow: 'Best practices',
     playbookTitle: 'Useful communication in three moments',
-    playbookDescription: 'A few well-timed messages can help reduce missed appointments and keep regular customers coming back.',
+    playbookDescription:
+      'A few well-timed messages can help reduce missed appointments and keep regular customers coming back.',
     beforeVisitTitle: 'Before the visit',
-    beforeVisitDescription: 'Send a clear reminder before the appointment and make it easy for customers to get in touch if they need to change the time.',
+    beforeVisitDescription:
+      'Send a clear reminder before the appointment and make it easy for customers to get in touch if they need to change the time.',
     afterVisitTitle: 'After the visit',
-    afterVisitDescription: 'Thank customers for visiting and invite them back without sending pushy messages.',
+    afterVisitDescription:
+      'Thank customers for visiting and invite them back without sending pushy messages.',
     winBackTitle: 'Stay connected',
-    winBackDescription: 'Use birthdays and automations thoughtfully to reconnect with customers who already know your shop.',
+    winBackDescription:
+      'Use birthdays and automations thoughtfully to reconnect with customers who already know your shop.',
     channelEyebrow: 'Available channels',
     channelTitle: 'Know what is active',
-    channelDescription: 'The platform only shows capabilities that are currently available.',
+    channelDescription:
+      'The platform only shows capabilities that are currently available.',
     emailTitle: 'Email',
-    emailDescription: 'Available for one-to-one messages and campaigns, depending on plan and configuration.',
+    emailDescription:
+      'Available for one-to-one messages and campaigns, depending on plan and configuration.',
     pushTitle: 'Push notifications',
-    pushDescription: 'Used for operational alerts to barbers, such as new bookings.',
+    pushDescription:
+      'Used for operational alerts to barbers, such as new bookings.',
     smsTitle: 'SMS and WhatsApp',
-    smsDescription: 'Direct sending through these channels is not currently available in this area. We do not promise sending that is not configured.',
-    privacyNote: 'Send promotional communications only when you have an appropriate lawful basis. Respect customer preferences and do-not-contact requests, and avoid excessive messaging.',
+    smsDescription:
+      'Direct sending through these channels is not currently available in this area. We do not promise sending that is not configured.',
+    privacyNote:
+      'Send promotional communications only when you have an appropriate lawful basis. Respect customer preferences and do-not-contact requests, and avoid excessive messaging.',
   },
 
   dashboard: {
@@ -319,23 +339,27 @@ export const enCopy = {
     statusScheduled: 'Confirmed',
     statusPending: 'Pending',
     statusCancelled: 'Cancelled',
-    detailDescription: 'Booking history, preferences and contact information for this client.',
+    detailDescription:
+      'Booking history, preferences and contact information for this client.',
     totalBookings: 'Total bookings',
     completedVisits: 'Completed visits',
     lastVisit: 'Last visit',
     appointmentHistory: 'Booking history',
-    noAppointmentHistory: 'There are no bookings in this customer’s history yet.',
+    noAppointmentHistory:
+      'There are no bookings in this customer’s history yet.',
     unknownService: 'Unknown service',
     noProfessional: 'No professional assigned',
     internalNotes: 'Internal notes',
-    notePlaceholder: 'Record preferences, observations or important information...',
+    notePlaceholder:
+      'Record preferences, observations or important information...',
     addNote: 'Add note',
     noNotes: 'There are no notes for this customer yet.',
     clientDetails: 'Customer details',
     email: 'Email',
     clientSince: 'Customer since',
     preferences: 'Preferences',
-    preferencesDescription: 'Notes about the customer’s style, haircuts and preferences.',
+    preferencesDescription:
+      'Notes about the customer’s style, haircuts and preferences.',
     noPreferences: 'No preferences have been recorded yet.',
     upcomingAppointments: 'Upcoming appointments',
     noUpcomingAppointments: 'There are no upcoming appointments.',
@@ -378,7 +402,8 @@ export const enCopy = {
     planEnd: 'End',
     planPaymentHistory: 'Monthly payment history',
     planEmptyTitle: 'This customer does not have a plan yet.',
-    planEmptyDescription: 'Create a custom monthly fee and track included uses and payments directly from this profile.',
+    planEmptyDescription:
+      'Create a custom monthly fee and track included uses and payments directly from this profile.',
     planAdd: 'Add plan',
     planPrevious: 'Previous plans',
     planPausedStatus: 'Paused',
@@ -386,15 +411,18 @@ export const enCopy = {
     planResume: 'Resume',
     planEditTitle: 'Edit plan',
     planCreateTitle: 'Create custom plan',
-    planFormDescription: 'Set the monthly fee, included uses and eligible services.',
+    planFormDescription:
+      'Set the monthly fee, included uses and eligible services.',
     planName: 'Plan name',
     planNamePlaceholder: 'E.g. Monthly plan — 2 haircuts',
     planIncluded: 'Appointments included per month',
     planStartDate: 'Start date',
-    planServicesHint: 'Leave every service unchecked to include all services. Otherwise, only selected services count towards the plan.',
+    planServicesHint:
+      'Leave every service unchecked to include all services. Otherwise, only selected services count towards the plan.',
     planNoServices: 'No services have been configured yet.',
     planNotes: 'Notes',
-    planNotesPlaceholder: 'Special conditions or details agreed with the customer…',
+    planNotesPlaceholder:
+      'Special conditions or details agreed with the customer…',
     planCancel: 'Cancel',
     planSave: 'Save changes',
     planCreate: 'Create plan',
@@ -669,33 +697,44 @@ export const enCopy = {
     subtitle:
       'Configure how clients earn points, what they can redeem, and validate rewards at the counter.',
     refresh: 'Refresh loyalty',
-    invalidSettings: 'Check the values: points per euro must be greater than 0 and bonus points cannot be negative.',
+    invalidSettings:
+      'Check the values: points per euro must be greater than 0 and bonus points cannot be negative.',
     invalidRewardName: 'Enter a reward name (up to 120 characters).',
-    invalidRewardPoints: 'Required points must be a whole number greater than 0.',
-    invalidRewardValue: 'Reward value must be a number greater than or equal to 0.',
+    invalidRewardPoints:
+      'Required points must be a whole number greater than 0.',
+    invalidRewardValue:
+      'Reward value must be a number greater than or equal to 0.',
     rewardStatusError: 'Unable to update the reward status.',
     rewardReactivated: 'Reward reactivated.',
-    deactivateRewardDescription: 'The reward will no longer be available for new redemptions. You can reactivate it later.',
+    deactivateRewardDescription:
+      'The reward will no longer be available for new redemptions. You can reactivate it later.',
     deactivateRewardAction: 'Deactivate reward',
     deactivateRewardConfirm: 'Deactivate this reward?',
-    validateShortcutDescription: 'Scan the voucher’s private QR code or enter its redemption code.',
-    pointsShortcutDescription: 'Choose how many points each completed service awards.',
-    programSetupDescription: 'Set how customers earn points, including sign-up and referral bonuses.',
-    activeProgramDescription: 'Customers can join, earn points and redeem the available rewards.',
+    validateShortcutDescription:
+      'Scan the voucher’s private QR code or enter its redemption code.',
+    pointsShortcutDescription:
+      'Choose how many points each completed service awards.',
+    programSetupDescription:
+      'Set how customers earn points, including sign-up and referral bonuses.',
+    activeProgramDescription:
+      'Customers can join, earn points and redeem the available rewards.',
     pointsRateHint: 'Points awarded for each eligible euro spent.',
     unsavedSettings: 'You have unsaved changes.',
     settingsUpToDate: 'Your rules are saved.',
-    programSummaryDescription: 'A quick overview of your configured rules and rewards.',
+    programSummaryDescription:
+      'A quick overview of your configured rules and rewards.',
     activeRewardsLabel: 'Active rewards',
     welcomePointsLabel: 'Welcome points',
     welcomePointsHint: 'Points awarded when a customer joins the programme.',
     rewardCatalogueEyebrow: 'Catalogue',
     rewardsTitle: 'Available rewards',
-    rewardsManagementDescription: 'Keep rewards simple and easy to understand. Customers see the points required before redeeming.',
+    rewardsManagementDescription:
+      'Keep rewards simple and easy to understand. Customers see the points required before redeeming.',
     rewardValueHint: 'e.g. 5',
     inactiveRewardsLabel: 'Inactive rewards',
     noActiveRewards: 'You have no active rewards.',
-    noActiveRewardsHint: 'Create a reward or reactivate one you have already configured.',
+    noActiveRewardsHint:
+      'Create a reward or reactivate one you have already configured.',
     editReward: 'Edit',
     deactivate: 'Deactivate',
     reactivate: 'Reactivate',
@@ -898,7 +937,8 @@ export const enCopy = {
     saveError: 'Unable to save these options.',
     saved: 'Changes saved.',
     autoRemindersTitle: 'Send an automatic reminder 24 hours before',
-    autoRemindersDescription: 'Email the customer on the day before their appointment. Only confirmed bookings are included, and this can be turned off at any time.',
+    autoRemindersDescription:
+      'Email the customer on the day before their appointment. Only confirmed bookings are included, and this can be turned off at any time.',
     autoRemindersAria: 'Enable automatic email reminders',
     autoConfirmTitle: 'Automatically confirm new bookings',
     autoConfirmDescription:
@@ -920,7 +960,8 @@ export const enCopy = {
     description:
       'Set how many points each service earns when a booking is completed.',
     validateReward: 'Validate reward',
-    earningHint: 'Points are awarded when a booking for the selected service is completed. Each booking can earn points only once.',
+    earningHint:
+      'Points are awarded when a booking for the selected service is completed. Each booking can earn points only once.',
     manageRewards: 'Manage rewards',
   },
   earningRules: {
@@ -1019,7 +1060,8 @@ export const enCopy = {
     publicSlug: 'Custom public URL',
     slugPlaceholder: 'your-barbershop-name',
     slugHint: 'Use 3 to 60 characters. Letters, numbers, and hyphens only.',
-    proFeatureHint: 'URL and caption customization is available on Pro and Enterprise plans.',
+    proFeatureHint:
+      'URL and caption customization is available on Pro and Enterprise plans.',
     saveSettings: 'Save changes',
     popupError: 'Allow pop-ups to print.',
     documentTitle: '{name} — QR code',
@@ -1149,15 +1191,20 @@ export const enCopy = {
     bookingSuccess: 'Booking completed successfully!',
     prepaymentOption: 'Prepay with MB WAY',
     requestPrepayment: 'Request prepayment',
-    prepaymentOptionDescription: 'Get priority for your time slot. The booking is confirmed only after the barbershop verifies the payment.',
+    prepaymentOptionDescription:
+      'Get priority for your time slot. The booking is confirmed only after the barbershop verifies the payment.',
     prepaymentAmount: 'Amount to pay',
     prepaymentNumber: 'MB WAY number',
     prepaymentPendingTitle: 'Prepayment request created',
-    prepaymentPendingDescription: 'Your time slot is held for 15 minutes while you send the proof of payment. The booking is confirmed only after the barbershop verifies the payment.',
+    prepaymentPendingDescription:
+      'Your time slot is held for 15 minutes while you send the proof of payment. The booking is confirmed only after the barbershop verifies the payment.',
     sendProofWhatsApp: 'Send proof via WhatsApp',
-    prepaymentEmailNotice: 'Once the barber confirms that the payment was received, you will get an email confirming your booking.',
-    prepaymentExpiry: 'Send your proof by {time}. If the payment is not verified by then, the time slot will be released.',
-    prepaymentSubmitted: 'Prepayment request created. Send your proof via WhatsApp.',
+    prepaymentEmailNotice:
+      'Once the barber confirms that the payment was received, you will get an email confirming your booking.',
+    prepaymentExpiry:
+      'Send your proof by {time}. If the payment is not verified by then, the time slot will be released.',
+    prepaymentSubmitted:
+      'Prepayment request created. Send your proof via WhatsApp.',
     whatsappProofMessage: 'Hello! Here is my MB WAY prepayment proof.',
     chooseBarberDayService: 'Choose a barber, day and service.',
     closeBooking: 'Close booking',
@@ -1317,11 +1364,14 @@ export const enCopy = {
   barbershopDeletion: {
     dangerZone: 'Danger zone',
     title: 'Permanently delete barbershop',
-    description: 'This permanently deletes the barbershop, bookings, team, services, associated customers, settings, files and all other business data. Your Silentra account remains active but will no longer have a barbershop attached.',
+    description:
+      'This permanently deletes the barbershop, bookings, team, services, associated customers, settings, files and all other business data. Your Silentra account remains active but will no longer have a barbershop attached.',
     openButton: 'Delete barbershop',
     confirmTitle: 'Are you sure you want to delete this barbershop?',
-    confirmDescription: 'To protect your account, first confirm your password. We will then send a security code to your account email.',
-    codeDescription: 'Enter the 6-digit code sent to your account email. Your password will also be checked before deletion.',
+    confirmDescription:
+      'To protect your account, first confirm your password. We will then send a security code to your account email.',
+    codeDescription:
+      'Enter the 6-digit code sent to your account email. Your password will also be checked before deletion.',
     password: 'Account password',
     emailCode: 'Email security code',
     codeExpiry: 'The code is valid for 10 minutes and can only be used once.',

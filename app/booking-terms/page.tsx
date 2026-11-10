@@ -7,11 +7,13 @@ const CANONICAL_URL = 'https://barbers.silentra.me/booking-terms';
 
 export const metadata: Metadata = {
   title: 'Política de Reservas',
-  description: 'Informação sobre reservas, confirmação, cancelamentos, pré-pagamento MB WAY e dados utilizados na marcação.',
+  description:
+    'Informação sobre reservas, confirmação, cancelamentos, pré-pagamento MB WAY e dados utilizados na marcação.',
   alternates: { canonical: CANONICAL_URL },
   openGraph: {
     title: 'Política de Reservas | Silentra for Barbers',
-    description: 'Informação sobre reservas, confirmação, cancelamentos, pré-pagamento MB WAY e dados utilizados na marcação.',
+    description:
+      'Informação sobre reservas, confirmação, cancelamentos, pré-pagamento MB WAY e dados utilizados na marcação.',
     url: CANONICAL_URL,
     siteName: 'Silentra',
     locale: 'pt_PT',
@@ -33,17 +35,26 @@ export default function BookingTermsPage() {
       highlights={[
         {
           label: { pt: 'Quem presta o serviço', en: 'Service provider' },
-          value: { pt: 'A barbearia escolhida é responsável pelo serviço e pelas condições da marcação.', en: 'The selected barbershop is responsible for the service and booking conditions.' },
+          value: {
+            pt: 'A barbearia escolhida é responsável pelo serviço e pelas condições da marcação.',
+            en: 'The selected barbershop is responsible for the service and booking conditions.',
+          },
           icon: <Store className="size-4" />,
         },
         {
           label: { pt: 'Cancelamentos', en: 'Cancellations' },
-          value: { pt: 'O prazo e as condições são definidos pela barbearia e apresentados antes da confirmação.', en: 'Notice periods and conditions are set by the barbershop and shown before confirmation.' },
+          value: {
+            pt: 'O prazo e as condições são definidos pela barbearia e apresentados antes da confirmação.',
+            en: 'Notice periods and conditions are set by the barbershop and shown before confirmation.',
+          },
           icon: <CalendarCheck className="size-4" />,
         },
         {
           label: { pt: 'Pré-pagamento', en: 'Prepayment' },
-          value: { pt: 'Quando existe MB WAY, o pagamento é feito diretamente à barbearia.', en: 'Where MB WAY is offered, payment is made directly to the barbershop.' },
+          value: {
+            pt: 'Quando existe MB WAY, o pagamento é feito diretamente à barbearia.',
+            en: 'Where MB WAY is offered, payment is made directly to the barbershop.',
+          },
           icon: <CreditCard className="size-4" />,
         },
       ]}
