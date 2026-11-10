@@ -94,22 +94,6 @@ const days = [
   ['Saturday', 'Saturday', 'Sábado'],
   ['Sunday', 'Sunday', 'Domingo'],
 ] as const;
-const amenitiesKeys = [
-  'wifi',
-  'wheelchair_accessible',
-  'accessible_entrance',
-  'accessible_toilet',
-  'kids_friendly',
-  'waiting_area',
-  'restroom',
-  'air_conditioning',
-  'card_payments',
-  'walk_ins',
-  'coffee',
-  'water',
-  'pet_friendly',
-  'appointment_required',
-] as const;
 const normalize = (v: Partial<Config>): Config => ({
   name: v.name ?? '',
   phone: v.phone ?? '',
@@ -642,59 +626,6 @@ export default function SettingsPageOrganized() {
                       })}
                     </p>
                   )}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {amenitiesKeys.map((k) => (
-                      <button
-                        key={k}
-                        type="button"
-                        aria-pressed={amenities[k]}
-                        onClick={() =>
-                          setAmenities((a) => ({ ...a, [k]: !a[k] }))
-                        }
-                        className={cn(
-                          'flex min-h-12 items-center justify-between rounded-xl border px-4 text-left text-sm',
-                          amenities[k]
-                            ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
-                            : 'border-white/10 bg-white/[.02] text-zinc-400',
-                        )}
-                      >
-                        {t(`settingsPage.amenities.${k}`)}
-                        {amenities[k] && <Check className="size-4" />}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="grid gap-2 sm:max-w-md">
-                    <p className="text-sm font-medium">
-                      {t('settingsPage.parking')}
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(
-                        [
-                          ['none', t('settingsPage.noParking')],
-                          ['free', t('settingsPage.freeParking')],
-                          ['paid', t('settingsPage.paidParking')],
-                        ] as const
-                      ).map(([v, l]) => (
-                        <button
-                          key={v}
-                          type="button"
-                          role="radio"
-                          aria-checked={amenities.parking === v}
-                          onClick={() =>
-                            setAmenities((a) => ({ ...a, parking: v }))
-                          }
-                          className={cn(
-                            'min-h-11 rounded-xl border text-sm',
-                            amenities.parking === v
-                              ? 'border-emerald-400/30 bg-emerald-400/[.08] text-emerald-200'
-                              : 'border-white/10 bg-white/[.02] text-zinc-400',
-                          )}
-                        >
-                          {l}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                   </CardContent>
                 </Card>
               </div>
