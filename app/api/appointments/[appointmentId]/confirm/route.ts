@@ -60,7 +60,7 @@ async function POST__unobserved(
     ) {
       await admin
         .from('appointments')
-        .update({ status: 'cancelled', payment_status: 'expired', cancelled_at: new Date().toISOString(), cancellation_reason: 'Pré-pagamento MB WAY não validado dentro do prazo.' })
+        .update({ status: 'cancelled', payment_status: 'expired', cancelled_at: new Date().toISOString(), cancellation_reason: 'Pré-pagamento MB WAY não validado dentro do prazo.', cancellation_actor: 'system', cancellation_actor_name: 'Sistema' })
         .eq('id', appointmentId)
         .eq('barbershop_id', barbershopId)
         .eq('status', 'pending');

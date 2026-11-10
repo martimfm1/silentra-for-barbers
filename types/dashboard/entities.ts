@@ -37,6 +37,10 @@ export interface Appointment {
   manual_phone?: string | null;
   manual_email?: string | null;
   manual_birth_date?: string | null;
+  cancelled_at?: string | null;
+  cancellation_reason?: string | null;
+  cancellation_actor?: 'staff' | 'customer' | string | null;
+  cancellation_actor_name?: string | null;
   value_products?: number;
   description_products?: string;
   payment_method?: 'mbway' | 'card' | string;

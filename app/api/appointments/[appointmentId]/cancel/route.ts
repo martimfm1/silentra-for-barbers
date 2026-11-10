@@ -95,6 +95,13 @@ async function DELETE__unobserved(
         { status: 503 },
       );
 
+    const { data: cancellingUser } = await tenant.admin
+      .from('users')
+      .select('name_complete')
+      .eq('id', tenant.userId)
+      .eq('barbershop_id', tenant.barbershopId)
+      .maybeSingle();
+
     const cancelledAt = new Date().toISOString();
     const isPrepaymentReview =
       currentAppointment?.payment_status === 'awaiting_review';
@@ -111,6 +118,8 @@ async function DELETE__unobserved(
       .update({
         status: 'cancelled',
         cancelled_at: cancelledAt,
+        cancellation_actor: 'staff',
+        cancellation_actor_name: cancellingUser?.name_complete?.trim() || tenant.role,
         ...paymentReviewUpdate,
       })
       .eq('id', appointmentId)

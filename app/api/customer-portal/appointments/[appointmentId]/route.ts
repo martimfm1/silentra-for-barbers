@@ -296,6 +296,8 @@ async function DELETE__unobserved(
         status: 'cancelled',
         cancelled_at: new Date().toISOString(),
         cancellation_reason: 'Cancelamento pelo cliente através do portal',
+        cancellation_actor: 'customer',
+        cancellation_actor_name: session.email,
       })
       .eq('id', appointment.id)
       .in('status', ['pending', 'scheduled'])
