@@ -43,6 +43,9 @@ const inputClass =
 type Profile = {
   slug: string;
   custom_slug: string | null;
+  city: string;
+  price: number;
+  tags: string[];
   public_profile_enabled: boolean;
   seo_title: string | null;
   seo_description: string | null;
@@ -213,6 +216,9 @@ const PUBLIC_PROFILE_COPY = {
       'Define o que os clientes precisam de saber antes de visitar ou reservar.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Informações do estabelecimento',
+    publicBasics: 'Informações públicas',
+    publicBasicsDescription: 'Define a localidade, o preço de referência e os serviços que aparecem no perfil público.',
+    city: 'Cidade ou localidade', price: 'Preço de referência (€)', tags: 'Serviços e características', tagsHint: 'Separa os elementos por vírgulas. Máximo de 12.',
     amenitiesDescription:
       'Seleciona as opções verdadeiras para a tua barbearia. Só as opções selecionadas aparecem publicamente.',
     selectedCount: (count: number) =>
@@ -251,6 +257,9 @@ const PUBLIC_PROFILE_COPY = {
       'Set the information customers should know before visiting or booking.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Business information',
+    publicBasics: 'Public information',
+    publicBasicsDescription: 'Set the location, reference price and services shown on your public profile.',
+    city: 'City or location', price: 'Reference price (€)', tags: 'Services and features', tagsHint: 'Separate items with commas. Up to 12.',
     amenitiesDescription:
       'Select the options that apply to your barbershop. Only selected options appear publicly.',
     selectedCount: (count: number) =>
@@ -289,6 +298,9 @@ export default function PublicProfileSettingsPage() {
     : AMENITIES;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [slug, setSlug] = useState('');
+  const [city, setCity] = useState('');
+  const [price, setPrice] = useState(15);
+  const [tags, setTags] = useState<string[]>(['Corte', 'Barba']);
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [ogImageUrl, setOgImageUrl] = useState('');
@@ -309,6 +321,9 @@ export default function PublicProfileSettingsPage() {
       const next = body.data as Profile;
       setProfile(next);
       setSlug(next.custom_slug || next.slug || '');
+      setCity(next.city || '');
+      setPrice(Number(next.price ?? 15));
+      setTags(Array.isArray(next.tags) ? next.tags : []);
       setSeoTitle(next.seo_title || '');
       setSeoDescription(next.seo_description || '');
       setOgImageUrl(next.og_image_url || '');
@@ -337,6 +352,9 @@ export default function PublicProfileSettingsPage() {
             ? { seoTitle, seoDescription, ogImageUrl }
             : {}),
           amenities,
+          city,
+          price,
+          tags,
         }),
       });
       const body = await response.json().catch(() => ({}));
@@ -400,6 +418,18 @@ export default function PublicProfileSettingsPage() {
             {copy.plan[profile.plan]}
           </span>
         </header>
+
+        <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-7" aria-labelledby="public-basics-title">
+          <div>
+            <h2 id="public-basics-title" className="font-semibold">{copy.publicBasics}</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-500">{copy.publicBasicsDescription}</p>
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm text-zinc-300">{copy.city}<Input value={city} onChange={(event) => setCity(event.target.value)} maxLength={100} className={inputClass} /></label>
+            <label className="grid gap-2 text-sm text-zinc-300">{copy.price}<Input type="number" min={0} max={10000} step={0.5} value={price} onChange={(event) => setPrice(event.target.value === '' ? 0 : Number(event.target.value))} className={inputClass} /></label>
+            <label className="grid gap-2 text-sm text-zinc-300 sm:col-span-2">{copy.tags}<Input value={tags.join(', ')} onChange={(event) => setTags(event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean).slice(0, 12))} placeholder="Corte, Barba, Degradê" className={inputClass} /><span className="text-xs text-zinc-600">{copy.tagsHint}</span></label>
+          </div>
+        </section>
 
         <section
           className="rounded-3xl border border-white/10 bg-white/[0.025] p-5 sm:p-7"
