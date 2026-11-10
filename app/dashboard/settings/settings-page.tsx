@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  CalendarCheck2,
   Camera,
   Check,
   ImageIcon,
@@ -74,7 +73,6 @@ type Config = {
   require_birth_date: boolean;
   allow_online_bookings: boolean;
   is_public_in_directory: boolean;
-  time_limit_cancellation_hours: number;
   auto_confirm_bookings: boolean;
   auto_confirm_manual_bookings: boolean;
   auto_complete_bookings: boolean;
@@ -108,10 +106,6 @@ const normalize = (v: Partial<Config>): Config => ({
   require_birth_date: v.require_birth_date !== false,
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
-  time_limit_cancellation_hours: Math.max(
-    0,
-    Math.min(720, Number(v.time_limit_cancellation_hours ?? 24)),
-  ),
   auto_confirm_bookings: v.auto_confirm_bookings === true,
   auto_confirm_manual_bookings: v.auto_confirm_manual_bookings !== false,
   auto_complete_bookings: v.auto_complete_bookings === true,
@@ -890,36 +884,6 @@ export default function SettingsPageOrganized() {
                       onCheckedChange={(value) => set({ require_birth_date: value })}
                       aria-label={t('settingsPage.requireBirthDate')}
                     />
-                  </div>
-                  <div className="border-t border-white/10 pt-5">
-                    <div className="flex items-center gap-2">
-                      <CalendarCheck2 className="size-4 text-amber-300" />
-                      <label htmlFor="settings-cancellation-window" className="text-sm font-medium">
-                        {t('settingsPage.cancellationWindow')}
-                      </label>
-                    </div>
-                    <Input
-                      id="settings-cancellation-window"
-                      type="number"
-                      min={0}
-                      max={720}
-                      step={1}
-                      value={config.time_limit_cancellation_hours}
-                      aria-label={t('settingsPage.cancellationWindow')}
-                      onChange={(e) =>
-                        set({
-                          time_limit_cancellation_hours: Number(e.target.value),
-                        })
-                      }
-                      className={`${INPUT_CLASS} mt-4 max-w-48`}
-                    />
-                    <p className="mt-2 max-w-xl text-xs leading-5 text-zinc-500">
-                      {config.time_limit_cancellation_hours === 0
-                        ? t('settingsPage.cancellationWindowNoLimit')
-                        : t('settingsPage.cancellationWindowHelp', {
-                            hours: config.time_limit_cancellation_hours,
-                          })}
-                    </p>
                   </div>
                   </CardContent>
                 </Card>
