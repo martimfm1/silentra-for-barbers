@@ -699,7 +699,7 @@ export function AppointmentDetailDialog({
                                   : isEnglish
                                     ? 'This booking and every later active booking in this recurring series will be cancelled.'
                                     : 'Esta marcação e todas as marcações futuras ativas desta série serão canceladas.'}
-                                {' '}{isEnglish ? 'The customer will receive a cancellation email for each booking.' : 'O cliente receberá um email de cancelamento por cada marcação.'}
+                                {' '}{isEnglish ? 'No cancellation emails will be sent for series cancellations.' : 'Não serão enviados emails de cancelamento quando cancelares uma série.'}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="flex-col-reverse sm:flex-row">
