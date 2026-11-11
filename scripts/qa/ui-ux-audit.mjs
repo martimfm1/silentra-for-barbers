@@ -2,12 +2,17 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
-const [agendaLayoutSettings, publicProfileSettingsCard, publicProfileRoute] =
-  await Promise.all([
-    read('app/dashboard/settings/agenda-view-settings.tsx'),
-    read('app/dashboard/settings/public-profile/public-profile-settings-card.tsx'),
-    read('app/dashboard/settings/public-profile/page.tsx'),
-  ]);
+const [
+  agendaLayoutSettings,
+  publicProfileSettingsCard,
+  publicProfileRoute,
+  publicProfileApi,
+] = await Promise.all([
+  read('app/dashboard/settings/agenda-view-settings.tsx'),
+  read('app/dashboard/settings/public-profile/public-profile-settings-card.tsx'),
+  read('app/dashboard/settings/public-profile/page.tsx'),
+  read('app/api/barbershops/public-profile/route.ts'),
+]);
 
 const [
   dashboardConfirmProvider,
@@ -225,6 +230,11 @@ assert.match(agendaLayoutSettings, /setView\('lines'\)/);
 assert.match(agendaLayoutSettings, /setView\('calendar'\)/);
 assert.match(publicProfileSettingsCard, /Visibilidade no diretório/);
 assert.match(publicProfileSettingsCard, /directoryVisible/);
+assert.match(publicProfileSettingsCard, /public_profile_enabled/);
+assert.match(publicProfileSettingsCard, /publicProfileEnabled/);
+assert.match(publicProfileSettingsCard, /publicPageVisibility/);
+assert.match(publicProfileApi, /'publicProfileEnabled'/);
+assert.match(publicProfileApi, /updates\.public_profile_enabled = body\.publicProfileEnabled/);
 assert.match(publicProfileSettingsCard, /Guardar alterações no topo das Definições/);
 assert.ok(publicProfileRoute.includes("redirect('/dashboard/settings#public-profile')"));
 assert.match(settingsPage, /time_limit_cancellation_hours/);
