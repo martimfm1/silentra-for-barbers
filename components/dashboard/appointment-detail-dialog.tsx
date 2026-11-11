@@ -44,6 +44,10 @@ type Props = {
     time: string,
   ) => Promise<boolean>;
   onCancel: (appointmentId: string) => Promise<boolean>;
+  onCancelSeries?: (
+    appointmentId: string,
+    scope: 'future' | 'all',
+  ) => Promise<boolean>;
   locale?: string;
 };
 
@@ -196,6 +200,7 @@ export function AppointmentDetailDialog({
   onOpenChange,
   onReschedule,
   onCancel,
+  onCancelSeries,
   locale = 'pt',
 }: Props) {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
@@ -205,6 +210,9 @@ export function AppointmentDetailDialog({
   const [isCancelConfirmationOpen, setIsCancelConfirmationOpen] =
     useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [seriesCancelScope, setSeriesCancelScope] = useState<
+    'future' | 'all' | null
+  >(null);
 
   useEffect(() => {
     if (!appointment) return;
@@ -230,6 +238,8 @@ export function AppointmentDetailDialog({
   const canReschedule =
     appointment.status === 'pending' || appointment.status === 'scheduled';
   const canCancel = canReschedule;
+  const canCancelSeries =
+    canCancel && Boolean(appointment.recurrence_series_id) && Boolean(onCancelSeries);
   const originalDate = toLocalDateInputValue(appointment.date_hour);
   const originalTime = toLocalTimeInputValue(appointment.date_hour);
   const today = toLocalDateInputValue(new Date());
@@ -256,6 +266,23 @@ export function AppointmentDetailDialog({
       if (completed) setIsEditingSchedule(false);
     } finally {
       setIsSavingSchedule(false);
+    }
+  };
+
+  const handleSeriesCancellation = async () => {
+    if (!seriesCancelScope || !canCancelSeries || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      const cancelled = await onCancelSeries?.(
+        appointment.id,
+        seriesCancelScope,
+      );
+      if (cancelled) {
+        setSeriesCancelScope(null);
+        onOpenChange(false);
+      }
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -629,6 +656,72 @@ export function AppointmentDetailDialog({
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
+                    {canCancelSeries ? (
+                      <div className="mt-4 flex flex-col gap-2 border-t border-rose-400/10 pt-4 sm:flex-row">
+                        <AlertDialog
+                          open={seriesCancelScope !== null}
+                          onOpenChange={(nextOpen) => {
+                            if (!isCancelling && !nextOpen) setSeriesCancelScope(null);
+                          }}
+                        >
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={isCancelling}
+                              className="min-h-11 border-white/10 bg-white/[0.03] text-zinc-200"
+                              onClick={() => setSeriesCancelScope('future')}
+                            >
+                              {isEnglish ? 'This and following' : 'Esta e as seguintes'}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={isCancelling}
+                              className="min-h-11 border-rose-400/20 bg-rose-400/[0.06] text-rose-200"
+                              onClick={() => setSeriesCancelScope('all')}
+                            >
+                              {isEnglish ? 'Cancel entire series' : 'Cancelar série completa'}
+                            </Button>
+                          </div>
+                          <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md border-white/10 bg-zinc-950 text-white">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {seriesCancelScope === 'all'
+                                  ? isEnglish ? 'Cancel the entire series?' : 'Cancelar a série completa?'
+                                  : isEnglish ? 'Cancel this and all following bookings?' : 'Cancelar esta e todas as seguintes?'}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-sm leading-6 text-zinc-400">
+                                {seriesCancelScope === 'all'
+                                  ? isEnglish
+                                    ? 'All active bookings in this recurring series, including earlier dates, will be cancelled.'
+                                    : 'Todas as marcações ativas desta série, incluindo datas anteriores, serão canceladas.'
+                                  : isEnglish
+                                    ? 'This booking and every later active booking in this recurring series will be cancelled.'
+                                    : 'Esta marcação e todas as marcações futuras ativas desta série serão canceladas.'}
+                                {' '}{isEnglish ? 'The customer will receive a cancellation email for each booking.' : 'O cliente receberá um email de cancelamento por cada marcação.'}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex-col-reverse sm:flex-row">
+                              <AlertDialogCancel disabled={isCancelling} className="min-h-11 border-white/10 bg-transparent">
+                                {isEnglish ? 'Keep bookings' : 'Manter marcações'}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                disabled={isCancelling}
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  void handleSeriesCancellation();
+                                }}
+                                className="min-h-11 bg-rose-600 text-white hover:bg-rose-500"
+                              >
+                                {isCancelling ? <Loader2 className="mr-2 size-4 animate-spin" /> : <CalendarX2 className="mr-2 size-4" />}
+                                {isEnglish ? 'Confirm series cancellation' : 'Confirmar cancelamento da série'}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    ) : null}
                   </div>
                 </Section>
               ) : null}
