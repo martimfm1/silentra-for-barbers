@@ -209,7 +209,7 @@ const PUBLIC_PROFILE_COPY = {
     loadError: 'Não foi possível carregar o perfil público.',
     saveError: 'Não foi possível guardar as alterações.',
     saveSuccess: 'Presença online atualizada.',
-    settings: 'Voltar à dashboard',
+    settings: 'Voltar às definições',
     onlinePresence: 'Presença online',
     pageTitle: 'Página pública da barbearia',
     pageDescription:
@@ -254,7 +254,7 @@ const PUBLIC_PROFILE_COPY = {
     loadError: 'Could not load the public profile.',
     saveError: 'Could not save your changes.',
     saveSuccess: 'Online presence updated.',
-    settings: 'Back to dashboard',
+    settings: 'Back to settings',
     onlinePresence: 'Online presence',
     pageTitle: 'Public barbershop page',
     pageDescription:
@@ -406,7 +406,7 @@ export default function PublicProfileSettingsPage() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
-              href="/dashboard"
+              href="/dashboard/settings"
               className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-zinc-500 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />{' '}
