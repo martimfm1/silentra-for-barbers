@@ -156,6 +156,60 @@ async function POST__unobserved(request: NextRequest) {
   }
 }
 
+async function DELETE__unobserved(request: NextRequest) {
+  try {
+    const { admin, barbershopId } = await requireModuleContext(
+      'marketing_campaigns',
+      'marketing',
+    );
+    const id = new URL(request.url).searchParams.get('id') ?? '';
+    if (!id) {
+      return NextResponse.json(
+        { error: 'O ID da automação é obrigatório.' },
+        { status: 400 },
+      );
+    }
+
+    const { data: automation, error: lookupError } = await admin
+      .from('marketing_campaigns')
+      .select('id,status,trigger_type')
+      .eq('id', id)
+      .eq('barbershop_id', barbershopId)
+      .in('trigger_type', ['interval', 'event', 'birthday'])
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!automation) {
+      return NextResponse.json(
+        { error: 'Automação não encontrada.' },
+        { status: 404 },
+      );
+    }
+    if (!['draft', 'scheduled', 'cancelled'].includes(automation.status)) {
+      return NextResponse.json(
+        { error: 'Só é possível eliminar automações antes de iniciarem o envio.' },
+        { status: 409 },
+      );
+    }
+
+    const { error } = await admin
+      .from('marketing_campaigns')
+      .delete()
+      .eq('id', id)
+      .eq('barbershop_id', barbershopId)
+      .in('trigger_type', ['interval', 'event', 'birthday']);
+    if (error) throw error;
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const response = moduleErrorResponse(error);
+    if (response) return response;
+    console.error('[MARKETING_AUTOMATION_DELETE]', error);
+    return NextResponse.json(
+      { ok: false, error: 'Não foi possível eliminar a automação.' },
+      { status: 500 },
+    );
+  }
+}
+
 export const GET = withApiObservability(
   '/api/marketing/campaigns',
   GET__unobserved,
@@ -163,4 +217,8 @@ export const GET = withApiObservability(
 export const POST = withApiObservability(
   '/api/marketing/campaigns',
   POST__unobserved,
+);
+export const DELETE = withApiObservability(
+  '/api/marketing/campaigns',
+  DELETE__unobserved,
 );
