@@ -107,11 +107,9 @@ assert.ok(
   settings.includes('box-border block min-h-11 w-full min-w-0 max-w-full'),
 );
 assert.ok(settings.includes("cn(INPUT_CLASS, 'color-scheme-dark')"));
-assert.ok(
-  settings.includes(
-    'w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm',
-  ),
-);
+assert.ok(settings.includes('<Switch'));
+assert.ok(settings.includes('checked={active}'));
+assert.ok(settings.includes('Definir ${label} como dia de encerramento'));
 
 assert.ok(bookingForm.includes('min-w-0'));
 assert.ok(bookingForm.includes('setRecurrenceEndDate'));
