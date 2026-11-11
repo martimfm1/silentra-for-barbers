@@ -39,7 +39,12 @@ assert.doesNotMatch(
 assert.match(automationsPage, /MarketingWorkspace initialView="automation"/);
 assert.match(workspace, /initialView !== 'automation'/);
 assert.match(workspace, /triggerType: 'birthday'/);
-assert.doesNotMatch(workspace, /Ações rápidas|Enviar agora/);
+const automationSection = workspace.slice(
+  workspace.indexOf("{view === 'automation' && ("),
+  workspace.indexOf("{initialView !== 'automation' && view === 'performance' && ("),
+);
+assert.ok(automationSection.length > 0, 'Automation workspace section must exist.');
+assert.doesNotMatch(automationSection, /Ações rápidas|Enviar agora/);
 assert.doesNotMatch(workspace, /option value="manual"/);
 assert.match(campaignsApi, /MANUAL_CAMPAIGNS_DISABLED/);
 assert.match(campaignsApi, /trigger_type: 'birthday'/);
@@ -51,6 +56,7 @@ for (const path of [
   'app/api/messages/status/route.ts',
   'app/api/marketing/campaigns/[campaignId]/send/route.ts',
   'app/api/marketing/campaigns/[campaignId]/cancel/route.ts',
+  'app/api/marketplace/orders/[orderId]/email/route.ts',
 ]) {
   assert.equal(fs.existsSync(path), false, path + ' must be removed.');
 }
