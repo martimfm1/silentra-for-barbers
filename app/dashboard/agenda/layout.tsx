@@ -2,15 +2,11 @@
 
 import { motion, useReducedMotion } from 'motion/react';
 import { CalendarDays } from 'lucide-react';
-import { AgendaCalendarView } from './agenda-calendar-view';
-import { useAgendaViewPreference } from '../settings/agenda-view-settings';
 
 export default function AgendaLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const reduceMotion = useReducedMotion();
-  const { view } = useAgendaViewPreference();
-  const calendar = view === 'calendar';
 
   return (
     <div className="relative mt-12 w-full min-w-0">
@@ -31,13 +27,9 @@ export default function AgendaLayout({
         initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0.1 : 0.22, ease: 'easeOut' }}
-        className={
-          calendar
-            ? 'min-w-0'
-            : "[&_[aria-label='Calendar']]:hidden [&_[aria-label='Calendário']]:hidden"
-        }
+        className="min-w-0"
       >
-        {calendar ? <AgendaCalendarView /> : children}
+        {children}
       </motion.div>
     </div>
   );
