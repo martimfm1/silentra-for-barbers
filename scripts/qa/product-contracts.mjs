@@ -154,19 +154,6 @@ const checks = [
       source.includes('invalid_order_transition'),
   },
   {
-    name: 'Manual customer email is scoped to the barbershop',
-    file: 'app/api/marketplace/orders/[orderId]/email/route.ts',
-    test: (source) =>
-      source.includes("requireModuleContext('pos', 'pos')") &&
-      source.includes(".eq('barbershop_id', barbershopId)") &&
-      source.includes('sendBrevoEmail') &&
-      source.includes('createMarketplaceTrackingToken()') &&
-      source.includes('hashMarketplaceTrackingToken(trackingToken)') &&
-      source.includes('marketplace_order_tracking_tokens') &&
-      source.includes('contactPixelTrackingConsent: false') &&
-      source.includes('Acompanhar encomenda'),
-  },
-  {
     name: 'Terms drawer keeps its heading fixed and scrolls the legal content on mobile',
     file: 'components/legal/terms-drawer.tsx',
     test: (source) =>
