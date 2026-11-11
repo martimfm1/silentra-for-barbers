@@ -643,7 +643,7 @@ const checks = [
       /trigger === 'booking_completed'\s*&&\s*isReviewRequestContent\(subject,\s*body\)/.test(
         source,
       ) &&
-      /if\s*\(\s*trigger === 'booking_completed'\s*&&\s*isReviewRequestContent\(subject,\s*body\)\s*\)\s*\\{\s*continue;\s*\\}/.test(
+      /if\s*\(\s*trigger === 'booking_completed'\s*&&\s*isReviewRequestContent\(subject,\s*body\)\s*\)\s*\{\s*continue;\s*\}/.test(
         source,
       ) &&
       source.includes('dedicated, single-use review flow'),
