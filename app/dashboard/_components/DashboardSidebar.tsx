@@ -17,6 +17,7 @@ import {
   Briefcase,
   Headset,
   QrCode,
+  Globe2,
   MoreHorizontal,
   Plus,
   Sparkles,
