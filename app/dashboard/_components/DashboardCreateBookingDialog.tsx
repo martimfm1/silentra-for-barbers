@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -24,6 +25,10 @@ import {
 } from '@/components/ui/dialog';
 
 const OPEN_CREATE_EVENT = 'silentra:open-create-booking';
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 function getLocalDateInputValue(date = new Date()) {
   const year = date.getFullYear();
@@ -100,11 +105,8 @@ export function DashboardCreateBookingDialog() {
     }
   }, [barbershopId, locale]);
 
-  const {
-    loadingAppointments,
-    setBookingFormData,
-    handleCreateBooking,
-  } = useAppointments(barbershopId, refreshBookingData);
+  const { loadingAppointments, setBookingFormData, handleCreateBooking } =
+    useAppointments(barbershopId, refreshBookingData);
 
   useEffect(() => {
     const openCreateBooking = () => setOpen(true);
@@ -195,6 +197,11 @@ export function DashboardCreateBookingDialog() {
       endDate: recurrenceEndDate,
     });
     if (!created) return;
+    if (posthogConfigured) {
+      posthog.capture('dashboard_booking_created', {
+        recurrence: recurrence,
+      });
+    }
     window.dispatchEvent(new Event('silentra:appointments-updated'));
     resetForm();
     setOpen(false);

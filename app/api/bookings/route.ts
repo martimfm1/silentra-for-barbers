@@ -1,8 +1,10 @@
+import { SeverityNumber } from '@opentelemetry/api-logs';
+import { after, NextResponse } from 'next/server';
+import { flushPostHogLogs, posthogLogLogger } from '@/instrumentation';
 import { withApiObservability } from '@/lib/observability/api';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { getClientIp } from '@/lib/security/public-rate-limit';
 import { createHmac } from 'node:crypto';
-import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
@@ -188,7 +190,13 @@ async function POST__unobserved(request: Request) {
         },
         { status: 400 },
       );
-    if (!(await enforcePublicBookingRateLimit(request, shopId)))
+    if (!(await enforcePublicBookingRateLimit(request, shopId))) {
+      posthogLogLogger?.emit({
+        body: 'Public booking request rate limited',
+        severityNumber: SeverityNumber.WARN,
+        attributes: { flow: 'public_booking' },
+      });
+      after(() => flushPostHogLogs());
       return NextResponse.json(
         {
           success: false,
@@ -202,6 +210,7 @@ async function POST__unobserved(request: Request) {
           },
         },
       );
+    }
     const supabase = await createClient();
     const admin = createAdminClient();
     const { data: shop, error: shopError } = await supabase
@@ -588,6 +597,12 @@ async function POST__unobserved(request: Request) {
         .eq('barbershop_id', barbershopId)
         .eq('status', 'pending');
       console.error('[BOOKING_PREPAYMENT_METADATA_MISSING]');
+      posthogLogLogger?.emit({
+        body: 'Prepayment booking metadata validation failed',
+        severityNumber: SeverityNumber.ERROR,
+        attributes: { flow: 'public_booking', payment_method: 'mbway' },
+      });
+      after(() => flushPostHogLogs());
       return NextResponse.json(
         {
           success: false,
@@ -623,6 +638,11 @@ async function POST__unobserved(request: Request) {
         '[BARBER_BOOKING_NOTIFICATION_ERROR]',
         error instanceof Error ? error.name : 'UNKNOWN',
       );
+      posthogLogLogger?.emit({
+        body: 'New booking notification dispatch failed',
+        severityNumber: SeverityNumber.WARN,
+        attributes: { flow: 'public_booking' },
+      });
     }
 
     if (appointment.status === 'scheduled') {
@@ -695,6 +715,16 @@ async function POST__unobserved(request: Request) {
         serviceName: selectedService.name || 'Serviço',
       });
     }
+    posthogLogLogger?.emit({
+      body: 'Public booking created',
+      severityNumber: SeverityNumber.INFO,
+      attributes: {
+        flow: 'public_booking',
+        booking_status: String(appointment.status),
+        prepayment: isPrepayment,
+      },
+    });
+    after(() => flushPostHogLogs());
     console.info('[API_BOOKING_SUCCESS]');
     return NextResponse.json(
       {

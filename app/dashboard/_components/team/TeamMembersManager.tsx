@@ -3,6 +3,7 @@
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import { useCallback, useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 import { ShieldCheck, Trash2, UserRoundCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,10 @@ import { useLanguage } from '@/context/LanguageContext';
 
 type Role = 'owner' | 'admin' | 'manager' | 'barber' | 'receptionist' | 'staff';
 type Permissions = Record<string, boolean>;
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 type Member = {
   user_id: string;
   name_complete: string | null;
@@ -92,6 +97,13 @@ export function TeamMembersManager({
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || t('teamMembers.saveError'));
+      if (posthogConfigured) {
+        posthog.capture('team_member_updated', {
+          role: member.role,
+          permission_count: Object.values(member.permissions).filter(Boolean)
+            .length,
+        });
+      }
       toast.success(
         t('teamMembers.updated', {
           name: member.name_complete || t('teamMembers.member'),
@@ -129,6 +141,12 @@ export function TeamMembersManager({
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || t('teamMembers.removeError'));
+      if (posthogConfigured) {
+        posthog.capture('team_member_removed', {
+          role: member.role,
+          joined_via_code: member.joined_via_code,
+        });
+      }
       toast.success(t('teamMembers.removed'));
       await load();
       await onMembershipChanged?.();

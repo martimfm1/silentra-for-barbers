@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import posthog from 'posthog-js';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,11 @@ import { StripeProvider } from '@/components/providers/StripeProvider';
 import { PaymentForm } from './PaymentForm';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { ShieldCheck } from 'lucide-react';
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 interface CheckoutDialogProps {
   clientSecret: string;
@@ -39,6 +45,11 @@ export function CheckoutDialog({
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
 
   const handleSuccess = () => {
+    if (posthogConfigured) {
+      posthog.capture('subscription_payment_completed', {
+        plan_name: planName,
+      });
+    }
     onSuccess?.();
     setIsOpen(false);
   };

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import posthog from 'posthog-js';
 import { Service, ServicesListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import {
@@ -40,6 +41,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export function ServicesListCard({
   servicesCount,
@@ -304,7 +310,14 @@ function AddServiceForm({
   const { t } = useLanguage();
   async function submit(event: React.FormEvent) {
     const created = await handleCreateService(event);
-    if (created) setShowAddServiceForm(false);
+    if (!created) return;
+    if (posthogConfigured) {
+      posthog.capture('service_created', {
+        price: newServiceData.price,
+        duration_minutes: newServiceData.duration,
+      });
+    }
+    setShowAddServiceForm(false);
   }
 
   return (

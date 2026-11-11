@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Client, ClientsListCardProps } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import type { FormEvent } from 'react';
+import posthog from 'posthog-js';
 import {
   Users,
   UserPlus,
@@ -42,6 +43,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export function ClientsListCard({
   clientsCount,
@@ -262,7 +268,9 @@ function AddClientForm({
   const { t } = useLanguage();
   async function submit(event: FormEvent) {
     const created = await handleCreateClient(event);
-    if (created) setShowAddClientForm(false);
+    if (!created) return;
+    if (posthogConfigured) posthog.capture('client_created');
+    setShowAddClientForm(false);
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useDashboardConfirm } from '@/components/dashboard/dashboard-confirm-provider';
 
 import { useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 import { Ban, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,10 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const ACTIVE_STATES = ['scheduled', 'sending'] as const;
 const VISIBLE_STATES = ['scheduled', 'sending', 'cancelled'] as const;
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 type Campaign = {
   id: string;
@@ -87,6 +92,12 @@ export function CampaignLifecycleActions() {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error ?? t('campaignLifecycle.cancelError'));
+      if (posthogConfigured) {
+        posthog.capture('marketing_campaign_cancelled', {
+          channel: campaign.channel,
+          trigger_type: campaign.trigger_type ?? 'unknown',
+        });
+      }
       toast.success(data.message ?? t('campaignLifecycle.cancelled'));
       await load();
     } catch (error) {
@@ -119,6 +130,12 @@ export function CampaignLifecycleActions() {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error ?? t('campaignLifecycle.deleteError'));
+      if (posthogConfigured) {
+        posthog.capture('marketing_campaign_deleted', {
+          channel: campaign.channel,
+          trigger_type: campaign.trigger_type ?? 'unknown',
+        });
+      }
       toast.success(t('campaignLifecycle.deleted'));
       await load();
     } catch (error) {

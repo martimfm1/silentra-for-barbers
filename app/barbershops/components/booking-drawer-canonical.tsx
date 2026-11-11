@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import posthog from 'posthog-js';
 import {
   ArrowLeft,
   ArrowRight,
@@ -73,6 +74,10 @@ const DAY_INDEX: Record<string, number> = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+  process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 function buildDays(locale: 'pt' | 'en', count = 14): BookingDayOption[] {
   const dateLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
@@ -558,6 +563,12 @@ export function BookingDrawerCanonical({
         throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
       if (waitlistOnly) {
+        if (posthogConfigured) {
+          posthog.capture('waitlist_joined', {
+            booking_flow: appearance,
+            shop_plan: shopPlan,
+          });
+        }
         setPaymentInstructions(null);
         toast.success(
           locale === 'en'
@@ -579,6 +590,14 @@ export function BookingDrawerCanonical({
       } else {
         setPaymentInstructions(null);
         toast.success(t('bookingDrawer.bookingSuccess'));
+      }
+      if (posthogConfigured) {
+        posthog.capture('booking_created', {
+          booking_flow: appearance,
+          prepayment_selected: prepaymentSelected,
+          shop_plan: shopPlan,
+          payment_method: payload.payment?.method ?? 'none',
+        });
       }
       setStep(4);
       if (payload.payment?.method !== 'mbway') {
