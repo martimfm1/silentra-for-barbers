@@ -16,7 +16,7 @@ const routes = [
   '/dashboard/clientes',
   '/dashboard/servicos',
   '/dashboard/equipa',
-  '/dashboard/mensagens',
+  '/dashboard/automations',
   '/dashboard/settings',
   '/dashboard/billing',
 ];
@@ -27,7 +27,6 @@ const expectedPrivateRedirects = new Set([
   '/dashboard/clientes',
   '/dashboard/servicos',
   '/dashboard/equipa',
-  '/dashboard/mensagens',
   '/dashboard/settings',
   '/dashboard/billing',
 ]);
