@@ -640,8 +640,11 @@ const checks = [
       source.includes(
         "import { isReviewRequestContent } from '@/lib/reviews/is-review-request'",
       ) &&
-      source.includes(
-        "trigger === 'booking_completed' && isReviewRequestContent(subject, body)",
+      /trigger === 'booking_completed'\\s*&&\\s*isReviewRequestContent\\(subject,\\s*body\\)/.test(
+        source,
+      ) &&
+      /if\\s*\\(\\s*trigger === 'booking_completed'\\s*&&\\s*isReviewRequestContent\\(subject,\\s*body\\)\\s*\\)\\s*\\{\\s*continue;\\s*\\}/.test(
+        source,
       ) &&
       source.includes('dedicated, single-use review flow'),
   },
