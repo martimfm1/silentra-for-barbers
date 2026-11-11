@@ -206,7 +206,7 @@ const checks = [
     test: (source) =>
       source.includes('result.error.message') &&
       source.includes("fileType: file.type || 'unknown'") &&
-      source.includes('finally {\n      setUploading(null);') &&
+      /finally\s*\{\s*setUploading\(null\);/.test(source) &&
       source.includes('disabled={uploading !== null}'),
   },
   {
