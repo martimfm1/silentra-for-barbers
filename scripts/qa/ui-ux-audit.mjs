@@ -12,6 +12,7 @@ const [
   marketingWorkspace,
   settingsPage,
   agendaCancellationPolicy,
+  globalBookingDialog,
 ] = await Promise.all([
   read('components/dashboard/dashboard-confirm-provider.tsx'),
   read('app/dashboard/page.tsx'),
@@ -21,6 +22,7 @@ const [
   read('app/dashboard/marketing/marketing-workspace.tsx'),
   read('app/dashboard/settings/settings-page.tsx'),
   read('components/dashboard/agenda-cancellation-policy-panel.tsx'),
+  read('app/dashboard/_components/DashboardCreateBookingDialog.tsx'),
 ]);
 const confirmationTargets = await Promise.all(
   [
@@ -91,7 +93,13 @@ assert.match(
   'Dock order must be Home, Agenda and Reports around the central create action.',
 );
 assert.match(sidebar, /primaryItems\.slice\(0, 2\)\.map\(renderDockItem\)/);
-assert.match(sidebar, /href="\/dashboard\/agenda\?create=1"/);
+assert.doesNotMatch(sidebar, /href="\/dashboard\/agenda\?create=1"/);
+assert.match(sidebar, /window\.dispatchEvent\(new Event\('silentra:open-create-booking'\)\)/);
+assert.match(dashboardShell, /DashboardCreateBookingDialog/);
+assert.match(globalBookingDialog, /window\.addEventListener\(OPEN_CREATE_EVENT/);
+assert.match(globalBookingDialog, /useAppointments\(barbershopId, refreshBookingData\)/);
+assert.match(globalBookingDialog, /<Dialog open=\{open\} onOpenChange=\{handleOpenChange\}>/);
+assert.match(globalBookingDialog, /pathname\.startsWith\('\/dashboard\/agenda'\)/);
 assert.match(sidebar, /primaryItems\.slice\(2\)\.map\(renderDockItem\)/);
 assert.match(sidebar, /silentra:open-create-booking/);
 assert.match(sidebar, /managementItems\.map\(renderItem\)/);
@@ -101,6 +109,7 @@ assert.match(
   /window\.addEventListener\('silentra:open-create-booking'/,
 );
 assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
+assert.doesNotMatch(agendaPage, /<AgendaViewSettings|<AgendaCancellationPolicyPanel/);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
 assert.match(sidebar, /const automationItems: SidebarItem\[\]/);
 assert.doesNotMatch(sidebar, /communicationItems|dashboard\/mensagens|dashboard\/marketing/);
@@ -183,6 +192,12 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
   );
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
+assert.match(settingsPage, /data-settings-category/);
+assert.match(settingsPage, /Apresentação da agenda/);
+assert.match(settingsPage, /<AgendaViewSettings\s*\/>/);
+assert.match(settingsPage, /<DashboardCustomizationDialog/);
+assert.match(settingsPage, /time_limit_cancellation_hours/);
+assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
 assert.ok(
@@ -209,6 +224,7 @@ assert.match(navbar, /const guestLinks = useMemo<NavLink\[\]>/);
 assert.match(navbar, /href: '\/software-gestao-barbearia'/);
 assert.match(sidebar, /href: '\/dashboard\/automations'/);
 assert.doesNotMatch(sidebar, /href: '\/dashboard\/mensagens\/birthdays'/);
+assert.doesNotMatch(sidebar, /href: '\/dashboard\/settings\/public-profile'/);
 assert.doesNotMatch(sidebar, /label: 'Aniversários'/);
 assert.match(automationPage, /MarketingWorkspace initialView="automation"/);
 assert.match(marketingWorkspace, /createBirthdayAutomation/);
