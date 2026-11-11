@@ -516,8 +516,8 @@ export default function SettingsPageOrganized() {
             <details open data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.business')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">t('settingsPage.businessDialogDescription')</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.businessDialogDescription')}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -689,8 +689,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.location')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">t('settingsPage.locationDialogDescription')</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.locationDialogDescription')}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -739,8 +739,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.hours')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">t('settingsPage.hoursDialogDescription')</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.hoursDialogDescription')}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -884,8 +884,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">locale === 'en' ? 'Booking rules' : 'Regras de marcação'</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Availability, confirmations and cancellation behaviour.' : 'Disponibilidade, confirmações e regras de cancelamento.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Booking rules' : 'Regras de marcação'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Availability, confirmations and cancellation behaviour.' : 'Disponibilidade, confirmações e regras de cancelamento.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1137,8 +1137,8 @@ export default function SettingsPageOrganized() {
 <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">locale === 'en' ? 'Notifications' : 'Notificações'</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Manage booking alerts on this device.' : 'Gere os avisos de novas marcações neste dispositivo.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Notifications' : 'Notificações'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage booking alerts on this device.' : 'Gere os avisos de novas marcações neste dispositivo.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1163,8 +1163,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.appearance')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Update your barbershop logo and cover image.' : 'Atualiza o logótipo e a imagem de capa da barbearia.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.appearance')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Update your barbershop logo and cover image.' : 'Atualiza o logótipo e a imagem de capa da barbearia.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1258,8 +1258,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.billingTitle')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Manage your plan, payments and invoices.' : 'Gere o teu plano, pagamentos e comprovativos.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.billingTitle')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your plan, payments and invoices.' : 'Gere o teu plano, pagamentos e comprovativos.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1288,8 +1288,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('barbershopDeletion.dangerZone')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Actions that permanently affect your barbershop.' : 'Ações que afetam permanentemente a tua barbearia.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('barbershopDeletion.dangerZone')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Actions that permanently affect your barbershop.' : 'Ações que afetam permanentemente a tua barbearia.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1328,8 +1328,8 @@ export default function SettingsPageOrganized() {
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">t('settingsPage.accountSecurity')</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
