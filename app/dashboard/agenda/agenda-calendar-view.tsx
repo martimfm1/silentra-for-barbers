@@ -123,10 +123,12 @@ function appointmentName(appointment: Appointment, t: (key: string) => string) {
 
 export function AgendaCalendarView({
   appointments,
+  appointmentsLoading,
   professionals: allProfessionals,
   onAppointmentClick,
 }: {
   appointments: Appointment[];
+  appointmentsLoading: boolean;
   professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
 }) {
@@ -233,7 +235,7 @@ export function AgendaCalendarView({
       ? 100
       : 0;
 
-  if (loading) return <AgendaCalendarSkeleton />;
+  if (loading || appointmentsLoading) return <AgendaCalendarSkeleton />;
 
   if (error) {
     return (
