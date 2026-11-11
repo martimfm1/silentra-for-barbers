@@ -53,7 +53,7 @@ const HERO_FEATURES_EN = {
     'Unlimited bookings, customers and services',
     'Online booking, public booking page and QR code',
     'Essential schedule, dashboard and customer history',
-    'Essential notifications and email messaging',
+    'Essential operational notifications',
     '1 barber and 1 location',
   ],
   pro: [
