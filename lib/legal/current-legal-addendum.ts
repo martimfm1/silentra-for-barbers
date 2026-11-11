@@ -72,7 +72,7 @@ export const currentTermsFeatureSections = {
         'A Plataforma pode disponibilizar páginas públicas para barbearias e um serviço de site próprio, sujeito ao plano, elegibilidade, aprovação do pedido, configuração e condições comerciais apresentadas. A publicação pode depender de revisão e atribuição de um endereço público.',
         'A barbearia é responsável por garantir que tem direitos para usar textos, imagens, marcas, testemunhos, preços e outros conteúdos que fornece, e por manter os seus dados públicos corretos e atualizados. Deve incluir no seu site as informações legais, comerciais e de contacto que lhe sejam aplicáveis.',
         'A API pública v1 está temporariamente desativada e responde com HTTP 503. Não deve ser utilizada até existir um aviso explícito de reativação; a documentação técnica anterior não representa disponibilidade do serviço.',
-        'Quem consome a API deve respeitar a documentação, os direitos de propriedade intelectual, a legislação de proteção de dados e os limites técnicos. Não pode tentar contornar limites, aceder a dados privados, reidentificar pessoas, realizar recolha abusiva ou apresentar dados públicos de forma enganadora.',
+        'Se e quando a API pública v1 for reativada, os consumidores terão de respeitar a documentação atualizada, os direitos de propriedade intelectual, a legislação de proteção de dados e os limites técnicos aplicáveis.',
       ],
     },
     {
@@ -101,7 +101,7 @@ export const currentTermsFeatureSections = {
         'The Platform may provide public barbershop pages and a custom-website service, subject to plan, eligibility, request approval, configuration, and the commercial terms presented. Publication may require review and assignment of a public address.',
         'The barbershop is responsible for ensuring it has the rights to use the text, images, trademarks, testimonials, prices, and other content it supplies, and for keeping public information accurate and current. It must include the legal, commercial, and contact information applicable to its own website.',
         'The public API v1 is temporarily disabled and responds with HTTP 503. It must not be used until an explicit reactivation notice is published; previous technical documentation does not indicate service availability.',
-        'API consumers must follow the documentation, intellectual-property rights, data-protection law, and technical limits. They may not bypass limits, access private data, re-identify individuals, perform abusive collection, or present public data misleadingly.',
+        'If and when the public API v1 is reactivated, consumers must follow its updated documentation, intellectual-property rights, data-protection law, and applicable technical limits.',
       ],
     },
     {
