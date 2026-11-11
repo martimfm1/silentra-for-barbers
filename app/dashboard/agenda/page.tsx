@@ -193,7 +193,7 @@ export default function AgendaPage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.get('create') === '1') {
-      setBookingDialogOpen(true);
+      window.dispatchEvent(new Event('silentra:open-create-booking'));
       url.searchParams.delete('create');
       window.history.replaceState(
         window.history.state,
@@ -484,7 +484,9 @@ export default function AgendaPage() {
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <Button
               variant="outline"
-              onClick={() => setBookingDialogOpen(true)}
+              onClick={() =>
+                window.dispatchEvent(new Event('silentra:open-create-booking'))
+              }
               className="min-h-11 w-full border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200 hover:border-emerald-400/30 hover:bg-emerald-400/[0.1] sm:w-auto"
             >
               <Plus className="size-4" aria-hidden="true" />
@@ -698,7 +700,9 @@ export default function AgendaPage() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => setBookingDialogOpen(true)}
+                        onClick={() =>
+                          window.dispatchEvent(new Event('silentra:open-create-booking'))
+                        }
                         className="mt-5 bg-zinc-50 text-zinc-950 hover:bg-white"
                       >
                         <Plus className="size-4" aria-hidden="true" />
