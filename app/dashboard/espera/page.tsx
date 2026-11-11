@@ -433,20 +433,14 @@ export default function WaitlistPage() {
                           </p>
                         )}
                       <div className="mt-3 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:flex-wrap sm:gap-4">
-                        <a
-                          className="flex min-h-8 items-center gap-2 hover:text-zinc-200"
-                          href={`mailto:${entry.customer_email}`}
-                        >
+                        <span className="flex min-h-8 items-center gap-2">
                           <Mail className="size-3.5" aria-hidden="true" />
                           {entry.customer_email}
-                        </a>
-                        <a
-                          className="flex min-h-8 items-center gap-2 hover:text-zinc-200"
-                          href={`tel:${entry.customer_phone}`}
-                        >
+                        </span>
+                        <span className="flex min-h-8 items-center gap-2">
                           <Phone className="size-3.5" aria-hidden="true" />
                           {entry.customer_phone}
-                        </a>
+                        </span>
                       </div>
                     </div>
                     {['waiting', 'offered'].includes(entry.status) && (
