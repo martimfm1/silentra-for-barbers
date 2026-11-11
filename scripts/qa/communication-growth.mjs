@@ -12,6 +12,8 @@ const automationsPage = read('app/dashboard/automations/page.tsx');
 const workspace = read('app/dashboard/marketing/marketing-workspace.tsx');
 const campaignsApi = read('app/api/marketing/campaigns/route.ts');
 const automationsApi = read('app/api/marketing/campaigns/automation/route.ts');
+const lifecycleActions = read('app/dashboard/marketing/campaign-lifecycle-actions.tsx');
+const cancellationApi = read('app/api/marketing/campaigns/[campaignId]/cancel/route.ts');
 const marketingDispatcher = read('lib/marketing/dispatcher.ts');
 const manualCampaignRetirement = read(
   'supabase/migrations/20261111130000_disable_manual_marketing_communications.sql',
@@ -63,7 +65,12 @@ assert.doesNotMatch(automationSection, /Ações rápidas|Enviar agora/);
 assert.doesNotMatch(workspace, /option value="manual"/);
 assert.match(campaignsApi, /MANUAL_CAMPAIGNS_DISABLED/);
 assert.match(campaignsApi, /trigger_type: 'birthday'/);
-assert.doesNotMatch(campaignsApi, /export const PATCH|export const DELETE/);
+assert.doesNotMatch(campaignsApi, /export const PATCH/);
+assert.match(campaignsApi, /export const DELETE/);
+assert.match(campaignsApi, /\.in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
+assert.match(cancellationApi, /\.in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
+assert.match(lifecycleActions, /campaign\.trigger_type/);
+assert.match(automationsPage, /CampaignLifecycleActions/);
 assert.match(automationsApi, /in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
 assert.match(
   marketingDispatcher,
@@ -77,7 +84,6 @@ for (const path of [
   'app/api/messages/send/route.ts',
   'app/api/messages/status/route.ts',
   'app/api/marketing/campaigns/[campaignId]/send/route.ts',
-  'app/api/marketing/campaigns/[campaignId]/cancel/route.ts',
   'app/api/marketplace/orders/[orderId]/email/route.ts',
 ]) {
   assert.equal(fs.existsSync(path), false, path + ' must be removed.');
@@ -96,5 +102,5 @@ for (const route of [
 }
 
 console.log(
-  '[COMMUNICATION_GROWTH_QA] Manual customer messaging and campaigns are disabled; automated communication remains available.',
+  '[COMMUNICATION_GROWTH_QA] Manual customer messaging and campaign creation are disabled; automatic triggers retain cancellation and cleanup controls.',
 );
