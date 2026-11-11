@@ -610,10 +610,10 @@ export function BookingForm({
                       />
                     </SelectTrigger>
                     <SelectContent
-                    position="popper"
-                    align="start"
-                    className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
-                  >
+                      position="popper"
+                      align="start"
+                      className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
+                    >
                       <SelectGroup>
                         {professionals.map((professional) => (
                           <SelectItem
