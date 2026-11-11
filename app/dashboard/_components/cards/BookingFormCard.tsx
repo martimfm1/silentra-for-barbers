@@ -511,7 +511,7 @@ export function BookingForm({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid min-w-0 gap-1.5">
                 <label
                   htmlFor="booking-service"
@@ -530,17 +530,21 @@ export function BookingForm({
                 >
                   <SelectTrigger
                     id="booking-service"
-                    className="box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
+                    className="box-border flex min-h-12 w-full min-w-0 max-w-full items-center rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
                   >
                     <SelectValue placeholder={t('bookingForm.chooseService')} />
                   </SelectTrigger>
-                  <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
+                  >
                     <SelectGroup>
                       {services.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id}
-                          className="min-h-11 rounded-lg py-2.5"
+                          className="min-h-11 min-w-0 rounded-lg py-2.5"
                         >
                           <span className="min-w-0 flex-1 truncate">
                             {service.name}
@@ -599,13 +603,17 @@ export function BookingForm({
                   >
                     <SelectTrigger
                       id="booking-barber"
-                      className="box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
+                      className="box-border flex min-h-12 w-full min-w-0 max-w-full items-center rounded-xl border-white/10 bg-zinc-900 px-3.5 text-base text-white"
                     >
                       <SelectValue
                         placeholder={t('bookingForm.chooseProfessional')}
                       />
                     </SelectTrigger>
-                    <SelectContent className="max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
+                    <SelectContent
+                      position="popper"
+                      align="start"
+                      className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
+                    >
                       <SelectGroup>
                         {professionals.map((professional) => (
                           <SelectItem

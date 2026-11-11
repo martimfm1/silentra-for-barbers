@@ -71,7 +71,7 @@ assert.match(seriesCancelRoute, /emailSent: false/);
 assert.match(appointmentDetail, /Não serão enviados emails de cancelamento quando cancelares uma série/);
 assert.match(seriesMigration, /add column if not exists recurrence_series_id uuid/);
 assert.match(seriesMigration, /having count\(\*\) > 1/);
-assert.match(service, /recurrence_series_id\?: string \| null/);
+assert.match(appointmentsService, /recurrence_series_id\?: string \| null/);
 assert.ok(appointmentDetail.includes('<AlertDialog'));
 assert.ok(appointmentDetail.includes('void handleCancellation()'));
 assert.ok(appointmentDetail.includes('onOpenChange(false)'));
