@@ -449,6 +449,11 @@ export function PublicProfileSettingsCard({
                   : english
                     ? 'Your barbershop remains visible on the Free plan. Pro lets you hide it from directory results.'
                     : 'No plano Free, a tua barbearia aparece sempre no diretório. Com o Pro, podes ocultá-la dos resultados.'}
+                <span className="mt-1 block text-zinc-600">
+                  {english
+                    ? 'This option is saved with the main Save changes button at the top of Settings.'
+                    : 'Esta opção é guardada através do botão Guardar alterações no topo das Definições.'}
+                </span>
               </p>
             </div>
             <Switch
