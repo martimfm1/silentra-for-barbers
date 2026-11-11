@@ -455,12 +455,8 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 md:gap-4">
                 {quickActions.map((action) => {
                   const Icon = action.icon;
-                  return (
-                    <Link
-                      key={action.id}
-                      href={action.href}
-                      className="glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4"
-                    >
+                  const cardContent = (
+                    <>
                       <span
                         className={cn(
                           'flex size-8 shrink-0 items-center justify-center rounded-full border',
@@ -479,6 +475,28 @@ export default function DashboardPage() {
                       <span className="min-w-0 flex-1 truncate font-heading text-sm font-semibold tracking-tight text-zinc-50">
                         {action.label}
                       </span>
+                    </>
+                  );
+                  const className =
+                    'glassmorphism group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition-all duration-200 hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 md:p-4';
+                  return action.id === 'new-booking' ? (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onClick={() =>
+                        window.dispatchEvent(new Event('silentra:open-create-booking'))
+                      }
+                      className={className}
+                    >
+                      {cardContent}
+                    </button>
+                  ) : (
+                    <Link
+                      key={action.id}
+                      href={action.href}
+                      className={className}
+                    >
+                      {cardContent}
                     </Link>
                   );
                 })}
