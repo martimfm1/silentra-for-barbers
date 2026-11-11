@@ -99,7 +99,7 @@ type FormState = {
   scheduledAt: string;
 };
 type AutomationState = {
-  mode: 'manual' | 'interval' | 'event' | 'birthday';
+  mode: 'interval' | 'event' | 'birthday';
   intervalValue: string;
   intervalUnit: 'hours' | 'days';
   eventName: EventKey;
@@ -116,7 +116,7 @@ const EMPTY_FORM: FormState = {
   scheduledAt: '',
 };
 const EMPTY_AUTOMATION: AutomationState = {
-  mode: 'manual',
+  mode: 'birthday',
   intervalValue: '24',
   intervalUnit: 'hours',
   eventName: 'booking_created',
@@ -273,7 +273,12 @@ export function MarketingWorkspace({
   useEffect(() => {
     if (!selected) return;
     setAutomation({
-      mode: selected.trigger_type ?? 'manual',
+      mode:
+        selected.trigger_type === 'interval' ||
+        selected.trigger_type === 'event' ||
+        selected.trigger_type === 'birthday'
+          ? selected.trigger_type
+          : 'birthday',
       intervalValue: String(selected.interval_value ?? 24),
       intervalUnit: selected.interval_unit ?? 'hours',
       eventName: (selected.event_name as EventKey) ?? 'booking_created',
@@ -963,7 +968,6 @@ export function MarketingWorkspace({
                             className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                             disabled={!canManage(selected)}
                           >
-                            <option value="manual">Manual</option>
                             <option value="interval">Intervalo</option>
                             <option value="event">Evento</option>
                             <option value="birthday">Aniversário</option>
@@ -1146,9 +1150,7 @@ export function MarketingWorkspace({
                           <span className="font-medium text-zinc-200">
                             {selected.next_run_at
                               ? formatDate(selected.next_run_at)
-                              : automation.mode === 'manual'
-                                ? 'Manual'
-                                : 'Calculada ao guardar'}
+                              : 'Calculada ao guardar'}
                           </span>
                         </p>
                         <Button
