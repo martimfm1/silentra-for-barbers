@@ -458,7 +458,11 @@ export default function AgendaPage() {
             className="mt-4"
             aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}
           >
-            <AgendaCalendarView onAppointmentClick={setSelectedAppointment} />
+            <AgendaCalendarView
+              appointments={appointments}
+              professionals={professionals}
+              onAppointmentClick={setSelectedAppointment}
+            />
           </section>
         ) : null}
 
