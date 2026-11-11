@@ -52,6 +52,12 @@ assert.ok(agendaCalendar.includes('const blockPreview = dayBlocks.slice(0, 1)'))
 assert.ok(agendaCalendar.includes('formatTime(block.start_time)'));
 assert.ok(agendaCalendar.includes('selectedBlocks.map((block) =>'));
 assert.ok(appointmentDetail.includes('onCancel: (appointmentId: string) => Promise<boolean>'));
+assert.ok(appointmentDetail.includes('onCancelSeries?:'));
+assert.ok(appointmentDetail.includes('Esta e as seguintes'));
+assert.ok(appointmentDetail.includes('Cancelar série completa'));
+assert.ok(hook.includes('recurrence_series_id: recurrenceSeriesId'));
+assert.ok(agenda.includes('/cancel-series'));
+assert.ok(agenda.includes('onCancelSeries={handleCancelAppointmentSeries}'));
 assert.ok(appointmentDetail.includes('<AlertDialog'));
 assert.ok(appointmentDetail.includes('void handleCancellation()'));
 assert.ok(appointmentDetail.includes('onOpenChange(false)'));
