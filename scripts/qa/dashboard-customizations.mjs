@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [dashboard, editor, api, migration, grantsMigration] = await Promise.all([
+const [dashboard, settingsPage, editor, api, migration] = await Promise.all([
   readFile('app/dashboard/page.tsx', 'utf8'),
+  readFile('app/dashboard/settings/settings-page.tsx', 'utf8'),
   readFile('app/dashboard/_components/DashboardCustomization.tsx', 'utf8'),
   readFile('app/api/dashboard/customizations/route.ts', 'utf8'),
   readFile(
@@ -31,7 +32,8 @@ assert.match(dashboard, /appointment\.professionals\?\.name/);
 assert.match(dashboard, /appointment\.users\?\.style_notes\?\.trim\(\)/);
 assert.match(dashboard, /dashboard\.upcomingAppointmentNotes/);
 assert.match(dashboard, /--dashboard-accent/);
-assert.match(dashboard, /DashboardCustomizationDialog/);
+assert.doesNotMatch(dashboard, /DashboardCustomizationDialog/);
+assert.match(settingsPage, /<DashboardCustomizationDialog/);
 for (const id of [
   'new-booking',
   'clients',

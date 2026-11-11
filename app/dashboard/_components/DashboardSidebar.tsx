@@ -119,11 +119,6 @@ const customerExperienceItems: SidebarItem[] = [
 const businessGrowthItems: SidebarItem[] = [
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
-  {
-    href: '/dashboard/settings/public-profile',
-    label: 'Perfil público',
-    icon: Globe2,
-  },
 ];
 
 const toolsItems: SidebarItem[] = [
@@ -154,7 +149,6 @@ const englishLabels: Record<string, string> = {
   'Validar recompensa': 'Validate reward',
   Vendas: 'Sales',
   'Site próprio': 'Website',
-  'Perfil público': 'Public profile',
   'Suporte Silentra': 'Silentra Support',
   'Plano e pagamentos': 'Plan and billing',
   Definições: 'Settings',
@@ -459,14 +453,11 @@ export function DashboardSidebar() {
         </div>
 
         <div className="px-3 pb-4 pt-4">
-          <Link
-            href="/dashboard/agenda?create=1"
-            onClick={(event) => {
-              if (pathname === '/dashboard/agenda') {
-                event.preventDefault();
-                window.dispatchEvent(new Event('silentra:open-create-booking'));
-              }
-            }}
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new Event('silentra:open-create-booking'))
+            }
             className="group flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400 px-3 text-sm font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.14)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-[0_12px_28px_rgba(52,211,153,0.2)] active:translate-y-0 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
           >
             <Plus
@@ -475,7 +466,7 @@ export function DashboardSidebar() {
               aria-hidden="true"
             />
             {locale === 'en' ? 'Create appointment' : 'Criar marcação'}
-          </Link>
+          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4 [scrollbar-color:rgba(161,161,170,0.25)_transparent] [scrollbar-width:thin]">
@@ -567,16 +558,11 @@ export function DashboardSidebar() {
             {primaryItems.slice(0, 2).map(renderDockItem)}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link
-                  href="/dashboard/agenda?create=1"
-                  onClick={(event) => {
-                    if (pathname === '/dashboard/agenda') {
-                      event.preventDefault();
-                      window.dispatchEvent(
-                        new Event('silentra:open-create-booking'),
-                      );
-                    }
-                  }}
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.dispatchEvent(new Event('silentra:open-create-booking'))
+                  }
                   aria-label={
                     locale === 'en' ? 'Create appointment' : 'Criar marcação'
                   }
@@ -590,7 +576,7 @@ export function DashboardSidebar() {
                   <span className="max-w-full truncate text-[9px] sm:text-[10px] lg:hidden">
                     {locale === 'en' ? 'Create' : 'Criar'}
                   </span>
-                </Link>
+                </button>
               </TooltipTrigger>
               <TooltipContent
                 side="top"

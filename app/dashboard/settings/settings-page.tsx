@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Camera,
+  ChevronDown,
   Check,
   ImageIcon,
   LogOut,
@@ -46,6 +47,11 @@ import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
+import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
+import {
+  DashboardCustomizationDialog,
+  useDashboardCustomization,
+} from '@/app/dashboard/_components/DashboardCustomization';
 import {
   Select,
   SelectContent,
@@ -67,6 +73,7 @@ type Config = {
   lunch_end: string;
   closed_days: string;
   minimum_booking_notice_minutes: number;
+  time_limit_cancellation_hours: number;
   require_birth_date: boolean;
   allow_online_bookings: boolean;
   is_public_in_directory: boolean;
@@ -100,6 +107,10 @@ const normalize = (v: Partial<Config>): Config => ({
     0,
     Math.min(43200, Math.round(Number(v.minimum_booking_notice_minutes ?? 0))),
   ),
+  time_limit_cancellation_hours: Math.max(
+    0,
+    Math.min(720, Math.round(Number(v.time_limit_cancellation_hours ?? 24))),
+  ),
   require_birth_date: v.require_birth_date !== false,
   allow_online_bookings: v.allow_online_bookings ?? true,
   is_public_in_directory: v.is_public_in_directory ?? true,
@@ -122,6 +133,7 @@ export default function SettingsPageOrganized() {
   const router = useRouter();
   const { t, setLocale, locale } = useLanguage();
   const { barbershopId } = useBarbershop();
+  const customization = useDashboardCustomization();
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
   const canManualMbway = hasFeature('manual_mbway_prepayment');
@@ -195,6 +207,16 @@ export default function SettingsPageOrganized() {
       config.minimum_booking_notice_minutes > 43200
     )
       return toast.error(t('settingsPage.minimumBookingNoticeInvalid'));
+    if (
+      !Number.isInteger(config.time_limit_cancellation_hours) ||
+      config.time_limit_cancellation_hours < 0 ||
+      config.time_limit_cancellation_hours > 720
+    )
+      return toast.error(
+        locale === 'en'
+          ? 'Cancellation notice must be between 0 and 720 hours.'
+          : 'A antecedência de cancelamento deve estar entre 0 e 720 horas.',
+      );
     setSaving(true);
     try {
       const payload = { ...config };
@@ -489,10 +511,20 @@ export default function SettingsPageOrganized() {
           )}
         </header>
         <div className="mt-5">
-          <div className="min-w-0 space-y-6">
-            <section id="settings-business" className="scroll-mt-24">
+          <p className="mb-3 text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Everything that controls how your barbershop works, looks and accepts bookings.' : 'Tudo o que define como a tua barbearia funciona, se apresenta e recebe marcações.'}</p>
+          <div className="min-w-0 space-y-3">
+            <details open data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.businessDialogDescription')}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-business" className="scroll-mt-24">
               <div className="space-y-4">
-                <div className="space-y-1">
+                <div className="hidden">
                   <h2 className="text-lg font-semibold">
                     {t('settingsPage.business')}
                   </h2>
@@ -652,9 +684,20 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-            <section id="settings-location" className="scroll-mt-24">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.locationDialogDescription')}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-location" className="scroll-mt-24">
               <div className="space-y-4">
-                <div className="space-y-1">
+                <div className="hidden">
                   <h2 className="text-lg font-semibold">
                     {t('settingsPage.location')}
                   </h2>
@@ -691,9 +734,20 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-            <section id="settings-hours" className="scroll-mt-24">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.hoursDialogDescription')}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-hours" className="scroll-mt-24">
               <div className="space-y-4">
-                <div className="space-y-1">
+                <div className="hidden">
                   <h2 className="text-lg font-semibold">
                     {t('settingsPage.hours')}
                   </h2>
@@ -789,28 +843,34 @@ export default function SettingsPageOrganized() {
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                         {days.map(([v, enLabel, ptLabel]) => {
                           const active = closed.includes(v);
+                          const label = locale === 'pt' ? ptLabel : enLabel;
                           return (
-                            <button
+                            <div
                               key={v}
-                              type="button"
-                              aria-pressed={active}
-                              onClick={() => {
-                                const n = active
-                                  ? closed.filter((x) => x !== v)
-                                  : [...closed, v];
-                                set({
-                                  closed_days: n.length ? n.join(',') : 'None',
-                                });
-                              }}
-                              className={cn(
-                                'box-border min-h-12 w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm',
-                                active
-                                  ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
-                                  : 'border-white/10 bg-white/[.02] text-zinc-400',
-                              )}
+                              className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[.02] px-3 py-2"
                             >
-                              {locale === 'pt' ? ptLabel : enLabel}
-                            </button>
+                              <span className="min-w-0 truncate text-sm text-zinc-300">
+                                {label}
+                              </span>
+                              <Switch
+                                checked={active}
+                                onCheckedChange={(checked) => {
+                                  const nextDays = checked
+                                    ? [...closed, v]
+                                    : closed.filter((day) => day !== v);
+                                  set({
+                                    closed_days: nextDays.length
+                                      ? nextDays.join(',')
+                                      : 'None',
+                                  });
+                                }}
+                                aria-label={
+                                  locale === 'en'
+                                    ? `Set ${label} as a closed day`
+                                    : `Definir ${label} como dia de encerramento`
+                                }
+                              />
+                            </div>
                           );
                         })}
                       </div>
@@ -819,9 +879,20 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-            <section id="settings-rules" className="scroll-mt-24">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Booking rules' : 'Regras de marcação'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Availability, confirmations and cancellation behaviour.' : 'Disponibilidade, confirmações e regras de cancelamento.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-rules" className="scroll-mt-24">
               <div className="space-y-4">
-                <div className="space-y-1">
+                <div className="hidden">
                   <h2 className="text-lg font-semibold">
                     {t('settingsPage.rules')}
                   </h2>
@@ -889,6 +960,36 @@ export default function SettingsPageOrganized() {
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+
+                    <div className="grid gap-2 border-t border-white/10 pt-5">
+                      <div className="min-w-0">
+                        <label htmlFor="settings-cancellation-notice" className="text-sm font-medium text-zinc-200">
+                          {locale === 'en' ? 'Cancellation notice' : 'Antecedência para cancelamentos'}
+                        </label>
+                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                          {locale === 'en'
+                            ? 'How many hours before an appointment customers can cancel or reschedule.'
+                            : 'Com quantas horas de antecedência os clientes podem cancelar ou reagendar uma marcação.'}
+                        </p>
+                      </div>
+                      <Select
+                        value={String(config.time_limit_cancellation_hours)}
+                        onValueChange={(value) => set({ time_limit_cancellation_hours: Number(value) })}
+                      >
+                        <SelectTrigger id="settings-cancellation-notice" className="h-11 w-full min-w-0 sm:max-w-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          <SelectItem value="0">{locale === 'en' ? 'No minimum' : 'Sem prazo mínimo'}</SelectItem>
+                          <SelectItem value="2">{locale === 'en' ? '2 hours' : '2 horas'}</SelectItem>
+                          <SelectItem value="6">{locale === 'en' ? '6 hours' : '6 horas'}</SelectItem>
+                          <SelectItem value="12">{locale === 'en' ? '12 hours' : '12 horas'}</SelectItem>
+                          <SelectItem value="24">{locale === 'en' ? '24 hours' : '24 horas'}</SelectItem>
+                          <SelectItem value="48">{locale === 'en' ? '48 hours' : '48 horas'}</SelectItem>
+                          <SelectItem value="72">{locale === 'en' ? '72 hours' : '72 horas'}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-4 border-t border-white/10 pt-5">
                       {!automationAllowed && (
@@ -991,9 +1092,60 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-            <section id="settings-notifications" className="scroll-mt-24">
+  </div>
+</details>
+            
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Agenda display' : 'Apresentação da agenda'}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose the default view for your appointments.' : 'Escolhe a vista que abre por defeito quando entras na agenda.'}</span>
+                </span>
+                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
+                <AgendaViewSettings />
+              </div>
+            </details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage the information, discoverability and public page of your barbershop.' : 'Gere a informação, visibilidade e página pública da tua barbearia.'}</span>
+                </span>
+                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="flex flex-col gap-3 border-t border-white/[.06] px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                <p className="max-w-2xl text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Set the public URL, SEO details, reference price, features and other information customers see before booking.' : 'Define o endereço público, os dados SEO, o preço de referência, comodidades e outras informações que os clientes veem antes de marcar.'}</p>
+                <Button asChild className="min-h-11 w-full shrink-0 sm:w-auto">
+                  <Link href="/dashboard/settings/public-profile">{locale === 'en' ? 'Open public profile' : 'Gerir perfil público'}</Link>
+                </Button>
+              </div>
+            </details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Dashboard preferences' : 'Personalização da dashboard'}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose your shortcuts, visible sections and dashboard accent colour.' : 'Escolhe os atalhos, secções visíveis e a cor de destaque da dashboard.'}</span>
+                </span>
+                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
+                <DashboardCustomizationDialog customization={customization} locale={locale} />
+              </div>
+            </details>
+<details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Notifications' : 'Notificações'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage booking alerts on this device.' : 'Gere os avisos de novas marcações neste dispositivo.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-notifications" className="scroll-mt-24">
               <div className="space-y-4">
-                <div className="space-y-1">
+                <div className="hidden">
                   <h2 className="text-lg font-semibold">
                     {locale === 'en' ? 'Notifications' : 'Notificações'}
                   </h2>
@@ -1006,9 +1158,20 @@ export default function SettingsPageOrganized() {
                 <SettingsPushNotificationsPanel />
               </div>
             </section>
-            <section id="settings-appearance">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.appearance')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Update your barbershop logo and cover image.' : 'Atualiza o logótipo e a imagem de capa da barbearia.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-appearance">
               <Card className={CARD_CLASS}>
-                <CardHeader>
+                <CardHeader className="hidden">
                   <CardTitle>{t('settingsPage.appearance')}</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1090,7 +1253,18 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
-            <section id="settings-billing">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.billingTitle')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your plan, payments and invoices.' : 'Gere o teu plano, pagamentos e comprovativos.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-billing">
               <Card className={CARD_CLASS}>
                 <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1109,9 +1283,20 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
-            <section id="settings-danger" className="scroll-mt-24">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('barbershopDeletion.dangerZone')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Actions that permanently affect your barbershop.' : 'Ações que afetam permanentemente a tua barbearia.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-danger" className="scroll-mt-24">
               <Card className={CARD_CLASS}>
-                <CardHeader>
+                <CardHeader className="hidden">
                   <CardTitle className="flex items-center gap-2 text-rose-200">
                     <Trash2 className="size-4" />
                     {t('barbershopDeletion.dangerZone')}
@@ -1138,9 +1323,20 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
-            <section id="settings-account">
+  </div>
+</details>
+            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+<section id="settings-account">
               <Card className={CARD_CLASS}>
-                <CardHeader>
+                <CardHeader className="hidden">
                   <CardTitle className="flex items-center gap-2">
                     <ShieldCheck className="size-4 text-emerald-400" />
                     {t('settingsPage.accountSecurity')}
@@ -1161,6 +1357,8 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
+  </div>
+</details>
           </div>
         </div>
       </div>
