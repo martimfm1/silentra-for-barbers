@@ -89,6 +89,7 @@ export function DashboardConfirmProvider({
                 {pending.cancelLabel ?? 'Cancelar'}
               </AlertDialogCancel>
               <AlertDialogAction
+                haptic={pending.destructive ? 'warning' : 'success'}
                 className={
                   pending.destructive
                     ? 'bg-red-600 text-white hover:bg-red-500'

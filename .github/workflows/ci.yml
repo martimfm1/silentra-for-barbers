@@ -115,6 +115,9 @@ jobs:
       - name: Button accessible-name audit
         run: pnpm qa:buttons
 
+      - name: Haptic feedback contracts
+        run: pnpm qa:haptics
+
       - name: Performance contracts
         run: pnpm qa:performance
 
