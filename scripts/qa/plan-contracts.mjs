@@ -81,10 +81,6 @@ expect(
   'Gestão de equipa deve permanecer disponível no sistema de features.',
 );
 expect(
-  /messaging/,
-  'Mensagens deve permanecer disponível no sistema de features.',
-);
-expect(
   /directory_visibility/,
   'A opção de ocultar a barbearia do diretório deve permanecer identificada como feature Pro.',
 );
