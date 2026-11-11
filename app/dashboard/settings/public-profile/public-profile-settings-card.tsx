@@ -214,6 +214,13 @@ const PUBLIC_PROFILE_COPY = {
     pageTitle: 'Página pública da barbearia',
     pageDescription:
       'Define o que os clientes precisam de saber antes de visitar ou reservar.',
+    publicPageVisibility: 'Disponibilidade da página pública',
+    publicPageVisibilityDescription:
+      'Controla se a página pode ser aberta pelo link direto. É independente da visibilidade no diretório.',
+    publicPageEnabled: 'Página pública ativa',
+    publicPageDisabled: 'Página pública desativada',
+    publicPageDisabledHint:
+      'Os clientes não conseguem abrir o link público enquanto a página estiver desativada.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Informações do estabelecimento',
     publicBasics: 'Informações públicas',
@@ -259,6 +266,13 @@ const PUBLIC_PROFILE_COPY = {
     pageTitle: 'Public barbershop page',
     pageDescription:
       'Set the information customers should know before visiting or booking.',
+    publicPageVisibility: 'Public page availability',
+    publicPageVisibilityDescription:
+      'Choose whether the page can be opened through its direct link. This is separate from directory visibility.',
+    publicPageEnabled: 'Public page enabled',
+    publicPageDisabled: 'Public page disabled',
+    publicPageDisabledHint:
+      'Customers cannot open the public link while this page is disabled.',
     plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise' },
     establishmentInfo: 'Business information',
     publicBasics: 'Public information',
@@ -317,6 +331,7 @@ export function PublicProfileSettingsCard({
     ? AMENITIES.map((option) => ({ ...option, ...AMENITIES_EN[option.key] }))
     : AMENITIES;
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [publicProfileEnabled, setPublicProfileEnabled] = useState(true);
   const [slug, setSlug] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState(15);
@@ -340,6 +355,7 @@ export function PublicProfileSettingsCard({
       if (!response.ok || !body.data) throw new Error(copy.loadError);
       const next = body.data as Profile;
       setProfile(next);
+      setPublicProfileEnabled(next.public_profile_enabled !== false);
       setSlug(next.custom_slug || next.slug || '');
       setCity(next.city || '');
       setPrice(Number(next.price ?? 15));
@@ -367,6 +383,7 @@ export function PublicProfileSettingsCard({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          publicProfileEnabled,
           ...(profile.canCustomizeSlug ? { slug } : {}),
           ...(profile.canCustomizeEnterprise
             ? { seoTitle, seoDescription, ogImageUrl }
@@ -428,6 +445,32 @@ export function PublicProfileSettingsCard({
             {copy.plan[profile.plan]}
           </span>
         </header>
+
+        <section
+          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          aria-labelledby="public-page-visibility-title"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h2 id="public-page-visibility-title" className="text-sm font-semibold">
+                {copy.publicPageVisibility}
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-zinc-500">
+                {copy.publicPageVisibilityDescription}
+              </p>
+              {!publicProfileEnabled && (
+                <p className="mt-1 text-xs leading-5 text-amber-300/90">
+                  {copy.publicPageDisabledHint}
+                </p>
+              )}
+            </div>
+            <Switch
+              checked={publicProfileEnabled}
+              onCheckedChange={setPublicProfileEnabled}
+              aria-label={copy.publicPageEnabled}
+            />
+          </div>
+        </section>
 
         <section
           className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
@@ -737,15 +780,22 @@ export function PublicProfileSettingsCard({
         </section>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link
-            href={publicUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-medium hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-          >
-            <ExternalLink className="size-4" aria-hidden="true" />{' '}
-            {copy.viewPage}
-          </Link>
+          {publicProfileEnabled ? (
+            <Link
+              href={publicUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm font-medium hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            >
+              <ExternalLink className="size-4" aria-hidden="true" />{' '}
+              {copy.viewPage}
+            </Link>
+          ) : (
+            <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 text-sm text-zinc-500">
+              <Lock className="size-4" aria-hidden="true" />{' '}
+              {copy.publicPageDisabled}
+            </span>
+          )}
           <Button
             aria-label={saving ? copy.savingProfile : copy.saveChanges}
             onClick={() => void save()}
