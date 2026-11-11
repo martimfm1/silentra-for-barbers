@@ -45,10 +45,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
-import {
-  DashboardCustomizationDialog,
-  useDashboardCustomization,
-} from '@/app/dashboard/_components/DashboardCustomization';
+import { useDashboardCustomization } from '@/app/dashboard/_components/DashboardCustomization';
 
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
@@ -368,10 +365,6 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <DashboardCustomizationDialog
-                customization={customization}
-                locale={locale}
-              />
               <Link
                 href="/dashboard/billing"
                 className="glassmorphism inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dashboard-accent)]"
