@@ -78,6 +78,25 @@ async function POST__unobserved(
       .select('id');
     if (updateError) return NextResponse.json({ success: false, error: 'Não foi possível cancelar a série.' }, { status: 503 });
 
+    const awaitingReviewIds = targets
+      .filter(item => item.payment_status === 'awaiting_review')
+      .map(item => item.id);
+    if (awaitingReviewIds.length > 0) {
+      const { error: paymentError } = await tenant.admin
+        .from('appointments')
+        .update({
+          payment_status: 'rejected',
+          payment_reviewed_at: cancelledAt,
+          cancellation_reason: 'Pré-pagamento MB WAY rejeitado pelo barbeiro.',
+        })
+        .eq('barbershop_id', tenant.barbershopId)
+        .in('id', awaitingReviewIds)
+        .eq('status', 'cancelled');
+      if (paymentError) {
+        console.error('[CANCEL_SERIES_PAYMENT_REJECTION_FAILED]');
+      }
+    }
+
     const [shop, service, professional, client] = await Promise.all([
       tenant.admin.from('barbershops').select('name,default_language').eq('id', tenant.barbershopId).maybeSingle(),
       selected.service_id ? tenant.admin.from('services').select('name').eq('id', selected.service_id).eq('barbershop_id', tenant.barbershopId).maybeSingle() : Promise.resolve({ data: null }),
