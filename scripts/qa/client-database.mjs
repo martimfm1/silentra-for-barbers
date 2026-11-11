@@ -101,7 +101,7 @@ assert.match(clientsListApi, /appointment_count/);
 assert.match(clientsListApi, /total_spent/);
 assert.match(clientsCard, /value="visits"/);
 assert.match(clientsCard, /value="spent"/);
-assert.doesNotMatch(clientsCard, /wa\\.me|tel:|mailto:/);
+assert.doesNotMatch(clientsCard, /wa\.me|tel:|mailto:/);
 assert.match(clientsCard, /dashboard\/agenda\?clientId/);
 assert.match(clientsCard, /navigator\.clipboard\.writeText/);
 assert.match(agendaPage, /new URLSearchParams\(window\.location\.search\)/);
