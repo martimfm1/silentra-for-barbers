@@ -210,8 +210,11 @@ export function useAppointments(
           toast.error(message);
           return false;
         }
+        const recurrenceSeriesId =
+          recurrence === 'none' ? null : crypto.randomUUID();
         const createPayloads = generatedDates.dates.map((bookingDate) => ({
           barbershop_id: barbershopId,
+          recurrence_series_id: recurrenceSeriesId,
           date_hour: combineDatetime(bookingDate, time),
           status: 'pending' as const,
           client_id: clientId || null,
