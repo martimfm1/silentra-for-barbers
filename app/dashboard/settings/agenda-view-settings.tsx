@@ -2,13 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { CalendarDays, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export type AgendaViewPreference = 'lines' | 'calendar';
 
@@ -64,22 +59,32 @@ export function AgendaViewSettings() {
             : 'Escolhe o que aparece quando abres a agenda.'}
         </p>
       </div>
-      <Select
-        value={view}
-        onValueChange={(value) => setView(value as AgendaViewPreference)}
+      <div
+        role="group"
+        aria-label={isEnglish ? 'Default agenda layout' : 'Layout predefinido da agenda'}
+        className="grid w-full min-w-0 grid-cols-2 gap-2 sm:w-auto"
       >
-        <SelectTrigger className="h-11 w-full min-w-0 sm:max-w-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent position="popper">
-          <SelectItem value="lines">
-            {isEnglish ? 'List view' : 'Vista em linhas'}
-          </SelectItem>
-          <SelectItem value="calendar">
-            {isEnglish ? 'Calendar view' : 'Vista em calendário'}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+        <Button
+          type="button"
+          variant="outline"
+          aria-pressed={view === 'lines'}
+          onClick={() => setView('lines')}
+          className={`h-11 min-w-0 gap-2 border-white/10 px-3 text-xs sm:text-sm ${view === 'lines' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15' : 'bg-white/[.03] text-zinc-300 hover:bg-white/[.07]'}`}
+        >
+          <List className="size-4 shrink-0" aria-hidden="true" />
+          <span>{isEnglish ? 'List' : 'Em linha'}</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          aria-pressed={view === 'calendar'}
+          onClick={() => setView('calendar')}
+          className={`h-11 min-w-0 gap-2 border-white/10 px-3 text-xs sm:text-sm ${view === 'calendar' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15' : 'bg-white/[.03] text-zinc-300 hover:bg-white/[.07]'}`}
+        >
+          <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+          <span>{isEnglish ? 'Calendar' : 'Calendário'}</span>
+        </Button>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
+const [agendaLayoutSettings, publicProfileSettingsCard, publicProfileRoute] =
+  await Promise.all([
+    read('app/dashboard/settings/agenda-view-settings.tsx'),
+    read('app/dashboard/settings/public-profile/public-profile-settings-card.tsx'),
+    read('app/dashboard/settings/public-profile/page.tsx'),
+  ]);
 
 const [
   dashboardConfirmProvider,
@@ -193,9 +199,34 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /data-settings-category/);
-assert.match(settingsPage, /Apresentação da agenda/);
-assert.match(settingsPage, /<AgendaViewSettings\s*\/>/);
+assert.ok(settingsPage.includes('data-settings-subcategory'));
+assert.ok(
+  settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
+  'Appearance must be nested under Information.',
+);
+assert.ok(settingsPage.includes('<AgendaViewSettings />'));
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
+assert.match(settingsPage, /<PublicProfileSettingsCard/);
+assert.ok(settingsPage.includes('directoryVisible={config.is_public_in_directory}'));
+assert.ok(!settingsPage.includes('href="/dashboard/settings/public-profile"'));
+assert.ok(
+  settingsPage.indexOf('id="settings-location"') >
+    settingsPage.indexOf("'Information' : 'Informações'"),
+  'Location settings must be nested under Information.',
+);
+assert.ok(
+  settingsPage.indexOf("'Appearance' : 'Aparência'") >
+    settingsPage.indexOf("'Information' : 'Informações'"),
+  'Appearance settings must be nested under Information.',
+);
+assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'lines'\}/);
+assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'calendar'\}/);
+assert.match(agendaLayoutSettings, /setView\('lines'\)/);
+assert.match(agendaLayoutSettings, /setView\('calendar'\)/);
+assert.match(publicProfileSettingsCard, /Visibilidade no diretório/);
+assert.match(publicProfileSettingsCard, /directoryVisible/);
+assert.match(publicProfileSettingsCard, /Guardar alterações no topo das Definições/);
+assert.ok(publicProfileRoute.includes("redirect('/dashboard/settings#public-profile')"));
 assert.match(settingsPage, /time_limit_cancellation_hours/);
 assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);

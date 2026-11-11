@@ -48,6 +48,7 @@ import { Switch } from '@/components/ui/switch';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
 import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
+import { PublicProfileSettingsCard } from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
 import {
   DashboardCustomizationDialog,
   useDashboardCustomization,
@@ -178,6 +179,17 @@ export default function SettingsPageOrganized() {
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    if (window.location.hash !== '#public-profile') return;
+    const profileAccordion = document.getElementById(
+      'public-profile',
+    ) as HTMLDetailsElement | null;
+    if (!profileAccordion) return;
+    profileAccordion.open = true;
+    requestAnimationFrame(() =>
+      profileAccordion.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    );
+  }, []);
   const dirty = useMemo(
     () =>
       JSON.stringify(config) !== JSON.stringify(initial) || suggestion !== null,
@@ -516,8 +528,8 @@ export default function SettingsPageOrganized() {
             <details open data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.business')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.businessDialogDescription')}</span>
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Information' : 'Informações'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Business details, location and appearance.' : 'Dados da barbearia, localização e apresentação.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -651,51 +663,13 @@ export default function SettingsPageOrganized() {
                         </div>
                       )}
                     </div>
-                    <div className="sm:col-span-2 flex items-center justify-between gap-4 border-t border-white/10 pt-5">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-medium">
-                            {t('settingsPage.directoryVisibility')}
-                          </p>
-                          <FeaturePlanBadge feature="directory_visibility" />
-                        </div>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
-                          {canDirectory
-                            ? t('settingsPage.directoryDescription')
-                            : locale === 'en'
-                              ? 'Your barbershop stays visible in the directory on Free. Upgrade to Pro to hide it from search results.'
-                              : 'No plano Free, a tua barbearia aparece sempre no diretório. Com o Pro, podes ocultá-la dos resultados.'}
-                        </p>
-                      </div>
-                      <Switch
-                        disabled={!canDirectory || planLoading || saving}
-                        checked={!canDirectory || config.is_public_in_directory}
-                        onCheckedChange={(value) =>
-                          canDirectory && set({ is_public_in_directory: value })
-                        }
-                        aria-label={
-                          locale === 'en'
-                            ? 'Show barbershop in public directory'
-                            : 'Mostrar barbearia no diretório público'
-                        }
-                      />
-                    </div>
+                    
                   </CardContent>
                 </Card>
               </div>
             </section>
-  </div>
-</details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.location')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.locationDialogDescription')}</span>
-    </span>
-    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-  </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
-<section id="settings-location" className="scroll-mt-24">
+<div className="mt-4 border-t border-white/[.06] pt-4">
+  <section id="settings-location" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
                   <h2 className="text-lg font-semibold">
@@ -734,8 +708,123 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
+</div>
+<details data-settings-subcategory className="group mt-4 min-w-0 overflow-hidden rounded-2xl border border-white/[.08] bg-black/15">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Appearance' : 'Aparência'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your barbershop identity and personalize the dashboard and agenda.' : 'Gere a identidade da barbearia e personaliza a dashboard e a agenda.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="space-y-4 border-t border-white/[.06] px-3 py-4 sm:px-4">
+    <section id="settings-appearance">
+              <Card className={CARD_CLASS}>
+                <CardHeader className="hidden">
+                  <CardTitle>{t('settingsPage.appearance')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
+                    <div className="relative h-52">
+                      <Image
+                        src={
+                          bannerPreviewError || !banner
+                            ? DEFAULT_BARBERSHOP_BANNER
+                            : banner
+                        }
+                        alt={t('settingsPage.bannerAlt')}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                        onError={() => setBannerPreviewError(true)}
+                      />
+                      <div className="absolute inset-x-4 bottom-4 flex items-end justify-between">
+                        <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
+                          <Image
+                            src={
+                              avatarPreviewError || !avatar
+                                ? DEFAULT_BARBERSHOP_AVATAR
+                                : avatar
+                            }
+                            alt={t('settingsPage.avatarAlt')}
+                            width={128}
+                            height={128}
+                            className="h-full w-full object-cover"
+                            unoptimized
+                            onError={() => setAvatarPreviewError(true)}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => bannerRef.current?.click()}
+                            disabled={uploading !== null}
+                          >
+                            <ImageIcon className="mr-2 size-4" />
+                            {t('settingsPage.cover')}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => avatarRef.current?.click()}
+                            disabled={uploading !== null}
+                          >
+                            <Camera className="mr-2 size-4" />
+                            {t('settingsPage.logo')}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    ref={avatarRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void upload('avatar', f);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                  <input
+                    ref={bannerRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void upload('banner', f);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </section>
+    <Card className={CARD_CLASS}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">{locale === 'en' ? 'Dashboard customization' : 'Personalização da dashboard'}</CardTitle>
+        <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose shortcuts, visible sections and the dashboard accent colour.' : 'Escolhe os atalhos, as secções visíveis e a cor de destaque da dashboard.'}</p>
+      </CardHeader>
+      <CardContent>
+        <DashboardCustomizationDialog customization={customization} locale={locale} />
+      </CardContent>
+    </Card>
+    <Card className={CARD_CLASS}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">{locale === 'en' ? 'Agenda layout' : 'Layout da agenda'}</CardTitle>
+        <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose how appointments are displayed by default.' : 'Escolhe como queres ver as marcações por defeito.'}</p>
+      </CardHeader>
+      <CardContent>
+        <AgendaViewSettings />
+      </CardContent>
+    </Card>
   </div>
 </details>
+  </div>
+</details>
+            
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
@@ -1095,45 +1184,25 @@ export default function SettingsPageOrganized() {
   </div>
 </details>
             
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Agenda display' : 'Apresentação da agenda'}</span>
-                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose the default view for your appointments.' : 'Escolhe a vista que abre por defeito quando entras na agenda.'}</span>
-                </span>
-                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-              </summary>
-              <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
-                <AgendaViewSettings />
-              </div>
-            </details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
-                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage the information, discoverability and public page of your barbershop.' : 'Gere a informação, visibilidade e página pública da tua barbearia.'}</span>
-                </span>
-                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-              </summary>
-              <div className="flex flex-col gap-3 border-t border-white/[.06] px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-                <p className="max-w-2xl text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Set the public URL, SEO details, reference price, features and other information customers see before booking.' : 'Define o endereço público, os dados SEO, o preço de referência, comodidades e outras informações que os clientes veem antes de marcar.'}</p>
-                <Button asChild className="min-h-11 w-full shrink-0 sm:w-auto">
-                  <Link href="/dashboard/settings/public-profile">{locale === 'en' ? 'Open public profile' : 'Gerir perfil público'}</Link>
-                </Button>
-              </div>
-            </details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Dashboard preferences' : 'Personalização da dashboard'}</span>
-                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose your shortcuts, visible sections and dashboard accent colour.' : 'Escolhe os atalhos, secções visíveis e a cor de destaque da dashboard.'}</span>
-                </span>
-                <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-              </summary>
-              <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
-                <DashboardCustomizationDialog customization={customization} locale={locale} />
-              </div>
-            </details>
+            
+            <details id="public-profile" data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage the information customers see and how your barbershop appears in search.' : 'Gere a informação que os clientes veem e a forma como a tua barbearia aparece nas pesquisas.'}</span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
+    <PublicProfileSettingsCard
+      directoryVisible={config.is_public_in_directory}
+      onDirectoryVisibilityChange={(value) => canDirectory && set({ is_public_in_directory: value })}
+      canDirectory={canDirectory}
+      directorySaving={saving || planLoading}
+    />
+  </div>
+</details>
+            
 <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
@@ -1160,101 +1229,7 @@ export default function SettingsPageOrganized() {
             </section>
   </div>
 </details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.appearance')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Update your barbershop logo and cover image.' : 'Atualiza o logótipo e a imagem de capa da barbearia.'}</span>
-    </span>
-    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-  </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
-<section id="settings-appearance">
-              <Card className={CARD_CLASS}>
-                <CardHeader className="hidden">
-                  <CardTitle>{t('settingsPage.appearance')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
-                    <div className="relative h-52">
-                      <Image
-                        src={
-                          bannerPreviewError || !banner
-                            ? DEFAULT_BARBERSHOP_BANNER
-                            : banner
-                        }
-                        alt={t('settingsPage.bannerAlt')}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        onError={() => setBannerPreviewError(true)}
-                      />
-                      <div className="absolute inset-x-4 bottom-4 flex items-end justify-between">
-                        <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
-                          <Image
-                            src={
-                              avatarPreviewError || !avatar
-                                ? DEFAULT_BARBERSHOP_AVATAR
-                                : avatar
-                            }
-                            alt={t('settingsPage.avatarAlt')}
-                            width={128}
-                            height={128}
-                            className="h-full w-full object-cover"
-                            unoptimized
-                            onError={() => setAvatarPreviewError(true)}
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => bannerRef.current?.click()}
-                            disabled={uploading !== null}
-                          >
-                            <ImageIcon className="mr-2 size-4" />
-                            {t('settingsPage.cover')}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => avatarRef.current?.click()}
-                            disabled={uploading !== null}
-                          >
-                            <Camera className="mr-2 size-4" />
-                            {t('settingsPage.logo')}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <input
-                    ref={avatarRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void upload('avatar', f);
-                      e.currentTarget.value = '';
-                    }}
-                  />
-                  <input
-                    ref={bannerRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void upload('banner', f);
-                      e.currentTarget.value = '';
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </section>
-  </div>
-</details>
+            
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
