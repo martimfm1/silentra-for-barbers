@@ -94,6 +94,9 @@ jobs:
       - name: Barber booking email contracts
         run: pnpm qa:barber-booking-email
 
+      - name: Subscription expiry email reminder contracts
+        run: pnpm qa:subscription-expiry
+
       - name: Appointment rescheduling contracts
         run: pnpm qa:appointment-rescheduling
 
