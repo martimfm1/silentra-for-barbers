@@ -119,7 +119,7 @@ const dashboardSurfaceStyles = `
     }
 
     /* The agenda is a full-bleed workspace on phones: remove both outer gutters. */
-    .silentra-dashboard-shell .dashboard-content.dashboard-agenda-content > .dashboard-page,
+    .silentra-dashboard-shell .dashboard-content.dashboard-agenda-content #dashboard-main-content,
     .silentra-dashboard-shell .dashboard-page.dashboard-agenda-page {
       padding-inline: 0 !important;
     }
