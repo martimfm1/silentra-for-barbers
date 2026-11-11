@@ -318,19 +318,19 @@ export function AgendaCalendarView({
           >
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-emerald-300" />
-              Pouco ocupada
+              {locale === 'en' ? 'Light occupancy' : 'Pouco ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-sky-300" />
-              Ocupada
+              {locale === 'en' ? 'Busy' : 'Ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-violet-300" />
-              Muito ocupada
+              {locale === 'en' ? 'Very busy' : 'Muito ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-rose-300" />
-              Bloqueio
+              {locale === 'en' ? 'Blocked time' : 'Bloqueio'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-amber-300" />
@@ -507,7 +507,7 @@ export function AgendaCalendarView({
                         ]
                           .filter(Boolean)
                           .join(' · ')}
-                        aria-label={`Bloqueio de horário das ${formatTime(block.start_time)} às ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.`}
+                        aria-label={locale === 'en' ? `Blocked time from ${formatTime(block.start_time)} to ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.` : `Bloqueio de horário das ${formatTime(block.start_time)} às ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.`}
                         className="flex min-w-0 items-center gap-1 rounded-md border border-rose-400/20 bg-rose-400/[0.07] px-1 py-1 text-[8px] text-rose-200/90 sm:px-1.5 sm:text-[9px]"
                       >
                         <CalendarOff
@@ -531,7 +531,7 @@ export function AgendaCalendarView({
                     {config.lunch_start && config.lunch_end && !isClosed ? (
                       <div className="hidden items-center gap-1 text-[9px] text-amber-300/70 sm:flex">
                         <Coffee className="size-3" aria-hidden="true" />
-                        Pausa {formatTime(config.lunch_start)}–
+                        {locale === 'en' ? 'Break' : 'Pausa'} {formatTime(config.lunch_start)}–
                         {formatTime(config.lunch_end)}
                       </div>
                     ) : null}
@@ -554,9 +554,11 @@ export function AgendaCalendarView({
                 {t('agendaCalendar.selectedDay')}
               </p>
               <CardTitle className="mt-1 text-lg capitalize sm:text-xl">
-                {format(selectedDate, "EEEE, d 'de' MMMM", {
-                  locale: dateLocale,
-                })}
+                {format(
+                  selectedDate,
+                  locale === 'en' ? 'EEEE, d MMMM' : "EEEE, d 'de' MMMM",
+                  { locale: dateLocale },
+                )}
               </CardTitle>
               <p
                 className={cn(
@@ -598,7 +600,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Bloqueios
+                {locale === 'en' ? 'Blocked times' : 'Bloqueios'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedBlocks.length}
@@ -606,7 +608,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Canceladas
+                {locale === 'en' ? 'Cancelled' : 'Canceladas'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-rose-300">
                 {
@@ -618,7 +620,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Carga
+                {locale === 'en' ? 'Occupancy' : 'Ocupação'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedLoad}%
@@ -637,7 +639,7 @@ export function AgendaCalendarView({
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs">
                 <span className="flex items-center gap-1.5 text-zinc-500">
                   <Coffee className="size-3.5" aria-hidden="true" />
-                  Pausa
+                  {locale === 'en' ? 'Break' : 'Pausa'}
                 </span>
                 <span className="font-medium tabular-nums text-amber-200">
                   {formatTime(config.lunch_start)}–
@@ -655,7 +657,7 @@ export function AgendaCalendarView({
           <div>
             <div className="mb-2 flex items-center justify-between gap-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
-                Agenda do dia
+                {locale === 'en' ? 'Day schedule' : 'Agenda do dia'}
               </p>
               {selectedAppointments.length > 0 ? (
                 <span className="text-[10px] font-medium text-zinc-600">
