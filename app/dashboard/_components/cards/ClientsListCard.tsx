@@ -477,6 +477,21 @@ function ClientItemCard({
         </div>
       </div>
 
+      <div className="mt-3">
+        <Button
+          asChild
+          type="button"
+          variant="outline"
+          className="min-h-10 w-full border-blue-500/20 bg-blue-500/[0.05] px-2 text-xs text-blue-200 hover:bg-blue-500/10"
+        >
+          <Link
+            href={`/dashboard/agenda?clientId=${encodeURIComponent(client.id)}`}
+          >
+            <UserPlus className="mr-1.5 size-4" aria-hidden="true" />
+            {locale === 'pt' ? 'Marcar' : 'Book'}
+          </Link>
+        </Button>
+      </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Button
           type="button"
