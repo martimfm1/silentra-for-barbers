@@ -15,8 +15,8 @@ const comparison = read('components/billing/plan-comparison.tsx');
 const apiAudit = read('scripts/qa/api-audit.mjs');
 const documentationPage = read('app/documentation/page.tsx');
 const apiDocumentation = read('docs/API_PUBLICA.md');
-const openApi = read('public/openapi-v1.yaml');
 const navbar = read('components/site-navbar.tsx');
+const dashboardSidebar = read('app/dashboard/_components/DashboardSidebar.tsx');
 const sitemap = read('app/sitemap.ts');
 
 assert.match(
@@ -63,6 +63,8 @@ assert.match(landingPage, /profile\.plan !== 'enterprise'/);
 assert.match(publicProfileApi, /landing_page_url/);
 assert.match(landingPage, /from\('barbershop_landing_pages'\)/);
 assert.match(landingPage, /notFound\(\)/);
+assert.match(publicApi, /const PUBLIC_API_ENABLED = false/);
+assert.match(publicApi, /if \(!PUBLIC_API_ENABLED\)/);
 assert.match(publicApi, /consumePublicRateLimit/);
 assert.match(publicApi, /isValidPublicProfileSlug/);
 assert.match(publicApi, /Access-Control-Allow-Origin/);
@@ -74,16 +76,10 @@ assert.match(apiAudit, /v1.*public.*barbershops/);
 assert.match(publicProfileApi, /landing_page_url/);
 assert.match(publicProfileApi, /owner_user_id: ownerUserId/);
 
-assert.match(documentationPage, /Documentação da API pública/);
-assert.match(documentationPage, /CopyCodeButton/);
-assert.match(documentationPage, /id="inicio"/);
-assert.match(documentationPage, /id="limites"/);
-assert.match(documentationPage, /\/openapi-v1\.yaml/);
-assert.match(apiDocumentation, /## 1\. Endpoint/);
-assert.match(apiDocumentation, /## 8\. Dados públicos e segurança/);
-assert.match(openApi, /openapi: 3\.1\.0/);
-assert.match(openApi, /PublicApiError/);
-assert.match(navbar, /href: '\/documentation'/);
-assert.match(sitemap, /\$\{SITE_URL\}\/documentation/);
+assert.match(documentationPage, /notFound\(\)/);
+assert.match(apiDocumentation, /temporariamente desativada/);
+assert.doesNotMatch(navbar, /\/documentation/);
+assert.doesNotMatch(dashboardSidebar, /\/documentation/);
+assert.doesNotMatch(sitemap, /\/documentation/);
 
 console.log('Enterprise landing-page and public API contracts passed.');
