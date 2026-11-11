@@ -58,8 +58,14 @@ assert.ok(
   'Do not offer SMS as a new campaign channel',
 );
 assert.ok(
-  marketing.includes("campaign.channel === 'sms' || sendingId === campaign.id"),
+  /campaign\\.channel === 'sms'\\s*\\|\\|\\s*sendingId === campaign\\.id/.test(
+    marketing,
+  ),
   'Legacy SMS campaigns must not be sent from the UI',
+);
+assert.ok(
+  marketing.includes('if (!canManage(campaign)) return;'),
+  'Campaign sending must reject unsupported channels before calling the API',
 );
 assert.ok(
   messageStatus.includes('contactsWithEmail'),
