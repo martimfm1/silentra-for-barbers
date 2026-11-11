@@ -843,28 +843,34 @@ export default function SettingsPageOrganized() {
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                         {days.map(([v, enLabel, ptLabel]) => {
                           const active = closed.includes(v);
+                          const label = locale === 'pt' ? ptLabel : enLabel;
                           return (
-                            <button
+                            <div
                               key={v}
-                              type="button"
-                              aria-pressed={active}
-                              onClick={() => {
-                                const n = active
-                                  ? closed.filter((x) => x !== v)
-                                  : [...closed, v];
-                                set({
-                                  closed_days: n.length ? n.join(',') : 'None',
-                                });
-                              }}
-                              className={cn(
-                                'box-border min-h-12 w-full min-w-0 max-w-full rounded-xl border px-3 text-left text-sm',
-                                active
-                                  ? 'border-emerald-400/30 bg-emerald-400/[.06] text-emerald-200'
-                                  : 'border-white/10 bg-white/[.02] text-zinc-400',
-                              )}
+                              className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[.02] px-3 py-2"
                             >
-                              {locale === 'pt' ? ptLabel : enLabel}
-                            </button>
+                              <span className="min-w-0 truncate text-sm text-zinc-300">
+                                {label}
+                              </span>
+                              <Switch
+                                checked={active}
+                                onCheckedChange={(checked) => {
+                                  const nextDays = checked
+                                    ? [...closed, v]
+                                    : closed.filter((day) => day !== v);
+                                  set({
+                                    closed_days: nextDays.length
+                                      ? nextDays.join(',')
+                                      : 'None',
+                                  });
+                                }}
+                                aria-label={
+                                  locale === 'en'
+                                    ? `Set ${label} as a closed day`
+                                    : `Definir ${label} como dia de encerramento`
+                                }
+                              />
+                            </div>
                           );
                         })}
                       </div>
@@ -976,12 +982,12 @@ export default function SettingsPageOrganized() {
                         </SelectTrigger>
                         <SelectContent position="popper">
                           <SelectItem value="0">{locale === 'en' ? 'No minimum' : 'Sem prazo mínimo'}</SelectItem>
-                          <SelectItem value="2">2 horas</SelectItem>
-                          <SelectItem value="6">6 horas</SelectItem>
-                          <SelectItem value="12">12 horas</SelectItem>
-                          <SelectItem value="24">24 horas</SelectItem>
-                          <SelectItem value="48">48 horas</SelectItem>
-                          <SelectItem value="72">72 horas</SelectItem>
+                          <SelectItem value="2">{locale === 'en' ? '2 hours' : '2 horas'}</SelectItem>
+                          <SelectItem value="6">{locale === 'en' ? '6 hours' : '6 horas'}</SelectItem>
+                          <SelectItem value="12">{locale === 'en' ? '12 hours' : '12 horas'}</SelectItem>
+                          <SelectItem value="24">{locale === 'en' ? '24 hours' : '24 horas'}</SelectItem>
+                          <SelectItem value="48">{locale === 'en' ? '48 hours' : '48 horas'}</SelectItem>
+                          <SelectItem value="72">{locale === 'en' ? '72 hours' : '72 horas'}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
