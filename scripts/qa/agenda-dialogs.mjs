@@ -40,6 +40,8 @@ assert.ok(
 );
 assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
 assert.ok(agenda.includes('appointments={appointments}'));
+assert.ok(agenda.includes('appointmentsLoading={loadingInitial}'));
+assert.ok(agendaCalendar.includes('appointmentsLoading: boolean'));
 assert.ok(agenda.includes('professionals={professionals}'));
 assert.ok(agendaCalendar.includes('appointments: Appointment[]'));
 assert.ok(!agendaCalendar.includes('appointmentService.getAll'));
