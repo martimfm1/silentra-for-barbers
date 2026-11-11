@@ -264,7 +264,10 @@ export function AppointmentDetailDialog({
     setIsCancelling(true);
     try {
       const cancelled = await onCancel(appointment.id);
-      if (cancelled) setIsCancelConfirmationOpen(false);
+      if (cancelled) {
+        setIsCancelConfirmationOpen(false);
+        onOpenChange(false);
+      }
     } finally {
       setIsCancelling(false);
     }
