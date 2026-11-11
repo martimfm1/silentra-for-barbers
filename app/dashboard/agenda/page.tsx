@@ -452,9 +452,9 @@ export default function AgendaPage() {
   };
 
   return (
-    <main className="silentra-page-shell dashboard-page">
+    <main className="silentra-page-shell dashboard-page dashboard-agenda-page">
       <div className="silentra-page-grid" aria-hidden="true" />
-      <div className="relative z-10 mx-auto w-full max-w-[100rem] px-3 py-5 sm:px-5 sm:py-8 lg:px-8 lg:py-10">
+      <div className="relative z-10 mx-auto w-full max-w-[100rem] px-0 py-5 sm:px-5 sm:py-8 lg:px-8 lg:py-10">
         <header className="mb-5 flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:p-6">
           <div className="min-w-0">
             <p className="silentra-eyebrow mb-1">
