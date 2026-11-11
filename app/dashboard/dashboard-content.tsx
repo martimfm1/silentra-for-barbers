@@ -118,6 +118,12 @@ const dashboardSurfaceStyles = `
       padding-inline: 1rem;
     }
 
+    /* The agenda is a full-bleed workspace on phones: remove both outer gutters. */
+    .silentra-dashboard-shell .dashboard-content.dashboard-agenda-content > .dashboard-page,
+    .silentra-dashboard-shell .dashboard-page.dashboard-agenda-page {
+      padding-inline: 0 !important;
+    }
+
     .silentra-dashboard-shell .dashboard-page > *,
     .silentra-dashboard-shell .dashboard-page [data-slot="card"] {
       min-width: 0;
@@ -144,6 +150,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const { config: dashboardConfig } = useDashboardCustomization();
   const accentColor = dashboardConfig.accentColor;
   const isSettingsPage = pathname.startsWith('/dashboard/settings');
+  const isAgendaPage = pathname === '/dashboard/agenda';
 
   // Disable browser/page zoom while the user is inside the dashboard.
   // Restore the site's original viewport configuration when leaving it.
@@ -255,7 +262,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <div
         className={`dashboard-content min-w-0 lg:pl-64 ${
           isSettingsPage ? 'pt-0' : 'pt-16'
-        }`}
+        } ${isAgendaPage ? 'dashboard-agenda-content' : ''}`}
       >
         <DashboardPageTransition>
           <main
