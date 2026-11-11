@@ -41,6 +41,7 @@ export const appointmentService = {
     manual_phone: string | null;
     manual_birth_date: string | null;
     manual_email?: string | null;
+    recurrence_series_id?: string | null;
   }) {
     let clientEmail = payload.manual_email?.trim().toLowerCase() || null;
     if (payload.client_id) {
@@ -127,6 +128,7 @@ export const appointmentService = {
       manual_phone: string | null;
       manual_birth_date: string | null;
       manual_email?: string | null;
+      recurrence_series_id?: string | null;
     }>,
   ) {
     if (payloads.length === 0) {

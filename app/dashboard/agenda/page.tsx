@@ -400,6 +400,37 @@ export default function AgendaPage() {
     [handleCancelBooking],
   );
 
+  const handleCancelAppointmentSeries = useCallback(
+    async (appointmentId: string, scope: 'future' | 'all') => {
+      try {
+        const response = await fetch(
+          `/api/appointments/${encodeURIComponent(appointmentId)}/cancel-series`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scope }),
+          },
+        );
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success !== true) {
+          throw new Error(payload.error || 'Não foi possível cancelar a série.');
+        }
+        const count = Number(payload.cancelledCount || 0);
+        toast.success(
+          locale === 'en'
+            ? `${count} recurring bookings cancelled.`
+            : `${count} marcações recorrentes canceladas.`,
+        );
+        await fetchInitialData();
+        return true;
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Não foi possível cancelar a série.');
+        return false;
+      }
+    },
+    [fetchInitialData, locale],
+  );
+
   const actionProps = {
     finishingBookingId,
     setFinishingBookingId,
@@ -784,6 +815,7 @@ export default function AgendaPage() {
         locale={locale}
         onReschedule={handleRescheduleAppointment}
         onCancel={handleCancelSelectedAppointment}
+        onCancelSeries={handleCancelAppointmentSeries}
         onOpenChange={(open) => {
           if (!open) setSelectedAppointment(null);
         }}
