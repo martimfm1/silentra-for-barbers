@@ -18,10 +18,23 @@ begin
   from public.appointments
   where id = p_appointment_id;
 
-  if not found
-    or v_appointment.client_id is not null
-    or nullif(trim(coalesce(v_appointment.manual_name, '')), '') is null
-  then
+  if not found then
+    return;
+  end if;
+
+  if v_appointment.client_id is not null then
+    update public.users
+    set email = coalesce(
+      nullif(trim(email), ''),
+      nullif(lower(trim(coalesce(v_appointment.manual_email, ''))), '')
+    )
+    where id = v_appointment.client_id
+      and barbershop_id = v_appointment.barbershop_id
+      and role = 'client';
+    return;
+  end if;
+
+  if nullif(trim(coalesce(v_appointment.manual_name, '')), '') is null then
     return;
   end if;
 
@@ -107,7 +120,6 @@ create trigger appointments_sync_crm_client
 after insert or update of manual_name, manual_phone, manual_email, client_id
 on public.appointments
 for each row
-when (new.client_id is null)
 execute function public.trigger_sync_appointment_crm_client();
 
 -- Backfill historical manual bookings so existing customers appear in the CRM
