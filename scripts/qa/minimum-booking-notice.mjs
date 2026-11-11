@@ -68,7 +68,7 @@ assert.match(
 assert.match(helper, /timeZone: 'Europe\/Lisbon'/);
 assert.match(
   booking,
-  /isBeforeMinimumBookingNotice\(bookingDate, bookingTime, minimumNoticeMinutes\)/,
+  /isBeforeMinimumBookingNotice\(\s*bookingDate,\s*bookingTime,\s*minimumNoticeMinutes,?\s*\)/,
 );
 assert.match(availability, /isBeforeMinimumBookingNotice\(/);
 assert.match(legacySlots, /isBeforeMinimumBookingNotice\(/);
