@@ -175,6 +175,16 @@ assert.match(sidebar, /managementItems\.map\(renderItem\)/);
 assert.match(sidebar, /secondaryItems\.map\(renderItem\)/);
 assert.match(sidebar, /lg:hidden/);
 assert.match(dashboardShell, /lg:pl-64/);
+assert.match(dashboardShell, /const isAgendaPage = pathname === '\/dashboard\/agenda'/);
+assert.match(dashboardShell, /dashboard-agenda-content/);
+assert.match(
+  dashboardShell,
+  /dashboard-page\.dashboard-agenda-page[\s\S]*?padding-inline:\s*0 !important/,
+  'The agenda shell must remove horizontal padding on mobile.',
+);
+assert.match(agendaPage, /dashboard-agenda-page/);
+assert.match(agendaPage, /max-w-\[100rem\] px-0 py-5 sm:px-5/);
+
 assert.match(topBar, /lg:left-64/);
 
 // Settings stay on one page: no category switcher, modal editor, or shortcut step.
