@@ -7,7 +7,9 @@ const haptics = read('lib/haptics.ts');
 const provider = read('components/haptics-provider.tsx');
 const button = read('components/ui/button.tsx');
 const clientShell = read('components/client-shell.tsx');
-const confirmProvider = read('components/dashboard/dashboard-confirm-provider.tsx');
+const confirmProvider = read(
+  'components/dashboard/dashboard-confirm-provider.tsx',
+);
 const clientsHook = read('app/state/_hooks/dashboard/useClients.ts');
 
 assert.match(haptics, /typeof navigator === 'undefined'/);
