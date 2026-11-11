@@ -30,7 +30,6 @@ const confirmationTargets = await Promise.all(
     'app/dashboard/pos/pedidos/page.tsx',
     'app/dashboard/pos/produtos/page.tsx',
     'app/dashboard/_components/team/TeamMembersManager.tsx',
-    'app/dashboard/marketing/campaign-lifecycle-actions.tsx',
     'components/dashboard/loyalty/earning-rules-card.tsx',
     'components/billing/BillingHub.tsx',
   ].map((file) => read(file)),
