@@ -297,14 +297,14 @@ const requestValidationChecks = [
     label: 'Manual billing admin request validation and authorization',
   },
   {
-    file: 'app/api/marketplace/orders/[orderId]/email/route.ts',
+    file: 'app/api/marketing/campaigns/route.ts',
     markers: [
-      'readJsonObject(request',
-      "allowedKeys: ['subject', 'message']",
+      'MANUAL_CAMPAIGNS_DISABLED',
+      "requireModuleContext(",
       ".eq('barbershop_id', barbershopId)",
-      'sendBrevoEmail',
+      ".in('trigger_type', ['interval', 'event', 'birthday'])",
     ],
-    label: 'Marketplace order email request validation and tenant binding',
+    label: 'Manual campaigns are rejected and automation reads stay tenant scoped',
   },
   {
     file: 'app/api/barbershops/avatar/route.ts',
