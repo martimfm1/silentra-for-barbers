@@ -63,7 +63,7 @@ const seriesMigration = read('supabase/migrations/20261111190000_appointment_rec
 assert.match(seriesCancelRoute, /requireTenantAuthorization/);
 assert.match(seriesCancelRoute, /recurrence_series_id/);
 assert.match(seriesCancelRoute, /scope === 'future'/);
-assert.match(seriesCancelRoute, /scope === 'all'/);
+assert.match(seriesCancelRoute, /scope !== 'all'/);
 assert.match(seriesCancelRoute, /status: 'cancelled'/);
 assert.doesNotMatch(seriesCancelRoute, /sendAppointmentCancellationEmail/);
 assert.doesNotMatch(seriesCancelRoute, /dispatchAppointmentAutomations/);
