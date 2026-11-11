@@ -98,6 +98,7 @@ async function PATCH__unobserved(request: Request) {
       maxBytes: 8 * 1024,
       allowedKeys: [
         'slug',
+        'publicProfileEnabled',
         'city',
         'price',
         'tags',
@@ -130,6 +131,12 @@ async function PATCH__unobserved(request: Request) {
     const updates: Record<string, unknown> = {
       public_profile_updated_at: new Date().toISOString(),
     };
+
+    if (body.publicProfileEnabled !== undefined) {
+      if (typeof body.publicProfileEnabled !== 'boolean')
+        return jsonError('O estado da página pública é inválido.', 400);
+      updates.public_profile_enabled = body.publicProfileEnabled;
+    }
 
     if (typeof body.slug === 'string') {
       if (!canCustomizeSlug)
