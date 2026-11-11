@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
-import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
-import { sendAppointmentCancellationEmail } from '@/lib/brevo/appointment-cancellation';
 
 const ROLES = ['owner', 'admin', 'manager', 'barber', 'receptionist', 'staff'] as const;
 type Scope = 'future' | 'all';
@@ -97,38 +95,11 @@ async function POST__unobserved(
       }
     }
 
-    const [shop, service, professional, client] = await Promise.all([
-      tenant.admin.from('barbershops').select('name,default_language').eq('id', tenant.barbershopId).maybeSingle(),
-      selected.service_id ? tenant.admin.from('services').select('name').eq('id', selected.service_id).eq('barbershop_id', tenant.barbershopId).maybeSingle() : Promise.resolve({ data: null }),
-      selected.professional_id ? tenant.admin.from('professionals').select('name').eq('id', selected.professional_id).eq('barbershop_id', tenant.barbershopId).maybeSingle() : Promise.resolve({ data: null }),
-      selected.client_id ? tenant.admin.from('users').select('email,name_complete').eq('id', selected.client_id).eq('barbershop_id', tenant.barbershopId).maybeSingle() : Promise.resolve({ data: null }),
-    ]);
-    const language = shop.data?.default_language === 'en' ? 'en' : 'pt';
-    const email = targets[0]?.manual_email?.trim() || client.data?.email?.trim() || '';
-    const clientName = targets[0]?.manual_name?.trim() || client.data?.name_complete?.trim() || 'Cliente';
-    const emailResults = await Promise.all((cancelled ?? []).map(async item => {
-      const target = targets.find(entry => entry.id === item.id);
-      if (!email || !target) return false;
-      const result = await sendAppointmentCancellationEmail({
-        to: email, clientName,
-        serviceName: service.data?.name?.trim() || 'Serviço',
-        professionalName: professional.data?.name?.trim() || null,
-        dateHour: target.date_hour, appointmentId: target.id,
-        barbershopName: shop.data?.name?.trim() || 'A tua barbearia', language,
-      });
-      void dispatchAppointmentAutomations('booking_cancelled', {
-        appointmentId: target.id, barbershopId: tenant.barbershopId,
-        clientId: target.client_id, manualEmail: target.manual_email,
-        manualName: target.manual_name, serviceName: service.data?.name ?? null,
-      });
-      return result.success;
-    }));
-
     return NextResponse.json({
       success: true,
       cancelledCount: cancelled?.length ?? 0,
-      emailSent: emailResults.length > 0 && emailResults.every(Boolean),
-      emailFailedCount: emailResults.filter(value => !value).length,
+      emailSent: false,
+      emailFailedCount: 0,
     });
   } catch (error) {
     console.error('[CANCEL_APPOINTMENT_SERIES_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
