@@ -226,7 +226,7 @@ assert.match(agendaLayoutSettings, /setView\('calendar'\)/);
 assert.match(publicProfileSettingsCard, /Visibilidade no diretório/);
 assert.match(publicProfileSettingsCard, /directoryVisible/);
 assert.match(publicProfileSettingsCard, /Guardar alterações no topo das Definições/);
-assert.match(publicProfileRoute, /redirect\('\/dashboard#public-profile'\)/);
+assert.ok(publicProfileRoute.includes("redirect('/dashboard/settings#public-profile')"));
 assert.match(settingsPage, /time_limit_cancellation_hours/);
 assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
