@@ -452,9 +452,11 @@ export function useAppointments(
         }
 
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Cancel Booking Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
