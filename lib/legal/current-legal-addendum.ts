@@ -71,7 +71,7 @@ export const currentTermsFeatureSections = {
       paragraphs: [
         'A Plataforma pode disponibilizar páginas públicas para barbearias e um serviço de site próprio, sujeito ao plano, elegibilidade, aprovação do pedido, configuração e condições comerciais apresentadas. A publicação pode depender de revisão e atribuição de um endereço público.',
         'A barbearia é responsável por garantir que tem direitos para usar textos, imagens, marcas, testemunhos, preços e outros conteúdos que fornece, e por manter os seus dados públicos corretos e atualizados. Deve incluir no seu site as informações legais, comerciais e de contacto que lhe sejam aplicáveis.',
-        'A API pública v1 disponibiliza apenas os campos definidos na documentação, em modo de consulta. A API pode aplicar limites de utilização, cache, versões e medidas de segurança; não existe garantia de disponibilidade ininterrupta nem de que todos os dados sejam atualizados em tempo real.',
+        'A API pública v1 está temporariamente desativada e responde com HTTP 503. Não deve ser utilizada até existir um aviso explícito de reativação; a documentação técnica anterior não representa disponibilidade do serviço.',
         'Quem consome a API deve respeitar a documentação, os direitos de propriedade intelectual, a legislação de proteção de dados e os limites técnicos. Não pode tentar contornar limites, aceder a dados privados, reidentificar pessoas, realizar recolha abusiva ou apresentar dados públicos de forma enganadora.',
       ],
     },
@@ -100,7 +100,7 @@ export const currentTermsFeatureSections = {
       paragraphs: [
         'The Platform may provide public barbershop pages and a custom-website service, subject to plan, eligibility, request approval, configuration, and the commercial terms presented. Publication may require review and assignment of a public address.',
         'The barbershop is responsible for ensuring it has the rights to use the text, images, trademarks, testimonials, prices, and other content it supplies, and for keeping public information accurate and current. It must include the legal, commercial, and contact information applicable to its own website.',
-        'The public API v1 exposes only the fields defined in the documentation, on a read-only basis. It may apply usage limits, caching, versioning, and security controls; uninterrupted availability and real-time updates are not guaranteed.',
+        'The public API v1 is temporarily disabled and responds with HTTP 503. It must not be used until an explicit reactivation notice is published; previous technical documentation does not indicate service availability.',
         'API consumers must follow the documentation, intellectual-property rights, data-protection law, and technical limits. They may not bypass limits, access private data, re-identify individuals, perform abusive collection, or present public data misleadingly.',
       ],
     },
@@ -151,7 +151,7 @@ export const currentPrivacyFeatureSections = {
         '18. Sites próprios, API pública e dados publicados — 1 de novembro de 2026',
       paragraphs: [
         'O serviço de sites próprios permite publicar determinados conteúdos de uma barbearia, como nome, texto descritivo, imagem, ligação para marcação e outros campos configurados. A barbearia decide que conteúdo fornece e deve assegurar que tem autorização para o publicar, incluindo dados, fotografias e testemunhos que possam identificar terceiros.',
-        'A API pública v1 fornece dados previamente definidos e destinados à publicação, como perfil público, serviços, horários, avaliações e ligações públicas, dentro dos limites documentados. Não foi concebida para devolver credenciais, dados de sessão, contactos privados ou o conteúdo interno de contas.',
+        'A API pública v1 está temporariamente desativada e não disponibiliza dados até existir um aviso explícito de reativação. A especificação técnica anterior não deve ser interpretada como uma promessa de disponibilidade.',
         'Os pedidos à API podem gerar registos técnicos de segurança e utilização, incluindo rota, código de resposta, duração, região e identificador do pedido. A aplicação de limites e cache serve para proteger a disponibilidade e o uso responsável do serviço.',
       ],
     },
@@ -191,7 +191,7 @@ export const currentPrivacyFeatureSections = {
         '18. Custom websites, public API, and published data — November 1, 2026',
       paragraphs: [
         'The custom-website service can publish selected barbershop content such as name, description, image, booking link, and other configured fields. The barbershop decides which content it supplies and must ensure it has permission to publish it, including data, photos, and testimonials that may identify other people.',
-        'The public API v1 provides predefined data intended for publication, such as public profile, services, opening hours, reviews, and public links, within the documented limits. It is not designed to return credentials, session data, private contact details, or internal account content.',
+        'The public API v1 is temporarily disabled and does not provide data until an explicit reactivation notice is published. The previous technical specification must not be interpreted as a promise of availability.',
         'API requests may generate technical security and usage logs, including route, response code, duration, region, and request identifier. Rate limits and caching help protect availability and responsible use of the service.',
       ],
     },
