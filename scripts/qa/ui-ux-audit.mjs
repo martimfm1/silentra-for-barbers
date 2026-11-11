@@ -254,6 +254,21 @@ assert.doesNotMatch(
 );
 assert.match(
   dashboardShell,
+  /\.settings-accordion\[open\][\s\S]*?var\(--dashboard-accent/,
+  'The active Settings category must use the dashboard customization color.',
+);
+assert.match(
+  dashboardShell,
+  /\.settings-subaccordion\[open\][\s\S]*?var\(--dashboard-accent/,
+  'The active nested Settings accordion must use the dashboard customization color.',
+);
+assert.match(
+  dashboardShell,
+  /settings-accordion\[open\] > summary > span > span:first-child[\s\S]*?color: var\(--dashboard-accent/,
+  'The active Settings category title must use the dashboard customization color.',
+);
+assert.match(
+  dashboardShell,
   /settings-accordion-content \[data-slot="card"\][\s\S]*?padding: 0 !important/,
   'Cards inside settings accordions must be visually flattened.',
 );
