@@ -80,8 +80,6 @@ const SHORTCUTS = [
   { id: 'loyalty', pt: 'Fidelização', en: 'Loyalty' },
   { id: 'qr-code', pt: 'Código QR', en: 'QR code' },
   { id: 'automations', pt: 'Automações', en: 'Automations' },
-  { id: 'messages', pt: 'Mensagens', en: 'Messages' },
-  { id: 'marketing', pt: 'Campanhas', en: 'Campaigns' },
   { id: 'sales', pt: 'Vendas', en: 'Sales' },
   { id: 'website', pt: 'Site próprio', en: 'Website' },
   { id: 'support', pt: 'Suporte', en: 'Support' },
@@ -166,7 +164,9 @@ function normalizeConfig(
     ...DEFAULT_CONFIG,
     ...input,
     shortcuts: Array.isArray(input?.shortcuts)
-      ? input.shortcuts
+      ? input.shortcuts.filter((id): id is string =>
+          SHORTCUTS.some((shortcut) => shortcut.id === id),
+        )
       : DEFAULT_CONFIG.shortcuts,
     visibleMetrics,
     sections: {
