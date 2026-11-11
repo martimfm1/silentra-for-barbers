@@ -30,10 +30,10 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <HapticsProvider>
       <div className="min-h-screen text-zinc-50">
-      <QueryProvider>{children}</QueryProvider>
-      {isDashboardRoute(pathname) ? <CursorFollowHint /> : null}
-      <Toaster richColors position="top-right" />
-      {showCookieConsent ? <CookieConsentManager /> : null}
+        <QueryProvider>{children}</QueryProvider>
+        {isDashboardRoute(pathname) ? <CursorFollowHint /> : null}
+        <Toaster richColors position="top-right" />
+        {showCookieConsent ? <CookieConsentManager /> : null}
       </div>
     </HapticsProvider>
   );
