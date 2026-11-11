@@ -174,6 +174,7 @@ export function MarketingWorkspace({
 }) {
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('marketing_campaigns');
+  const isAutomationOnly = initialView === 'automation';
   const [view, setView] = useState<View>(initialView);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -235,10 +236,16 @@ export function MarketingWorkspace({
 
       const base = (campaignData.campaigns ?? []) as Campaign[];
       const automated = (automationData.campaigns ?? []) as Campaign[];
-      const merged = base.map((campaign) => ({
-        ...campaign,
-        ...(automated.find((item) => item.id === campaign.id) ?? {}),
-      }));
+      const merged = base
+        .map((campaign) => ({
+          ...campaign,
+          ...(automated.find((item) => item.id === campaign.id) ?? {}),
+        }))
+        .filter(
+          (campaign) =>
+            !isAutomationOnly ||
+            (campaign.trigger_type && campaign.trigger_type !== 'manual'),
+        );
       setCampaigns(merged);
       setServices((automationData.services ?? []) as Service[]);
       setEvents(
@@ -463,70 +470,33 @@ export function MarketingWorkspace({
     }
 
     setCreatingBirthday(true);
-    let createdCampaignId = '';
     try {
-      const createResponse = await fetch('/api/marketing/campaigns', {
+      const response = await fetch('/api/marketing/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          triggerType: 'birthday',
           name: 'Aniversários',
           channel: 'email',
           subject: 'Feliz aniversário, {{nome}}! 🎂',
-          body: 'Olá {{nome}},\n\nA equipa da {{barbearia}} deseja-te um feliz aniversário, cheio de coisas boas! 🎉\n\nObrigado por fazeres parte da nossa comunidade. Esperamos ver-te em breve!\n\nCom os melhores votos,\n{{barbearia}}',
+          body: 'Olá {{nome}},\\n\\nA equipa da {{barbearia}} deseja-te um feliz aniversário, cheio de coisas boas! 🎉\\n\\nObrigado por fazeres parte da nossa comunidade. Esperamos ver-te em breve!\\n\\nCom os melhores votos,\\n{{barbearia}}',
         }),
       });
-      const createData = await createResponse.json().catch(() => ({}));
-      if (!createResponse.ok || !createData.campaign?.id) {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.campaign?.id) {
         throw new Error(
-          createData.error ??
-            'Não foi possível criar a campanha de aniversário.',
+          data.error ?? 'Não foi possível criar a automação de aniversário.',
         );
       }
 
-      const campaign = createData.campaign as Campaign;
-      createdCampaignId = campaign.id;
-
-      const automationResponse = await fetch(
-        '/api/marketing/campaigns/automation',
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: campaign.id,
-            triggerType: 'birthday',
-            birthdayOffsetDays: 0,
-            birthdayRewardType: 'none',
-            birthdayRewardServiceId: null,
-          }),
-        },
-      );
-      const automationData = await automationResponse.json().catch(() => ({}));
-      if (!automationResponse.ok || !automationData.campaign) {
-        throw new Error(
-          automationData.error ??
-            'A campanha foi criada, mas não foi possível ativar o gatilho de aniversário.',
-        );
-      }
-
-      setCampaigns((current) => [
-        { ...campaign, ...automationData.campaign },
-        ...current.filter((item) => item.id !== campaign.id),
-      ]);
+      const campaign = data.campaign as Campaign;
+      setCampaigns((current) => [campaign, ...current.filter((item) => item.id !== campaign.id)]);
       setSelectedId(campaign.id);
-      setAutomation({
-        ...EMPTY_AUTOMATION,
-        mode: 'birthday',
-      });
+      setAutomation({ ...EMPTY_AUTOMATION, mode: 'birthday' });
       setView('automation');
       setLiveMessage('Automação de aniversário criada e ativada.');
       toast.success('Automação de aniversário criada e ativada.');
     } catch (error) {
-      if (createdCampaignId) {
-        await fetch(
-          `/api/marketing/campaigns?id=${encodeURIComponent(createdCampaignId)}`,
-          { method: 'DELETE' },
-        ).catch(() => undefined);
-      }
       toast.error(
         error instanceof Error
           ? error.message
@@ -651,6 +621,7 @@ export function MarketingWorkspace({
           ))}
         </section>
 
+        {initialView !== 'automation' && (
         <div
           className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1"
           role="tablist"
@@ -673,8 +644,9 @@ export function MarketingWorkspace({
             </button>
           ))}
         </div>
+        )}
 
-        {view === 'campaigns' && (
+        {initialView !== 'automation' && view === 'campaigns' && (
           <section className="space-y-4" aria-labelledby="campaign-list-title">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-2 sm:flex-row">
@@ -953,9 +925,9 @@ export function MarketingWorkspace({
               {!selected ? (
                 <Card className="border-white/10 bg-white/[0.02]">
                   <CardContent className="py-16 text-center">
-                    <p className="font-medium">Seleciona uma campanha</p>
+                    <p className="font-medium">Ainda não tens automações configuradas.</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Volta a Campanhas e escolhe “Gerir”.
+                      Adiciona a automação de aniversário acima para começares.
                     </p>
                   </CardContent>
                 </Card>
@@ -1196,53 +1168,14 @@ export function MarketingWorkspace({
                       )}
                     </CardContent>
                   </Card>
-                  <Card className="border-white/10 bg-white/[0.02]">
-                    <CardHeader>
-                      <CardTitle>Ações rápidas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setDetails(selected)}
-                      >
-                        <Eye className="mr-2 size-4" aria-hidden="true" />
-                        Detalhes
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => openEdit(selected)}
-                        disabled={!canManage(selected)}
-                      >
-                        <Pencil className="mr-2 size-4" aria-hidden="true" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setConfirmDelete(selected)}
-                        disabled={!canManage(selected)}
-                        className="text-red-300"
-                      >
-                        <Trash2 className="mr-2 size-4" aria-hidden="true" />
-                        Apagar
-                      </Button>
-                      <Button
-                        onClick={() => void sendCampaign(selected)}
-                        disabled={
-                          !canManage(selected) || sendingId === selected.id
-                        }
-                      >
-                        <Send className="mr-2 size-4" aria-hidden="true" />
-                        Enviar agora
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  
                 </>
               )}
             </section>
           </>
         )}
 
-        {view === 'performance' && (
+        {initialView !== 'automation' && view === 'performance' && (
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardContent className="p-5">
