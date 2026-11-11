@@ -89,7 +89,7 @@ const content = {
       ],
       [
         'Confirmações e lembretes',
-        'Reduz a troca de mensagens manuais com comunicação por email e fluxos automatizados disponíveis na plataforma.',
+        'Mantém os clientes informados com confirmações, lembretes e notificações automáticas de marcações.',
       ],
       [
         'Fidelização e crescimento',
@@ -184,7 +184,7 @@ const content = {
       ],
       [
         'Confirmations and reminders',
-        'Reduce manual messaging with email communication and automation workflows available in the platform.',
+        'Keep customers informed with automatic booking confirmations, reminders and notifications.',
       ],
       [
         'Loyalty and growth',
@@ -224,7 +224,7 @@ const content = {
     faqs: [
       [
         'What is barbershop management software?',
-        'It is a platform for organising bookings, services, customers and staff. Silentra connects these tasks to a public page, communication tools and growth features available on each plan.',
+        'It is a platform for organising bookings, services, customers and staff. Silentra connects these tasks to a public page, automatic booking notifications and growth features available on each plan.',
       ],
       [
         'Do customers need an account to book?',
