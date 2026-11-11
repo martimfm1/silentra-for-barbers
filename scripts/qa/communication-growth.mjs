@@ -36,6 +36,16 @@ assert.doesNotMatch(
   /dashboard\/comunicacao/,
   'Tools overview must not link to the retired communication workspace.',
 );
+const orderManagement = read('app/dashboard/pos/pedidos/page.tsx');
+const clientCards = read('app/dashboard/_components/cards/ClientsListCard.tsx');
+const waitlist = read('app/dashboard/espera/page.tsx');
+const appointmentDetails = read('components/dashboard/appointment-detail-dialog.tsx');
+assert.doesNotMatch(orderManagement, /openEmail|sendEmail|mailto:|Enviar email ao cliente/);
+assert.doesNotMatch(clientCards, /wa\\.me|mailto:|tel:/);
+assert.doesNotMatch(waitlist, /mailto:|tel:/);
+assert.equal(appointmentDetails.includes('href={`mailto:'), false);
+assert.equal(appointmentDetails.includes('href={`tel:'), false);
+
 assert.match(automationsPage, /MarketingWorkspace initialView="automation"/);
 assert.match(workspace, /initialView !== 'automation'/);
 assert.match(workspace, /triggerType: 'birthday'/);
