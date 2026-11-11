@@ -553,8 +553,7 @@ function ClientItemCard({
             ]
               .filter(Boolean)
               .join('\n');
-            void navigator.clipboard
-              .writeText(details)
+            void navigator.clipboard.writeText(details)
               .then(() =>
                 toast.success(
                   locale === 'pt'
