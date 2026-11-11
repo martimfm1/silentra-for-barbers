@@ -555,7 +555,7 @@ export function MarketingWorkspace({
         <Card className="mx-auto max-w-xl border-white/10 bg-white/[0.02]">
           <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
             <Sparkles className="size-8 text-primary" aria-hidden="true" />
-            <h1 className="text-2xl font-semibold">Marketing avançado</h1>
+            <h1 className="text-2xl font-semibold">Automações avançadas</h1>
             <FeaturePlanBadge feature="marketing_campaigns" />
             <p className="text-muted-foreground">
               Campanhas de email, automações e resultados de entrega num só
