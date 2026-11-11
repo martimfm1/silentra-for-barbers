@@ -100,6 +100,7 @@ export default function AgendaPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [calendarBlocksRefreshKey, setCalendarBlocksRefreshKey] = useState(0);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
@@ -156,7 +157,7 @@ export default function AgendaPage() {
     confirmBooking,
     finalizeBooking,
     addCompletedAppointmentClient,
-    handleCreateBlock,
+    handleCreateBlock: createBlockAction,
     handleCancelBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
@@ -387,6 +388,17 @@ export default function AgendaPage() {
     [fetchInitialData, locale],
   );
 
+  const handleCreateBlock = useCallback(
+    async (event?: React.SyntheticEvent) => {
+      const created = await createBlockAction(event);
+      if (created) {
+        setCalendarBlocksRefreshKey((current) => current + 1);
+      }
+      return created;
+    },
+    [createBlockAction],
+  );
+
   const handleCancelSelectedAppointment = useCallback(
     async (appointmentId: string) => {
       const cancelled = await handleCancelBooking(appointmentId);
@@ -470,6 +482,7 @@ export default function AgendaPage() {
             <AgendaCalendarView
               appointments={appointments}
               appointmentsLoading={loadingInitial}
+              blocksRefreshKey={calendarBlocksRefreshKey}
               professionals={professionals}
               onAppointmentClick={setSelectedAppointment}
             />
