@@ -110,15 +110,14 @@ assert.match(dashboardShell, /DashboardCreateBookingDialog/);
 assert.match(globalBookingDialog, /window\.addEventListener\(OPEN_CREATE_EVENT/);
 assert.match(globalBookingDialog, /useAppointments\(barbershopId, refreshBookingData\)/);
 assert.match(globalBookingDialog, /<Dialog open=\{open\} onOpenChange=\{handleOpenChange\}>/);
-assert.match(globalBookingDialog, /pathname\.startsWith\('\/dashboard\/agenda'\)/);
+assert.doesNotMatch(globalBookingDialog, /pathname\.startsWith\('\/dashboard\/agenda'\)/);
+assert.match(globalBookingDialog, /silentra:appointments-updated/);
 assert.match(sidebar, /primaryItems\.slice\(2\)\.map\(renderDockItem\)/);
 assert.match(sidebar, /silentra:open-create-booking/);
 assert.match(sidebar, /managementItems\.map\(renderItem\)/);
 assert.match(sidebar, /'Gestão', 'Management'/);
-assert.match(
-  agendaPage,
-  /window\.addEventListener\('silentra:open-create-booking'/,
-);
+assert.match(agendaPage, /silentra:appointments-updated/);
+assert.doesNotMatch(agendaPage, /window\.addEventListener\('silentra:open-create-booking'/);
 assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
 assert.doesNotMatch(agendaPage, /<AgendaViewSettings|<AgendaCancellationPolicyPanel/);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
