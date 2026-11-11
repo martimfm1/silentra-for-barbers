@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   BarChart3,
-  Megaphone,
   Settings,
   Heart,
   CreditCard,
@@ -16,7 +15,6 @@ import {
   Users,
   Scissors,
   Briefcase,
-  MessageCircle,
   Headset,
   QrCode,
   Globe2,
@@ -77,20 +75,7 @@ const teamItems: SidebarItem[] = [
   },
 ];
 
-const communicationItems: SidebarItem[] = [
-  { href: '/dashboard/comunicacao', label: 'Visão geral', icon: Megaphone },
-  {
-    href: '/dashboard/mensagens',
-    label: 'Mensagens',
-    icon: MessageCircle,
-    feature: 'messaging',
-  },
-  {
-    href: '/dashboard/marketing',
-    label: 'Campanhas',
-    icon: Megaphone,
-    feature: 'marketing_campaigns',
-  },
+const automationItems: SidebarItem[] = [
   {
     href: '/dashboard/automations',
     label: 'Automações',
@@ -159,10 +144,7 @@ const englishLabels: Record<string, string> = {
   Clientes: 'Clients',
   Serviços: 'Services',
   Equipa: 'Team',
-  Comunicação: 'Communication',
   'Visão geral': 'Overview',
-  Mensagens: 'Messages',
-  Campanhas: 'Campaigns',
   Automações: 'Automations',
   'QR Code': 'QR code',
   'Lista de espera': 'Waitlist',
@@ -296,7 +278,7 @@ export function DashboardSidebar() {
   const moreItems = [
     ...managementItems,
     ...teamItems,
-    ...communicationItems,
+    ...automationItems,
     ...toolsItems,
     ...secondaryItems,
   ];
@@ -523,9 +505,9 @@ export function DashboardSidebar() {
               </div>
             </section>
             <section>
-              {sectionTitle('Comunicação', 'Communication')}
+              {sectionTitle('Automações', 'Automations')}
               <div className="grid gap-1">
-                {communicationItems.map(renderItem)}
+                {automationItems.map(renderItem)}
               </div>
             </section>
             <section>
@@ -759,9 +741,9 @@ export function DashboardSidebar() {
                       </div>
                     </div>
                     <div className="mt-5">
-                      {sectionTitle('Comunicação', 'Communication')}
+                      {sectionTitle('Automações', 'Automations')}
                       <div className="grid gap-1.5">
-                        {communicationItems.map(renderItem)}
+                        {automationItems.map(renderItem)}
                       </div>
                     </div>
                   </section>
