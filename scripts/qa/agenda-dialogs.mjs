@@ -12,6 +12,8 @@ const appointmentsService = read(
 );
 const blockForm = read('app/dashboard/_components/cards/BlockFormCard.tsx');
 const popover = read('components/ui/popover.tsx');
+const alertDialog = read('components/ui/alert-dialog.tsx');
+const baseDialog = read('components/ui/dialog.tsx');
 const select = read('components/ui/select.tsx');
 const combobox = read('components/ui/combobox.tsx');
 const pt = read('app/locales/pt.ts');
@@ -244,6 +246,28 @@ assert.match(
   /z-\[10003\]/,
   'Customer suggestions must sit above the dialog overlay.',
 );
+assert.match(
+  baseDialog,
+  /fixed inset-0 isolate z-\[10000\]/,
+  'The base dialog overlay must keep its shared stacking layer.',
+);
+assert.match(
+  baseDialog,
+  /fixed top-1\/2 left-1\/2 z-\[10001\]/,
+  'The base dialog content must stay below nested confirmations.',
+);
+assert.match(
+  alertDialog,
+  /fixed inset-0 z-\[10002\]/,
+  'Alert dialog overlays must cover the base dialog content.',
+);
+assert.match(
+  alertDialog,
+  /fixed top-1\/2 left-1\/2 z-\[10003\]/,
+  'Alert dialog content must render above appointment and client detail dialogs.',
+);
+assert.match(appointmentDetail, /seriesCancelScope !== null/);
+assert.match(appointmentDetail, /<AlertDialogContent className=/);
 
 console.log(
   '[AGENDA_DIALOGS_QA] Booking and block dialogs, submit lifecycle, translations and overlay stacking passed.',
