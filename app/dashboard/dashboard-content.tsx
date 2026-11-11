@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { BarbershopProvider } from '@/context/BarbershopContext';
 import { DashboardTopBar } from '@/app/dashboard/_components/DashboardTopBar';
 import { DashboardSidebar } from '@/app/dashboard/_components/DashboardSidebar';
+import { DashboardCreateBookingDialog } from '@/app/dashboard/_components/DashboardCreateBookingDialog';
 import { Spotlight } from '@/components/aceternity/spotlight';
 import { DashboardTabMotionEnhancer } from '@/components/dashboard/dashboard-tab-motion-enhancer';
 import { DashboardConfirmProvider } from '@/components/dashboard/dashboard-confirm-provider';
@@ -250,6 +251,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <DashboardTabMotionEnhancer />
       {!isSettingsPage && <DashboardTopBar />}
       <DashboardSidebar />
+      <DashboardCreateBookingDialog />
       <div
         className={`dashboard-content min-w-0 lg:pl-64 ${
           isSettingsPage ? 'pt-0' : 'pt-16'
