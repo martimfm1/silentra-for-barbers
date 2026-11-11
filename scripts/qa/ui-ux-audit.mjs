@@ -213,6 +213,8 @@ assert.ok(accountSecurityAccordion.includes('id="settings-billing"'), 'Billing m
 assert.ok(accountSecurityAccordion.includes('id="settings-danger"'), 'Permanent barbershop deletion must stay inside Account and security.');
 assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="settings-billing"')), accountSecurityDetailsStart);
 assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="settings-danger"')), accountSecurityDetailsStart);
+assert.match(settingsPage, /window\.location\.hash\.slice\(1\)/, 'Settings hash links must open the containing category.');
+assert.match(settingsPage, /target\?\.closest\([\s\S]*?details\[data-settings-category\]/);
 assert.ok(settingsPage.includes('data-settings-subcategory'));
 assert.ok(
   settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
