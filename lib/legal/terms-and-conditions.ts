@@ -55,8 +55,8 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'A Plataforma pode disponibilizar email, notificações push e outras funcionalidades de comunicação conforme o plano e a configuração da conta.',
           'Atualmente, as notificações push são utilizadas para alertar os barbeiros sobre eventos operacionais, incluindo novos bookings. A barbearia é responsável por utilizar estas funcionalidades de acordo com a legislação aplicável.',
-          'O envio manual de email pode utilizar a infraestrutura da Brevo e o nome da barbearia como nome do remetente. O envio manual de SMS encontra-se atualmente desativado.',
-          'Quando forem utilizadas funcionalidades de marketing ou mensagens para clientes, a barbearia é responsável por possuir uma base legal adequada, respeitar preferências de comunicação e cumprir as regras aplicáveis a comunicações comerciais.',
+          'Atualmente, a plataforma envia emails transacionais e automáticos relacionados com marcações e automações ativadas pela barbearia. O envio de emails manuais e campanhas compostas diretamente pela barbearia não está disponível.',
+          'Quando forem ativadas automações que contactem clientes, a barbearia é responsável por possuir uma base legal adequada, respeitar preferências de comunicação e cumprir as regras aplicáveis a comunicações comerciais.',
         ],
       },
       {
@@ -173,8 +173,8 @@ export const termsAndConditions: Record<'pt' | 'en', TermsDocument> = {
         paragraphs: [
           'The Platform may provide email, push notifications, and other communication features depending on the plan and account configuration.',
           'Push notifications are currently used to alert barbers about operational events, including new bookings. The barbershop is responsible for using these features in accordance with applicable law.',
-          'Manual email may use Brevo infrastructure and the barbershop name as the sender name. Manual SMS sending is currently disabled.',
-          'When marketing or customer messaging features are used, the barbershop is responsible for having an appropriate lawful basis, respecting communication preferences, and complying with applicable commercial-communication rules.',
+          'The platform currently sends transactional and automated emails related to bookings and automations enabled by the barbershop. Manually composed customer emails and campaigns are not available.',
+          'When customer-facing automations are enabled, the barbershop is responsible for having an appropriate lawful basis, respecting communication preferences, and complying with applicable commercial-communication rules.',
         ],
       },
       {
