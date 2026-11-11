@@ -17,7 +17,6 @@ import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import { useAppointments } from '@/app/state/_hooks/dashboard/useAppointments';
 import { BookingForm } from '@/app/dashboard/_components/cards/BookingFormCard';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -171,6 +170,16 @@ export function DashboardCreateBookingDialog() {
 
   const resetForm = () => {
     setFormData(EMPTY_FORM);
+    setBookingFormData({
+      clientId: '',
+      serviceId: '',
+      professionalId: '',
+      date: '',
+      time: '',
+      manualName: '',
+      manualPhone: '',
+      birthDate: '',
+    });
     setSelectedProfessionalId('');
     setSelectedDate(getLocalDateInputValue());
     setSelectedTime('');
