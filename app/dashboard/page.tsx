@@ -38,8 +38,6 @@ import {
   Gift,
   QrCode,
   Zap,
-  MessageSquare,
-  Megaphone,
   ShoppingBag,
   Globe,
   Headset,
@@ -305,18 +303,6 @@ export default function DashboardPage() {
       href: '/dashboard/automations',
       label: t('dashboard.automations'),
       icon: Zap,
-    },
-    {
-      id: 'messages',
-      href: '/dashboard/mensagens',
-      label: t('dashboard.messages'),
-      icon: MessageSquare,
-    },
-    {
-      id: 'marketing',
-      href: '/dashboard/marketing',
-      label: t('dashboard.marketing'),
-      icon: Megaphone,
     },
     {
       id: 'sales',
