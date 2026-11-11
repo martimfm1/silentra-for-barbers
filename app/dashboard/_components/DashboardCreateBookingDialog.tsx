@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -59,7 +58,6 @@ const EMPTY_FORM: BookingFormData = {
 };
 
 export function DashboardCreateBookingDialog() {
-  const pathname = usePathname();
   const { barbershopId, loading: barbershopLoading } = useBarbershop();
   const { locale, t } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -109,12 +107,11 @@ export function DashboardCreateBookingDialog() {
   } = useAppointments(barbershopId, refreshBookingData);
 
   useEffect(() => {
-    if (pathname.startsWith('/dashboard/agenda')) return;
     const openCreateBooking = () => setOpen(true);
     window.addEventListener(OPEN_CREATE_EVENT, openCreateBooking);
     return () =>
       window.removeEventListener(OPEN_CREATE_EVENT, openCreateBooking);
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     if (open && !barbershopLoading && barbershopId) {
@@ -198,11 +195,10 @@ export function DashboardCreateBookingDialog() {
       endDate: recurrenceEndDate,
     });
     if (!created) return;
+    window.dispatchEvent(new Event('silentra:appointments-updated'));
     resetForm();
     setOpen(false);
   };
-
-  if (pathname.startsWith('/dashboard/agenda')) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

@@ -88,7 +88,7 @@ assert.match(
   agenda,
   /<Dialog open=\{blockDialogOpen\} onOpenChange=\{setBlockDialogOpen\}>/,
 );
-assert.match(agenda, /onClick=\{\(\) => setBookingDialogOpen\(true\)\}/);
+assert.match(agenda, /window\.dispatchEvent\(new Event\('silentra:open-create-booking'\)\)/);
 assert.match(agenda, /onClick=\{\(\) => setBlockDialogOpen\(true\)\}/);
 assert.ok(agenda.includes('h-[100dvh] max-h-[100dvh] w-screen'));
 assert.ok(agenda.includes('showCloseButton={false}'));
