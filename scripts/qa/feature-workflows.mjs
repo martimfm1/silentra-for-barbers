@@ -30,7 +30,6 @@ const websiteMigration = read(
 const sitemap = read('app/sitemap.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
 const publicApiDocs = read('docs/API_PUBLICA.md');
-const openApi = read('public/openapi-v1.yaml');
 const birthdayApi = read('app/api/messages/birthdays/route.ts');
 const birthdayWorker = read('lib/marketing/birthday-delivery.ts');
 const birthdayReconciliation = read(
@@ -116,14 +115,14 @@ assert.match(
   /customWebsiteRoutes\.push\([\s\S]*url: `\$\{SITE_URL\}\/\$\{encodeURIComponent\(slug\)\}`/,
 );
 
+assert.match(publicApi, /const PUBLIC_API_ENABLED = false/);
+assert.match(publicApi, /if \(!PUBLIC_API_ENABLED\)/);
 assert.match(publicApi, /consumePublicRateLimit/);
 assert.match(publicApi, /Access-Control-Allow-Origin/);
 assert.match(publicApi, /if-none-match/);
 assert.match(publicApi, /ETag: etag/);
 assert.match(publicApi, /'Cache-Control': PUBLIC_CACHE/);
-assert.match(publicApiDocs, /GET \/api\/v1\/public\/barbershops\/\{slug\}/);
-assert.match(openApi, /openapi: 3\.1\.0/);
-assert.match(openApi, /PublicBarbershopResponse/);
+assert.match(publicApiDocs, /temporariamente desativada/);
 
 assert.match(birthdayApi, /trigger_type: 'birthday'/);
 assert.match(birthdayApi, /active: enabled/);
