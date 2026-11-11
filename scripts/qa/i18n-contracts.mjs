@@ -309,7 +309,7 @@ if (
 }
 
 const localeAwareSources = {
-  'app/dashboard/settings/public-profile/page.tsx': [
+  'app/dashboard/settings/public-profile/public-profile-settings-card.tsx': [
     'useLanguage()',
     'PUBLIC_PROFILE_COPY',
     'AMENITIES_EN',
