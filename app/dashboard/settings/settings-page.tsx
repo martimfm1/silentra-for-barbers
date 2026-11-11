@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Camera,
   ChevronDown,
+  CreditCard,
   Check,
   ImageIcon,
   LogOut,
@@ -1234,88 +1235,100 @@ export default function SettingsPageOrganized() {
             
             
             
-            <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
-  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage account access, subscription and barbershop security.' : 'Gere o acesso à conta, a subscrição e a segurança da barbearia.'}</span>
+            <details data-settings-category className="settings-accordion settings-account-security group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
+  <summary className="flex min-h-[5.25rem] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden sm:px-5">
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="account-security-icon" aria-hidden="true">
+        <ShieldCheck className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="account-security-eyebrow">{locale === 'en' ? 'ACCOUNT CONTROL' : 'CONTROLO DA CONTA'}</span>
+        <span className="mt-0.5 block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
+        <span className="mt-1 block max-w-xl text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage account access, subscription and barbershop security.' : 'Gere o acesso à conta, a subscrição e a segurança da barbearia.'}</span>
+      </span>
     </span>
-    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+    <span className="flex shrink-0 items-center gap-2">
+      <span className="account-security-count">{locale === 'en' ? '3 areas' : '3 áreas'}</span>
+      <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+    </span>
   </summary>
-  <div className="settings-accordion-content space-y-4 border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
-<section id="settings-account">
-              <Card className={CARD_CLASS}>
-                <CardHeader className="hidden">
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-emerald-400" />
-                    {t('settingsPage.accountSecurity')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void logout()}
-                    disabled={logoutLoading}
-                  >
-                    <LogOut className="mr-2 size-4" />
-                    {logoutLoading
-                      ? t('settingsPage.logoutLoading')
-                      : t('settingsPage.logout')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
+  <div className="settings-accordion-content space-y-3">
+    <section id="settings-account" className="settings-account-security-panel">
+      <Card className={CARD_CLASS}>
+        <CardContent className="flex flex-col gap-4 p-0 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="account-security-panel-icon" aria-hidden="true">
+              <ShieldCheck className="size-4" />
+            </span>
+            <div className="min-w-0 space-y-1">
+              <p className="account-security-panel-eyebrow">{locale === 'en' ? 'ACCOUNT ACCESS' : 'ACESSO À CONTA'}</p>
+              <p className="text-sm font-medium text-zinc-100">{locale === 'en' ? 'Current session' : 'Sessão atual'}</p>
+              <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Sign out from this device.' : 'Termina a sessão neste dispositivo.'}</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void logout()}
+            disabled={logoutLoading}
+            className="min-h-10 w-full shrink-0 rounded-xl border-white/10 bg-white/[.035] sm:w-auto"
+          >
+            <LogOut className="mr-2 size-4" />
+            {logoutLoading
+              ? t('settingsPage.logoutLoading')
+              : t('settingsPage.logout')}
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
 
-            <section id="settings-billing">
-              <Card className={CARD_CLASS}>
-                <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[.16em] text-emerald-400">
-                      {t('settingsPage.billing')}
-                    </p>
-                    <h2 className="mt-1 text-lg font-semibold">
-                      {t('settingsPage.billingTitle')}
-                    </h2>
-                  </div>
-                  <Button asChild>
-                    <Link href="/dashboard/billing">
-                      {t('settingsPage.openBilling')}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
+    <section id="settings-billing" className="settings-account-security-panel">
+      <Card className={CARD_CLASS}>
+        <CardContent className="flex flex-col gap-3 p-0 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="account-security-panel-icon" aria-hidden="true">
+              <CreditCard className="size-4" />
+            </span>
+            <div className="min-w-0 space-y-1">
+              <p className="account-security-panel-eyebrow">{t('settingsPage.billing')}</p>
+              <h2 className="text-sm font-semibold text-zinc-100">{t('settingsPage.billingTitle')}</h2>
+              <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your plan and billing details.' : 'Gere o teu plano e consulta os dados de faturação.'}</p>
+            </div>
+          </div>
+          <Button asChild className="min-h-10 w-full shrink-0 rounded-xl sm:w-auto">
+            <Link href="/dashboard/billing">
+              {t('settingsPage.openBilling')}
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
 
-            <section id="settings-danger" className="scroll-mt-24">
-              <Card className={CARD_CLASS}>
-                <CardHeader className="hidden">
-                  <CardTitle className="flex items-center gap-2 text-rose-200">
-                    <Trash2 className="size-4" />
-                    {t('barbershopDeletion.dangerZone')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-zinc-100">
-                      {t('barbershopDeletion.title')}
-                    </p>
-                    <p className="max-w-2xl text-sm leading-6 text-zinc-400">
-                      {t('barbershopDeletion.description')}
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => setDeleteDialogOpen(true)}
-                    className="min-h-11"
-                  >
-                    <Trash2 className="mr-2 size-4" />
-                    {t('barbershopDeletion.openButton')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
+    <section id="settings-danger" className="settings-account-security-panel settings-account-security-panel--danger scroll-mt-24">
+      <Card className={CARD_CLASS}>
+        <CardContent className="flex flex-col gap-4 p-0 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="account-security-panel-icon account-security-panel-icon--danger" aria-hidden="true">
+              <Trash2 className="size-4" />
+            </span>
+            <div className="min-w-0 space-y-1">
+              <p className="account-security-panel-eyebrow account-security-panel-eyebrow--danger">{locale === 'en' ? 'DANGER ZONE' : 'ZONA DE PERIGO'}</p>
+              <p className="text-sm font-semibold text-zinc-100">{t('barbershopDeletion.title')}</p>
+              <p className="max-w-2xl text-xs leading-5 text-zinc-400">{t('barbershopDeletion.description')}</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="min-h-10 w-full shrink-0 rounded-xl sm:w-auto"
+          >
+            <Trash2 className="mr-2 size-4" />
+            {t('barbershopDeletion.openButton')}
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
   </div>
 </details>
           </div>
