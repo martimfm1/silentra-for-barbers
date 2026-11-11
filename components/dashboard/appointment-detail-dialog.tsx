@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import {
   CalendarClock,
   CalendarDays,
+  CalendarX2,
   Clock3,
   Loader2,
   Mail,
@@ -11,6 +12,17 @@ import {
   UserRound,
   Wallet,
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +43,7 @@ type Props = {
     date: string,
     time: string,
   ) => Promise<boolean>;
+  onCancel: (appointmentId: string) => Promise<boolean>;
   locale?: string;
 };
 
@@ -182,12 +195,16 @@ export function AppointmentDetailDialog({
   open,
   onOpenChange,
   onReschedule,
+  onCancel,
   locale = 'pt',
 }: Props) {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [editDate, setEditDate] = useState('');
   const [editTime, setEditTime] = useState('');
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const [isCancelConfirmationOpen, setIsCancelConfirmationOpen] =
+    useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (!appointment) return;
@@ -212,6 +229,7 @@ export function AppointmentDetailDialog({
   const isEnglish = locale === 'en';
   const canReschedule =
     appointment.status === 'pending' || appointment.status === 'scheduled';
+  const canCancel = canReschedule;
   const originalDate = toLocalDateInputValue(appointment.date_hour);
   const originalTime = toLocalTimeInputValue(appointment.date_hour);
   const today = toLocalDateInputValue(new Date());
@@ -238,6 +256,17 @@ export function AppointmentDetailDialog({
       if (completed) setIsEditingSchedule(false);
     } finally {
       setIsSavingSchedule(false);
+    }
+  };
+
+  const handleCancellation = async () => {
+    if (!canCancel || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      const cancelled = await onCancel(appointment.id);
+      if (cancelled) setIsCancelConfirmationOpen(false);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -495,6 +524,117 @@ export function AppointmentDetailDialog({
                   </DetailItem>
                 </div>
               </Section>
+              {canCancel ? (
+                <Section
+                  title={isEnglish ? 'Cancel booking' : 'Cancelar marcação'}
+                >
+                  <div className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.035] p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-100">
+                          {isEnglish
+                            ? 'Need to cancel this booking?'
+                            : 'Precisas de cancelar esta marcação?'}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
+                          {appointment.payment_status === 'awaiting_review'
+                            ? isEnglish
+                              ? 'The MB WAY prepayment will be rejected and the customer will be notified by email.'
+                              : 'O pré-pagamento MB WAY será rejeitado e o cliente será notificado por email.'
+                            : isEnglish
+                              ? 'The booking will be cancelled and the customer will be notified by email.'
+                              : 'A marcação será cancelada e o cliente será notificado por email.'}
+                        </p>
+                      </div>
+                      <AlertDialog
+                        open={isCancelConfirmationOpen}
+                        onOpenChange={(nextOpen) => {
+                          if (!isCancelling) {
+                            setIsCancelConfirmationOpen(nextOpen);
+                          }
+                        }}
+                      >
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="min-h-11 shrink-0 border border-rose-400/20 bg-rose-400/[0.08] text-rose-200 hover:bg-rose-400/[0.14]"
+                          >
+                            <CalendarX2
+                              className="mr-2 size-4"
+                              aria-hidden="true"
+                            />
+                            {isEnglish
+                              ? 'Cancel booking'
+                              : 'Cancelar marcação'}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md border-white/10 bg-zinc-950 text-white">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {appointment.payment_status === 'awaiting_review'
+                                ? isEnglish
+                                  ? 'Reject the prepayment and cancel?'
+                                  : 'Rejeitar o pré-pagamento e cancelar?'
+                                : isEnglish
+                                  ? 'Cancel this booking?'
+                                  : 'Cancelar esta marcação?'}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm leading-6 text-zinc-400">
+                              {appointment.payment_status === 'awaiting_review'
+                                ? isEnglish
+                                  ? 'This action rejects the MB WAY prepayment, cancels the booking and sends a cancellation email to the customer.'
+                                  : 'Esta ação rejeita o pré-pagamento MB WAY, cancela a marcação e envia um email de cancelamento ao cliente.'
+                                : isEnglish
+                                  ? 'This action cannot be undone. The booking will be cancelled and the customer will receive an email.'
+                                  : 'Esta ação não pode ser anulada. A marcação será cancelada e o cliente receberá um email.'}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex-col-reverse sm:flex-row">
+                            <AlertDialogCancel
+                              disabled={isCancelling}
+                              className="min-h-11 border-white/10 bg-transparent text-zinc-200 hover:bg-white/[0.06]"
+                            >
+                              {isEnglish ? 'Keep booking' : 'Manter marcação'}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              disabled={isCancelling}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                void handleCancellation();
+                              }}
+                              className="min-h-11 bg-rose-600 text-white hover:bg-rose-500"
+                            >
+                              {isCancelling ? (
+                                <Loader2
+                                  className="mr-2 size-4 animate-spin"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <CalendarX2
+                                  className="mr-2 size-4"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              {isCancelling
+                                ? isEnglish
+                                  ? 'Cancelling…'
+                                  : 'A cancelar…'
+                                : appointment.payment_status === 'awaiting_review'
+                                  ? isEnglish
+                                    ? 'Reject and cancel'
+                                    : 'Rejeitar e cancelar'
+                                  : isEnglish
+                                    ? 'Confirm cancellation'
+                                    : 'Confirmar cancelamento'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </Section>
+              ) : null}
               {appointment.status === 'cancelled' ? (
                 <Section
                   title={
