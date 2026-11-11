@@ -50,7 +50,6 @@ function publicApiDisabledResponse(): Response {
   return jsonResponse(
     { error: 'A API pública está temporariamente desativada.' },
     503,
-    { 'Retry-After': '3600' },
   );
 }
 
