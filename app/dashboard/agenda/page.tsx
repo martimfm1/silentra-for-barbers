@@ -460,6 +460,7 @@ export default function AgendaPage() {
           >
             <AgendaCalendarView
               appointments={appointments}
+              appointmentsLoading={loadingInitial}
               professionals={professionals}
               onAppointmentClick={setSelectedAppointment}
             />
