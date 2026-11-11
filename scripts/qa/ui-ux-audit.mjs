@@ -272,6 +272,19 @@ assert.match(
   /settings-accordion-content \[data-slot="card"\][\s\S]*?padding: 0 !important/,
   'Cards inside settings accordions must be visually flattened.',
 );
+assert.ok(settingsPage.includes('settings-account-security'), 'Account and security must use its dedicated visual treatment.');
+assert.ok(settingsPage.includes('account-security-panel--danger'), 'The destructive action must be visually separated.');
+assert.ok(settingsPage.includes('account-security-count'), 'Account and security must show its compact section count.');
+assert.match(
+  dashboardShell,
+  /\.settings-account-security > summary::before[\s\S]*?var\(--dashboard-accent/,
+  'Account and security must use a restrained accent rail.',
+);
+assert.match(
+  dashboardShell,
+  /\.settings-account-security-panel--danger[\s\S]*?rgb\(244 63 94/,
+  'The destructive panel must use a distinct danger treatment.',
+);
 assert.doesNotMatch(
   publicProfileSettingsCard,
   /rounded-2xl border border-white\/10 bg-white\/\[0\.025\] p-4 sm:p-5/,
