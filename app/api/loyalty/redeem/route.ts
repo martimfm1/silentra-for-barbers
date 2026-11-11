@@ -104,9 +104,7 @@ async function POST__unobserved(request: Request) {
         requestId,
       });
 
-    const { error: expiryError } = await admin.rpc(
-      'expire_loyalty_redemptions',
-    );
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
     if (expiryError) {
       console.error('[LOYALTY_REDEEM_EXPIRY_ERROR]', {
         requestId,
