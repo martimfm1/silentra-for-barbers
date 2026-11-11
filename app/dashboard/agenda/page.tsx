@@ -400,11 +400,7 @@ export default function AgendaPage() {
   );
 
   const handleCancelSelectedAppointment = useCallback(
-    async (appointmentId: string) => {
-      const cancelled = await handleCancelBooking(appointmentId);
-      if (cancelled) setSelectedAppointment(null);
-      return cancelled;
-    },
+    (appointmentId: string) => handleCancelBooking(appointmentId),
     [handleCancelBooking],
   );
 
