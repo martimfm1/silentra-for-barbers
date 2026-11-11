@@ -17,7 +17,6 @@ import {
   Briefcase,
   Headset,
   QrCode,
-  Globe2,
   MoreHorizontal,
   Plus,
   Sparkles,
@@ -531,16 +530,6 @@ export function DashboardSidebar() {
           </p>
           <div className="grid gap-1">
             {secondaryItems.map(renderItem)}
-            <Link
-              href="/documentation"
-              className="flex min-h-10 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-            >
-              <Globe2
-                className="size-4 shrink-0 text-zinc-500"
-                aria-hidden="true"
-              />
-              <span>{locale === 'en' ? 'Documentation' : 'Documentação'}</span>
-            </Link>
           </div>
         </div>
       </motion.aside>
@@ -765,17 +754,6 @@ export function DashboardSidebar() {
                     <div className="grid gap-1.5">
                       {secondaryItems.map(renderItem)}
                     </div>
-                    <Link
-                      href="/documentation"
-                      onClick={closeMore}
-                      className="mt-1 flex min-h-11 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm font-medium text-zinc-400 transition-colors hover:border-white/8 hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                    >
-                      <Globe2
-                        className="size-4 text-zinc-500"
-                        aria-hidden="true"
-                      />
-                      {locale === 'en' ? 'Documentation' : 'Documentação'}
-                    </Link>
                   </section>
                 </div>
               </div>

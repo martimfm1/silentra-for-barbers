@@ -327,11 +327,7 @@ const localeAwareSources = {
     'Could not load settings.',
     'Publish online',
   ],
-  'app/documentation/page.tsx': [
-    "cookieStore.get('locale')?.value === 'en'",
-    'localizedSections',
-    'localizedResponseStatuses',
-  ],
+  'app/documentation/page.tsx': ['notFound()'],
   'app/plans/page.tsx': [
     "cookieStore.get('locale')?.value === 'en'",
     'localizedFaqs',

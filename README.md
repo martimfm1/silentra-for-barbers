@@ -95,10 +95,6 @@ Os contratos de planos são validados por QA e as APIs não devem confiar no est
 
 Quando o entitlement Enterprise fica ativo — através de Stripe, pagamento manual ou atribuição administrativa — a plataforma provisiona automaticamente uma landing page para a barbearia. A página utiliza o perfil e os serviços públicos existentes, fica ligada ao perfil público e é suspensa quando o acesso Enterprise deixa de estar ativo. Não é necessário configurar uma segunda conta ou associar a página manualmente.
 
-### API pública v1
-
-A API pública disponibiliza dados aprovados para publicação externa, com contrato versionado, cache HTTP, ETag, CORS sem credenciais, rate limiting e resposta allowlist. Consulta o [guia técnico da API](docs/API_PUBLICA.md), a [documentação online](https://barbers.silentra.me/documentation) ou a especificação [OpenAPI 3.1](public/openapi-v1.yaml).
-
 ## Billing
 
 O sistema suporta **Pagamento Manual** e **Stripe**.
@@ -348,7 +344,6 @@ Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 | [Billing](docs/BILLING.md)           | Stripe e pagamentos manuais                    |
 | [Support Chat](docs/SUPPORT_CHAT.md) | Inbox privada, prioridade e notificações email |
 | [Security](docs/SECURITY.md)         | Segurança, auth, RLS, APIs e embeds            |
-| [API pública](docs/API_PUBLICA.md)   | Endpoints públicos, payloads e limites         |
 | [Deployment](docs/DEPLOYMENT.md)     | Release, Vercel, Supabase e produção           |
 
 ## Estado do projeto
