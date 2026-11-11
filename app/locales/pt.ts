@@ -267,7 +267,6 @@ export const pt = {
     codeFallback: 'Se não conseguires usar o QR code, apresenta este código.',
   },
   nav: {
-    documentation: 'Documentação',
     barbershops: 'Barbearias',
     howItWorks: 'Como funciona',
     forBarbers: 'Para barbeiros',
