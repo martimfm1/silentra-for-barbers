@@ -103,7 +103,7 @@ assert.match(clientsCard, /value="visits"/);
 assert.match(clientsCard, /value="spent"/);
 assert.doesNotMatch(clientsCard, /wa\.me|tel:|mailto:/);
 assert.match(clientsCard, /dashboard\/agenda\?clientId/);
-assert.match(clientsCard, /navigator\.clipboard\.writeText/);
+assert.doesNotMatch(clientsCard, /navigator\.clipboard\.writeText/);
 assert.match(agendaPage, /new URLSearchParams\(window\.location\.search\)/);
 assert.match(agendaPage, /setBookingDialogOpen\(true\)/);
 assert.match(
