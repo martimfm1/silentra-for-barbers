@@ -179,6 +179,17 @@ export default function SettingsPageOrganized() {
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    if (window.location.hash !== '#public-profile') return;
+    const profileAccordion = document.getElementById(
+      'public-profile',
+    ) as HTMLDetailsElement | null;
+    if (!profileAccordion) return;
+    profileAccordion.open = true;
+    requestAnimationFrame(() =>
+      profileAccordion.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    );
+  }, []);
   const dirty = useMemo(
     () =>
       JSON.stringify(config) !== JSON.stringify(initial) || suggestion !== null,
