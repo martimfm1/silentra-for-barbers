@@ -1,13 +1,13 @@
 # API pública — Silentra for Barbers
 
-A API pública v1 permite integrar informação pública das barbearias Silentra em websites, diretórios e aplicações. O contrato é de **consulta apenas**: não cria nem altera marcações, clientes, serviços, pagamentos ou configurações.
+> **Estado: temporariamente desativada.** O endpoint público v1 responde com HTTP 503 e não deve ser utilizado até existir um aviso explícito de reativação. Este ficheiro é apenas uma referência técnica interna.
+
+A API pública v1 foi concebida para integrar informação pública das barbearias Silentra em websites, diretórios e aplicações. O contrato previsto é de **consulta apenas**: não cria nem altera marcações, clientes, serviços, pagamentos ou configurações.
 
 - **Base URL:** `https://barbers.silentra.me`
 - **Formato:** JSON em UTF-8
 - **Versão:** v1
 - **Autenticação:** não necessária para este recurso público
-- **Especificação:** [OpenAPI 3.1](../public/openapi-v1.yaml)
-- **Documentação online:** [barbers.silentra.me/documentation](https://barbers.silentra.me/documentation)
 
 ## 1. Endpoint
 
