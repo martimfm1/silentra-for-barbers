@@ -22,15 +22,15 @@ const bookingTypes = read('types/dashboard/forms.ts');
 const calendarSync = read('components/dashboard/calendar-sync-card.tsx');
 const settings = read('app/dashboard/settings/settings-page.tsx');
 const selectComponent = read('components/ui/select.tsx');
+const appointmentDetail = read(
+  'components/dashboard/appointment-detail-dialog.tsx',
+);
+const appointmentActions = read('components/dashboard/appointment-actions.tsx');
 
 const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 assert.ok(agenda.includes('useAgendaViewPreference'));
 assert.ok(agenda.includes('isCalendarView'));
-assert.match(
-  agenda,
-  /<AgendaCalendarView[\\s\\S]*?onAppointmentClick=\\{setSelectedAppointment\\}/,
-  'Calendar entries must open the selected appointment detail dialog.',
-);
+assert.ok(agenda.includes('onAppointmentClick={setSelectedAppointment}'));
 assert.ok(agenda.includes('<AppointmentDetailDialog'));
 assert.ok(agendaLayout.includes('{children}'));
 assert.ok(
@@ -44,6 +44,21 @@ assert.ok(agendaCalendar.includes('appointmentsLoading: boolean'));
 assert.ok(agenda.includes('professionals={professionals}'));
 assert.ok(agendaCalendar.includes('appointments: Appointment[]'));
 assert.ok(!agendaCalendar.includes('appointmentService.getAll'));
+assert.ok(agenda.includes('blocksRefreshKey={calendarBlocksRefreshKey}'));
+assert.ok(agenda.includes('setCalendarBlocksRefreshKey((current) => current + 1)'));
+assert.ok(agendaCalendar.includes('blocksRefreshKey: number'));
+assert.ok(agendaCalendar.includes('[load, blocksRefreshKey]'));
+assert.ok(agendaCalendar.includes('const blockPreview = dayBlocks.slice(0, 1)'));
+assert.ok(agendaCalendar.includes('formatTime(block.start_time)'));
+assert.ok(agendaCalendar.includes('selectedBlocks.map((block) =>'));
+assert.ok(appointmentDetail.includes('onCancel: (appointmentId: string) => Promise<boolean>'));
+assert.ok(appointmentDetail.includes('<AlertDialog'));
+assert.ok(appointmentDetail.includes('void handleCancellation()'));
+assert.ok(appointmentDetail.includes('onOpenChange(false)'));
+assert.ok(appointmentActions.includes('handleCancelBooking: (id: string) => void | Promise<unknown>'));
+assert.ok(hook.includes('const handleCancelBooking = useCallback'));
+assert.ok(hook.includes('await onRefreshData();\n        return true;'));
+assert.ok(hook.includes('return false;'));
 
 assert.match(
   agenda,
