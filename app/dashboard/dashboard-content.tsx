@@ -108,6 +108,43 @@ const dashboardSurfaceStyles = `
     min-width: 0;
   }
 
+  /* Keep the open Settings category tied to the user's dashboard accent color. */
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] {
+    border-color: color-mix(in srgb, var(--dashboard-accent, #34d399) 52%, rgb(255 255 255 / 0.08)) !important;
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 5%, rgb(255 255 255 / 0.012)) !important;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--dashboard-accent, #34d399) 12%, transparent),
+      0 12px 30px color-mix(in srgb, var(--dashboard-accent, #34d399) 5%, transparent) !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--dashboard-accent, #34d399) 10%, transparent),
+      transparent 72%
+    );
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary > span > span:first-child,
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary > svg {
+    color: var(--dashboard-accent, #34d399);
+  }
+
+  /* Nested Settings accordions use the same accent with a quieter emphasis. */
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] {
+    border-color: color-mix(in srgb, var(--dashboard-accent, #34d399) 34%, rgb(255 255 255 / 0.08)) !important;
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 3%, transparent) !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary {
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 6%, transparent);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary > span > span:first-child,
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary > svg {
+    color: var(--dashboard-accent, #34d399);
+  }
+
   .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card"] {
     border: 0 !important;
     border-radius: 0 !important;
