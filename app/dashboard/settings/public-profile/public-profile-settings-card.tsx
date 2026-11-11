@@ -466,6 +466,7 @@ export function PublicProfileSettingsCard({
             </div>
             <Switch
               checked={publicProfileEnabled}
+              disabled={saving}
               onCheckedChange={setPublicProfileEnabled}
               aria-label={copy.publicPageEnabled}
             />
