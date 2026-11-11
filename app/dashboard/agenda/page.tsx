@@ -389,7 +389,7 @@ export default function AgendaPage() {
   );
 
   const handleCreateBlock = useCallback(
-    async (event?: React.SyntheticEvent) => {
+    async (event?: Parameters<typeof createBlockAction>[0]) => {
       const created = await createBlockAction(event);
       if (created) {
         setCalendarBlocksRefreshKey((current) => current + 1);
