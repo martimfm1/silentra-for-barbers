@@ -145,6 +145,147 @@ const dashboardSurfaceStyles = `
     color: var(--dashboard-accent, #34d399);
   }
 
+  /* Account and security gets a dedicated, card-like visual hierarchy. */
+  .silentra-dashboard-shell .dashboard-page .settings-account-security > summary {
+    position: relative;
+    min-height: 5.25rem;
+    transition: background 180ms ease, color 180ms ease;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security > summary::before {
+    position: absolute;
+    inset-block: 1rem;
+    left: 0;
+    width: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 38%, transparent);
+    content: "";
+    transition: background 180ms ease, inset-block 180ms ease;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security[open] > summary::before {
+    inset-block: 0.65rem;
+    background: var(--dashboard-accent, #34d399);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-icon {
+    display: grid;
+    width: 2.85rem;
+    height: 2.85rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--dashboard-accent, #34d399) 28%, rgb(255 255 255 / 0.1));
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 10%, rgb(255 255 255 / 0.025));
+    color: var(--dashboard-accent, #34d399);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security[open] .account-security-icon {
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 16%, rgb(255 255 255 / 0.025));
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--dashboard-accent, #34d399) 12%, transparent);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-eyebrow,
+  .silentra-dashboard-shell .dashboard-page .account-security-panel-eyebrow {
+    display: block;
+    color: color-mix(in srgb, var(--dashboard-accent, #34d399) 78%, rgb(255 255 255 / 0.55));
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-count {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    border: 1px solid rgb(255 255 255 / 0.09);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.035);
+    padding: 0.25rem 0.625rem;
+    color: rgb(161 161 170 / 0.95);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security[open] .account-security-count {
+    border-color: color-mix(in srgb, var(--dashboard-accent, #34d399) 24%, rgb(255 255 255 / 0.08));
+    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 8%, transparent);
+    color: var(--dashboard-accent, #34d399);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security .settings-accordion-content {
+    display: grid;
+    gap: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.07);
+    padding: 1rem !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security-panel {
+    min-width: 0;
+    border: 1px solid rgb(255 255 255 / 0.075);
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.012));
+    padding: 1rem;
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security-panel:hover {
+    border-color: color-mix(in srgb, var(--dashboard-accent, #34d399) 24%, rgb(255 255 255 / 0.075));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--dashboard-accent, #34d399) 5%, rgb(255 255 255 / 0.025)), rgb(255 255 255 / 0.012));
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-panel-icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.85rem;
+    background: rgb(255 255 255 / 0.045);
+    color: var(--dashboard-accent, #34d399);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-panel-icon--danger {
+    border-color: rgb(244 63 94 / 0.2);
+    background: rgb(244 63 94 / 0.075);
+    color: rgb(251 113 133);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .account-security-panel-eyebrow--danger {
+    color: rgb(251 113 133);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security-panel--danger {
+    border-color: rgb(244 63 94 / 0.18);
+    background: linear-gradient(135deg, rgb(244 63 94 / 0.055), rgb(255 255 255 / 0.01));
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-account-security-panel--danger:hover {
+    border-color: rgb(244 63 94 / 0.32);
+    background: linear-gradient(135deg, rgb(244 63 94 / 0.085), rgb(255 255 255 / 0.015));
+  }
+
+  @media (max-width: 639px) {
+    .silentra-dashboard-shell .dashboard-page .settings-account-security .settings-accordion-content {
+      padding: 0.75rem !important;
+    }
+
+    .silentra-dashboard-shell .dashboard-page .settings-account-security-panel {
+      padding: 0.875rem;
+    }
+
+    .silentra-dashboard-shell .dashboard-page .account-security-count {
+      display: none;
+    }
+  }
+
   .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card"] {
     border: 0 !important;
     border-radius: 0 !important;
