@@ -12,6 +12,7 @@ declare
   v_appointment public.appointments%rowtype;
   v_client public.users%rowtype;
   v_phone_digits text;
+  v_email text;
 begin
   select *
     into v_appointment
@@ -22,15 +23,26 @@ begin
     return;
   end if;
 
+  v_email := nullif(lower(trim(coalesce(v_appointment.manual_email, ''))), '');
+
   if v_appointment.client_id is not null then
-    update public.users
+    update public.users as current_client
     set email = coalesce(
-      nullif(trim(email), ''),
-      nullif(lower(trim(coalesce(v_appointment.manual_email, ''))), '')
+      nullif(trim(current_client.email), ''),
+      case
+        when v_email is not null and not exists (
+          select 1
+          from public.users other_user
+          where other_user.barbershop_id = v_appointment.barbershop_id
+            and lower(other_user.email) = v_email
+            and other_user.id <> current_client.id
+        ) then v_email
+        else null
+      end
     )
-    where id = v_appointment.client_id
-      and barbershop_id = v_appointment.barbershop_id
-      and role = 'client';
+    where current_client.id = v_appointment.client_id
+      and current_client.barbershop_id = v_appointment.barbershop_id
+      and current_client.role = 'client';
     return;
   end if;
 
@@ -60,6 +72,19 @@ begin
   order by created_at asc
   limit 1;
 
+  -- If a customer changed phone numbers, their unique email can still
+  -- reconnect the booking to the existing CRM record.
+  if v_client.id is null and v_email is not null then
+    select *
+      into v_client
+    from public.users
+    where barbershop_id = v_appointment.barbershop_id
+      and role = 'client'
+      and lower(email) = v_email
+    order by created_at asc
+    limit 1;
+  end if;
+
   if v_client.id is null then
     insert into public.users (
       barbershop_id,
@@ -72,7 +97,15 @@ begin
       v_appointment.barbershop_id,
       trim(v_appointment.manual_name),
       trim(v_appointment.manual_phone),
-      nullif(lower(trim(coalesce(v_appointment.manual_email, ''))), ''),
+      case
+        when v_email is not null and not exists (
+          select 1
+          from public.users other_user
+          where other_user.barbershop_id = v_appointment.barbershop_id
+            and lower(other_user.email) = v_email
+        ) then v_email
+        else null
+      end,
       'client'
     )
     returning * into v_client;
@@ -83,7 +116,16 @@ begin
     set
       email = coalesce(
         nullif(trim(email), ''),
-        nullif(lower(trim(coalesce(v_appointment.manual_email, ''))), '')
+        case
+          when v_email is not null and not exists (
+            select 1
+            from public.users other_user
+            where other_user.barbershop_id = v_appointment.barbershop_id
+              and lower(other_user.email) = v_email
+              and other_user.id <> v_client.id
+          ) then v_email
+          else null
+        end
       ),
       name_complete = coalesce(nullif(trim(name_complete), ''), trim(v_appointment.manual_name)),
       num_phone = coalesce(nullif(trim(num_phone), ''), trim(v_appointment.manual_phone))
