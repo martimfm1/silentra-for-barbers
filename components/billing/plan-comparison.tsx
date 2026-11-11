@@ -46,9 +46,8 @@ const FEATURE_GROUPS: ReadonlyArray<{
     features: ['manual_mbway_prepayment'],
   },
   {
-    title: 'Comunicação e automação',
+    title: 'Automações e notificações',
     features: [
-      'messaging',
       'basic_notifications',
       'automated_reminders',
       'automated_followups',
@@ -108,14 +107,13 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
   basic_client_history: 'Customer history',
   basic_notifications: 'Essential notifications',
   team_management: 'Team management',
-  messaging: 'Email messaging',
   directory_visibility: 'Hide from public directory',
   manual_mbway_prepayment: 'Manual MB WAY prepayment',
   advanced_crm: 'Advanced CRM',
   advanced_analytics: 'Advanced analytics',
   automated_reminders: 'Automated reminders',
   automated_followups: 'Automated follow-ups',
-  marketing_campaigns: 'Marketing campaigns',
+  marketing_campaigns: 'Email automations',
   customer_segments: 'Customer segments',
   loyalty: 'Loyalty programme',
   advanced_reports: 'Advanced reports',
@@ -134,7 +132,7 @@ const FEATURE_LABELS_EN: Record<ComparisonFeatureKey, string> = {
 
 const GROUP_LABELS_EN: Record<string, string> = {
   'Gestão da barbearia': 'Barbershop management',
-  'Comunicação e automação': 'Communication and automation',
+  'Automações e notificações': 'Automations and notifications',
   'Crescimento e retenção': 'Growth and customer retention',
   'Analytics e relatórios': 'Analytics and reporting',
   'Equipa e operação': 'Team and operations',

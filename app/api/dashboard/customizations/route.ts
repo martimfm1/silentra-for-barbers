@@ -29,8 +29,6 @@ const SHORTCUT_IDS = new Set([
   'loyalty',
   'qr-code',
   'automations',
-  'messages',
-  'marketing',
   'sales',
   'website',
   'support',

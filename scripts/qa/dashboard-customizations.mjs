@@ -41,8 +41,6 @@ for (const id of [
   'loyalty',
   'qr-code',
   'automations',
-  'messages',
-  'marketing',
   'sales',
   'website',
   'support',

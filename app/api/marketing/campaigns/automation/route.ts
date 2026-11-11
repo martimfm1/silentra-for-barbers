@@ -10,7 +10,7 @@ const EVENTS = [
   'booking_completed',
   'booking_cancelled',
 ] as const;
-const MODES = ['manual', 'interval', 'event', 'birthday'] as const;
+const MODES = ['interval', 'event', 'birthday'] as const;
 const CAMPAIGN_SELECT =
   'id,name,channel,trigger_type,interval_value,interval_unit,next_run_at,event_name,birthday_offset_days,birthday_reward_type,birthday_reward_service_id,active,status,updated_at';
 
@@ -25,6 +25,7 @@ async function GET__unobserved() {
       .from('marketing_campaigns')
       .select(CAMPAIGN_SELECT)
       .eq('barbershop_id', barbershopId)
+      .in('trigger_type', ['interval', 'event', 'birthday'])
       .order('created_at', { ascending: false });
 
     if (campaignError) {
@@ -99,7 +100,7 @@ async function PATCH__unobserved(request: NextRequest) {
     > | null;
     const id = typeof body?.id === 'string' ? body.id : '';
     const mode =
-      typeof body?.triggerType === 'string' ? body.triggerType : 'manual';
+      typeof body?.triggerType === 'string' ? body.triggerType : '';
 
     if (!id || !MODES.includes(mode as (typeof MODES)[number])) {
       return NextResponse.json(
@@ -213,16 +214,6 @@ async function PATCH__unobserved(request: NextRequest) {
         rewardType === 'free_service' ? rewardServiceId : null;
       patch.active = true;
       patch.status = 'scheduled';
-    } else {
-      patch.interval_value = null;
-      patch.interval_unit = null;
-      patch.next_run_at = null;
-      patch.event_name = null;
-      patch.birthday_offset_days = 0;
-      patch.birthday_reward_type = 'none';
-      patch.birthday_reward_service_id = null;
-      patch.active = true;
-      patch.status = 'draft';
     }
 
     const { data, error } = await admin
@@ -230,6 +221,7 @@ async function PATCH__unobserved(request: NextRequest) {
       .update(patch)
       .eq('id', id)
       .eq('barbershop_id', barbershopId)
+      .in('trigger_type', ['interval', 'event', 'birthday'])
       .select(CAMPAIGN_SELECT)
       .maybeSingle();
 

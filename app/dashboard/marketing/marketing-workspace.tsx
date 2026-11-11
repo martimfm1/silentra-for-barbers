@@ -99,7 +99,7 @@ type FormState = {
   scheduledAt: string;
 };
 type AutomationState = {
-  mode: 'manual' | 'interval' | 'event' | 'birthday';
+  mode: 'interval' | 'event' | 'birthday';
   intervalValue: string;
   intervalUnit: 'hours' | 'days';
   eventName: EventKey;
@@ -116,7 +116,7 @@ const EMPTY_FORM: FormState = {
   scheduledAt: '',
 };
 const EMPTY_AUTOMATION: AutomationState = {
-  mode: 'manual',
+  mode: 'birthday',
   intervalValue: '24',
   intervalUnit: 'hours',
   eventName: 'booking_created',
@@ -174,6 +174,7 @@ export function MarketingWorkspace({
 }) {
   const { hasFeature, loading: accessLoading } = useFeatureAccess();
   const allowed = hasFeature('marketing_campaigns');
+  const isAutomationOnly = initialView === 'automation';
   const [view, setView] = useState<View>(initialView);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -235,10 +236,16 @@ export function MarketingWorkspace({
 
       const base = (campaignData.campaigns ?? []) as Campaign[];
       const automated = (automationData.campaigns ?? []) as Campaign[];
-      const merged = base.map((campaign) => ({
-        ...campaign,
-        ...(automated.find((item) => item.id === campaign.id) ?? {}),
-      }));
+      const merged = base
+        .map((campaign) => ({
+          ...campaign,
+          ...(automated.find((item) => item.id === campaign.id) ?? {}),
+        }))
+        .filter(
+          (campaign) =>
+            !isAutomationOnly ||
+            (campaign.trigger_type && campaign.trigger_type !== 'manual'),
+        );
       setCampaigns(merged);
       setServices((automationData.services ?? []) as Service[]);
       setEvents(
@@ -266,7 +273,12 @@ export function MarketingWorkspace({
   useEffect(() => {
     if (!selected) return;
     setAutomation({
-      mode: selected.trigger_type ?? 'manual',
+      mode:
+        selected.trigger_type === 'interval' ||
+        selected.trigger_type === 'event' ||
+        selected.trigger_type === 'birthday'
+          ? selected.trigger_type
+          : 'birthday',
       intervalValue: String(selected.interval_value ?? 24),
       intervalUnit: selected.interval_unit ?? 'hours',
       eventName: (selected.event_name as EventKey) ?? 'booking_created',
@@ -463,70 +475,33 @@ export function MarketingWorkspace({
     }
 
     setCreatingBirthday(true);
-    let createdCampaignId = '';
     try {
-      const createResponse = await fetch('/api/marketing/campaigns', {
+      const response = await fetch('/api/marketing/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          triggerType: 'birthday',
           name: 'Aniversários',
           channel: 'email',
           subject: 'Feliz aniversário, {{nome}}! 🎂',
-          body: 'Olá {{nome}},\n\nA equipa da {{barbearia}} deseja-te um feliz aniversário, cheio de coisas boas! 🎉\n\nObrigado por fazeres parte da nossa comunidade. Esperamos ver-te em breve!\n\nCom os melhores votos,\n{{barbearia}}',
+          body: 'Olá {{nome}},\\n\\nA equipa da {{barbearia}} deseja-te um feliz aniversário, cheio de coisas boas! 🎉\\n\\nObrigado por fazeres parte da nossa comunidade. Esperamos ver-te em breve!\\n\\nCom os melhores votos,\\n{{barbearia}}',
         }),
       });
-      const createData = await createResponse.json().catch(() => ({}));
-      if (!createResponse.ok || !createData.campaign?.id) {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.campaign?.id) {
         throw new Error(
-          createData.error ??
-            'Não foi possível criar a campanha de aniversário.',
+          data.error ?? 'Não foi possível criar a automação de aniversário.',
         );
       }
 
-      const campaign = createData.campaign as Campaign;
-      createdCampaignId = campaign.id;
-
-      const automationResponse = await fetch(
-        '/api/marketing/campaigns/automation',
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: campaign.id,
-            triggerType: 'birthday',
-            birthdayOffsetDays: 0,
-            birthdayRewardType: 'none',
-            birthdayRewardServiceId: null,
-          }),
-        },
-      );
-      const automationData = await automationResponse.json().catch(() => ({}));
-      if (!automationResponse.ok || !automationData.campaign) {
-        throw new Error(
-          automationData.error ??
-            'A campanha foi criada, mas não foi possível ativar o gatilho de aniversário.',
-        );
-      }
-
-      setCampaigns((current) => [
-        { ...campaign, ...automationData.campaign },
-        ...current.filter((item) => item.id !== campaign.id),
-      ]);
+      const campaign = data.campaign as Campaign;
+      setCampaigns((current) => [campaign, ...current.filter((item) => item.id !== campaign.id)]);
       setSelectedId(campaign.id);
-      setAutomation({
-        ...EMPTY_AUTOMATION,
-        mode: 'birthday',
-      });
+      setAutomation({ ...EMPTY_AUTOMATION, mode: 'birthday' });
       setView('automation');
       setLiveMessage('Automação de aniversário criada e ativada.');
       toast.success('Automação de aniversário criada e ativada.');
     } catch (error) {
-      if (createdCampaignId) {
-        await fetch(
-          `/api/marketing/campaigns?id=${encodeURIComponent(createdCampaignId)}`,
-          { method: 'DELETE' },
-        ).catch(() => undefined);
-      }
       toast.error(
         error instanceof Error
           ? error.message
@@ -580,7 +555,7 @@ export function MarketingWorkspace({
         <Card className="mx-auto max-w-xl border-white/10 bg-white/[0.02]">
           <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
             <Sparkles className="size-8 text-primary" aria-hidden="true" />
-            <h1 className="text-2xl font-semibold">Marketing avançado</h1>
+            <h1 className="text-2xl font-semibold">Automações avançadas</h1>
             <FeaturePlanBadge feature="marketing_campaigns" />
             <p className="text-muted-foreground">
               Campanhas de email, automações e resultados de entrega num só
@@ -606,16 +581,19 @@ export function MarketingWorkspace({
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing
+              <Sparkles className="size-3.5" aria-hidden="true" />{' '}
+              {isAutomationOnly ? 'Automações' : 'Marketing'}
             </div>
             <h1
               id="marketing-title"
               className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl"
             >
-              Marketing
+              {isAutomationOnly ? 'Automações' : 'Marketing'}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              Cria, gere, automatiza e acompanha campanhas num só lugar.
+              {isAutomationOnly
+                ? 'Configura lembretes e mensagens automáticas acionadas por eventos da barbearia.'
+                : 'Cria, gere, automatiza e acompanha campanhas num só lugar.'}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -625,32 +603,38 @@ export function MarketingWorkspace({
                 Dashboard
               </Link>
             </Button>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 size-4" aria-hidden="true" />
-              Nova campanha
-            </Button>
+            {!isAutomationOnly && (
+              <Button onClick={openCreate}>
+                <Plus className="mr-2 size-4" aria-hidden="true" />
+                Nova campanha
+              </Button>
+            )}
           </div>
         </header>
 
-        <section
-          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-          aria-label="Resumo de marketing"
-        >
-          {metrics.map(({ label, value, Icon, tone }) => (
-            <Card key={label} className="border-white/10 bg-white/[0.025]">
-              <CardContent className="flex items-center justify-between p-5">
-                <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums">
-                    {value}
-                  </p>
-                </div>
-                <Icon className={`size-5 ${tone}`} aria-hidden="true" />
-              </CardContent>
-            </Card>
-          ))}
-        </section>
+        {!isAutomationOnly && (
+          <section
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+            aria-label="Resumo de marketing"
+          >
+            {metrics.map(({ label, value, Icon, tone }) => (
+              <Card key={label} className="border-white/10 bg-white/[0.025]">
+                <CardContent className="flex items-center justify-between p-5">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">
+                      {value}
+                    </p>
+                  </div>
+                  <Icon className={`size-5 ${tone}`} aria-hidden="true" />
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+  
+        )}
 
+        {initialView !== 'automation' && (
         <div
           className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1"
           role="tablist"
@@ -673,8 +657,9 @@ export function MarketingWorkspace({
             </button>
           ))}
         </div>
+        )}
 
-        {view === 'campaigns' && (
+        {initialView !== 'automation' && view === 'campaigns' && (
           <section className="space-y-4" aria-labelledby="campaign-list-title">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-2 sm:flex-row">
@@ -953,9 +938,9 @@ export function MarketingWorkspace({
               {!selected ? (
                 <Card className="border-white/10 bg-white/[0.02]">
                   <CardContent className="py-16 text-center">
-                    <p className="font-medium">Seleciona uma campanha</p>
+                    <p className="font-medium">Ainda não tens automações configuradas.</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Volta a Campanhas e escolhe “Gerir”.
+                      Adiciona a automação de aniversário acima para começares.
                     </p>
                   </CardContent>
                 </Card>
@@ -991,7 +976,6 @@ export function MarketingWorkspace({
                             className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                             disabled={!canManage(selected)}
                           >
-                            <option value="manual">Manual</option>
                             <option value="interval">Intervalo</option>
                             <option value="event">Evento</option>
                             <option value="birthday">Aniversário</option>
@@ -1174,9 +1158,7 @@ export function MarketingWorkspace({
                           <span className="font-medium text-zinc-200">
                             {selected.next_run_at
                               ? formatDate(selected.next_run_at)
-                              : automation.mode === 'manual'
-                                ? 'Manual'
-                                : 'Calculada ao guardar'}
+                              : 'Calculada ao guardar'}
                           </span>
                         </p>
                         <Button
@@ -1196,53 +1178,14 @@ export function MarketingWorkspace({
                       )}
                     </CardContent>
                   </Card>
-                  <Card className="border-white/10 bg-white/[0.02]">
-                    <CardHeader>
-                      <CardTitle>Ações rápidas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setDetails(selected)}
-                      >
-                        <Eye className="mr-2 size-4" aria-hidden="true" />
-                        Detalhes
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => openEdit(selected)}
-                        disabled={!canManage(selected)}
-                      >
-                        <Pencil className="mr-2 size-4" aria-hidden="true" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setConfirmDelete(selected)}
-                        disabled={!canManage(selected)}
-                        className="text-red-300"
-                      >
-                        <Trash2 className="mr-2 size-4" aria-hidden="true" />
-                        Apagar
-                      </Button>
-                      <Button
-                        onClick={() => void sendCampaign(selected)}
-                        disabled={
-                          !canManage(selected) || sendingId === selected.id
-                        }
-                      >
-                        <Send className="mr-2 size-4" aria-hidden="true" />
-                        Enviar agora
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  
                 </>
               )}
             </section>
           </>
         )}
 
-        {view === 'performance' && (
+        {initialView !== 'automation' && view === 'performance' && (
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardContent className="p-5">

@@ -327,12 +327,6 @@ const localeAwareSources = {
     'Could not load settings.',
     'Publish online',
   ],
-  'app/dashboard/mensagens/page.tsx': [
-    'useLanguage()',
-    'Appointment reminder',
-    'copy.loadClientsFailed',
-    'copy.emailSent',
-  ],
   'app/documentation/page.tsx': [
     "cookieStore.get('locale')?.value === 'en'",
     'localizedSections',

@@ -208,6 +208,21 @@ export async function processQueuedCampaignRecipients(limit = BATCH_SIZE) {
 
     try {
       const campaign = await getCampaign(recipient.campaign_id);
+      if (
+        !['interval', 'event', 'birthday'].includes(campaign.trigger_type)
+      ) {
+        const { error: skipError } = await admin
+          .from('marketing_campaign_recipients')
+          .update({
+            status: 'skipped',
+            next_attempt_at: null,
+            error_message: 'Manual customer messaging is temporarily disabled.',
+          })
+          .eq('id', recipient.id)
+          .eq('status', 'sending');
+        if (skipError) throw skipError;
+        continue;
+      }
       // Also discard review requests that were queued before this safeguard
       // was deployed, so an old event cannot send a second review email later.
       if (

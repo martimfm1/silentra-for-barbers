@@ -14,7 +14,6 @@ import {
   PackageCheck,
   RefreshCw,
   Search,
-  Send,
   Truck,
   XCircle,
 } from 'lucide-react';
@@ -148,12 +147,6 @@ export default function MarketplaceOrdersPage() {
     'all' | Order['fulfillment_method']
   >('all');
   const [updating, setUpdating] = useState<string | null>(null);
-  const [emailOrder, setEmailOrder] = useState<Order | null>(null);
-  const [emailSubject, setEmailSubject] = useState(
-    t('orderManagement.updateSubject'),
-  );
-  const [emailMessage, setEmailMessage] = useState('');
-  const [sendingEmail, setSendingEmail] = useState(false);
 
   async function load(showLoading = true) {
     if (showLoading) setLoading(true);
@@ -265,52 +258,6 @@ export default function MarketplaceOrdersPage() {
       );
     } finally {
       setUpdating(null);
-    }
-  }
-
-  function openEmail(order: Order) {
-    setEmailOrder(order);
-    setEmailSubject(
-      order.status === 'ready'
-        ? t('orderManagement.readySubject')
-        : t('orderManagement.updateSubject'),
-    );
-    setEmailMessage(
-      order.status === 'ready'
-        ? t('orderManagement.readyMessage')
-        : t('orderManagement.updateMessage', {
-            reference: order.id.slice(0, 8),
-          }),
-    );
-  }
-
-  async function sendEmail() {
-    if (!emailOrder) return;
-    setSendingEmail(true);
-    try {
-      const response = await fetch(
-        `/api/marketplace/orders/${emailOrder.id}/email`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            subject: emailSubject,
-            message: emailMessage,
-          }),
-        },
-      );
-      const json = await response.json();
-      if (!response.ok) throw new Error(t('orderManagement.emailError'));
-      toast.success('Email enviado ao cliente.');
-      setEmailOrder(null);
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t('orderManagement.emailError'),
-      );
-    } finally {
-      setSendingEmail(false);
     }
   }
 
@@ -530,13 +477,10 @@ export default function MarketplaceOrdersPage() {
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-600">
                               Cliente
                             </p>
-                            <a
-                              className="mt-2 flex items-center gap-2 text-sm text-zinc-200 hover:text-emerald-300"
-                              href={`mailto:${order.customer_email}`}
-                            >
+                            <p className="mt-2 flex items-center gap-2 text-sm text-zinc-200">
                               <Mail className="size-3.5" aria-hidden="true" />
                               {order.customer_email}
-                            </a>
+                            </p>
                             <p className="mt-1 text-sm text-zinc-400">
                               {order.customer_phone}
                             </p>
@@ -598,11 +542,6 @@ export default function MarketplaceOrdersPage() {
                                       formatLocale,
                                     )}
                                   </p>
-                                  {event.source === 'manual_email' && (
-                                    <p className="mt-1 text-zinc-500">
-                                      Email enviado ao cliente
-                                    </p>
-                                  )}
                                 </div>
                               ))}
                             </div>
@@ -642,15 +581,6 @@ export default function MarketplaceOrdersPage() {
                           Cancelar
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        disabled={sendingEmail && emailOrder?.id === order.id}
-                        onClick={() => openEmail(order)}
-                        className="min-h-11"
-                      >
-                        <Mail className="mr-2 size-4" aria-hidden="true" />
-                        Enviar email ao cliente
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -660,81 +590,7 @@ export default function MarketplaceOrdersPage() {
         )}
       </div>
 
-      {emailOrder && (
-        <div
-          className="fixed inset-0 z-[250] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="send-order-email-title"
-        >
-          <div className="glassmorphism w-full max-w-lg rounded-t-[1.5rem] border border-white/10 p-5 sm:rounded-[1.5rem] sm:p-7">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
-                  {t('orderManagement.communication')}
-                </p>
-                <h2
-                  id="send-order-email-title"
-                  className="mt-2 text-xl font-semibold"
-                >
-                  Enviar email ao cliente
-                </h2>
-                <p className="mt-1 text-sm text-zinc-500">
-                  {emailOrder.customer_name} · {emailOrder.customer_email}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => setEmailOrder(null)}
-                className="min-h-10"
-              >
-                Fechar
-              </Button>
-            </div>
-            <div className="mt-6 space-y-4">
-              <label className="grid gap-1.5 text-xs text-zinc-400">
-                <span>{t('orderPage.subject')}</span>
-                <Input
-                  value={emailSubject}
-                  onChange={(event) => setEmailSubject(event.target.value)}
-                  maxLength={180}
-                />
-              </label>
-              <label className="grid gap-1.5 text-xs text-zinc-400">
-                <span>{t('orderPage.message')}</span>
-                <textarea
-                  value={emailMessage}
-                  onChange={(event) => setEmailMessage(event.target.value)}
-                  maxLength={5000}
-                  rows={7}
-                  className="w-full resize-y rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                />
-              </label>
-              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setEmailOrder(null)}
-                  className="min-h-11"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  disabled={
-                    sendingEmail ||
-                    emailSubject.trim().length < 3 ||
-                    emailMessage.trim().length < 3
-                  }
-                  onClick={() => void sendEmail()}
-                  className="min-h-11"
-                >
-                  <Send className="mr-2 size-4" aria-hidden="true" />
-                  {sendingEmail ? 'A enviar…' : 'Enviar email'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </main>
   );
 }

@@ -30,7 +30,6 @@ const confirmationTargets = await Promise.all(
     'app/dashboard/pos/pedidos/page.tsx',
     'app/dashboard/pos/produtos/page.tsx',
     'app/dashboard/_components/team/TeamMembersManager.tsx',
-    'app/dashboard/marketing/campaign-lifecycle-actions.tsx',
     'components/dashboard/loyalty/earning-rules-card.tsx',
     'components/billing/BillingHub.tsx',
   ].map((file) => read(file)),
@@ -103,7 +102,8 @@ assert.match(
 );
 assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
-assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
+assert.match(sidebar, /const automationItems: SidebarItem\[\]/);
+assert.doesNotMatch(sidebar, /communicationItems|dashboard\/mensagens|dashboard\/marketing/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
 assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
 assert.match(

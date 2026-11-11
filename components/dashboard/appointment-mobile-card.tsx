@@ -88,14 +88,9 @@ export function AppointmentMobileCard({
             ) : null}
           </div>
           {phone ? (
-            <a
-              href={`tel:${phone}`}
-              onClick={(event) => event.stopPropagation()}
-              className="mt-1.5 block w-fit text-xs text-zinc-500 underline-offset-4 hover:text-emerald-300 hover:underline"
-              aria-label={isEnglish ? `Call ${name}` : `Ligar a ${name}`}
-            >
+            <span className="mt-1.5 block w-fit text-xs text-zinc-500">
               {phone}
-            </a>
+            </span>
           ) : (
             <span className="mt-1.5 block text-xs text-zinc-600">
               {isEnglish ? 'No phone number' : 'Sem telefone'}

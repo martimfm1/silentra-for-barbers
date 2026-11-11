@@ -18,15 +18,18 @@ async function POST__unobserved(
 
     const { data: campaign, error: campaignError } = await admin
       .from('marketing_campaigns')
-      .select('id,status,active')
+      .select('id,status,active,trigger_type')
       .eq('id', campaignId)
       .eq('barbershop_id', barbershopId)
       .maybeSingle();
 
     if (campaignError) throw campaignError;
-    if (!campaign) {
+    if (
+      !campaign ||
+      !['interval', 'event', 'birthday'].includes(campaign.trigger_type ?? '')
+    ) {
       return NextResponse.json(
-        { error: 'Campanha não encontrada.' },
+        { error: 'Automação não encontrada.' },
         { status: 404 },
       );
     }
@@ -49,7 +52,8 @@ async function POST__unobserved(
       })
       .eq('id', campaignId)
       .eq('barbershop_id', barbershopId)
-      .in('status', ['scheduled', 'sending']);
+      .in('status', ['scheduled', 'sending'])
+      .in('trigger_type', ['interval', 'event', 'birthday']);
 
     if (campaignUpdateError) throw campaignUpdateError;
 

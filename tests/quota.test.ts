@@ -74,7 +74,6 @@ test('Free plan does not include Pro/Enterprise features', () => {
 
 test('getMinimumPlanForFeature resolves the actual required tier', () => {
   assert.equal(getMinimumPlanForFeature('appointments'), null);
-  assert.equal(getMinimumPlanForFeature('messaging'), null);
   assert.equal(getMinimumPlanForFeature('team_management'), 'pro');
   assert.equal(getMinimumPlanForFeature('loyalty'), 'pro');
   assert.equal(getMinimumPlanForFeature('advanced_crm'), 'pro');

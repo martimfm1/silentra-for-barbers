@@ -48,8 +48,8 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '4. Comunicações e fornecedores',
         paragraphs: [
           'A Silentra pode utilizar fornecedores especializados para alojamento, base de dados, pagamentos, email, monitorização e infraestrutura técnica. Estes fornecedores apenas recebem os dados necessários para prestar os respetivos serviços.',
-          'O envio de email transacional e de mensagens manuais por email pode ser realizado através da Brevo. O nome da barbearia pode ser utilizado como nome do remetente nas mensagens enviadas em seu nome.',
-          'O envio manual de SMS encontra-se atualmente desativado. A Silentra não deve ser considerada como estando a enviar SMS através da plataforma enquanto essa funcionalidade permanecer desativada. Se a funcionalidade for ativada no futuro, esta política poderá ser atualizada para refletir o tratamento correspondente.',
+          'Os emails transacionais e automáticos podem ser enviados através da Brevo. O nome da barbearia pode ser utilizado como nome do remetente nas mensagens enviadas em seu nome. O envio de emails manuais e campanhas compostas diretamente pela barbearia não está disponível atualmente.',
+          '',
         ],
       },
       {
@@ -174,8 +174,8 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
         title: '4. Communications and providers',
         paragraphs: [
           'Silentra may use specialist providers for hosting, databases, payments, email, monitoring, and technical infrastructure. Providers receive only the data required to perform their services.',
-          'Transactional and manual email may be sent through Brevo. The barbershop name may be used as the sender name for messages sent on its behalf.',
-          'Manual SMS sending is currently disabled. Silentra should not be considered to be sending SMS through the platform while this feature remains disabled. If it is enabled in the future, this policy may be updated to reflect the relevant processing.',
+          'Transactional and automated email may be sent through Brevo. The barbershop name may be used as the sender name for messages sent on its behalf. Manually composed customer emails and campaigns are currently unavailable.',
+          '',
         ],
       },
       {
@@ -184,7 +184,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
           'We process data to create and administer accounts, provide contracted features, manage bookings and customers, send operational communications, process billing, provide support, prevent fraud and abuse, protect security, and improve platform reliability.',
           'Waitlist data is used only to record the request and allow the selected barbershop to contact you about a suitable opening. We do not use this consent for campaigns or commercial communications.',
           'Legal bases may include contract performance, legal obligations, legitimate interests of Silentra or the barbershop, and consent where required by applicable law.',
-          'Marketing and messaging features must be used by barbershops only when they have an appropriate lawful basis to contact recipients and comply with applicable commercial-communications rules.',
+          'Customer-facing automations must be used by barbershops only when they have an appropriate lawful basis to contact recipients and comply with applicable commercial-communications rules.',
         ],
       },
       {

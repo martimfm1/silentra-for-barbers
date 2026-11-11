@@ -16,6 +16,7 @@ type Campaign = {
   name: string;
   channel: 'email' | 'sms';
   status: string;
+  trigger_type: 'interval' | 'event' | 'birthday' | 'manual' | null;
 };
 
 function statusLabel(status: string, t: (key: string) => string) {
@@ -42,10 +43,14 @@ export function CampaignLifecycleActions() {
       if (!response.ok)
         throw new Error(data.error ?? t('campaignLifecycle.loadError'));
       setCampaigns(
-        (data.campaigns ?? []).filter((campaign: Campaign) =>
-          VISIBLE_STATES.includes(
-            campaign.status as (typeof VISIBLE_STATES)[number],
-          ),
+        (data.campaigns ?? []).filter(
+          (campaign: Campaign) =>
+            ['interval', 'event', 'birthday'].includes(
+              campaign.trigger_type ?? '',
+            ) &&
+            VISIBLE_STATES.includes(
+              campaign.status as (typeof VISIBLE_STATES)[number],
+            ),
         ),
       );
     } catch (error) {

@@ -11,8 +11,7 @@ export type FreeFeatureKey =
   | 'basic_dashboard'
   | 'basic_revenue'
   | 'basic_client_history'
-  | 'basic_notifications'
-  | 'messaging';
+  | 'basic_notifications';
 
 export type ProFeatureKey =
   | 'advanced_crm'
@@ -58,7 +57,6 @@ const FREE_FEATURES: readonly (
   'basic_revenue',
   'basic_client_history',
   'basic_notifications',
-  'messaging',
 ];
 
 const PRO_FEATURES: readonly (
@@ -196,14 +194,13 @@ export const FEATURE_LABELS: Record<
   basic_client_history: 'Histórico do cliente',
   basic_notifications: 'Notificações essenciais',
   team_management: 'Gestão de equipa',
-  messaging: 'Mensagens por email',
   directory_visibility: 'Controlar ocultação no diretório',
   manual_mbway_prepayment: 'Pré-pagamento MB WAY',
   advanced_crm: 'CRM avançado',
   advanced_analytics: 'Analytics avançado',
   automated_reminders: 'Lembretes automáticos',
   automated_followups: 'Follow-ups automáticos',
-  marketing_campaigns: 'Campanhas de marketing',
+  marketing_campaigns: 'Automações de email',
   customer_segments: 'Segmentos de clientes',
   loyalty: 'Programa de fidelização',
   advanced_reports: 'Relatórios avançados',
