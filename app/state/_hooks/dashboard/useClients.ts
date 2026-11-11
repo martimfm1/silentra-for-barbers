@@ -7,6 +7,7 @@ import {
 import { getErrorMessage } from '@/app/dashboard/_lib/error-utils';
 import { Client } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
+import { useHaptics } from '@/lib/haptics';
 
 export function useClients(
   barbershopId: string | null,
@@ -14,6 +15,7 @@ export function useClients(
 ) {
   const { locale } = useLanguage();
   const isPortuguese = locale === 'pt';
+  const haptic = useHaptics();
   const [loadingClients, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -29,6 +31,7 @@ export function useClients(
     e?.preventDefault();
     const formattedPhone = newClientData.num_phone.trim();
     if (!newClientData.name_complete.trim() || !formattedPhone) {
+      haptic('error');
       toast.error('Por favor, introduz um nome e um telemóvel.');
       return false;
     }
@@ -45,12 +48,14 @@ export function useClients(
       };
       const { error } = await clientsService.createClient(payload);
       if (error) throw error;
+      haptic('success');
       toast.success('Cliente adicionado com sucesso!');
       setNewClientData({ name_complete: '', num_phone: '', email: '' });
       await onRefreshData();
       return true;
     } catch (error) {
       console.error('[Create Client Hook Error]:', error);
+      haptic('error');
       toast.error(getErrorMessage(error));
       return false;
     } finally {
@@ -71,11 +76,13 @@ export function useClients(
         style_notes: editingClient.style_notes?.trim() || '',
       });
       if (error) throw error;
+      haptic('success');
       toast.success('Cliente editado com sucesso!');
       setEditingClient(null);
       await onRefreshData();
     } catch (error) {
       console.error('[Update Client Hook Error]:', error);
+      haptic('error');
       toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -87,6 +94,7 @@ export function useClients(
     try {
       const { error } = await clientsService.deleteClient(id);
       if (error) throw error;
+      haptic('success');
       toast.success(
         isPortuguese
           ? 'Cliente removido com sucesso.'
@@ -95,6 +103,7 @@ export function useClients(
       await onRefreshData();
     } catch (error) {
       console.error('[Delete Client Hook Error]:', error);
+      haptic('error');
       toast.error(
         isPortuguese
           ? 'Não é possível eliminar um cliente com histórico ou outros registos associados.'
