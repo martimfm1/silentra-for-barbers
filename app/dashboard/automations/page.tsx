@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CampaignLifecycleActions } from '@/app/dashboard/marketing/campaign-lifecycle-actions';
 import { MarketingWorkspace } from '@/app/dashboard/marketing/marketing-workspace';
 
 export const metadata: Metadata = {
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function AutomationsPage() {
-  return <MarketingWorkspace initialView="automation" />;
+  return (
+    <>
+      <CampaignLifecycleActions />
+      <MarketingWorkspace initialView="automation" />
+    </>
+  );
 }
