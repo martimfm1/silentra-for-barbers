@@ -124,11 +124,13 @@ function appointmentName(appointment: Appointment, t: (key: string) => string) {
 export function AgendaCalendarView({
   appointments,
   appointmentsLoading,
+  blocksRefreshKey,
   professionals: allProfessionals,
   onAppointmentClick,
 }: {
   appointments: Appointment[];
   appointmentsLoading: boolean;
+  blocksRefreshKey: number;
   professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
 }) {
@@ -176,7 +178,7 @@ export function AgendaCalendarView({
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, blocksRefreshKey]);
 
   const calendarDays = useMemo(
     () =>
@@ -368,6 +370,7 @@ export function AgendaCalendarView({
                 (item) => item.status === 'cancelled',
               ).length;
               const preview = dayAppointments.slice(0, 2);
+              const blockPreview = dayBlocks.slice(0, 1);
 
               return (
                 <button
@@ -494,17 +497,36 @@ export function AgendaCalendarView({
                         +{dayAppointments.length - 2} mais
                       </span>
                     ) : null}
-                    {dayBlocks.length > 0 ? (
-                      <div className="flex items-center gap-1 text-[8px] text-rose-300/80 sm:text-[9px]">
+                    {blockPreview.map((block) => (
+                      <div
+                        key={block.id}
+                        title={[
+                          `${formatTime(block.start_time)}–${formatTime(block.end_time)}`,
+                          block.reason,
+                          block.professionals?.name,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                        aria-label={`Bloqueio de horário das ${formatTime(block.start_time)} às ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.`}
+                        className="flex min-w-0 items-center gap-1 rounded-md border border-rose-400/20 bg-rose-400/[0.07] px-1 py-1 text-[8px] text-rose-200/90 sm:px-1.5 sm:text-[9px]"
+                      >
                         <CalendarOff
-                          className="size-2.5 sm:size-3"
+                          className="size-2.5 shrink-0 sm:size-3"
                           aria-hidden="true"
                         />
-                        <span>
-                          {dayBlocks.length} bloqueio
-                          {dayBlocks.length === 1 ? '' : 's'}
+                        <span className="hidden min-w-0 truncate tabular-nums sm:block">
+                          {formatTime(block.start_time)}–{formatTime(block.end_time)}
+                        </span>
+                        <span className="block truncate tabular-nums sm:hidden">
+                          {formatTime(block.start_time)}
                         </span>
                       </div>
+                    ))}
+                    {dayBlocks.length > blockPreview.length ? (
+                      <span className="block truncate px-1 text-[8px] font-medium text-rose-300/80 sm:text-[9px]">
+                        +{dayBlocks.length - blockPreview.length}{' '}
+                        {locale === 'en' ? 'more blocked times' : 'bloqueios'}
+                      </span>
                     ) : null}
                     {config.lunch_start && config.lunch_end && !isClosed ? (
                       <div className="hidden items-center gap-1 text-[9px] text-amber-300/70 sm:flex">
@@ -606,7 +628,7 @@ export function AgendaCalendarView({
 
           <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
             <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="text-zinc-500">Funcionamento</span>
+              <span className="text-zinc-500">{locale === 'en' ? 'Opening hours' : 'Funcionamento'}</span>
               <span className="font-medium tabular-nums text-zinc-200">
                 {config.opening_time ?? '—'}–{config.closing_time ?? '—'}
               </span>
