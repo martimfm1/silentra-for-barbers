@@ -179,6 +179,11 @@ assert.match(dashboardShell, /const isAgendaPage = pathname === '\/dashboard\/ag
 assert.match(dashboardShell, /dashboard-agenda-content/);
 assert.match(
   dashboardShell,
+  /dashboard-content\.dashboard-agenda-content #dashboard-main-content/,
+);
+
+assert.match(
+  dashboardShell,
   /dashboard-page\.dashboard-agenda-page[\s\S]*?padding-inline:\s*0 !important/,
   'The agenda shell must remove horizontal padding on mobile.',
 );
