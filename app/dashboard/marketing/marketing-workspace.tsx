@@ -581,16 +581,19 @@ export function MarketingWorkspace({
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Sparkles className="size-3.5" aria-hidden="true" /> Marketing
+              <Sparkles className="size-3.5" aria-hidden="true" />{' '}
+              {isAutomationOnly ? 'Automações' : 'Marketing'}
             </div>
             <h1
               id="marketing-title"
               className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl"
             >
-              Marketing
+              {isAutomationOnly ? 'Automações' : 'Marketing'}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              Cria, gere, automatiza e acompanha campanhas num só lugar.
+              {isAutomationOnly
+                ? 'Configura lembretes e mensagens automáticas acionadas por eventos da barbearia.'
+                : 'Cria, gere, automatiza e acompanha campanhas num só lugar.'}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -600,31 +603,36 @@ export function MarketingWorkspace({
                 Dashboard
               </Link>
             </Button>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 size-4" aria-hidden="true" />
-              Nova campanha
-            </Button>
+            {!isAutomationOnly && (
+              <Button onClick={openCreate}>
+                <Plus className="mr-2 size-4" aria-hidden="true" />
+                Nova campanha
+              </Button>
+            )}
           </div>
         </header>
 
-        <section
-          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-          aria-label="Resumo de marketing"
-        >
-          {metrics.map(({ label, value, Icon, tone }) => (
-            <Card key={label} className="border-white/10 bg-white/[0.025]">
-              <CardContent className="flex items-center justify-between p-5">
-                <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums">
-                    {value}
-                  </p>
-                </div>
-                <Icon className={`size-5 ${tone}`} aria-hidden="true" />
-              </CardContent>
-            </Card>
-          ))}
-        </section>
+        {!isAutomationOnly && (
+          <section
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+            aria-label="Resumo de marketing"
+          >
+            {metrics.map(({ label, value, Icon, tone }) => (
+              <Card key={label} className="border-white/10 bg-white/[0.025]">
+                <CardContent className="flex items-center justify-between p-5">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">
+                      {value}
+                    </p>
+                  </div>
+                  <Icon className={`size-5 ${tone}`} aria-hidden="true" />
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+  
+        )}
 
         {initialView !== 'automation' && (
         <div
