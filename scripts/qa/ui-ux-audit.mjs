@@ -103,7 +103,8 @@ assert.match(
 );
 assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
-assert.match(sidebar, /const communicationItems: SidebarItem\[\]/);
+assert.match(sidebar, /const automationItems: SidebarItem\[\]/);
+assert.doesNotMatch(sidebar, /communicationItems|dashboard\/mensagens|dashboard\/marketing/);
 assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
 assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
 assert.match(
