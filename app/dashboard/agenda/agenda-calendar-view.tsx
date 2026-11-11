@@ -27,10 +27,8 @@ import {
 import { enGB, pt } from 'date-fns/locale';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { getScheduleBlocksByShop } from '@/app/dashboard/_services/schedule-blocks.service';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
-import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import type { Appointment, Professional } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -124,8 +122,12 @@ function appointmentName(appointment: Appointment, t: (key: string) => string) {
 }
 
 export function AgendaCalendarView({
+  appointments,
+  professionals: allProfessionals,
   onAppointmentClick,
 }: {
+  appointments: Appointment[];
+  professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
 }) {
   const { t, locale } = useLanguage();
@@ -137,43 +139,30 @@ export function AgendaCalendarView({
   const { barbershopId } = useBarbershop();
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [blocks, setBlocks] = useState<CalendarBlock[]>([]);
   const [config, setConfig] = useState<ScheduleConfig>({});
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const professionals = useMemo(
+    () => allProfessionals.filter((item) => item.active !== false),
+    [allProfessionals],
+  );
 
   const load = useCallback(async () => {
     if (!barbershopId) return;
     setLoading(true);
     setError(null);
     try {
-      const [
-        appointmentsResult,
-        configResult,
-        blocksResult,
-        professionalsResult,
-      ] = await Promise.all([
-        appointmentService.getAll(barbershopId),
+      const [configResult, blocksResult] = await Promise.all([
         barbershopService.getConfig(barbershopId),
         getScheduleBlocksByShop(barbershopId),
-        professionalService.getAll(barbershopId),
       ]);
 
-      if (appointmentsResult.error) throw appointmentsResult.error;
       if (configResult.error) throw configResult.error;
       if (blocksResult.error) throw blocksResult.error;
-      if (professionalsResult.error) throw professionalsResult.error;
 
-      setAppointments(appointmentsResult.data ?? []);
       setConfig((configResult.data ?? {}) as ScheduleConfig);
       setBlocks((blocksResult.data ?? []) as CalendarBlock[]);
-      setProfessionals(
-        (professionalsResult.data ?? []).filter(
-          (item) => item.active !== false,
-        ),
-      );
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : t('agendaCalendar.loadError'),
