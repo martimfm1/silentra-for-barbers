@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/support-email-notifications",
       "schedule": "45 0 * * *"
+    },
+    {
+      "path": "/api/cron/subscription-expiry-reminders",
+      "schedule": "25 0 * * *"
     }
   ],
   "git": {
