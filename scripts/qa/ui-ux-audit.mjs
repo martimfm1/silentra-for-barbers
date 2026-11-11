@@ -117,6 +117,7 @@ assert.match(sidebar, /silentra:open-create-booking/);
 assert.match(sidebar, /managementItems\.map\(renderItem\)/);
 assert.match(sidebar, /'Gestão', 'Management'/);
 assert.match(agendaPage, /silentra:appointments-updated/);
+assert.match(agendaPage, /window\.dispatchEvent\(new Event\('silentra:open-create-booking'\)\)/);
 assert.doesNotMatch(agendaPage, /window\.addEventListener\('silentra:open-create-booking'/);
 assert.match(agendaPage, /searchParams\.get\('create'\) === '1'/);
 assert.doesNotMatch(agendaPage, /<AgendaViewSettings|<AgendaCancellationPolicyPanel/);
