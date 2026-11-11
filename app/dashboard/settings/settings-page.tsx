@@ -180,14 +180,16 @@ export default function SettingsPageOrganized() {
     void load();
   }, [load]);
   useEffect(() => {
-    if (window.location.hash !== '#public-profile') return;
-    const profileAccordion = document.getElementById(
-      'public-profile',
+    const targetId = window.location.hash.slice(1);
+    if (!targetId) return;
+    const target = document.getElementById(targetId);
+    const accordion = target?.closest(
+      'details[data-settings-category]',
     ) as HTMLDetailsElement | null;
-    if (!profileAccordion) return;
-    profileAccordion.open = true;
+    if (!target || !accordion) return;
+    accordion.open = true;
     requestAnimationFrame(() =>
-      profileAccordion.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' }),
     );
   }, []);
   const dirty = useMemo(
@@ -1236,7 +1238,7 @@ export default function SettingsPageOrganized() {
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage account access, subscription and barbershop security.' : 'Gere o acesso à conta, a subscrição e a segurança da barbearia.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
