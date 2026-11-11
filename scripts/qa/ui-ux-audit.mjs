@@ -187,7 +187,7 @@ assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
 assert.match(
   settingsPage,
-  /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/,
+  /const INPUT_CLASS =\\s*'box-border block min-h-11 w-full min-w-0 max-w-full/,
 );
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
