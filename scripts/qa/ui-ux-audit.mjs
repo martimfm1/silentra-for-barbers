@@ -35,6 +35,8 @@ const [
   read('components/dashboard/agenda-cancellation-policy-panel.tsx'),
   read('app/dashboard/_components/DashboardCreateBookingDialog.tsx'),
 ]);
+const settingsPushNotifications = await read('components/dashboard/settings-push-notifications-panel.tsx');
+
 const confirmationTargets = await Promise.all(
   [
     'app/dashboard/pos/page.tsx',
@@ -236,6 +238,25 @@ assert.ok(
   'Appearance must be nested under Information.',
 );
 assert.ok(settingsPage.includes('<AgendaViewSettings />'));
+assert.match(settingsPage, /settings-accordion-content/);
+assert.doesNotMatch(
+  settingsPage,
+  /settings-subaccordion[^>]*bg-black\/15/,
+  'The nested Appearance accordion must use the same neutral surface as its parent.',
+);
+assert.match(
+  dashboardShell,
+  /settings-accordion-content \[data-slot="card"\][\s\S]*?padding: 0 !important/,
+  'Cards inside settings accordions must be visually flattened.',
+);
+assert.doesNotMatch(
+  publicProfileSettingsCard,
+  /rounded-2xl border border-white\/10 bg-white\/\[0\.025\] p-4 sm:p-5/,
+  'Public profile sections must sit directly in the accordion content.',
+);
+assert.match(publicProfileSettingsCard, /border-t border-white\/\[.08\] pt-4/);
+assert.doesNotMatch(settingsPushNotifications, /<Card\b|<CardContent\b|ui\/card/);
+assert.match(settingsPushNotifications, /className="w-full min-w-0"/);
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
 assert.match(settingsPage, /<PublicProfileSettingsCard/);
 assert.ok(settingsPage.includes('directoryVisible={config.is_public_in_directory}'));
