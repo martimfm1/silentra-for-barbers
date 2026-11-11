@@ -191,9 +191,6 @@ export default function AgendaPage() {
   }, [bookingRecurrence, recurrenceEndDate, selectedDate]);
 
   useEffect(() => {
-    const openCreateBooking = () => setBookingDialogOpen(true);
-    window.addEventListener('silentra:open-create-booking', openCreateBooking);
-
     const url = new URL(window.location.href);
     if (url.searchParams.get('create') === '1') {
       setBookingDialogOpen(true);
@@ -204,13 +201,22 @@ export default function AgendaPage() {
         `${url.pathname}${url.search}${url.hash}`,
       );
     }
+  }, []);
 
+  useEffect(() => {
+    const refreshAppointments = () => {
+      void fetchInitialData();
+    };
+    window.addEventListener(
+      'silentra:appointments-updated',
+      refreshAppointments,
+    );
     return () =>
       window.removeEventListener(
-        'silentra:open-create-booking',
-        openCreateBooking,
+        'silentra:appointments-updated',
+        refreshAppointments,
       );
-  }, []);
+  }, [fetchInitialData]);
 
   useEffect(() => {
     const clientId = new URLSearchParams(window.location.search).get(
