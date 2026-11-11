@@ -417,7 +417,7 @@ export function PublicProfileSettingsCard({
 
   if (loading)
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className="animate-pulse space-y-3">
         <div className="h-5 w-1/3 rounded bg-white/10" />
         <div className="mt-4 h-11 rounded-xl bg-white/[0.06]" />
         <div className="mt-3 h-32 rounded-xl bg-white/[0.06]" />
@@ -441,13 +441,13 @@ export function PublicProfileSettingsCard({
               {copy.pageDescription}
             </p>
           </div>
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             {copy.plan[profile.plan]}
           </span>
         </header>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="public-page-visibility-title"
         >
           <div className="flex items-center justify-between gap-4">
@@ -474,7 +474,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="directory-visibility-title"
         >
           <div className="flex items-center justify-between gap-4">
@@ -510,7 +510,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="public-basics-title"
         >
           <div>
@@ -569,7 +569,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="amenities-title"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -592,8 +592,8 @@ export function PublicProfileSettingsCard({
             </span>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
+          <div className="mt-4 grid gap-x-5 gap-y-1 sm:grid-cols-2">
+            <div className="border-t border-white/[.08] pt-4 sm:col-span-2">
               <div className="flex items-start gap-3">
                 <Car
                   className="mt-0.5 size-5 text-sky-300"
@@ -631,7 +631,7 @@ export function PublicProfileSettingsCard({
                   type="button"
                   aria-pressed={checked}
                   onClick={() => toggle(key)}
-                  className={`group flex min-h-[92px] items-start gap-3 rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${checked ? 'border-emerald-400/30 bg-emerald-400/[0.06]' : 'border-white/10 bg-black/20 hover:border-white/20 hover:bg-white/[0.035]'}`}
+                  className={`group flex min-h-14 min-w-0 items-center gap-3 border-b border-white/[.07] py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${checked ? 'text-emerald-100' : 'text-zinc-300 hover:text-zinc-100'}`}
                 >
                   <span
                     className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border ${checked ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-white/10 bg-white/[0.03] text-zinc-500'}`}
@@ -659,7 +659,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="url-title"
         >
           <div className="flex items-center gap-3">
@@ -670,7 +670,7 @@ export function PublicProfileSettingsCard({
             <FeaturePlanBadge minimumPlan="pro" />
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded-lg border-b border-white/[.12] bg-transparent">
               <span className="hidden shrink-0 px-3 text-xs text-zinc-600 md:inline">
                 barbers.silentra.me/barbershops/
               </span>
@@ -696,7 +696,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="seo-title"
         >
           <div className="flex items-center gap-3">
@@ -740,7 +740,7 @@ export function PublicProfileSettingsCard({
               </div>
             </div>
           ) : (
-            <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
+            <div className="mt-4 inline-flex items-center gap-2 text-sm text-zinc-500">
               <Lock className="size-4" aria-hidden="true" />{' '}
               {copy.advancedSeoEnterprise}
             </div>
@@ -748,7 +748,7 @@ export function PublicProfileSettingsCard({
         </section>
 
         <section
-          className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+          className="min-w-0 border-t border-white/[.08] pt-4"
           aria-labelledby="og-title"
         >
           <div className="flex items-center gap-3">
@@ -773,7 +773,7 @@ export function PublicProfileSettingsCard({
               <p className="text-xs text-zinc-600">{copy.ogRecommendation}</p>
             </div>
           ) : (
-            <div className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
+            <div className="mt-4 inline-flex items-center gap-2 text-sm text-zinc-500">
               <Lock className="size-4" aria-hidden="true" />{' '}
               {copy.ogImageEnterprise}
             </div>

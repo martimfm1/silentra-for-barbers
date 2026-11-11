@@ -61,8 +61,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 const INPUT_CLASS =
-  'box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-white/5 text-sm sm:max-w-sm';
-const CARD_CLASS = 'border border-white/10 bg-white/[.02] text-zinc-50';
+  'box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border-white/10 bg-white/5 text-sm';
+const CARD_CLASS = 'border-0 bg-transparent p-0 text-zinc-50 shadow-none';
 
 type Config = {
   name: string;
@@ -434,7 +434,7 @@ export default function SettingsPageOrganized() {
   if (loading || planLoading)
     return (
       <main
-        className="min-h-screen bg-zinc-950 px-4 py-6 text-zinc-50"
+        className="settings-page min-h-screen bg-transparent px-4 py-6 text-zinc-50"
         aria-busy="true"
         aria-label={t('settingsPage.title')}
       >
@@ -450,7 +450,7 @@ export default function SettingsPageOrganized() {
             {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
-                className="space-y-4 rounded-2xl border border-white/10 bg-white/[.02] p-5"
+                className="space-y-4 border-b border-white/[.07] pb-5"
               >
                 <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
                 <div className="h-10 w-full animate-pulse rounded-xl bg-white/[.06]" />
@@ -463,7 +463,7 @@ export default function SettingsPageOrganized() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-50">
+    <main className="settings-page min-h-screen bg-transparent text-zinc-50">
       <div className="mx-auto max-w-7xl px-4 pb-28 pt-4 sm:px-6 lg:px-8">
         <header className="sticky top-0 z-30 -mx-4 border-b bg-zinc-950/10 px-4 py-4 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -527,7 +527,7 @@ export default function SettingsPageOrganized() {
         <div className="mt-5">
           <p className="mb-3 text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Everything that controls how your barbershop works, looks and accepts bookings.' : 'Tudo o que define como a tua barbearia funciona, se apresenta e recebe marcações.'}</p>
           <div className="min-w-0 space-y-3">
-            <details open data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+            <details open data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Information' : 'Informações'}</span>
@@ -535,7 +535,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+  <div className="settings-accordion-content border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
 <section id="settings-business" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
@@ -571,7 +571,7 @@ export default function SettingsPageOrganized() {
                         className={INPUT_CLASS}
                       />
                     </div>
-                    <div className="sm:col-span-2 grid gap-2 border-t border-white/10 pt-5">
+                    <div className="sm:col-span-2 grid gap-2 border-t border-white/[.07] pt-5">
                       <label
                         htmlFor="settings-default-language"
                         className="text-sm font-medium"
@@ -591,7 +591,7 @@ export default function SettingsPageOrganized() {
                       >
                         <SelectTrigger
                           id="settings-default-language"
-                          className="box-border h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200 sm:max-w-sm"
+                          className="box-border h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/[.04] px-3 text-sm text-zinc-200"
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -606,7 +606,7 @@ export default function SettingsPageOrganized() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="sm:col-span-2 space-y-4 border-t border-white/10 pt-5">
+                    <div className="sm:col-span-2 space-y-4 border-t border-white/[.07] pt-5">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
@@ -653,7 +653,7 @@ export default function SettingsPageOrganized() {
                         </p>
                       </div>
                       {!canManualMbway && (
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[.07] pt-4">
                           <p className="text-xs text-zinc-400">
                             {t('settingsPage.mbwayProRequired')}
                           </p>
@@ -670,7 +670,7 @@ export default function SettingsPageOrganized() {
                 </Card>
               </div>
             </section>
-<div className="mt-4 border-t border-white/[.06] pt-4">
+<div className="mt-4 border-t border-white/[.07] pt-4">
   <section id="settings-location" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
@@ -682,7 +682,7 @@ export default function SettingsPageOrganized() {
                   </p>
                 </div>
                 <Card className={CARD_CLASS}>
-                  <CardContent className="space-y-6 ">
+                  <CardContent className="space-y-4 ">
                     <div className="w-full max-w-2xl">
                       <AddressAutocomplete
                         value={config.address}
@@ -711,7 +711,7 @@ export default function SettingsPageOrganized() {
               </div>
             </section>
 </div>
-<details data-settings-subcategory className="group mt-4 min-w-0 overflow-hidden rounded-2xl border border-white/[.08] bg-black/15">
+<details data-settings-subcategory className="settings-subaccordion group mt-4 min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-transparent">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Appearance' : 'Aparência'}</span>
@@ -719,7 +719,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="space-y-4 border-t border-white/[.06] px-3 py-4 sm:px-4">
+  <div className="settings-accordion-content space-y-4 border-t border-white/[.07] px-4 py-4 sm:px-5">
     <section id="settings-appearance">
               <Card className={CARD_CLASS}>
                 <CardHeader className="hidden">
@@ -827,7 +827,7 @@ export default function SettingsPageOrganized() {
   </div>
 </details>
             
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+            <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
@@ -835,7 +835,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+  <div className="settings-accordion-content border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
 <section id="settings-hours" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
@@ -847,7 +847,7 @@ export default function SettingsPageOrganized() {
                   </p>
                 </div>
                 <Card className={CARD_CLASS}>
-                  <CardContent className="space-y-6 ">
+                  <CardContent className="space-y-4 ">
                     <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                       <div className="grid gap-2">
                         <label
@@ -938,7 +938,7 @@ export default function SettingsPageOrganized() {
                           return (
                             <div
                               key={v}
-                              className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[.02] px-3 py-2"
+                              className="flex min-h-11 min-w-0 items-center justify-between gap-3 border-b border-white/[.07] py-2"
                             >
                               <span className="min-w-0 truncate text-sm text-zinc-300">
                                 {label}
@@ -972,7 +972,7 @@ export default function SettingsPageOrganized() {
             </section>
   </div>
 </details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+            <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Booking rules' : 'Regras de marcação'}</span>
@@ -980,7 +980,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+  <div className="settings-accordion-content border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
 <section id="settings-rules" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
@@ -992,7 +992,7 @@ export default function SettingsPageOrganized() {
                   </p>
                 </div>
                 <Card className={CARD_CLASS}>
-                  <CardContent className="space-y-6 ">
+                  <CardContent className="space-y-4 ">
                     <div className="grid gap-2">
                       <label
                         htmlFor="settings-minimum-booking-notice"
@@ -1037,7 +1037,7 @@ export default function SettingsPageOrganized() {
                         >
                           <SelectTrigger
                             aria-label={t('settingsPage.noticeUnit')}
-                            className="h-11 w-28 min-w-0 rounded-xl border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                            className="h-11 w-28 min-w-0 rounded-xl border border-white/10 bg-white/[.04] px-3 text-sm text-zinc-200"
                           >
                             <SelectValue />
                           </SelectTrigger>
@@ -1053,7 +1053,7 @@ export default function SettingsPageOrganized() {
                       </div>
                     </div>
 
-                    <div className="grid gap-2 border-t border-white/10 pt-5">
+                    <div className="grid gap-2 border-t border-white/[.07] pt-5">
                       <div className="min-w-0">
                         <label htmlFor="settings-cancellation-notice" className="text-sm font-medium text-zinc-200">
                           {locale === 'en' ? 'Cancellation notice' : 'Antecedência para cancelamentos'}
@@ -1082,7 +1082,7 @@ export default function SettingsPageOrganized() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-4 border-t border-white/10 pt-5">
+                    <div className="space-y-4 border-t border-white/[.07] pt-5">
                       {!automationAllowed && (
                         <div className="flex flex-wrap items-center gap-2">
                           <FeaturePlanBadge feature="automated_reminders" />
@@ -1104,7 +1104,7 @@ export default function SettingsPageOrganized() {
                           }
                         />
                       </div>
-                      <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-4">
                         <div className="min-w-0">
                           <p className="text-sm font-medium">
                             {t('settingsPage.autoConfirmManual')}
@@ -1121,7 +1121,7 @@ export default function SettingsPageOrganized() {
                           aria-label={t('settingsPage.autoConfirmManual')}
                         />
                       </div>
-                      <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-4">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-sm font-medium">
@@ -1141,7 +1141,7 @@ export default function SettingsPageOrganized() {
                           }
                         />
                       </div>
-                      <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+                      <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-4">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-sm font-medium">
@@ -1162,7 +1162,7 @@ export default function SettingsPageOrganized() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-5">
+                    <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-5">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-zinc-200">
                           {t('settingsPage.requireBirthDate')}
@@ -1187,7 +1187,7 @@ export default function SettingsPageOrganized() {
 </details>
             
             
-            <details id="public-profile" data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+            <details id="public-profile" data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
@@ -1195,7 +1195,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 py-4 sm:px-4">
+  <div className="settings-accordion-content border-t border-white/[.07] px-4 py-4 sm:px-5">
     <PublicProfileSettingsCard
       directoryVisible={config.is_public_in_directory}
       onDirectoryVisibilityChange={(value) => canDirectory && set({ is_public_in_directory: value })}
@@ -1205,7 +1205,7 @@ export default function SettingsPageOrganized() {
   </div>
 </details>
             
-<details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+<details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Notifications' : 'Notificações'}</span>
@@ -1213,7 +1213,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
+  <div className="settings-accordion-content border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
 <section id="settings-notifications" className="scroll-mt-24">
               <div className="space-y-4">
                 <div className="hidden">
@@ -1234,7 +1234,7 @@ export default function SettingsPageOrganized() {
             
             
             
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
+            <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
       <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
@@ -1242,7 +1242,7 @@ export default function SettingsPageOrganized() {
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4 space-y-4">
+  <div className="settings-accordion-content space-y-4 border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
 <section id="settings-account">
               <Card className={CARD_CLASS}>
                 <CardHeader className="hidden">

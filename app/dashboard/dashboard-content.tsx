@@ -96,6 +96,47 @@ const dashboardSurfaceStyles = `
     border-color: rgb(255 255 255 / 0.055) !important;
   }
 
+  /* Settings content is rendered directly inside its accordion, not as nested cards. */
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card"] {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    gap: 0 !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card-header"] {
+    padding: 0 0 0.75rem !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card-content"],
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card-footer"] {
+    padding: 0 !important;
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="card-description"] {
+    color: rgb(161 161 170 / 0.82);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content input,
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content textarea,
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="select-trigger"],
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content select {
+    background-color: rgb(255 255 255 / 0.035);
+  }
+
+  .silentra-dashboard-shell .dashboard-page .settings-accordion-content .settings-subaccordion {
+    background: transparent;
+  }
+
   /* Mobile viewport guard: dashboard content must not inherit desktop canvas widths. */
   @media (max-width: 767px) {
     .silentra-dashboard-shell {

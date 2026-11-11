@@ -5,13 +5,6 @@ import { Bell, BellOff, CheckCircle2, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 
 type PushState =
   | 'loading'
@@ -260,65 +253,59 @@ export function SettingsPushNotificationsPanel() {
                   : copy.enableFailed;
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 lg:px-8"
+      className="w-full min-w-0"
       aria-labelledby="push-settings-title"
     >
-      <Card className="border border-white/10 bg-white/[.02] text-zinc-50">
-        <CardHeader>
-          <CardTitle
-            id="push-settings-title"
-            className="flex items-center gap-2"
-          >
-            <Bell className="size-5 text-violet-300" />
-            {copy.title}
-          </CardTitle>
-          <CardDescription className="text-zinc-400">
-            {copy.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex items-start gap-3">
-            {state === 'enabled' ? (
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-400" />
-            ) : (
-              <Smartphone className="mt-0.5 size-5 shrink-0 text-zinc-400" />
-            )}
-            <p className="text-sm leading-6 text-zinc-300">{statusText}</p>
+      <h3 id="push-settings-title" className="sr-only">
+        {copy.title}
+      </h3>
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          {state === 'enabled' ? (
+            <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-400" />
+          ) : (
+            <Smartphone className="mt-0.5 size-5 shrink-0 text-zinc-400" />
+          )}
+          <div className="min-w-0">
+            <p className="text-sm leading-6 text-zinc-200">{statusText}</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              {copy.description}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {state === 'disabled' || state === 'denied' || state === 'error' ? (
+        </div>
+        <div className="flex min-w-0 flex-wrap gap-2 sm:shrink-0">
+          {state === 'disabled' || state === 'denied' || state === 'error' ? (
+            <Button
+              type="button"
+              onClick={() => void enable()}
+              disabled={busy || state === 'denied'}
+            >
+              <Bell className="mr-2 size-4" />
+              {copy.enable}
+            </Button>
+          ) : null}
+          {state === 'enabled' ? (
+            <>
               <Button
                 type="button"
-                onClick={() => void enable()}
-                disabled={busy || state === 'denied'}
+                onClick={() => void sendTest()}
+                disabled={busy}
               >
-                <Bell className="mr-2 size-4" />
-                {copy.enable}
+                {copy.test}
               </Button>
-            ) : null}
-            {state === 'enabled' ? (
-              <>
-                <Button
-                  type="button"
-                  onClick={() => void sendTest()}
-                  disabled={busy}
-                >
-                  {copy.test}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void disable()}
-                  disabled={busy}
-                >
-                  <BellOff className="mr-2 size-4" />
-                  {copy.disable}
-                </Button>
-              </>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void disable()}
+                disabled={busy}
+              >
+                <BellOff className="mr-2 size-4" />
+                {copy.disable}
+              </Button>
+            </>
+          ) : null}
+        </div>
+      </div>
     </section>
   );
 }
