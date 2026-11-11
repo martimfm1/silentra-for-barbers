@@ -42,11 +42,7 @@ import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
 import { CalendarSyncCard } from '@/components/dashboard/calendar-sync-card';
 import { AgendaCalendarView } from './agenda-calendar-view';
-import {
-  AgendaViewSettings,
-  useAgendaViewPreference,
-} from '@/app/dashboard/settings/agenda-view-settings';
-import { AgendaCancellationPolicyPanel } from '@/components/dashboard/agenda-cancellation-policy-panel';
+import { useAgendaViewPreference } from '@/app/dashboard/settings/agenda-view-settings';
 
 const STATUS_FILTERS = [
   { id: 'all', label: 'agenda.all' },
@@ -711,8 +707,6 @@ export default function AgendaPage() {
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-7xl space-y-5 px-1">
-        <AgendaViewSettings />
-        <AgendaCancellationPolicyPanel />
       </div>
       <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
         <DialogContent
