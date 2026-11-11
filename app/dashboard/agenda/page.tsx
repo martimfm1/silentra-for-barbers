@@ -421,13 +421,6 @@ export default function AgendaPage() {
             ? `${count} recurring bookings cancelled.`
             : `${count} marcações recorrentes canceladas.`,
         );
-        if (payload.emailFailedCount > 0) {
-          toast.warning(
-            locale === 'en'
-              ? `Cancellation saved, but ${payload.emailFailedCount} email(s) could not be sent.`
-              : `Cancelamento guardado, mas não foi possível enviar ${payload.emailFailedCount} email(s).`,
-          );
-        }
         await fetchInitialData();
         return true;
       } catch (error) {
