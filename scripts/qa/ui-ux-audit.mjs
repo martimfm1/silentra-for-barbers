@@ -193,9 +193,23 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /data-settings-category/);
-assert.match(settingsPage, /Apresentação da agenda/);
-assert.match(settingsPage, /<AgendaViewSettings\s*\/>/);
+assert.match(settingsPage, /data-settings-subcategory/);
+assert.match(settingsPage, /locale === 'en' \\? 'Appearance' : 'Aparência'/);
+assert.match(settingsPage, /<AgendaViewSettings\\s*\\/>/);
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
+assert.match(settingsPage, /<PublicProfileSettingsCard/);
+assert.match(settingsPage, /directoryVisible=\\{config\\.is_public_in_directory\\}/);
+assert.doesNotMatch(settingsPage, /href="\\/dashboard\\/settings\\/public-profile"/);
+assert.ok(
+  settingsPage.indexOf('id="settings-location"') >
+    settingsPage.indexOf("'Information' : 'Informações'"),
+  'Location settings must be nested under Information.',
+);
+assert.ok(
+  settingsPage.indexOf("'Appearance' : 'Aparência'") >
+    settingsPage.indexOf("'Information' : 'Informações'"),
+  'Appearance settings must be nested under Information.',
+);
 assert.match(settingsPage, /time_limit_cancellation_hours/);
 assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
