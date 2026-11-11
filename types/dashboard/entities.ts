@@ -32,6 +32,7 @@ export interface Professional {
 export interface Appointment {
   id: string;
   date_hour: string;
+  recurrence_series_id?: string | null;
   status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
   manual_name?: string | null;
   manual_phone?: string | null;
