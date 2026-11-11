@@ -38,6 +38,12 @@ const dashboardSurfaceStyles = `
     background: transparent;
   }
 
+  /* The agenda workspace is full-bleed: its outer shells add no general padding. */
+  .silentra-dashboard-shell .dashboard-content.dashboard-agenda-content #dashboard-main-content.dashboard-agenda-main,
+  .silentra-dashboard-shell .dashboard-page.dashboard-agenda-page {
+    padding: 0 !important;
+  }
+
   /* Full-page route wrappers should never create a second opaque canvas. */
   .silentra-dashboard-shell .dashboard-page > main[class*="min-h-screen"],
   .silentra-dashboard-shell .dashboard-page > div[class*="min-h-screen"] {
@@ -157,12 +163,6 @@ const dashboardSurfaceStyles = `
 
     .silentra-dashboard-shell .dashboard-page {
       padding-inline: 1rem;
-    }
-
-    /* The agenda is a full-bleed workspace on phones: remove both outer gutters. */
-    .silentra-dashboard-shell .dashboard-content.dashboard-agenda-content #dashboard-main-content,
-    .silentra-dashboard-shell .dashboard-page.dashboard-agenda-page {
-      padding-inline: 0 !important;
     }
 
     .silentra-dashboard-shell .dashboard-page > *,
@@ -309,7 +309,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <main
             id="dashboard-main-content"
             tabIndex={-1}
-            className="dashboard-page mx-auto max-w-[1600px] py-5 sm:py-7"
+            className={`dashboard-page mx-auto max-w-[1600px] ${isAgendaPage ? 'dashboard-agenda-main p-0' : 'py-5 sm:py-7'}`}
           >
             {children}
           </main>
