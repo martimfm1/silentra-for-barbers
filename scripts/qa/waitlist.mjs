@@ -134,7 +134,7 @@ assert.match(bookingDrawer, /selectedProfessionalId/);
 assert.match(bookingDrawer, /hasCompleteOffer/);
 assert.match(offersWorker, /searchParams\.set\('service'/);
 assert.match(offersWorker, /searchParams\.set\('date'/);
-assert.match(offersWorker, /searchParams\.set\('time'/);
+assert.match(offersWorker, /searchParams\.set\(\s*'time'/);
 assert.match(offersWorker, /searchParams\.set\('professional'/);
 assert.match(offersWorker, /booking-waitlist-decline:/);
 assert.match(offersWorker, /waitlist\/decline/);

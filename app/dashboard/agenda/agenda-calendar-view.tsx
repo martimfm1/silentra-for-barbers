@@ -27,10 +27,8 @@ import {
 import { enGB, pt } from 'date-fns/locale';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { appointmentService } from '@/app/dashboard/_services/appointments.service';
 import { getScheduleBlocksByShop } from '@/app/dashboard/_services/schedule-blocks.service';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
-import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import type { Appointment, Professional } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -124,8 +122,16 @@ function appointmentName(appointment: Appointment, t: (key: string) => string) {
 }
 
 export function AgendaCalendarView({
+  appointments,
+  appointmentsLoading,
+  blocksRefreshKey,
+  professionals: allProfessionals,
   onAppointmentClick,
 }: {
+  appointments: Appointment[];
+  appointmentsLoading: boolean;
+  blocksRefreshKey: number;
+  professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
 }) {
   const { t, locale } = useLanguage();
@@ -137,43 +143,30 @@ export function AgendaCalendarView({
   const { barbershopId } = useBarbershop();
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [blocks, setBlocks] = useState<CalendarBlock[]>([]);
   const [config, setConfig] = useState<ScheduleConfig>({});
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const professionals = useMemo(
+    () => allProfessionals.filter((item) => item.active !== false),
+    [allProfessionals],
+  );
 
   const load = useCallback(async () => {
     if (!barbershopId) return;
     setLoading(true);
     setError(null);
     try {
-      const [
-        appointmentsResult,
-        configResult,
-        blocksResult,
-        professionalsResult,
-      ] = await Promise.all([
-        appointmentService.getAll(barbershopId),
+      const [configResult, blocksResult] = await Promise.all([
         barbershopService.getConfig(barbershopId),
         getScheduleBlocksByShop(barbershopId),
-        professionalService.getAll(barbershopId),
       ]);
 
-      if (appointmentsResult.error) throw appointmentsResult.error;
       if (configResult.error) throw configResult.error;
       if (blocksResult.error) throw blocksResult.error;
-      if (professionalsResult.error) throw professionalsResult.error;
 
-      setAppointments(appointmentsResult.data ?? []);
       setConfig((configResult.data ?? {}) as ScheduleConfig);
       setBlocks((blocksResult.data ?? []) as CalendarBlock[]);
-      setProfessionals(
-        (professionalsResult.data ?? []).filter(
-          (item) => item.active !== false,
-        ),
-      );
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : t('agendaCalendar.loadError'),
@@ -185,7 +178,7 @@ export function AgendaCalendarView({
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, blocksRefreshKey]);
 
   const calendarDays = useMemo(
     () =>
@@ -244,7 +237,7 @@ export function AgendaCalendarView({
       ? 100
       : 0;
 
-  if (loading) return <AgendaCalendarSkeleton />;
+  if (loading || appointmentsLoading) return <AgendaCalendarSkeleton />;
 
   if (error) {
     return (
@@ -325,19 +318,19 @@ export function AgendaCalendarView({
           >
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-emerald-300" />
-              Pouco ocupada
+              {locale === 'en' ? 'Light occupancy' : 'Pouco ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-sky-300" />
-              Ocupada
+              {locale === 'en' ? 'Busy' : 'Ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-violet-300" />
-              Muito ocupada
+              {locale === 'en' ? 'Very busy' : 'Muito ocupada'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-rose-300" />
-              Bloqueio
+              {locale === 'en' ? 'Blocked time' : 'Bloqueio'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
               <span className="size-1.5 rounded-full bg-amber-300" />
@@ -377,6 +370,7 @@ export function AgendaCalendarView({
                 (item) => item.status === 'cancelled',
               ).length;
               const preview = dayAppointments.slice(0, 2);
+              const blockPreview = dayBlocks.slice(0, 1);
 
               return (
                 <button
@@ -503,22 +497,41 @@ export function AgendaCalendarView({
                         +{dayAppointments.length - 2} mais
                       </span>
                     ) : null}
-                    {dayBlocks.length > 0 ? (
-                      <div className="flex items-center gap-1 text-[8px] text-rose-300/80 sm:text-[9px]">
+                    {blockPreview.map((block) => (
+                      <div
+                        key={block.id}
+                        title={[
+                          `${formatTime(block.start_time)}–${formatTime(block.end_time)}`,
+                          block.reason,
+                          block.professionals?.name,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                        aria-label={locale === 'en' ? `Blocked time from ${formatTime(block.start_time)} to ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.` : `Bloqueio de horário das ${formatTime(block.start_time)} às ${formatTime(block.end_time)}. ${block.reason || t('agendaCalendar.scheduleBlock')}. ${block.professionals?.name || t('agendaCalendar.team')}.`}
+                        className="flex min-w-0 items-center gap-1 rounded-md border border-rose-400/20 bg-rose-400/[0.07] px-1 py-1 text-[8px] text-rose-200/90 sm:px-1.5 sm:text-[9px]"
+                      >
                         <CalendarOff
-                          className="size-2.5 sm:size-3"
+                          className="size-2.5 shrink-0 sm:size-3"
                           aria-hidden="true"
                         />
-                        <span>
-                          {dayBlocks.length} bloqueio
-                          {dayBlocks.length === 1 ? '' : 's'}
+                        <span className="hidden min-w-0 truncate tabular-nums sm:block">
+                          {formatTime(block.start_time)}–{formatTime(block.end_time)}
+                        </span>
+                        <span className="block truncate tabular-nums sm:hidden">
+                          {formatTime(block.start_time)}
                         </span>
                       </div>
+                    ))}
+                    {dayBlocks.length > blockPreview.length ? (
+                      <span className="block truncate px-1 text-[8px] font-medium text-rose-300/80 sm:text-[9px]">
+                        +{dayBlocks.length - blockPreview.length}{' '}
+                        {locale === 'en' ? 'more blocked times' : 'bloqueios'}
+                      </span>
                     ) : null}
                     {config.lunch_start && config.lunch_end && !isClosed ? (
                       <div className="hidden items-center gap-1 text-[9px] text-amber-300/70 sm:flex">
                         <Coffee className="size-3" aria-hidden="true" />
-                        Pausa {formatTime(config.lunch_start)}–
+                        {locale === 'en' ? 'Break' : 'Pausa'} {formatTime(config.lunch_start)}–
                         {formatTime(config.lunch_end)}
                       </div>
                     ) : null}
@@ -541,9 +554,11 @@ export function AgendaCalendarView({
                 {t('agendaCalendar.selectedDay')}
               </p>
               <CardTitle className="mt-1 text-lg capitalize sm:text-xl">
-                {format(selectedDate, "EEEE, d 'de' MMMM", {
-                  locale: dateLocale,
-                })}
+                {format(
+                  selectedDate,
+                  locale === 'en' ? 'EEEE, d MMMM' : "EEEE, d 'de' MMMM",
+                  { locale: dateLocale },
+                )}
               </CardTitle>
               <p
                 className={cn(
@@ -585,7 +600,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Bloqueios
+                {locale === 'en' ? 'Blocked times' : 'Bloqueios'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedBlocks.length}
@@ -593,7 +608,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Canceladas
+                {locale === 'en' ? 'Cancelled' : 'Canceladas'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-rose-300">
                 {
@@ -605,7 +620,7 @@ export function AgendaCalendarView({
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
               <p className="text-[9px] uppercase tracking-[0.14em] text-zinc-600">
-                Carga
+                {locale === 'en' ? 'Occupancy' : 'Ocupação'}
               </p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                 {selectedLoad}%
@@ -615,7 +630,7 @@ export function AgendaCalendarView({
 
           <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
             <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="text-zinc-500">Funcionamento</span>
+              <span className="text-zinc-500">{locale === 'en' ? 'Opening hours' : 'Funcionamento'}</span>
               <span className="font-medium tabular-nums text-zinc-200">
                 {config.opening_time ?? '—'}–{config.closing_time ?? '—'}
               </span>
@@ -624,7 +639,7 @@ export function AgendaCalendarView({
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs">
                 <span className="flex items-center gap-1.5 text-zinc-500">
                   <Coffee className="size-3.5" aria-hidden="true" />
-                  Pausa
+                  {locale === 'en' ? 'Break' : 'Pausa'}
                 </span>
                 <span className="font-medium tabular-nums text-amber-200">
                   {formatTime(config.lunch_start)}–
@@ -642,7 +657,7 @@ export function AgendaCalendarView({
           <div>
             <div className="mb-2 flex items-center justify-between gap-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
-                Agenda do dia
+                {locale === 'en' ? 'Day schedule' : 'Agenda do dia'}
               </p>
               {selectedAppointments.length > 0 ? (
                 <span className="text-[10px] font-medium text-zinc-600">

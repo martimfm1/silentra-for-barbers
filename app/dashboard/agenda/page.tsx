@@ -42,7 +42,10 @@ import { AppointmentsTable } from '@/components/dashboard/appointments-table';
 import { AgendaLinesSkeleton } from './agenda-view-skeletons';
 import { CalendarSyncCard } from '@/components/dashboard/calendar-sync-card';
 import { AgendaCalendarView } from './agenda-calendar-view';
-import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
+import {
+  AgendaViewSettings,
+  useAgendaViewPreference,
+} from '@/app/dashboard/settings/agenda-view-settings';
 import { AgendaCancellationPolicyPanel } from '@/components/dashboard/agenda-cancellation-policy-panel';
 
 const STATUS_FILTERS = [
@@ -89,12 +92,15 @@ function sameLocalDay(value: string, reference: Date) {
 
 export default function AgendaPage() {
   const { locale, t } = useLanguage();
+  const { view: agendaView } = useAgendaViewPreference();
+  const isCalendarView = agendaView === 'calendar';
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [calendarBlocksRefreshKey, setCalendarBlocksRefreshKey] = useState(0);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
@@ -151,7 +157,7 @@ export default function AgendaPage() {
     confirmBooking,
     finalizeBooking,
     addCompletedAppointmentClient,
-    handleCreateBlock,
+    handleCreateBlock: createBlockAction,
     handleCancelBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
@@ -382,6 +388,22 @@ export default function AgendaPage() {
     [fetchInitialData, locale],
   );
 
+  const handleCreateBlock = useCallback(
+    async (event?: Parameters<typeof createBlockAction>[0]) => {
+      const created = await createBlockAction(event);
+      if (created) {
+        setCalendarBlocksRefreshKey((current) => current + 1);
+      }
+      return created;
+    },
+    [createBlockAction],
+  );
+
+  const handleCancelSelectedAppointment = useCallback(
+    (appointmentId: string) => handleCancelBooking(appointmentId),
+    [handleCancelBooking],
+  );
+
   const actionProps = {
     finishingBookingId,
     setFinishingBookingId,
@@ -446,15 +468,24 @@ export default function AgendaPage() {
           </div>
         </header>
 
-        <CalendarSyncCard />
+        {!isCalendarView ? <CalendarSyncCard /> : null}
 
-        <section
-          className="mt-4"
-          aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}
-        >
-          <AgendaCalendarView onAppointmentClick={setSelectedAppointment} />
-        </section>
+        {isCalendarView ? (
+          <section
+            className="mt-4"
+            aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}
+          >
+            <AgendaCalendarView
+              appointments={appointments}
+              appointmentsLoading={loadingInitial}
+              blocksRefreshKey={calendarBlocksRefreshKey}
+              professionals={professionals}
+              onAppointmentClick={setSelectedAppointment}
+            />
+          </section>
+        ) : null}
 
+        <div className={isCalendarView ? 'hidden' : ''}>
         {loadingInitial ? (
           <div className="mt-5">
             <AgendaLinesSkeleton />
@@ -677,6 +708,7 @@ export default function AgendaPage() {
             </div>
           </>
         )}
+        </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-7xl space-y-5 px-1">
         <AgendaViewSettings />
@@ -757,6 +789,7 @@ export default function AgendaPage() {
         open={Boolean(selectedAppointment)}
         locale={locale}
         onReschedule={handleRescheduleAppointment}
+        onCancel={handleCancelSelectedAppointment}
         onOpenChange={(open) => {
           if (!open) setSelectedAppointment(null);
         }}

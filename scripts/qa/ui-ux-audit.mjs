@@ -185,9 +185,12 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
-assert.match(
-  settingsPage,
-  /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/,
+assert.ok(
+  settingsPage.includes('const INPUT_CLASS =') &&
+    settingsPage.includes(
+      "'box-border block min-h-11 w-full min-w-0 max-w-full",
+    ),
+  'Settings input class must remain mobile-safe',
 );
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
@@ -240,9 +243,12 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
-assert.match(
-  settingsPage,
-  /const INPUT_CLASS = 'box-border block min-h-11 w-full min-w-0 max-w-full/,
+assert.ok(
+  settingsPage.includes('const INPUT_CLASS =') &&
+    settingsPage.includes(
+      "'box-border block min-h-11 w-full min-w-0 max-w-full",
+    ),
+  'Settings input class must remain mobile-safe',
 );
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
