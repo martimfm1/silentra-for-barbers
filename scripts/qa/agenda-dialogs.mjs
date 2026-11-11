@@ -26,10 +26,9 @@ const selectComponent = read('components/ui/select.tsx');
 const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 assert.ok(agenda.includes('useAgendaViewPreference'));
 assert.ok(agenda.includes('isCalendarView'));
-assert.ok(
-  agenda.includes(
-    '<AgendaCalendarView onAppointmentClick={setSelectedAppointment} />',
-  ),
+assert.match(
+  agenda,
+  /<AgendaCalendarView[\\s\\S]*?onAppointmentClick=\\{setSelectedAppointment\\}/,
   'Calendar entries must open the selected appointment detail dialog.',
 );
 assert.ok(agenda.includes('<AppointmentDetailDialog'));
