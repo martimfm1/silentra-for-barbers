@@ -11,6 +11,9 @@ import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+// Re-enable only after the public API and its documentation have been reviewed.
+const PUBLIC_API_ENABLED = false;
+
 const RATE_LIMIT = 120;
 const RATE_WINDOW_SECONDS = 60;
 const PUBLIC_CACHE = 'public, s-maxage=60, stale-while-revalidate=300';
@@ -43,10 +46,20 @@ function jsonResponse(
   });
 }
 
+function publicApiDisabledResponse(): Response {
+  return jsonResponse(
+    { error: 'A API pública está temporariamente desativada.' },
+    503,
+    { 'Retry-After': '3600' },
+  );
+}
+
 async function GET__unobserved(
   request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
+  if (!PUBLIC_API_ENABLED) return publicApiDisabledResponse();
+
   const { slug: rawSlug } = await context.params;
   const slug = rawSlug.trim().toLowerCase();
 
@@ -259,6 +272,8 @@ async function GET__unobserved(
 }
 
 export function OPTIONS() {
+  if (!PUBLIC_API_ENABLED) return publicApiDisabledResponse();
+
   return new Response(null, {
     status: 204,
     headers: { ...CORS_HEADERS, Allow: 'GET, OPTIONS' },
