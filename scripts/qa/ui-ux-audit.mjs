@@ -193,13 +193,16 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /data-settings-category/);
-assert.match(settingsPage, /data-settings-subcategory/);
-assert.match(settingsPage, /locale === 'en' \\? 'Appearance' : 'Aparência'/);
-assert.match(settingsPage, /<AgendaViewSettings\\s*\\/>/);
+assert.ok(settingsPage.includes('data-settings-subcategory'));
+assert.ok(
+  settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
+  'Appearance must be nested under Information.',
+);
+assert.ok(settingsPage.includes('<AgendaViewSettings />'));
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
 assert.match(settingsPage, /<PublicProfileSettingsCard/);
-assert.match(settingsPage, /directoryVisible=\\{config\\.is_public_in_directory\\}/);
-assert.doesNotMatch(settingsPage, /href="\\/dashboard\\/settings\\/public-profile"/);
+assert.ok(settingsPage.includes('directoryVisible={config.is_public_in_directory}'));
+assert.ok(!settingsPage.includes('href="/dashboard/settings/public-profile"'));
 assert.ok(
   settingsPage.indexOf('id="settings-location"') >
     settingsPage.indexOf("'Information' : 'Informações'"),
