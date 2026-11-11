@@ -44,9 +44,7 @@ async function GET__unobserved(request: Request) {
       );
 
     const admin = createAdminClient();
-    const { error: expiryError } = await admin.rpc(
-      'expire_loyalty_redemptions',
-    );
+    const { error: expiryError } = await admin.rpc('expire_loyalty_redemptions');
     if (expiryError) {
       console.error('[LOYALTY_REDEMPTION_RECOVER_EXPIRY_ERROR]', {
         requestId,
