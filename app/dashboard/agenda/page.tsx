@@ -387,6 +387,15 @@ export default function AgendaPage() {
     [fetchInitialData, locale],
   );
 
+  const handleCancelSelectedAppointment = useCallback(
+    async (appointmentId: string) => {
+      const cancelled = await handleCancelBooking(appointmentId);
+      if (cancelled) setSelectedAppointment(null);
+      return cancelled;
+    },
+    [handleCancelBooking],
+  );
+
   const actionProps = {
     finishingBookingId,
     setFinishingBookingId,
@@ -771,6 +780,7 @@ export default function AgendaPage() {
         open={Boolean(selectedAppointment)}
         locale={locale}
         onReschedule={handleRescheduleAppointment}
+        onCancel={handleCancelSelectedAppointment}
         onOpenChange={(open) => {
           if (!open) setSelectedAppointment(null);
         }}
