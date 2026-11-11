@@ -484,12 +484,9 @@ export function AppointmentDetailDialog({
                     label="Telefone"
                   >
                     {phone ? (
-                      <a
-                        href={`tel:${phone}`}
-                        className="inline-flex min-h-9 max-w-full items-center rounded-lg text-zinc-100 underline decoration-white/20 underline-offset-4 transition-colors hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                      >
+                      <span className="inline-flex min-h-9 max-w-full items-center text-zinc-100">
                         {phone}
-                      </a>
+                      </span>
                     ) : (
                       <span className="text-zinc-500">Não indicado</span>
                     )}
@@ -499,12 +496,9 @@ export function AppointmentDetailDialog({
                     label="Email"
                   >
                     {email ? (
-                      <a
-                        href={`mailto:${email}`}
-                        className="inline-flex min-h-9 max-w-full break-all rounded-lg text-zinc-100 underline decoration-white/20 underline-offset-4 transition-colors hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                      >
+                      <span className="inline-flex min-h-9 max-w-full break-all items-center text-zinc-100">
                         {email}
-                      </a>
+                      </span>
                     ) : (
                       <span className="text-zinc-500">Não indicado</span>
                     )}
