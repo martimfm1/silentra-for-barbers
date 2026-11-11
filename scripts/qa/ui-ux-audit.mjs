@@ -204,6 +204,15 @@ for (const category of ['business', 'location', 'hours', 'rules']) {
 }
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /data-settings-category/);
+const accountSecurityMarker = "t('settingsPage.accountSecurity')";
+const accountSecurityDetailsStart = settingsPage.lastIndexOf('<details', settingsPage.indexOf(accountSecurityMarker));
+const accountSecurityDetailsEnd = settingsPage.indexOf('</details>', accountSecurityDetailsStart);
+assert.ok(accountSecurityDetailsStart >= 0 && accountSecurityDetailsEnd > accountSecurityDetailsStart);
+const accountSecurityAccordion = settingsPage.slice(accountSecurityDetailsStart, accountSecurityDetailsEnd);
+assert.ok(accountSecurityAccordion.includes('id="settings-billing"'), 'Billing must stay inside Account and security.');
+assert.ok(accountSecurityAccordion.includes('id="settings-danger"'), 'Permanent barbershop deletion must stay inside Account and security.');
+assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="settings-billing"')), accountSecurityDetailsStart);
+assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="settings-danger"')), accountSecurityDetailsStart);
 assert.ok(settingsPage.includes('data-settings-subcategory'));
 assert.ok(
   settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
