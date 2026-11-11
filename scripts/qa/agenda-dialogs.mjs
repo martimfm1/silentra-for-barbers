@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(path, 'utf8');
 const agenda = read('app/dashboard/agenda/page.tsx');
+const agendaLayout = read('app/dashboard/agenda/layout.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 
 const bookingForm = read('app/dashboard/_components/cards/BookingFormCard.tsx');
@@ -21,6 +22,23 @@ const bookingTypes = read('types/dashboard/forms.ts');
 const calendarSync = read('components/dashboard/calendar-sync-card.tsx');
 const settings = read('app/dashboard/settings/settings-page.tsx');
 const selectComponent = read('components/ui/select.tsx');
+
+const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
+assert.ok(agenda.includes('useAgendaViewPreference'));
+assert.ok(agenda.includes('isCalendarView'));
+assert.ok(
+  agenda.includes(
+    '<AgendaCalendarView onAppointmentClick={setSelectedAppointment} />',
+  ),
+  'Calendar entries must open the selected appointment detail dialog.',
+);
+assert.ok(agenda.includes('<AppointmentDetailDialog'));
+assert.ok(agendaLayout.includes('{children}'));
+assert.ok(
+  !agendaLayout.includes('<AgendaCalendarView'),
+  'The layout must not mount a detached calendar without the page detail handler.',
+);
+assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
 
 assert.match(
   agenda,
