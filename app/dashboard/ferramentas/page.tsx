@@ -569,9 +569,9 @@ export default function ToolsGrowthPage() {
                     icon: Users,
                     title: 'Keep customers informed',
                     description:
-                      'Review your email communication and make sure booking confirmations and changes are clear and useful.',
-                    action: 'Open communication',
-                    href: '/dashboard/comunicacao',
+                      'Set up automatic reminders so clients receive timely booking updates.',
+                    action: 'Open automations',
+                    href: '/dashboard/automations',
                   },
                 ]
               : [
@@ -609,9 +609,9 @@ export default function ToolsGrowthPage() {
                     icon: Users,
                     title: 'Mantém os clientes informados',
                     description:
-                      'Revê a comunicação por email e garante que as confirmações e alterações de marcação são claras e úteis.',
-                    action: 'Abrir comunicação',
-                    href: '/dashboard/comunicacao',
+                      'Configura lembretes automáticos para manter os clientes informados sobre as marcações.',
+                    action: 'Abrir automações',
+                    href: '/dashboard/automations',
                   },
                 ]
             ).map((item) => {
