@@ -28,14 +28,14 @@ const HERO_FEATURES = {
     'Marcações, clientes e serviços ilimitados',
     'Reservas online, página pública e QR code',
     'Agenda, dashboard e histórico essenciais',
-    'Notificações essenciais e mensagens por email',
+    'Notificações operacionais essenciais',
     '1 barbeiro e 1 localização',
   ],
   pro: [
     'Até 5 barbeiros e gestão de equipa',
     'CRM, segmentos de clientes e analytics avançados',
     'Fidelização e follow-ups automáticos',
-    'Lembretes, notificações e campanhas de marketing',
+    'Lembretes e automações de email',
     'Pré-pagamento manual MB WAY e controlo de visibilidade no diretório',
   ],
   enterprise: [
@@ -60,7 +60,7 @@ const HERO_FEATURES_EN = {
     'Up to 5 barbers and team management',
     'Advanced CRM, customer segments and analytics',
     'Loyalty programme and automated follow-ups',
-    'Reminders, advanced notifications and marketing campaigns',
+    'Reminders and email automations',
     'Manual MB WAY prepayment and directory visibility controls',
   ],
   enterprise: [
