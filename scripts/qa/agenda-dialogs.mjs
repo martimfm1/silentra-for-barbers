@@ -39,6 +39,10 @@ assert.ok(
   'The layout must not mount a detached calendar without the page detail handler.',
 );
 assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
+assert.ok(agenda.includes('appointments={appointments}'));
+assert.ok(agenda.includes('professionals={professionals}'));
+assert.ok(agendaCalendar.includes('appointments: Appointment[]'));
+assert.ok(!agendaCalendar.includes('appointmentService.getAll'));
 
 assert.match(
   agenda,
