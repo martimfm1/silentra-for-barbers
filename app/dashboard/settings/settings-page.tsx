@@ -1230,16 +1230,42 @@ export default function SettingsPageOrganized() {
   </div>
 </details>
             
+            
+            
             <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.billingTitle')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your plan, payments and invoices.' : 'Gere o teu plano, pagamentos e comprovativos.'}</span>
+      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'}</span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
-<section id="settings-billing">
+  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4 space-y-4">
+<section id="settings-account">
+              <Card className={CARD_CLASS}>
+                <CardHeader className="hidden">
+                  <CardTitle className="flex items-center gap-2">
+                    <ShieldCheck className="size-4 text-emerald-400" />
+                    {t('settingsPage.accountSecurity')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void logout()}
+                    disabled={logoutLoading}
+                  >
+                    <LogOut className="mr-2 size-4" />
+                    {logoutLoading
+                      ? t('settingsPage.logoutLoading')
+                      : t('settingsPage.logout')}
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
+
+            <section id="settings-billing">
               <Card className={CARD_CLASS}>
                 <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1258,18 +1284,8 @@ export default function SettingsPageOrganized() {
                 </CardContent>
               </Card>
             </section>
-  </div>
-</details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('barbershopDeletion.dangerZone')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Actions that permanently affect your barbershop.' : 'Ações que afetam permanentemente a tua barbearia.'}</span>
-    </span>
-    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-  </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
-<section id="settings-danger" className="scroll-mt-24">
+
+            <section id="settings-danger" className="scroll-mt-24">
               <Card className={CARD_CLASS}>
                 <CardHeader className="hidden">
                   <CardTitle className="flex items-center gap-2 text-rose-200">
@@ -1294,40 +1310,6 @@ export default function SettingsPageOrganized() {
                   >
                     <Trash2 className="mr-2 size-4" />
                     {t('barbershopDeletion.openButton')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
-  </div>
-</details>
-            <details data-settings-category className="group min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-white/[.018]">
-  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.accountSecurity')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage access to your account.' : 'Gere o acesso à tua conta.'}</span>
-    </span>
-    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-  </summary>
-  <div className="border-t border-white/[.06] px-3 pb-4 pt-4 sm:px-4">
-<section id="settings-account">
-              <Card className={CARD_CLASS}>
-                <CardHeader className="hidden">
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-emerald-400" />
-                    {t('settingsPage.accountSecurity')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void logout()}
-                    disabled={logoutLoading}
-                  >
-                    <LogOut className="mr-2 size-4" />
-                    {logoutLoading
-                      ? t('settingsPage.logoutLoading')
-                      : t('settingsPage.logout')}
                   </Button>
                 </CardContent>
               </Card>
