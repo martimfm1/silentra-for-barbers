@@ -45,6 +45,7 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
+import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
 import {
   Select,
   SelectContent,
@@ -988,6 +989,21 @@ export default function SettingsPageOrganized() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            </section>
+            <section id="settings-notifications" className="scroll-mt-24">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">
+                    {locale === 'en' ? 'Notifications' : 'Notificações'}
+                  </h2>
+                  <p className="text-sm leading-5 text-zinc-500">
+                    {locale === 'en'
+                      ? 'Manage operational booking alerts on this device.'
+                      : 'Gere neste dispositivo os avisos operacionais de novas marcações.'}
+                  </p>
+                </div>
+                <SettingsPushNotificationsPanel />
               </div>
             </section>
             <section id="settings-appearance">
