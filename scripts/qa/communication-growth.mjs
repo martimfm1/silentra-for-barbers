@@ -12,6 +12,11 @@ const automationsPage = read('app/dashboard/automations/page.tsx');
 const workspace = read('app/dashboard/marketing/marketing-workspace.tsx');
 const campaignsApi = read('app/api/marketing/campaigns/route.ts');
 const automationsApi = read('app/api/marketing/campaigns/automation/route.ts');
+const marketingDispatcher = read('lib/marketing/dispatcher.ts');
+const manualCampaignRetirement = read(
+  'supabase/migrations/20261111130000_disable_manual_marketing_communications.sql',
+);
+
 
 for (const source of [communication, messages, marketingPage]) {
   assert.match(
@@ -60,6 +65,13 @@ assert.match(campaignsApi, /MANUAL_CAMPAIGNS_DISABLED/);
 assert.match(campaignsApi, /trigger_type: 'birthday'/);
 assert.doesNotMatch(campaignsApi, /export const PATCH|export const DELETE/);
 assert.match(automationsApi, /in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
+assert.match(
+  marketingDispatcher,
+  /!\['interval', 'event', 'birthday'\]\.includes\(campaign\.trigger_type\)/,
+  'Queued manual campaign recipients must be skipped by the background worker.',
+);
+assert.match(manualCampaignRetirement, /status = 'skipped'/);
+assert.match(manualCampaignRetirement, /active = false/);
 
 for (const path of [
   'app/api/messages/send/route.ts',
