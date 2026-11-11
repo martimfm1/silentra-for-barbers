@@ -49,6 +49,7 @@ const waitlist = read('app/dashboard/espera/page.tsx');
 const appointmentDetails = read('components/dashboard/appointment-detail-dialog.tsx');
 assert.doesNotMatch(orderManagement, /openEmail|sendEmail|mailto:|Enviar email ao cliente/);
 assert.doesNotMatch(clientCards, /wa\.me|mailto:|tel:/);
+assert.doesNotMatch(clientCards, /navigator\.clipboard\.writeText/);
 assert.doesNotMatch(waitlist, /mailto:|tel:/);
 assert.equal(appointmentDetails.includes('href={`mailto:'), false);
 assert.equal(appointmentDetails.includes('href={`tel:'), false);
