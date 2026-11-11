@@ -181,16 +181,24 @@ assert.match(dashboardShell, /const isAgendaPage = pathname === '\/dashboard\/ag
 assert.match(dashboardShell, /dashboard-agenda-content/);
 assert.match(
   dashboardShell,
-  /dashboard-content\.dashboard-agenda-content #dashboard-main-content/,
+  /dashboard-content\.dashboard-agenda-content #dashboard-main-content\.dashboard-agenda-main/,
 );
 
 assert.match(
   dashboardShell,
-  /dashboard-page\.dashboard-agenda-page[\s\S]*?padding-inline:\s*0 !important/,
-  'The agenda shell must remove horizontal padding on mobile.',
+  /dashboard-agenda-main,[\s\S]*?dashboard-page\.dashboard-agenda-page[\s\S]*?padding:\s*0 !important/,
+  'The agenda shells must remove all general padding at every breakpoint.',
 );
 assert.match(agendaPage, /dashboard-agenda-page/);
-assert.match(agendaPage, /max-w-\[100rem\] px-0 py-5 sm:px-5/);
+const agendaContentWrapper = agendaPage.match(
+  /<div className="relative z-10 mx-auto w-full max-w-\[100rem\]([^"]*)">/,
+);
+assert.ok(agendaContentWrapper, 'The agenda content wrapper must remain full width.');
+assert.doesNotMatch(
+  agendaContentWrapper[1],
+  /\b(?:p|px|py|pt|pb|pl|pr)-/,
+  'The agenda content wrapper must not add general padding.',
+);
 
 assert.match(topBar, /lg:left-64/);
 
