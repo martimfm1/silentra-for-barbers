@@ -67,7 +67,7 @@ export function ClientsListCard({
   const hasSearch = searchClientQuery.trim().length > 0;
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-white/10 bg-zinc-900/0 shadow-xl backdrop-blur-xl">
+    <Card className="ph-no-capture overflow-hidden rounded-2xl border-white/10 bg-zinc-900/0 shadow-xl backdrop-blur-xl">
       <CardHeader className="border-b border-white/10 p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Header Info */}
