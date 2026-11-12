@@ -50,7 +50,7 @@ export function AppointmentsTable({
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50 md:block">
+      <div className="ph-no-capture hidden overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50 md:block">
         <Table>
           <TableHeader className="border-white/5 bg-zinc-900">
             <TableRow>

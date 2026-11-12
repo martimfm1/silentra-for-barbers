@@ -9,6 +9,8 @@ import { combineDatetime } from '@/app/dashboard/_lib/date-utils';
 import { getErrorMessage } from '@/app/dashboard/_lib/error-utils';
 import type { BookingRecurrence, BlockFormData } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
+import { captureProductEvent } from '@/lib/observability/posthog';
+import { captureException } from '@/lib/observability/sentry';
 
 const MAX_RECURRING_APPOINTMENTS = 52;
 
@@ -255,6 +257,11 @@ export function useAppointments(
                 count: generatedDates.dates.length,
               }),
         );
+        captureProductEvent('agendamento_criado', {
+          origem: 'dashboard',
+          recorrente: recurrence !== 'none',
+          quantidade: generatedDates.dates.length,
+        });
         setBookingFormData({
           clientId: '',
           serviceId: '',
@@ -269,6 +276,10 @@ export function useAppointments(
         return true;
       } catch (error) {
         console.error('[Create Booking Hook Error]:', error);
+        captureException(error, {
+          area: 'appointments',
+          action: 'create_booking',
+        });
         toast.error(getErrorMessage(error));
         return false;
       } finally {

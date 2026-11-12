@@ -118,6 +118,9 @@ jobs:
       - name: Haptic feedback contracts
         run: pnpm qa:haptics
 
+      - name: Observability contracts
+        run: pnpm qa:observability
+
       - name: Performance contracts
         run: pnpm qa:performance
 
