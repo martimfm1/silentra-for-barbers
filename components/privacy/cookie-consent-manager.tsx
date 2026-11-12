@@ -30,7 +30,7 @@ const copy = {
       'Sessão e autenticação, segurança, idioma e memorização da tua escolha de cookies. Não podem ser desativados neste painel.',
     analytics: 'Estatísticas e desempenho',
     analyticsDesc:
-      'Permite Vercel Analytics e Speed Insights para medir utilização e desempenho. O Google Tag Manager só é carregado se também autorizares marketing, porque o contentor pode executar etiquetas de várias categorias.',
+      'Permite Vercel Analytics, Speed Insights e PostHog para medir a utilização, incluindo gravações de sessão em até 20% das sessões. O Sentry é usado para diagnóstico de erros e desempenho com dados pessoais minimizados. O Google Tag Manager só é carregado se também autorizares marketing, porque o contentor pode executar etiquetas de várias categorias.',
     marketing: 'Marketing e etiquetas de terceiros',
     marketingDesc:
       'Permite o pixel Whop. O contentor Google Tag Manager pode carregar etiquetas de medição e marketing e, por isso, só é carregado quando autorizas também estatísticas.',
@@ -57,7 +57,7 @@ const copy = {
       'Session and authentication, security, language, and remembering your cookie choice. These cannot be disabled here.',
     analytics: 'Analytics and performance',
     analyticsDesc:
-      'Allows Vercel Analytics and Speed Insights to measure usage and performance. Google Tag Manager loads only if you also allow marketing because the container may run tags from multiple categories.',
+      'Allows Vercel Analytics, Speed Insights and PostHog to measure usage, including session recordings for up to 20% of sessions. Sentry is used for error and performance diagnostics with personal data minimized. Google Tag Manager loads only if you also allow marketing because the container may run tags from multiple categories.',
     marketing: 'Marketing and third-party tags',
     marketingDesc:
       'Allows the Whop pixel. The Google Tag Manager container can load measurement and marketing tags, so it loads only when analytics is also allowed.',
