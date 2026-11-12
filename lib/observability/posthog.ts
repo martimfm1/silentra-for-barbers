@@ -2,6 +2,29 @@ import posthog from 'posthog-js';
 
 type ProductEventProperties = Record<string, string | number | boolean>;
 
+const URL_PROPERTIES = [
+  '$current_url',
+  '$initial_current_url',
+  '$session_entry_url',
+  '$referrer',
+] as const;
+
+function sanitizeUrl(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !value) return undefined;
+
+  try {
+    const url = new URL(value, window.location.origin);
+    const safePath = url.pathname
+      .replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, '[id]')
+      .replace(/\\/\\d+(?=\\/|$)/g, '/[id]')
+      .replace(/\\/[a-f0-9]{24,}(?=\\/|$)/gi, '/[id]')
+      .replace(/\\/[^/]{32,}(?=\\/|$)/g, '/[redacted]');
+    return `${url.origin}${safePath}`;
+  } catch {
+    return undefined;
+  }
+}
+
 let posthogInitialized = false;
 
 /**
@@ -20,6 +43,19 @@ export function initializePostHog() {
     autocapture: false,
     capture_pageview: 'history_change',
     capture_pageleave: 'if_capture_pageview',
+    disable_capture_url_hashes: true,
+    before_send(event) {
+      for (const property of URL_PROPERTIES) {
+        const safeUrl = sanitizeUrl(event.properties[property]);
+        if (safeUrl) {
+          event.properties[property] = safeUrl;
+        } else {
+          delete event.properties[property];
+        }
+      }
+
+      return event;
+    },
     opt_out_capturing_by_default: true,
     disable_session_recording: false,
     session_recording: {
