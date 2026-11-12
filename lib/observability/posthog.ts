@@ -16,9 +16,9 @@ function sanitizeUrl(value: unknown): string | undefined {
     const url = new URL(value, window.location.origin);
     const safePath = url.pathname
       .replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, '[id]')
-      .replace(/\\/\\d+(?=\\/|$)/g, '/[id]')
-      .replace(/\\/[a-f0-9]{24,}(?=\\/|$)/gi, '/[id]')
-      .replace(/\\/[^/]{32,}(?=\\/|$)/g, '/[redacted]');
+      .replace(/\/\d+(?=\/|$)/g, '/[id]')
+      .replace(/\/[a-f0-9]{24,}(?=\/|$)/gi, '/[id]')
+      .replace(/\/[^/]{32,}(?=\/|$)/g, '/[redacted]');
     return `${url.origin}${safePath}`;
   } catch {
     return undefined;
