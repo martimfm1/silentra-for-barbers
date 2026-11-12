@@ -22,12 +22,16 @@ function isIrrelevantBrowserError(event: Sentry.Event) {
 function redactSensitiveText(value: string) {
   return value
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]')
-    .replace(/(?:\+351[\s.-]?)?(?:2[1-9][0-9]|9[0-9]{2})[\s.-]?[0-9]{3}[\s.-]?[0-9]{3}/g, '[redacted-phone]');
+    .replace(
+      /(?:\+351[\s.-]?)?(?:2[1-9][0-9]|9[0-9]{2})[\s.-]?[0-9]{3}[\s.-]?[0-9]{3}/g,
+      '[redacted-phone]',
+    );
 }
 
 function removeSensitiveRequestData<T extends Sentry.Event>(event: T): T {
   if (event.message) event.message = redactSensitiveText(event.message);
-  if (event.transaction) event.transaction = redactSensitiveText(event.transaction);
+  if (event.transaction)
+    event.transaction = redactSensitiveText(event.transaction);
 
   for (const exception of event.exception?.values ?? []) {
     if (exception.value) exception.value = redactSensitiveText(exception.value);
@@ -78,14 +82,41 @@ function removeSensitiveRequestData<T extends Sentry.Event>(event: T): T {
   return event;
 }
 
-/** Initialize Sentry for a specific runtime. Never initializes outside production. */
+/** Enable local Sentry only when explicitly opted in; production remains enabled. */
+export function isSentryEnabled() {
+  return (
+    process.env.NODE_ENV === 'production' ||
+    (process.env.NODE_ENV === 'development' &&
+      process.env.NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV === 'true')
+  );
+}
+
+/** Initialize Sentry for a specific runtime when enabled and a DSN exists. */
 export function initializeSentry(dsn: string | undefined) {
-  if (process.env.NODE_ENV !== 'production' || !dsn) return;
+  if (!isSentryEnabled() || !dsn) return;
+
+  const integrations =
+    typeof window !== 'undefined'
+      ? [
+          Sentry.replayIntegration({
+            maskAllText: true,
+            maskAllInputs: true,
+            blockAllMedia: true,
+            block: [
+              '.ph-no-capture',
+              '[data-ph-no-capture]',
+              '[data-private-data]',
+            ],
+          }),
+        ]
+      : [];
 
   Sentry.init({
     dsn,
     enabled: true,
-    environment: 'production',
+    integrations,
+    environment:
+      process.env.NODE_ENV === 'production' ? 'production' : 'development',
     dataCollection: {
       userInfo: false,
       cookies: false,
@@ -101,6 +132,8 @@ export function initializeSentry(dsn: string | undefined) {
       graphQL: { document: false, variables: false },
     },
     tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
     maxBreadcrumbs: 50,
     ignoreErrors: [
       /ResizeObserver loop limit exceeded/i,
@@ -115,9 +148,22 @@ export function initializeSentry(dsn: string | undefined) {
       if (isIrrelevantBrowserError(event)) return null;
       return removeSensitiveRequestData(event);
     },
-    beforeSendTransaction(event) {
-      if (isIrrelevantBrowserError(event)) return null;
-      return removeSensitiveRequestData(event);
+    beforeSendSpan(span) {
+      span.name = redactSensitiveText(span.name);
+
+      for (const [key, value] of Object.entries(span.attributes)) {
+        if (
+          /url|http|user|email|phone|query|statement|cookie|authorization|token|request|response/i.test(
+            key,
+          )
+        ) {
+          delete span.attributes[key];
+        } else if (typeof value === 'string') {
+          span.attributes[key] = redactSensitiveText(value);
+        }
+      }
+
+      return span;
     },
   });
 }
@@ -127,7 +173,7 @@ export function captureException(
   error: unknown,
   context: { area: string; action: string },
 ) {
-  if (process.env.NODE_ENV !== 'production' || !Sentry.getClient()) return;
+  if (!isSentryEnabled() || !Sentry.getClient()) return;
 
   Sentry.captureException(error, {
     tags: {

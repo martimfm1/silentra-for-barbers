@@ -1,23 +1,24 @@
 # Production observability
 
 Silentra for Barbers uses PostHog for product analytics/session replay and Sentry
-for error tracking/performance. Both are deliberately disabled in development.
+for error tracking/performance. PostHog is disabled in development. Local Sentry
+reporting is opt-in through `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=true`.
 
 ## Environment variables
 
-Add these to `.env.local` for local build configuration (the SDKs still do not
-initialize on localhost), and configure the same values in Vercel's Production
-environment before deploying:
+Add these to `.env.local` for local build configuration, and configure the
+production values in Vercel's Production environment before deploying:
 
-| Variable | Purpose | Visibility |
-| --- | --- | --- |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key | Browser/public |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingestion host; default is EU Cloud | Browser/public |
-| `NEXT_PUBLIC_SENTRY_DSN` | Sentry browser DSN | Browser/public |
-| `SENTRY_DSN` | Sentry Node.js/Edge DSN | Server-only |
-| `SENTRY_ORG` | Sentry organization slug for source map uploads | Build/server-only |
-| `SENTRY_PROJECT` | Sentry project slug for source map uploads | Build/server-only |
-| `SENTRY_AUTH_TOKEN` | Sentry source-map upload token | Secret; never expose publicly |
+| Variable                           | Purpose                                         | Visibility                    |
+| ---------------------------------- | ----------------------------------------------- | ----------------------------- |
+| `NEXT_PUBLIC_POSTHOG_KEY`          | PostHog project API key                         | Browser/public                |
+| `NEXT_PUBLIC_POSTHOG_HOST`         | PostHog ingestion host; default is EU Cloud     | Browser/public                |
+| `NEXT_PUBLIC_SENTRY_DSN`           | Sentry browser DSN                              | Browser/public                |
+| `SENTRY_DSN`                       | Sentry Node.js/Edge DSN                         | Server-only                   |
+| `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV` | Set to `true` to send local development errors  | Browser/public                |
+| `SENTRY_ORG`                       | Sentry organization slug for source map uploads | Build/server-only             |
+| `SENTRY_PROJECT`                   | Sentry project slug for source map uploads      | Build/server-only             |
+| `SENTRY_AUTH_TOKEN`                | Sentry source-map upload token                  | Secret; never expose publicly |
 
 The DSN and PostHog project key are designed to be public identifiers, not
 secret credentials. `SENTRY_AUTH_TOKEN` is a secret and must never be prefixed
@@ -25,8 +26,9 @@ with `NEXT_PUBLIC_` or committed to Git.
 
 ## Runtime rules and privacy
 
-- The client and server SDK initialization functions return unless
-  `process.env.NODE_ENV === 'production'` and the corresponding DSN/key exists.
+- Sentry initializes in production when its corresponding DSN exists. In local
+  development, set `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=true` to opt in; browser
+  Sentry still requires analytics consent. PostHog remains production only.
 - PostHog and browser Sentry initialize only after the existing
   `silentra_cookie_consent` cookie grants the analytics category. Changing the
   preference reloads the page and applies the new choice.
@@ -43,6 +45,12 @@ with `NEXT_PUBLIC_` or committed to Git.
   user info, cookies, request bodies, and GenAI data disabled, ignores common
   ResizeObserver/extension/ad-blocker noise, strips query strings and request
   bodies, and removes cookies/auth headers before events leave the app.
+- Sentry Replay is sampled at `0.1` for sessions and `1.0` for sessions with
+  errors. It masks all text and inputs, blocks media, and excludes private
+  sections using the same no-capture selectors as product analytics.
+- Sentry Replay is sampled at `0.1` for sessions and `1.0` for sessions with
+  errors. It masks all text and inputs, blocks media, and excludes private
+  sections using the same no-capture selectors as product analytics.
 - Node.js and Edge Sentry setup is kept separate. Server-side request failures
   are operational diagnostics; browser analytics and browser Sentry remain
   gated by analytics consent.

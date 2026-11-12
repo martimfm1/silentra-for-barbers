@@ -11,7 +11,9 @@ const edgeConfig = read('sentry.edge.config.ts');
 const nextConfig = read('next.config.ts');
 const consent = read('components/privacy/cookie-consent-manager.tsx');
 const appointments = read('app/state/_hooks/dashboard/useAppointments.ts');
-const appointmentsTable = read('app/dashboard/_components/AppointmentsTable.tsx');
+const appointmentsTable = read(
+  'app/dashboard/_components/AppointmentsTable.tsx',
+);
 const globalError = read('app/global-error.tsx');
 const envExample = read('.env.example');
 const docs = read('docs/observability.md');
@@ -27,15 +29,18 @@ assert.match(posthog, /autocapture: false/);
 assert.ok(posthog.includes('before_send(event)'));
 assert.match(posthog, /disable_capture_url_hashes: true/);
 assert.match(posthog, /URL_PROPERTIES/);
-assert.match(clientInstrumentation, /process\.env\.NODE_ENV === 'production'/);
+assert.match(clientInstrumentation, /isSentryEnabled\(\)/);
 assert.match(clientInstrumentation, /hasAnalyticsConsent\(\)/);
-assert.match(sentry, /process\.env\.NODE_ENV !== 'production'/);
+assert.match(sentry, /NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV/);
 assert.match(sentry, /tracesSampleRate: 0\.1/);
 assert.match(sentry, /dataCollection: \{/);
 assert.match(sentry, /userInfo: false/);
 assert.match(sentry, /httpBodies: \[\]/);
 assert.match(sentry, /beforeSend\(event\)/);
-assert.match(sentry, /beforeSendTransaction\(event\)/);
+assert.match(sentry, /beforeSendSpan\(span\)/);
+assert.match(sentry, /replaysSessionSampleRate: 0\.1/);
+assert.match(sentry, /maskAllText: true/);
+assert.match(sentry, /maskAllInputs: true/);
 assert.match(sentry, /redactSensitiveText/);
 assert.match(sentry, /event\.extra = undefined/);
 assert.match(sentry, /event\.breadcrumbs = event\.breadcrumbs\?\.map/);
@@ -57,8 +62,12 @@ assert.match(envExample, /NEXT_PUBLIC_POSTHOG_KEY=/);
 assert.match(envExample, /NEXT_PUBLIC_POSTHOG_HOST=/);
 assert.match(envExample, /NEXT_PUBLIC_SENTRY_DSN=/);
 assert.match(envExample, /SENTRY_DSN=/);
+assert.match(envExample, /NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=/);
 assert.match(docs, /SENTRY_AUTH_TOKEN/);
-assert.equal(packageJson.scripts['qa:observability'], 'node scripts/qa/observability.mjs');
+assert.equal(
+  packageJson.scripts['qa:observability'],
+  'node scripts/qa/observability.mjs',
+);
 assert.ok(packageJson.scripts.qa.includes('pnpm qa:observability'));
 assert.match(workflow, /Observability contracts[\s\S]*pnpm qa:observability/);
 
