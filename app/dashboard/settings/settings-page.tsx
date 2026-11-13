@@ -250,6 +250,7 @@ export default function SettingsPageOrganized() {
     customization.loading,
     customization.config,
     customization.activePreset,
+    customization.activeId,
     initialDashboardConfig,
     locale,
   ]);
@@ -1003,7 +1004,7 @@ export default function SettingsPageOrganized() {
           onCreatePreset={createDashboardPresetDraft}
           customization={customization}
           locale={locale}
-          disabled={customization.loading}
+          disabled={saving || customization.loading}
 />
       </CardContent>
     </Card>
