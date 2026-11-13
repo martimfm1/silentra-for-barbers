@@ -34,6 +34,9 @@ const appointmentCompletion = read(
 const appointmentCompletionRoute = read(
   'app/api/appointments/[appointmentId]/complete/route.ts',
 );
+const appointmentConfirmRoute = read(
+  'app/api/appointments/[appointmentId]/confirm/route.ts',
+);
 const appointmentEmailRoute = read(
   'app/api/appointments/[appointmentId]/email/route.ts',
 );
@@ -85,6 +88,16 @@ assert.match(seriesMigration, /add column if not exists recurrence_series_id uui
 assert.match(seriesMigration, /having count\(\*\) > 1/);
 assert.match(appointmentsService, /recurrence_series_id\?: string \| null/);
 assert.ok(appointmentDetail.includes('<AlertDialog'));
+assert.ok(appointmentDetail.includes('confirmBooking: (appointmentId: string) => Promise<boolean>'));
+assert.ok(appointmentDetail.includes('canConfirmBooking'));
+assert.ok(appointmentDetail.includes("appointment.payment_method === 'mbway'"));
+assert.ok(appointmentDetail.includes('Confirmar pré-pagamento MB WAY'));
+assert.ok(appointmentDetail.includes('Confirmar agendamento'));
+assert.ok(appointmentDetail.includes('na conta MB WAY da barbearia'));
+assert.ok(agenda.includes('confirmBooking={confirmBooking}'));
+assert.ok(appointmentConfirmRoute.includes("payment_status: 'confirmed'"));
+assert.ok(appointmentConfirmRoute.includes('prepaymentConfirmed: isPrepaymentReview'));
+assert.ok(hook.includes('Pré-pagamento MB WAY validado e marcação confirmada.'));
 assert.ok(appointmentDetail.includes('<AppointmentCompletionDialog'));
 assert.match(appointmentDetail, /appointment\.status === 'scheduled'/);
 assert.ok(agenda.includes('finalizeBooking={finalizeBooking}'));
