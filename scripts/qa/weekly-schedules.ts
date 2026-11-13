@@ -64,6 +64,17 @@ assert.equal(
   false,
 );
 
+const migration = readFileSync(
+  'supabase/migrations/20261113190000_weekly_barber_schedules.sql',
+  'utf8',
+);
+assert.ok(migration.includes('set_barbershop_weekly_schedule'));
+assert.ok(migration.includes('set_professional_weekly_schedule'));
+assert.ok(migration.includes('is_valid_weekly_schedule'));
+assert.ok(migration.includes('coalesce(p.weekly_schedule, b.weekly_schedule)'));
+assert.ok(migration.includes('BOOKING_OUTSIDE_WORKING_HOURS'));
+assert.ok(migration.includes('BOOKING_OVERLAPS_BREAK'));
+
 const files = [
   'app/api/shops/[id]/booking-data/route.ts',
   'app/api/bookings/route.ts',
