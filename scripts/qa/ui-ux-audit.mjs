@@ -277,8 +277,8 @@ assert.ok(settingsPage.includes('account-security-panel--danger'), 'The destruct
 assert.ok(settingsPage.includes('account-security-count'), 'Account and security must show its compact section count.');
 assert.match(
   dashboardShell,
-  /\.settings-account-security > summary::before[\s\S]*?var\(--dashboard-accent/,
-  'Account and security must use a restrained accent rail.',
+  /\.settings-accordion > summary::before[\s\S]*?var\(--dashboard-accent/,
+  'Account and security must inherit the shared restrained accent rail.',
 );
 assert.match(
   dashboardShell,
