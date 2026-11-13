@@ -149,7 +149,7 @@ export function BookingForm({
           : undefined,
       [field]: value,
     }));
-    if (field !== 'birth_date') setClientQuery('');
+    if (field !== 'birth_date' && field !== 'email') setClientQuery('');
   };
 
   const chooseClient = (clientId: string) => {
