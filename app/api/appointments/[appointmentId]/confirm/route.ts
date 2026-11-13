@@ -247,6 +247,7 @@ async function POST__unobserved(
     return NextResponse.json({
       success: true,
       appointment: confirmedAppointment,
+      prepaymentConfirmed: isPrepaymentReview,
       emailSent,
       emailError,
       message: emailSent
