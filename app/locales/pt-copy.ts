@@ -1185,6 +1185,8 @@ export const ptCopy = {
     birthDate: 'Data de nascimento',
     checkingDetails: 'A verificar os teus dados…',
     profileFound: 'Encontrámos o teu perfil. Os dados serão reutilizados.',
+    profileSuggestionCustomer: 'Cliente encontrado',
+    profileSuggestionNameUnavailable: 'Nome não disponível',
     profileSuggestionEmail:
       'Encontrámos um cliente associado a este email nesta barbearia. És tu?',
     profileSuggestionPhone:
