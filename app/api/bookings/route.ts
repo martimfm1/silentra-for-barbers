@@ -12,6 +12,11 @@ import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appoi
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+} from '@/lib/scheduling/weekly-schedule';
+import {
   isSafePublicBookingDate,
   isValidTime,
   normalizeText,
@@ -207,7 +212,7 @@ async function POST__unobserved(request: Request) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select(
-        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,minimum_booking_notice_minutes,require_birth_date,phone,mbway_enabled,mbway_phone)`,
+        `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,minimum_booking_notice_minutes,require_birth_date,phone,mbway_enabled,mbway_phone)`,
       )
       .eq('id', shopId)
       .maybeSingle();
@@ -360,23 +365,28 @@ async function POST__unobserved(request: Request) {
         { status: 409 },
       );
     const selectedWeekday = new Date(`${bookingDate}T12:00:00`).getDay();
-    const closedDays = parseClosedDays(shopRelation?.closed_days);
-    if (closedDays.has(selectedWeekday))
+    const { data: selectedProfessional, error: selectedProfessionalError } =
+      normalizedProfessionalId
+        ? await admin
+            .from('professionals')
+            .select('id,weekly_schedule')
+            .eq('id', normalizedProfessionalId)
+            .eq('barbershop_id', barbershopId)
+            .maybeSingle()
+        : { data: null, error: null };
+    if (selectedProfessionalError || (normalizedProfessionalId && !selectedProfessional))
       return NextResponse.json(
-        {
-          success: false,
-          error: 'A barbearia está fechada neste dia. Escolhe outro dia.',
-        },
-        { status: 409 },
+        { success: false, error: 'O barbeiro selecionado não está disponível nesta barbearia.' },
+        { status: 400 },
       );
-    const openTime = shopRelation?.opening_time || '09:00';
-    const closeTime = shopRelation?.closing_time || '19:00';
-    const lunchStart = shopRelation?.lunch_start
-      ? timeToMinutes(shopRelation.lunch_start)
-      : null;
-    const lunchEnd = shopRelation?.lunch_end
-      ? timeToMinutes(shopRelation.lunch_end)
-      : null;
+    const shopSchedule = normalizeWeeklySchedule(
+      shopRelation?.weekly_schedule,
+      shopRelation,
+    );
+    const effectiveSchedule = selectedProfessional?.weekly_schedule
+      ? normalizeWeeklySchedule(selectedProfessional.weekly_schedule)
+      : shopSchedule;
+    const daySchedule = getDailySchedule(effectiveSchedule, selectedWeekday);
     const requestedStart = timeToMinutes(bookingTime);
     const { data: selectedService, error: serviceError } = await supabase
       .from('services')
@@ -407,34 +417,21 @@ async function POST__unobserved(request: Request) {
       1440,
     );
     const requestedEnd = requestedStart + durationMinutes;
-    if (
-      requestedStart < timeToMinutes(openTime) ||
-      requestedStart >= timeToMinutes(closeTime)
-    )
+    if (daySchedule.day_off)
       return NextResponse.json(
         {
           success: false,
-          error: 'Este horário está fora do horário de funcionamento.',
+          error: normalizedProfessionalId
+            ? 'O barbeiro está de folga neste dia. Escolhe outro horário.'
+            : 'A barbearia está fechada neste dia. Escolhe outro dia.',
         },
         { status: 409 },
       );
-    if (requestedEnd > timeToMinutes(closeTime))
+    if (!isSlotWithinDailySchedule(daySchedule, requestedStart, requestedEnd))
       return NextResponse.json(
         {
           success: false,
-          error: 'O serviço ultrapassa o horário de funcionamento.',
-        },
-        { status: 409 },
-      );
-    if (
-      lunchStart !== null &&
-      lunchEnd !== null &&
-      overlaps(requestedStart, requestedEnd, lunchStart, lunchEnd)
-    )
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Este horário coincide com a pausa da barbearia.',
+          error: 'Este horário está fora dos períodos de trabalho ou coincide com uma pausa.',
         },
         { status: 409 },
       );
