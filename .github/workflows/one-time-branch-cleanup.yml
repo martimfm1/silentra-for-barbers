@@ -14,31 +14,30 @@ jobs:
     steps:
       - name: Delete non-main branches
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t branch_names < <(
-            gh api --paginate "repos/\${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name'
-          )
+          branches_json="$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/branches?per_page=100")"
+          mapfile -t branch_names < <(jq -r 'add[] | .name' <<< "$branches_json")
           deleted=0
           failed=()
 
-          for branch in "\${branch_names[@]}"; do
-            [[ "\${branch}" == "main" ]] && continue
-            encoded_ref="$(jq -rn --arg ref "heads/\${branch}" '$ref | @uri')"
-            if gh api --method DELETE "repos/\${GITHUB_REPOSITORY}/git/refs/\${encoded_ref}" >/dev/null; then
+          for branch in "${branch_names[@]}"; do
+            [[ "$branch" == "main" ]] && continue
+            encoded_ref="$(jq -rn --arg ref "heads/$branch" '$ref | @uri')"
+            if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/${encoded_ref}" >/dev/null; then
               deleted=$((deleted + 1))
-              echo "Deleted \${branch}"
+              echo "Deleted $branch"
             else
-              failed+=("\${branch}")
-              echo "::warning::Could not delete \${branch}; it may be protected."
+              failed+=("$branch")
+              echo "::warning::Could not delete $branch; it may be protected."
             fi
           done
 
-          echo "Deleted branches: \${deleted}" | tee -a "$GITHUB_STEP_SUMMARY"
-          echo "Failed branches: \${#failed[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
-          if (("\${#failed[@]}")); then
-            printf '%s\n' "\${failed[@]}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deleted branches: $deleted" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "Failed branches: ${#failed[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [[ "${#failed[@]}" -gt 0 ]]; then
+            printf '%s\n' "${failed[@]}" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
