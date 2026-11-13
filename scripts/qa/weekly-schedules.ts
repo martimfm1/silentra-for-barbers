@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   createDefaultWeeklySchedule,
   createWeeklyScheduleFromLegacy,
@@ -72,7 +73,6 @@ const files = [
   'app/dashboard/settings/settings-page.tsx',
   'components/dashboard/weekly-schedule-settings.tsx',
 ];
-const { readFileSync } = await import('node:fs');
 for (const path of files) {
   const source = readFileSync(path, 'utf8');
   assert.ok(
