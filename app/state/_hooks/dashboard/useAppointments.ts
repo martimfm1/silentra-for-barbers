@@ -361,9 +361,11 @@ export function useAppointments(
         setValueProducts('');
         setDescriptionProducts('');
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Finalize Booking Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
