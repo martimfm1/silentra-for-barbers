@@ -1,6 +1,7 @@
 'use client';
 
-import { CalendarX2, Check, Loader2, UserPlus } from 'lucide-react';
+import { CalendarX2, Check } from 'lucide-react';
+import { AppointmentCompletionDialog } from './appointment-completion-dialog';
 import type { Appointment } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,14 +15,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 type Props = {
   appointment: Appointment;
@@ -32,7 +25,7 @@ type Props = {
   descriptionProducts: string;
   setDescriptionProducts: (value: string) => void;
   confirmBooking: (id: string) => void | Promise<void>;
-  finalizeBooking: (id: string, paymentMethod: string) => void | Promise<void>;
+  finalizeBooking: (id: string, paymentMethod: string) => Promise<boolean>;
   addCompletedAppointmentClient: (id: string) => void | Promise<void>;
   addingClientAppointmentId: string | null;
   handleCancelBooking: (id: string) => void | Promise<unknown>;
@@ -63,7 +56,6 @@ export function AppointmentActions({
     appointment.users?.name_complete ||
     appointment.manual_name ||
     (isEnglish ? 'Customer' : 'Cliente');
-  const isAddingClient = addingClientAppointmentId === appointment.id;
   const buttonSize = compact ? 'h-8 px-3' : 'min-h-[44px] w-full';
 
   return (
@@ -100,158 +92,32 @@ export function AppointmentActions({
       )}
 
       {appointment.status === 'scheduled' && (
-        <Dialog
-          open={finishingBookingId === appointment.id}
-          onOpenChange={(open) => !open && setFinishingBookingId(null)}
-        >
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              onClick={() => setFinishingBookingId(appointment.id)}
-              className={`${buttonSize} border border-emerald-500/20 bg-emerald-500/10 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20`}
-            >
-              <Check className="mr-1.5 size-4" aria-hidden="true" />
-              {isEnglish ? 'Complete' : 'Concluir'}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[92vw] max-w-[420px] rounded-xl border-white/10 bg-zinc-950 p-5 text-white">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-zinc-100">
-                {isEnglish ? 'Complete appointment' : 'Concluir atendimento'}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-zinc-400">
-                {isEnglish ? (
-                  <>
-                    Complete the appointment for{' '}
-                    <strong className="text-zinc-200">{name}</strong> and choose
-                    how the payment was received.
-                  </>
-                ) : (
-                  <>
-                    Finaliza o atendimento de{' '}
-                    <strong className="text-zinc-200">{name}</strong> e escolhe
-                    como foi recebido o pagamento.
-                  </>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-3">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor={`prod-desc-${appointment.id}`}
-                  className="text-xs font-medium text-zinc-300"
-                >
-                  {isEnglish ? 'Extra product ' : 'Produto extra '}{' '}
-                  <span className="text-zinc-500">
-                    ({isEnglish ? 'optional' : 'opcional'})
-                  </span>
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id={`prod-desc-${appointment.id}`}
-                    type="text"
-                    placeholder={
-                      isEnglish ? 'E.g. Styling clay' : 'Ex.: Pomada'
-                    }
-                    className="min-h-[44px] flex-1 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    value={descriptionProducts}
-                    onChange={(event) =>
-                      setDescriptionProducts(event.target.value)
-                    }
-                  />
-                  <input
-                    id={`prod-val-${appointment.id}`}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0,00 €"
-                    aria-label={
-                      isEnglish
-                        ? 'Product price in euros'
-                        : 'Valor do produto em euros'
-                    }
-                    className="min-h-[44px] w-24 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    value={valueProducts}
-                    onChange={(event) =>
-                      setValueProducts(
-                        event.target.value === '0' ? '' : event.target.value,
-                      )
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold text-zinc-200">
-                      {isEnglish ? 'Customer' : 'Cliente'}
-                    </p>
-                    <p className="text-[11px] text-zinc-500">
-                      {isEnglish
-                        ? 'Save this booking contact to your client list.'
-                        : 'Guarda os dados desta marcação na tua lista.'}
-                    </p>
-                  </div>
-                  {appointment.client_id ? (
-                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
-                      {isEnglish ? 'Already a client' : 'Já é cliente'}
-                    </span>
-                  ) : null}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  disabled={Boolean(appointment.client_id) || isAddingClient}
-                  onClick={() => addCompletedAppointmentClient(appointment.id)}
-                  className="min-h-[44px] w-full border border-white/10 bg-white/[0.04] text-xs text-zinc-100 hover:bg-white/[0.08] disabled:opacity-50"
-                >
-                  {isAddingClient ? (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <UserPlus className="mr-2 size-4" />
-                  )}
-                  {appointment.client_id
-                    ? isEnglish
-                      ? 'Already in client list'
-                      : 'Cliente já está na lista'
-                    : isEnglish
-                      ? 'Add to client list'
-                      : 'Adicionar à lista de clientes'}
-                </Button>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-zinc-300">
-                  {isEnglish ? 'How was it paid?' : 'Como foi pago?'}
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => finalizeBooking(appointment.id, 'cash')}
-                    className="min-h-[44px] border border-white/10 bg-white/5 text-xs text-zinc-100 hover:bg-white/10"
-                  >
-                    {isEnglish ? 'Cash' : 'Dinheiro'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => finalizeBooking(appointment.id, 'mbway')}
-                    className="min-h-[44px] border border-white/10 bg-white/5 text-xs text-zinc-100 hover:bg-white/10"
-                  >
-                    MB WAY
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => finalizeBooking(appointment.id, 'card')}
-                    className="min-h-[44px] border border-white/10 bg-white/5 text-xs text-zinc-100 hover:bg-white/10"
-                  >
-                    {isEnglish ? 'Card' : 'Cartão'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setFinishingBookingId(appointment.id)}
+            className={`${buttonSize} border border-emerald-500/20 bg-emerald-500/10 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20`}
+          >
+            <Check className="mr-1.5 size-4" aria-hidden="true" />
+            {isEnglish ? 'Complete' : 'Concluir'}
+          </Button>
+          <AppointmentCompletionDialog
+            appointment={appointment}
+            open={finishingBookingId === appointment.id}
+            onOpenChange={(open) => {
+              if (!open) setFinishingBookingId(null);
+            }}
+            valueProducts={valueProducts}
+            setValueProducts={setValueProducts}
+            descriptionProducts={descriptionProducts}
+            setDescriptionProducts={setDescriptionProducts}
+            finalizeBooking={finalizeBooking}
+            addCompletedAppointmentClient={addCompletedAppointmentClient}
+            addingClientAppointmentId={addingClientAppointmentId}
+            locale={locale}
+          />
+        </>
       )}
 
       {(appointment.status === 'scheduled' ||
