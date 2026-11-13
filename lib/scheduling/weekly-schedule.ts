@@ -64,7 +64,6 @@ const LEGACY_DAY_NAMES: Record<string, number> = {
   'sexta-feira': 5,
   sabado: 6,
   sábado: 6,
-  'sábado': 6,
 };
 
 const DEFAULT_WORK_INTERVAL: ScheduleInterval = {
@@ -101,7 +100,7 @@ export function createDefaultWeeklySchedule(): WeeklySchedule {
         break_intervals: [],
       },
     ]),
-  ) as WeeklySchedule;
+  ) as unknown as WeeklySchedule;
 }
 
 export function createWeeklyScheduleFromLegacy(
@@ -150,7 +149,7 @@ export function createWeeklyScheduleFromLegacy(
         },
       ];
     }),
-  ) as WeeklySchedule;
+  ) as unknown as WeeklySchedule;
 }
 
 export function normalizeWeeklySchedule(
