@@ -53,32 +53,6 @@ function normalizeWhatsAppNumber(value: string): string {
   return digits;
 }
 
-const DAY_INDEX: Record<string, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  domingo: 0,
-  segunda: 1,
-  'segunda-feira': 1,
-  terça: 2,
-  terca: 2,
-  'terça-feira': 2,
-  'terca-feira': 2,
-  quarta: 3,
-  'quarta-feira': 3,
-  quinta: 4,
-  'quinta-feira': 4,
-  sexta: 5,
-  'sexta-feira': 5,
-  sábado: 6,
-  sabado: 6,
-  'sábado-feira': 6,
-};
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function buildDays(locale: 'pt' | 'en', count = 14): BookingDayOption[] {
@@ -110,27 +84,6 @@ function buildDays(locale: 'pt' | 'en', count = 14): BookingDayOption[] {
     };
   });
 }
-
-function parseClosedDays(value: MarketplaceShopValue) {
-  const values =
-    typeof value === 'string'
-      ? value.split(',')
-      : Array.isArray(value)
-        ? value
-        : [];
-  return new Set(
-    values.flatMap((entry) => {
-      if (typeof entry === 'number' && entry >= 0 && entry <= 6) return [entry];
-      const key = String(entry).trim().toLowerCase();
-      if (/^[0-6]$/.test(key)) return [Number(key)];
-      return DAY_INDEX[key] === undefined ? [] : [DAY_INDEX[key]];
-    }),
-  );
-}
-
-type MarketplaceShopValue =
-  MarketplaceDrawerShopValue | string | number[] | null | undefined;
-type MarketplaceDrawerShopValue = string;
 
 function formatBirthDate(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -173,7 +126,6 @@ export function BookingDrawerCanonical({
   selectedTime = null,
   selectedProfessionalId = null,
   appearance = 'default',
-  hideClosedDays = false,
   requireBirthDate = true,
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
@@ -225,41 +177,13 @@ export function BookingDrawerCanonical({
   }, [isOpen, step]);
 
   const service = services.find((item) => item.id === serviceId) ?? null;
-  const configuredClosedDays = useMemo(
-    () =>
-      parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
-    [shop],
-  );
-  const closedDays = hideClosedDays ? new Set<number>() : configuredClosedDays;
-  // Some booking pages should omit weekly days off entirely, not display disabled dates.
-  const availableDays = useMemo(
-    () =>
-      hideClosedDays
-        ? days.filter(
-            (day) =>
-              !configuredClosedDays.has(
-                new Date(day.dateStr + 'T12:00:00').getDay(),
-              ),
-          )
-        : days,
-    [configuredClosedDays, days, hideClosedDays],
-  );
-  const firstOpenDayIndex = availableDays.findIndex(
-    (day) => !closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay()),
-  );
+  // Day-off decisions are now professional-specific and come from booking-data.
+  // A global shop.closed_days check would incorrectly hide Saturdays when a barber
+  // has a personal afternoon-only schedule.
+  const availableDays = days;
+  const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
-  const currentDayClosed = currentDay
-    ? closedDays.has(new Date(currentDay.dateStr + 'T12:00:00').getDay())
-    : true;
-
-  // If the drawer opens on a day off, start on the first selectable date.
-  // This avoids leaving the Pro drawer in a disabled state before the user
-  // has had a chance to interact with the calendar.
-  useEffect(() => {
-    if (!isOpen || !currentDayClosed || firstOpenDayIndex < 0) return;
-    setDayIndex(firstOpenDayIndex);
-    setSelectedSlot(null);
-  }, [currentDayClosed, firstOpenDayIndex, isOpen]);
+  const currentDayClosed = false;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -611,7 +535,6 @@ export function BookingDrawerCanonical({
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
-    if (currentDayClosed) return toast.error(t('bookingDrawer.chooseOpenDay'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
     setStep(2);
   }
@@ -985,9 +908,7 @@ export function BookingDrawerCanonical({
                   <>
                     <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {availableDays.map((day, index) => {
-                        const isDayOff = closedDays.has(
-                          new Date(day.dateStr + 'T12:00:00').getDay(),
-                        );
+                        const isDayOff = false;
                         return (
                           <button
                             key={day.dateStr}
@@ -1032,34 +953,10 @@ export function BookingDrawerCanonical({
                         );
                       })}
                     </div>
-                    {closedDays.size > 0 && (
-                      <p
-                        className="mt-2 flex items-center gap-2 text-[11px] text-rose-300"
-                        role="note"
-                      >
-                        <span
-                          className="size-2 shrink-0 rounded-full bg-rose-400"
-                          aria-hidden="true"
-                        />
-                        {locale === 'pt'
-                          ? 'Dia de folga — indisponível para marcação'
-                          : 'Day off — unavailable for booking'}
-                      </p>
-                    )}
                   </>
                 ) : (
                   <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
                     {t('bookingDrawer.noOpenDays')}
-                  </p>
-                )}
-                {currentDayClosed && currentDay && (
-                  <p
-                    role="status"
-                    className="mt-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-3 py-2.5 text-xs font-medium text-rose-200"
-                  >
-                    {locale === 'pt'
-                      ? 'A barbearia está de folga neste dia. Escolhe outra data para continuar.'
-                      : 'The barbershop is closed on this day. Choose another date to continue.'}
                   </p>
                 )}
               </div>
