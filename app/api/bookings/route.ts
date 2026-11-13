@@ -482,6 +482,18 @@ async function POST__unobserved(request: Request) {
           { status: 409 },
         );
       if (
+        createError?.message === 'PROFESSIONAL_DAY_OFF' ||
+        createError?.message === 'BOOKING_OUTSIDE_WORKING_HOURS' ||
+        createError?.message === 'BOOKING_OVERLAPS_BREAK'
+      )
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'O horário já não está disponível de acordo com o horário definido para este barbeiro.',
+          },
+          { status: 409 },
+        );
+      if (
         createError?.message === 'BOOKING_BARBERSHOP_CLOSED_DAY' ||
         createError?.message === 'BARBERSHOP_CLOSED_DAY'
       )
