@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { captureException } from '@/lib/observability/sentry';
+import { capturePostHogException } from '@/lib/observability/posthog';
 
 export default function GlobalError({
   error,
@@ -15,6 +16,7 @@ export default function GlobalError({
       area: 'nextjs',
       action: 'global_error_boundary',
     });
+    capturePostHogException(error);
   }, [error]);
 
   return (

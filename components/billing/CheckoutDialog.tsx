@@ -12,6 +12,7 @@ import {
 import { StripeProvider } from '@/components/providers/StripeProvider';
 import { PaymentForm } from './PaymentForm';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
+import { captureProductEvent } from '@/lib/observability/posthog';
 import { ShieldCheck } from 'lucide-react';
 
 interface CheckoutDialogProps {
@@ -39,6 +40,9 @@ export function CheckoutDialog({
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
 
   const handleSuccess = () => {
+    captureProductEvent('subscription_payment_completed', {
+      plan_name: planName,
+    });
     onSuccess?.();
     setIsOpen(false);
   };

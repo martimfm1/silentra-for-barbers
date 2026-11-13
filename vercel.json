@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/manual-subscriptions",
+      "schedule": "10 0 * * *"
+    },
+    {
+      "path": "/api/cron/support-email-notifications",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

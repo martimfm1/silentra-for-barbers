@@ -739,11 +739,14 @@ const checks = [
       source.includes('processScheduledCampaigns'),
   },
   {
-    name: 'Marketing worker is scheduled in Vercel Cron',
-    file: 'vercel.json',
+    name: 'Marketing worker is scheduled in GitHub Actions',
+    file: '.github/workflows/marketing-cron.yml',
     test: (source) =>
-      source.includes('"/api/cron/marketing"') &&
-      source.includes('"schedule": "10 0 * * *"'),
+      source.includes("cron: '*/5 * * * *'") &&
+      source.includes(
+        'MARKETING_CRON_URL: https://barbers.silentra.me/api/cron/marketing',
+      ) &&
+      source.includes('x-cron-secret'),
   },
   {
     name: 'Published custom websites are included in the sitemap',

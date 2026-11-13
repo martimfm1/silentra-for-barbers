@@ -9,6 +9,13 @@ class SentryExampleAPIError extends Error {
 
 // A faulty API route to test Sentry's error monitoring
 export async function GET() {
+  if (
+    process.env.NODE_ENV !== 'development' ||
+    process.env.NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV !== 'true'
+  ) {
+    return new Response(null, { status: 404 });
+  }
+
   // Opt out of prerendering so the error is thrown at request time
   await connection();
   Sentry.logger.info('Sentry example API called');

@@ -22,6 +22,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { captureProductEvent } from '@/lib/observability/posthog';
 import type {
   BookingDayOption,
   BookingDrawerProps,
@@ -558,6 +559,9 @@ export function BookingDrawerCanonical({
         throw new Error(payload?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
       if (waitlistOnly) {
+        captureProductEvent('waitlist_joined', {
+          booking_surface: appearance,
+        });
         setPaymentInstructions(null);
         toast.success(
           locale === 'en'
@@ -567,6 +571,11 @@ export function BookingDrawerCanonical({
         setStep(4);
         return;
       }
+      captureProductEvent('booking_completed', {
+        booking_surface: appearance,
+        manual_prepayment_requested: prepaymentSelected,
+        payment_method: payload.payment?.method ?? 'none',
+      });
       if (payload.payment?.method === 'mbway') {
         setPaymentInstructions({
           bookingId: String(payload.booking?.id ?? ''),

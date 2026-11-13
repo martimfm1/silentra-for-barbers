@@ -93,7 +93,7 @@ const adminReportsApi = read('app/api/silentra-admin/reports/route.ts');
 const adminReportsMigration = read(
   'supabase/migrations/20261022165246_platform_admin_reports.sql',
 );
-const vercel = JSON.parse(read('vercel.json'));
+const marketingCronWorkflow = read('.github/workflows/marketing-cron.yml');
 
 assert.match(
   websiteRequestApi,
@@ -138,7 +138,8 @@ assert.match(
 );
 assert.match(marketingCron, /processBirthdayCampaignDelivery/);
 assert.match(marketingCron, /CRON_SECRET/);
-assert.ok(vercel.crons.some((job) => job.path === '/api/cron/marketing'));
+assert.match(marketingCronWorkflow, /cron: '\*\/5 \* \* \* \*'/);
+assert.match(marketingCronWorkflow, /\/api\/cron\/marketing/);
 
 assert.match(bookingApi, /'create_booking_atomic'/);
 assert.match(

@@ -2,12 +2,20 @@ import posthog from 'posthog-js';
 
 type ProductEventProperties = Record<string, string | number | boolean>;
 
+type AuthenticatedUser = {
+  id: string;
+};
+
 const URL_PROPERTIES = [
   '$current_url',
   '$initial_current_url',
   '$session_entry_url',
   '$referrer',
 ] as const;
+
+let posthogInitialized = false;
+const SENSITIVE_PROPERTY_KEY =
+  /email|phone|password|secret|token|cookie|authorization|address|full.?name|birth|request.?body|response.?body|payload/i;
 
 function sanitizeUrl(value: unknown): string | undefined {
   if (typeof value !== 'string' || !value) return undefined;
@@ -25,26 +33,50 @@ function sanitizeUrl(value: unknown): string | undefined {
   }
 }
 
-let posthogInitialized = false;
+function sanitizeAnalyticsValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return value
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]')
+      .replace(
+        /(?:\+351[\s.-]?)?(?:2[1-9][0-9]|9[0-9]{2})[\s.-]?[0-9]{3}[\s.-]?[0-9]{3}/g,
+        '[redacted-phone]',
+      );
+  }
 
-/**
- * Initializes browser analytics only in production. The caller must check the
- * site's analytics consent before calling this function.
- */
+  if (Array.isArray(value)) return value.map(sanitizeAnalyticsValue);
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).flatMap(([key, item]) =>
+        SENSITIVE_PROPERTY_KEY.test(key)
+          ? []
+          : [[key, sanitizeAnalyticsValue(item)]],
+      ),
+    );
+  }
+
+  return value;
+}
+
+/** Caller must check the analytics-consent cookie before initializing. */
 export function initializePostHog() {
   if (process.env.NODE_ENV !== 'production' || posthogInitialized) return;
 
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  if (!key) return;
+  const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+  if (!projectToken || !host) return;
 
-  posthog.init(key, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com',
+  posthog.init(projectToken, {
+    api_host: host,
     defaults: '2026-08-30',
     autocapture: false,
     capture_pageview: 'history_change',
     capture_pageleave: 'if_capture_pageview',
+    capture_exceptions: true,
     disable_capture_url_hashes: true,
     before_send(event) {
+      event.properties = sanitizeAnalyticsValue(event.properties) as typeof event.properties;
+
       for (const property of URL_PROPERTIES) {
         const safeUrl = sanitizeUrl(event.properties[property]);
         if (safeUrl) {
@@ -68,7 +100,7 @@ export function initializePostHog() {
     },
   });
 
-  // Analytics are enabled only after the consent cookie has been verified.
+  // The caller gates initialization on consent; opt in only after that check.
   posthog.opt_in_capturing({ captureEventName: false });
   posthogInitialized = true;
 }
@@ -78,6 +110,25 @@ export function captureProductEvent(
   event: string,
   properties: ProductEventProperties = {},
 ) {
-  if (process.env.NODE_ENV !== 'production' || !posthogInitialized) return;
+  if (!posthogInitialized) return;
   posthog.capture(event, properties);
+}
+
+/** Report a caught exception only after analytics consent initialized PostHog. */
+export function capturePostHogException(error: unknown) {
+  if (!posthogInitialized) return;
+  posthog.captureException(error);
+}
+
+/** Persist only the authenticated Supabase user's stable ID for analytics. */
+export function identifyProductUser({ id }: AuthenticatedUser) {
+  if (!posthogInitialized) return;
+
+  posthog.identify(id);
+}
+
+/** Clear the previous user's persisted analytics identity on sign-out. */
+export function resetProductUser() {
+  if (!posthogInitialized) return;
+  posthog.reset();
 }

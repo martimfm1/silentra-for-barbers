@@ -23,7 +23,7 @@ function hasAnalyticsConsent() {
 }
 
 // instrumentation-client.ts is evaluated by Next.js before the app renders.
-// Product analytics stays production-only; local Sentry requires explicit opt-in.
+// Product analytics stays production-only and requires explicit analytics consent.
 if (process.env.NODE_ENV === 'production' && hasAnalyticsConsent()) {
   initializePostHog();
 }

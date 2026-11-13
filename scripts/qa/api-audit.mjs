@@ -66,6 +66,14 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
+    pattern: /\/sentry-example-api\/route\.ts$/,
+    markers: [
+      "process.env.NODE_ENV !== 'development'",
+      "process.env.NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV !== 'true'",
+      'status: 404',
+    ],
+  },
+  {
     pattern: /\/public\/reviews\/route\.ts$/,
     markers: [
       'consumePublicRateLimit',

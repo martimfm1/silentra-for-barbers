@@ -27,6 +27,7 @@ import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { captureProductEvent } from '@/lib/observability/posthog';
 import { toast } from 'sonner';
 
 type Step = 'selection' | 'create' | 'join';
@@ -249,6 +250,9 @@ export default function OnboardingPage() {
         );
       }
 
+      captureProductEvent('onboarding_shop_created', {
+        business_mode: businessMode,
+      });
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
       router.push(businessMode === 'team' ? '/dashboard/equipa' : '/dashboard');
     } catch (error) {
@@ -282,6 +286,7 @@ export default function OnboardingPage() {
         );
       }
 
+      captureProductEvent('onboarding_team_joined');
       toast.success(t('onboarding.inviteSuccess'));
       router.push('/dashboard');
     } catch (error) {
