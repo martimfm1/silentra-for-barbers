@@ -45,6 +45,11 @@ assert.ok(drawer.includes('confirmCustomerProfile'));
 assert.ok(drawer.includes('declineCustomerProfile'));
 assert.ok(drawer.includes('profileSuggestionEmail'));
 assert.ok(drawer.includes('profileSuggestionPhone'));
+assert.ok(profileRoute.includes('customerName: displayCustomerName || null'));
+assert.ok(profileRoute.includes('.slice(0, 80)'));
+assert.ok(drawer.includes('customerSuggestion.customerName'));
+assert.ok(drawer.includes('profileSuggestionCustomer'));
+assert.ok(drawer.includes('profileSuggestionNameUnavailable'));
 assert.ok(drawer.includes("setName((current) => current.trim() || profile.name?.trim() || '')"));
 assert.match(
   bookingService,
