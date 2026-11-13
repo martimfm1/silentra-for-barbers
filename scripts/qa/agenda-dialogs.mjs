@@ -28,6 +28,12 @@ const appointmentDetail = read(
   'components/dashboard/appointment-detail-dialog.tsx',
 );
 const appointmentActions = read('components/dashboard/appointment-actions.tsx');
+const appointmentCompletion = read(
+  'components/dashboard/appointment-completion-dialog.tsx',
+);
+const appointmentCompletionRoute = read(
+  'app/api/appointments/[appointmentId]/complete/route.ts',
+);
 
 const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 assert.ok(agenda.includes('useAgendaViewPreference'));
@@ -75,6 +81,16 @@ assert.match(seriesMigration, /add column if not exists recurrence_series_id uui
 assert.match(seriesMigration, /having count\(\*\) > 1/);
 assert.match(appointmentsService, /recurrence_series_id\?: string \| null/);
 assert.ok(appointmentDetail.includes('<AlertDialog'));
+assert.ok(appointmentDetail.includes('<AppointmentCompletionDialog'));
+assert.match(appointmentDetail, /appointment\.status === 'scheduled'/);
+assert.ok(agenda.includes('finalizeBooking={finalizeBooking}'));
+assert.ok(appointmentActions.includes('<AppointmentCompletionDialog'));
+assert.match(appointmentCompletion, /complete\('cash'\)/);
+assert.match(appointmentCompletion, /complete\('mbway'\)/);
+assert.match(appointmentCompletion, /complete\('card'\)/);
+assert.match(appointmentCompletion, /if \(completed\)/);
+assert.match(appointmentCompletionRoute, /status: 'completed'/);
+assert.match(appointmentCompletionRoute, /\.eq\('status', 'scheduled'\)/);
 assert.ok(appointmentDetail.includes('void handleCancellation()'));
 assert.ok(appointmentDetail.includes('onOpenChange(false)'));
 assert.ok(appointmentActions.includes('handleCancelBooking: (id: string) => void | Promise<unknown>'));
