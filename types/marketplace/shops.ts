@@ -4,7 +4,6 @@ export interface MarketplaceBarbershopRelation {
   address: string | null;
   opening_time: string | null;
   closing_time: string | null;
-  public_profile_enabled?: boolean | null;
 }
 
 export interface MarketplaceShopRecord {
@@ -18,6 +17,7 @@ export interface MarketplaceShopRecord {
   lng: number;
   rating?: number | null;
   reviews_count?: number | null;
+  public_profile_enabled?: boolean | null;
   is_active: boolean;
   barbershops:
     MarketplaceBarbershopRelation | MarketplaceBarbershopRelation[] | null;
