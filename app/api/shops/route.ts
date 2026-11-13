@@ -11,9 +11,9 @@ type ShopRelation = MarketplaceBarbershopRelation & {
   lunch_start?: string | null;
   lunch_end?: string | null;
   is_public_in_directory?: boolean | null;
-  public_profile_enabled?: boolean | null;
 };
 type ShopRecord = Omit<MarketplaceShopRecord, 'barbershops'> & {
+  public_profile_enabled?: boolean | null;
   rating?: number | null;
   reviews_count?: number | null;
   barbershops: ShopRelation | ShopRelation[] | null;
@@ -151,7 +151,7 @@ async function GET__unobserved(request: Request) {
     const { data, error } = await supabase
       .from('shops')
       .select(
-        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory, public_profile_enabled )`,
+        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, public_profile_enabled, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory )`,
       )
       .eq('is_active', true)
       .eq('barbershops.is_public_in_directory', true);
