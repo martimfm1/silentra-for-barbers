@@ -455,7 +455,7 @@ export function BookingDrawerCanonical({
         : '';
 
   useEffect(() => {
-    if (!isOpen || step !== 3 || !shop || waitlistOnly) return;
+    if (!isOpen || step !== 3 || !shop) return;
     const lookupField = customerLookupField;
     const normalizedEmail = lookupField === 'email' ? customerLookupValue : '';
     const normalizedPhone = lookupField === 'phone' ? customerLookupValue : '';
@@ -532,7 +532,6 @@ export function BookingDrawerCanonical({
     isOpen,
     shop?.id,
     step,
-    waitlistOnly,
   ]);
 
   async function confirmCustomerProfile() {
@@ -1344,8 +1343,7 @@ export function BookingDrawerCanonical({
                   </div>
                 )}
 
-                {!waitlistOnly && (
-                  <div
+                <div
                     className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
                     aria-live="polite"
                   >
@@ -1432,8 +1430,7 @@ export function BookingDrawerCanonical({
                         {t('bookingDrawer.profileIdle')}
                       </p>
                     )}
-                  </div>
-                )}
+                </div>
 
                 <Button
                   type="button"
