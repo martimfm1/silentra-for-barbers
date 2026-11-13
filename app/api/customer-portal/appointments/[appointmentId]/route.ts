@@ -30,39 +30,6 @@ function overlaps(
 ): boolean {
   return start < otherEnd && end > otherStart;
 }
-function parseClosedDays(value: unknown): Set<number> {
-  const names: Record<string, number> = {
-    sunday: 0,
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-    domingo: 0,
-    segunda: 1,
-    terça: 2,
-    terca: 2,
-    quarta: 3,
-    quinta: 4,
-    sexta: 5,
-    sábado: 6,
-    sabado: 6,
-  };
-  const values =
-    typeof value === 'string'
-      ? value.split(',').map((item) => item.trim().toLowerCase())
-      : Array.isArray(value)
-        ? value
-        : [];
-  const result = new Set<number>();
-  for (const item of values) {
-    if (typeof item === 'number' && item >= 0 && item <= 6) result.add(item);
-    if (typeof item === 'string' && names[item] !== undefined)
-      result.add(names[item]);
-  }
-  return result;
-}
 function jsonError(error: string, status = 400) {
   return NextResponse.json(
     { success: false, error },
