@@ -3,6 +3,12 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
+import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+  timeToMinutes as scheduleTimeToMinutes,
+} from '@/lib/scheduling/weekly-schedule';
 
 type AppointmentRow = {
   date_hour: string | null;
@@ -107,7 +113,7 @@ async function GET__unobserved(
     const { data: shopRecord, error: shopError } = await admin
       .from('shops')
       .select(
-        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days, minimum_booking_notice_minutes, phone, mbway_enabled, mbway_phone)`,
+        `id, barbershop_id, barbershops (opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, minimum_booking_notice_minutes, phone, mbway_enabled, mbway_phone)`,
       )
       .eq('id', shopId)
       .single();
@@ -147,7 +153,7 @@ async function GET__unobserved(
         .eq('is_active', true),
       admin
         .from('professionals')
-        .select('id, name, active')
+        .select('id, name, active, weekly_schedule')
         .eq('barbershop_id', barbershopId)
         .eq('active', true)
         .order('name', { ascending: true }),
@@ -188,17 +194,16 @@ async function GET__unobserved(
       mbwayPhone,
       whatsappPhone,
     };
-    const openTime = relation.opening_time || '09:00:00';
-    const closeTime = relation.closing_time || '19:00:00';
+    const shopSchedule = normalizeWeeklySchedule(
+      relation.weekly_schedule,
+      relation,
+    );
     const minimumNoticeMinutes = Math.max(
       0,
       Math.min(43200, Number(relation.minimum_booking_notice_minutes ?? 0)),
     );
-    const lunchStart = relation.lunch_start || null;
-    const lunchEnd = relation.lunch_end || null;
-    const closedDays = normalizeClosedDays(relation.closed_days);
     const selectedWeekday = new Date(`${date}T12:00:00`).getDay();
-    const isClosedDay = closedDays.has(selectedWeekday);
+    const shopDaySchedule = getDailySchedule(shopSchedule, selectedWeekday);
 
     if (servicesResult.error) {
       console.error(
@@ -253,6 +258,15 @@ async function GET__unobserved(
       name: professional.name || 'Barbeiro',
       role: 'Barbeiro Profissional',
     }));
+    const professionalSchedules = new Map<string, ReturnType<typeof normalizeWeeklySchedule>>();
+    for (const professional of professionalsData) {
+      professionalSchedules.set(
+        professional.id,
+        professional.weekly_schedule
+          ? normalizeWeeklySchedule(professional.weekly_schedule)
+          : shopSchedule,
+      );
+    }
     if (
       requestedProfessionalId &&
       !professionals.some(
@@ -305,8 +319,6 @@ async function GET__unobserved(
     });
     const isToday = date === todayPortugal;
     const currentMinutesNow = timeToMinutes(timePortugal);
-    const lunchStartMinutes = lunchStart ? timeToMinutes(lunchStart) : null;
-    const lunchEndMinutes = lunchEnd ? timeToMinutes(lunchEnd) : null;
     const selectedService = serviceId
       ? services.find((service) => service.id === serviceId)
       : services[0];
@@ -383,55 +395,64 @@ async function GET__unobserved(
     ) =>
       !isBlockedForProfessional(slotStart, slotEnd, professionalId) &&
       !isBookedForProfessional(slotStart, slotEnd, professionalId);
-    const availableSlots: string[] = [];
     const professionalAvailability: Record<string, string[]> =
       Object.fromEntries(
         professionals.map((professional) => [professional.id, []]),
       );
-    const openTotalMinutes = timeToMinutes(openTime);
-    const closeTotalMinutes = timeToMinutes(closeTime);
-    for (
-      let slotStart = openTotalMinutes;
-      slotStart < closeTotalMinutes;
-      slotStart += 30
-    ) {
-      const slotEnd = slotStart + serviceDuration;
-      if (
-        slotEnd > closeTotalMinutes ||
-        (isToday && slotStart <= currentMinutesNow) ||
-        isClosedDay ||
-        isBeforeMinimumBookingNotice(
-          date,
-          minutesToTime(slotStart),
-          minimumNoticeMinutes,
-        )
-      )
-        continue;
-      if (
-        lunchStartMinutes !== null &&
-        lunchEndMinutes !== null &&
-        overlaps(slotStart, slotEnd, lunchStartMinutes, lunchEndMinutes)
-      )
-        continue;
-      const availableForProfessionals = professionals.filter((professional) =>
-        canProfessionalTakeSlot(slotStart, slotEnd, professional.id),
-      );
-      for (const professional of availableForProfessionals)
-        professionalAvailability[professional.id].push(
-          minutesToTime(slotStart),
-        );
-      if (requestedProfessionalId) {
-        if (
-          availableForProfessionals.some(
-            (professional) => professional.id === requestedProfessionalId,
-          )
-        )
-          availableSlots.push(minutesToTime(slotStart));
-      } else if (availableForProfessionals.length > 0) {
-        availableSlots.push(minutesToTime(slotStart));
+
+    for (const professional of professionals) {
+      const schedule = professionalSchedules.get(professional.id) ?? shopSchedule;
+      const daySchedule = getDailySchedule(schedule, selectedWeekday);
+      if (daySchedule.day_off) continue;
+
+      for (const period of daySchedule.work_intervals) {
+        const periodStart = scheduleTimeToMinutes(period.start);
+        const periodEnd = scheduleTimeToMinutes(period.end);
+        for (
+          let slotStart = periodStart;
+          slotStart + serviceDuration <= periodEnd;
+          slotStart += 30
+        ) {
+          const slotEnd = slotStart + serviceDuration;
+          if (
+            (isToday && slotStart <= currentMinutesNow) ||
+            isBeforeMinimumBookingNotice(
+              date,
+              minutesToTime(slotStart),
+              minimumNoticeMinutes,
+            ) ||
+            !isSlotWithinDailySchedule(daySchedule, slotStart, slotEnd) ||
+            !canProfessionalTakeSlot(slotStart, slotEnd, professional.id)
+          ) {
+            continue;
+          }
+          professionalAvailability[professional.id].push(
+            minutesToTime(slotStart),
+          );
+        }
       }
     }
 
+    const selectedProfessionalDay = requestedProfessionalId
+      ? getDailySchedule(
+          professionalSchedules.get(requestedProfessionalId) ?? shopSchedule,
+          selectedWeekday,
+        )
+      : null;
+    const isClosedDay = requestedProfessionalId
+      ? selectedProfessionalDay?.day_off === true
+      : professionals.length > 0
+        ? professionals.every(
+            (professional) =>
+              getDailySchedule(
+                professionalSchedules.get(professional.id) ?? shopSchedule,
+                selectedWeekday,
+              ).day_off,
+          )
+        : shopDaySchedule.day_off;
+    const availableSlots = requestedProfessionalId
+      ? (professionalAvailability[requestedProfessionalId] ?? [])
+      : Array.from(new Set(Object.values(professionalAvailability).flat())).sort();
     const visibleBlockedIntervals = requestedProfessionalId
       ? blockedIntervals.filter(
           (block) =>
