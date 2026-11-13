@@ -145,14 +145,16 @@ const dashboardSurfaceStyles = `
     color: var(--dashboard-accent, #34d399);
   }
 
-  /* Account and security gets a dedicated, card-like visual hierarchy. */
-  .silentra-dashboard-shell .dashboard-page .settings-account-security > summary {
+  /* All Settings accordions share the account and security header treatment. */
+  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary,
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion > summary {
     position: relative;
     min-height: 5.25rem;
     transition: background 180ms ease, color 180ms ease;
   }
 
-  .silentra-dashboard-shell .dashboard-page .settings-account-security > summary::before {
+  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary::before,
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion > summary::before {
     position: absolute;
     inset-block: 1rem;
     left: 0;
@@ -163,7 +165,8 @@ const dashboardSurfaceStyles = `
     transition: background 180ms ease, inset-block 180ms ease;
   }
 
-  .silentra-dashboard-shell .dashboard-page .settings-account-security[open] > summary::before {
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary::before,
+  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary::before {
     inset-block: 0.65rem;
     background: var(--dashboard-accent, #34d399);
   }

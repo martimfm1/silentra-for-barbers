@@ -1,113 +1,92 @@
 # Production observability
 
-Silentra for Barbers uses PostHog for product analytics/session replay and Sentry
-for error tracking/performance. PostHog is disabled in development. Local Sentry
-reporting is opt-in through `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=true`.
+## Sentry source maps
 
-## Environment variables
+Set `SENTRY_AUTH_TOKEN` as a secret in the build environment to upload source
+maps to Sentry. It is optional for local builds and error reporting, and must
+never be exposed through a `NEXT_PUBLIC_` variable. The token is read by
+`next.config.ts` during the Sentry webpack plugin setup.
 
-Add these to `.env.local` for local build configuration, and configure the
-production values in Vercel's Production environment before deploying:
+## Goals
 
-| Variable                           | Purpose                                         | Visibility                    |
-| ---------------------------------- | ----------------------------------------------- | ----------------------------- |
-| `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` | PostHog project token                          | Browser/public                |
-| `NEXT_PUBLIC_POSTHOG_HOST`          | PostHog ingestion host                          | Browser/public                |
-| `NEXT_PUBLIC_SENTRY_DSN`           | Sentry browser DSN                              | Browser/public                |
-| `SENTRY_DSN`                       | Sentry Node.js/Edge DSN                         | Server-only                   |
-| `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV` | Set to `true` to send local development errors  | Browser/public                |
-| `SENTRY_ORG`                       | Sentry organization slug for source map uploads | Build/server-only             |
-| `SENTRY_PROJECT`                   | Sentry project slug for source map uploads      | Build/server-only             |
-| `SENTRY_AUTH_TOKEN`                | Sentry source-map upload token                  | Secret; never expose publicly |
+Production logs exist to answer three questions quickly:
 
-The DSN and PostHog project key are designed to be public identifiers, not
-secret credentials. `SENTRY_AUTH_TOKEN` is a secret and must never be prefixed
-with `NEXT_PUBLIC_` or committed to Git.
+1. Which operation failed?
+2. Where did it fail?
+3. Was the failure caused by infrastructure, validation, authorization or application logic?
 
-## Runtime rules and privacy
+## Logger
 
-- Sentry initializes in production when its corresponding DSN exists. In local
-  development, set `NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=true` to opt in; browser
-  Sentry still requires analytics consent. PostHog remains production only.
-- PostHog and browser Sentry initialize only after the existing
-  `silentra_cookie_consent` cookie grants the analytics category. Changing the
-  preference reloads the page and applies the new choice.
-- PostHog autocapture is disabled. Page views are tracked on Next.js route
-  changes; product events are emitted explicitly by application code. Session
-  replay is sampled at `0.2`; inputs are masked, sensitive text uses
-  `ph-mask`/`data-ph-mask`/`data-sensitive`, and private sections are blocked
-  with `ph-no-capture`/`data-ph-no-capture`/`data-private-data`. Its `before_send`
-  hook strips URL query strings, fragments, and identifier-like path segments.
-- PostHog exception capture is enabled only after analytics consent. Server log
-  export runs only in production and emits service-level records without
-  request or customer data. PostHog user identity uses only the stable Supabase
-  user ID; event properties redact email addresses and phone numbers.
-- Sentry removes request payloads, query strings, breadcrumb data, arbitrary
-  extras, and common email/phone patterns before sending events.
-- Sentry uses `tracesSampleRate: 0.1`, granular `dataCollection` controls with
-  user info, cookies, request bodies, and GenAI data disabled, ignores common
-  ResizeObserver/extension/ad-blocker noise, strips query strings and request
-  bodies, and removes cookies/auth headers before events leave the app.
-- Sentry Replay is sampled at `0.1` for sessions and `1.0` for sessions with
-  errors. It masks all text and inputs, blocks media, and excludes private
-  sections using its own no-capture selectors.
-- Node.js and Edge Sentry setup is kept separate. Server-side request failures
-  are operational diagnostics; browser analytics and browser Sentry remain
-  gated by analytics consent.
+Use `productionLogger` from `lib/observability/logger.ts` for server-side operational logs.
 
-## Capture a product event
+Prefer event names such as:
 
-Use `captureProductEvent` from a client-side flow. Never pass customer names,
-phone numbers, email addresses, customer IDs, appointment IDs, notes, or form
-contents as event properties.
+- `booking.create_failed`
+- `booking.availability_failed`
+- `marketing.campaign_load_failed`
+- `settings.update_failed`
+- `server.unhandled_rejection`
 
-```ts
-import { captureProductEvent } from '@/lib/observability/posthog';
+Use stable context fields such as `route`, `operation`, `status`, `error_code`, `request_id` and `duration_ms`.
 
-captureProductEvent('agendamento_criado', {
-  origem: 'dashboard',
-  recorrente: false,
-  quantidade: 1,
-});
-```
+## Never log
 
-The manual booking workflow already emits `agendamento_criado` with only these
-non-identifying properties.
+Do not log passwords, access tokens, refresh tokens, authorization headers, cookies, API keys, QR payloads, email addresses, phone numbers, birth dates or full request bodies.
 
-## Capture a caught exception
+The logger redacts sensitive keys as a second line of defence, but callers should still avoid passing sensitive data.
 
-Use `captureException` in a `try/catch` when an exception is handled and would
-otherwise be invisible to Sentry's automatic request instrumentation:
+## Unhandled errors
 
-```ts
-import { captureException } from '@/lib/observability/sentry';
+`instrumentation.ts` registers production handlers for `uncaughtException` and `unhandledRejection`. They keep diagnostic information in the server logs without exposing request payloads.
 
-try {
-  await performOperation();
-} catch (error) {
-  captureException(error, {
-    area: 'appointments',
-    action: 'create_booking',
-  });
-  throw error;
-}
-```
+## API routes
 
-The helper tags the exception with the operation context, but does not attach
-customer data or request payloads.
+API handlers should:
 
-## Setup checklist
+- return a user-safe error message;
+- log the internal event once at the boundary;
+- include an error code when available;
+- never log the complete Supabase, Stripe or provider object.
 
-1. Copy the PostHog project token and ingestion host for the configured project.
-2. Create the Sentry project for Next.js and copy its DSN. Add a Sentry auth
-   token only when source-map uploads are desired.
-3. Set the values in Vercel **Project → Settings → Environment Variables** for
-   Production, then redeploy `main`.
-4. Accept the analytics category in the production cookie banner and verify a
-   page view/event and a sampled replay in PostHog. With analytics rejected,
-   browser PostHog/Sentry must remain uninitialized.
-5. Verify a test exception in Sentry and confirm readable source maps when the
-   optional build-upload credentials are configured.
+Expected user-facing errors are not exceptional and should generally not be logged as server errors (for example, invalid form input or an occupied booking slot).
 
-`pnpm qa:observability` checks the production guards, PostHog initialization,
-and CI wiring without sending telemetry.
+## Silentra Admin — Saúde da API
+
+The `/silentra-admin?tab=api_health` view reads from the private
+`platform_api_logs` table and shows HTTP request volume, 5xx rate, latency
+(p95 over the retained sample), route-level metrics, request IDs, and recent
+status/error records. API route handlers use `withApiObservability` from
+`lib/observability/api.ts`.
+
+The telemetry record intentionally stores only the normalized route template,
+HTTP method/status, elapsed handler time, a generated request ID, environment,
+region, and a safe error code. It never stores request/response bodies, query
+strings, cookies, authorization headers, IP addresses, email addresses or phone
+numbers. The table is service-role-only and requires the
+`platform_api_observability` migration.
+
+INFO records are written as structured JSON to stdout, while warnings and errors
+remain visible in platform runtime logs.
+
+## Dashboard checks and interpretation
+
+- The dashboard checks Supabase tables used by the core product and performs
+  read-only GET requests to the configured Stripe and Brevo account endpoints.
+  It does not create charges, update configuration, or send email.
+- HTTP 4xx responses are presented separately from 5xx responses so invalid or
+  unauthorized requests are not confused with application/server failures.
+- Route-level latency and error percentages are calculated from the recent
+  telemetry sample. The aggregate request count uses database counts when
+  available; latency percentiles describe the sample loaded by the dashboard,
+  not all requests ever received.
+- The current view reads the previous 24 hours and loads up to 2,000 records.
+  This table does not imply automatic retention or deletion; retention needs an
+  explicit policy before a cleanup job is enabled.
+- Historical API logs only begin after the route instrumentation and migration
+  have been deployed. A newly enabled dashboard cannot reconstruct older
+  requests.
+
+Request logging is scheduled after the handler response so the Supabase insert
+does not add database round-trip latency to the client-facing response. If
+persistence fails, the request itself still succeeds or fails according to its
+normal handler result, and a safe logger event records the telemetry failure.
