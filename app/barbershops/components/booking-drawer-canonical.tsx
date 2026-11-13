@@ -554,9 +554,15 @@ export function BookingDrawerCanonical({
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.success || !payload.profile) {
-        throw new Error(
-          payload?.error || t('bookingDrawer.verifyCustomerError'),
-        );
+        const message =
+          payload?.error || t('bookingDrawer.verifyCustomerError');
+        if (response.status === 410 || response.status === 404) {
+          setCustomerSuggestion(null);
+          setCustomerState('new');
+          toast.error(message);
+          return;
+        }
+        throw new Error(message);
       }
 
       const profile = payload.profile as {
