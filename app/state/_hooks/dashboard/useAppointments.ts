@@ -350,7 +350,9 @@ export function useAppointments(
           throw new Error(
             result?.error || 'Não foi possível confirmar a marcação.',
           );
-        if (result.emailSent)
+        if (result.prepaymentConfirmed)
+          toast.success('Pré-pagamento MB WAY validado e marcação confirmada.');
+        else if (result.emailSent)
           toast.success('Marcação confirmada e e-mail enviado.');
         else if (result.emailError)
           toast.warning(
