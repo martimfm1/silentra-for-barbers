@@ -32,7 +32,9 @@ import type {
 import type { MarketplaceService } from '@/types/marketplace/shops';
 
 type Step = 1 | 2 | 3 | 4;
-type CustomerState = 'idle' | 'checking' | 'matched' | 'new' | 'error';
+type CustomerState = 'idle' | 'checking' | 'suggestion' | 'matched' | 'new' | 'error';
+type CustomerLookupField = 'email' | 'phone';
+type CustomerSuggestion = { lookupToken: string; matchedBy: CustomerLookupField };
 type ManualPrepaymentInstructions = {
   bookingId: string;
   amount: number;
@@ -133,6 +135,11 @@ function formatBirthDate(value: string) {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
+function birthDateToDisplay(value: string) {
+  const match = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(value);
+  return match ? match[3] + '/' + match[2] + '/' + match[1] : '';
+}
+
 function birthDateToIso(value: string) {
   const digits = value.replace(/\D/g, '');
   if (digits.length !== 8) return null;
@@ -190,6 +197,8 @@ export function BookingDrawerCanonical({
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
+  const [customerLookupField, setCustomerLookupField] = useState<CustomerLookupField | null>(null);
+  const [customerSuggestion, setCustomerSuggestion] = useState<CustomerSuggestion | null>(null);
   const [manualPrepayment, setManualPrepayment] = useState<
     MarketplaceBookingResponse['manualPrepayment'] | null
   >(null);
@@ -280,6 +289,8 @@ export function BookingDrawerCanonical({
     setEmail('');
     setBirthDate('');
     setCustomerState('idle');
+    setCustomerLookupField(null);
+    setCustomerSuggestion(null);
     setManualPrepayment(null);
     setPrepaymentSelected(false);
     setPaymentInstructions(null);
@@ -436,28 +447,46 @@ export function BookingDrawerCanonical({
     step,
   ]);
 
+  const customerLookupValue =
+    customerLookupField === 'email'
+      ? email.trim().toLowerCase()
+      : customerLookupField === 'phone'
+        ? phone.trim()
+        : '';
+
   useEffect(() => {
-    if (!isOpen || step !== 3 || !shop || waitlistOnly) return;
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedPhone = phone.replace(/\D/g, '');
-    if (!EMAIL_PATTERN.test(normalizedEmail) || normalizedPhone.length < 7) {
+    if (!isOpen || step !== 3 || !shop) return;
+    const lookupField = customerLookupField;
+    const normalizedEmail = lookupField === 'email' ? customerLookupValue : '';
+    const normalizedPhone = lookupField === 'phone' ? customerLookupValue : '';
+    const validLookup =
+      lookupField === 'email'
+        ? EMAIL_PATTERN.test(normalizedEmail)
+        : lookupField === 'phone' &&
+          normalizedPhone.replace(/\D/g, '').length >= 7;
+
+    if (!validLookup) {
       customerControllerRef.current?.abort();
+      setCustomerSuggestion(null);
       setCustomerState('idle');
       return;
     }
+
     const timeout = window.setTimeout(() => {
       customerControllerRef.current?.abort();
       const controller = new AbortController();
       customerControllerRef.current = controller;
+      setCustomerSuggestion(null);
       setCustomerState('checking');
       void fetch('/api/bookings/customer-profile', {
         method: 'POST',
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'lookup',
           shopId: shop.id,
-          email: normalizedEmail,
-          phone: phone.trim(),
+          lookupBy: lookupField,
+          value: customerLookupValue,
         }),
       })
         .then(async (response) => {
@@ -466,21 +495,108 @@ export function BookingDrawerCanonical({
             throw new Error(
               payload?.error || t('bookingDrawer.verifyCustomerError'),
             );
-          return payload as { matched?: boolean; hasBirthDate?: boolean };
+          return payload as {
+            matched?: boolean;
+            matchedBy?: CustomerLookupField;
+            lookupToken?: string;
+          };
         })
         .then((payload) => {
           if (controller.signal.aborted) return;
-          setCustomerState(payload.matched ? 'matched' : 'new');
+          if (payload.matched && payload.lookupToken && payload.matchedBy) {
+            setCustomerSuggestion({
+              lookupToken: payload.lookupToken,
+              matchedBy: payload.matchedBy,
+            });
+            setCustomerState('suggestion');
+          } else {
+            setCustomerSuggestion(null);
+            setCustomerState('new');
+          }
         })
         .catch((reason) => {
-          if (reason?.name !== 'AbortError') setCustomerState('error');
+          if (reason?.name !== 'AbortError') {
+            setCustomerSuggestion(null);
+            setCustomerState('error');
+          }
         });
-    }, 450);
+    }, 500);
+
     return () => {
       window.clearTimeout(timeout);
       customerControllerRef.current?.abort();
     };
-  }, [email, isOpen, phone, shop, step, waitlistOnly]);
+  }, [
+    customerLookupField,
+    customerLookupValue,
+    isOpen,
+    shop?.id,
+    step,
+  ]);
+
+  async function confirmCustomerProfile() {
+    if (!shop || !customerSuggestion) return;
+    customerControllerRef.current?.abort();
+    const controller = new AbortController();
+    customerControllerRef.current = controller;
+    setCustomerState('checking');
+
+    try {
+      const response = await fetch('/api/bookings/customer-profile', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'confirm',
+          shopId: shop.id,
+          lookupToken: customerSuggestion.lookupToken,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.success || !payload.profile) {
+        const message =
+          payload?.error || t('bookingDrawer.verifyCustomerError');
+        if (response.status === 410 || response.status === 404) {
+          setCustomerSuggestion(null);
+          setCustomerState('new');
+          toast.error(message);
+          return;
+        }
+        throw new Error(message);
+      }
+
+      const profile = payload.profile as {
+        name?: string;
+        email?: string;
+        phone?: string;
+        birthDate?: string;
+      };
+      setName((current) => current.trim() || profile.name?.trim() || '');
+      setEmail((current) => current.trim() || profile.email?.trim() || '');
+      setPhone((current) => current.trim() || profile.phone?.trim() || '');
+      setBirthDate(
+        (current) =>
+          current.trim() ||
+          (profile.birthDate ? birthDateToDisplay(profile.birthDate) : ''),
+      );
+      setCustomerSuggestion(null);
+      setCustomerState('matched');
+      toast.success(t('bookingDrawer.profileAutofilled'));
+    } catch (reason) {
+      if (reason instanceof Error && reason.name === 'AbortError') return;
+      setCustomerState('suggestion');
+      toast.error(
+        reason instanceof Error
+          ? reason.message
+          : t('bookingDrawer.verifyCustomerError'),
+      );
+    }
+  }
+
+  function declineCustomerProfile() {
+    setCustomerSuggestion(null);
+    setCustomerState('new');
+  }
 
   const canContinueOne = Boolean(
     currentDay && professional && service && !currentDayClosed,
@@ -1115,7 +1231,12 @@ export function BookingDrawerCanonical({
                     <Input
                       className="pl-10"
                       value={phone}
-                      onChange={(event) => setPhone(event.target.value)}
+                      onChange={(event) => {
+                        setPhone(event.target.value);
+                        setCustomerLookupField('phone');
+                        setCustomerSuggestion(null);
+                        setCustomerState('idle');
+                      }}
                       autoComplete="tel"
                       inputMode="tel"
                       placeholder="912 345 678"
@@ -1133,7 +1254,12 @@ export function BookingDrawerCanonical({
                       className="pl-10"
                       type="email"
                       value={email}
-                      onChange={(event) => setEmail(event.target.value)}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                        setCustomerLookupField('email');
+                        setCustomerSuggestion(null);
+                        setCustomerState('idle');
+                      }}
                       autoComplete="email"
                       placeholder="nome@email.com"
                     />
@@ -1223,43 +1349,71 @@ export function BookingDrawerCanonical({
                   </div>
                 )}
 
-                {!waitlistOnly && (
-                  <div
-                    className="min-h-12 rounded-xl border border-white/10 bg-white/[0.02] p-3"
-                    aria-live="polite"
-                  >
-                    {customerState === 'checking' && (
-                      <p className="flex items-center gap-2 text-xs text-zinc-400">
-                        <Loader2
-                          className="size-3.5 animate-spin"
-                          aria-hidden="true"
-                        />
-                        {t('bookingDrawer.checkingDetails')}
+                <div
+                  className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                  aria-live="polite"
+                >
+                  {customerState === 'checking' && (
+                    <p className="flex items-center gap-2 text-xs text-zinc-400">
+                      <Loader2
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
+                      {t('bookingDrawer.checkingDetails')}
+                    </p>
+                  )}
+                  {customerState === 'suggestion' && customerSuggestion && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-zinc-100">
+                        {customerSuggestion.matchedBy === 'email'
+                          ? t('bookingDrawer.profileSuggestionEmail')
+                          : t('bookingDrawer.profileSuggestionPhone')}
                       </p>
-                    )}
-                    {customerState === 'matched' && (
-                      <p className="flex items-center gap-2 text-xs text-emerald-300">
-                        <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                        {t('bookingDrawer.profileFound')}
-                      </p>
-                    )}
-                    {customerState === 'new' && (
-                      <p className="text-xs text-zinc-500">
-                        {t('bookingDrawer.profileNew')}
-                      </p>
-                    )}
-                    {customerState === 'error' && (
-                      <p className="text-xs text-amber-300">
-                        {t('bookingDrawer.profileError')}
-                      </p>
-                    )}
-                    {customerState === 'idle' && (
-                      <p className="text-xs text-zinc-600">
-                        {t('bookingDrawer.profileIdle')}
-                      </p>
-                    )}
-                  </div>
-                )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={submitting}
+                          onClick={() => void confirmCustomerProfile()}
+                          className="w-full"
+                        >
+                          {t('bookingDrawer.profileConfirm')}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={submitting}
+                          onClick={declineCustomerProfile}
+                          className="w-full"
+                        >
+                          {t('bookingDrawer.profileReject')}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {customerState === 'matched' && (
+                    <p className="flex items-center gap-2 text-xs text-emerald-300">
+                      <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                      {t('bookingDrawer.profileAutofilled')}
+                    </p>
+                  )}
+                  {customerState === 'new' && (
+                    <p className="text-xs text-zinc-500">
+                      {t('bookingDrawer.profileNew')}
+                    </p>
+                  )}
+                  {customerState === 'error' && (
+                    <p className="text-xs text-amber-300">
+                      {t('bookingDrawer.profileError')}
+                    </p>
+                  )}
+                  {customerState === 'idle' && (
+                    <p className="text-xs text-zinc-600">
+                      {t('bookingDrawer.profileIdle')}
+                    </p>
+                  )}
+                </div>
 
                 <Button
                   type="button"
