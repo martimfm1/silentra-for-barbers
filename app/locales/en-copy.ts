@@ -850,6 +850,8 @@ export const enCopy = {
     fullName: 'Full name',
     namePlaceholder: 'e.g. John Smith',
     mobile: 'Mobile phone',
+    email: 'Customer email',
+    emailHelp: 'The customer will receive the booking details at this address.',
     emailPlaceholder: 'client@email.com',
     submit: 'Add',
     notFound: 'We could not find that client',
