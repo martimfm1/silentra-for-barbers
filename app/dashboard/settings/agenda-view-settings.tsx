@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { CalendarDays, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,41 +9,26 @@ export type AgendaViewPreference = 'lines' | 'calendar';
 const STORAGE_KEY = 'silentra:agenda-view';
 const CHANGE_EVENT = 'silentra:agenda-view-change';
 
-export function useAgendaViewPreference() {
-  const [view, setView] = useState<AgendaViewPreference>('lines');
-
-  useEffect(() => {
-    const readPreference = () => {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      setView(stored === 'calendar' ? 'calendar' : 'lines');
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY) readPreference();
-    };
-
-    readPreference();
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener(CHANGE_EVENT, readPreference);
-
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener(CHANGE_EVENT, readPreference);
-    };
-  }, []);
-
-  const updateView = (nextView: AgendaViewPreference) => {
-    window.localStorage.setItem(STORAGE_KEY, nextView);
-    setView(nextView);
-    window.dispatchEvent(new Event(CHANGE_EVENT));
-  };
-
-  return { view, setView: updateView };
+export function readAgendaViewPreference(): AgendaViewPreference {
+  if (typeof window === 'undefined') return 'lines';
+  return window.localStorage.getItem(STORAGE_KEY) === 'calendar'
+    ? 'calendar'
+    : 'lines';
 }
 
-export function AgendaViewSettings() {
+export function saveAgendaViewPreference(view: AgendaViewPreference) {
+  window.localStorage.setItem(STORAGE_KEY, view);
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+export function AgendaViewSettings({
+  view,
+  onChange,
+}: {
+  view: AgendaViewPreference;
+  onChange: (view: AgendaViewPreference) => void;
+}) {
   const { locale } = useLanguage();
-  const { view, setView } = useAgendaViewPreference();
   const isEnglish = locale === 'en';
 
   return (
@@ -68,7 +52,7 @@ export function AgendaViewSettings() {
           type="button"
           variant="outline"
           aria-pressed={view === 'lines'}
-          onClick={() => setView('lines')}
+          onClick={() => onChange('lines')}
           className={`h-11 min-w-0 gap-2 border-white/10 px-3 text-xs sm:text-sm ${view === 'lines' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15' : 'bg-white/[.03] text-zinc-300 hover:bg-white/[.07]'}`}
         >
           <List className="size-4 shrink-0" aria-hidden="true" />
@@ -78,7 +62,7 @@ export function AgendaViewSettings() {
           type="button"
           variant="outline"
           aria-pressed={view === 'calendar'}
-          onClick={() => setView('calendar')}
+          onClick={() => onChange('calendar')}
           className={`h-11 min-w-0 gap-2 border-white/10 px-3 text-xs sm:text-sm ${view === 'calendar' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15' : 'bg-white/[.03] text-zinc-300 hover:bg-white/[.07]'}`}
         >
           <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
