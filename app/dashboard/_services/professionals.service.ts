@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { Professional } from '@/types';
+import type { WeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 const supabase = createClient();
 
@@ -14,6 +15,7 @@ export interface UpdateProfessionalPayload {
   name: string;
   active?: boolean;
   commission_percentage?: number;
+  weekly_schedule?: WeeklySchedule | null;
 }
 
 export const professionalService = {
