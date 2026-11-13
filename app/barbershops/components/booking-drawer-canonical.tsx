@@ -136,7 +136,7 @@ function formatBirthDate(value: string) {
 }
 
 function birthDateToDisplay(value: string) {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value);
+  const match = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(value);
   return match ? match[3] + '/' + match[2] + '/' + match[1] : '';
 }
 
