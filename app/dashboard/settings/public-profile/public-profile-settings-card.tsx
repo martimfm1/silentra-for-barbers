@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
-import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -355,6 +354,7 @@ export function PublicProfileSettingsCard({
   );
   const [loading, setLoading] = useState(true);
   const [initialDraft, setInitialDraft] = useState<PublicProfileSettingsDraft | null>(null);
+  const [appliedSaveVersion, setAppliedSaveVersion] = useState(0);
 
   async function load() {
     setLoading(true);
@@ -446,8 +446,10 @@ export function PublicProfileSettingsCard({
   }, [draft, draftDirty, initialDraft, onDraftChange]);
 
   useEffect(() => {
-    if (saveVersion > 0 && initialDraft) setInitialDraft(draft);
-  }, [saveVersion]);
+    if (saveVersion === appliedSaveVersion || !initialDraft) return;
+    setInitialDraft(draft);
+    setAppliedSaveVersion(saveVersion);
+  }, [saveVersion, appliedSaveVersion, initialDraft, draft]);
 
 
   const selectedCount = useMemo(() => {
