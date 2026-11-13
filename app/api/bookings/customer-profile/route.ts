@@ -226,8 +226,8 @@ async function POST__unobserved(request: Request) {
       const displayCustomerName =
         typeof customer.customer_name === 'string'
           ? customer.customer_name
-              .replace(/[\\u0000-\\u001f\\u007f]/g, ' ')
-              .replace(/\\s+/g, ' ')
+              .replace(/[\x00-\x1f\x7f]/g, ' ')
+              .replace(/\s+/g, ' ')
               .trim()
               .slice(0, 80)
           : '';
