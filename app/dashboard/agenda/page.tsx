@@ -825,6 +825,7 @@ export default function AgendaPage() {
       <AppointmentDetailDialog
         appointment={selectedAppointment}
         open={Boolean(selectedAppointment)}
+        confirmBooking={confirmBooking}
         valueProducts={valueProducts}
         setValueProducts={setValueProducts}
         descriptionProducts={descriptionProducts}
