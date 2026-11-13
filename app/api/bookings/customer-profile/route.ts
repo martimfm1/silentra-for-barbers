@@ -1,5 +1,11 @@
 import { withApiObservability } from '@/lib/observability/api';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+} from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getClientIp } from '@/lib/security/public-rate-limit';
@@ -28,38 +34,58 @@ function getTokenSecret(): string {
   return secret;
 }
 
+function getTokenEncryptionKey(): Buffer {
+  return createHash('sha256').update(getTokenSecret()).digest();
+}
+
 function signLookupToken(payload: LookupTokenPayload): string {
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const signature = createHmac('sha256', getTokenSecret())
-    .update(encodedPayload)
-    .digest('base64url');
-  return encodedPayload + '.' + signature;
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', getTokenEncryptionKey(), iv);
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify(payload), 'utf8'),
+    cipher.final(),
+  ]);
+  return [
+    iv.toString('base64url'),
+    cipher.getAuthTag().toString('base64url'),
+    encrypted.toString('base64url'),
+  ].join('.');
 }
 
 function verifyLookupToken(token: string): LookupTokenPayload | null {
-  const [encodedPayload, providedSignature, extra] = token.split('.');
-  if (!encodedPayload || !providedSignature || extra !== undefined) return null;
-
-  const expectedSignature = createHmac('sha256', getTokenSecret())
-    .update(encodedPayload)
-    .digest();
-  let receivedSignature: Buffer;
-  try {
-    receivedSignature = Buffer.from(providedSignature, 'base64url');
-  } catch {
-    return null;
-  }
+  const [encodedIv, encodedTag, encodedPayload, extra] = token.split('.');
   if (
-    receivedSignature.length !== expectedSignature.length ||
-    !timingSafeEqual(receivedSignature, expectedSignature)
+    !encodedIv ||
+    !encodedTag ||
+    !encodedPayload ||
+    extra !== undefined ||
+    token.length > 2048
   ) {
     return null;
   }
 
   try {
+    const iv = Buffer.from(encodedIv, 'base64url');
+    const authTag = Buffer.from(encodedTag, 'base64url');
+    const encrypted = Buffer.from(encodedPayload, 'base64url');
+    if (iv.length !== 12 || authTag.length !== 16 || encrypted.length === 0) {
+      return null;
+    }
+
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      getTokenEncryptionKey(),
+      iv,
+    );
+    decipher.setAuthTag(authTag);
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
     const payload = JSON.parse(
-      Buffer.from(encodedPayload, 'base64url').toString('utf8'),
+      decrypted.toString('utf8'),
     ) as Partial<LookupTokenPayload>;
+
     if (
       typeof payload.shopId !== 'string' ||
       !UUID_PATTERN.test(payload.shopId) ||
