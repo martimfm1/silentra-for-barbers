@@ -337,8 +337,8 @@ assert.ok(
 );
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'lines'\}/);
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'calendar'\}/);
-assert.match(agendaLayoutSettings, /onChange\(\) => onChange\('lines'\)/);
-assert.match(agendaLayoutSettings, /onChange\(\) => onChange\('calendar'\)/);
+assert.match(agendaLayoutSettings, /onClick=\{\(\) => onChange\('lines'\)\}/);
+assert.match(agendaLayoutSettings, /onClick=\{\(\) => onChange\('calendar'\)\}/);
 assert.match(publicProfileSettingsCard, /Visibilidade no diretório/);
 assert.match(publicProfileSettingsCard, /directoryVisible/);
 assert.match(publicProfileSettingsCard, /public_profile_enabled/);
