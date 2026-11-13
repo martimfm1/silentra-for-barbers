@@ -59,34 +59,6 @@ function overlaps(
 ): boolean {
   return start < otherEnd && end > otherStart;
 }
-function parseClosedDays(value: unknown): Set<number> {
-  const names: Record<string, number> = {
-    sunday: 0,
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-    domingo: 0,
-    segunda: 1,
-    terça: 2,
-    terca: 2,
-    quarta: 3,
-    quinta: 4,
-    sexta: 5,
-    sábado: 6,
-    sabado: 6,
-  };
-  const values =
-    typeof value === 'string'
-      ? value.split(',').map((item) => item.trim().toLowerCase())
-      : [];
-  const result = new Set<number>();
-  for (const item of values)
-    if (names[item] !== undefined) result.add(names[item]);
-  return result;
-}
 function getRateLimitKey(request: Request, shopId: string): string {
   const secret = process.env.RATE_LIMIT_SECRET;
   if (!secret || secret.length < 32)
