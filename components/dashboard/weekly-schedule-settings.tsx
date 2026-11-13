@@ -229,7 +229,12 @@ export function WeeklyScheduleSettings({ barbershopId, locale }: Props) {
 
   async function save() {
     if (!dirty || saving) return;
-    const validation = validateWeeklySchedule(draft, locale);
+    const scheduleToSave = cloneSchedule(draft);
+    for (const day of WEEKDAY_KEYS) {
+      scheduleToSave[day].work_intervals.sort((a, b) => a.start.localeCompare(b.start));
+      scheduleToSave[day].break_intervals.sort((a, b) => a.start.localeCompare(b.start));
+    }
+    const validation = validateWeeklySchedule(scheduleToSave, locale);
     if (validation) {
       toast.error(validation);
       return;
@@ -239,23 +244,27 @@ export function WeeklyScheduleSettings({ barbershopId, locale }: Props) {
     try {
       if (selectedProfessionalId === 'shop') {
         const result = await barbershopService.updateConfig(barbershopId, {
-          weekly_schedule: draft,
+          weekly_schedule: scheduleToSave,
         });
         if (result.error) throw result.error;
-        setShopSchedule(cloneSchedule(draft));
-        setInitialShopSchedule(cloneSchedule(draft));
-        setInitialDraft(cloneSchedule(draft));
+        setShopSchedule(cloneSchedule(scheduleToSave));
+        setInitialShopSchedule(cloneSchedule(scheduleToSave));
+        setDraft(cloneSchedule(scheduleToSave));
+        setInitialDraft(cloneSchedule(scheduleToSave));
       } else {
         const result = await professionalService.updateWeeklySchedule(
           selectedProfessionalId,
-          hasCustomSchedule ? draft : null,
+          hasCustomSchedule ? scheduleToSave : null,
         );
         if (result.error) throw result.error;
         setProfessionalSchedules((current) => ({
           ...current,
-          [selectedProfessionalId]: hasCustomSchedule ? cloneSchedule(draft) : null,
+          [selectedProfessionalId]: hasCustomSchedule ? cloneSchedule(scheduleToSave) : null,
         }));
-        if (hasCustomSchedule) setInitialDraft(cloneSchedule(draft));
+        if (hasCustomSchedule) {
+          setDraft(cloneSchedule(scheduleToSave));
+          setInitialDraft(cloneSchedule(scheduleToSave));
+        }
         else {
           setDraft(cloneSchedule(shopSchedule));
           setInitialDraft(cloneSchedule(shopSchedule));
