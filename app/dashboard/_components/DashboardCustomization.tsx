@@ -16,6 +16,7 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  ChevronDown,
   Palette,
   Settings2,
 } from 'lucide-react';
@@ -296,18 +297,30 @@ export function useDashboardCustomization() {
   return context;
 }
 
+type CustomizationState = ReturnType<typeof useDashboardCustomization>;
+
 export function DashboardCustomizationDialog({
+  customization,
   config,
   setConfig,
   name,
   onNameChange,
+  selectedPresetId,
+  isNewPreset,
+  onSelectPreset,
+  onCreatePreset,
   locale,
   disabled = false,
 }: {
+  customization: CustomizationState;
   config: DashboardCustomizationConfig;
   setConfig: Dispatch<SetStateAction<DashboardCustomizationConfig>>;
   name: string;
   onNameChange: (name: string) => void;
+  selectedPresetId: string | null;
+  isNewPreset: boolean;
+  onSelectPreset: (id: string) => void;
+  onCreatePreset: () => void;
   locale: string;
   disabled?: boolean;
 }) {
@@ -388,27 +401,66 @@ export function DashboardCustomizationDialog({
 
           <div className="space-y-6">
             <section className="space-y-3">
-              <div>
-                <label
-                  className="text-sm font-medium"
-                  htmlFor="dashboard-preset-name"
-                >
-                  {copy('Nome da personalização', 'Customization name')}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <label className="text-sm font-medium">
+                  {copy('Personalização', 'Customization')}
                 </label>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {copy(
-                    'As alterações ficam pendentes até carregares em Guardar no topo das definições.',
-                    'Changes stay pending until you press Save at the top of Settings.',
-                  )}
-                </p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <select
+                    aria-label={copy(
+                      'Escolher personalização',
+                      'Choose customization',
+                    )}
+                    value={isNewPreset ? '__new__' : (selectedPresetId ?? '')}
+                    disabled={disabled}
+                    onChange={(event) => {
+                      if (event.target.value === '__new__') {
+                        setDraftShortcuts([...config.shortcuts]);
+                        onCreatePreset();
+                        return;
+                      }
+                      const selected = customization.presets.find(
+                        (preset) => preset.id === event.target.value,
+                      );
+                      if (selected) {
+                        setDraftShortcuts([...selected.config.shortcuts]);
+                        onSelectPreset(selected.id);
+                      }
+                    }}
+                    className="min-h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-zinc-900 px-3 text-sm"
+                  >
+                    {customization.presets.map((preset) => (
+                      <option key={preset.id} value={preset.id}>
+                        {preset.name}
+                      </option>
+                    ))}
+                    <option value="__new__">
+                      {copy('+ Nova personalização', '+ New customization')}
+                    </option>
+                  </select>
+                  <ChevronDown className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+                </div>
               </div>
+              <label
+                className="block text-sm font-medium"
+                htmlFor="dashboard-preset-name"
+              >
+                {copy('Nome', 'Name')}
+              </label>
               <Input
                 id="dashboard-preset-name"
                 value={name}
                 maxLength={48}
+                disabled={disabled}
                 onChange={(event) => onNameChange(event.target.value)}
                 className="border-white/10 bg-zinc-900"
               />
+              <p className="text-xs text-zinc-500">
+                {copy(
+                  'As alterações ficam pendentes até carregares em Guardar no topo das definições.',
+                  'Changes stay pending until you press Save at the top of Settings.',
+                )}
+              </p>
             </section>
 
             <section className="space-y-3">
