@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CalendarDays,
   CalendarX2,
+  Check,
   Clock3,
   Loader2,
   Mail,
@@ -32,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { AppointmentCompletionDialog } from './appointment-completion-dialog';
 import type { Appointment } from '@/types';
 
 type Props = {
@@ -48,6 +50,13 @@ type Props = {
     appointmentId: string,
     scope: 'future' | 'all',
   ) => Promise<boolean>;
+  valueProducts: string;
+  setValueProducts: (value: string) => void;
+  descriptionProducts: string;
+  setDescriptionProducts: (value: string) => void;
+  finalizeBooking: (appointmentId: string, paymentMethod: string) => Promise<boolean>;
+  addCompletedAppointmentClient: (appointmentId: string) => void | Promise<void>;
+  addingClientAppointmentId: string | null;
   locale?: string;
 };
 
@@ -201,6 +210,13 @@ export function AppointmentDetailDialog({
   onReschedule,
   onCancel,
   onCancelSeries,
+  valueProducts,
+  setValueProducts,
+  descriptionProducts,
+  setDescriptionProducts,
+  finalizeBooking,
+  addCompletedAppointmentClient,
+  addingClientAppointmentId,
   locale = 'pt',
 }: Props) {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
@@ -210,6 +226,7 @@ export function AppointmentDetailDialog({
   const [isCancelConfirmationOpen, setIsCancelConfirmationOpen] =
     useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isCompletionOpen, setIsCompletionOpen] = useState(false);
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
@@ -219,6 +236,7 @@ export function AppointmentDetailDialog({
     setEditDate(toLocalDateInputValue(appointment.date_hour));
     setEditTime(toLocalTimeInputValue(appointment.date_hour));
     setIsEditingSchedule(false);
+    setIsCompletionOpen(false);
   }, [appointment?.id, appointment?.date_hour, open]);
 
   if (!appointment) return null;
@@ -372,6 +390,36 @@ export function AppointmentDetailDialog({
                   </DetailItem>
                 </div>
               </Section>
+              {appointment.status === 'scheduled' ? (
+                <Section
+                  title={isEnglish ? 'Complete appointment' : 'Concluir marcação'}
+                >
+                  <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.035] p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-100">
+                          {isEnglish
+                            ? 'Has the service been completed?'
+                            : 'O atendimento já foi realizado?'}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
+                          {isEnglish
+                            ? 'Mark it as completed, record the payment method and any extra products.'
+                            : 'Marca o atendimento como concluído e regista o método de pagamento e eventuais produtos adicionais.'}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setIsCompletionOpen(true)}
+                        className="min-h-11 shrink-0 bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                      >
+                        <Check className="mr-2 size-4" aria-hidden="true" />
+                        {isEnglish ? 'Complete booking' : 'Concluir marcação'}
+                      </Button>
+                    </div>
+                  </div>
+                </Section>
+              ) : null}
               {canReschedule ? (
                 <Section
                   title={isEnglish ? 'Change booking' : 'Alterar marcação'}
@@ -821,6 +869,20 @@ export function AppointmentDetailDialog({
           </div>
         </div>
       </DialogContent>
+      <AppointmentCompletionDialog
+        appointment={appointment}
+        open={isCompletionOpen}
+        onOpenChange={setIsCompletionOpen}
+        valueProducts={valueProducts}
+        setValueProducts={setValueProducts}
+        descriptionProducts={descriptionProducts}
+        setDescriptionProducts={setDescriptionProducts}
+        finalizeBooking={finalizeBooking}
+        addCompletedAppointmentClient={addCompletedAppointmentClient}
+        addingClientAppointmentId={addingClientAppointmentId}
+        locale={locale}
+        onCompleted={() => onOpenChange(false)}
+      />
     </Dialog>
   );
 }
