@@ -55,14 +55,15 @@ export function AppointmentCompletionDialog({
   const complete = async (paymentMethod: 'cash' | 'mbway' | 'card') => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    let completed = false;
     try {
-      const completed = await finalizeBooking(appointment.id, paymentMethod);
-      if (completed) {
-        onOpenChange(false);
-        onCompleted?.();
-      }
+      completed = await finalizeBooking(appointment.id, paymentMethod);
     } finally {
       setIsSubmitting(false);
+    }
+    if (completed) {
+      onOpenChange(false);
+      onCompleted?.();
     }
   };
 
