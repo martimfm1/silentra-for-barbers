@@ -363,7 +363,7 @@ assert.ok(
 assert.match(settingsPage, /async function saveAll\(\)/);
 assert.match(settingsPage, /onClick=\{\(\) => void saveAll\(\)\}/);
 assert.match(settingsPage, /sticky top-0/);
-assert.match(settingsPage, /setLocale\(n\.default_language\)/);
+assert.match(settingsPage, /setLocale\(savedConfig\.default_language\)/);
 assert.match(settingsPage, /canManualMbway/);
 assert.match(settingsPage, /automationAllowed/);
 assert.doesNotMatch(settingsPage, /<select\b/);
