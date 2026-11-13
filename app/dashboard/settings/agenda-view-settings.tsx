@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { CalendarDays, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,32 @@ export function readAgendaViewPreference(): AgendaViewPreference {
 export function saveAgendaViewPreference(view: AgendaViewPreference) {
   window.localStorage.setItem(STORAGE_KEY, view);
   window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+export function useAgendaViewPreference() {
+  const [view, setView] = useState<AgendaViewPreference>('lines');
+
+  useEffect(() => {
+    const read = () => setView(readAgendaViewPreference());
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) read();
+    };
+
+    read();
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(CHANGE_EVENT, read);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(CHANGE_EVENT, read);
+    };
+  }, []);
+
+  const updateView = (nextView: AgendaViewPreference) => {
+    saveAgendaViewPreference(nextView);
+    setView(nextView);
+  };
+
+  return { view, setView: updateView };
 }
 
 export function AgendaViewSettings({
