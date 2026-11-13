@@ -28,7 +28,7 @@ export function mapRecordToMarketplaceShopResponse(
     nextSlot: '15:00',
     rating: Number(record.rating ?? 0),
     reviewsCount: Number(record.reviews_count ?? 0),
-    publicProfileEnabled: relation?.public_profile_enabled !== false,
+    publicProfileEnabled: record.public_profile_enabled !== false,
   };
 }
 
