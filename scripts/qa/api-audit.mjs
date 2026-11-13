@@ -66,7 +66,7 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
-    pattern: /\\/shops\\/route\\.ts$/,
+    pattern: /\/shops\/route\.ts$/,
     markers: [
       'barbershops!inner',
       ".eq('barbershops.is_public_in_directory', true)",
