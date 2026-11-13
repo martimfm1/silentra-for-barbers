@@ -6,6 +6,8 @@ import { getClientIp } from '@/lib/security/public-rate-limit';
 import { normalizeText, UUID_PATTERN } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 
+export const runtime = 'nodejs';
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOOKUP_TOKEN_TTL_SECONDS = 5 * 60;
 const LOOKUP_RATE_LIMIT = 30;
