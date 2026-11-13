@@ -1,7 +1,13 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { generateTimeSlots } from '@/app/barbershops/utils/booking-slots';
+import { createAdminClient } from '@/lib/supabase/admin';
+import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+  timeToMinutes,
+} from '@/lib/scheduling/weekly-schedule';
 import { isSafePublicBookingDate, UUID_PATTERN } from '@/lib/validation';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 
@@ -25,21 +31,24 @@ async function GET__unobserved(
       );
     }
 
-    const selectedDate = new Date(`${dateParam}T00:00:00`);
-    const dayOfWeek = selectedDate.getDay(); // 0 = Domingo, 1 = Segunda...
+    const selectedDate = new Date(`${dateParam}T12:00:00`);
+    const dayOfWeek = selectedDate.getDay();
 
     const supabase = await createClient();
-
     const { data: shop, error } = await supabase
       .from('shops')
       .select(
         `
         id,
+        barbershop_id,
         barbershops (
           name,
           opening_time,
           closing_time,
-          off_days,
+          lunch_start,
+          lunch_end,
+          closed_days,
+          weekly_schedule,
           minimum_booking_notice_minutes
         )
       `,
@@ -47,7 +56,7 @@ async function GET__unobserved(
       .eq('id', shopId)
       .single();
 
-    if (error || !shop) {
+    if (error || !shop?.barbershop_id) {
       return NextResponse.json(
         { error: 'Barbearia não encontrada' },
         { status: 404 },
@@ -57,44 +66,73 @@ async function GET__unobserved(
     const barbershop = Array.isArray(shop.barbershops)
       ? shop.barbershops[0]
       : shop.barbershops;
-
-    const offDays: number[] = barbershop?.off_days || [0];
-
-    // Validação de Dia de Folga
-    if (offDays.includes(dayOfWeek)) {
+    if (!barbershop) {
       return NextResponse.json(
-        {
-          shopId,
-          date: dateParam,
-          isClosed: true,
-          message: 'A barbearia está encerada/de folga neste dia.',
-          slots: [],
-        },
-        { headers: { 'Cache-Control': 'private, no-cache' } },
+        { error: 'Configuração da barbearia indisponível.' },
+        { status: 503 },
       );
     }
 
-    const openTime = barbershop?.opening_time
-      ? barbershop.opening_time.substring(0, 5)
-      : '09:00';
-    const closeTime = barbershop?.closing_time
-      ? barbershop.closing_time.substring(0, 5)
-      : '19:00';
+    const admin = createAdminClient();
+    const { data: professionals, error: professionalsError } = await admin
+      .from('professionals')
+      .select('id,weekly_schedule')
+      .eq('barbershop_id', shop.barbershop_id)
+      .eq('active', true);
 
+    if (professionalsError) {
+      console.error('[API_SLOTS_PROFESSIONALS_ERROR]', professionalsError.code);
+      return NextResponse.json(
+        { error: 'Não foi possível carregar os horários dos barbeiros.' },
+        { status: 503 },
+      );
+    }
+
+    const shopSchedule = normalizeWeeklySchedule(
+      barbershop.weekly_schedule,
+      barbershop,
+    );
     const minimumNoticeMinutes = Math.max(
       0,
-      Math.min(43200, Number(barbershop?.minimum_booking_notice_minutes ?? 0)),
+      Math.min(43200, Number(barbershop.minimum_booking_notice_minutes ?? 0)),
     );
-    const slots = generateTimeSlots(openTime, closeTime, 30).filter(
-      (slot) =>
-        !isBeforeMinimumBookingNotice(dateParam, slot, minimumNoticeMinutes),
-    );
+    const scheduleSources =
+      professionals && professionals.length > 0
+        ? professionals.map((professional) =>
+            professional.weekly_schedule
+              ? normalizeWeeklySchedule(professional.weekly_schedule)
+              : shopSchedule,
+          )
+        : [shopSchedule];
 
+    const slotSet = new Set<string>();
+    for (const schedule of scheduleSources) {
+      const day = getDailySchedule(schedule, dayOfWeek);
+      if (day.day_off) continue;
+      for (const period of day.work_intervals) {
+        const from = timeToMinutes(period.start);
+        const to = timeToMinutes(period.end);
+        for (let start = from; start + 30 <= to; start += 30) {
+          if (!isSlotWithinDailySchedule(day, start, start + 30)) continue;
+          const slot = `${String(Math.floor(start / 60)).padStart(2, '0')}:${String(start % 60).padStart(2, '0')}`;
+          if (
+            !isBeforeMinimumBookingNotice(
+              dateParam,
+              slot,
+              minimumNoticeMinutes,
+            )
+          )
+            slotSet.add(slot);
+        }
+      }
+    }
+
+    const slots = Array.from(slotSet).sort();
     return NextResponse.json(
       {
         shopId,
         date: dateParam,
-        isClosed: false,
+        isClosed: slots.length === 0,
         slots,
       },
       { headers: { 'Cache-Control': 'private, no-cache' } },
