@@ -6,6 +6,11 @@ import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendBrevoEmail } from '@/lib/email/brevo';
+import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+} from '@/lib/scheduling/weekly-schedule';
 
 const ROLES = [
   'owner',
