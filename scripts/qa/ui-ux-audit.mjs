@@ -22,6 +22,8 @@ const [
   automationPage,
   marketingWorkspace,
   settingsPage,
+  shopsDirectoryRoute,
+  barbershopConfigService,
   agendaCancellationPolicy,
   globalBookingDialog,
 ] = await Promise.all([
@@ -32,6 +34,8 @@ const [
   read('app/dashboard/automations/page.tsx'),
   read('app/dashboard/marketing/marketing-workspace.tsx'),
   read('app/dashboard/settings/settings-page.tsx'),
+  read('app/api/shops/route.ts'),
+  read('app/dashboard/_services/barbershop.service.ts'),
   read('components/dashboard/agenda-cancellation-policy-panel.tsx'),
   read('app/dashboard/_components/DashboardCreateBookingDialog.tsx'),
 ]);
@@ -296,6 +300,16 @@ assert.match(settingsPushNotifications, /className="w-full min-w-0"/);
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
 assert.match(settingsPage, /<PublicProfileSettingsCard/);
 assert.ok(settingsPage.includes('directoryVisible={config.is_public_in_directory}'));
+assert.match(settingsPage, /async function handleDirectoryVisibilityChange\\(visible: boolean\\)/);
+assert.match(settingsPage, /barbershopService\\.updateConfig\\(barbershopId, \\{\\s*is_public_in_directory: visible/s);
+assert.match(settingsPage, /setInitial\\(\\(current\\) =>[\\s\\S]*is_public_in_directory: visible/);
+assert.ok(settingsPage.includes('directorySaving={saving || directorySaving || planLoading}'));
+assert.ok(barbershopConfigService.includes("field: 'is_public_in_directory'"));
+assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada automaticamente quando a alteras.'));
+assert.ok(shopsDirectoryRoute.includes('barbershops!inner'));
+assert.ok(shopsDirectoryRoute.includes(".eq('barbershops.is_public_in_directory', true)"));
+assert.ok(shopsDirectoryRoute.includes('relation?.is_public_in_directory !== true'));
+assert.ok(shopsDirectoryRoute.includes("'Cache-Control': 'no-store, max-age=0'"));
 assert.ok(!settingsPage.includes('href="/dashboard/settings/public-profile"'));
 assert.ok(
   settingsPage.indexOf('id="settings-location"') >
