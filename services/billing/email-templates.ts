@@ -432,18 +432,22 @@ export function customerPaymentReceiptEmail(context: BillingEmailContext) {
     new URL('/dashboard/billing', getBaseUrl()).toString();
   const content =
     details([
-      ['Comprovativo', context.documentNumber || '—'],
+      ['Documento', context.documentNumber || '—'],
+      ['Estado', 'Pagamento confirmado'],
+      ['Cliente', context.customerName || '—'],
+      ['Barbearia', context.barbershopName || '—'],
       ['Plano', planLabel(context.plan)],
       ['Período', intervalLabel(context.billingInterval)],
-      ['Total pago', money(context.price, context.currency)],
-      ['Data', dateTime(context.issuedAt)],
-      ['Referência', reference(context.requestId)],
+      ['Método', 'Pagamento manual validado pela Silentra'],
+      ['Total confirmado', money(context.price, context.currency)],
+      ['Data de confirmação', dateTime(context.issuedAt)],
+      ['Referência do pedido', reference(context.requestId)],
     ]) +
-    '<p style="margin:18px 0 0;color:#71717a;font-size:12px;line-height:1.7">O PDF em anexo é um comprovativo interno de pagamento. Não substitui uma fatura ou recibo fiscal certificado.</p>';
+    '<p style="margin:18px 0 0;color:#71717a;font-size:12px;line-height:1.7">O PDF em anexo é um comprovativo interno do pagamento registado. Não substitui a fatura ou o recibo fiscal que deva ser emitido pelo prestador de serviços.</p>';
   return shell({
-    preheader: `Comprovativo ${context.documentNumber || reference(context.requestId)} do teu pagamento Silentra.`,
+    preheader: `Pagamento confirmado · ${context.documentNumber || reference(context.requestId)} · ${money(context.price, context.currency)}.`,
     eyebrow: 'Billing · Comprovativo',
-    title: 'Pagamento confirmado',
+    title: 'O teu pagamento foi confirmado',
     intro:
       'O pagamento da tua subscrição foi confirmado. Enviamos em anexo o teu comprovativo de pagamento em PDF.',
     content,
