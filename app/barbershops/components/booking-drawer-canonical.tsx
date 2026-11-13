@@ -1350,92 +1350,69 @@ export function BookingDrawerCanonical({
                 )}
 
                 <div
-                    className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
-                    aria-live="polite"
-                  >
-                    {customerState === 'checking' && (
-                      <p className="flex items-center gap-2 text-xs text-zinc-400">
-                        <Loader2
-                          className="size-3.5 animate-spin"
-                          aria-hidden="true"
-                        />
-                        {t('bookingDrawer.checkingDetails')}
+                  className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                  aria-live="polite"
+                >
+                  {customerState === 'checking' && (
+                    <p className="flex items-center gap-2 text-xs text-zinc-400">
+                      <Loader2
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
+                      {t('bookingDrawer.checkingDetails')}
+                    </p>
+                  )}
+                  {customerState === 'suggestion' && customerSuggestion && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-zinc-100">
+                        {customerSuggestion.matchedBy === 'email'
+                          ? t('bookingDrawer.profileSuggestionEmail')
+                          : t('bookingDrawer.profileSuggestionPhone')}
                       </p>
-                    )}
-                    {customerState === 'suggestion' && customerSuggestion && (
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium text-zinc-100">
-                          {customerSuggestion.matchedBy === 'email'
-                            ? t('bookingDrawer.profileSuggestionEmail')
-                            : t('bookingDrawer.profileSuggestionPhone')}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            disabled={submitting}
-                            onClick={() => void confirmCustomerProfile()}
-                            className="w-full"
-                          >
-                            {t('bookingDrawer.profileConfirm')}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={submitting}
-                            onClick={declineCustomerProfile}
-                            className="w-full"
-                          >
-                            {t('bookingDrawer.profileReject')}
-                          </Button>
-                        </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={submitting}
+                          onClick={() => void confirmCustomerProfile()}
+                          className="w-full"
+                        >
+                          {t('bookingDrawer.profileConfirm')}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={submitting}
+                          onClick={declineCustomerProfile}
+                          className="w-full"
+                        >
+                          {t('bookingDrawer.profileReject')}
+                        </Button>
                       </div>
-                    )}
-                    {customerState === 'matched' && (
-                      <p className="flex items-center gap-2 text-xs text-emerald-300">
-                        <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                        {t('bookingDrawer.profileAutofilled')}
-                      </p>
-                    )}
-                    {customerState === 'new' && (
-                      <p className="text-xs text-zinc-500">
-                        {t('bookingDrawer.profileNew')}
-                      </p>
-                    )}
-                    {customerState === 'error' && (
-                      <p className="text-xs text-amber-300">
-                        {t('bookingDrawer.profileError')}
-                      </p>
-                    )}
-                    {customerState === 'idle' && (
-                      <p className="text-xs text-zinc-600">
-                        {t('bookingDrawer.profileIdle')}
-                      </p>
-                    )}
-                  </div>
-                )}
-                    {customerState === 'matched' && (
-                      <p className="flex items-center gap-2 text-xs text-emerald-300">
-                        <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                        {t('bookingDrawer.profileFound')}
-                      </p>
-                    )}
-                    {customerState === 'new' && (
-                      <p className="text-xs text-zinc-500">
-                        {t('bookingDrawer.profileNew')}
-                      </p>
-                    )}
-                    {customerState === 'error' && (
-                      <p className="text-xs text-amber-300">
-                        {t('bookingDrawer.profileError')}
-                      </p>
-                    )}
-                    {customerState === 'idle' && (
-                      <p className="text-xs text-zinc-600">
-                        {t('bookingDrawer.profileIdle')}
-                      </p>
-                    )}
+                    </div>
+                  )}
+                  {customerState === 'matched' && (
+                    <p className="flex items-center gap-2 text-xs text-emerald-300">
+                      <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                      {t('bookingDrawer.profileAutofilled')}
+                    </p>
+                  )}
+                  {customerState === 'new' && (
+                    <p className="text-xs text-zinc-500">
+                      {t('bookingDrawer.profileNew')}
+                    </p>
+                  )}
+                  {customerState === 'error' && (
+                    <p className="text-xs text-amber-300">
+                      {t('bookingDrawer.profileError')}
+                    </p>
+                  )}
+                  {customerState === 'idle' && (
+                    <p className="text-xs text-zinc-600">
+                      {t('bookingDrawer.profileIdle')}
+                    </p>
+                  )}
                 </div>
 
                 <Button
