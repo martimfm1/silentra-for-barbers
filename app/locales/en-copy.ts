@@ -1173,11 +1173,18 @@ export const enCopy = {
     birthDate: 'Date of birth',
     checkingDetails: 'Checking your details…',
     profileFound: 'We found your profile. Your details will be reused.',
+    profileSuggestionEmail:
+      'We found a customer linked to this email at this barbershop. Is this you?',
+    profileSuggestionPhone:
+      'We found a customer linked to this phone number at this barbershop. Is this you?',
+    profileConfirm: 'Yes, that is me',
+    profileReject: 'No, that is not me',
+    profileAutofilled: 'Customer details filled in. Review any remaining fields.',
     profileNew:
-      "We couldn't find a profile with this email and phone number. It will be created or updated during booking.",
+      "We couldn't find a customer with this contact. You can continue normally.",
     profileError: "We couldn't verify the profile right now. You can continue.",
     profileIdle:
-      'We use your email and phone number to recognise existing customers at this barbershop.',
+      'Enter your email or phone number to check whether you are already a customer at this barbershop.',
     chooseBarber: 'Choose a barber first.',
     chooseOpenDay: 'Choose a day when the barbershop is open.',
     chooseService: 'Choose a service.',
