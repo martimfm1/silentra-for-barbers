@@ -273,11 +273,12 @@ async function PATCH__unobserved(
       { data: shop, error: shopError },
       { data: blocks, error: blocksError },
       { data: others, error: othersError },
+      { data: professionalSchedule, error: professionalScheduleError },
     ] = await Promise.all([
       admin
         .from('barbershops')
         .select(
-          'name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days',
+          'name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule',
         )
         .eq('id', barbershopId)
         .maybeSingle(),
@@ -297,8 +298,20 @@ async function PATCH__unobserved(
           .in('status', ['pending', 'scheduled'])
           .neq('id', appointmentId);
       })(),
+      admin
+        .from('professionals')
+        .select('weekly_schedule')
+        .eq('id', appointment.professional_id ?? '')
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle(),
     ]);
-    if (shopError || blocksError || othersError)
+    if (
+      shopError ||
+      blocksError ||
+      othersError ||
+      professionalScheduleError ||
+      (appointment.professional_id && !professionalSchedule)
+    )
       return NextResponse.json(
         {
           success: false,
@@ -307,49 +320,25 @@ async function PATCH__unobserved(
         { status: 503 },
       );
 
-    const closedDays = Array.isArray(shop?.closed_days)
-      ? shop.closed_days
-      : String(shop?.closed_days ?? '')
-          .split(',')
-          .map((day) => day.trim().toLowerCase());
+    const shopSchedule = normalizeWeeklySchedule(
+      shop?.weekly_schedule,
+      shop ?? undefined,
+    );
+    const effectiveSchedule = professionalSchedule?.weekly_schedule
+      ? normalizeWeeklySchedule(professionalSchedule.weekly_schedule)
+      : shopSchedule;
     const weekday = new Date(`${date}T12:00:00`).getDay();
-    const weekdayNames = [
-      'sunday',
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-    ];
-    if (
-      closedDays.includes(weekday) ||
-      closedDays.includes(weekdayNames[weekday])
-    )
+    const daySchedule = getDailySchedule(effectiveSchedule, weekday);
+    if (daySchedule.day_off)
       return NextResponse.json(
-        { success: false, error: 'A barbearia está fechada nesse dia.' },
+        { success: false, error: 'O barbeiro está de folga neste dia.' },
         { status: 409 },
       );
-    const opening = minutes(String(shop?.opening_time ?? '09:00'));
-    const closing = minutes(String(shop?.closing_time ?? '19:00'));
-    if (startMinutes < opening || endMinutes > closing)
+    if (!isSlotWithinDailySchedule(daySchedule, startMinutes, endMinutes))
       return NextResponse.json(
         {
           success: false,
-          error: 'O horário está fora do horário de funcionamento.',
-        },
-        { status: 409 },
-      );
-    if (
-      shop?.lunch_start &&
-      shop?.lunch_end &&
-      startMinutes < minutes(shop.lunch_end) &&
-      endMinutes > minutes(shop.lunch_start)
-    )
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'O horário coincide com a pausa da barbearia.',
+          error: 'O horário está fora dos períodos de trabalho ou coincide com uma pausa.',
         },
         { status: 409 },
       );
