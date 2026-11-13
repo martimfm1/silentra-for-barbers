@@ -320,28 +320,31 @@ export function generateManualPaymentReceiptPdf(
   label(302, 594, 'Dados do cliente');
   drawText(302, 575, safeCustomerName, 10, true);
   let customerY = 560;
+  const contactLine = [document.customer_email, document.customer_phone]
+    .filter((value) => Boolean(value?.trim()))
+    .join(' · ');
+  const addressSummary = addressLines.join(', ');
   const customerDetails = [
     document.barbershop_name?.trim()
-      ? 'Barbearia: ' + document.barbershop_name.trim()
+      ? { value: 'Barbearia: ' + document.barbershop_name.trim(), lines: 1 }
       : null,
     document.customer_tax_id?.trim()
-      ? 'NIF / ID fiscal: ' + document.customer_tax_id.trim()
+      ? { value: 'NIF / ID fiscal: ' + document.customer_tax_id.trim(), lines: 1 }
       : null,
-    document.customer_email?.trim() || null,
-    document.customer_phone?.trim() || null,
-    ...addressLines,
-  ].filter((value): value is string => Boolean(value));
+    contactLine ? { value: contactLine, lines: 2 } : null,
+    addressSummary ? { value: addressSummary, lines: 3 } : null,
+  ].filter((value): value is { value: string; lines: number } => Boolean(value));
 
-  for (const detail of customerDetails.slice(0, 6)) {
+  for (const detail of customerDetails) {
     const used = drawWrapped(
       302,
       customerY,
-      detail,
+      detail.value,
       42,
       7.5,
       false,
       '0.35 0.37 0.40',
-      2,
+      detail.lines,
       10,
     );
     customerY -= Math.max(11, used);
