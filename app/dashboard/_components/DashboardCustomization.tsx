@@ -489,8 +489,6 @@ export function DashboardCustomizationDialog({
                         toggleShortcut(shortcut.id, event.target.checked)
                       }
                       disabled={disabled}
-                      disabled={disabled}
-                      disabled={disabled}
                       className="size-4 accent-emerald-400"
                     />
                     <label
@@ -565,6 +563,7 @@ export function DashboardCustomizationDialog({
                       onChange={(event) =>
                         updateSection(section.id, event.target.checked)
                       }
+                      disabled={disabled}
                       className="size-4 accent-emerald-400"
                     />
                     {isEnglish ? section.en : section.pt}
@@ -626,6 +625,7 @@ export function DashboardCustomizationDialog({
                               ),
                         }))
                       }
+                      disabled={disabled}
                       className="size-4 accent-emerald-400"
                     />
                     {isEnglish ? metric.en : metric.pt}
