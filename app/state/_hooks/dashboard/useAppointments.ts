@@ -361,9 +361,11 @@ export function useAppointments(
             'Marcação confirmada. O cliente não tem e-mail associado.',
           );
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Confirm Booking Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
