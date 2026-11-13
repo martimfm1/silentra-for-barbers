@@ -1176,6 +1176,8 @@ export const enCopy = {
     birthDate: 'Date of birth',
     checkingDetails: 'Checking your details…',
     profileFound: 'We found your profile. Your details will be reused.',
+    profileSuggestionCustomer: 'Customer found',
+    profileSuggestionNameUnavailable: 'Name unavailable',
     profileSuggestionEmail:
       'We found a customer linked to this email at this barbershop. Is this you?',
     profileSuggestionPhone:
