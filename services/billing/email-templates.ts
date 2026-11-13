@@ -23,6 +23,15 @@ export type BillingEmailContext = {
   dashboardUrl?: string | null;
 };
 
+export type SubscriptionExpiryReminderContext = {
+  customerName?: string | null;
+  plan: Exclude<BillingPlan, 'free'>;
+  expiresAt: string;
+  daysRemaining: 1 | 3 | 7;
+  locale?: 'pt' | 'en';
+  dashboardUrl?: string | null;
+};
+
 function escapeHtml(value: string) {
   return value.replace(
     /[&<>"']/g,
@@ -178,12 +187,13 @@ function shell(input: {
   content: string;
   cta?: { label: string; href: string };
   footer?: string;
+  lang?: 'pt' | 'en';
 }) {
   const ctaHref = input.cta ? safeUrl(input.cta.href) : null;
 
   return {
     html: `<!doctype html>
-<html lang="pt">
+<html lang="${input.lang === 'en' ? 'en' : 'pt-PT'}">
   <body style="margin:0;padding:0;background:#f5f5f4;color:#18181b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
     <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;color:transparent">${escapeHtml(input.preheader)}</span>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#f5f5f4">
@@ -439,6 +449,54 @@ export function customerPaymentReceiptEmail(context: BillingEmailContext) {
     content,
     cta: { label: 'Abrir faturação', href: dashboardUrl },
     footer: 'Silentra · Gestão e agendamento para barbearias',
+  });
+}
+
+export function customerSubscriptionExpiryReminderEmail(
+  context: SubscriptionExpiryReminderContext,
+) {
+  const isEnglish = context.locale === 'en';
+  const dashboardUrl =
+    safeUrl(context.dashboardUrl) ??
+    new URL('/dashboard/billing', getBaseUrl()).toString();
+  const name =
+    context.customerName?.trim() || (isEnglish ? 'there' : 'Cliente');
+  const days = context.daysRemaining;
+  const title = isEnglish
+    ? days === 1
+      ? 'Your subscription ends tomorrow'
+      : `Your subscription ends in ${days} days`
+    : days === 1
+      ? 'A tua subscrição termina amanhã'
+      : `A tua subscrição termina daqui a ${days} dias`;
+  const expiryDate = new Intl.DateTimeFormat(
+    isEnglish ? 'en-GB' : 'pt-PT',
+    { dateStyle: 'long', timeZone: 'Europe/Lisbon' },
+  ).format(new Date(context.expiresAt));
+  const content = details([
+    [isEnglish ? 'Plan' : 'Plano', planLabel(context.plan)],
+    [isEnglish ? 'Access until' : 'Acesso até', expiryDate],
+    [isEnglish ? 'Days remaining' : 'Dias restantes', String(days)],
+  ]);
+
+  return shell({
+    lang: isEnglish ? 'en' : 'pt',
+    preheader: title,
+    eyebrow: isEnglish
+      ? 'Billing · Subscription expiry'
+      : 'Faturação · Fim da subscrição',
+    title,
+    intro: isEnglish
+      ? `Hello ${escapeHtml(name)}. Your ${escapeHtml(planLabel(context.plan))} subscription ends ${days === 1 ? 'tomorrow' : `in ${days} days`}. To keep using your plan, review the renewal options in your billing area.`
+      : `Olá ${escapeHtml(name)}. A tua subscrição ${escapeHtml(planLabel(context.plan))} termina ${days === 1 ? 'amanhã' : `daqui a ${days} dias`}. Para continuares a utilizar o plano, consulta as opções de renovação na área de faturação.`,
+    content,
+    cta: {
+      label: isEnglish ? 'Manage subscription' : 'Gerir subscrição',
+      href: dashboardUrl,
+    },
+    footer: isEnglish
+      ? 'You are receiving this operational reminder because your subscription is scheduled to end.'
+      : 'Recebes este aviso porque a tua subscrição está prevista para terminar nesta data.',
   });
 }
 
