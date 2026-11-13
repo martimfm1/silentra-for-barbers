@@ -54,6 +54,18 @@ A fila `appointment_reminder_outbox` é idempotente por marcação e hora agenda
 
 A migration de agendamento deriva o endpoint `/api/cron/appointment-reminders` a partir de `silentra_booking_outbox_url`; não é necessário guardar um segundo URL. Confirmar que o Vault contém `silentra_booking_outbox_cron_secret` e `silentra_booking_outbox_url` antes de ativar o job.
 
+## Avisos de fim de subscrição
+
+O endpoint `/api/cron/subscription-expiry-reminders` está agendado diariamente pelo Vercel Cron às **00:25 UTC**, cinco minutos antes do worker que expira as subscrições manuais. Requer o mesmo `CRON_SECRET` do ambiente de produção.
+
+O worker envia avisos por email **7 dias, 3 dias e 1 dia antes** da data de fim, usando o calendário de `Europe/Lisbon`:
+
+- Subscrições pagas manuais ativas ou em período experimental: recebem os três avisos.
+- Subscrições Stripe: recebem os avisos apenas quando o cancelamento no fim do período já está agendado; subscrições com renovação automática não recebem alertas de fim.
+- Subscrições com override de plano ou uma atribuição administrativa ativa são excluídas, porque o acesso não depende do fim da subscrição faturada.
+
+A tabela `subscription_expiry_reminder_outbox` garante uma entrada por subscrição, data de fim e marco (7/3/1 dias), com reclamação concorrente, recuperação de leases abandonadas e novas tentativas em caso de falha. O envio é feito através do Brevo e o endpoint regista apenas contagens e identificadores operacionais, sem expor endereços de email nos logs.
+
 ## Vercel
 
 `vercel.json` mantém apenas cron jobs diários compatíveis com Vercel Hobby. Não agendar `/api/cron/booking-lifecycle` de hora a hora em Vercel Hobby: o deploy de produção é rejeitado por essa frequência. O estado da conclusão automática é tratado pelo job `silentra-booking-completion` do Supabase a cada 10 minutos. A emissão das automações `booking_completed` pela rota HTTP ainda requer uma estratégia de execução compatível com o plano antes de ser considerada ativa em produção.
