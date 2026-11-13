@@ -26,6 +26,7 @@ export async function fetchShops({
 
   const response = await fetch(`/api/shops?${params.toString()}`, {
     signal,
+    cache: 'no-store',
     headers: { Accept: 'application/json' },
   });
 
