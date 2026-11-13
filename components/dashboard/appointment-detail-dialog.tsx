@@ -40,6 +40,7 @@ type Props = {
   appointment: Appointment | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  confirmBooking: (appointmentId: string) => Promise<boolean>;
   onReschedule: (
     appointmentId: string,
     date: string,
@@ -207,6 +208,7 @@ export function AppointmentDetailDialog({
   appointment,
   open,
   onOpenChange,
+  confirmBooking,
   onReschedule,
   onCancel,
   onCancelSeries,
@@ -227,6 +229,9 @@ export function AppointmentDetailDialog({
     useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCompletionOpen, setIsCompletionOpen] = useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
+  const [isConfirmingBooking, setIsConfirmingBooking] = useState(false);
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
@@ -237,6 +242,8 @@ export function AppointmentDetailDialog({
     setEditTime(toLocalTimeInputValue(appointment.date_hour));
     setIsEditingSchedule(false);
     setIsCompletionOpen(false);
+    setIsBookingConfirmationOpen(false);
+    setIsConfirmingBooking(false);
   }, [appointment?.id, appointment?.date_hour, open]);
 
   if (!appointment) return null;
@@ -255,6 +262,10 @@ export function AppointmentDetailDialog({
   const isEnglish = locale === 'en';
   const canReschedule =
     appointment.status === 'pending' || appointment.status === 'scheduled';
+  const canConfirmBooking = appointment.status === 'pending';
+  const isMbwayPrepaymentReview =
+    appointment.payment_method === 'mbway' &&
+    appointment.payment_status === 'awaiting_review';
   const canCancel = canReschedule;
   const canCancelSeries =
     canCancel && Boolean(appointment.recurrence_series_id) && Boolean(onCancelSeries);
@@ -317,6 +328,21 @@ export function AppointmentDetailDialog({
       setIsCancelling(false);
     }
   };
+
+  const handleBookingConfirmation = async () => {
+    if (!canConfirmBooking || isConfirmingBooking) return;
+    setIsConfirmingBooking(true);
+    try {
+      const confirmed = await confirmBooking(appointment.id);
+      if (confirmed) {
+        setIsBookingConfirmationOpen(false);
+        onOpenChange(false);
+      }
+    } finally {
+      setIsConfirmingBooking(false);
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -390,6 +416,115 @@ export function AppointmentDetailDialog({
                   </DetailItem>
                 </div>
               </Section>
+              {canConfirmBooking ? (
+                <Section
+                  title={
+                    isMbwayPrepaymentReview
+                      ? isEnglish
+                        ? 'MB WAY prepayment review'
+                        : 'Validar pré-pagamento MB WAY'
+                      : isEnglish
+                        ? 'Confirm booking'
+                        : 'Confirmar agendamento'
+                  }
+                >
+                  <div className={`rounded-2xl border p-4 sm:p-5 ${isMbwayPrepaymentReview ? 'border-amber-400/20 bg-amber-400/[0.035]' : 'border-sky-400/15 bg-sky-400/[0.035]'}`}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-100">
+                          {isMbwayPrepaymentReview
+                            ? isEnglish
+                              ? 'Confirm the MB WAY payment request'
+                              : 'Confirmar o pedido de pré-pagamento MB WAY'
+                            : isEnglish
+                              ? 'This booking is waiting for confirmation'
+                              : 'Esta marcação está à espera de confirmação'}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
+                          {isMbwayPrepaymentReview
+                            ? isEnglish
+                              ? 'Only confirm after checking that the amount has arrived in the barbershop’s MB WAY account.'
+                              : 'Só confirma depois de verificares que o valor entrou na conta MB WAY da barbearia.'
+                            : isEnglish
+                              ? 'Confirm the booking to move it to the confirmed schedule and send the customer a confirmation email, when an email is available.'
+                              : 'Confirma a marcação para a passar para a agenda confirmada e enviar um email ao cliente, caso tenha email associado.'}
+                        </p>
+                      </div>
+                      <AlertDialog
+                        open={isBookingConfirmationOpen}
+                        onOpenChange={setIsBookingConfirmationOpen}
+                      >
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            disabled={isConfirmingBooking}
+                            className={`min-h-11 shrink-0 ${isMbwayPrepaymentReview ? 'bg-amber-400 text-zinc-950 hover:bg-amber-300' : 'bg-sky-500 text-zinc-950 hover:bg-sky-400'}`}
+                          >
+                            {isConfirmingBooking ? (
+                              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <Check className="mr-2 size-4" aria-hidden="true" />
+                            )}
+                            {isMbwayPrepaymentReview
+                              ? isEnglish
+                                ? 'Confirm MB WAY prepayment'
+                                : 'Confirmar pré-pagamento MB WAY'
+                              : isEnglish
+                                ? 'Confirm booking'
+                                : 'Confirmar agendamento'}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="w-[92vw] max-w-[440px] rounded-xl border-white/10 bg-zinc-950">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {isMbwayPrepaymentReview
+                                ? isEnglish
+                                  ? 'Confirm receipt of the MB WAY prepayment?'
+                                  : 'Confirmar a receção do pré-pagamento MB WAY?'
+                                : isEnglish
+                                  ? 'Confirm this booking?'
+                                  : 'Confirmar este agendamento?'}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm leading-6 text-zinc-400">
+                              {isMbwayPrepaymentReview
+                                ? isEnglish
+                                  ? `Only continue after verifying that ${Number(appointment.payment_amount ?? 0).toFixed(2)} € has been received in the barbershop’s MB WAY account. The payment and booking will both be marked as confirmed.`
+                                  : `Continua apenas depois de confirmares que recebeste ${Number(appointment.payment_amount ?? 0).toFixed(2)} € na conta MB WAY da barbearia. O pagamento e a marcação ficarão confirmados.`
+                                : isEnglish
+                                  ? 'The booking will move to the confirmed schedule. A confirmation email will be sent if the customer has an email address.'
+                                  : 'A marcação passará para a agenda confirmada. Será enviado um email de confirmação se o cliente tiver um endereço associado.'}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex-row justify-end gap-2">
+                            <AlertDialogCancel
+                              disabled={isConfirmingBooking}
+                              className="m-0 min-h-[44px] flex-1 border-white/10 bg-transparent text-white"
+                            >
+                              {isEnglish ? 'Cancel' : 'Voltar'}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              disabled={isConfirmingBooking}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                void handleBookingConfirmation();
+                              }}
+                              className="m-0 min-h-[44px] flex-1 bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                            >
+                              {isConfirmingBooking
+                                ? isEnglish
+                                  ? 'Confirming…'
+                                  : 'A confirmar…'
+                                : isEnglish
+                                  ? 'Confirm'
+                                  : 'Confirmar'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </Section>
+              ) : null}
               {appointment.status === 'scheduled' ? (
                 <Section
                   title={isEnglish ? 'Complete appointment' : 'Concluir marcação'}
