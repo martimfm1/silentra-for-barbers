@@ -24,7 +24,7 @@ type Props = {
   setValueProducts: (value: string) => void;
   descriptionProducts: string;
   setDescriptionProducts: (value: string) => void;
-  confirmBooking: (id: string) => void | Promise<void>;
+  confirmBooking: (id: string) => void | Promise<boolean | void>;
   finalizeBooking: (id: string, paymentMethod: string) => Promise<boolean>;
   addCompletedAppointmentClient: (id: string) => void | Promise<void>;
   addingClientAppointmentId: string | null;
