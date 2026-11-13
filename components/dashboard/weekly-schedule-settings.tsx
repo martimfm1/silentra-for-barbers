@@ -246,9 +246,10 @@ export function WeeklyScheduleSettings({ barbershopId, locale }: Props) {
         setInitialShopSchedule(cloneSchedule(draft));
         setInitialDraft(cloneSchedule(draft));
       } else {
-        const result = await professionalService.update(selectedProfessionalId, {
-          weekly_schedule: hasCustomSchedule ? draft : null,
-        });
+        const result = await professionalService.updateWeeklySchedule(
+          selectedProfessionalId,
+          hasCustomSchedule ? draft : null,
+        );
         if (result.error) throw result.error;
         setProfessionalSchedules((current) => ({
           ...current,
