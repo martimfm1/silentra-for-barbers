@@ -242,7 +242,7 @@ ${isPending ? '' : `<p style="font-size:13px;font-weight:700;color:#fff;margin:0
         to: [{ email: payload.to, name: payload.clientName }],
         subject: copy.subject,
         htmlContent,
-        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedPrice ? `${copy.price}: ${formattedPrice}\n` : ''}${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedPrice ? `${copy.price}: ${formattedPrice}\n` : ''}${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}${recurringCopy ? `\n${recurringCopy}` : ''}\n${isPending ? '' : `Google Calendar: ${google}\nApple Calendar: ${apple}\n`}Google Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {
