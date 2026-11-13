@@ -150,9 +150,10 @@ async function GET__unobserved(request: Request) {
     const { data, error } = await supabase
       .from('shops')
       .select(
-        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory )`,
+        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory )`,
       )
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('barbershops.is_public_in_directory', true);
 
     if (error) {
       console.error('[SHOPS_GET_ERROR]', error);
@@ -167,7 +168,7 @@ async function GET__unobserved(request: Request) {
         const relation = Array.isArray(record.barbershops)
           ? record.barbershops[0]
           : record.barbershops;
-        if (relation?.is_public_in_directory === false) return false;
+        if (relation?.is_public_in_directory !== true) return false;
         if (!query) return true;
         return [
           relation?.name,
@@ -235,8 +236,7 @@ async function GET__unobserved(request: Request) {
       { data: shops },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
-          Vary: 'Accept-Encoding',
+          'Cache-Control': 'no-store, max-age=0',
         },
       },
     );
