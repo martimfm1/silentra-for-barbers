@@ -276,6 +276,20 @@ export async function updateBarbershopConfig(
       );
     }
     if (
+      directoryVisibility !== undefined &&
+      result.data?.is_public_in_directory !== directoryVisibility
+    ) {
+      console.error('[Barbershop Config Persistence Mismatch]', {
+        field: 'is_public_in_directory',
+        expected: directoryVisibility,
+        actual: result.data?.is_public_in_directory ?? null,
+      });
+      throw new Error(
+        'A visibilidade no diretório não foi guardada. Atualiza as migrations da base de dados e tenta novamente.',
+      );
+    }
+
+    if (
       expectedRequireBirthDate !== undefined &&
       result.data &&
       result.data.require_birth_date !== expectedRequireBirthDate
