@@ -454,6 +454,22 @@ async function POST__unobserved(request: Request) {
 
     if (error || !appointment) {
       if (
+        [
+          'PROFESSIONAL_DAY_OFF',
+          'BOOKING_OUTSIDE_WORKING_HOURS',
+          'BOOKING_OVERLAPS_BREAK',
+          'BARBERSHOP_CLOSED_DAY',
+        ].some((reason) => error?.message?.includes(reason))
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              'O horário escolhido não está dentro dos períodos de trabalho deste barbeiro ou coincide com uma pausa.',
+          },
+          { status: 409 },
+        );
+      }
+      if (
         error?.code === '23P01' ||
         error?.code === '23505' ||
         error?.message?.includes('BOOKING_CONFLICT')
