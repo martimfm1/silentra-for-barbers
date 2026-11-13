@@ -64,7 +64,10 @@ import {
   PublicProfileSettingsCard,
   type PublicProfileSettingsDraft,
 } from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
-import type { DashboardCustomizationConfig } from '@/app/dashboard/_components/DashboardCustomization';
+import type {
+  DashboardCustomizationConfig,
+  DashboardCustomizationPreset,
+} from '@/app/dashboard/_components/DashboardCustomization';
 import {
   DashboardCustomizationDialog,
   useDashboardCustomization,
@@ -158,6 +161,10 @@ export default function SettingsPageOrganized() {
   const [customizationName, setCustomizationName] = useState('A minha dashboard');
   const [initialCustomizationName, setInitialCustomizationName] =
     useState<string | null>(null);
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+  const [initialSelectedPresetId, setInitialSelectedPresetId] =
+    useState<string | null>(null);
+  const [isNewDashboardPreset, setIsNewDashboardPreset] = useState(false);
   const [agendaView, setAgendaView] = useState<AgendaViewPreference>('lines');
   const [initialAgendaView, setInitialAgendaView] =
     useState<AgendaViewPreference>('lines');
@@ -237,6 +244,8 @@ export default function SettingsPageOrganized() {
     setInitialDashboardConfig(nextConfig);
     setCustomizationName(nextName);
     setInitialCustomizationName(nextName);
+    setSelectedPresetId(customization.activeId);
+    setInitialSelectedPresetId(customization.activeId);
   }, [
     customization.loading,
     customization.config,
@@ -260,7 +269,9 @@ export default function SettingsPageOrganized() {
   const dashboardCustomizationDirty =
     initialDashboardConfig !== null &&
     (JSON.stringify(dashboardConfig) !== JSON.stringify(initialDashboardConfig) ||
-      customizationName !== initialCustomizationName);
+      customizationName !== initialCustomizationName ||
+      selectedPresetId !== initialSelectedPresetId ||
+      isNewDashboardPreset);
   const agendaViewDirty = agendaView !== initialAgendaView;
   const dirty = useMemo(
     () =>
@@ -295,6 +306,21 @@ export default function SettingsPageOrganized() {
     },
     [],
   );
+
+  function selectDashboardPreset(id: string) {
+    const preset = customization.presets.find((item) => item.id === id);
+    if (!preset) return;
+    setSelectedPresetId(id);
+    setIsNewDashboardPreset(false);
+    setDashboardConfig(preset.config);
+    setCustomizationName(preset.name);
+  }
+
+  function createDashboardPresetDraft() {
+    setSelectedPresetId(null);
+    setIsNewDashboardPreset(true);
+    setCustomizationName(locale === 'en' ? 'My dashboard' : 'A minha dashboard');
+  }
 
   async function saveAll() {
     if (!barbershopId || !dirty || saving) return;
@@ -380,15 +406,35 @@ export default function SettingsPageOrganized() {
           throw new Error(body.error || t('settingsPage.saveFailed'));
       }
 
-      let savedCustomization: {
-        name: string;
-        config: DashboardCustomizationConfig;
-      } | null = null;
+      let savedCustomization: DashboardCustomizationPreset | null = null;
       if (dashboardCustomizationDirty) {
-        savedCustomization = await customization.save(
-          customizationName.trim(),
-          dashboardConfig,
-        );
+        if (isNewDashboardPreset || !selectedPresetId) {
+          savedCustomization = await customization.create(
+            customizationName.trim(),
+            dashboardConfig,
+          );
+        } else if (selectedPresetId !== customization.activeId) {
+          const response = await fetch('/api/dashboard/customizations', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: selectedPresetId,
+              name: customizationName.trim(),
+              config: dashboardConfig,
+              activate: true,
+            }),
+          });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok || !body.data)
+            throw new Error(body.error || t('settingsPage.saveFailed'));
+          savedCustomization = body.data as DashboardCustomizationPreset;
+          await customization.refresh();
+        } else {
+          savedCustomization = await customization.save(
+            customizationName.trim(),
+            dashboardConfig,
+          );
+        }
       }
 
       if (agendaViewDirty) saveAgendaViewPreference(agendaView);
@@ -439,6 +485,9 @@ export default function SettingsPageOrganized() {
         setInitialDashboardConfig(savedCustomization.config);
         setCustomizationName(savedCustomization.name);
         setInitialCustomizationName(savedCustomization.name);
+        setSelectedPresetId(savedCustomization.id);
+        setInitialSelectedPresetId(savedCustomization.id);
+        setIsNewDashboardPreset(false);
       }
 
       if (publicProfileDirty && publicProfileDraft) {
@@ -948,6 +997,11 @@ export default function SettingsPageOrganized() {
           setConfig={setDashboardConfig}
           name={customizationName}
           onNameChange={setCustomizationName}
+          selectedPresetId={selectedPresetId}
+          isNewPreset={isNewDashboardPreset}
+          onSelectPreset={selectDashboardPreset}
+          onCreatePreset={createDashboardPresetDraft}
+          customization={customization}
           locale={locale}
           disabled={customization.loading}
 />
