@@ -822,6 +822,13 @@ export default function AgendaPage() {
       <AppointmentDetailDialog
         appointment={selectedAppointment}
         open={Boolean(selectedAppointment)}
+        valueProducts={valueProducts}
+        setValueProducts={setValueProducts}
+        descriptionProducts={descriptionProducts}
+        setDescriptionProducts={setDescriptionProducts}
+        finalizeBooking={finalizeBooking}
+        addCompletedAppointmentClient={addCompletedAppointmentClient}
+        addingClientAppointmentId={addingClientAppointmentId}
         locale={locale}
         onReschedule={handleRescheduleAppointment}
         onCancel={handleCancelSelectedAppointment}

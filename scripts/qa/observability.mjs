@@ -16,7 +16,6 @@ const appointmentsTable = read(
 );
 const globalError = read('app/global-error.tsx');
 const envExample = read('.env.example');
-const docs = read('docs/observability.md');
 const packageJson = JSON.parse(read('package.json'));
 const workflow = read('.github/workflows/ci.yml');
 
@@ -70,7 +69,7 @@ assert.match(envExample, /NEXT_PUBLIC_POSTHOG_HOST=/);
 assert.match(envExample, /NEXT_PUBLIC_SENTRY_DSN=/);
 assert.match(envExample, /SENTRY_DSN=/);
 assert.match(envExample, /NEXT_PUBLIC_SENTRY_ENABLE_IN_DEV=/);
-assert.match(docs, /SENTRY_AUTH_TOKEN/);
+assert.match(nextConfig, /authToken: process\.env\.SENTRY_AUTH_TOKEN/);
 assert.equal(
   packageJson.scripts['qa:observability'],
   'node scripts/qa/observability.mjs',
