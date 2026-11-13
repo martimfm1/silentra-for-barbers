@@ -34,7 +34,11 @@ import type { MarketplaceService } from '@/types/marketplace/shops';
 type Step = 1 | 2 | 3 | 4;
 type CustomerState = 'idle' | 'checking' | 'suggestion' | 'matched' | 'new' | 'error';
 type CustomerLookupField = 'email' | 'phone';
-type CustomerSuggestion = { lookupToken: string; matchedBy: CustomerLookupField };
+type CustomerSuggestion = {
+  lookupToken: string;
+  matchedBy: CustomerLookupField;
+  customerName: string | null;
+};
 type ManualPrepaymentInstructions = {
   bookingId: string;
   amount: number;
@@ -499,6 +503,7 @@ export function BookingDrawerCanonical({
             matched?: boolean;
             matchedBy?: CustomerLookupField;
             lookupToken?: string;
+            customerName?: string | null;
           };
         })
         .then((payload) => {
@@ -507,6 +512,7 @@ export function BookingDrawerCanonical({
             setCustomerSuggestion({
               lookupToken: payload.lookupToken,
               matchedBy: payload.matchedBy,
+              customerName: payload.customerName ?? null,
             });
             setCustomerState('suggestion');
           } else {
@@ -1364,6 +1370,15 @@ export function BookingDrawerCanonical({
                   )}
                   {customerState === 'suggestion' && customerSuggestion && (
                     <div className="space-y-3">
+                      <div className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2.5">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                          {t('bookingDrawer.profileSuggestionCustomer')}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-zinc-100">
+                          {customerSuggestion.customerName ||
+                            t('bookingDrawer.profileSuggestionNameUnavailable')}
+                        </p>
+                      </div>
                       <p className="text-sm font-medium text-zinc-100">
                         {customerSuggestion.matchedBy === 'email'
                           ? t('bookingDrawer.profileSuggestionEmail')
