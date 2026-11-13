@@ -34,6 +34,10 @@ const appointmentCompletion = read(
 const appointmentCompletionRoute = read(
   'app/api/appointments/[appointmentId]/complete/route.ts',
 );
+const appointmentEmailRoute = read(
+  'app/api/appointments/[appointmentId]/email/route.ts',
+);
+const bookingEmail = read('lib/brevo/brevo.ts');
 
 const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 assert.ok(agenda.includes('useAgendaViewPreference'));
@@ -115,6 +119,13 @@ assert.ok(
   bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'),
 );
 assert.ok(bookingForm.includes('type="search"'));
+assert.match(bookingForm, /id="booking-email"[\s\S]*?type="email"[\s\S]*?required/);
+assert.match(hook, /manual_email: manualEmail\.trim\(\)\.toLowerCase\(\)/);
+assert.match(hook, /\/api\/appointments\/\$\{encodeURIComponent\(firstCreatedAppointment\.id\)\}\/email/);
+assert.match(appointmentEmailRoute, /requireTenantAuthorization/);
+assert.match(appointmentEmailRoute, /sendBookingConfirmationEmail/);
+assert.match(appointmentEmailRoute, /emailSent: true/);
+assert.match(bookingEmail, /payload\.status === 'pending'/);
 assert.ok(bookingForm.includes('role="combobox"'));
 assert.ok(bookingForm.includes('matchingClients'));
 assert.ok(bookingForm.includes('replace(/\\D/g'));
@@ -155,6 +166,8 @@ assert.ok(agenda.includes('frequency: bookingRecurrence'));
 assert.ok(agenda.includes('endDate: recurrenceEndDate'));
 assert.ok(agenda.includes('addMonthsToDateValue(selectedDate, 6)'));
 assert.ok(bookingTypes.includes("'everyThreeWeeks'"));
+assert.match(ptCopy, /email: 'Email do cliente'/);
+assert.match(enCopy, /email: 'Customer email'/);
 assert.ok(hook.includes('MAX_RECURRING_APPOINTMENTS = 52'));
 assert.ok(hook.includes('generateRecurringBookingDates'));
 assert.ok(hook.includes("frequency === 'biweekly' ? 14 : 21"));
