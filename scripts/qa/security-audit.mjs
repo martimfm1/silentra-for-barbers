@@ -335,7 +335,7 @@ const requestValidationChecks = [
       'UUID_PATTERN.test(shopId)',
       'lookup_public_booking_customer',
       'verifyLookupToken',
-      'timingSafeEqual',
+      'createDecipheriv',
       'consume_public_rate_limit',
     ],
     label: 'Public booking customer profile request validation',
