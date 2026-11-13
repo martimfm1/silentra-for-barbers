@@ -4,6 +4,11 @@ import { getPortalSession } from '@/lib/customer-booking-portal';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
+import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+} from '@/lib/scheduling/weekly-schedule';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import {
   isSafePublicBookingDate,
@@ -75,7 +80,7 @@ async function getAuthorizedAppointment(
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(opening_time,closing_time,lunch_start,lunch_end,closed_days,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
@@ -105,13 +110,24 @@ async function getAvailability(
   date: string,
 ) {
   const shop = getShop(appointment);
-  const isClosedDay = parseClosedDays(shop?.closed_days).has(
-    new Date(`${date}T12:00:00`).getDay(),
+  const weekday = new Date(`${date}T12:00:00`).getDay();
+  const { data: professionalSchedule, error: professionalScheduleError } =
+    await admin
+      .from('professionals')
+      .select('weekly_schedule')
+      .eq('id', appointment.professional_id ?? '')
+      .eq('barbershop_id', appointment.barbershop_id)
+      .maybeSingle();
+  if (professionalScheduleError || (appointment.professional_id && !professionalSchedule))
+    throw new Error('PROFESSIONAL_SCHEDULE_LOOKUP_FAILED');
+  const shopSchedule = normalizeWeeklySchedule(
+    shop?.weekly_schedule,
+    shop ?? undefined,
   );
-  const openingTime = String(shop?.opening_time || '09:00').slice(0, 5);
-  const closingTime = String(shop?.closing_time || '19:00').slice(0, 5);
-  const lunchStart = shop?.lunch_start ? timeToMinutes(shop.lunch_start) : null;
-  const lunchEnd = shop?.lunch_end ? timeToMinutes(shop.lunch_end) : null;
+  const effectiveSchedule = professionalSchedule?.weekly_schedule
+    ? normalizeWeeklySchedule(professionalSchedule.weekly_schedule)
+    : shopSchedule;
+  const daySchedule = getDailySchedule(effectiveSchedule, weekday);
   const service = Array.isArray(appointment.services)
     ? appointment.services[0]
     : appointment.services;
@@ -122,7 +138,7 @@ async function getAvailability(
     ),
     1440,
   );
-  if (isClosedDay)
+  if (daySchedule.day_off)
     return { availableSlots: [], closedDay: true, blockedIntervals: [] };
   const { data: blocks, error: blocksError } = await admin
     .from('schedule_blocks')
@@ -168,44 +184,43 @@ async function getAvailability(
       String(block.reason || 'Horário bloqueado').trim() || 'Horário bloqueado',
   }));
   const slots: string[] = [];
-  for (
-    let start = timeToMinutes(openingTime);
-    start + duration <= timeToMinutes(closingTime);
-    start += 30
-  ) {
-    const end = start + duration;
-    if (
-      lunchStart !== null &&
-      lunchEnd !== null &&
-      overlaps(start, end, lunchStart, lunchEnd)
-    )
-      continue;
-    if (
-      visibleBlocks.some(
-        (block: any) =>
-          !block.start_time ||
-          !block.end_time ||
-          overlaps(
-            start,
-            end,
-            timeToMinutes(block.start_time),
-            timeToMinutes(block.end_time),
-          ),
+  for (const period of daySchedule.work_intervals) {
+    const periodStart = timeToMinutes(period.start);
+    const periodEnd = timeToMinutes(period.end);
+    for (
+      let start = periodStart;
+      start + duration <= periodEnd;
+      start += 30
+    ) {
+      const end = start + duration;
+      if (!isSlotWithinDailySchedule(daySchedule, start, end)) continue;
+      if (
+        visibleBlocks.some(
+          (block: any) =>
+            !block.start_time ||
+            !block.end_time ||
+            overlaps(
+              start,
+              end,
+              timeToMinutes(block.start_time),
+              timeToMinutes(block.end_time),
+            ),
+        )
       )
-    )
-      continue;
-    if (occupied.some((item) => overlaps(start, end, item.start, item.end)))
-      continue;
-    const candidateTime = minutesToTime(start);
-    if (
-      isBeforeMinimumBookingNotice(
-        date,
-        candidateTime,
-        Number(shop?.minimum_booking_notice_minutes ?? 0),
+        continue;
+      if (occupied.some((item) => overlaps(start, end, item.start, item.end)))
+        continue;
+      const candidateTime = minutesToTime(start);
+      if (
+        isBeforeMinimumBookingNotice(
+          date,
+          candidateTime,
+          Number(shop?.minimum_booking_notice_minutes ?? 0),
+        )
       )
-    )
-      continue;
-    slots.push(candidateTime);
+        continue;
+      slots.push(candidateTime);
+    }
   }
   const todayPortugal = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Lisbon',
