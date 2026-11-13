@@ -5,8 +5,12 @@
   },
   "crons": [
     {
+      "path": "/api/cron/subscription-expiry-reminders",
+      "schedule": "25 0 * * *"
+    },
+    {
       "path": "/api/cron/manual-subscriptions",
-      "schedule": "10 0 * * *"
+      "schedule": "30 0 * * *"
     }
   ]
 }
