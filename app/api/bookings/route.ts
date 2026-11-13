@@ -569,16 +569,20 @@ async function POST__unobserved(request: Request) {
       : 0;
     if (
       isPrepayment &&
-      (appointment.payment_status !== 'awaiting_review' ||
+      (appointment.status !== 'pending' ||
+        appointment.payment_status !== 'awaiting_review' ||
         !paymentExpiresAt ||
         paymentAmount <= 0 ||
         appointment.payment_method !== 'mbway')
     ) {
-      await admin
+      const cancelledAt = new Date().toISOString();
+      const { error: cleanupError } = await admin
         .from('appointments')
         .update({
           status: 'cancelled',
-          cancelled_at: new Date().toISOString(),
+          payment_status: 'rejected',
+          payment_reviewed_at: cancelledAt,
+          cancelled_at: cancelledAt,
           cancellation_reason:
             'Metadados de pré-pagamento MB WAY não foram preparados.',
           cancellation_actor: 'system',
@@ -586,8 +590,22 @@ async function POST__unobserved(request: Request) {
         })
         .eq('id', appointment.id)
         .eq('barbershop_id', barbershopId)
-        .eq('status', 'pending');
-      console.error('[BOOKING_PREPAYMENT_METADATA_MISSING]');
+        .in('status', ['pending', 'scheduled']);
+
+      if (cleanupError) {
+        console.error('[BOOKING_PREPAYMENT_CLEANUP_ERROR]', {
+          appointmentId: appointment.id,
+          code: cleanupError.code ?? 'UNKNOWN',
+        });
+      }
+      console.error('[BOOKING_PREPAYMENT_METADATA_MISSING]', {
+        appointmentId: appointment.id,
+        appointmentStatus: appointment.status,
+        hasPaymentExpiry: Boolean(paymentExpiresAt),
+        hasPaymentAmount: paymentAmount > 0,
+        paymentMethod: appointment.payment_method ?? null,
+        paymentStatus: appointment.payment_status ?? null,
+      });
       return NextResponse.json(
         {
           success: false,
