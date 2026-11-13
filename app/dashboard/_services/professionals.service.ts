@@ -67,6 +67,17 @@ export const professionalService = {
     return { data: data as Professional | null, error };
   },
 
+  async updateWeeklySchedule(
+    id: string,
+    weeklySchedule: WeeklySchedule | null,
+  ) {
+    const { error } = await supabase.rpc('set_professional_weekly_schedule', {
+      p_professional_id: id,
+      p_weekly_schedule: weeklySchedule,
+    });
+    return { error };
+  },
+
   async delete(id: string) {
     const { error } = await supabase
       .from('professionals')
