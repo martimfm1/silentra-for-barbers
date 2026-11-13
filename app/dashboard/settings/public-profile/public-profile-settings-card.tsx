@@ -495,8 +495,8 @@ export function PublicProfileSettingsCard({
                     : 'No plano Free, a tua barbearia aparece sempre no diretório. Com o Pro, podes ocultá-la dos resultados.'}
                 <span className="mt-1 block text-zinc-600">
                   {english
-                    ? 'This option is saved with the main Save changes button at the top of Settings.'
-                    : 'Esta opção é guardada através do botão Guardar alterações no topo das Definições.'}
+                    ? 'This option is saved automatically when you change it.'
+                    : 'Esta opção é guardada automaticamente quando a alteras.'}
                 </span>
               </p>
             </div>
