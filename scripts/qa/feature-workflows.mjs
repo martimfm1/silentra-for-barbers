@@ -46,6 +46,9 @@ const mbwayConfirmationApi = read(
 const mbwayMigration = read(
   'supabase/migrations/20261031112123_manual_mbway_prepayment.sql',
 );
+const mbwayRpcRepairMigration = read(
+  'supabase/migrations/20261113174000_restore_mbway_prepayment_booking_rpc.sql',
+);
 const bookingSettings = read(
   'components/dashboard/settings-automatic-booking-panel.tsx',
 );
@@ -161,6 +164,18 @@ assert.match(mbwayMigration, /expire_manual_mbway_prepayments/);
 assert.match(mbwayMigration, /silentra-mbway-prepayment-expiry/);
 assert.match(mbwayMigration, /<> 'prepayment_pending'/);
 assert.match(mbwayMigration, /notify pgrst, 'reload schema'/);
+assert.match(mbwayRpcRepairMigration, /create or replace function public\.create_booking_atomic/);
+assert.match(mbwayRpcRepairMigration, /v_is_prepayment boolean/);
+assert.match(mbwayRpcRepairMigration, /in \('pending', 'prepayment_pending'\)/);
+assert.match(mbwayRpcRepairMigration, /payment_method[\s\S]*payment_status[\s\S]*payment_amount[\s\S]*payment_expires_at/);
+assert.match(mbwayRpcRepairMigration, /interval '15 minutes'/);
+assert.match(mbwayRpcRepairMigration, /v_auto_confirm_manual/);
+assert.match(mbwayRpcRepairMigration, /not v_is_prepayment/);
+assert.match(mbwayRpcRepairMigration, /payment_status = 'awaiting_review'[\s\S]*payment_expires_at <= now\(\)/);
+assert.match(mbwayRpcRepairMigration, /set search_path = ''/);
+assert.match(bookingApi, /appointment\.status !== 'pending'/);
+assert.match(bookingApi, /\.in\('status', \['pending', 'scheduled'\]\)/);
+assert.match(bookingApi, /payment_status: 'rejected'/);
 assert.match(bookingSettings, /auto_confirm_bookings/);
 assert.match(bookingSettings, /auto_complete_bookings/);
 assert.match(bookingSettings, /barbershopService\.updateConfig/);
