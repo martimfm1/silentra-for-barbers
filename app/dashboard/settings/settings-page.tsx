@@ -185,7 +185,10 @@ export default function SettingsPageOrganized() {
   const [bannerTick, setBannerTick] = useState(0);
   const [avatarPreviewError, setAvatarPreviewError] = useState(false);
   const [bannerPreviewError, setBannerPreviewError] = useState(false);
-  const [uploading, setUploading] = useState<'avatar' | 'banner' | null>(null);
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
+  const [pendingBanner, setPendingBanner] = useState<File | null>(null);
+  const [avatarDraftUrl, setAvatarDraftUrl] = useState<string | null>(null);
+  const [bannerDraftUrl, setBannerDraftUrl] = useState<string | null>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
   const load = useCallback(async () => {
@@ -209,6 +212,16 @@ export default function SettingsPageOrganized() {
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    return () => {
+      if (avatarDraftUrl) URL.revokeObjectURL(avatarDraftUrl);
+    };
+  }, [avatarDraftUrl]);
+  useEffect(() => {
+    return () => {
+      if (bannerDraftUrl) URL.revokeObjectURL(bannerDraftUrl);
+    };
+  }, [bannerDraftUrl]);
   useEffect(() => {
     const storedView = readAgendaViewPreference();
     setAgendaView(storedView);
@@ -255,7 +268,9 @@ export default function SettingsPageOrganized() {
       suggestion !== null ||
       publicProfileDirty ||
       dashboardCustomizationDirty ||
-      agendaViewDirty,
+      agendaViewDirty ||
+      pendingAvatar !== null ||
+      pendingBanner !== null,
     [
       config,
       initial,
@@ -263,6 +278,8 @@ export default function SettingsPageOrganized() {
       publicProfileDirty,
       dashboardCustomizationDirty,
       agendaViewDirty,
+      pendingAvatar,
+      pendingBanner,
     ],
   );
   const closed = useMemo(
@@ -376,6 +393,41 @@ export default function SettingsPageOrganized() {
 
       if (agendaViewDirty) saveAgendaViewPreference(agendaView);
 
+      if (pendingAvatar) {
+        const result = await processAndUploadImage({
+          file: pendingAvatar,
+          bucket: 'avatar',
+          path: `${barbershopId}/avatar.webp`,
+          maxWidth: 400,
+          quality: 0.85,
+        });
+        if (result.error || !result.data?.publicUrl)
+          throw new Error(result.error?.message || t('settingsPage.imageUpdateFailed'));
+      }
+
+      if (pendingBanner) {
+        const result = await processAndUploadImage({
+          file: pendingBanner,
+          bucket: 'banner',
+          path: `${barbershopId}/banner.webp`,
+          maxWidth: 1400,
+          quality: 0.85,
+        });
+        if (result.error || !result.data?.publicUrl)
+          throw new Error(result.error?.message || t('settingsPage.imageUpdateFailed'));
+      }
+
+      if (pendingAvatar) {
+        setAvatarTick(Date.now());
+        setPendingAvatar(null);
+        setAvatarDraftUrl(null);
+      }
+      if (pendingBanner) {
+        setBannerTick(Date.now());
+        setPendingBanner(null);
+        setBannerDraftUrl(null);
+      }
+
       setConfig(savedConfig);
       setInitial(savedConfig);
       setLocale(savedConfig.default_language);
@@ -405,64 +457,19 @@ export default function SettingsPageOrganized() {
       setSaving(false);
     }
   }
-  async function upload(type: 'avatar' | 'banner', file: File) {
-    if (!barbershopId) {
-      toast.error(t('settingsPage.imageUpdateFailed'));
-      return;
-    }
-
-    setUploading(type);
-    try {
-      const result = await processAndUploadImage({
-        file,
-        bucket: type,
-        path: `${barbershopId}/${type}.webp`,
-        maxWidth: type === 'avatar' ? 400 : 1400,
-        quality: 0.85,
-      });
-
-      if (result.error) {
-        console.error(`[Barbershop ${type} Upload Failed]`, {
-          message: result.error.message,
-          fileType: file.type || 'unknown',
-          fileSize: file.size,
-          barbershopId,
-        });
-        toast.error(
-          result.error.message || t('settingsPage.imageUpdateFailed'),
-        );
-        return;
-      }
-
-      if (!result.data?.publicUrl) {
-        toast.error(t('settingsPage.imageUpdateFailed'));
-        return;
-      }
-
-      if (type === 'avatar') {
-        setAvatarPreviewError(false);
-        setAvatarTick(Date.now());
-      } else {
-        setBannerPreviewError(false);
-        setBannerTick(Date.now());
-      }
-
-      toast.success(
-        type === 'avatar'
-          ? t('settingsPage.logoUpdated')
-          : t('settingsPage.coverUpdated'),
-      );
-    } catch (error) {
-      console.error(`[Barbershop ${type} Upload Unexpected Error]`, error);
-      toast.error(
-        error instanceof Error && error.message
-          ? error.message
-          : t('settingsPage.imageUpdateFailed'),
-      );
-    } finally {
-      setUploading(null);
+  function queueImage(type: 'avatar' | 'banner', file: File) {
+    const previewUrl = URL.createObjectURL(file);
+    if (type === 'avatar') {
+      setPendingAvatar(file);
+      setAvatarDraftUrl(previewUrl);
+      setAvatarPreviewError(false);
+    } else {
+      setPendingBanner(file);
+      setBannerDraftUrl(previewUrl);
+      setBannerPreviewError(false);
     }
   }
+
   async function requestBarbershopDeletionCode() {
     if (!deletePassword || deleteLoading) return;
     setDeleteLoading(true);
@@ -856,9 +863,9 @@ export default function SettingsPageOrganized() {
                     <div className="relative h-52">
                       <Image
                         src={
-                          bannerPreviewError || !banner
+                          bannerPreviewError
                             ? DEFAULT_BARBERSHOP_BANNER
-                            : banner
+                            : bannerDraftUrl || banner || DEFAULT_BARBERSHOP_BANNER
                         }
                         alt={t('settingsPage.bannerAlt')}
                         fill
@@ -870,9 +877,9 @@ export default function SettingsPageOrganized() {
                         <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
                           <Image
                             src={
-                              avatarPreviewError || !avatar
+                              avatarPreviewError
                                 ? DEFAULT_BARBERSHOP_AVATAR
-                                : avatar
+                                : avatarDraftUrl || avatar || DEFAULT_BARBERSHOP_AVATAR
                             }
                             alt={t('settingsPage.avatarAlt')}
                             width={128}
@@ -887,7 +894,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => bannerRef.current?.click()}
-                            disabled={uploading !== null}
+                            disabled={saving}
                           >
                             <ImageIcon className="mr-2 size-4" />
                             {t('settingsPage.cover')}
@@ -896,7 +903,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => avatarRef.current?.click()}
-                            disabled={uploading !== null}
+                            disabled={saving}
                           >
                             <Camera className="mr-2 size-4" />
                             {t('settingsPage.logo')}
@@ -912,7 +919,7 @@ export default function SettingsPageOrganized() {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
-                      if (f) void upload('avatar', f);
+                      if (f) queueImage('avatar', f);
                       e.currentTarget.value = '';
                     }}
                   />
@@ -923,7 +930,7 @@ export default function SettingsPageOrganized() {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
-                      if (f) void upload('banner', f);
+                      if (f) queueImage('banner', f);
                       e.currentTarget.value = '';
                     }}
                   />
