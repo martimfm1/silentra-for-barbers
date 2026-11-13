@@ -39,7 +39,7 @@ const requiredGuards = [
 const specializedGuards = [
   {
     pattern: /\/bookings\/customer-profile\/route\.ts$/,
-    markers: ['findPublicBookingCustomer', 'UUID_PATTERN', 'EMAIL_PATTERN'],
+    markers: ['lookup_public_booking_customer', 'verifyLookupToken', 'consume_public_rate_limit', 'UUID_PATTERN', 'EMAIL_PATTERN'],
   },
   {
     pattern: /\/calendar\/appointments\/\[appointmentId\]\/route\.ts$/,
