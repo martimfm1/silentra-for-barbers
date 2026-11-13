@@ -16,7 +16,7 @@ const [
   readFile('app/dashboard/_services/clients.service.ts', 'utf8'),
   readFile('app/barbershops/components/booking-drawer-canonical.tsx', 'utf8'),
   readFile('lib/bookings/public-customer-profile.ts', 'utf8'),
-  readFile('supabase/migrations/20261113174400_booking_customer_profile_lookup.sql', 'utf8'),
+  readFile('supabase/migrations/20261113174709_booking_customer_profile_lookup.sql', 'utf8'),
   readFile('package.json', 'utf8').then(JSON.parse),
   readFile('.github/workflows/ci.yml', 'utf8'),
 ]);
