@@ -145,6 +145,7 @@ export function BookingDrawerCanonical({
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [selectedDayClosed, setSelectedDayClosed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
@@ -208,6 +209,7 @@ export function BookingDrawerCanonical({
     setShopPlan(shop?.plan ?? null);
     setSlots([]);
     setSelectedSlot(null);
+    setSelectedDayClosed(false);
     setLoadingAvailability(false);
     setSubmitting(false);
     setError('');
@@ -306,6 +308,7 @@ export function BookingDrawerCanonical({
       !service
     ) {
       setSlots([]);
+      setSelectedDayClosed(false);
       return;
     }
     controllerRef.current?.abort();
@@ -316,6 +319,7 @@ export function BookingDrawerCanonical({
     if (cached && Date.now() - cached.timestamp < 8000) {
       const cachedSlots = cached.data.availableSlots ?? [];
       setSlots(cachedSlots);
+      setSelectedDayClosed(cached.data.closedDay === true);
       setSelectedSlot(
         selectedDate === currentDay.dateStr &&
           selectedTime &&
@@ -327,6 +331,7 @@ export function BookingDrawerCanonical({
       return () => controller.abort();
     }
     setLoadingAvailability(true);
+    setSelectedDayClosed(false);
     setError('');
     void fetch(
       `/api/shops/${shop.id}/booking-data?date=${encodeURIComponent(currentDay.dateStr)}&professionalId=${encodeURIComponent(professional.id)}&serviceId=${encodeURIComponent(service.id)}`,
@@ -343,6 +348,7 @@ export function BookingDrawerCanonical({
         cacheRef.current.set(key, { data: payload, timestamp: Date.now() });
         const availableSlots = payload.availableSlots ?? [];
         setSlots(availableSlots);
+        setSelectedDayClosed(payload.closedDay === true);
         setSelectedSlot(
           selectedDate === currentDay.dateStr &&
             selectedTime &&
@@ -1046,10 +1052,18 @@ export function BookingDrawerCanonical({
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-center">
                   <p className="text-sm font-medium">
-                    {t('bookingDrawer.noSlots')}
+                    {selectedDayClosed
+                      ? locale === 'pt'
+                        ? 'O barbeiro está de folga neste dia.'
+                        : 'This barber is off on this day.'
+                      : t('bookingDrawer.noSlots')}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {t('bookingDrawer.tryOtherDayBarber')}
+                    {selectedDayClosed
+                      ? locale === 'pt'
+                        ? 'Escolhe outro dia para veres os horários disponíveis.'
+                        : 'Choose another day to see available times.'
+                      : t('bookingDrawer.tryOtherDayBarber')}
                   </p>
                   {shopPlan === 'enterprise' ? (
                     <Button
