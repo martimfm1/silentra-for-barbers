@@ -319,7 +319,8 @@ assert.ok(dashboardCustomization.includes('Changes stay pending until you press 
 assert.match(shopCard, /publicPageEnabled && \(/);
 assert.match(shopCard, /disabled=\{!publicPageEnabled\}/);
 assert.match(shopMapper, /public_profile_enabled: shop\.publicProfileEnabled/);
-assert.match(shopsDirectoryRoute, /public_profile_enabled/);
+assert.match(shopsDirectoryRoute, /public_profile_enabled, barbershops!inner/);
+assert.match(shopMapper, /publicProfileEnabled: record\.public_profile_enabled/);
 assert.ok(shopsDirectoryRoute.includes('barbershops!inner'));
 assert.ok(shopsDirectoryRoute.includes(".eq('barbershops.is_public_in_directory', true)"));
 assert.ok(shopsDirectoryRoute.includes('relation?.is_public_in_directory !== true'));
