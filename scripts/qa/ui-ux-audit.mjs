@@ -7,11 +7,17 @@ const [
   publicProfileSettingsCard,
   publicProfileRoute,
   publicProfileApi,
+  dashboardCustomization,
+  shopCard,
+  shopMapper,
 ] = await Promise.all([
   read('app/dashboard/settings/agenda-view-settings.tsx'),
   read('app/dashboard/settings/public-profile/public-profile-settings-card.tsx'),
   read('app/dashboard/settings/public-profile/page.tsx'),
   read('app/api/barbershops/public-profile/route.ts'),
+  read('app/dashboard/_components/DashboardCustomization.tsx'),
+  read('app/barbershops/components/shop-card.tsx'),
+  read('lib/marketplace/shop-mappers.ts'),
 ]);
 
 const [
@@ -249,7 +255,7 @@ assert.ok(
   settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
   'Appearance must be nested under Information.',
 );
-assert.ok(settingsPage.includes('<AgendaViewSettings />'));
+assert.ok(settingsPage.includes('<AgendaViewSettings view={agendaView} onChange={setAgendaView} />'));
 assert.match(settingsPage, /settings-accordion-content/);
 assert.doesNotMatch(
   settingsPage,
@@ -300,12 +306,20 @@ assert.match(settingsPushNotifications, /className="w-full min-w-0"/);
 assert.match(settingsPage, /<DashboardCustomizationDialog/);
 assert.match(settingsPage, /<PublicProfileSettingsCard/);
 assert.ok(settingsPage.includes('directoryVisible={config.is_public_in_directory}'));
-assert.ok(settingsPage.includes('async function handleDirectoryVisibilityChange(visible: boolean)'));
-assert.ok(settingsPage.includes('barbershopService.updateConfig(barbershopId, {'));
-assert.ok(settingsPage.includes('setInitial((current) =>'));
-assert.ok(settingsPage.includes('directorySaving={saving || directorySaving || planLoading}'));
+assert.doesNotMatch(settingsPage, /handleDirectoryVisibilityChange|directorySaving/);
+assert.ok(settingsPage.includes('onDirectoryVisibilityChange={(visible) =>'));
+assert.ok(settingsPage.includes('set({ is_public_in_directory: visible })'));
+assert.ok(settingsPage.includes('barbershopService.updateConfig(barbershopId, payload)'));
+assert.ok(settingsPage.includes("fetch('/api/barbershops/public-profile'"));
+assert.ok(settingsPage.includes('customization.save('));
+assert.ok(settingsPage.includes('saveAgendaViewPreference(agendaView)'));
 assert.ok(barbershopConfigService.includes("field: 'is_public_in_directory'"));
-assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada automaticamente quando a alteras.'));
+assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada pelo botão no topo das definições.'));
+assert.ok(dashboardCustomization.includes('Changes stay pending until you press Save at the top of Settings.'));
+assert.match(shopCard, /publicPageEnabled && \(/);
+assert.match(shopCard, /disabled=\{!publicPageEnabled\}/);
+assert.match(shopMapper, /public_profile_enabled: shop\.publicProfileEnabled/);
+assert.match(shopsDirectoryRoute, /public_profile_enabled/);
 assert.ok(shopsDirectoryRoute.includes('barbershops!inner'));
 assert.ok(shopsDirectoryRoute.includes(".eq('barbershops.is_public_in_directory', true)"));
 assert.ok(shopsDirectoryRoute.includes('relation?.is_public_in_directory !== true'));
@@ -323,8 +337,8 @@ assert.ok(
 );
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'lines'\}/);
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'calendar'\}/);
-assert.match(agendaLayoutSettings, /setView\('lines'\)/);
-assert.match(agendaLayoutSettings, /setView\('calendar'\)/);
+assert.match(agendaLayoutSettings, /onChange\(\) => onChange\('lines'\)/);
+assert.match(agendaLayoutSettings, /onChange\(\) => onChange\('calendar'\)/);
 assert.match(publicProfileSettingsCard, /Visibilidade no diretório/);
 assert.match(publicProfileSettingsCard, /directoryVisible/);
 assert.match(publicProfileSettingsCard, /public_profile_enabled/);
@@ -332,7 +346,7 @@ assert.match(publicProfileSettingsCard, /publicProfileEnabled/);
 assert.match(publicProfileSettingsCard, /publicPageVisibility/);
 assert.match(publicProfileApi, /'publicProfileEnabled'/);
 assert.match(publicProfileApi, /updates\.public_profile_enabled = body\.publicProfileEnabled/);
-assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada automaticamente quando a alteras.'));
+assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada pelo botão no topo das definições.'));
 assert.ok(publicProfileRoute.includes("redirect('/dashboard/settings#public-profile')"));
 assert.match(settingsPage, /time_limit_cancellation_hours/);
 assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
