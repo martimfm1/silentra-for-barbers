@@ -47,7 +47,7 @@ const mbwayMigration = read(
   'supabase/migrations/20261031112123_manual_mbway_prepayment.sql',
 );
 const mbwayRpcRepairMigration = read(
-  'supabase/migrations/20261113174000_restore_mbway_prepayment_booking_rpc.sql',
+  'supabase/migrations/20261113174136_restore_mbway_prepayment_booking_rpc.sql',
 );
 const bookingSettings = read(
   'components/dashboard/settings-automatic-booking-panel.tsx',
