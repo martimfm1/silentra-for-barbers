@@ -858,6 +858,8 @@ export const ptCopy = {
     fullName: 'Nome completo',
     namePlaceholder: 'Ex.: João Silva',
     mobile: 'Telemóvel',
+    email: 'Email do cliente',
+    emailHelp: 'O cliente receberá os detalhes da marcação neste endereço.',
     emailPlaceholder: 'cliente@email.com',
     submit: 'Adicionar',
     notFound: 'Não encontrámos esse cliente',
