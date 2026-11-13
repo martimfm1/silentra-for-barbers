@@ -138,12 +138,15 @@ export function BookingForm({
   }, [clientQuery, clients, formData.clientId, locale]);
 
   const updateCustomer = (
-    field: 'name_complete' | 'num_phone' | 'birth_date',
+    field: 'name_complete' | 'num_phone' | 'email' | 'birth_date',
     value: string,
   ) => {
     setFormData((previous) => ({
       ...previous,
-      clientId: field === 'birth_date' ? previous.clientId : undefined,
+      clientId:
+        field === 'birth_date' || field === 'email'
+          ? previous.clientId
+          : undefined,
       [field]: value,
     }));
     if (field !== 'birth_date') setClientQuery('');
@@ -450,6 +453,33 @@ export function BookingForm({
                   className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
                 />
               </div>
+            </div>
+
+            <div className="mt-3 grid min-w-0 gap-1.5">
+              <label
+                htmlFor="booking-email"
+                className="text-xs font-medium text-zinc-400"
+              >
+                {t('bookingForm.email')}
+              </label>
+              <input
+                id="booking-email"
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                required
+                maxLength={254}
+                value={formData.email}
+                onFocus={() => setShowClientResults(false)}
+                onChange={(event) => updateCustomer('email', event.target.value)}
+                placeholder={t('bookingForm.emailPlaceholder')}
+                aria-describedby="booking-email-help"
+                className="min-h-12 w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3.5 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
+              />
+              <p id="booking-email-help" className="text-xs leading-5 text-zinc-500">
+                {t('bookingForm.emailHelp')}
+              </p>
             </div>
 
             <details className="group mt-3 rounded-xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
