@@ -1182,12 +1182,19 @@ export const ptCopy = {
     birthDate: 'Data de nascimento',
     checkingDetails: 'A verificar os teus dados…',
     profileFound: 'Encontrámos o teu perfil. Os dados serão reutilizados.',
+    profileSuggestionEmail:
+      'Encontrámos um cliente associado a este email nesta barbearia. És tu?',
+    profileSuggestionPhone:
+      'Encontrámos um cliente associado a este telemóvel nesta barbearia. És tu?',
+    profileConfirm: 'Sim, sou eu',
+    profileReject: 'Não sou eu',
+    profileAutofilled: 'Dados do cliente preenchidos. Confirma o que falta.',
     profileNew:
-      'Não encontrámos um perfil com este email e número. Será criado/atualizado durante a reserva.',
+      'Não encontrámos um cliente com este contacto. Podes continuar normalmente.',
     profileError:
       'Não foi possível verificar o perfil agora. Podes continuar normalmente.',
     profileIdle:
-      'Usamos email + telemóvel para reconhecer clientes existentes nesta barbearia.',
+      'Introduz o email ou telemóvel para verificarmos se já és cliente desta barbearia.',
     chooseBarber: 'Escolhe primeiro o barbeiro.',
     chooseOpenDay: 'Escolhe um dia em que a barbearia esteja aberta.',
     chooseService: 'Escolhe o serviço.',
