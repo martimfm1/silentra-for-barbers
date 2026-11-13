@@ -223,6 +223,15 @@ async function POST__unobserved(request: Request) {
         );
       }
 
+      const displayCustomerName =
+        typeof customer.customer_name === 'string'
+          ? customer.customer_name
+              .replace(/[\x00-\x1f\x7f]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 80)
+          : '';
+
       const lookupToken = signLookupToken({
         shopId,
         barbershopId: shop.barbershop_id,
@@ -236,6 +245,7 @@ async function POST__unobserved(request: Request) {
           success: true,
           matched: true,
           matchedBy: lookupBy,
+          customerName: displayCustomerName || null,
           lookupToken,
           expiresInSeconds: LOOKUP_TOKEN_TTL_SECONDS,
         },
