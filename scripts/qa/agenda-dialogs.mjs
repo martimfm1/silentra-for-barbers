@@ -121,6 +121,7 @@ assert.ok(
 assert.ok(bookingForm.includes('type="search"'));
 assert.match(bookingForm, /id="booking-email"[\s\S]*?type="email"[\s\S]*?required/);
 assert.match(hook, /manual_email: manualEmail\.trim\(\)\.toLowerCase\(\)/);
+assert.match(appointmentsService, /if \(!clientEmail && typeof client\?\.email === 'string'\)/);
 assert.match(hook, /\/api\/appointments\/\$\{encodeURIComponent\(firstCreatedAppointment\.id\)\}\/email/);
 assert.match(appointmentEmailRoute, /requireTenantAuthorization/);
 assert.match(appointmentEmailRoute, /sendBookingConfirmationEmail/);
