@@ -33,6 +33,7 @@ type ExtendedBarbershopDetails = BarbershopPublicDetails & {
   reviewsCount?: number;
   reviews?: number;
   hours?: string;
+  public_profile_enabled?: boolean | null;
 };
 
 function getStorageUrl(
@@ -121,15 +122,17 @@ export const ShopCard: React.FC<ShopCardProps> = ({
     );
 
   const hasRating = ratingValue > 0;
+  const publicPageEnabled = shop.public_profile_enabled !== false;
   const displayPrice = formatDisplayPrice(shop.price);
 
   return (
     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/75 shadow-xl shadow-black/10 backdrop-blur-3xl transition-colors sm:hover:border-white/25">
       <button
         type="button"
-        onClick={() => onNavigate?.(rawShop)}
-        className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-inset"
-        aria-label={t('directory.viewDetails', { shop: shop.name })}
+        onClick={publicPageEnabled ? () => onNavigate?.(rawShop) : undefined}
+        disabled={!publicPageEnabled}
+        className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-inset disabled:cursor-default"
+        aria-label={publicPageEnabled ? t('directory.viewDetails', { shop: shop.name }) : undefined}
       >
         <div className="relative h-32 w-full overflow-hidden border-b border-white/10 bg-zinc-900 sm:h-36">
           <Image
@@ -236,7 +239,8 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             {displayPrice}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+        <div className={publicPageEnabled ? "grid grid-cols-2 gap-2 sm:flex sm:shrink-0" : "grid grid-cols-1 gap-2 sm:flex sm:shrink-0"}>
+          {publicPageEnabled && (
           <button
             type="button"
             onClick={(e) => {
@@ -248,6 +252,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             <Eye className="h-3.5 w-3.5 text-zinc-400" />
             <span>Detalhes</span>
           </button>
+          )}
           <button
             type="button"
             onClick={(e) => {

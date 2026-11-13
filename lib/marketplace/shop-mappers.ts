@@ -28,6 +28,7 @@ export function mapRecordToMarketplaceShopResponse(
     nextSlot: '15:00',
     rating: Number(record.rating ?? 0),
     reviewsCount: Number(record.reviews_count ?? 0),
+    publicProfileEnabled: record.public_profile_enabled !== false,
   };
 }
 
@@ -54,5 +55,6 @@ export function mapMarketplaceShopResponseToMarketplaceShop(
     lat: shop.lat,
     lng: shop.lng,
     accent: 'amber',
+    public_profile_enabled: shop.publicProfileEnabled,
   };
 }

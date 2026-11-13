@@ -313,7 +313,7 @@ const localeAwareSources = {
     'useLanguage()',
     'PUBLIC_PROFILE_COPY',
     'AMENITIES_EN',
-    'copy.saveSuccess',
+    'copy.publicPageVisibilityDescription',
   ],
   'app/dashboard/pos/loja/page.tsx': [
     'useLanguage()',

@@ -9,7 +9,6 @@ import {
   Globe2,
   ImageIcon,
   Lock,
-  Save,
   Sparkles,
   Wifi,
   Car,
@@ -27,7 +26,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -39,6 +37,18 @@ import {
 
 const inputClass =
   'min-h-11 rounded-xl border-white/10 bg-white/[0.04] text-zinc-100 placeholder:text-zinc-600';
+
+export type PublicProfileSettingsDraft = {
+  publicProfileEnabled: boolean;
+  slug?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImageUrl?: string;
+  amenities: BarbershopAmenities;
+  city: string;
+  price: number;
+  tags: string[];
+};
 
 type Profile = {
   slug: string;
@@ -208,7 +218,7 @@ const PUBLIC_PROFILE_COPY = {
   pt: {
     loadError: 'Não foi possível carregar o perfil público.',
     saveError: 'Não foi possível guardar as alterações.',
-    saveSuccess: 'Presença online atualizada.',
+
     settings: 'Voltar às definições',
     onlinePresence: 'Presença online',
     pageTitle: 'Página pública da barbearia',
@@ -253,14 +263,12 @@ const PUBLIC_PROFILE_COPY = {
       'A imagem OG personalizada está disponível no Enterprise.',
     ogRecommendation: 'Recomendado: 1200×630.',
     viewPage: 'Ver página pública',
-    savingProfile: 'A guardar perfil público',
-    saving: 'A guardar…',
-    saveChanges: 'Guardar alterações',
+
   },
   en: {
     loadError: 'Could not load the public profile.',
     saveError: 'Could not save your changes.',
-    saveSuccess: 'Online presence updated.',
+
     settings: 'Back to settings',
     onlinePresence: 'Online presence',
     pageTitle: 'Public barbershop page',
@@ -305,9 +313,7 @@ const PUBLIC_PROFILE_COPY = {
     ogImageEnterprise: 'Custom OG images are available on the Enterprise plan.',
     ogRecommendation: 'Recommended: 1200×630.',
     viewPage: 'View public page',
-    savingProfile: 'Saving public profile',
-    saving: 'Saving…',
-    saveChanges: 'Save changes',
+
   },
 } as const;
 
@@ -315,14 +321,18 @@ type PublicProfileSettingsCardProps = {
   directoryVisible: boolean;
   onDirectoryVisibilityChange: (visible: boolean) => void;
   canDirectory: boolean;
-  directorySaving?: boolean;
+  onDraftChange: (draft: PublicProfileSettingsDraft, dirty: boolean) => void;
+  saveVersion: number;
+  saving: boolean;
 };
 
 export function PublicProfileSettingsCard({
   directoryVisible,
   onDirectoryVisibilityChange,
   canDirectory,
-  directorySaving = false,
+  onDraftChange,
+  saveVersion,
+  saving,
 }: PublicProfileSettingsCardProps) {
   const { locale } = useLanguage();
   const english = locale === 'en';
@@ -343,7 +353,8 @@ export function PublicProfileSettingsCard({
     DEFAULT_BARBERSHOP_AMENITIES,
   );
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [initialDraft, setInitialDraft] = useState<PublicProfileSettingsDraft | null>(null);
+  const [appliedSaveVersion, setAppliedSaveVersion] = useState(0);
 
   async function load() {
     setLoading(true);
@@ -354,16 +365,41 @@ export function PublicProfileSettingsCard({
       const body = await response.json().catch(() => ({}));
       if (!response.ok || !body.data) throw new Error(copy.loadError);
       const next = body.data as Profile;
+      const nextPublicProfileEnabled = next.public_profile_enabled !== false;
+      const nextSlug = next.custom_slug || next.slug || '';
+      const nextCity = next.city || '';
+      const nextPrice = Number(next.price ?? 15);
+      const nextTags = Array.isArray(next.tags) ? next.tags : [];
+      const nextSeoTitle = next.seo_title || '';
+      const nextSeoDescription = next.seo_description || '';
+      const nextOgImageUrl = next.og_image_url || '';
+      const nextAmenities = normalizeBarbershopAmenities(next.amenities);
+
       setProfile(next);
-      setPublicProfileEnabled(next.public_profile_enabled !== false);
-      setSlug(next.custom_slug || next.slug || '');
-      setCity(next.city || '');
-      setPrice(Number(next.price ?? 15));
-      setTags(Array.isArray(next.tags) ? next.tags : []);
-      setSeoTitle(next.seo_title || '');
-      setSeoDescription(next.seo_description || '');
-      setOgImageUrl(next.og_image_url || '');
-      setAmenities(normalizeBarbershopAmenities(next.amenities));
+      setPublicProfileEnabled(nextPublicProfileEnabled);
+      setSlug(nextSlug);
+      setCity(nextCity);
+      setPrice(nextPrice);
+      setTags(nextTags);
+      setSeoTitle(nextSeoTitle);
+      setSeoDescription(nextSeoDescription);
+      setOgImageUrl(nextOgImageUrl);
+      setAmenities(nextAmenities);
+      setInitialDraft({
+        publicProfileEnabled: nextPublicProfileEnabled,
+        ...(next.canCustomizeSlug ? { slug: nextSlug } : {}),
+        ...(next.canCustomizeEnterprise
+          ? {
+              seoTitle: nextSeoTitle,
+              seoDescription: nextSeoDescription,
+              ogImageUrl: nextOgImageUrl,
+            }
+          : {}),
+        amenities: nextAmenities,
+        city: nextCity,
+        price: nextPrice,
+        tags: nextTags,
+      });
     } catch {
       toast.error(copy.loadError);
     } finally {
@@ -375,36 +411,46 @@ export function PublicProfileSettingsCard({
     void load();
   }, [locale]);
 
-  async function save() {
-    if (!profile) return;
-    setSaving(true);
-    try {
-      const response = await fetch('/api/barbershops/public-profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          publicProfileEnabled,
-          ...(profile.canCustomizeSlug ? { slug } : {}),
-          ...(profile.canCustomizeEnterprise
-            ? { seoTitle, seoDescription, ogImageUrl }
-            : {}),
-          amenities,
-          city,
-          price,
-          tags,
-        }),
-      });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(copy.saveError);
-      setAmenities(normalizeBarbershopAmenities(body.data?.amenities));
-      toast.success(copy.saveSuccess);
-      await load();
-    } catch {
-      toast.error(copy.saveError);
-    } finally {
-      setSaving(false);
-    }
-  }
+  const draft = useMemo<PublicProfileSettingsDraft>(
+    () => ({
+      publicProfileEnabled,
+      ...(profile?.canCustomizeSlug ? { slug } : {}),
+      ...(profile?.canCustomizeEnterprise
+        ? { seoTitle, seoDescription, ogImageUrl }
+        : {}),
+      amenities,
+      city,
+      price,
+      tags,
+    }),
+    [
+      publicProfileEnabled,
+      profile?.canCustomizeSlug,
+      profile?.canCustomizeEnterprise,
+      slug,
+      seoTitle,
+      seoDescription,
+      ogImageUrl,
+      amenities,
+      city,
+      price,
+      tags,
+    ],
+  );
+  const draftDirty =
+    initialDraft !== null &&
+    JSON.stringify(draft) !== JSON.stringify(initialDraft);
+
+  useEffect(() => {
+    if (initialDraft) onDraftChange(draft, draftDirty);
+  }, [draft, draftDirty, initialDraft, onDraftChange]);
+
+  useEffect(() => {
+    if (saveVersion === appliedSaveVersion || !initialDraft) return;
+    setInitialDraft(draft);
+    setAppliedSaveVersion(saveVersion);
+  }, [saveVersion, appliedSaveVersion, initialDraft, draft]);
+
 
   const selectedCount = useMemo(() => {
     const flags = AMENITIES.filter((item) => amenities[item.key]);
@@ -495,14 +541,14 @@ export function PublicProfileSettingsCard({
                     : 'No plano Free, a tua barbearia aparece sempre no diretório. Com o Pro, podes ocultá-la dos resultados.'}
                 <span className="mt-1 block text-zinc-600">
                   {english
-                    ? 'This option is saved automatically when you change it.'
-                    : 'Esta opção é guardada automaticamente quando a alteras.'}
+                    ? 'This option is saved using the button at the top of Settings.'
+                    : 'Esta opção é guardada pelo botão no topo das definições.'}
                 </span>
               </p>
             </div>
             <Switch
               checked={!canDirectory || directoryVisible}
-              disabled={!canDirectory || directorySaving}
+              disabled={!canDirectory || saving}
               onCheckedChange={onDirectoryVisibilityChange}
               aria-label={english ? 'Show in public directory' : 'Mostrar no diretório público'}
             />
@@ -607,6 +653,7 @@ export function PublicProfileSettingsCard({
                   <select
                     aria-label={copy.parkingAvailability}
                     value={amenities.parking}
+                    disabled={saving}
                     onChange={(e) =>
                       setAmenities((current) => ({
                         ...current,
@@ -631,6 +678,7 @@ export function PublicProfileSettingsCard({
                   type="button"
                   aria-pressed={checked}
                   onClick={() => toggle(key)}
+                  disabled={saving}
                   className={`group flex min-h-14 min-w-0 items-center gap-3 border-b border-white/[.07] py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${checked ? 'text-emerald-100' : 'text-zinc-300 hover:text-zinc-100'}`}
                 >
                   <span
@@ -780,7 +828,7 @@ export function PublicProfileSettingsCard({
           )}
         </section>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-between gap-3 border-t border-white/[.08] pt-4">
           {publicProfileEnabled ? (
             <Link
               href={publicUrl}
@@ -797,21 +845,11 @@ export function PublicProfileSettingsCard({
               {copy.publicPageDisabled}
             </span>
           )}
-          <Button
-            aria-label={saving ? copy.savingProfile : copy.saveChanges}
-            onClick={() => void save()}
-            disabled={saving}
-            className="min-h-11 rounded-xl bg-zinc-100 px-5 text-zinc-950 hover:bg-white"
-          >
-            {saving ? (
-              copy.saving
-            ) : (
-              <>
-                <Save className="mr-2 size-4" aria-hidden="true" />
-                {copy.saveChanges}
-              </>
-            )}
-          </Button>
+          {draftDirty && (
+            <span className="text-xs text-amber-300">
+              {english ? 'Unsaved changes' : 'Alterações por guardar'}
+            </span>
+          )}
         </div>
     </div>
   );

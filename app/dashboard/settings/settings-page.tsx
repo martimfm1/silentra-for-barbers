@@ -6,12 +6,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
+  BellRing,
+  Building2,
+  CalendarCheck,
   Camera,
   ChevronDown,
+  Clock3,
   CreditCard,
   Check,
+  Globe2,
   ImageIcon,
   LogOut,
+  Palette,
   Save,
   ShieldCheck,
   Trash2,
@@ -48,8 +54,20 @@ import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
-import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
-import { PublicProfileSettingsCard } from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
+import {
+  AgendaViewSettings,
+  readAgendaViewPreference,
+  saveAgendaViewPreference,
+  type AgendaViewPreference,
+} from '@/app/dashboard/settings/agenda-view-settings';
+import {
+  PublicProfileSettingsCard,
+  type PublicProfileSettingsDraft,
+} from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
+import type {
+  DashboardCustomizationConfig,
+  DashboardCustomizationPreset,
+} from '@/app/dashboard/_components/DashboardCustomization';
 import {
   DashboardCustomizationDialog,
   useDashboardCustomization,
@@ -136,13 +154,30 @@ export default function SettingsPageOrganized() {
   const { t, setLocale, locale } = useLanguage();
   const { barbershopId } = useBarbershop();
   const customization = useDashboardCustomization();
+  const [dashboardConfig, setDashboardConfig] =
+    useState<DashboardCustomizationConfig>(customization.config);
+  const [initialDashboardConfig, setInitialDashboardConfig] =
+    useState<DashboardCustomizationConfig | null>(null);
+  const [customizationName, setCustomizationName] = useState('A minha dashboard');
+  const [initialCustomizationName, setInitialCustomizationName] =
+    useState<string | null>(null);
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+  const [initialSelectedPresetId, setInitialSelectedPresetId] =
+    useState<string | null>(null);
+  const [isNewDashboardPreset, setIsNewDashboardPreset] = useState(false);
+  const [agendaView, setAgendaView] = useState<AgendaViewPreference>('lines');
+  const [initialAgendaView, setInitialAgendaView] =
+    useState<AgendaViewPreference>('lines');
+  const [publicProfileDraft, setPublicProfileDraft] =
+    useState<PublicProfileSettingsDraft | null>(null);
+  const [publicProfileDirty, setPublicProfileDirty] = useState(false);
+  const [publicProfileSaveVersion, setPublicProfileSaveVersion] = useState(0);
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
   const canManualMbway = hasFeature('manual_mbway_prepayment');
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [directorySaving, setDirectorySaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
@@ -157,7 +192,10 @@ export default function SettingsPageOrganized() {
   const [bannerTick, setBannerTick] = useState(0);
   const [avatarPreviewError, setAvatarPreviewError] = useState(false);
   const [bannerPreviewError, setBannerPreviewError] = useState(false);
-  const [uploading, setUploading] = useState<'avatar' | 'banner' | null>(null);
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
+  const [pendingBanner, setPendingBanner] = useState<File | null>(null);
+  const [avatarDraftUrl, setAvatarDraftUrl] = useState<string | null>(null);
+  const [bannerDraftUrl, setBannerDraftUrl] = useState<string | null>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
   const load = useCallback(async () => {
@@ -182,6 +220,41 @@ export default function SettingsPageOrganized() {
     void load();
   }, [load]);
   useEffect(() => {
+    return () => {
+      if (avatarDraftUrl) URL.revokeObjectURL(avatarDraftUrl);
+    };
+  }, [avatarDraftUrl]);
+  useEffect(() => {
+    return () => {
+      if (bannerDraftUrl) URL.revokeObjectURL(bannerDraftUrl);
+    };
+  }, [bannerDraftUrl]);
+  useEffect(() => {
+    const storedView = readAgendaViewPreference();
+    setAgendaView(storedView);
+    setInitialAgendaView(storedView);
+  }, []);
+  useEffect(() => {
+    if (customization.loading || initialDashboardConfig !== null) return;
+    const nextConfig = customization.config;
+    const nextName =
+      customization.activePreset?.name ??
+      (locale === 'en' ? 'My dashboard' : 'A minha dashboard');
+    setDashboardConfig(nextConfig);
+    setInitialDashboardConfig(nextConfig);
+    setCustomizationName(nextName);
+    setInitialCustomizationName(nextName);
+    setSelectedPresetId(customization.activeId);
+    setInitialSelectedPresetId(customization.activeId);
+  }, [
+    customization.loading,
+    customization.config,
+    customization.activePreset,
+    customization.activeId,
+    initialDashboardConfig,
+    locale,
+  ]);
+  useEffect(() => {
     const targetId = window.location.hash.slice(1);
     if (!targetId) return;
     const target = document.getElementById(targetId);
@@ -194,10 +267,32 @@ export default function SettingsPageOrganized() {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' }),
     );
   }, []);
+  const dashboardCustomizationDirty =
+    initialDashboardConfig !== null &&
+    (JSON.stringify(dashboardConfig) !== JSON.stringify(initialDashboardConfig) ||
+      customizationName !== initialCustomizationName ||
+      selectedPresetId !== initialSelectedPresetId ||
+      isNewDashboardPreset);
+  const agendaViewDirty = agendaView !== initialAgendaView;
   const dirty = useMemo(
     () =>
-      JSON.stringify(config) !== JSON.stringify(initial) || suggestion !== null,
-    [config, initial, suggestion],
+      JSON.stringify(config) !== JSON.stringify(initial) ||
+      suggestion !== null ||
+      publicProfileDirty ||
+      dashboardCustomizationDirty ||
+      agendaViewDirty ||
+      pendingAvatar !== null ||
+      pendingBanner !== null,
+    [
+      config,
+      initial,
+      suggestion,
+      publicProfileDirty,
+      dashboardCustomizationDirty,
+      agendaViewDirty,
+      pendingAvatar,
+      pendingBanner,
+    ],
   );
   const closed = useMemo(
     () => closedList(config.closed_days),
@@ -205,73 +300,39 @@ export default function SettingsPageOrganized() {
   );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
-  async function handleDirectoryVisibilityChange(visible: boolean) {
-    if (
-      !barbershopId ||
-      !canDirectory ||
-      directorySaving ||
-      config.is_public_in_directory === visible
-    ) {
-      return;
-    }
+  const handlePublicProfileDraftChange = useCallback(
+    (draft: PublicProfileSettingsDraft, hasUnsavedChanges: boolean) => {
+      setPublicProfileDraft(draft);
+      setPublicProfileDirty(hasUnsavedChanges);
+    },
+    [],
+  );
 
-    const previousValue = config.is_public_in_directory;
-    setDirectorySaving(true);
-    setConfig((current) => ({
-      ...current,
-      is_public_in_directory: visible,
-    }));
+  function selectDashboardPreset(id: string) {
+    const preset = customization.presets.find((item) => item.id === id);
+    if (!preset) return;
+    setSelectedPresetId(id);
+    setIsNewDashboardPreset(false);
+    setDashboardConfig(preset.config);
+    setCustomizationName(preset.name);
+  }
 
-    try {
-      const result = await barbershopService.updateConfig(barbershopId, {
-        is_public_in_directory: visible,
-      });
-      if (result.error) throw result.error;
-      if (result.data?.is_public_in_directory !== visible) {
-        throw new Error(
-          locale === 'en'
-            ? 'Directory visibility could not be saved. Please try again.'
-            : 'Não foi possível guardar a visibilidade no diretório. Tenta novamente.',
-        );
-      }
-
-      setConfig((current) => ({
-        ...current,
-        is_public_in_directory: visible,
-      }));
-      setInitial((current) =>
-        current
-          ? { ...current, is_public_in_directory: visible }
-          : current,
-      );
-      toast.success(
-        visible
-          ? locale === 'en'
-            ? 'Your barbershop is visible in the directory.'
-            : 'A tua barbearia está visível no diretório.'
-          : locale === 'en'
-            ? 'Your barbershop is hidden from the directory.'
-            : 'A tua barbearia está oculta do diretório.',
-      );
-    } catch (error) {
-      setConfig((current) => ({
-        ...current,
-        is_public_in_directory: previousValue,
-      }));
-      toast.error(
-        error instanceof Error && error.message
-          ? error.message
-          : locale === 'en'
-            ? 'Could not update directory visibility.'
-            : 'Não foi possível atualizar a visibilidade no diretório.',
-      );
-    } finally {
-      setDirectorySaving(false);
-    }
+  function createDashboardPresetDraft() {
+    setSelectedPresetId(null);
+    setIsNewDashboardPreset(true);
+    setCustomizationName(locale === 'en' ? 'My dashboard' : 'A minha dashboard');
   }
 
   async function saveAll() {
-    if (!barbershopId || !dirty || saving || directorySaving) return;
+    if (!barbershopId || !dirty || saving) return;
+    if (dashboardCustomizationDirty && !customizationName.trim()) {
+      toast.error(
+        locale === 'en'
+          ? 'Enter a name for your dashboard customization.'
+          : 'Indica um nome para a personalização da dashboard.',
+      );
+      return;
+    }
     if (config.opening_time >= config.closing_time)
       return toast.error(t('settingsPage.openingAfterClosing'));
     if (
@@ -300,22 +361,28 @@ export default function SettingsPageOrganized() {
       );
     setSaving(true);
     try {
-      const payload = { ...config };
-      if (!canDirectory)
-        delete (payload as Partial<Config>).is_public_in_directory;
-      if (!canManualMbway) {
-        delete (payload as Partial<Config>).mbway_enabled;
-        delete (payload as Partial<Config>).mbway_phone;
+      let savedConfig = config;
+      const configDirty = JSON.stringify(config) !== JSON.stringify(initial);
+      if (configDirty || suggestion) {
+        const payload = { ...config };
+        if (!canDirectory)
+          delete (payload as Partial<Config>).is_public_in_directory;
+        if (!canManualMbway) {
+          delete (payload as Partial<Config>).mbway_enabled;
+          delete (payload as Partial<Config>).mbway_phone;
+        }
+        if (!automationAllowed) {
+          payload.auto_confirm_bookings = initial?.auto_confirm_bookings ?? false;
+          payload.auto_complete_bookings =
+            initial?.auto_complete_bookings ?? false;
+        }
+        const result = await barbershopService.updateConfig(barbershopId, payload);
+        if (result.error) throw result.error;
+        savedConfig = normalize(result.data ?? config);
       }
-      if (!automationAllowed) {
-        payload.auto_confirm_bookings = initial?.auto_confirm_bookings ?? false;
-        payload.auto_complete_bookings =
-          initial?.auto_complete_bookings ?? false;
-      }
-      const c = await barbershopService.updateConfig(barbershopId, payload);
-      if (c.error) throw c.error;
+
       if (suggestion) {
-        const r = await fetch(`/api/barbershops/${barbershopId}/location`, {
+        const response = await fetch(`/api/barbershops/${barbershopId}/location`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -324,14 +391,111 @@ export default function SettingsPageOrganized() {
             longitude: suggestion.lng,
           }),
         });
-        const b = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(t('settingsPage.locationUpdateFailed'));
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok)
+          throw new Error(body.error || t('settingsPage.locationUpdateFailed'));
       }
-      const n = normalize(c.data ?? config);
-      setConfig(n);
-      setInitial(n);
-      setLocale(n.default_language);
+
+      if (publicProfileDirty && publicProfileDraft) {
+        const response = await fetch('/api/barbershops/public-profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(publicProfileDraft),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok)
+          throw new Error(body.error || t('settingsPage.saveFailed'));
+      }
+
+      let savedCustomization: DashboardCustomizationPreset | null = null;
+      if (dashboardCustomizationDirty) {
+        if (isNewDashboardPreset || !selectedPresetId) {
+          savedCustomization = await customization.create(
+            customizationName.trim(),
+            dashboardConfig,
+          );
+        } else if (selectedPresetId !== customization.activeId) {
+          const response = await fetch('/api/dashboard/customizations', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: selectedPresetId,
+              name: customizationName.trim(),
+              config: dashboardConfig,
+              activate: true,
+            }),
+          });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok || !body.data)
+            throw new Error(body.error || t('settingsPage.saveFailed'));
+          savedCustomization = body.data as DashboardCustomizationPreset;
+          await customization.refresh();
+        } else {
+          savedCustomization = await customization.save(
+            customizationName.trim(),
+            dashboardConfig,
+          );
+        }
+      }
+
+      if (agendaViewDirty) saveAgendaViewPreference(agendaView);
+
+      if (pendingAvatar) {
+        const result = await processAndUploadImage({
+          file: pendingAvatar,
+          bucket: 'avatar',
+          path: `${barbershopId}/avatar.webp`,
+          maxWidth: 400,
+          quality: 0.85,
+        });
+        if (result.error || !result.data?.publicUrl)
+          throw new Error(result.error?.message || t('settingsPage.imageUpdateFailed'));
+      }
+
+      if (pendingBanner) {
+        const result = await processAndUploadImage({
+          file: pendingBanner,
+          bucket: 'banner',
+          path: `${barbershopId}/banner.webp`,
+          maxWidth: 1400,
+          quality: 0.85,
+        });
+        if (result.error || !result.data?.publicUrl)
+          throw new Error(result.error?.message || t('settingsPage.imageUpdateFailed'));
+      }
+
+      if (pendingAvatar) {
+        setAvatarTick(Date.now());
+        setPendingAvatar(null);
+        setAvatarDraftUrl(null);
+      }
+      if (pendingBanner) {
+        setBannerTick(Date.now());
+        setPendingBanner(null);
+        setBannerDraftUrl(null);
+      }
+
+      setConfig(savedConfig);
+      setInitial(savedConfig);
+      setLocale(savedConfig.default_language);
       setSuggestion(null);
+      setInitialAgendaView(agendaView);
+
+      if (savedCustomization) {
+        setDashboardConfig(savedCustomization.config);
+        setInitialDashboardConfig(savedCustomization.config);
+        setCustomizationName(savedCustomization.name);
+        setInitialCustomizationName(savedCustomization.name);
+        setSelectedPresetId(savedCustomization.id);
+        setInitialSelectedPresetId(savedCustomization.id);
+        setIsNewDashboardPreset(false);
+      }
+
+      if (publicProfileDirty && publicProfileDraft) {
+        setPublicProfileDirty(false);
+        setPublicProfileSaveVersion((version) => version + 1);
+      }
+
       toast.success(t('settingsPage.saved'));
     } catch (e) {
       toast.error(
@@ -343,68 +507,19 @@ export default function SettingsPageOrganized() {
       setSaving(false);
     }
   }
-  function reset() {
-    if (initial) setConfig(initial);
-    setSuggestion(null);
-  }
-  async function upload(type: 'avatar' | 'banner', file: File) {
-    if (!barbershopId) {
-      toast.error(t('settingsPage.imageUpdateFailed'));
-      return;
-    }
-
-    setUploading(type);
-    try {
-      const result = await processAndUploadImage({
-        file,
-        bucket: type,
-        path: `${barbershopId}/${type}.webp`,
-        maxWidth: type === 'avatar' ? 400 : 1400,
-        quality: 0.85,
-      });
-
-      if (result.error) {
-        console.error(`[Barbershop ${type} Upload Failed]`, {
-          message: result.error.message,
-          fileType: file.type || 'unknown',
-          fileSize: file.size,
-          barbershopId,
-        });
-        toast.error(
-          result.error.message || t('settingsPage.imageUpdateFailed'),
-        );
-        return;
-      }
-
-      if (!result.data?.publicUrl) {
-        toast.error(t('settingsPage.imageUpdateFailed'));
-        return;
-      }
-
-      if (type === 'avatar') {
-        setAvatarPreviewError(false);
-        setAvatarTick(Date.now());
-      } else {
-        setBannerPreviewError(false);
-        setBannerTick(Date.now());
-      }
-
-      toast.success(
-        type === 'avatar'
-          ? t('settingsPage.logoUpdated')
-          : t('settingsPage.coverUpdated'),
-      );
-    } catch (error) {
-      console.error(`[Barbershop ${type} Upload Unexpected Error]`, error);
-      toast.error(
-        error instanceof Error && error.message
-          ? error.message
-          : t('settingsPage.imageUpdateFailed'),
-      );
-    } finally {
-      setUploading(null);
+  function queueImage(type: 'avatar' | 'banner', file: File) {
+    const previewUrl = URL.createObjectURL(file);
+    if (type === 'avatar') {
+      setPendingAvatar(file);
+      setAvatarDraftUrl(previewUrl);
+      setAvatarPreviewError(false);
+    } else {
+      setPendingBanner(file);
+      setBannerDraftUrl(previewUrl);
+      setBannerPreviewError(false);
     }
   }
+
   async function requestBarbershopDeletionCode() {
     if (!deletePassword || deleteLoading) return;
     setDeleteLoading(true);
@@ -549,15 +664,6 @@ export default function SettingsPageOrganized() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {dirty && (
-                <Button
-                  variant="ghost"
-                  onClick={reset}
-                  className="hidden sm:inline-flex"
-                >
-                  {t('settingsPage.discard')}
-                </Button>
-              )}
               <Button
                 onClick={() => void saveAll()}
                 disabled={!dirty || saving}
@@ -596,9 +702,14 @@ export default function SettingsPageOrganized() {
           <div className="min-w-0 space-y-3">
             <details open data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Information' : 'Informações'}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Business details, location and appearance.' : 'Dados da barbearia, localização e apresentação.'}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[.06] text-emerald-300" aria-hidden="true">
+        <Building2 className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Information' : 'Informações'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Business details, location and appearance.' : 'Dados da barbearia, localização e apresentação.'}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -780,9 +891,14 @@ export default function SettingsPageOrganized() {
 </div>
 <details data-settings-subcategory className="settings-subaccordion group mt-4 min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-transparent">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Appearance' : 'Aparência'}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your barbershop identity and personalize the dashboard and agenda.' : 'Gere a identidade da barbearia e personaliza a dashboard e a agenda.'}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/[.06] text-violet-300" aria-hidden="true">
+        <Palette className="size-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Appearance' : 'Aparência'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your barbershop identity and personalize the dashboard and agenda.' : 'Gere a identidade da barbearia e personaliza a dashboard e a agenda.'}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -797,9 +913,9 @@ export default function SettingsPageOrganized() {
                     <div className="relative h-52">
                       <Image
                         src={
-                          bannerPreviewError || !banner
+                          bannerPreviewError
                             ? DEFAULT_BARBERSHOP_BANNER
-                            : banner
+                            : bannerDraftUrl || banner || DEFAULT_BARBERSHOP_BANNER
                         }
                         alt={t('settingsPage.bannerAlt')}
                         fill
@@ -811,9 +927,9 @@ export default function SettingsPageOrganized() {
                         <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
                           <Image
                             src={
-                              avatarPreviewError || !avatar
+                              avatarPreviewError
                                 ? DEFAULT_BARBERSHOP_AVATAR
-                                : avatar
+                                : avatarDraftUrl || avatar || DEFAULT_BARBERSHOP_AVATAR
                             }
                             alt={t('settingsPage.avatarAlt')}
                             width={128}
@@ -828,7 +944,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => bannerRef.current?.click()}
-                            disabled={uploading !== null}
+                            disabled={saving}
                           >
                             <ImageIcon className="mr-2 size-4" />
                             {t('settingsPage.cover')}
@@ -837,7 +953,7 @@ export default function SettingsPageOrganized() {
                             type="button"
                             variant="secondary"
                             onClick={() => avatarRef.current?.click()}
-                            disabled={uploading !== null}
+                            disabled={saving}
                           >
                             <Camera className="mr-2 size-4" />
                             {t('settingsPage.logo')}
@@ -853,7 +969,7 @@ export default function SettingsPageOrganized() {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
-                      if (f) void upload('avatar', f);
+                      if (f) queueImage('avatar', f);
                       e.currentTarget.value = '';
                     }}
                   />
@@ -864,7 +980,7 @@ export default function SettingsPageOrganized() {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
-                      if (f) void upload('banner', f);
+                      if (f) queueImage('banner', f);
                       e.currentTarget.value = '';
                     }}
                   />
@@ -877,7 +993,19 @@ export default function SettingsPageOrganized() {
         <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose shortcuts, visible sections and the dashboard accent colour.' : 'Escolhe os atalhos, as secções visíveis e a cor de destaque da dashboard.'}</p>
       </CardHeader>
       <CardContent>
-        <DashboardCustomizationDialog customization={customization} locale={locale} />
+        <DashboardCustomizationDialog
+          config={dashboardConfig}
+          setConfig={setDashboardConfig}
+          name={customizationName}
+          onNameChange={setCustomizationName}
+          selectedPresetId={selectedPresetId}
+          isNewPreset={isNewDashboardPreset}
+          onSelectPreset={selectDashboardPreset}
+          onCreatePreset={createDashboardPresetDraft}
+          customization={customization}
+          locale={locale}
+          disabled={saving || customization.loading}
+/>
       </CardContent>
     </Card>
     <Card className={CARD_CLASS}>
@@ -886,7 +1014,7 @@ export default function SettingsPageOrganized() {
         <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose how appointments are displayed by default.' : 'Escolhe como queres ver as marcações por defeito.'}</p>
       </CardHeader>
       <CardContent>
-        <AgendaViewSettings />
+        <AgendaViewSettings view={agendaView} onChange={setAgendaView} />
       </CardContent>
     </Card>
   </div>
@@ -896,9 +1024,14 @@ export default function SettingsPageOrganized() {
             
             <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.hoursDialogDescription')}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-sky-400/15 bg-sky-400/[.06] text-sky-300" aria-hidden="true">
+        <Clock3 className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{t('settingsPage.hours')}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{t('settingsPage.hoursDialogDescription')}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1041,9 +1174,14 @@ export default function SettingsPageOrganized() {
 </details>
             <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Booking rules' : 'Regras de marcação'}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Availability, confirmations and cancellation behaviour.' : 'Disponibilidade, confirmações e regras de cancelamento.'}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-amber-400/15 bg-amber-400/[.06] text-amber-300" aria-hidden="true">
+        <CalendarCheck className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Booking rules' : 'Regras de marcação'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Availability, confirmations and cancellation behaviour.' : 'Disponibilidade, confirmações e regras de cancelamento.'}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1256,27 +1394,41 @@ export default function SettingsPageOrganized() {
             
             <details id="public-profile" data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage the information customers see and how your barbershop appears in search.' : 'Gere a informação que os clientes veem e a forma como a tua barbearia aparece nas pesquisas.'}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[.06] text-emerald-300" aria-hidden="true">
+        <Globe2 className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Public profile' : 'Perfil público'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage the information customers see and how your barbershop appears in search.' : 'Gere a informação que os clientes veem e a forma como a tua barbearia aparece nas pesquisas.'}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
   <div className="settings-accordion-content border-t border-white/[.07] px-4 py-4 sm:px-5">
     <PublicProfileSettingsCard
       directoryVisible={config.is_public_in_directory}
-      onDirectoryVisibilityChange={handleDirectoryVisibilityChange}
+      onDirectoryVisibilityChange={(visible) =>
+        set({ is_public_in_directory: visible })
+      }
       canDirectory={canDirectory}
-      directorySaving={saving || directorySaving || planLoading}
+      onDraftChange={handlePublicProfileDraftChange}
+      saveVersion={publicProfileSaveVersion}
+      saving={saving || planLoading}
     />
   </div>
 </details>
             
 <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
-    <span className="min-w-0">
-      <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Notifications' : 'Notificações'}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage booking alerts on this device.' : 'Gere os avisos de novas marcações neste dispositivo.'}</span>
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fuchsia-400/15 bg-fuchsia-400/[.06] text-fuchsia-300" aria-hidden="true">
+        <BellRing className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Notifications' : 'Notificações'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage booking alerts on this device.' : 'Gere os avisos de novas marcações neste dispositivo.'}</span>
+      </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
@@ -1504,24 +1656,6 @@ export default function SettingsPageOrganized() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {dirty && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/95 p-3 backdrop-blur-xl sm:hidden">
-          <div className="mx-auto flex max-w-xl gap-2">
-            <Button variant="ghost" onClick={reset} className="min-h-11 flex-1">
-              {t('settingsPage.discard')}
-            </Button>
-            <Button
-              onClick={() => void saveAll()}
-              disabled={saving || directorySaving}
-              className="min-h-11 flex-1 bg-white text-zinc-950"
-            >
-              {saving
-                ? t('settingsPage.saving')
-                : t('settingsPage.saveChanges')}
-            </Button>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
