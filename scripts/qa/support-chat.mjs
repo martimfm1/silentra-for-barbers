@@ -13,7 +13,6 @@ const requiredFiles = [
   'app/_silentra-admin/support-inbox.tsx',
   'app/_silentra-admin/platform-admin-console.tsx',
   'app/dashboard/_components/DashboardSidebar.tsx',
-  'vercel.json',
 ];
 
 for (const path of requiredFiles) {
@@ -164,12 +163,15 @@ assert.match(
   /href: '\/dashboard\/suporte', label: 'Suporte Silentra'/,
 );
 
-const vercel = JSON.parse(await readFile(requiredFiles[11], 'utf8'));
-assert.ok(
-  vercel.crons.some(
-    (cron) => cron.path === '/api/cron/support-email-notifications',
-  ),
-  'Support notification retry worker must be scheduled',
+const supportCronWorkflow = await readFile(
+  '.github/workflows/support-email-cron.yml',
+  'utf8',
 );
+assert.match(supportCronWorkflow, /cron: '\*\/5 \* \* \* \*'/);
+assert.match(
+  supportCronWorkflow,
+  /SUPPORT_NOTIFICATIONS_CRON_URL: https:\/\/barbers\.silentra\.me\/api\/cron\/support-email-notifications/,
+);
+assert.match(supportCronWorkflow, /secrets\.CRON_SECRET/);
 
 console.log('Support-chat contracts passed.');

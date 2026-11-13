@@ -1,0 +1,33 @@
+name: Support Email Retry Cron
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retry-support-notifications:
+    name: Retry due support notifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Invoke production support notification worker
+        env:
+          SUPPORT_NOTIFICATIONS_CRON_URL: https://barbers.silentra.me/api/cron/support-email-notifications
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPPORT_NOTIFICATIONS_CRON_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "SUPPORT_NOTIFICATIONS_CRON_URL and CRON_SECRET are required."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --retry-delay 2 \
+            --max-time 120 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "x-cron-secret: ${CRON_SECRET}" \
+            "${SUPPORT_NOTIFICATIONS_CRON_URL}"
