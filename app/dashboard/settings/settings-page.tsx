@@ -50,6 +50,7 @@ import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { SettingsPushNotificationsPanel } from '@/components/dashboard/settings-push-notifications-panel';
 import { AgendaViewSettings } from '@/app/dashboard/settings/agenda-view-settings';
 import { PublicProfileSettingsCard } from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
+import { WeeklyScheduleSettings } from '@/components/dashboard/weekly-schedule-settings';
 import {
   DashboardCustomizationDialog,
   useDashboardCustomization,
@@ -87,15 +88,6 @@ type Config = {
   mbway_phone: string;
 };
 
-const days = [
-  ['Monday', 'Monday', 'Segunda-feira'],
-  ['Tuesday', 'Tuesday', 'Terça-feira'],
-  ['Wednesday', 'Wednesday', 'Quarta-feira'],
-  ['Thursday', 'Thursday', 'Quinta-feira'],
-  ['Friday', 'Friday', 'Sexta-feira'],
-  ['Saturday', 'Saturday', 'Sábado'],
-  ['Sunday', 'Sunday', 'Domingo'],
-] as const;
 const normalize = (v: Partial<Config>): Config => ({
   name: v.name ?? '',
   phone: v.phone ?? '',
@@ -198,10 +190,6 @@ export default function SettingsPageOrganized() {
     () =>
       JSON.stringify(config) !== JSON.stringify(initial) || suggestion !== null,
     [config, initial, suggestion],
-  );
-  const closed = useMemo(
-    () => closedList(config.closed_days),
-    [config.closed_days],
   );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
@@ -903,140 +891,7 @@ export default function SettingsPageOrganized() {
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
   <div className="settings-accordion-content border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
-<section id="settings-hours" className="scroll-mt-24">
-              <div className="space-y-4">
-                <div className="hidden">
-                  <h2 className="text-lg font-semibold">
-                    {t('settingsPage.hours')}
-                  </h2>
-                  <p className="text-sm leading-5 text-zinc-500">
-                    {t('settingsPage.hoursDialogDescription')}
-                  </p>
-                </div>
-                <Card className={CARD_CLASS}>
-                  <CardContent className="space-y-4 ">
-                    <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-                      <div className="grid gap-2">
-                        <label
-                          htmlFor="settings-opening-time"
-                          className="text-sm font-medium text-zinc-200"
-                        >
-                          {t('settingsPage.openingTime')}
-                        </label>
-                        <Input
-                          id="settings-opening-time"
-                          type="time"
-                          aria-label={t('settingsPage.openingTime')}
-                          value={config.opening_time}
-                          onChange={(e) =>
-                            set({ opening_time: e.target.value })
-                          }
-                          className={cn(INPUT_CLASS, 'color-scheme-dark')}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <label
-                          htmlFor="settings-closing-time"
-                          className="text-sm font-medium text-zinc-200"
-                        >
-                          {t('settingsPage.closingTime')}
-                        </label>
-                        <Input
-                          id="settings-closing-time"
-                          type="time"
-                          aria-label={t('settingsPage.closingTime')}
-                          value={config.closing_time}
-                          onChange={(e) =>
-                            set({ closing_time: e.target.value })
-                          }
-                          className={cn(INPUT_CLASS, 'color-scheme-dark')}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-medium text-zinc-200">
-                        {t('settingsPage.lunchBreak')}
-                      </h3>
-                      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-                        <div className="grid gap-2">
-                          <label
-                            htmlFor="settings-lunch-start"
-                            className="text-sm font-medium text-zinc-300"
-                          >
-                            {t('settingsPage.lunchStart')}
-                          </label>
-                          <Input
-                            id="settings-lunch-start"
-                            type="time"
-                            aria-label={t('settingsPage.lunchStart')}
-                            value={config.lunch_start}
-                            onChange={(e) =>
-                              set({ lunch_start: e.target.value })
-                            }
-                            className={cn(INPUT_CLASS, 'color-scheme-dark')}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <label
-                            htmlFor="settings-lunch-end"
-                            className="text-sm font-medium text-zinc-300"
-                          >
-                            {t('settingsPage.lunchEnd')}
-                          </label>
-                          <Input
-                            id="settings-lunch-end"
-                            type="time"
-                            aria-label={t('settingsPage.lunchEnd')}
-                            value={config.lunch_end}
-                            onChange={(e) => set({ lunch_end: e.target.value })}
-                            className={cn(INPUT_CLASS, 'color-scheme-dark')}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-medium text-zinc-200">
-                        {t('settingsPage.daysOffInHours')}
-                      </h3>
-                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        {days.map(([v, enLabel, ptLabel]) => {
-                          const active = closed.includes(v);
-                          const label = locale === 'pt' ? ptLabel : enLabel;
-                          return (
-                            <div
-                              key={v}
-                              className="flex min-h-11 min-w-0 items-center justify-between gap-3 border-b border-white/[.07] py-2"
-                            >
-                              <span className="min-w-0 truncate text-sm text-zinc-300">
-                                {label}
-                              </span>
-                              <Switch
-                                checked={active}
-                                onCheckedChange={(checked) => {
-                                  const nextDays = checked
-                                    ? [...closed, v]
-                                    : closed.filter((day) => day !== v);
-                                  set({
-                                    closed_days: nextDays.length
-                                      ? nextDays.join(',')
-                                      : 'None',
-                                  });
-                                }}
-                                aria-label={
-                                  locale === 'en'
-                                    ? `Set ${label} as a closed day`
-                                    : `Definir ${label} como dia de encerramento`
-                                }
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
+<WeeklyScheduleSettings barbershopId={barbershopId!} locale={locale} />
   </div>
 </details>
             <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
