@@ -107,6 +107,110 @@ begin
 end;
 $$;
 
+create or replace function public.is_valid_weekly_schedule(
+  p_weekly_schedule jsonb
+)
+returns boolean
+language plpgsql
+immutable
+set search_path = public
+as $$
+declare
+  v_day_key text;
+  v_day jsonb;
+  v_item jsonb;
+  v_work_item jsonb;
+  v_start text;
+  v_end text;
+  v_previous_end text;
+  v_inside_work_period boolean;
+begin
+  if jsonb_typeof(p_weekly_schedule) is distinct from 'object' then
+    return false;
+  end if;
+
+  foreach v_day_key in array array[
+    'monday', 'tuesday', 'wednesday', 'thursday',
+    'friday', 'saturday', 'sunday'
+  ] loop
+    v_day := p_weekly_schedule -> v_day_key;
+    if jsonb_typeof(v_day) is distinct from 'object'
+      or jsonb_typeof(v_day -> 'day_off') is distinct from 'boolean'
+      or jsonb_typeof(v_day -> 'work_intervals') is distinct from 'array'
+      or jsonb_typeof(v_day -> 'break_intervals') is distinct from 'array'
+    then
+      return false;
+    end if;
+
+    if (v_day ->> 'day_off')::boolean then
+      continue;
+    end if;
+
+    if jsonb_array_length(v_day -> 'work_intervals') = 0 then
+      return false;
+    end if;
+
+    v_previous_end := null;
+    for v_item in
+      select value from jsonb_array_elements(v_day -> 'work_intervals')
+    loop
+      if jsonb_typeof(v_item) is distinct from 'object' then
+        return false;
+      end if;
+      v_start := v_item ->> 'start';
+      v_end := v_item ->> 'end';
+      if v_start !~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+        or v_end !~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+        or v_start >= v_end
+        or (v_previous_end is not null and v_start < v_previous_end)
+      then
+        return false;
+      end if;
+      v_previous_end := v_end;
+    end loop;
+
+    v_previous_end := null;
+    for v_item in
+      select value from jsonb_array_elements(v_day -> 'break_intervals')
+    loop
+      if jsonb_typeof(v_item) is distinct from 'object' then
+        return false;
+      end if;
+      v_start := v_item ->> 'start';
+      v_end := v_item ->> 'end';
+      if v_start !~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+        or v_end !~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+        or v_start >= v_end
+        or (v_previous_end is not null and v_start < v_previous_end)
+      then
+        return false;
+      end if;
+
+      v_inside_work_period := false;
+      for v_work_item in
+        select value from jsonb_array_elements(v_day -> 'work_intervals')
+      loop
+        if (v_work_item ->> 'start') <= v_start
+          and (v_work_item ->> 'end') >= v_end
+        then
+          v_inside_work_period := true;
+          exit;
+        end if;
+      end loop;
+      if not v_inside_work_period then
+        return false;
+      end if;
+      v_previous_end := v_end;
+    end loop;
+  end loop;
+
+  return true;
+end;
+$$;
+
+revoke all on function public.is_valid_weekly_schedule(jsonb)
+  from public, anon, authenticated;
+
 create or replace function public.set_barbershop_weekly_schedule(
   p_barbershop_id uuid,
   p_weekly_schedule jsonb
@@ -123,17 +227,7 @@ begin
     raise exception using errcode = '42501', message = 'FORBIDDEN';
   end if;
 
-  if jsonb_typeof(p_weekly_schedule) <> 'object'
-    or not (
-      p_weekly_schedule ? 'monday'
-      and p_weekly_schedule ? 'tuesday'
-      and p_weekly_schedule ? 'wednesday'
-      and p_weekly_schedule ? 'thursday'
-      and p_weekly_schedule ? 'friday'
-      and p_weekly_schedule ? 'saturday'
-      and p_weekly_schedule ? 'sunday'
-    )
-  then
+  if not public.is_valid_weekly_schedule(p_weekly_schedule) then
     raise exception using errcode = '22023', message = 'INVALID_WEEKLY_SCHEDULE';
   end if;
 
@@ -151,4 +245,46 @@ $$;
 revoke all on function public.set_barbershop_weekly_schedule(uuid, jsonb)
   from public, anon;
 grant execute on function public.set_barbershop_weekly_schedule(uuid, jsonb)
+  to authenticated;
+
+create or replace function public.set_professional_weekly_schedule(
+  p_professional_id uuid,
+  p_weekly_schedule jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_barbershop_id uuid;
+begin
+  select barbershop_id
+  into v_barbershop_id
+  from public.professionals
+  where id = p_professional_id;
+
+  if v_barbershop_id is null
+    or auth.uid() is null
+    or public.get_my_barbershop_id() is distinct from v_barbershop_id
+  then
+    raise exception using errcode = '42501', message = 'FORBIDDEN';
+  end if;
+
+  if p_weekly_schedule is not null
+    and not public.is_valid_weekly_schedule(p_weekly_schedule)
+  then
+    raise exception using errcode = '22023', message = 'INVALID_WEEKLY_SCHEDULE';
+  end if;
+
+  update public.professionals
+  set weekly_schedule = p_weekly_schedule
+  where id = p_professional_id
+    and barbershop_id = v_barbershop_id;
+end;
+$$;
+
+revoke all on function public.set_professional_weekly_schedule(uuid, jsonb)
+  from public, anon;
+grant execute on function public.set_professional_weekly_schedule(uuid, jsonb)
   to authenticated;
