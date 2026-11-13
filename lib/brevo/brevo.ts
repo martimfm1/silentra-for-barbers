@@ -11,6 +11,8 @@ export interface BookingEmailPayload {
   date: string;
   time: string;
   durationMinutes?: number;
+  status?: 'pending' | 'scheduled';
+  recurringCount?: number;
   appointmentId: string;
   barbershopId?: string;
   barbershopName: string;
@@ -99,7 +101,7 @@ export async function sendBookingConfirmationEmail(
   const safeBarbershopName = escapeHtml(payload.barbershopName);
   const safeBarbershopAddress = escapeHtml(payload.barbershopAddress);
   const isEnglish = payload.language === 'en';
-  const copy = isEnglish
+  const confirmedCopy = isEnglish
     ? {
         subject: `Booking confirmed — ${payload.barbershopName}`,
         title: 'Booking confirmed',
@@ -138,6 +140,39 @@ export async function sendBookingConfirmationEmail(
         textTitle: 'Agendamento confirmado',
         textAt: 'às',
       };
+  const isPending = payload.status === 'pending';
+  const copy = isPending
+    ? {
+        ...confirmedCopy,
+        subject: isEnglish
+          ? `Booking received — ${payload.barbershopName}`
+          : `Marcação recebida — ${payload.barbershopName}`,
+        title: isEnglish ? 'Booking received' : 'Marcação recebida',
+        greeting: isEnglish
+          ? `Hello <strong style="color:#fff;">${safeClientName}</strong>, we received your booking request. It is awaiting confirmation from the barbershop.`
+          : `Olá <strong style="color:#fff;">${safeClientName}</strong>, recebemos o teu pedido de marcação. Está a aguardar confirmação da barbearia.`,
+        manageHint: isEnglish
+          ? 'You can view this booking in your customer area. The barbershop will email you again once it is confirmed.'
+          : 'Podes consultar esta marcação na tua área de cliente. A barbearia envia-te outro email assim que a confirmar.',
+        footer: isEnglish
+          ? 'This booking is not confirmed yet. You will receive another email when the barbershop confirms it.'
+          : 'Esta marcação ainda não está confirmada. Vais receber outro email quando a barbearia a confirmar.',
+        description: isEnglish
+          ? `Booking request for ${payload.serviceName} for ${payload.clientName}.`
+          : `Pedido de marcação de ${payload.serviceName} para ${payload.clientName}.`,
+        textTitle: isEnglish ? 'Booking received' : 'Marcação recebida',
+      }
+    : confirmedCopy;
+  const recurringCount = Math.max(1, Math.floor(payload.recurringCount ?? 1));
+  const recurringCopy =
+    recurringCount > 1
+      ? isEnglish
+        ? `This series includes ${recurringCount} appointments. You can view all dates in your customer area.`
+        : `Esta série inclui ${recurringCount} marcações. Podes consultar todas as datas na tua área de cliente.`
+      : '';
+  const recurringMarkup = recurringCopy
+    ? `<p style="font-size:13px;line-height:1.6;color:#a1a1aa;margin:16px 0 0;">${escapeHtml(recurringCopy)}</p>`
+    : '';
   const formattedPrice =
     typeof payload.servicePrice === 'number' &&
     Number.isFinite(payload.servicePrice) &&
@@ -184,9 +219,10 @@ ${avatarMarkup}
 <div style="height:1px;background:#27272a;margin:20px 0;"></div>
 <p style="font-size:13px;line-height:1.6;color:#a1a1aa;margin:0 0 12px;">${copy.manageHint}</p>
 <a href="${customerPortalUrl}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:14px 16px;font-size:14px;font-weight:700;margin-bottom:22px;">${copy.manageBooking}</a>
-<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.addCalendar}</p>
+${recurringMarkup}
+${isPending ? '' : `<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.addCalendar}</p>
 <a href="${google}" style="display:block;background:#fff;color:#09090b;text-decoration:none;text-align:center;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:10px;">Google Calendar</a>
-<a href="${apple}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:18px;">Apple Calendar (.ics)</a>
+<a href="${apple}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:13px 16px;font-size:13px;font-weight:700;margin-bottom:18px;">Apple Calendar (.ics)</a>`}
 <p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 10px;">${copy.openLocation}</p>
 <a href="${googleMaps}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:8px;">Google Maps</a>
 <a href="${appleMaps}" style="display:block;background:#1c1c20;color:#fff;text-decoration:none;text-align:center;border:1px solid #3f3f46;border-radius:10px;padding:12px 16px;font-size:13px;">Apple Maps</a>
@@ -206,7 +242,7 @@ ${avatarMarkup}
         to: [{ email: payload.to, name: payload.clientName }],
         subject: copy.subject,
         htmlContent,
-        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedPrice ? `${copy.price}: ${formattedPrice}\n` : ''}${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}\n\nGoogle Calendar: ${google}\nApple Calendar: ${apple}\nGoogle Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
+        textContent: `${copy.textTitle}\n${copy.manageBooking}: ${customerPortalUrl}\n${payload.serviceName}\n${formattedPrice ? `${copy.price}: ${formattedPrice}\n` : ''}${formattedDate} ${copy.textAt} ${payload.time}\n${payload.barbershopName}\n${payload.barbershopAddress}${recurringCopy ? `\n${recurringCopy}` : ''}\n${isPending ? '' : `Google Calendar: ${google}\nApple Calendar: ${apple}\n`}Google Maps: ${googleMaps}\nApple Maps: ${appleMaps}`,
       }),
     });
     const data = (await response.json()) as {

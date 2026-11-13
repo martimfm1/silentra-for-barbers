@@ -250,6 +250,7 @@ export default function AgendaPage() {
         time: selectedTime,
         manualName: formData.name_complete,
         manualPhone: formData.num_phone,
+        manualEmail: formData.email.trim().toLowerCase(),
         birthDate: formData.birth_date ?? '',
       };
       const changed =
@@ -260,6 +261,7 @@ export default function AgendaPage() {
         prev.time !== next.time ||
         prev.manualName !== next.manualName ||
         prev.manualPhone !== next.manualPhone ||
+        prev.manualEmail !== next.manualEmail ||
         prev.birthDate !== next.birthDate;
       return changed ? next : prev;
     });
@@ -267,6 +269,7 @@ export default function AgendaPage() {
     formData.clientId,
     formData.name_complete,
     formData.num_phone,
+    formData.email,
     formData.birth_date,
     formData.service_id,
     selectedProfessionalId,

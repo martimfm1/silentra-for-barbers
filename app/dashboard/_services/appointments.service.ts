@@ -52,7 +52,7 @@ export const appointmentService = {
         .eq('barbershop_id', payload.barbershop_id)
         .eq('role', 'client')
         .maybeSingle();
-      if (typeof client?.email === 'string') {
+      if (!clientEmail && typeof client?.email === 'string') {
         clientEmail = client.email.trim().toLowerCase() || clientEmail;
       }
     }

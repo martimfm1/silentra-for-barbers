@@ -13,6 +13,7 @@ import { captureProductEvent } from '@/lib/observability/posthog';
 import { captureException } from '@/lib/observability/sentry';
 
 const MAX_RECURRING_APPOINTMENTS = 52;
+const CUSTOMER_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type RecurrenceGenerationError = 'invalid-range' | 'no-repeats' | 'too-many';
 
@@ -121,6 +122,7 @@ export function useAppointments(
     time: '',
     manualName: '',
     manualPhone: '',
+    manualEmail: '',
     birthDate: '',
   });
   const [blockFormData, setBlockFormData] = useState<BlockFormData>({
@@ -178,6 +180,7 @@ export function useAppointments(
           time,
           manualName,
           manualPhone,
+          manualEmail,
           birthDate,
         } = bookingFormData;
         if (!manualName?.trim() || !manualPhone?.trim()) {
@@ -185,6 +188,14 @@ export function useAppointments(
             locale === 'en'
               ? 'Enter the customer name and phone number.'
               : 'Indica o nome e o telemóvel do cliente.',
+          );
+          return false;
+        }
+        if (!CUSTOMER_EMAIL_PATTERN.test(manualEmail.trim())) {
+          toast.error(
+            locale === 'en'
+              ? 'Enter a valid customer email address.'
+              : 'Indica um endereço de email válido para o cliente.',
           );
           return false;
         }
@@ -224,6 +235,7 @@ export function useAppointments(
           professional_id: professionalId,
           manual_name: manualName || null,
           manual_phone: manualPhone || null,
+          manual_email: manualEmail.trim().toLowerCase(),
           manual_birth_date: birthDate || null,
         }));
         const result =
@@ -248,15 +260,50 @@ export function useAppointments(
           }
           throw result.error;
         }
-        toast.success(
+        const firstCreatedAppointment = Array.isArray(result.data)
+          ? result.data[0]
+          : result.data;
+        let emailSent = false;
+        if (firstCreatedAppointment?.id) {
+          try {
+            const emailResponse = await fetch(
+              `/api/appointments/${encodeURIComponent(firstCreatedAppointment.id)}/email`,
+              { method: 'POST' },
+            );
+            const emailResult = await emailResponse.json().catch(() => null);
+            emailSent = emailResponse.ok && emailResult?.emailSent === true;
+            if (!emailSent) {
+              console.error('[CREATE_BOOKING_EMAIL_ERROR]', {
+                appointmentId: firstCreatedAppointment.id,
+                status: emailResponse.status,
+              });
+            }
+          } catch (emailError) {
+            console.error('[CREATE_BOOKING_EMAIL_ERROR]', emailError);
+          }
+        }
+
+        const bookingCreatedMessage =
           recurrence === 'none'
             ? locale === 'en'
               ? 'Booking created successfully.'
               : 'Marcação criada com sucesso.'
             : t('bookingForm.recurringCreated', {
                 count: generatedDates.dates.length,
-              }),
-        );
+              });
+        if (emailSent) {
+          toast.success(
+            locale === 'en'
+              ? `${bookingCreatedMessage} Email sent to the customer.`
+              : `${bookingCreatedMessage} Email enviado ao cliente.`,
+          );
+        } else {
+          toast.warning(
+            locale === 'en'
+              ? `${bookingCreatedMessage} The customer email could not be sent.`
+              : `${bookingCreatedMessage} Não foi possível enviar o email ao cliente.`,
+          );
+        }
         captureProductEvent('agendamento_criado', {
           origem: 'dashboard',
           recorrente: recurrence !== 'none',
@@ -270,6 +317,7 @@ export function useAppointments(
           time: '',
           manualName: '',
           manualPhone: '',
+          manualEmail: '',
           birthDate: '',
         });
         await onRefreshData();
