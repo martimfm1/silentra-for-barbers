@@ -1,3 +1,5 @@
+begin;
+
 -- Weekly opening hours with optional per-professional overrides.
 alter table public.barbershops
   add column if not exists weekly_schedule jsonb;
@@ -290,7 +292,6 @@ grant execute on function public.set_professional_weekly_schedule(uuid, jsonb)
   to authenticated;
 
 -- Ensure the atomic booking RPC respects the chosen barber's weekly schedule.
-begin;
 
 -- Reconcile the public booking RPC after the manual-booking auto-confirmation
 -- migration replaced it with an older implementation that discarded MB WAY
