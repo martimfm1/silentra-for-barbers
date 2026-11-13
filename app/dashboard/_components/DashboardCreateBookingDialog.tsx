@@ -130,6 +130,7 @@ export function DashboardCreateBookingDialog() {
         time: selectedTime,
         manualName: formData.name_complete,
         manualPhone: formData.num_phone,
+        manualEmail: formData.email.trim().toLowerCase(),
         birthDate: formData.birth_date ?? '',
       };
       const changed = Object.keys(next).some(
@@ -175,6 +176,7 @@ export function DashboardCreateBookingDialog() {
       time: '',
       manualName: '',
       manualPhone: '',
+      manualEmail: '',
       birthDate: '',
     });
     setSelectedProfessionalId('');
