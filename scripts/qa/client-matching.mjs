@@ -28,7 +28,8 @@ assert.match(
 assert.match(profileRoute, /barbershopId:\s*shop\.barbershop_id/);
 assert.ok(profileRoute.includes('lookup_public_booking_customer'));
 assert.ok(profileRoute.includes('verifyLookupToken'));
-assert.ok(profileRoute.includes('timingSafeEqual'));
+assert.ok(profileRoute.includes('createDecipheriv'));
+assert.ok(profileRoute.includes('createCipheriv'));
 assert.ok(profileRoute.includes('consume_public_rate_limit'));
 assert.ok(profileRoute.includes(".eq('barbershop_id', tokenPayload.barbershopId)"));
 assert.ok(customerLookupMigration.includes('where (select count(*) from matches) = 1'));
