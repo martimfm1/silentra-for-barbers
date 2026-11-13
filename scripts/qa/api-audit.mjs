@@ -66,6 +66,15 @@ const specializedGuards = [
 
 const routeSecurityChecks = [
   {
+    pattern: /\/shops\/route\.ts$/,
+    markers: [
+      'barbershops!inner',
+      ".eq('barbershops.is_public_in_directory', true)",
+      'relation?.is_public_in_directory !== true',
+      "'Cache-Control': 'no-store, max-age=0'",
+    ],
+  },
+  {
     pattern: /\/sentry-example-api\/route\.ts$/,
     markers: [
       "process.env.NODE_ENV !== 'development'",

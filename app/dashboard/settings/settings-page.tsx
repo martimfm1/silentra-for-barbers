@@ -142,6 +142,7 @@ export default function SettingsPageOrganized() {
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [directorySaving, setDirectorySaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
@@ -204,8 +205,73 @@ export default function SettingsPageOrganized() {
   );
   const set = (patch: Partial<Config>) =>
     setConfig((c) => ({ ...c, ...patch }));
+  async function handleDirectoryVisibilityChange(visible: boolean) {
+    if (
+      !barbershopId ||
+      !canDirectory ||
+      directorySaving ||
+      config.is_public_in_directory === visible
+    ) {
+      return;
+    }
+
+    const previousValue = config.is_public_in_directory;
+    setDirectorySaving(true);
+    setConfig((current) => ({
+      ...current,
+      is_public_in_directory: visible,
+    }));
+
+    try {
+      const result = await barbershopService.updateConfig(barbershopId, {
+        is_public_in_directory: visible,
+      });
+      if (result.error) throw result.error;
+      if (result.data?.is_public_in_directory !== visible) {
+        throw new Error(
+          locale === 'en'
+            ? 'Directory visibility could not be saved. Please try again.'
+            : 'Não foi possível guardar a visibilidade no diretório. Tenta novamente.',
+        );
+      }
+
+      setConfig((current) => ({
+        ...current,
+        is_public_in_directory: visible,
+      }));
+      setInitial((current) =>
+        current
+          ? { ...current, is_public_in_directory: visible }
+          : current,
+      );
+      toast.success(
+        visible
+          ? locale === 'en'
+            ? 'Your barbershop is visible in the directory.'
+            : 'A tua barbearia está visível no diretório.'
+          : locale === 'en'
+            ? 'Your barbershop is hidden from the directory.'
+            : 'A tua barbearia está oculta do diretório.',
+      );
+    } catch (error) {
+      setConfig((current) => ({
+        ...current,
+        is_public_in_directory: previousValue,
+      }));
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : locale === 'en'
+            ? 'Could not update directory visibility.'
+            : 'Não foi possível atualizar a visibilidade no diretório.',
+      );
+    } finally {
+      setDirectorySaving(false);
+    }
+  }
+
   async function saveAll() {
-    if (!barbershopId || !dirty || saving) return;
+    if (!barbershopId || !dirty || saving || directorySaving) return;
     if (config.opening_time >= config.closing_time)
       return toast.error(t('settingsPage.openingAfterClosing'));
     if (
@@ -1199,9 +1265,9 @@ export default function SettingsPageOrganized() {
   <div className="settings-accordion-content border-t border-white/[.07] px-4 py-4 sm:px-5">
     <PublicProfileSettingsCard
       directoryVisible={config.is_public_in_directory}
-      onDirectoryVisibilityChange={(value) => canDirectory && set({ is_public_in_directory: value })}
+      onDirectoryVisibilityChange={handleDirectoryVisibilityChange}
       canDirectory={canDirectory}
-      directorySaving={saving || planLoading}
+      directorySaving={saving || directorySaving || planLoading}
     />
   </div>
 </details>
@@ -1446,7 +1512,7 @@ export default function SettingsPageOrganized() {
             </Button>
             <Button
               onClick={() => void saveAll()}
-              disabled={saving}
+              disabled={saving || directorySaving}
               className="min-h-11 flex-1 bg-white text-zinc-950"
             >
               {saving
