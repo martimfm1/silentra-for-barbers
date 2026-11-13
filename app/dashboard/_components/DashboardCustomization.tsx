@@ -488,6 +488,9 @@ export function DashboardCustomizationDialog({
                       onChange={(event) =>
                         toggleShortcut(shortcut.id, event.target.checked)
                       }
+                      disabled={disabled}
+                      disabled={disabled}
+                      disabled={disabled}
                       className="size-4 accent-emerald-400"
                     />
                     <label
@@ -507,7 +510,7 @@ export function DashboardCustomizationDialog({
                               -1,
                             )
                           }
-                          disabled={draftShortcuts.indexOf(shortcut.id) === 0}
+                          disabled={disabled || draftShortcuts.indexOf(shortcut.id) === 0}
                           className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
                         >
                           <ArrowUp className="size-3.5" />
@@ -519,8 +522,9 @@ export function DashboardCustomizationDialog({
                             moveShortcut(draftShortcuts.indexOf(shortcut.id), 1)
                           }
                           disabled={
+                            disabled ||
                             draftShortcuts.indexOf(shortcut.id) ===
-                            draftShortcuts.length - 1
+                              draftShortcuts.length - 1
                           }
                           className="rounded-md p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
                         >
@@ -642,6 +646,7 @@ export function DashboardCustomizationDialog({
                   <button
                     key={color.value}
                     type="button"
+                    disabled={disabled}
                     aria-label={isEnglish ? color.en : color.pt}
                     aria-pressed={
                       config.accentColor === color.value
@@ -680,6 +685,7 @@ export function DashboardCustomizationDialog({
                       'Choose custom color',
                     )}
                     value={config.accentColor}
+                    disabled={disabled}
                     onChange={(event) =>
                       setConfig((current) => ({
                         ...current,
