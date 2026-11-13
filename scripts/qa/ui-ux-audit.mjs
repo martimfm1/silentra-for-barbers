@@ -332,7 +332,7 @@ assert.match(publicProfileSettingsCard, /publicProfileEnabled/);
 assert.match(publicProfileSettingsCard, /publicPageVisibility/);
 assert.match(publicProfileApi, /'publicProfileEnabled'/);
 assert.match(publicProfileApi, /updates\.public_profile_enabled = body\.publicProfileEnabled/);
-assert.match(publicProfileSettingsCard, /Esta opção é guardada automaticamente quando a alteras\\./);
+assert.ok(publicProfileSettingsCard.includes('Esta opção é guardada automaticamente quando a alteras.'));
 assert.ok(publicProfileRoute.includes("redirect('/dashboard/settings#public-profile')"));
 assert.match(settingsPage, /time_limit_cancellation_hours/);
 assert.match(settingsPage, /value=\{String\(config\.time_limit_cancellation_hours\)\}/);
