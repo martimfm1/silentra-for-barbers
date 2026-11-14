@@ -291,19 +291,23 @@ export function WeeklyScheduleSettings({ barbershopId, locale }: Props) {
 
   if (loading) {
     return (
-      <div className="space-y-3" aria-busy="true">
+      <section
+        id="settings-hours"
+        className="scroll-mt-24 space-y-3"
+        aria-busy="true"
+      >
         <div className="h-10 animate-pulse rounded-xl bg-white/[.05]" />
         <div className="grid gap-3 sm:grid-cols-2">
           {Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="h-52 animate-pulse rounded-2xl bg-white/[.035]" />
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <section id="settings-hours" className="scroll-mt-24 space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-zinc-100">
@@ -459,6 +463,6 @@ export function WeeklyScheduleSettings({ barbershopId, locale }: Props) {
             : (isPt ? 'Guardar horário' : 'Save schedule')}
         </Button>
       </div>
-    </div>
+    </section>
   );
 }
