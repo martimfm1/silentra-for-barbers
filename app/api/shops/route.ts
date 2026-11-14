@@ -178,7 +178,7 @@ async function GET__unobserved(request: Request) {
     const { data, error } = await supabase
       .from('shops')
       .select(
-        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory )`,
+        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, is_public_in_directory )`,
       )
       .eq('is_active', true)
       .eq('barbershops.is_public_in_directory', true);
