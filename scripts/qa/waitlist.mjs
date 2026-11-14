@@ -118,7 +118,10 @@ assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
 assert.match(sidebar, /feature: 'waitlist'/);
 assert.match(bookingDataApi, /get_effective_billing_plan_for_barbershop/);
 assert.match(bookingDataApi, /plan: resolvedPlan/);
-assert.match(bookingDrawer, /setShopPlan\(payload\.plan/);
+assert.match(
+  bookingDrawer,
+  /setShopPlan\(\s*responseData\.plan\s*\?\?\s*shop\?\.plan\s*\?\?\s*'free'\s*\)/,
+);
 assert.match(bookingDrawer, /shopPlan === 'enterprise'/);
 assert.match(offersWorker, /profile\.plan !== 'enterprise'/);
 assert.match(dashboardApi, /allowedStatuses/);
