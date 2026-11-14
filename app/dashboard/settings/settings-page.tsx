@@ -260,16 +260,6 @@ export default function SettingsPageOrganized() {
 
   async function saveAll() {
     if (!barbershopId || !dirty || saving || directorySaving) return;
-    if (config.opening_time >= config.closing_time)
-      return toast.error(t('settingsPage.openingAfterClosing'));
-    if (
-      (config.lunch_start && !config.lunch_end) ||
-      (!config.lunch_start && config.lunch_end) ||
-      (config.lunch_start &&
-        config.lunch_end &&
-        config.lunch_start >= config.lunch_end)
-    )
-      return toast.error(t('settingsPage.lunchInvalid'));
     if (
       !Number.isInteger(config.minimum_booking_notice_minutes) ||
       config.minimum_booking_notice_minutes < 0 ||
