@@ -82,7 +82,7 @@ const authorizationMigration = readFileSync(
   'utf8',
 );
 assert.equal(
-  (authorizationMigration.match(/u\\.role in \\('owner', 'admin'\\)/g) ?? []).length,
+  authorizationMigration.split("u.role in ('owner', 'admin')").length - 1,
   2,
   'Both schedule RPCs must authorize owners/admins, not every user linked to the tenant',
 );
