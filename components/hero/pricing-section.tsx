@@ -33,9 +33,9 @@ const HERO_FEATURES = {
   ],
   pro: [
     'Até 5 barbeiros e gestão de equipa',
-    'CRM, segmentos de clientes e analytics avançados',
-    'Fidelização e follow-ups automáticos',
-    'Lembretes e automações de email',
+    'CRM avançado, histórico e segmentos de clientes',
+    'Fidelização, follow-ups e lembretes automáticos',
+    'Analytics, relatórios avançados e automações de email',
     'Pré-pagamento manual MB WAY e controlo de visibilidade no diretório',
   ],
   enterprise: [
@@ -58,9 +58,9 @@ const HERO_FEATURES_EN = {
   ],
   pro: [
     'Up to 5 barbers and team management',
-    'Advanced CRM, customer segments and analytics',
-    'Loyalty programme and automated follow-ups',
-    'Reminders and email automations',
+    'Advanced CRM, customer history and segments',
+    'Loyalty programme, follow-ups and automated reminders',
+    'Analytics, advanced reports and email automations',
     'Manual MB WAY prepayment and directory visibility controls',
   ],
   enterprise: [
@@ -85,16 +85,16 @@ export function PricingSection({
   const featureCopy = english ? HERO_FEATURES_EN : HERO_FEATURES;
   const descriptions = english
     ? {
-        free: 'The essentials to start taking bookings and keep your barbershop organised.',
-        pro: 'For barbershops ready to grow, retain customers and automate daily operations.',
+        free: 'Start with online bookings, a complete schedule and the essentials for daily management.',
+        pro: 'For teams of up to 5 barbers that need advanced CRM, loyalty, analytics and automation.',
         enterprise:
-          'For larger operations that need automatic waitlist recovery, unlimited locations and advanced management.',
+          'For growing operations with unlimited professionals and locations, advanced tools and a professional online presence.',
       }
     : {
-        free: 'O essencial para começar a receber marcações e organizar a barbearia.',
-        pro: 'Para barbearias que querem crescer, fidelizar clientes e automatizar o dia a dia.',
+        free: 'Começa com reservas online, agenda completa e as ferramentas essenciais para gerir o dia a dia.',
+        pro: 'Para equipas até 5 profissionais que precisam de CRM avançado, fidelização, analytics e automações.',
         enterprise:
-          'Para operações maiores, com recuperação automática de vagas, localizações ilimitadas e gestão avançada.',
+          'Para operações com profissionais e localizações ilimitados, ferramentas avançadas e presença online profissional.',
       };
   const [prices, setPrices] = useState<BillingPrice[]>([]);
   const [paymentMode, setPaymentMode] = useState<'MANUAL' | 'STRIPE'>('MANUAL');
