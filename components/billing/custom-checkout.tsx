@@ -62,12 +62,13 @@ const PLAN_COPY = {
     shortName: 'Pro',
     price: '9,90 € / mês',
     description:
-      'Para barbearias que querem crescer com CRM, automações, campanhas e fidelização.',
-    trial: '14 dias grátis para novos utilizadores elegíveis.',
+      'Para equipas até 5 profissionais que querem aprofundar a relação com clientes e automatizar operações.',
+    trial: '1 mês de Pro grátis pode aplicar-se a novos utilizadores elegíveis em subscrições mensais.',
     highlights: [
-      'CRM e clientes',
-      'Campanhas e automações',
-      'Fidelização e estatísticas',
+      'Até 5 profissionais e gestão de equipa',
+      'CRM avançado, segmentos e fidelização',
+      'Lembretes, follow-ups e automações de email',
+      'Pré-pagamento MB WAY e controlo de visibilidade no diretório',
     ],
   },
   enterprise: {
@@ -75,12 +76,14 @@ const PLAN_COPY = {
     shortName: 'Enterprise',
     price: 'A partir de 29,90 € / mês',
     description:
-      'Para equipas maiores, várias localizações, POS, stock e gestão avançada.',
+      'Para operações com profissionais e localizações ilimitados, gestão avançada e presença online profissional.',
     trial: null,
     highlights: [
-      'Equipas e localizações',
-      'Operação avançada',
-      'Maior controlo e escala',
+      'Profissionais e localizações ilimitados',
+      'Lista de espera e recuperação automática de vagas',
+      'POS, stock, comissões e relatórios empresariais',
+      'Landing page e endereço público Silentra incluídos',
+      'Site próprio com ativação única de 50 €',
     ],
   },
 } as const;
@@ -91,12 +94,13 @@ const PLAN_COPY_EN = {
     shortName: 'Pro',
     price: '€9.90 / month',
     description:
-      'For barbershops ready to grow with CRM, automation, campaigns and loyalty.',
-    trial: '14 days free for eligible new users.',
+      'For teams of up to 5 barbers that want stronger customer relationships and automated operations.',
+    trial: 'One month of Pro free may apply to eligible new users on monthly subscriptions.',
     highlights: [
-      'CRM and customers',
-      'Campaigns and automation',
-      'Loyalty and analytics',
+      'Up to 5 professionals and team management',
+      'Advanced CRM, segments and loyalty',
+      'Reminders, follow-ups and email automations',
+      'Manual MB WAY prepayment and directory visibility controls',
     ],
   },
   enterprise: {
@@ -104,12 +108,14 @@ const PLAN_COPY_EN = {
     shortName: 'Enterprise',
     price: 'From €29.90 / month',
     description:
-      'For larger teams, multiple locations, POS, inventory and advanced management.',
+      'For operations with unlimited professionals and locations, advanced management and a professional online presence.',
     trial: null,
     highlights: [
-      'Teams and locations',
-      'Advanced operations',
-      'More control and scale',
+      'Unlimited professionals and locations',
+      'Waitlist and automatic cancelled-slot recovery',
+      'POS, inventory, commissions and business reports',
+      'Landing page and public Silentra address included',
+      'Custom website with a one-time €50 setup fee',
     ],
   },
 } as const;
@@ -248,13 +254,13 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
               {english ? 'Today' : 'Hoje'}
             </p>
             <p className="mt-1 text-sm font-semibold text-white">
-              {english ? 'Subscription total' : 'Total da subscrição'}
+              {english ? 'Due today' : 'A pagar hoje'}
             </p>
             <p className="mt-1 max-w-xl text-xs leading-5 text-zinc-500">
               {isZeroTotal
                 ? english
-                  ? 'Nothing is due today. The regular price starts at the end of the trial, when applicable.'
-                  : 'Não tens nenhum valor a pagar hoje. O preço normal começa no fim do trial, quando aplicável.'
+                  ? 'No payment is due today. Review the recurring price and renewal terms shown in your subscription summary.'
+                  : 'Não há qualquer valor a pagar hoje. Confirma o preço recorrente e as condições de renovação apresentados no resumo da subscrição.'
                 : english
                   ? 'Total automatically updated to include discounts and taxes.'
                   : 'Total atualizado automaticamente com descontos e impostos.'}
@@ -268,8 +274,8 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
           <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-emerald-300/15 bg-emerald-300/5 px-3 py-2 text-xs font-medium text-emerald-200">
             <Check className="size-3.5" />
             {english
-              ? '14 days with no initial charge'
-              : '14 dias sem cobrança inicial'}
+              ? 'No initial charge'
+              : 'Sem cobrança inicial'}
           </div>
         ) : null}
       </div>
@@ -415,8 +421,8 @@ function CheckoutForm({ plan }: CheckoutFormProps) {
               : 'A confirmar subscrição…'
             : isZeroTotal
               ? english
-                ? 'Start the 14-day free trial'
-                : 'Começar os 14 dias grátis'
+                ? 'Confirm subscription'
+                : 'Confirmar subscrição'
               : plan === 'pro'
                 ? english
                   ? 'Confirm and subscribe to Pro'
