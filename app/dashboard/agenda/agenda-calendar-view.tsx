@@ -34,6 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AgendaCalendarSkeleton } from './agenda-view-skeletons';
+import { getDailySchedule, normalizeWeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 type ScheduleConfig = {
   opening_time?: string | null;
@@ -41,6 +42,7 @@ type ScheduleConfig = {
   lunch_start?: string | null;
   lunch_end?: string | null;
   closed_days?: string | null;
+  weekly_schedule?: unknown;
 };
 
 type CalendarBlock = {
@@ -53,31 +55,12 @@ type CalendarBlock = {
   professionals?: { name?: string | null } | null;
 };
 
-const weekdayKeys = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-] as const;
-
 const statusTone: Record<Appointment['status'], string> = {
   pending: 'bg-amber-300',
   scheduled: 'bg-sky-300',
   completed: 'bg-emerald-300',
   cancelled: 'bg-rose-300',
 };
-
-function parseClosedDays(value?: string | null) {
-  return new Set(
-    (value ?? '')
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean),
-  );
-}
 
 function dayKey(date: Date) {
   return format(date, 'yyyy-MM-dd');
@@ -106,11 +89,6 @@ function occupancyLabel(level: string, t: (key: string) => string) {
     default:
       return t('agendaCalendar.available');
   }
-}
-
-function weekdayKey(date: Date) {
-  const mondayIndex = (date.getDay() + 6) % 7;
-  return weekdayKeys[mondayIndex];
 }
 
 function appointmentName(appointment: Appointment, t: (key: string) => string) {
@@ -215,14 +193,32 @@ export function AgendaCalendarView({
     return map;
   }, [blocks]);
 
-  const closedDays = useMemo(
-    () => parseClosedDays(config.closed_days),
-    [config.closed_days],
+  const shopSchedule = useMemo(
+    () => normalizeWeeklySchedule(config.weekly_schedule, config),
+    [config],
   );
+  const getProfessionalSchedule = (professional: Professional) => {
+    const customSchedule = (
+      professional as Professional & { weekly_schedule?: unknown }
+    ).weekly_schedule;
+    return customSchedule
+      ? normalizeWeeklySchedule(customSchedule)
+      : shopSchedule;
+  };
+  const isTeamDayOff = (date: Date) =>
+    professionals.length > 0
+      ? professionals.every((professional) =>
+          getDailySchedule(
+            getProfessionalSchedule(professional),
+            date.getDay(),
+          ).day_off,
+        )
+      : getDailySchedule(shopSchedule, date.getDay()).day_off;
+  const selectedShopDay = getDailySchedule(shopSchedule, selectedDate.getDay());
   const selectedAppointments =
     appointmentsByDay.get(dayKey(selectedDate)) ?? [];
   const selectedBlocks = blocksByDay.get(dayKey(selectedDate)) ?? [];
-  const selectedClosed = closedDays.has(weekdayKey(selectedDate));
+  const selectedClosed = isTeamDayOff(selectedDate);
   const selectedActive = selectedAppointments.filter(
     (item) => item.status !== 'cancelled',
   );
@@ -360,7 +356,8 @@ export function AgendaCalendarView({
               const dayAppointments = appointmentsByDay.get(key) ?? [];
               const dayBlocks = blocksByDay.get(key) ?? [];
               const level = occupancyLevel(dayAppointments);
-              const isClosed = closedDays.has(weekdayKey(date));
+              const isClosed = isTeamDayOff(date);
+              const generalDay = getDailySchedule(shopSchedule, date.getDay());
               const inMonth = isSameMonth(date, month);
               const selected = isSameDay(date, selectedDate);
               const activeCount = dayAppointments.filter(
@@ -528,11 +525,10 @@ export function AgendaCalendarView({
                         {locale === 'en' ? 'more blocked times' : 'bloqueios'}
                       </span>
                     ) : null}
-                    {config.lunch_start && config.lunch_end && !isClosed ? (
+                    {generalDay.break_intervals.length > 0 && !isClosed ? (
                       <div className="hidden items-center gap-1 text-[9px] text-amber-300/70 sm:flex">
                         <Coffee className="size-3" aria-hidden="true" />
-                        {locale === 'en' ? 'Break' : 'Pausa'} {formatTime(config.lunch_start)}–
-                        {formatTime(config.lunch_end)}
+                        {locale === 'en' ? 'Break' : 'Pausa'} {generalDay.break_intervals.map((item) => `${item.start}–${item.end}`).join(', ')}
                       </div>
                     ) : null}
                   </div>
@@ -629,27 +625,33 @@ export function AgendaCalendarView({
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="text-zinc-500">{locale === 'en' ? 'Opening hours' : 'Funcionamento'}</span>
-              <span className="font-medium tabular-nums text-zinc-200">
-                {config.opening_time ?? '—'}–{config.closing_time ?? '—'}
+            <div className="flex items-start justify-between gap-3 text-xs">
+              <span className="shrink-0 text-zinc-500">{locale === 'en' ? 'Default hours' : 'Horário geral'}</span>
+              <span className="text-right font-medium tabular-nums text-zinc-200">
+                {selectedShopDay.day_off
+                  ? (locale === 'en' ? 'Day off' : 'Folga')
+                  : selectedShopDay.work_intervals.map((item) => `${item.start}–${item.end}`).join(' · ')}
               </span>
             </div>
-            {config.lunch_start && config.lunch_end && !selectedClosed ? (
-              <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs">
-                <span className="flex items-center gap-1.5 text-zinc-500">
+            {selectedShopDay.break_intervals.length > 0 ? (
+              <div className="mt-3 flex items-start justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs">
+                <span className="flex shrink-0 items-center gap-1.5 text-zinc-500">
                   <Coffee className="size-3.5" aria-hidden="true" />
-                  {locale === 'en' ? 'Break' : 'Pausa'}
+                  {locale === 'en' ? 'Breaks' : 'Pausas'}
                 </span>
-                <span className="font-medium tabular-nums text-amber-200">
-                  {formatTime(config.lunch_start)}–
-                  {formatTime(config.lunch_end)}
+                <span className="text-right font-medium tabular-nums text-amber-200">
+                  {selectedShopDay.break_intervals.map((item) => `${item.start}–${item.end}`).join(' · ')}
                 </span>
               </div>
             ) : null}
+            <p className="mt-3 border-t border-white/[0.06] pt-3 text-[10px] leading-4 text-zinc-600">
+              {locale === 'en'
+                ? 'Barbers with a personal schedule may have different hours.'
+                : 'Os barbeiros com horário próprio podem ter horários diferentes.'}
+            </p>
             {selectedClosed ? (
-              <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs leading-5 text-amber-200/80">
-                {t('agendaCalendar.closedWeekday')}
+              <p className="mt-2 text-xs leading-5 text-amber-200/80">
+                {locale === 'en' ? 'All barbers are off on this day.' : 'Todos os barbeiros estão de folga neste dia.'}
               </p>
             ) : null}
           </div>

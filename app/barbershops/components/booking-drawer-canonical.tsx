@@ -22,7 +22,11 @@ import { useLanguage } from '@/context/LanguageContext';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { captureProductEvent } from '@/lib/observability/posthog';
+import {
+  trackBookingCompleted,
+  trackWaitlistJoined,
+} from '@/lib/observability/booking-events';
+import { getDailySchedule } from '@/lib/scheduling/weekly-schedule';
 import type {
   BookingDayOption,
   BookingDrawerProps,
@@ -52,32 +56,6 @@ function normalizeWhatsAppNumber(value: string): string {
   if (digits.length === 9) digits = `351${digits}`;
   return digits;
 }
-
-const DAY_INDEX: Record<string, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  domingo: 0,
-  segunda: 1,
-  'segunda-feira': 1,
-  terça: 2,
-  terca: 2,
-  'terça-feira': 2,
-  'terca-feira': 2,
-  quarta: 3,
-  'quarta-feira': 3,
-  quinta: 4,
-  'quinta-feira': 4,
-  sexta: 5,
-  'sexta-feira': 5,
-  sábado: 6,
-  sabado: 6,
-  'sábado-feira': 6,
-};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -110,27 +88,6 @@ function buildDays(locale: 'pt' | 'en', count = 14): BookingDayOption[] {
     };
   });
 }
-
-function parseClosedDays(value: MarketplaceShopValue) {
-  const values =
-    typeof value === 'string'
-      ? value.split(',')
-      : Array.isArray(value)
-        ? value
-        : [];
-  return new Set(
-    values.flatMap((entry) => {
-      if (typeof entry === 'number' && entry >= 0 && entry <= 6) return [entry];
-      const key = String(entry).trim().toLowerCase();
-      if (/^[0-6]$/.test(key)) return [Number(key)];
-      return DAY_INDEX[key] === undefined ? [] : [DAY_INDEX[key]];
-    }),
-  );
-}
-
-type MarketplaceShopValue =
-  MarketplaceDrawerShopValue | string | number[] | null | undefined;
-type MarketplaceDrawerShopValue = string;
 
 function formatBirthDate(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -173,7 +130,6 @@ export function BookingDrawerCanonical({
   selectedTime = null,
   selectedProfessionalId = null,
   appearance = 'default',
-  hideClosedDays = false,
   requireBirthDate = true,
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
@@ -193,6 +149,7 @@ export function BookingDrawerCanonical({
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [selectedDayClosed, setSelectedDayClosed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
@@ -225,41 +182,48 @@ export function BookingDrawerCanonical({
   }, [isOpen, step]);
 
   const service = services.find((item) => item.id === serviceId) ?? null;
-  const configuredClosedDays = useMemo(
-    () =>
-      parseClosedDays(shop?.closed_days ?? shop?.closedDays ?? shop?.off_days),
-    [shop],
-  );
-  const closedDays = hideClosedDays ? new Set<number>() : configuredClosedDays;
-  // Some booking pages should omit weekly days off entirely, not display disabled dates.
-  const availableDays = useMemo(
-    () =>
-      hideClosedDays
-        ? days.filter(
-            (day) =>
-              !configuredClosedDays.has(
-                new Date(day.dateStr + 'T12:00:00').getDay(),
-              ),
-          )
-        : days,
-    [configuredClosedDays, days, hideClosedDays],
-  );
-  const firstOpenDayIndex = availableDays.findIndex(
-    (day) => !closedDays.has(new Date(day.dateStr + 'T12:00:00').getDay()),
-  );
+  // Day-off state is derived from the selected barber's effective weekly
+  // schedule. Before a barber is selected, a date is closed only if every
+  // available barber is off that weekday.
+  const isDayOffForBookingDay = (day: BookingDayOption) => {
+    const weekday = new Date(`${day.dateStr}T12:00:00`).getDay();
+    const scheduleOwners = professional ? [professional] : professionals;
+    return (
+      scheduleOwners.length > 0 &&
+      scheduleOwners.every(
+        (item) =>
+          item.weekly_schedule
+            ? getDailySchedule(item.weekly_schedule, weekday).day_off
+            : false,
+      )
+    );
+  };
+  const availableDays = days;
+  const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
   const currentDayClosed = currentDay
-    ? closedDays.has(new Date(currentDay.dateStr + 'T12:00:00').getDay())
-    : true;
+    ? isDayOffForBookingDay(currentDay)
+    : false;
 
-  // If the drawer opens on a day off, start on the first selectable date.
-  // This avoids leaving the Pro drawer in a disabled state before the user
-  // has had a chance to interact with the calendar.
   useEffect(() => {
-    if (!isOpen || !currentDayClosed || firstOpenDayIndex < 0) return;
-    setDayIndex(firstOpenDayIndex);
-    setSelectedSlot(null);
-  }, [currentDayClosed, firstOpenDayIndex, isOpen]);
+    if (!isOpen || professionals.length === 0) return;
+    const selectedDay = days[dayIndex];
+    if (!selectedDay || !isDayOffForBookingDay(selectedDay)) return;
+
+    const nextOpenIndex = days.findIndex(
+      (day, index) =>
+        index >= dayIndex && !isDayOffForBookingDay(day),
+    );
+    const firstOpenIndex = days.findIndex(
+      (day) => !isDayOffForBookingDay(day),
+    );
+    const targetIndex =
+      nextOpenIndex >= 0 ? nextOpenIndex : firstOpenIndex;
+    if (targetIndex >= 0) {
+      setDayIndex(targetIndex);
+      setSelectedSlot(null);
+    }
+  }, [dayIndex, days, isOpen, professional, professionals]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -284,6 +248,7 @@ export function BookingDrawerCanonical({
     setShopPlan(shop?.plan ?? null);
     setSlots([]);
     setSelectedSlot(null);
+    setSelectedDayClosed(false);
     setLoadingAvailability(false);
     setSubmitting(false);
     setError('');
@@ -323,17 +288,17 @@ export function BookingDrawerCanonical({
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
+        const responseData = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            payload?.error || t('bookingDrawer.loadBarbersError'),
+            responseData?.error || t('bookingDrawer.loadBarbersError'),
           );
-        return payload as MarketplaceBookingResponse;
+        return responseData as MarketplaceBookingResponse;
       })
-      .then((payload) => {
+      .then((responseData) => {
         if (controller.signal.aborted) return;
-        const loadedProfessionals = payload.professionals ?? [];
-        setShopPlan(payload.plan ?? shop?.plan ?? 'free');
+        const loadedProfessionals = responseData.professionals ?? [];
+        setShopPlan(responseData.plan ?? shop?.plan ?? 'free');
         setProfessionals(loadedProfessionals);
         const requestedProfessional = selectedProfessionalId
           ? loadedProfessionals.find(
@@ -349,9 +314,9 @@ export function BookingDrawerCanonical({
         } else if (selectedProfessionalId) {
           setStep(1);
         }
-        setServices(payload.services ?? []);
+        setServices(responseData.services ?? []);
         setManualPrepayment(
-          payload.manualPrepayment?.enabled ? payload.manualPrepayment : null,
+          responseData.manualPrepayment?.enabled ? responseData.manualPrepayment : null,
         );
       })
       .catch((reason) => {
@@ -382,6 +347,7 @@ export function BookingDrawerCanonical({
       !service
     ) {
       setSlots([]);
+      setSelectedDayClosed(false);
       return;
     }
     controllerRef.current?.abort();
@@ -392,6 +358,7 @@ export function BookingDrawerCanonical({
     if (cached && Date.now() - cached.timestamp < 8000) {
       const cachedSlots = cached.data.availableSlots ?? [];
       setSlots(cachedSlots);
+      setSelectedDayClosed(cached.data.closedDay === true);
       setSelectedSlot(
         selectedDate === currentDay.dateStr &&
           selectedTime &&
@@ -403,22 +370,24 @@ export function BookingDrawerCanonical({
       return () => controller.abort();
     }
     setLoadingAvailability(true);
+    setSelectedDayClosed(false);
     setError('');
     void fetch(
       `/api/shops/${shop.id}/booking-data?date=${encodeURIComponent(currentDay.dateStr)}&professionalId=${encodeURIComponent(professional.id)}&serviceId=${encodeURIComponent(service.id)}`,
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
+        const responseData = await response.json().catch(() => ({}));
         if (!response.ok)
-          throw new Error(payload?.error || t('bookingDrawer.loadTimesError'));
-        return payload as MarketplaceBookingResponse;
+          throw new Error(responseData?.error || t('bookingDrawer.loadTimesError'));
+        return responseData as MarketplaceBookingResponse;
       })
-      .then((payload) => {
+      .then((responseData) => {
         if (controller.signal.aborted) return;
-        cacheRef.current.set(key, { data: payload, timestamp: Date.now() });
-        const availableSlots = payload.availableSlots ?? [];
+        cacheRef.current.set(key, { data: responseData, timestamp: Date.now() });
+        const availableSlots = responseData.availableSlots ?? [];
         setSlots(availableSlots);
+        setSelectedDayClosed(responseData.closedDay === true);
         setSelectedSlot(
           selectedDate === currentDay.dateStr &&
             selectedTime &&
@@ -494,25 +463,25 @@ export function BookingDrawerCanonical({
         }),
       })
         .then(async (response) => {
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok || !payload.success)
+          const responseData = await response.json().catch(() => ({}));
+          if (!response.ok || !responseData.success)
             throw new Error(
-              payload?.error || t('bookingDrawer.verifyCustomerError'),
+              responseData?.error || t('bookingDrawer.verifyCustomerError'),
             );
-          return payload as {
+          return responseData as {
             matched?: boolean;
             matchedBy?: CustomerLookupField;
             lookupToken?: string;
             customerName?: string | null;
           };
         })
-        .then((payload) => {
+        .then((responseData) => {
           if (controller.signal.aborted) return;
-          if (payload.matched && payload.lookupToken && payload.matchedBy) {
+          if (responseData.matched && responseData.lookupToken && responseData.matchedBy) {
             setCustomerSuggestion({
-              lookupToken: payload.lookupToken,
-              matchedBy: payload.matchedBy,
-              customerName: payload.customerName ?? null,
+              lookupToken: responseData.lookupToken,
+              matchedBy: responseData.matchedBy,
+              customerName: responseData.customerName ?? null,
             });
             setCustomerState('suggestion');
           } else {
@@ -558,10 +527,10 @@ export function BookingDrawerCanonical({
           lookupToken: customerSuggestion.lookupToken,
         }),
       });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.success || !payload.profile) {
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok || !responseData.success || !responseData.profile) {
         const message =
-          payload?.error || t('bookingDrawer.verifyCustomerError');
+          responseData?.error || t('bookingDrawer.verifyCustomerError');
         if (response.status === 410 || response.status === 404) {
           setCustomerSuggestion(null);
           setCustomerState('new');
@@ -571,7 +540,7 @@ export function BookingDrawerCanonical({
         throw new Error(message);
       }
 
-      const profile = payload.profile as {
+      const profile = responseData.profile as {
         name?: string;
         email?: string;
         phone?: string;
@@ -611,8 +580,13 @@ export function BookingDrawerCanonical({
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
-    if (currentDayClosed) return toast.error(t('bookingDrawer.chooseOpenDay'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
+    if (currentDayClosed)
+      return toast.error(
+        locale === 'pt'
+          ? 'O barbeiro está de folga neste dia. Escolhe outra data.'
+          : 'This barber is off on this day. Choose another date.',
+      );
     setStep(2);
   }
 
@@ -676,14 +650,12 @@ export function BookingDrawerCanonical({
           ),
         },
       );
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.success)
-        throw new Error(payload?.error || t('bookingDrawer.bookingError'));
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok || !responseData.success)
+        throw new Error(responseData?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
       if (waitlistOnly) {
-        captureProductEvent('waitlist_joined', {
-          booking_surface: appearance,
-        });
+        trackWaitlistJoined(appearance);
         setPaymentInstructions(null);
         toast.success(
           locale === 'en'
@@ -693,18 +665,15 @@ export function BookingDrawerCanonical({
         setStep(4);
         return;
       }
-      captureProductEvent('booking_completed', {
-        booking_surface: appearance,
-        manual_prepayment_requested: prepaymentSelected,
-        payment_method: payload.payment?.method ?? 'none',
-      });
-      if (payload.payment?.method === 'mbway') {
+      const paymentMethod = responseData.payment?.method ?? null;
+      trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
+      if (paymentMethod === 'mbway') {
         setPaymentInstructions({
-          bookingId: String(payload.booking?.id ?? ''),
-          amount: Number(payload.payment.amount),
-          mbwayPhone: String(payload.payment.mbwayPhone),
-          whatsappPhone: String(payload.payment.whatsappPhone),
-          expiresAt: String(payload.payment.expiresAt),
+          bookingId: String(responseData.booking?.id ?? ''),
+          amount: Number(responseData.payment.amount),
+          mbwayPhone: String(responseData.payment.mbwayPhone),
+          whatsappPhone: String(responseData.payment.whatsappPhone),
+          expiresAt: String(responseData.payment.expiresAt),
         });
         toast.success(t('bookingDrawer.prepaymentSubmitted'));
       } else {
@@ -712,7 +681,7 @@ export function BookingDrawerCanonical({
         toast.success(t('bookingDrawer.bookingSuccess'));
       }
       setStep(4);
-      if (payload.payment?.method !== 'mbway') {
+      if (paymentMethod !== 'mbway') {
         onSuccess?.({
           shopName: shop.name,
           serviceName: service.name,
@@ -985,9 +954,7 @@ export function BookingDrawerCanonical({
                   <>
                     <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {availableDays.map((day, index) => {
-                        const isDayOff = closedDays.has(
-                          new Date(day.dateStr + 'T12:00:00').getDay(),
-                        );
+                        const isDayOff = isDayOffForBookingDay(day);
                         return (
                           <button
                             key={day.dateStr}
@@ -1032,34 +999,18 @@ export function BookingDrawerCanonical({
                         );
                       })}
                     </div>
-                    {closedDays.size > 0 && (
-                      <p
-                        className="mt-2 flex items-center gap-2 text-[11px] text-rose-300"
-                        role="note"
-                      >
-                        <span
-                          className="size-2 shrink-0 rounded-full bg-rose-400"
-                          aria-hidden="true"
-                        />
+                    {availableDays.some(isDayOffForBookingDay) ? (
+                      <p className="mt-2 flex items-center gap-2 text-[11px] text-rose-300" role="note">
+                        <span className="size-2 shrink-0 rounded-full bg-rose-400" aria-hidden="true" />
                         {locale === 'pt'
                           ? 'Dia de folga — indisponível para marcação'
                           : 'Day off — unavailable for booking'}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 ) : (
                   <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
                     {t('bookingDrawer.noOpenDays')}
-                  </p>
-                )}
-                {currentDayClosed && currentDay && (
-                  <p
-                    role="status"
-                    className="mt-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-3 py-2.5 text-xs font-medium text-rose-200"
-                  >
-                    {locale === 'pt'
-                      ? 'A barbearia está de folga neste dia. Escolhe outra data para continuar.'
-                      : 'The barbershop is closed on this day. Choose another date to continue.'}
                   </p>
                 )}
               </div>
@@ -1149,10 +1100,18 @@ export function BookingDrawerCanonical({
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-center">
                   <p className="text-sm font-medium">
-                    {t('bookingDrawer.noSlots')}
+                    {selectedDayClosed
+                      ? locale === 'pt'
+                        ? 'O barbeiro está de folga neste dia.'
+                        : 'This barber is off on this day.'
+                      : t('bookingDrawer.noSlots')}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
-                    {t('bookingDrawer.tryOtherDayBarber')}
+                    {selectedDayClosed
+                      ? locale === 'pt'
+                        ? 'Escolhe outro dia para veres os horários disponíveis.'
+                        : 'Choose another day to see available times.'
+                      : t('bookingDrawer.tryOtherDayBarber')}
                   </p>
                   {shopPlan === 'enterprise' ? (
                     <Button

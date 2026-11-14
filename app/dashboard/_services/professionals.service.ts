@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { Professional } from '@/types';
+import type { WeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 const supabase = createClient();
 
@@ -14,6 +15,7 @@ export interface UpdateProfessionalPayload {
   name: string;
   active?: boolean;
   commission_percentage?: number;
+  weekly_schedule?: WeeklySchedule | null;
 }
 
 export const professionalService = {
@@ -63,6 +65,17 @@ export const professionalService = {
       .single();
 
     return { data: data as Professional | null, error };
+  },
+
+  async updateWeeklySchedule(
+    id: string,
+    weeklySchedule: WeeklySchedule | null,
+  ) {
+    const { error } = await supabase.rpc('set_professional_weekly_schedule', {
+      p_professional_id: id,
+      p_weekly_schedule: weeklySchedule,
+    });
+    return { error };
   },
 
   async delete(id: string) {

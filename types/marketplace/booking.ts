@@ -1,4 +1,5 @@
 import type { MarketplaceService, MarketplaceShop } from './shops';
+import type { WeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 /** A selectable day in the booking flow. */
 export interface BookingDayOption {
@@ -13,6 +14,7 @@ export interface MarketplaceProfessional {
   id: string;
   name: string;
   role?: string;
+  weekly_schedule?: WeeklySchedule;
 }
 
 export interface BookingBlockedInterval {

@@ -115,6 +115,9 @@ jobs:
       - name: Closed-day localization contracts
         run: pnpm qa:closed-days
 
+      - name: Weekly barber schedule contracts
+        run: pnpm qa:weekly-schedules
+
       - name: Button accessible-name audit
         run: pnpm qa:buttons
 

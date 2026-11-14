@@ -1,16 +1,26 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   MarketplaceBarbershopRelation,
   MarketplaceShopRecord,
 } from '@/types/marketplace/shops';
 import { mapRecordToMarketplaceShopResponse } from '@/lib/marketplace/shop-mappers';
+import {
+  getDailySchedule,
+  isSlotWithinDailySchedule,
+  normalizeWeeklySchedule,
+  timeToMinutes,
+  type LegacyScheduleInput,
+  type WeeklySchedule,
+} from '@/lib/scheduling/weekly-schedule';
 
 type ShopRelation = MarketplaceBarbershopRelation & {
   lunch_start?: string | null;
   lunch_end?: string | null;
   is_public_in_directory?: boolean | null;
+  weekly_schedule?: unknown;
 };
 type ShopRecord = Omit<MarketplaceShopRecord, 'barbershops'> & {
   rating?: number | null;
@@ -30,14 +40,6 @@ function lisbonDate(offsetDays: number) {
   );
   value.setDate(value.getDate() + offsetDays);
   return value.toISOString().slice(0, 10);
-}
-
-function minutes(time: string | null | undefined, fallback: number) {
-  if (!time) return fallback;
-  const [hours, mins] = time.split(':').map(Number);
-  return Number.isFinite(hours) && Number.isFinite(mins)
-    ? hours * 60 + mins
-    : fallback;
 }
 
 function isValidCoordinates(latitude: number, longitude: number) {
@@ -64,20 +66,34 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
   );
 }
 
+type ProfessionalScheduleRecord = {
+  id: string;
+  barbershop_id: string;
+  weekly_schedule?: unknown;
+};
+
+type BookedInterval = {
+  professionalId: string | null;
+  start: number;
+  end: number;
+};
+
 function hasAvailableSlot(
   record: ShopRecord,
-  booked: Set<string>,
+  professionals: ProfessionalScheduleRecord[],
+  booked: BookedInterval[],
   date: string,
 ) {
   const relation = Array.isArray(record.barbershops)
     ? record.barbershops[0]
     : record.barbershops;
-  const start = minutes(relation?.opening_time, 9 * 60);
-  const end = minutes(relation?.closing_time, 19 * 60);
-  const lunchStart = relation?.lunch_start
-    ? minutes(relation.lunch_start, 0)
-    : null;
-  const lunchEnd = relation?.lunch_end ? minutes(relation.lunch_end, 0) : null;
+  if (!relation || professionals.length === 0) return false;
+
+  const shopSchedule = normalizeWeeklySchedule(
+    relation.weekly_schedule,
+    relation as LegacyScheduleInput,
+  );
+  const weekday = new Date(`${date}T12:00:00`).getDay();
   const today = lisbonDate(0);
   const now = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Lisbon',
@@ -89,21 +105,32 @@ function hasAvailableSlot(
     Number(now.find((part) => part.type === 'hour')?.value ?? 0) * 60 +
     Number(now.find((part) => part.type === 'minute')?.value ?? 0);
 
-  for (let slot = start; slot < end; slot += 30) {
-    if (date === today && slot <= nowMinutes) continue;
-    if (
-      lunchStart !== null &&
-      lunchEnd !== null &&
-      slot >= lunchStart &&
-      slot < lunchEnd
-    )
-      continue;
-    const key = `${String(Math.floor(slot / 60)).padStart(2, '0')}:${String(slot % 60).padStart(2, '0')}`;
-    if (!booked.has(key)) return true;
+  for (const professional of professionals) {
+    const schedule: WeeklySchedule = professional.weekly_schedule
+      ? normalizeWeeklySchedule(professional.weekly_schedule)
+      : shopSchedule;
+    const day = getDailySchedule(schedule, weekday);
+    if (day.day_off) continue;
+
+    for (const period of day.work_intervals) {
+      const from = timeToMinutes(period.start);
+      const to = timeToMinutes(period.end);
+      for (let slot = from; slot + 30 <= to; slot += 30) {
+        if (date === today && slot <= nowMinutes) continue;
+        if (!isSlotWithinDailySchedule(day, slot, slot + 30)) continue;
+        const conflicts = booked.some(
+          (appointment) =>
+            (!appointment.professionalId ||
+              appointment.professionalId === professional.id) &&
+            slot < appointment.end &&
+            slot + 30 > appointment.start,
+        );
+        if (!conflicts) return true;
+      }
+    }
   }
   return false;
 }
-
 async function GET__unobserved(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -147,10 +174,11 @@ async function GET__unobserved(request: Request) {
     const canMeasureDistance = isValidCoordinates(latitude, longitude);
 
     const supabase = await createClient();
+    const admin = createAdminClient();
     const { data, error } = await supabase
       .from('shops')
       .select(
-        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, is_public_in_directory )`,
+        `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, is_public_in_directory )`,
       )
       .eq('is_active', true)
       .eq('barbershops.is_public_in_directory', true);
@@ -182,28 +210,74 @@ async function GET__unobserved(request: Request) {
     const barbershopIds = records
       .map((record) => record.barbershop_id)
       .filter(Boolean);
-    const { data: appointments } = barbershopIds.length
-      ? await supabase
-          .from('appointments')
-          .select('barbershop_id, date_hour')
-          .in('barbershop_id', barbershopIds)
-          .gte('date_hour', `${date}T00:00:00`)
-          .lte('date_hour', `${date}T23:59:59`)
-      : { data: [] as { barbershop_id: string; date_hour: string }[] };
+    let professionals: ProfessionalScheduleRecord[] = [];
+    let appointments: {
+      barbershop_id: string;
+      professional_id: string | null;
+      date_hour: string;
+      duration_minutes: number | null;
+    }[] = [];
 
-    const bookedByShop = new Map<string, Set<string>>();
+    if (barbershopIds.length > 0) {
+      const [professionalsResult, appointmentsResult] = await Promise.all([
+        admin
+          .from('professionals')
+          .select('id,barbershop_id,weekly_schedule')
+          .in('barbershop_id', barbershopIds)
+          .eq('active', true),
+        admin
+          .from('appointments')
+          .select('barbershop_id,professional_id,date_hour,duration_minutes')
+          .in('barbershop_id', barbershopIds)
+          .in('status', ['pending', 'scheduled'])
+          .gte('date_hour', `${date}T00:00:00`)
+          .lte('date_hour', `${date}T23:59:59`),
+      ]);
+
+      if (professionalsResult.error || appointmentsResult.error) {
+        console.error('[SHOPS_AVAILABILITY_ERROR]', {
+          professionals: professionalsResult.error?.code ?? null,
+          appointments: appointmentsResult.error?.code ?? null,
+        });
+        return NextResponse.json(
+          { error: 'Não foi possível validar os horários disponíveis.' },
+          { status: 503 },
+        );
+      }
+
+      professionals = (professionalsResult.data ?? []) as ProfessionalScheduleRecord[];
+      appointments = (appointmentsResult.data ?? []) as typeof appointments;
+    }
+
+    const professionalsByShop = new Map<string, ProfessionalScheduleRecord[]>();
+    for (const professional of (professionals ?? []) as ProfessionalScheduleRecord[]) {
+      const current = professionalsByShop.get(professional.barbershop_id) ?? [];
+      current.push(professional);
+      professionalsByShop.set(professional.barbershop_id, current);
+    }
+
+    const bookedByShop = new Map<string, BookedInterval[]>();
     for (const appointment of appointments ?? []) {
       const time = appointment.date_hour?.split('T')[1]?.slice(0, 5) ?? '';
-      if (!bookedByShop.has(appointment.barbershop_id))
-        bookedByShop.set(appointment.barbershop_id, new Set());
-      bookedByShop.get(appointment.barbershop_id)?.add(time);
+      const [hours, minutesPart] = time.split(':').map(Number);
+      if (!Number.isFinite(hours) || !Number.isFinite(minutesPart)) continue;
+      const start = hours * 60 + minutesPart;
+      const duration = Math.max(1, Number(appointment.duration_minutes ?? 30));
+      const current = bookedByShop.get(appointment.barbershop_id) ?? [];
+      current.push({
+        professionalId: appointment.professional_id ?? null,
+        start,
+        end: start + duration,
+      });
+      bookedByShop.set(appointment.barbershop_id, current);
     }
 
     const shops = records
       .filter((record) =>
         hasAvailableSlot(
           record,
-          bookedByShop.get(record.barbershop_id) ?? new Set(),
+          professionalsByShop.get(record.barbershop_id) ?? [],
+          bookedByShop.get(record.barbershop_id) ?? [],
           date,
         ),
       )

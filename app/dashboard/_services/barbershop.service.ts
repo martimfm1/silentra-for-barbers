@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import type { WeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 export interface BarbershopConfigPayload {
   name: string;
@@ -7,6 +8,7 @@ export interface BarbershopConfigPayload {
   opening_time?: string;
   closing_time?: string;
   closed_days?: string;
+  weekly_schedule?: WeeklySchedule | null;
   allow_online_bookings?: boolean;
   auto_reminders?: boolean;
   auto_confirm_bookings?: boolean;
@@ -34,7 +36,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled, mbway_phone',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled, mbway_phone',
       )
       .eq('id', barbershopId)
       .single();
@@ -128,6 +130,7 @@ export async function updateBarbershopConfig(
         );
     }
 
+    const weeklySchedule = payload.weekly_schedule;
     const directoryVisibility = payload.is_public_in_directory;
     const manualAutoConfirm = payload.auto_confirm_manual_bookings;
     const mbwayEnabled = payload.mbway_enabled;
@@ -145,10 +148,19 @@ export async function updateBarbershopConfig(
 
     const barbershopPayload: Record<string, unknown> = { ...payload };
     delete barbershopPayload.popular_service_id;
+    delete barbershopPayload.weekly_schedule;
     delete barbershopPayload.is_public_in_directory;
     delete barbershopPayload.auto_confirm_manual_bookings;
     delete barbershopPayload.mbway_enabled;
     delete barbershopPayload.mbway_phone;
+
+    if (weeklySchedule !== undefined) {
+      const { error } = await supabase.rpc('set_barbershop_weekly_schedule', {
+        p_barbershop_id: barbershopId,
+        p_weekly_schedule: weeklySchedule,
+      });
+      if (error) throw error;
+    }
 
     if (manualAutoConfirm !== undefined) {
       const { error } = await supabase.rpc(

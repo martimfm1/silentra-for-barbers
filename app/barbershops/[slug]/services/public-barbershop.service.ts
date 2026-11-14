@@ -1,5 +1,6 @@
 import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { PublicProfileRecord } from '@/lib/barbershops/public-profile';
+import type { WeeklySchedule } from '@/lib/scheduling/weekly-schedule';
 
 export interface ServiceItem {
   id: string;
@@ -30,6 +31,7 @@ export interface BarbershopPublicDetails extends PublicProfileRecord {
   lunch_start?: string | null;
   lunch_end?: string | null;
   closed_days?: string | null;
+  weekly_schedule?: WeeklySchedule | null;
   require_birth_date?: boolean;
   off_days?: number[];
   price?: number | string | null;
