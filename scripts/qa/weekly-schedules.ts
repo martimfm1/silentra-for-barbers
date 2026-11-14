@@ -65,7 +65,7 @@ assert.equal(
 );
 
 const migration = readFileSync(
-  'supabase/migrations/20261113190000_weekly_barber_schedules.sql',
+  'supabase/migrations/20261114002250_weekly_barber_schedules.sql',
   'utf8',
 );
 assert.ok(migration.includes('set_barbershop_weekly_schedule'));
