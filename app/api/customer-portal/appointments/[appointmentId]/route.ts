@@ -10,6 +10,7 @@ import {
   normalizeWeeklySchedule,
 } from '@/lib/scheduling/weekly-schedule';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
+import { notifyBarberOfAppointmentChange } from '@/lib/brevo/appointment-change-notifications';
 import {
   isSafePublicBookingDate,
   isValidTime,
@@ -47,24 +48,32 @@ async function getAuthorizedAppointment(
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
   if (error || !appointment) return { session, appointment: null, admin };
   let ownsAppointment =
     appointment.manual_email?.trim().toLowerCase() === session.email;
-  if (!ownsAppointment && appointment.client_id) {
+  let clientName: string | null = null;
+  if (appointment.client_id) {
     const { data: client, error: clientError } = await admin
       .from('users')
-      .select('email')
+      .select('email,name_complete')
       .eq('id', appointment.client_id)
+      .eq('barbershop_id', appointment.barbershop_id)
       .maybeSingle();
     if (clientError) throw new Error('CUSTOMER_LOOKUP_FAILED');
-    ownsAppointment = client?.email?.trim().toLowerCase() === session.email;
+    clientName = client?.name_complete?.trim() || null;
+    if (!ownsAppointment)
+      ownsAppointment = client?.email?.trim().toLowerCase() === session.email;
   }
   if (!ownsAppointment) return { session, appointment: null, admin };
-  return { session, appointment, admin };
+  return {
+    session,
+    appointment: { ...appointment, client_name: clientName },
+    admin,
+  };
 }
 function getShop(appointment: any) {
   return Array.isArray(appointment.barbershops)
@@ -294,11 +303,30 @@ async function DELETE__unobserved(
         'A marcação já foi alterada. Atualiza a página e tenta novamente.',
         409,
       );
+    const service = Array.isArray(appointment.services)
+      ? appointment.services[0]
+      : appointment.services;
+    const barberNotification = await notifyBarberOfAppointmentChange({
+      event: 'cancelled',
+      appointmentId: appointment.id,
+      barbershopId: appointment.barbershop_id,
+      professionalId: appointment.professional_id,
+      customerName:
+        appointment.manual_name?.trim() ||
+        appointment.client_name ||
+        session.email,
+      serviceName: service?.name?.trim() || 'Serviço',
+      dateHour: appointment.date_hour,
+    });
     await admin.from('audit_logs').insert({
       action: 'customer_portal_cancel',
       entity_type: 'appointment',
       entity_id: appointment.id,
-      metadata: { email: session.email },
+      metadata: {
+        email: session.email,
+        barberEmailsSent: barberNotification.emailsSent,
+        barberPushSent: barberNotification.pushSent,
+      },
     });
     void dispatchAppointmentAutomations('booking_cancelled', {
       appointmentId: appointment.id,
@@ -307,7 +335,11 @@ async function DELETE__unobserved(
       manualEmail: appointment.manual_email,
       manualName: appointment.manual_name,
     });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      barberNotificationSent:
+        barberNotification.emailsSent > 0 || barberNotification.pushSent > 0,
+    });
   } catch (error) {
     console.error('[CUSTOMER_PORTAL_CANCEL_CRITICAL]', error);
     return jsonError('Não foi possível cancelar a marcação.', 500);
@@ -427,6 +459,22 @@ async function PATCH__unobserved(
         'A marcação já foi alterada. Atualiza a página e tenta novamente.',
         409,
       );
+    const service = Array.isArray(appointment.services)
+      ? appointment.services[0]
+      : appointment.services;
+    const barberNotification = await notifyBarberOfAppointmentChange({
+      event: 'rescheduled',
+      appointmentId: appointment.id,
+      barbershopId: appointment.barbershop_id,
+      professionalId: appointment.professional_id,
+      customerName:
+        appointment.manual_name?.trim() ||
+        appointment.client_name ||
+        session.email,
+      serviceName: service?.name?.trim() || 'Serviço',
+      previousDateHour: appointment.date_hour,
+      newDateHour: updated.date_hour,
+    });
     await admin.from('audit_logs').insert({
       action: 'customer_portal_reschedule',
       entity_type: 'appointment',
@@ -435,9 +483,16 @@ async function PATCH__unobserved(
         email: session.email,
         from: appointment.date_hour,
         to: newDateHour,
+        barberEmailsSent: barberNotification.emailsSent,
+        barberPushSent: barberNotification.pushSent,
       },
     });
-    return NextResponse.json({ success: true, dateHour: updated.date_hour });
+    return NextResponse.json({
+      success: true,
+      dateHour: updated.date_hour,
+      barberNotificationSent:
+        barberNotification.emailsSent > 0 || barberNotification.pushSent > 0,
+    });
   } catch (error) {
     console.error('[CUSTOMER_PORTAL_RESCHEDULE_CRITICAL]', error);
     return jsonError('Não foi possível reagendar a marcação.', 500);
