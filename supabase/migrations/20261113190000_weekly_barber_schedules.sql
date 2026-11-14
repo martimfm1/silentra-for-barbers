@@ -642,11 +642,6 @@ comment on function public.create_booking_atomic(
 ) is
   'Atomic tenant-scoped public booking creation with MB WAY prepayment holds, expiry-aware conflict checks, client matching and separate manual/online auto-confirmation settings.';
 
-comment on function public.create_booking_atomic(
-  uuid, uuid, uuid, timestamptz, integer, text, text, text, date, text
-) is
-  'Atomic tenant-scoped public booking creation; schedule availability is enforced from the selected professional weekly schedule (or shop default), including day-off and break validation.';
-
 notify pgrst, 'reload schema';
 
 commit;
