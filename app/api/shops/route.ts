@@ -41,14 +41,6 @@ function lisbonDate(offsetDays: number) {
   return value.toISOString().slice(0, 10);
 }
 
-function minutes(time: string | null | undefined, fallback: number) {
-  if (!time) return fallback;
-  const [hours, mins] = time.split(':').map(Number);
-  return Number.isFinite(hours) && Number.isFinite(mins)
-    ? hours * 60 + mins
-    : fallback;
-}
-
 function isValidCoordinates(latitude: number, longitude: number) {
   return (
     Number.isFinite(latitude) &&
@@ -216,32 +208,44 @@ async function GET__unobserved(request: Request) {
     const barbershopIds = records
       .map((record) => record.barbershop_id)
       .filter(Boolean);
-    const [{ data: professionals }, { data: appointments }] = barbershopIds.length
-      ? await Promise.all([
-          supabase
-            .from('professionals')
-            .select('id,barbershop_id,weekly_schedule')
-            .in('barbershop_id', barbershopIds)
-            .eq('active', true),
-          supabase
-            .from('appointments')
-            .select('barbershop_id,professional_id,date_hour,duration_minutes')
-            .in('barbershop_id', barbershopIds)
-            .in('status', ['pending', 'scheduled'])
-            .gte('date_hour', `${date}T00:00:00`)
-            .lte('date_hour', `${date}T23:59:59`),
-        ])
-      : [
-          { data: [] as ProfessionalScheduleRecord[] },
-          {
-            data: [] as {
-              barbershop_id: string;
-              professional_id: string | null;
-              date_hour: string;
-              duration_minutes: number | null;
-            }[],
-          },
-        ];
+    let professionals: ProfessionalScheduleRecord[] = [];
+    let appointments: {
+      barbershop_id: string;
+      professional_id: string | null;
+      date_hour: string;
+      duration_minutes: number | null;
+    }[] = [];
+
+    if (barbershopIds.length > 0) {
+      const [professionalsResult, appointmentsResult] = await Promise.all([
+        supabase
+          .from('professionals')
+          .select('id,barbershop_id,weekly_schedule')
+          .in('barbershop_id', barbershopIds)
+          .eq('active', true),
+        supabase
+          .from('appointments')
+          .select('barbershop_id,professional_id,date_hour,duration_minutes')
+          .in('barbershop_id', barbershopIds)
+          .in('status', ['pending', 'scheduled'])
+          .gte('date_hour', `${date}T00:00:00`)
+          .lte('date_hour', `${date}T23:59:59`),
+      ]);
+
+      if (professionalsResult.error || appointmentsResult.error) {
+        console.error('[SHOPS_AVAILABILITY_ERROR]', {
+          professionals: professionalsResult.error?.code ?? null,
+          appointments: appointmentsResult.error?.code ?? null,
+        });
+        return NextResponse.json(
+          { error: 'Não foi possível validar os horários disponíveis.' },
+          { status: 503 },
+        );
+      }
+
+      professionals = (professionalsResult.data ?? []) as ProfessionalScheduleRecord[];
+      appointments = (appointmentsResult.data ?? []) as typeof appointments;
+    }
 
     const professionalsByShop = new Map<string, ProfessionalScheduleRecord[]>();
     for (const professional of (professionals ?? []) as ProfessionalScheduleRecord[]) {
