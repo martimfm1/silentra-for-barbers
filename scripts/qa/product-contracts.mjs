@@ -899,7 +899,10 @@ const checks = [
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
         normalized.includes('const availableDays = days;') &&
-        normalized.includes('currentDayClosed = false') &&
+        normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) : false') &&
+        normalized.includes('disabled={isDayOff}') &&
+        normalized.includes('const nextOpenIndex = days.findIndex(') &&
+        normalized.includes('Dia de folga — indisponível para marcação') &&
         normalized.includes('booking-data?date=') &&
         normalized.includes('professional.id') &&
         normalized.includes('setSelectedDayClosed(payload.closedDay === true)') &&
