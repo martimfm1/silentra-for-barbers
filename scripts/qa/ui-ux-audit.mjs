@@ -40,6 +40,7 @@ const [
   read('app/dashboard/_components/DashboardCreateBookingDialog.tsx'),
 ]);
 const settingsPushNotifications = await read('components/dashboard/settings-push-notifications-panel.tsx');
+const weeklyScheduleSettings = await read('components/dashboard/weekly-schedule-settings.tsx');
 
 const confirmationTargets = await Promise.all(
   [
@@ -225,12 +226,15 @@ assert.doesNotMatch(
   /settingsPage\.overviewTitle|completedSetupSteps|role="progressbar"/,
 );
 for (const category of ['business', 'location', 'hours', 'rules']) {
+  const categorySource =
+    category === 'hours' ? weeklyScheduleSettings : settingsPage;
   assert.match(
-    settingsPage,
+    categorySource,
     new RegExp(`<section id="settings-${category}"`),
     `Settings ${category} form must be visible inline`,
   );
 }
+assert.match(settingsPage, /<WeeklyScheduleSettings barbershopId=\{barbershopId!\} locale=\{locale\} \/>/);
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(settingsPage, /data-settings-category/);
 const accountSecurityMarker = "t('settingsPage.accountSecurity')";
