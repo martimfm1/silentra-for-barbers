@@ -74,6 +74,8 @@ assert.ok(migration.includes('is_valid_weekly_schedule'));
 assert.ok(migration.includes('coalesce(p.weekly_schedule, b.weekly_schedule)'));
 assert.ok(migration.includes('BOOKING_OUTSIDE_WORKING_HOURS'));
 assert.ok(migration.includes('BOOKING_OVERLAPS_BREAK'));
+assert.ok(migration.includes('v_start is null'));
+assert.ok(migration.includes('v_end is null'));
 
 const files = [
   'app/api/shops/[id]/booking-data/route.ts',
