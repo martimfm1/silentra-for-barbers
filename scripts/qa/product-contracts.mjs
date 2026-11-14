@@ -915,6 +915,17 @@ const checks = [
     },
   },
   {
+    name: 'Marketplace availability uses shop defaults and per-barber weekly schedules',
+    file: 'app/api/shops/route.ts',
+    test: (source) =>
+      source.includes('weekly_schedule, is_public_in_directory') &&
+      source.includes('professional.weekly_schedule') &&
+      source.includes('normalizeWeeklySchedule') &&
+      source.includes('getDailySchedule') &&
+      source.includes('isSlotWithinDailySchedule') &&
+      source.includes('professionalsByShop'),
+  },
+  {
     name: 'iCalendar feed tokens are purpose-scoped and timing-safe verified',
     file: 'lib/calendar/feed-token.ts',
     test: (source) =>
