@@ -28,7 +28,11 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import type { BarbershopAmenities } from '@/lib/barbershops/amenities';
 import type { BarbershopPublicDetails } from './services/public-barbershop.service';
-import { formatClosedDays } from '@/lib/utils/format-closed-days';
+import {
+  normalizeWeeklySchedule,
+  WEEKDAY_KEYS,
+  type WeekdayKey,
+} from '@/lib/scheduling/weekly-schedule';
 import {
   DEFAULT_BARBERSHOP_AVATAR,
   DEFAULT_BARBERSHOP_BANNER,
@@ -264,33 +268,54 @@ export default function BarbershopPublicPageFinal({
         </section>
 
         <section
-          className="mt-6 grid gap-3 sm:grid-cols-3"
-          aria-label="Horários da barbearia"
+          className="silentra-section-block mt-6 rounded-3xl p-4 sm:p-5 glassmorphism"
+          aria-label={locale === 'en' ? 'Weekly opening hours' : 'Horário semanal da barbearia'}
         >
-          <div className="silentra-section-block rounded-2xl p-4 mt-0 glassmorphism">
-            <p className="text-xs text-zinc-500">Horário</p>
-            <p className="mt-1 text-sm font-semibold">
-              {formatTime(shop.opening_time)} - {formatTime(shop.closing_time)}
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-zinc-100">
+              {locale === 'en' ? 'Weekly opening hours' : 'Horário semanal'}
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              {locale === 'en'
+                ? 'These are the default hours. Individual barbers may have different schedules.'
+                : 'Este é o horário geral. Cada barbeiro pode ter um horário individual diferente.'}
             </p>
           </div>
-          {shop.lunch_start && shop.lunch_end && (
-            <div className="silentra-section-block rounded-2xl p-4 glassmorphism">
-              <p className="text-xs text-zinc-500">Pausa</p>
-              <p className="mt-1 text-sm font-semibold">
-                {formatTime(shop.lunch_start)} - {formatTime(shop.lunch_end)}
-              </p>
-            </div>
-          )}
-          <div className="silentra-section-block rounded-2xl p-4 glassmorphism">
-            <p className="text-xs text-zinc-500">
-              {locale === 'en' ? 'Closed days' : 'Dias de fecho'}
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              {formatClosedDays(
-                shop.closed_days,
-                locale === 'en' ? 'en' : 'pt',
-              ) || (locale === 'en' ? 'None' : 'Nenhum')}
-            </p>
+          <div className="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {WEEKDAY_KEYS.map((dayKey) => {
+              const weekly = normalizeWeeklySchedule(shop.weekly_schedule, shop);
+              const day = weekly[dayKey];
+              const labels: Record<WeekdayKey, { pt: string; en: string }> = {
+                monday: { pt: 'Segunda-feira', en: 'Monday' },
+                tuesday: { pt: 'Terça-feira', en: 'Tuesday' },
+                wednesday: { pt: 'Quarta-feira', en: 'Wednesday' },
+                thursday: { pt: 'Quinta-feira', en: 'Thursday' },
+                friday: { pt: 'Sexta-feira', en: 'Friday' },
+                saturday: { pt: 'Sábado', en: 'Saturday' },
+                sunday: { pt: 'Domingo', en: 'Sunday' },
+              };
+              return (
+                <div
+                  key={dayKey}
+                  className="min-w-0 rounded-xl border border-white/[.07] bg-white/[.025] px-3 py-3"
+                >
+                  <p className="text-xs font-semibold text-zinc-200">
+                    {labels[dayKey][locale === 'en' ? 'en' : 'pt']}
+                  </p>
+                  <p className={`mt-1 text-sm font-semibold ${day.day_off ? 'text-amber-200' : 'text-zinc-100'}`}>
+                    {day.day_off
+                      ? (locale === 'en' ? 'Day off' : 'Folga')
+                      : day.work_intervals.map((item) => `${formatTime(item.start)}–${formatTime(item.end)}`).join(' · ')}
+                  </p>
+                  {day.break_intervals.length > 0 && (
+                    <p className="mt-1 text-[11px] leading-4 text-zinc-500">
+                      {locale === 'en' ? 'Breaks: ' : 'Pausas: '}
+                      {day.break_intervals.map((item) => `${formatTime(item.start)}–${formatTime(item.end)}`).join(', ')}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 
