@@ -223,6 +223,9 @@ async function GET__unobserved(
       id: professional.id,
       name: professional.name || 'Barbeiro',
       role: 'Barbeiro Profissional',
+      weekly_schedule: professional.weekly_schedule
+        ? normalizeWeeklySchedule(professional.weekly_schedule)
+        : shopSchedule,
     }));
     const professionalSchedules = new Map<string, ReturnType<typeof normalizeWeeklySchedule>>();
     for (const professional of professionalsData) {
