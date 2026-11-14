@@ -23,6 +23,7 @@ const enCopy = read('app/locales/en-copy.ts');
 const bookingTypes = read('types/dashboard/forms.ts');
 const calendarSync = read('components/dashboard/calendar-sync-card.tsx');
 const settings = read('app/dashboard/settings/settings-page.tsx');
+const weeklySettings = read('components/dashboard/weekly-schedule-settings.tsx');
 const selectComponent = read('components/ui/select.tsx');
 const appointmentDetail = read(
   'components/dashboard/appointment-detail-dialog.tsx',
@@ -169,10 +170,12 @@ assert.ok(
 assert.ok(
   settings.includes('box-border block min-h-11 w-full min-w-0 max-w-full'),
 );
-assert.ok(settings.includes("cn(INPUT_CLASS, 'color-scheme-dark')"));
-assert.ok(settings.includes('<Switch'));
-assert.ok(settings.includes('checked={active}'));
-assert.ok(settings.includes('Definir ${label} como dia de encerramento'));
+assert.ok(weeklySettings.includes('color-scheme-dark'));
+assert.ok(weeklySettings.includes('checked={day.day_off}'));
+assert.ok(weeklySettings.includes('work_intervals'));
+assert.ok(weeklySettings.includes('break_intervals'));
+assert.ok(weeklySettings.includes('Adicionar'));
+assert.ok(weeklySettings.includes('Horário semanal'));
 
 assert.ok(bookingForm.includes('min-w-0'));
 assert.ok(bookingForm.includes('setRecurrenceEndDate'));
