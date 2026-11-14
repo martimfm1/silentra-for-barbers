@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const [
   settings,
+  weeklySettings,
   service,
   booking,
   availability,
@@ -17,6 +18,7 @@ const [
   workflow,
 ] = await Promise.all([
   readFile('app/dashboard/settings/settings-page.tsx', 'utf8'),
+  readFile('components/dashboard/weekly-schedule-settings.tsx', 'utf8'),
   readFile('app/dashboard/_services/barbershop.service.ts', 'utf8'),
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('app/api/shops/[id]/booking-data/route.ts', 'utf8'),
@@ -39,9 +41,13 @@ const [
   readFile('package.json', 'utf8').then(JSON.parse),
   readFile('.github/workflows/ci.yml', 'utf8'),
 ]);
-assert.match(settings, /htmlFor="settings-closing-time"/);
-assert.match(settings, /settingsPage\.lunchBreak/);
-assert.match(settings, /settingsPage\.daysOffInHours/);
+assert.match(settings, /<WeeklyScheduleSettings/);
+assert.doesNotMatch(settings, /settings-closing-time/);
+assert.match(weeklySettings, /work_intervals/);
+assert.match(weeklySettings, /break_intervals/);
+assert.match(weeklySettings, /day_off/);
+assert.match(weeklySettings, /updateWeeklySchedule/);
+assert.match(weeklySettings, /Horário semanal/);
 assert.match(settings, /settingsPage\.minimumBookingNotice/);
 assert.match(settings, /settingsPage\.allowOnline/);
 assert.match(settings, /settingsPage\.autoConfirm/);
