@@ -1,6 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   MarketplaceBarbershopRelation,
   MarketplaceShopRecord,
@@ -173,6 +174,7 @@ async function GET__unobserved(request: Request) {
     const canMeasureDistance = isValidCoordinates(latitude, longitude);
 
     const supabase = await createClient();
+    const admin = createAdminClient();
     const { data, error } = await supabase
       .from('shops')
       .select(
@@ -218,12 +220,12 @@ async function GET__unobserved(request: Request) {
 
     if (barbershopIds.length > 0) {
       const [professionalsResult, appointmentsResult] = await Promise.all([
-        supabase
+        admin
           .from('professionals')
           .select('id,barbershop_id,weekly_schedule')
           .in('barbershop_id', barbershopIds)
           .eq('active', true),
-        supabase
+        admin
           .from('appointments')
           .select('barbershop_id,professional_id,date_hour,duration_minutes')
           .in('barbershop_id', barbershopIds)
