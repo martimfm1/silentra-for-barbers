@@ -288,17 +288,17 @@ export function BookingDrawerCanonical({
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
+        const responseData = await response.json().catch(() => ({}));
         if (!response.ok)
           throw new Error(
-            payload?.error || t('bookingDrawer.loadBarbersError'),
+            responseData?.error || t('bookingDrawer.loadBarbersError'),
           );
-        return payload as MarketplaceBookingResponse;
+        return responseData as MarketplaceBookingResponse;
       })
-      .then((payload) => {
+      .then((responseData) => {
         if (controller.signal.aborted) return;
-        const loadedProfessionals = payload.professionals ?? [];
-        setShopPlan(payload.plan ?? shop?.plan ?? 'free');
+        const loadedProfessionals = responseData.professionals ?? [];
+        setShopPlan(responseData.plan ?? shop?.plan ?? 'free');
         setProfessionals(loadedProfessionals);
         const requestedProfessional = selectedProfessionalId
           ? loadedProfessionals.find(
@@ -314,9 +314,9 @@ export function BookingDrawerCanonical({
         } else if (selectedProfessionalId) {
           setStep(1);
         }
-        setServices(payload.services ?? []);
+        setServices(responseData.services ?? []);
         setManualPrepayment(
-          payload.manualPrepayment?.enabled ? payload.manualPrepayment : null,
+          responseData.manualPrepayment?.enabled ? responseData.manualPrepayment : null,
         );
       })
       .catch((reason) => {
@@ -377,17 +377,17 @@ export function BookingDrawerCanonical({
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
+        const responseData = await response.json().catch(() => ({}));
         if (!response.ok)
-          throw new Error(payload?.error || t('bookingDrawer.loadTimesError'));
-        return payload as MarketplaceBookingResponse;
+          throw new Error(responseData?.error || t('bookingDrawer.loadTimesError'));
+        return responseData as MarketplaceBookingResponse;
       })
-      .then((payload) => {
+      .then((responseData) => {
         if (controller.signal.aborted) return;
-        cacheRef.current.set(key, { data: payload, timestamp: Date.now() });
-        const availableSlots = payload.availableSlots ?? [];
+        cacheRef.current.set(key, { data: responseData, timestamp: Date.now() });
+        const availableSlots = responseData.availableSlots ?? [];
         setSlots(availableSlots);
-        setSelectedDayClosed(payload.closedDay === true);
+        setSelectedDayClosed(responseData.closedDay === true);
         setSelectedSlot(
           selectedDate === currentDay.dateStr &&
             selectedTime &&
@@ -463,25 +463,25 @@ export function BookingDrawerCanonical({
         }),
       })
         .then(async (response) => {
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok || !payload.success)
+          const responseData = await response.json().catch(() => ({}));
+          if (!response.ok || !responseData.success)
             throw new Error(
-              payload?.error || t('bookingDrawer.verifyCustomerError'),
+              responseData?.error || t('bookingDrawer.verifyCustomerError'),
             );
-          return payload as {
+          return responseData as {
             matched?: boolean;
             matchedBy?: CustomerLookupField;
             lookupToken?: string;
             customerName?: string | null;
           };
         })
-        .then((payload) => {
+        .then((responseData) => {
           if (controller.signal.aborted) return;
-          if (payload.matched && payload.lookupToken && payload.matchedBy) {
+          if (responseData.matched && responseData.lookupToken && responseData.matchedBy) {
             setCustomerSuggestion({
-              lookupToken: payload.lookupToken,
-              matchedBy: payload.matchedBy,
-              customerName: payload.customerName ?? null,
+              lookupToken: responseData.lookupToken,
+              matchedBy: responseData.matchedBy,
+              customerName: responseData.customerName ?? null,
             });
             setCustomerState('suggestion');
           } else {
@@ -527,10 +527,10 @@ export function BookingDrawerCanonical({
           lookupToken: customerSuggestion.lookupToken,
         }),
       });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.success || !payload.profile) {
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok || !responseData.success || !responseData.profile) {
         const message =
-          payload?.error || t('bookingDrawer.verifyCustomerError');
+          responseData?.error || t('bookingDrawer.verifyCustomerError');
         if (response.status === 410 || response.status === 404) {
           setCustomerSuggestion(null);
           setCustomerState('new');
@@ -540,7 +540,7 @@ export function BookingDrawerCanonical({
         throw new Error(message);
       }
 
-      const profile = payload.profile as {
+      const profile = responseData.profile as {
         name?: string;
         email?: string;
         phone?: string;
@@ -650,9 +650,9 @@ export function BookingDrawerCanonical({
           ),
         },
       );
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.success)
-        throw new Error(payload?.error || t('bookingDrawer.bookingError'));
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok || !responseData.success)
+        throw new Error(responseData?.error || t('bookingDrawer.bookingError'));
       cacheRef.current.clear();
       if (waitlistOnly) {
         trackWaitlistJoined(appearance);
@@ -665,15 +665,15 @@ export function BookingDrawerCanonical({
         setStep(4);
         return;
       }
-      const paymentMethod = payload.payment?.method ?? null;
+      const paymentMethod = responseData.payment?.method ?? null;
       trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
       if (paymentMethod === 'mbway') {
         setPaymentInstructions({
-          bookingId: String(payload.booking?.id ?? ''),
-          amount: Number(payload.payment.amount),
-          mbwayPhone: String(payload.payment.mbwayPhone),
-          whatsappPhone: String(payload.payment.whatsappPhone),
-          expiresAt: String(payload.payment.expiresAt),
+          bookingId: String(responseData.booking?.id ?? ''),
+          amount: Number(responseData.payment.amount),
+          mbwayPhone: String(responseData.payment.mbwayPhone),
+          whatsappPhone: String(responseData.payment.whatsappPhone),
+          expiresAt: String(responseData.payment.expiresAt),
         });
         toast.success(t('bookingDrawer.prepaymentSubmitted'));
       } else {
