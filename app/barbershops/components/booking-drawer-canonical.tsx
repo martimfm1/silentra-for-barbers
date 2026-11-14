@@ -23,6 +23,7 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { captureProductEvent } from '@/lib/observability/posthog';
+import { getDailySchedule } from '@/lib/scheduling/weekly-schedule';
 import type {
   BookingDayOption,
   BookingDrawerProps,
@@ -178,13 +179,42 @@ export function BookingDrawerCanonical({
   }, [isOpen, step]);
 
   const service = services.find((item) => item.id === serviceId) ?? null;
-  // Day-off decisions are now professional-specific and come from booking-data.
-  // A global shop.closed_days check would incorrectly hide Saturdays when a barber
-  // has a personal afternoon-only schedule.
+  // Day-off state is derived from the selected barber's effective weekly
+  // schedule. Before a barber is selected, a date is closed only if every
+  // available barber is off that weekday.
+  const isDayOffForBookingDay = (day: BookingDayOption) => {
+    const weekday = new Date(`${day.dateStr}T12:00:00`).getDay();
+    const scheduleOwners = professional ? [professional] : professionals;
+    return (
+      scheduleOwners.length > 0 &&
+      scheduleOwners.every(
+        (item) =>
+          item.weekly_schedule
+            ? getDailySchedule(item.weekly_schedule, weekday).day_off
+            : false,
+      )
+    );
+  };
   const availableDays = days;
   const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
-  const currentDayClosed = false;
+  const currentDayClosed = currentDay
+    ? isDayOffForBookingDay(currentDay)
+    : false;
+
+  useEffect(() => {
+    if (!isOpen || professionals.length === 0) return;
+    const selectedDay = days[dayIndex];
+    if (!selectedDay || !isDayOffForBookingDay(selectedDay)) return;
+
+    const nextOpenIndex = days.findIndex(
+      (day) => !isDayOffForBookingDay(day),
+    );
+    if (nextOpenIndex >= 0) {
+      setDayIndex(nextOpenIndex);
+      setSelectedSlot(null);
+    }
+  }, [dayIndex, days, isOpen, professional, professionals]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -542,6 +572,12 @@ export function BookingDrawerCanonical({
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
+    if (currentDayClosed)
+      return toast.error(
+        locale === 'pt'
+          ? 'O barbeiro está de folga neste dia. Escolhe outra data.'
+          : 'This barber is off on this day. Choose another date.',
+      );
     setStep(2);
   }
 
@@ -914,7 +950,7 @@ export function BookingDrawerCanonical({
                   <>
                     <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {availableDays.map((day, index) => {
-                        const isDayOff = false;
+                        const isDayOff = isDayOffForBookingDay(day);
                         return (
                           <button
                             key={day.dateStr}
@@ -959,6 +995,14 @@ export function BookingDrawerCanonical({
                         );
                       })}
                     </div>
+                    {availableDays.some(isDayOffForBookingDay) ? (
+                      <p className="mt-2 flex items-center gap-2 text-[11px] text-rose-300" role="note">
+                        <span className="size-2 shrink-0 rounded-full bg-rose-400" aria-hidden="true" />
+                        {locale === 'pt'
+                          ? 'Dia de folga — indisponível para marcação'
+                          : 'Day off — unavailable for booking'}
+                      </p>
+                    ) : null}
                   </>
                 ) : (
                   <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-500">
