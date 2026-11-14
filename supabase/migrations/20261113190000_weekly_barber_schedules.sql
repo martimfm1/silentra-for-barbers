@@ -34,10 +34,10 @@ begin
       lower(coalesce(v_shop.closed_days, '')),
       '\s*,\s*'
     );
-    v_open := coalesce(to_char(v_shop.opening_time, 'HH24:MI'), '09:00');
-    v_close := coalesce(to_char(v_shop.closing_time, 'HH24:MI'), '19:00');
-    v_lunch_start := to_char(v_shop.lunch_start, 'HH24:MI');
-    v_lunch_end := to_char(v_shop.lunch_end, 'HH24:MI');
+    v_open := coalesce(left(v_shop.opening_time::text, 5), '09:00');
+    v_close := coalesce(left(v_shop.closing_time::text, 5), '19:00');
+    v_lunch_start := left(v_shop.lunch_start::text, 5);
+    v_lunch_end := left(v_shop.lunch_end::text, 5);
 
     for v_day_index in 0..6 loop
       case v_day_index
@@ -429,8 +429,8 @@ begin
         'work_intervals',
           case when v_open_time < v_close_time then
             jsonb_build_array(jsonb_build_object(
-              'start', to_char(v_open_time, 'HH24:MI'),
-              'end', to_char(v_close_time, 'HH24:MI')
+              'start', left(v_open_time::text, 5),
+              'end', left(v_close_time::text, 5)
             ))
           else '[]'::jsonb end,
         'break_intervals',
@@ -441,8 +441,8 @@ begin
               and v_lunch_start >= v_open_time
               and v_lunch_end <= v_close_time
             then jsonb_build_array(jsonb_build_object(
-              'start', to_char(v_lunch_start, 'HH24:MI'),
-              'end', to_char(v_lunch_end, 'HH24:MI')
+              'start', left(v_lunch_start::text, 5),
+              'end', left(v_lunch_end::text, 5)
             ))
             else '[]'::jsonb
           end
