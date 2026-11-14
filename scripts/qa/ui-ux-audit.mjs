@@ -392,12 +392,15 @@ for (const source of confirmationTargets) {
 
 // Settings stay consolidated into one inline page with a single save flow.
 for (const category of ['business', 'location', 'hours', 'rules']) {
+  const categorySource =
+    category === 'hours' ? weeklyScheduleSettings : settingsPage;
   assert.match(
-    settingsPage,
+    categorySource,
     new RegExp(`<section id="settings-${category}"`),
     `Settings ${category} form must remain visible inline`,
   );
 }
+assert.match(settingsPage, /<WeeklyScheduleSettings barbershopId=\{barbershopId!\} locale=\{locale\} \/>/);
 assert.match(settingsPage, /settingsPage\.rulesDialogDescription/);
 assert.match(agendaCancellationPolicy, /time_limit_cancellation_hours/);
 assert.match(agendaCancellationPolicy, /Cancellation policy/);
