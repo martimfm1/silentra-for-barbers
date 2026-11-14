@@ -893,23 +893,20 @@ const checks = [
       source.includes('shop={bookingShop}'),
   },
   {
-    name: 'Booking drawer disables days off, shows a red legend and starts on an open date',
+    name: 'Booking drawer loads day-off status and slots for the selected barber',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
-        normalized.includes('const availableDays = useMemo(') &&
-        normalized.includes('hideClosedDays ? days.filter(') &&
-        normalized.includes('availableDays.map((day, index)') &&
-        normalized.includes('disabled={isDayOff}') &&
-        normalized.includes('if (isDayOff) return;') &&
-        normalized.includes('bg-rose-400/[0.08]') &&
-        normalized.includes('Dia de folga — indisponível para marcação') &&
-        normalized.includes('firstOpenDayIndex') &&
-        source.includes('requestedDayIndex >= 0') &&
-        source.includes('firstOpenDayIndex >= 0') &&
-        source.includes(': 0,') &&
-        normalized.includes('professionals.length === 1') &&
+        normalized.includes('const availableDays = days;') &&
+        normalized.includes('currentDayClosed = false') &&
+        normalized.includes('booking-data?date=') &&
+        normalized.includes('professional.id') &&
+        normalized.includes('setSelectedDayClosed(payload.closedDay === true)') &&
+        normalized.includes('setSelectedDayClosed(cached.data.closedDay === true)') &&
+        normalized.includes('selectedDayClosed') &&
+        normalized.includes('O barbeiro está de folga neste dia.') &&
+        normalized.includes('Escolhe outro dia para veres os horários disponíveis.') &&
         normalized.includes('data-booking-theme={appearance}')
       );
     },
