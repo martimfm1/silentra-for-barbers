@@ -905,7 +905,7 @@ const checks = [
         normalized.includes('Dia de folga — indisponível para marcação') &&
         normalized.includes('booking-data?date=') &&
         normalized.includes('professional.id') &&
-        normalized.includes('setSelectedDayClosed(payload.closedDay === true)') &&
+        normalized.includes('setSelectedDayClosed(responseData.closedDay === true)') &&
         normalized.includes('setSelectedDayClosed(cached.data.closedDay === true)') &&
         normalized.includes('selectedDayClosed') &&
         normalized.includes('O barbeiro está de folga neste dia.') &&
