@@ -38,10 +38,10 @@ assert.match(agendaPage, /onReschedule={handleRescheduleAppointment}/);
 
 assert.match(rescheduleRoute, /\.in\('status', \['pending', 'scheduled'\]\)/);
 assert.match(rescheduleRoute, /\.update\(\{ date_hour: newDateHour \}\)/);
-assert.match(rescheduleRoute, /sendCustomerAppointmentRescheduledEmail\\(/);
-assert.match(rescheduleRoute, /shop\\?\\.default_language === 'en'/);
+assert.match(rescheduleRoute, /sendCustomerAppointmentRescheduledEmail\(/);
+assert.match(rescheduleRoute, /shop\?\.default_language === 'en'/);
 assert.match(customerPortalRoute, /event: 'rescheduled'/);
-assert.match(customerPortalRoute, /previousDateHour: appointment\\.date_hour/);
+assert.match(customerPortalRoute, /previousDateHour: appointment\.date_hour/);
 assert.match(appointmentChangeNotifications, /sendCustomerAppointmentRescheduledEmail/);
 assert.match(appointmentChangeNotifications, /Your appointment was rescheduled/);
 assert.match(appointmentChangeNotifications, /A tua marcação foi alterada/);
