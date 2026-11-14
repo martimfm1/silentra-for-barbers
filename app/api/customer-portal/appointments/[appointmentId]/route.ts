@@ -61,12 +61,14 @@ async function getAuthorizedAppointment(
       .from('users')
       .select('email,name_complete')
       .eq('id', appointment.client_id)
-      .eq('barbershop_id', appointment.barbershop_id)
       .maybeSingle();
-    if (clientError) throw new Error('CUSTOMER_LOOKUP_FAILED');
-    clientName = client?.name_complete?.trim() || null;
-    if (!ownsAppointment)
-      ownsAppointment = client?.email?.trim().toLowerCase() === session.email;
+    if (clientError && !ownsAppointment)
+      throw new Error('CUSTOMER_LOOKUP_FAILED');
+    if (!clientError) {
+      clientName = client?.name_complete?.trim() || null;
+      if (!ownsAppointment)
+        ownsAppointment = client?.email?.trim().toLowerCase() === session.email;
+    }
   }
   if (!ownsAppointment) return { session, appointment: null, admin };
   return {
