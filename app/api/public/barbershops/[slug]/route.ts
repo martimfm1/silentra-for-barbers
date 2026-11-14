@@ -57,7 +57,7 @@ async function GET__unobserved(
         .maybeSingle(),
       database
         .from('barbershops')
-        .select('require_birth_date')
+        .select('opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,require_birth_date')
         .eq('id', barbershopId)
         .maybeSingle(),
     ]);
@@ -112,6 +112,12 @@ async function GET__unobserved(
               ? '/site/' + encodeURIComponent(profile.slug)
               : null,
           amenities: normalizeBarbershopAmenities(shop?.amenities),
+          opening_time: barbershop?.opening_time ?? null,
+          closing_time: barbershop?.closing_time ?? null,
+          lunch_start: barbershop?.lunch_start ?? null,
+          lunch_end: barbershop?.lunch_end ?? null,
+          closed_days: barbershop?.closed_days ?? null,
+          weekly_schedule: barbershop?.weekly_schedule ?? null,
           require_birth_date: barbershop?.require_birth_date !== false,
           services: (services ?? []).map((service) => ({
             ...service,
