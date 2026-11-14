@@ -65,7 +65,7 @@ assert.equal(
 );
 
 const migration = readFileSync(
-  'supabase/migrations/20261113190000_weekly_barber_schedules.sql',
+  'supabase/migrations/20261114002250_weekly_barber_schedules.sql',
   'utf8',
 );
 assert.ok(migration.includes('set_barbershop_weekly_schedule'));
@@ -76,6 +76,23 @@ assert.ok(migration.includes('BOOKING_OUTSIDE_WORKING_HOURS'));
 assert.ok(migration.includes('BOOKING_OVERLAPS_BREAK'));
 assert.ok(migration.includes('v_start is null'));
 assert.ok(migration.includes('v_end is null'));
+
+const authorizationMigration = readFileSync(
+  'supabase/migrations/20261114002436_harden_weekly_schedule_rpc_authorization.sql',
+  'utf8',
+);
+assert.equal(
+  authorizationMigration.split("u.role in ('owner', 'admin')").length - 1,
+  2,
+  'Both schedule RPCs must authorize owners/admins, not every user linked to the tenant',
+);
+assert.equal(
+  (authorizationMigration.match(/set search_path = ''/g) ?? []).length,
+  2,
+  'SECURITY DEFINER schedule RPCs must pin an empty search_path',
+);
+assert.ok(authorizationMigration.includes('u.barbershop_id = p_barbershop_id'));
+assert.ok(authorizationMigration.includes('u.barbershop_id = v_barbershop_id'));
 
 const files = [
   'app/api/shops/[id]/booking-data/route.ts',
