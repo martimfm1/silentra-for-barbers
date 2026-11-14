@@ -10,6 +10,8 @@ const [
   cancellationEmail,
   dashboardActions,
   appointmentsHook,
+  customerPortalAppointments,
+  appointmentChangeNotifications,
 ] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
@@ -19,6 +21,8 @@ const [
   readFile('lib/brevo/appointment-cancellation.ts', 'utf8'),
   readFile('components/dashboard/appointment-actions.tsx', 'utf8'),
   readFile('app/state/_hooks/dashboard/useAppointments.ts', 'utf8'),
+  readFile('app/api/customer-portal/appointments/[appointmentId]/route.ts', 'utf8'),
+  readFile('lib/brevo/appointment-change-notifications.ts', 'utf8'),
 ]);
 assert.match(bookingRoute, /notifyBarbersOfNewBooking\(/);
 assert.match(bookingRoute, /professionalId:\s*normalizedProfessionalId/);
@@ -33,6 +37,15 @@ assert.match(notification, /default_language/);
 assert.match(notification, /input\.customerPhone/);
 assert.match(notification, /input\.customerEmail/);
 assert.match(notification, /escapeHtml\(/);
+assert.match(customerPortalAppointments, /event: 'cancelled'/);
+assert.match(customerPortalAppointments, /event: 'rescheduled'/);
+assert.match(customerPortalAppointments, /barberEmailsSent/);
+assert.match(appointmentChangeNotifications, /sendBrevoEmail\\(/);
+assert.match(appointmentChangeNotifications, /sendWebPushToUsers\\(/);
+assert.match(appointmentChangeNotifications, /Customer cancelled a booking/);
+assert.match(appointmentChangeNotifications, /Cliente cancelou uma marcação/);
+assert.match(appointmentChangeNotifications, /Customer changed a booking/);
+assert.match(appointmentChangeNotifications, /Cliente reagendou uma marcação/);
 assert.match(cancellationRoute, /requireTenantAuthorization\(request, ROLES\)/);
 assert.match(cancellationRoute, /\.update\([\s\S]*?status: 'cancelled'/);
 assert.match(cancellationRoute, /cancelled_at: cancelledAt/);
