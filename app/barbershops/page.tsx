@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, MapPin, Search, Tag, X } from 'lucide-react';
+import { AlertTriangle, Search, Tag, X } from 'lucide-react';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { SiteNavbar } from '@/components/site-navbar';
 import { useLanguage } from '@/context/LanguageContext';
@@ -131,7 +131,7 @@ export default function BarbershopsDirectoryPage() {
   };
 
   return (
-    <div className="silentra-page-shell min-h-[100svh] overflow-x-clip text-zinc-50 antialiased mt-6 mb-6">
+    <div className="silentra-page-shell min-h-[100svh] overflow-x-clip text-zinc-50 antialiased">
       <div className="silentra-page-grid" aria-hidden="true" />
       <SiteNavbar />
       <main className="relative z-10 mx-auto w-full max-w-7xl px-3 pb-[max(4rem,env(safe-area-inset-bottom))] pt-[calc(5rem+env(safe-area-inset-top))] sm:px-6 sm:pb-16 sm:pt-28 lg:px-8 lg:pt-32">
@@ -259,27 +259,9 @@ export default function BarbershopsDirectoryPage() {
                     : `${visibleShops.length} ${visibleShops.length === 1 ? t('directory.foundOne') : t('directory.foundMany')}`}
               </p>
             </div>
-            <div className="grid w-full grid-cols-2 gap-2 sm:hidden">
-              <button
-                type="button"
-                onClick={() => setView('grid')}
-                aria-pressed={view === 'grid'}
-                className={`min-h-11 rounded-xl border px-3 text-xs font-semibold transition active:scale-[0.98] ${view === 'grid' ? 'border-white/20 bg-white text-zinc-950' : 'border-white/10 bg-white/[0.03] text-zinc-400'}`}
-              >
-                {t('directory.list')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('map')}
-                aria-pressed={view === 'map'}
-                className={`min-h-11 rounded-xl border px-3 text-xs font-semibold transition active:scale-[0.98] ${view === 'map' ? 'border-white/20 bg-white text-zinc-950' : 'border-white/10 bg-white/[0.03] text-zinc-400'}`}
-              >
-                {t('directory.map')}
-              </button>
-            </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid min-w-0 gap-5">
             <div className="min-w-0">
               {isLoading ? (
                 <div
@@ -347,30 +329,6 @@ export default function BarbershopsDirectoryPage() {
                 </div>
               )}
             </div>
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 overflow-hidden rounded-3xl">
-                <div className="mb-4 border-b border-white/8 px-4 py-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
-                    <MapPin
-                      className="size-4 text-emerald-300"
-                      aria-hidden="true"
-                    />
-                    Explora no mapa
-                  </div>
-                  <p className="mt-1 text-[11px] text-zinc-500">
-                    {t('directory.selectShopHint')}
-                  </p>
-                </div>
-                <div className="min-h-[30rem] max-h-[38rem] overflow-hidden">
-                  <MapPreview
-                    shops={visibleShops}
-                    view={view}
-                    onSelectShop={handleNavigateToShop}
-                    userLocation={userLocation}
-                  />
-                </div>
-              </div>
-            </aside>
           </div>
         </section>
       </main>
