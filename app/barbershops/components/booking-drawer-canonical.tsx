@@ -208,10 +208,16 @@ export function BookingDrawerCanonical({
     if (!selectedDay || !isDayOffForBookingDay(selectedDay)) return;
 
     const nextOpenIndex = days.findIndex(
+      (day, index) =>
+        index >= dayIndex && !isDayOffForBookingDay(day),
+    );
+    const firstOpenIndex = days.findIndex(
       (day) => !isDayOffForBookingDay(day),
     );
-    if (nextOpenIndex >= 0) {
-      setDayIndex(nextOpenIndex);
+    const targetIndex =
+      nextOpenIndex >= 0 ? nextOpenIndex : firstOpenIndex;
+    if (targetIndex >= 0) {
+      setDayIndex(targetIndex);
       setSelectedSlot(null);
     }
   }, [dayIndex, days, isOpen, professional, professionals]);
