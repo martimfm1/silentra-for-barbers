@@ -664,12 +664,13 @@ export function BookingDrawerCanonical({
         setStep(4);
         return;
       }
+      const paymentMethod = payload.payment?.method ?? null;
       captureProductEvent('booking_completed', {
         booking_surface: appearance,
         manual_prepayment_requested: prepaymentSelected,
-        payment_method: payload.payment?.method ?? 'none',
+        payment_method: paymentMethod ?? 'none',
       });
-      if (payload.payment?.method === 'mbway') {
+      if (paymentMethod === 'mbway') {
         setPaymentInstructions({
           bookingId: String(payload.booking?.id ?? ''),
           amount: Number(payload.payment.amount),
@@ -683,7 +684,7 @@ export function BookingDrawerCanonical({
         toast.success(t('bookingDrawer.bookingSuccess'));
       }
       setStep(4);
-      if (payload.payment?.method !== 'mbway') {
+      if (paymentMethod !== 'mbway') {
         onSuccess?.({
           shopName: shop.name,
           serviceName: service.name,
