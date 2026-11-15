@@ -17,6 +17,7 @@ type ConnectionState = {
   connectedAt: string | null;
   lastSyncedAt: string | null;
   pendingEvents: number;
+  failedEvents: number;
 };
 
 type ApiResult = {
@@ -28,6 +29,7 @@ type ApiResult = {
   connectedAt?: string | null;
   lastSyncedAt?: string | null;
   pendingEvents?: number;
+  failedEvents?: number;
 };
 
 function formatDate(value: string | null) {
@@ -65,6 +67,7 @@ export default function MoneyFlowIntegrationPanel() {
         connectedAt: payload.connectedAt ?? null,
         lastSyncedAt: payload.lastSyncedAt ?? null,
         pendingEvents: payload.pendingEvents ?? 0,
+        failedEvents: payload.failedEvents ?? 0,
       });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Erro inesperado.');
@@ -110,6 +113,7 @@ export default function MoneyFlowIntegrationPanel() {
       `Ligado em: ${formatDate(connection.connectedAt)}`,
       `Última sincronização: ${formatDate(connection.lastSyncedAt)}`,
       `Eventos pendentes: ${connection.pendingEvents}`,
+      `Eventos com erro: ${connection.failedEvents}`,
     ].join('\n');
     try {
       await navigator.clipboard.writeText(details);
@@ -171,7 +175,7 @@ export default function MoneyFlowIntegrationPanel() {
               </button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-black/15 p-4">
                 <p className="text-[10px] uppercase tracking-[0.13em] text-zinc-600">Ligação criada</p>
                 <p className="mt-2 text-sm font-semibold text-zinc-200">{formatDate(connection.connectedAt)}</p>
@@ -183,6 +187,10 @@ export default function MoneyFlowIntegrationPanel() {
               <div className="rounded-xl border border-white/8 bg-black/15 p-4">
                 <p className="text-[10px] uppercase tracking-[0.13em] text-zinc-600">Na fila</p>
                 <p className="mt-2 text-sm font-semibold text-zinc-200">{connection.pendingEvents}</p>
+              </div>
+              <div className="rounded-xl border border-white/8 bg-black/15 p-4">
+                <p className="text-[10px] uppercase tracking-[0.13em] text-zinc-600">Com erro</p>
+                <p className="mt-2 text-sm font-semibold text-zinc-200">{connection.failedEvents}</p>
               </div>
             </div>
             <p className="text-xs leading-5 text-zinc-600">
