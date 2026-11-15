@@ -25,20 +25,27 @@ function moneyFlowApiUrl() {
 export async function GET() {
   try {
     const { admin } = await requirePlatformAdmin();
-    const [{ data: connection, error }, { count: pendingEvents }] =
-      await Promise.all([
-        admin
-          .from('moneyflow_sync_credentials')
-          .select(
-            'account_name, currency_code, status, connected_at, last_synced_at',
-          )
-          .eq('integration_key', 'silentra-platform')
-          .maybeSingle(),
-        admin
-          .from('moneyflow_sync_outbox')
-          .select('id', { count: 'exact', head: true })
-          .in('status', ['pending', 'processing']),
-      ]);
+    const [
+      { data: connection, error },
+      { count: pendingEvents },
+      { count: failedEvents },
+    ] = await Promise.all([
+      admin
+        .from('moneyflow_sync_credentials')
+        .select(
+          'account_name, currency_code, status, connected_at, last_synced_at',
+        )
+        .eq('integration_key', 'silentra-platform')
+        .maybeSingle(),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'processing']),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'failed'),
+    ]);
 
     if (error) throw error;
 
@@ -54,6 +61,7 @@ export async function GET() {
         connectedAt: connected ? connection.connected_at : null,
         lastSyncedAt: connected ? connection.last_synced_at : null,
         pendingEvents: pendingEvents ?? 0,
+        failedEvents: failedEvents ?? 0,
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
