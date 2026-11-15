@@ -192,7 +192,9 @@ async function processPaidSubscriptionInvoice(invoice: Stripe.Invoice) {
     if (!customerId) return;
     const customerMapping =
       await BarbershopStripeService.findBarbershopByCustomerId(customerId);
-    if (!customerMapping) return;
+    // An invoice tied to a barbershop customer is operational barbershop revenue,
+    // not revenue earned by the Silentra platform.
+    if (customerMapping) return;
   }
 
   const paidAt =
