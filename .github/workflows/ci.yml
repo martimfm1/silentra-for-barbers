@@ -88,6 +88,9 @@ jobs:
       - name: Database security contracts
         run: pnpm qa:database-security
 
+      - name: Production hardening regression contracts
+        run: pnpm qa:production-hardening
+
       - name: CSRF origin contracts
         run: pnpm qa:csrf
 
