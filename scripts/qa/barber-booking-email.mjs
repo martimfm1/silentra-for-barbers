@@ -18,6 +18,7 @@ const [
   appointmentEmailRoute,
   appointmentReminderRoute,
   appointmentAutomations,
+  appointmentCompletionRoute,
 ] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
@@ -35,6 +36,7 @@ const [
   readFile('app/api/appointments/[appointmentId]/email/route.ts', 'utf8'),
   readFile('app/api/cron/appointment-reminders/route.ts', 'utf8'),
   readFile('lib/automations/dispatch-appointment.ts', 'utf8'),
+  readFile('app/api/appointments/[appointmentId]/complete/route.ts', 'utf8'),
 ]);
 assert.match(bookingRoute, /notifyBarbersOfNewBooking\(/);
 assert.match(bookingRoute, /professionalId:\s*normalizedProfessionalId/);
@@ -75,6 +77,8 @@ assert.doesNotMatch(appointmentEmailRoute, /clientResult\.data\?\.email/);
 assert.match(appointmentEmailRoute, /emailSkipped: true/);
 assert.match(appointmentReminderRoute, /const recipient = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
 assert.doesNotMatch(appointmentReminderRoute, /client\?\.email/);
+assert.match(appointmentCompletionRoute, /let customerEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
+assert.doesNotMatch(appointmentCompletionRoute, /customerEmail = client\?\.email/);
 assert.doesNotMatch(appointmentAutomations, /client\?\.email/);
 assert.match(cancellationEmail, /A tua marcação foi cancelada pela barbearia/);
 assert.match(

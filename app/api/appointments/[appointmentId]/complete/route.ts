@@ -245,14 +245,13 @@ async function POST__unobserved(
       .maybeSingle();
     let customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
     let customerName = appointment.manual_name?.trim() || 'Cliente';
-    if (!customerEmail && appointment.client_id) {
+    if (appointment.client_id) {
       const { data: client } = await admin
         .from('users')
-        .select('email,name_complete')
+        .select('name_complete')
         .eq('id', appointment.client_id)
         .eq('barbershop_id', barbershopId)
         .maybeSingle();
-      customerEmail = client?.email?.trim().toLowerCase() || '';
       customerName = client?.name_complete?.trim() || customerName;
     }
 
