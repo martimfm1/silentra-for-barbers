@@ -169,8 +169,15 @@ async function enqueueMoneyFlowPaidInvoice(invoice: Stripe.Invoice) {
     );
   }
 
-  // This is not a platform subscription customer managed by this project.
-  if (!billingAccount) return;
+  // A subscription invoice must resolve to a barbershop billing account.
+  // Fail the webhook claim and let Stripe retry instead of silently dropping a
+  // confirmed payment during a temporary customer-mapping race.
+  if (!billingAccount) {
+    throw new BillingError(
+      'Could not resolve the paid SaaS subscription customer.',
+      'BILLING_MAPPING_NOT_FOUND',
+    );
+  }
 
   const invoiceId = invoice.id;
   const eventKey = `stripe-invoice:${invoiceId}`;
