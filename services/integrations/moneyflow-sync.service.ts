@@ -70,15 +70,14 @@ export async function dispatchMoneyFlowSyncBatch(
         }
 
         const response = await fetch(
-          `${MONEYFLOW_API_URL}/api/integrations/silentra/payments`,
+          `${MONEYFLOW_API_URL}/api/integrations/silentra-for-barbers/events`,
           {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${credential.sync_token}`,
               'Content-Type': 'application/json',
               'Cache-Control': 'no-store',
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ ...payload, eventSecret: credential.sync_token }),
             cache: 'no-store',
             signal: AbortSignal.timeout(10_000),
           },
