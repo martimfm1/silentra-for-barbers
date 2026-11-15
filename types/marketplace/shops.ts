@@ -17,6 +17,7 @@ export interface MarketplaceShopRecord {
   lng: number;
   rating?: number | null;
   reviews_count?: number | null;
+  public_profile_enabled?: boolean | null;
   is_active: boolean;
   barbershops:
     MarketplaceBarbershopRelation | MarketplaceBarbershopRelation[] | null;
@@ -40,6 +41,7 @@ export interface MarketplaceShopResponse {
   nextSlot: string;
   rating: number;
   reviewsCount: number;
+  publicProfileEnabled: boolean;
 }
 
 /** Marketplace card and map model. */
@@ -69,6 +71,7 @@ export interface MarketplaceShop {
   off_days?: number[];
   /** Resolved public subscription tier; required to expose Enterprise-only booking options. */
   plan?: 'free' | 'pro' | 'enterprise' | null;
+  public_profile_enabled?: boolean | null;
 }
 
 export interface MarketplaceService {
