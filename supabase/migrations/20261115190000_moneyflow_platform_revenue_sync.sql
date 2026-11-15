@@ -155,4 +155,53 @@ revoke all on function public.claim_moneyflow_sync_events(integer)
 grant execute on function public.claim_moneyflow_sync_events(integer)
   to service_role;
 
+-- Reuse the existing Vault-backed signed Supabase Cron setup. The worker runs
+-- every five minutes without exposing the cron secret in pg_net's request queue.
+do $
+begin
+  if not exists (
+    select 1 from cron.job where jobname = 'silentra-moneyflow-sync'
+  ) then
+    perform cron.schedule(
+      'silentra-moneyflow-sync',
+      '*/5 * * * *',
+      $job$
+        with signing as (
+          select
+            floor(extract(epoch from clock_timestamp()))::bigint::text as ts,
+            (select decrypted_secret
+             from vault.decrypted_secrets
+             where name = 'silentra_booking_outbox_cron_secret'
+             limit 1) as secret,
+            (select decrypted_secret
+             from vault.decrypted_secrets
+             where name = 'silentra_booking_outbox_url'
+             limit 1) as endpoint
+        )
+        select net.http_post(
+          url := regexp_replace(
+            signing.endpoint,
+            '/api/cron/booking-automation-outbox/?
+,
+            '/api/cron/moneyflow-sync'
+          ),
+          headers := jsonb_build_object(
+            'Content-Type', 'application/json',
+            'x-moneyflow-timestamp', signing.ts,
+            'x-moneyflow-signature', encode(
+              extensions.hmac(signing.ts || ':moneyflow-sync', signing.secret, 'sha256'),
+              'hex'
+            )
+          ),
+          body := jsonb_build_object('source', 'supabase-cron'),
+          timeout_milliseconds := 20000
+        )
+        from signing
+        where signing.secret is not null and signing.endpoint is not null;
+      $job$
+    );
+  end if;
+end;
+$;
+
 notify pgrst, 'reload schema';
