@@ -77,7 +77,7 @@ assert.doesNotMatch(appointmentEmailRoute, /clientResult\.data\?\.email/);
 assert.match(appointmentEmailRoute, /emailSkipped: true/);
 assert.match(appointmentReminderRoute, /const recipient = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
 assert.doesNotMatch(appointmentReminderRoute, /client\?\.email/);
-assert.match(appointmentCompletionRoute, /let customerEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
+assert.match(appointmentCompletionRoute, /const customerEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
 assert.doesNotMatch(appointmentCompletionRoute, /customerEmail = client\?\.email/);
 assert.doesNotMatch(appointmentAutomations, /client\?\.email/);
 assert.match(cancellationEmail, /A tua marcação foi cancelada pela barbearia/);
