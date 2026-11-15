@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import SupportInbox from './support-inbox';
+import MoneyFlowIntegrationPanel from './moneyflow-integration-panel';
 
 import {
   Activity,
@@ -153,6 +154,7 @@ const tabs = [
   { id: 'subscriptions', label: 'Subscrições', icon: Database },
   { id: 'payments', label: 'Pagamentos', icon: CreditCard },
   { id: 'payment_requests', label: 'Pedidos de pagamento', icon: MailCheck },
+  { id: 'moneyflow', label: 'MoneyFlow', icon: WalletCards },
   { id: 'support', label: 'Suporte', icon: MessageCircle },
   { id: 'api_health', label: 'Saúde da API', icon: Activity },
   { id: 'diagnostics', label: 'Diagnóstico', icon: Wrench },
@@ -163,7 +165,7 @@ type Tab = (typeof tabs)[number]['id'];
 const navigationGroups: { label: string; items: Tab[] }[] = [
   { label: 'Visão geral', items: ['overview'] },
   { label: 'Negócio', items: ['shops', 'plans', 'subscriptions'] },
-  { label: 'Financeiro', items: ['payments', 'payment_requests'] },
+  { label: 'Financeiro', items: ['payments', 'payment_requests', 'moneyflow'] },
   { label: 'Acompanhamento', items: ['support'] },
   { label: 'Sistema', items: ['api_health', 'diagnostics'] },
 ];
@@ -179,6 +181,8 @@ const tabDescriptions: Record<Tab, string> = {
   payments: 'Configura o método de cobrança e acompanha a operação financeira.',
   payment_requests:
     'Trata pedidos de pagamento, confirma transferências e resolve pendências.',
+  moneyflow:
+    'Liga o MoneyFlow e acompanha a sincronização das receitas de subscrições da plataforma.',
   support:
     'Responde aos pedidos de ajuda e acompanha as conversas com clientes.',
   api_health: 'Monitoriza disponibilidade, latência, erros e rotas da API.',
@@ -2559,6 +2563,18 @@ export default function PlatformAdminConsole() {
                     </section>
                   </>
                 ) : null}
+              </section>
+            ) : null}
+
+            {tab === 'moneyflow' ? (
+              <section className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold">Ligação financeira ao MoneyFlow</h2>
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                    Apenas pagamentos confirmados das subscrições Silentra são enviados para a conta escolhida no espaço financeiro Silentra. Receitas das barbearias não são incluídas.
+                  </p>
+                </div>
+                <MoneyFlowIntegrationPanel />
               </section>
             ) : null}
 
