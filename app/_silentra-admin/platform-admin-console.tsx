@@ -305,7 +305,9 @@ export default function PlatformAdminConsole() {
 
   useEffect(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('tab');
-    if (requestedTab === 'support') setTab('support');
+    if (requestedTab === 'support' || requestedTab === 'moneyflow') {
+      setTab(requestedTab);
+    }
   }, []);
   const [data, setData] = useState<Overview | null>(null);
   const [query, setQuery] = useState('');
