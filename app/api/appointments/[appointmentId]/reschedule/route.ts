@@ -5,7 +5,7 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
-import { sendBrevoEmail } from '@/lib/email/brevo';
+import { sendCustomerAppointmentRescheduledEmail } from '@/lib/brevo/appointment-change-notifications';
 import {
   getDailySchedule,
   isSlotWithinDailySchedule,
@@ -92,36 +92,6 @@ function toLisbonISOString(date: string, time: string): string | null {
   const local = getLisbonParts(instant);
   if (local.date !== date || local.time !== time) return null;
   return instant.toISOString();
-}
-
-function escapeEmailHtml(value: string): string {
-  return value.replace(
-    /[&<>"']/g,
-    (character) =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      })[character] ?? character,
-  );
-}
-
-function formatLisbonDate(value: string | Date): string {
-  return new Intl.DateTimeFormat('pt-PT', {
-    dateStyle: 'full',
-    timeZone: 'Europe/Lisbon',
-  }).format(new Date(value instanceof Date ? value.getTime() : value));
-}
-
-function formatLisbonTime(value: string | Date): string {
-  return new Intl.DateTimeFormat('pt-PT', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    timeZone: 'Europe/Lisbon',
-  }).format(new Date(value instanceof Date ? value.getTime() : value));
 }
 
 async function PATCH__unobserved(
@@ -283,7 +253,7 @@ async function PATCH__unobserved(
       admin
         .from('barbershops')
         .select(
-          'name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule',
+          'name,address,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule',
         )
         .eq('id', barbershopId)
         .maybeSingle(),
@@ -449,21 +419,18 @@ async function PATCH__unobserved(
     let notificationSent = false;
     if (recipientEmail) {
       try {
-        const previousDate = formatLisbonDate(appointment.date_hour);
-        const previousTime = formatLisbonTime(appointment.date_hour);
-        const nextDate = formatLisbonDate(updated.date_hour);
-        const nextTime = formatLisbonTime(updated.date_hour);
-        const barbershopName = String(shop?.name || 'A tua barbearia').trim();
-        const serviceName = String(service?.name || 'Serviço').trim();
-        const htmlContent = `<!doctype html><html lang="pt-PT"><body style="margin:0;padding:24px;background:#f4f4f5;color:#18181b;font-family:Arial,sans-serif;line-height:1.6"><main style="max-width:560px;margin:auto;padding:28px;border:1px solid #e4e4e7;border-radius:16px;background:#fff"><p style="font-size:12px;font-weight:bold;letter-spacing:1px;color:#52525b">${escapeEmailHtml(barbershopName)}</p><h1 style="font-size:24px;margin-bottom:12px">A tua marcação foi alterada</h1><p>Olá ${escapeEmailHtml(recipientName)},</p><p>A barbearia alterou a data ou hora da tua marcação. Consulta os novos detalhes abaixo.</p><p>${updated.status === 'scheduled' ? 'A tua marcação continua confirmada para o novo horário abaixo.' : 'A tua marcação continua pendente de confirmação da barbearia. O novo horário será utilizado assim que a marcação for confirmada.'}</p><p><strong>Serviço:</strong> ${escapeEmailHtml(serviceName)}</p><div style="margin:20px 0;padding:16px;border-radius:12px;background:#f4f4f5"><p style="margin:0 0 8px;color:#71717a;font-size:12px">HORÁRIO ANTERIOR</p><p style="margin:0;text-decoration:line-through">${escapeEmailHtml(previousDate)} às ${escapeEmailHtml(previousTime)}</p><p style="margin:18px 0 8px;color:#047857;font-size:12px;font-weight:bold">NOVO HORÁRIO</p><p style="margin:0;font-size:18px;font-weight:bold">${escapeEmailHtml(nextDate)} às ${escapeEmailHtml(nextTime)}</p></div><p>Se este horário não te for conveniente, contacta a barbearia para combinar uma alternativa.</p><p style="margin-top:28px;color:#71717a;font-size:12px">Mensagem automática enviada pela Silentra for Barbers.</p></main></body></html>`;
-        const result = await sendBrevoEmail({
+        const emailResult = await sendCustomerAppointmentRescheduledEmail({
           to: recipientEmail,
-          toName: recipientName,
-          senderName: barbershopName,
-          subject: `A tua marcação foi alterada — ${barbershopName}`,
-          htmlContent,
+          customerName: recipientName,
+          barbershopName: String(shop?.name || 'A tua barbearia').trim(),
+          serviceName: String(service?.name || 'Serviço').trim(),
+          previousDateHour: appointment.date_hour,
+          newDateHour: updated.date_hour,
+          appointmentId: appointment.id,
+          status: updated.status === 'scheduled' ? 'scheduled' : 'pending',
+          language: shop?.default_language === 'en' ? 'en' : 'pt',
         });
-        notificationSent = result.success;
+        notificationSent = emailResult.success;
       } catch (emailError) {
         console.error(
           '[PRO_APPOINTMENT_RESCHEDULE_EMAIL_ERROR]',
