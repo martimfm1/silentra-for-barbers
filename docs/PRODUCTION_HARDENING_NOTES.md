@@ -194,11 +194,11 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] PR #271 merged; migration `20261115154352` confirmada no histórico remoto de produção.
 - [x] PR #269 merged; inclui notificações ao barbeiro em cancelamento/reagendamento do cliente e email ao cliente em reagendamento pelo barbeiro.
 - [x] Contratos QA de hardening passaram; CI, build e smoke QA passaram no run `43731029145`.
-- [ ] Deploy manual da versão merged (em validação no momento desta atualização).
+- [x] Deploy manual da versão merged; deployment `dpl_B3UDXPvnrx1CesmRuzDCzB7DyiYc` READY para `899ba60347dbec2b3abcc05c4ba1ba3fbca9653f`, alias `barbers.silentra.me` confirmado.
 - [x] Identificados no Vercel os nomes de todas as variáveis exigidas por `qa:env` em produção, sem ler nem expor valores.
-- [ ] `qa:env` completo não corre no pull_request CI porque exige secrets de produção e a CI usa placeholders. Em vez de injectar credenciais no runner, a CI valida estaticamente o contrato `qa:env` através de `qa:env-contract`.
+- [x] `qa:env` completo fica deliberadamente reservado a um ambiente de produção/local com valores reais; não corre no pull_request CI com placeholders. A CI valida estaticamente o contrato através de `qa:env-contract`, sem injetar secrets.
 - [x] Atualizar runner CI para Node.js 24.x, alinhado com o runtime de produção Vercel (PR de CI separado).
-- [ ] Leaked Password Protection continua a exigir ativação manual em Supabase Auth > Password Security.
+- [x] Confirmado bloqueio de plano para Leaked Password Protection: organização Supabase `Silentra` está em `tier_free`; a funcionalidade HaveIBeenPwned está disponível apenas a partir de Pro. Sem upgrade não pode ser ativada; alternativa gratuita: configurar comprimento mínimo e requisitos de caracteres em Authentication → Sign In / Providers → Email.
 - [ ] Confirmar que o secret `CRON_SECRET` em GitHub Actions coincide com o valor de produção Vercel. O nome existe em Vercel; não foi possível inspecionar o secret GitHub através da ligação disponível.
 - [ ] Validar a recuperação dos workflows Marketing Cron e Support Email Retry Cron através de novas execuções depois de confirmar o secret.
 - [ ] Analisar 50 FKs sem índice de cobertura e 74 índices sem uso quando existir workload suficiente; não adicionar/remover índices sem evidência.
@@ -229,13 +229,13 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 
 ### Em curso / requer validação posterior
 
-- [ ] PR #273 acrescenta códigos de erro Brevo seguros e logs de cancelamento sem PII. A causa das 26 falhas históricas (11–13/11) não é recuperável pelos logs retidos no plano atual; o transporte atual só registava um marcador genérico. Não foi enviado email de teste nem reenviado email a clientes.
-- [ ] Executar a próxima execução agendada do cron `subscription-expiry-reminders` depois da migration e confirmar um HTTP 200; a função SQL já foi exercitada sem erro numa transação revertida.
+- [x] PR #273 merged e deployed: o transporte Brevo devolve códigos de falha categorizados (configuração, input, HTTP status, rede); cancelamentos registam apenas `appointmentId`, `reasonCode` e existência de destinatário, sem PII. A causa das 26 falhas históricas (11–13/11) não é recuperável porque os logs antigos só guardavam um marcador genérico. Não foi enviado email de teste nem reenviado email a clientes.
+- [ ] Confirmar o próximo run diário do `subscription-expiry-reminders` (agendado às 00:25 UTC) com HTTP 200; a função SQL já foi exercitada sem erro numa transação revertida.
 - [ ] Confirmar que o GitHub Actions secret `CRON_SECRET` corresponde ao valor de produção da Vercel. O nome existe nas variáveis Vercel, mas esta integração não permite ler/verificar GitHub Actions secrets.
-- [ ] Confirmar os workflows Marketing Cron e Support Email Retry Cron numa execução agendada/manual; o plano Vercel Hobby não suporta a frequência de 5 minutos usada por estes workflows.
-- [ ] Ativar Leaked Password Protection em Supabase Auth > Password Security. Não existe ação de configuração Auth disponível nesta ligação.
+- [ ] Confirmar execução dos workflows GitHub Actions Marketing Cron e Support Email Retry Cron numa execução agendada/manual. Não há logs destas rotas na última meia hora e esta ligação não expõe o histórico geral dos workflows; os schedules correm no GitHub Actions, não no Vercel Cron.
+- [x] Leaked Password Protection permanece bloqueada pelo plano Free da organização; não existe ação de configuração Auth no conector. É necessário upgrade para Pro para ativar a verificação HaveIBeenPwned.
 - [ ] Testes E2E reais de booking, billing, CRM e staff por tenant; não existem contas staff de teste em produção. Executar com fixtures isoladas num ambiente de teste.
 - [ ] Teste de restauro PITR num projeto/ambiente dedicado.
 - [ ] Rever 50 FKs sem cobertura e 74 índices sem utilização após recolha de workload representativo. Não indexar/remover em massa.
 - [ ] Avaliar btree_gist; pg_net é não relocável e não deve ser movido.
-- [ ] Configurar `SENTRY_AUTH_TOKEN` para que os source maps/releases sejam enviados ao Sentry; o build atual passou, mas o upload foi ignorado por falta de token.
+- [ ] Configurar `SENTRY_AUTH_TOKEN` para que os source maps/releases sejam enviados ao Sentry; o build atual passou, mas o upload foi ignorado por falta de token. A variável não consta da lista de envs de produção.
