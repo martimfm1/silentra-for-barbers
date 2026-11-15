@@ -353,6 +353,7 @@ export default function AgendaPage() {
           success?: boolean;
           error?: string;
           notificationSent?: boolean;
+          notificationSkipped?: boolean;
         };
         if (!response.ok || payload.success !== true) {
           throw new Error(
