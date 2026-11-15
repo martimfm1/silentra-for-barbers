@@ -155,3 +155,31 @@ Consulta aos Supabase advisors do projeto de produção (`ACTIVE_HEALTHY`, Postg
 - Não foi aplicada nenhuma alteração à produção durante esta revalidação.
 - Próxima ação segura: exportar inventário de constraints, índices, grants e definições das 14 funções; cruzar com migrations e contratos QA antes de preparar uma migration.
 - Validar leaked-password protection no dashboard e depois confirmar o estado no advisor.
+
+
+## Revalidação e remediação — 15 de novembro de 2026
+
+Revalidação da produção: Supabase `yzrdpwsfqsazxvwsjobf` (`eu-west-1`), GitHub `main` e Vercel.
+
+### Regressões confirmadas e correções preparadas
+
+- [ ] **Convites de equipa — SQLSTATE 42702:** `join_barbershop_with_invite` tinha a referência `role` ambígua entre a coluna e a variável de saída de `RETURNS TABLE`. A migration `20261115153000_fix_production_audit_regressions` qualifica `users.role` pelo alias `u`.
+- [ ] **Lembretes de expiração — SQLSTATE 42702:** `claim_subscription_expiry_reminder_events` usava `ON CONFLICT (subscription_id, period_end, days_before)`, colidindo com os parâmetros de saída. A migration passa a usar a constraint `subscription_expiry_reminder_outbox_once`.
+- [ ] **SECURITY DEFINER — EXECUTE anónimo:** a mesma migration revoga EXECUTE de `anon` em `set_manual_booking_auto_confirmation`, retira execução direta da função trigger e revoga EXECUTE de `PUBLIC`/`anon` por omissão para novas funções em `public` criadas por `postgres` (owner das migrations da aplicação). O papel `supabase_admin` não é membro do owner `postgres` e os seus defaults são geridos pelo Supabase, por isso não são alterados. A chamada autenticada de owner/admin continua permitida.
+- [ ] **Fila antiga de notificações:** o trigger produtor `trigger_notify_new_review` não tinha consumidor no código atual. A migration desliga o produtor para evitar acumulação adicional; os quatro registos existentes são preservados, sem DELETE/UPDATE.
+- [ ] Adicionado contrato QA `qa:production-hardening` para bloquear regressões nestes pontos.
+
+A aplicação à produção e a validação pós-migration ficam dependentes de CI e da confirmação dos advisors.
+
+### Itens ainda dependentes de acesso/configuração ou workload
+
+- **Leaked Password Protection:** continua por ativar. Requer configuração em Supabase Auth > Password Security; a ligação atual não expõe uma ação de atualização Auth segura.
+- **Marketing Cron e Support Email Retry Cron:** os workflows falharam, mas não foi possível obter os logs do job nem verificar a correspondência do secret GitHub Actions com a variável da Vercel. Não assumir que a causa é o secret; é necessária confirmação sem revelar o seu valor.
+- **Índices:** 50 foreign keys sem índice de cobertura e 74 índices sem utilização. Não criar/remover índices em massa sem workload representativo, análise de cascades e EXPLAIN.
+- **Extensões em public:** `btree_gist` e `pg_net` continuam a exigir revisão de relocatabilidade e dependências antes de alterar schema.
+- **Testes comportamentais RLS/staff:** não há contas staff ativas no dataset de produção consultado; executar em ambiente de teste com fixtures isoladas.
+- **PITR:** teste de restauro continua por executar.
+- **Notification queue:** os registos antigos ficam preservados até decisão explícita sobre retenção/eliminação.
+- **Refresh tokens:** não foi observado reuse; há eventos históricos de refresh token inválido, compatíveis com sessões expiradas. Continuar monitorização.
+
+Não marcar os itens dependentes de validação/configuração como concluídos sem evidência.
