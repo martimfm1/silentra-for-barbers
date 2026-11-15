@@ -3,6 +3,7 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { ManualPaymentService } from '@/services/billing/manual-payment.service';
 import { assertSameOrigin } from '@/services/billing/http';
+import { dispatchMoneyFlowOutboxBatch } from '@/services/moneyflow/outbox';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -112,6 +113,13 @@ export async function PATCH(request: Request, { params }: Params) {
         requestId,
         user.id,
       );
+      try {
+        await dispatchMoneyFlowOutboxBatch(10);
+      } catch (error) {
+        console.error('[MONEYFLOW_MANUAL_PAYMENT_DISPATCH_FAILED]', {
+          error: error instanceof Error ? error.name : 'UNKNOWN',
+        });
+      }
       return json({
         ok: true,
         status: 'PAID',
