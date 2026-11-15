@@ -71,7 +71,7 @@ begin
       'amount', new.total,
       'currency', pg_catalog.upper(new.currency),
       'occurredAt', new.issued_at,
-      'description', pg_catalog.left(new.description, 120),
+      'description', pg_catalog.left(coalesce(nullif(pg_catalog.btrim(new.description), ''), 'Subscrição Silentra for Barbers'), 120),
       'externalReference', new.document_number
     )
   )
