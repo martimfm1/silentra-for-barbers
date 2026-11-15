@@ -12,6 +12,7 @@ const [
   appointmentsHook,
   customerPortalAppointments,
   appointmentChangeNotifications,
+  emailTransport,
 ] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
@@ -23,6 +24,7 @@ const [
   readFile('app/state/_hooks/dashboard/useAppointments.ts', 'utf8'),
   readFile('app/api/customer-portal/appointments/[appointmentId]/route.ts', 'utf8'),
   readFile('lib/brevo/appointment-change-notifications.ts', 'utf8'),
+  readFile('lib/email/brevo.ts', 'utf8'),
 ]);
 assert.match(bookingRoute, /notifyBarbersOfNewBooking\(/);
 assert.match(bookingRoute, /professionalId:\s*normalizedProfessionalId/);
@@ -57,6 +59,19 @@ assert.match(
   /Your appointment was cancelled by the barbershop/,
 );
 assert.match(cancellationEmail, /sendBrevoEmail\(/);
+assert.match(cancellationRoute, /reasonCode:[\s\S]*emailResult\.errorCode/);
+assert.match(emailTransport, /BREVO_CONFIGURATION_MISSING/);
+assert.match(emailTransport, /EMAIL_INPUT_INVALID/);
+assert.match(emailTransport, /BREVO_HTTP_\$\{response\.status\}/);
+assert.match(emailTransport, /BREVO_NETWORK_ERROR/);
+assert.doesNotMatch(
+  cancellationRoute.slice(
+    cancellationRoute.indexOf('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]'),
+    cancellationRoute.indexOf('// Keep optional marketing automations'),
+  ),
+  /customerEmail|recipientEmail/,
+  'Cancellation email failure logs must not expose recipient addresses.',
+);
 assert.match(dashboardActions, /Cancelar marcação/);
 assert.match(dashboardActions, /customer will receive an email/);
 assert.doesNotMatch(
