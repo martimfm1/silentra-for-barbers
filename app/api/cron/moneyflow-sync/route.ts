@@ -38,15 +38,11 @@ async function GET__unobserved(request: Request) {
   const admin = createAdminClient();
 
   try {
-    const [{ data: connection, error: connectionError }, { data: events, error: claimError }] =
-      await Promise.all([
-        admin
-          .from('moneyflow_sync_credentials')
-          .select('sync_token,status')
-          .eq('integration_key', 'silentra-platform')
-          .maybeSingle(),
-        Promise.resolve({ data: null, error: null }),
-      ]);
+    const { data: connection, error: connectionError } = await admin
+      .from('moneyflow_sync_credentials')
+      .select('sync_token,status')
+      .eq('integration_key', 'silentra-platform')
+      .maybeSingle();
 
     if (connectionError) throw connectionError;
     if (!connection || connection.status !== 'connected' || !connection.sync_token) {
@@ -67,6 +63,9 @@ async function GET__unobserved(request: Request) {
     let failed = 0;
     const baseUrl = process.env.MONEYFLOW_APP_URL?.trim() || MONEYFLOW_BASE_URL;
     const endpoint = new URL('/api/integrations/silentra/events', baseUrl);
+    if (endpoint.protocol !== 'https:' || endpoint.hostname !== 'moneyflow.silentra.me') {
+      throw new Error('INVALID_MONEYFLOW_ORIGIN');
+    }
 
     for (const event of queue) {
       let response: Response | null = null;
