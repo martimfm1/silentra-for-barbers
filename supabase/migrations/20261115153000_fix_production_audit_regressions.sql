@@ -5,8 +5,8 @@ begin;
 -- this only changes defaults for functions created from now on.
 alter default privileges for role postgres in schema public
   revoke execute on functions from public, anon;
-alter default privileges for role supabase_admin in schema public
-  revoke execute on functions from public, anon;
+-- The supabase_admin role is not a member of the migration owner and its
+-- defaults are managed by Supabase; do not attempt to alter its ACLs here.
 
 -- Fix PL/pgSQL output-parameter/column collision: RETURNS TABLE exposes "role"
 -- as an output variable, so the users column must always be qualified.
