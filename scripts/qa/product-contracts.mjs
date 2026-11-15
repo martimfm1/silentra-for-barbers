@@ -201,13 +201,18 @@ const checks = [
       source.includes('.webp({ quality: 85, effort: 4 })'),
   },
   {
-    name: 'Dashboard branding uploads show actionable errors and always reset upload state',
+    name: 'Dashboard branding uploads remain pending until the global settings save',
     file: 'app/dashboard/settings/settings-page.tsx',
     test: (source) =>
-      source.includes('result.error.message') &&
-      source.includes("fileType: file.type || 'unknown'") &&
-      /finally\s*\{\s*setUploading\(null\);/.test(source) &&
-      source.includes('disabled={uploading !== null}'),
+      source.includes('setPendingAvatar(file)') &&
+      source.includes('setPendingBanner(file)') &&
+      source.includes('pendingAvatar !== null') &&
+      source.includes('pendingBanner !== null') &&
+      source.includes("bucket: 'avatar'") &&
+      source.includes("bucket: 'banner'") &&
+      source.includes('if (result.error || !result.data?.publicUrl)') &&
+      source.includes('setAvatarDraftUrl(null)') &&
+      source.includes('setBannerDraftUrl(null)'),
   },
   {
     name: 'Reports page separates service revenue from product sales and supports client rebooking analysis',
