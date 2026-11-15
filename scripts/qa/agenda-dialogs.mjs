@@ -134,7 +134,7 @@ assert.ok(
 );
 assert.ok(bookingForm.includes('type="search"'));
 assert.match(bookingForm, /id="booking-email"[\s\S]*?type="email"/);
-const bookingEmailInput = bookingForm.match(/<input[\s\S]*?id="booking-email"[\s\S]*?\/>/)?.[0] ?? '';
+const bookingEmailInput = bookingForm.match(/<input\s+id="booking-email"[\s\S]*?\/>/)?.[0] ?? '';
 assert.ok(bookingEmailInput, 'Customer email input must exist.');
 assert.doesNotMatch(bookingEmailInput, /\brequired\b/);
 assert.match(hook, /manualEmail\.trim\(\) && !CUSTOMER_EMAIL_PATTERN\.test\(manualEmail\.trim\(\)\)/);
