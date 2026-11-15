@@ -143,6 +143,50 @@ async function processCheckoutSessionCompleted(
   );
 }
 
+async function enqueueMoneyFlowStripeInvoice(invoice: Stripe.Invoice) {
+  const amount = Number(invoice.amount_paid ?? 0) / 100;
+  const currency = String(invoice.currency ?? '').toUpperCase();
+
+  // MoneyFlow currently links an EUR account only. Do not queue other
+  // currencies or zero-value trial invoices.
+  if (!Number.isFinite(amount) || amount <= 0 || currency !== 'EUR') return;
+
+  const eventId = `stripe-invoice:${invoice.id}`;
+  const paidAt = invoice.status_transitions?.paid_at;
+  const occurredAt = new Date(
+    (typeof paidAt === 'number' ? paidAt : invoice.created) * 1000,
+  ).toISOString();
+  const firstLine = invoice.lines?.data?.[0];
+  const description =
+    firstLine?.description?.trim() || 'Subscrição Silentra for Barbers';
+
+  const database = createAdminClient();
+  const { error } = await database
+    .from('moneyflow_sync_outbox')
+    .upsert(
+      {
+        event_key: eventId,
+        event_type: 'subscription_payment',
+        payload: {
+          eventId,
+          amount,
+          currency,
+          occurredAt,
+          description: description.slice(0, 120),
+          externalReference: invoice.number || invoice.id,
+        },
+      },
+      { onConflict: 'event_key', ignoreDuplicates: true },
+    );
+
+  if (error) {
+    throw new BillingError(
+      'Could not enqueue confirmed Stripe invoice for MoneyFlow.',
+      'WEBHOOK_PROCESSING_FAILED',
+    );
+  }
+}
+
 async function POST__unobserved(request: Request) {
   const signature = request.headers.get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -205,6 +249,10 @@ async function POST__unobserved(request: Request) {
       ) {
         await processCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
+        );
+      } else if (event.type === 'invoice.paid') {
+        await enqueueMoneyFlowStripeInvoice(
+          event.data.object as Stripe.Invoice,
         );
       } else if (
         [
