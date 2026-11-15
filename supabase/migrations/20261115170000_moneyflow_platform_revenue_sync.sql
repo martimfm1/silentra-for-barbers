@@ -49,7 +49,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $manual_sync$
 declare
   v_event_key text;
 begin
@@ -88,7 +88,7 @@ begin
 
   return new;
 end;
-$;
+$manual_sync$;
 
 revoke all on function public.enqueue_moneyflow_manual_subscription_request()
   from public, anon, authenticated;
