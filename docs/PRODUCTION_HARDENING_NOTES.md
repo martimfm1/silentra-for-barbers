@@ -183,3 +183,25 @@ A aplicação à produção e a validação pós-migration ficam dependentes de 
 - **Refresh tokens:** não foi observado reuse; há eventos históricos de refresh token inválido, compatíveis com sessões expiradas. Continuar monitorização.
 
 Não marcar os itens dependentes de validação/configuração como concluídos sem evidência.
+
+
+## Seguimento — CI/runtime e auditoria de 15 de novembro de 2026
+
+- [x] Corrigidas em produção as ambiguidades SQLSTATE 42702 em `join_barbershop_with_invite` e `claim_subscription_expiry_reminder_events`.
+- [x] Revogado EXECUTE anónimo na RPC de confirmação manual e removido EXECUTE direto de clientes na função trigger.
+- [x] Revogado EXECUTE de PUBLIC/anon por omissão para novas funções no schema `public` criadas pelo owner `postgres`.
+- [x] Desativado o trigger órfão de novas-review notifications; os quatro registos pendentes foram preservados.
+- [x] PR #271 merged; migration `20261115154352` confirmada no histórico remoto de produção.
+- [x] PR #269 merged; inclui notificações ao barbeiro em cancelamento/reagendamento do cliente e email ao cliente em reagendamento pelo barbeiro.
+- [x] Contratos QA de hardening passaram; CI, build e smoke QA passaram no run `43731029145`.
+- [ ] Deploy manual da versão merged (em validação no momento desta atualização).
+- [x] Identificados no Vercel os nomes de todas as variáveis exigidas por `qa:env` em produção, sem ler nem expor valores.
+- [ ] `qa:env` completo não corre no pull_request CI porque exige secrets de produção e a CI usa placeholders. Em vez de injectar credenciais no runner, a CI valida estaticamente o contrato `qa:env` através de `qa:env-contract`.
+- [x] Atualizar runner CI para Node.js 24.x, alinhado com o runtime de produção Vercel (PR de CI separado).
+- [ ] Leaked Password Protection continua a exigir ativação manual em Supabase Auth > Password Security.
+- [ ] Confirmar que o secret `CRON_SECRET` em GitHub Actions coincide com o valor de produção Vercel. O nome existe em Vercel; não foi possível inspecionar o secret GitHub através da ligação disponível.
+- [ ] Validar a recuperação dos workflows Marketing Cron e Support Email Retry Cron através de novas execuções depois de confirmar o secret.
+- [ ] Analisar 50 FKs sem índice de cobertura e 74 índices sem uso quando existir workload suficiente; não adicionar/remover índices sem evidência.
+- [ ] Avaliar relocação de `btree_gist` após análise das dependências; `pg_net` não é relocável.
+- [ ] Executar teste de restauro PITR num ambiente de recuperação dedicado e testes E2E com fixtures staff em ambiente seguro.
+- [ ] Investigar separadamente os marcadores históricos de falha de email de cancelamento; os logs atuais não distinguem falta de email de erro do fornecedor.
