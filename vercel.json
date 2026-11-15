@@ -11,10 +11,6 @@
     {
       "path": "/api/cron/manual-subscriptions",
       "schedule": "30 0 * * *"
-    },
-    {
-      "path": "/api/cron/moneyflow-sync",
-      "schedule": "35 0 * * *"
     }
   ]
 }
