@@ -104,6 +104,27 @@ export default function MoneyFlowIntegrationPanel() {
     });
   }
 
+  function disconnect() {
+    setError(null);
+    setMessage(null);
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/silentra-admin/moneyflow/connect', {
+          method: 'DELETE',
+          cache: 'no-store',
+        });
+        const payload = (await response.json()) as ApiResult;
+        if (!response.ok || payload.ok !== true) {
+          throw new Error(payload.error || 'Não foi possível desligar o MoneyFlow.');
+        }
+        setMessage('Ligação ao MoneyFlow desligada.');
+        await load();
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : 'Erro inesperado.');
+      }
+    });
+  }
+
   async function copyIntegrationInfo() {
     if (!connection?.connected) return;
     const details = [
@@ -175,6 +196,17 @@ export default function MoneyFlowIntegrationPanel() {
               </button>
             </div>
 
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={disconnect}
+                disabled={isPending}
+                className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-red-400/15 px-3 text-xs font-medium text-red-200 transition hover:bg-red-400/[0.05] disabled:opacity-50"
+              >
+                <Unplug className="size-3.5" />
+                {isPending ? 'A desligar…' : 'Desligar integração'}
+              </button>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-black/15 p-4">
                 <p className="text-[10px] uppercase tracking-[0.13em] text-zinc-600">Ligação criada</p>
