@@ -183,20 +183,17 @@ async function processPaidSubscriptionInvoice(invoice: Stripe.Invoice) {
   const subscription = await getStripeClient().subscriptions.retrieve(
     subscriptionId,
   );
-  let mapping = await hydrateBillingMappingFromMetadata(
+  const metadataMapping = await hydrateBillingMappingFromMetadata(
     subscription.metadata,
   );
 
-  if (!mapping) {
+  if (!metadataMapping) {
     const customerId = stripeObjectId(fields.customer);
     if (!customerId) return;
-    mapping =
-      (await BarbershopStripeService.findBarbershopByCustomerId(
-        customerId,
-      )) ?? null;
+    const customerMapping =
+      await BarbershopStripeService.findBarbershopByCustomerId(customerId);
+    if (!customerMapping) return;
   }
-
-  if (!mapping) return;
 
   const paidAt =
     fields.status_transitions?.paid_at ??
