@@ -6,6 +6,7 @@ import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { billingErrorResponse } from '@/services/billing/http';
 import { BillingError } from '@/types/stripe';
+import { dispatchMoneyFlowSyncBatch } from '@/services/integrations/moneyflow-sync.service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -262,6 +263,7 @@ async function POST__unobserved(request: Request) {
         await enqueueMoneyFlowStripeInvoice(
           event.data.object as Stripe.Invoice,
         );
+        await dispatchMoneyFlowSyncBatch(1);
       } else if (
         [
           'customer.subscription.created',
