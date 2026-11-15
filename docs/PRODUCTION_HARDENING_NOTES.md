@@ -163,13 +163,13 @@ Revalidação da produção: Supabase `yzrdpwsfqsazxvwsjobf` (`eu-west-1`), GitH
 
 ### Regressões confirmadas e correções preparadas
 
-- [ ] **Convites de equipa — SQLSTATE 42702:** `join_barbershop_with_invite` tinha a referência `role` ambígua entre a coluna e a variável de saída de `RETURNS TABLE`. A migration `20261115153000_fix_production_audit_regressions` qualifica `users.role` pelo alias `u`.
-- [ ] **Lembretes de expiração — SQLSTATE 42702:** `claim_subscription_expiry_reminder_events` usava `ON CONFLICT (subscription_id, period_end, days_before)`, colidindo com os parâmetros de saída. A migration passa a usar a constraint `subscription_expiry_reminder_outbox_once`.
-- [ ] **SECURITY DEFINER — EXECUTE anónimo:** a mesma migration revoga EXECUTE de `anon` em `set_manual_booking_auto_confirmation`, retira execução direta da função trigger e revoga EXECUTE de `PUBLIC`/`anon` por omissão para novas funções em `public` criadas por `postgres` (owner das migrations da aplicação). O papel `supabase_admin` não é membro do owner `postgres` e os seus defaults são geridos pelo Supabase, por isso não são alterados. A chamada autenticada de owner/admin continua permitida.
-- [ ] **Fila antiga de notificações:** o trigger produtor `trigger_notify_new_review` não tinha consumidor no código atual. A migration desliga o produtor para evitar acumulação adicional; os quatro registos existentes são preservados, sem DELETE/UPDATE.
-- [ ] Adicionado contrato QA `qa:production-hardening` para bloquear regressões nestes pontos.
+- [x] **Convites de equipa — SQLSTATE 42702:** `join_barbershop_with_invite` tinha a referência `role` ambígua entre a coluna e a variável de saída de `RETURNS TABLE`. A migration `20261115153000_fix_production_audit_regressions` qualifica `users.role` pelo alias `u`.
+- [x] **Lembretes de expiração — SQLSTATE 42702:** `claim_subscription_expiry_reminder_events` usava `ON CONFLICT (subscription_id, period_end, days_before)`, colidindo com os parâmetros de saída. A migration passa a usar a constraint `subscription_expiry_reminder_outbox_once`.
+- [x] **SECURITY DEFINER — EXECUTE anónimo:** a mesma migration revoga EXECUTE de `anon` em `set_manual_booking_auto_confirmation`, retira execução direta da função trigger e revoga EXECUTE de `PUBLIC`/`anon` por omissão para novas funções em `public` criadas por `postgres` (owner das migrations da aplicação). O papel `supabase_admin` não é membro do owner `postgres` e os seus defaults são geridos pelo Supabase, por isso não são alterados. A chamada autenticada de owner/admin continua permitida.
+- [x] **Fila antiga de notificações:** o trigger produtor `trigger_notify_new_review` não tinha consumidor no código atual. A migration desliga o produtor para evitar acumulação adicional; os quatro registos existentes são preservados, sem DELETE/UPDATE.
+- [x] Adicionado contrato QA `qa:production-hardening` para bloquear regressões nestes pontos.
 
-A aplicação à produção e a validação pós-migration ficam dependentes de CI e da confirmação dos advisors.
+Migration aplicada em produção a 15/11 depois de CI passar. Os advisors e as permissões foram novamente consultados depois da aplicação.
 
 ### Itens ainda dependentes de acesso/configuração ou workload
 
@@ -205,3 +205,37 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [ ] Avaliar relocação de `btree_gist` após análise das dependências; `pg_net` não é relocável.
 - [ ] Executar teste de restauro PITR num ambiente de recuperação dedicado e testes E2E com fixtures staff em ambiente seguro.
 - [ ] Investigar separadamente os marcadores históricos de falha de email de cancelamento; os logs atuais não distinguem falta de email de erro do fornecedor.
+
+
+## Verificação final — 15 de novembro de 2026 (15:00–16:00 UTC)
+
+### Concluído e verificado em produção
+
+- [x] PR #269 merged: emails ao cliente quando o barbeiro reagenda; emails e notificações ao barbeiro quando o cliente cancela ou reagenda.
+- [x] PR #271 merged; migration `20261115154352_fix_production_audit_regressions` aplicada no Supabase de produção.
+- [x] `join_barbershop_with_invite`: referência `users.role` qualificada; `anon` não executa, `authenticated` executa.
+- [x] `claim_subscription_expiry_reminder_events`: conflito usa a constraint nomeada; execução reservada a `service_role`. Chamada dentro de transação revertida passou sem erro.
+- [x] `set_manual_booking_auto_confirmation`: execução anónima removida; autenticados mantidos.
+- [x] `apply_manual_booking_confirmation_setting`: continua associado ao trigger de INSERT em appointments, mas sem EXECUTE direto para qualquer role cliente.
+- [x] Defaults de funções do owner `postgres` em `public`: sem EXECUTE de PUBLIC/anon para novas funções.
+- [x] Trigger `trigger_notify_new_review` desativado. A tabela contém apenas 4 entradas antigas `new_review`; nenhuma foi eliminada. A aplicação não contém consumidor para esse tipo de entrada.
+- [x] PR #272 merged: CI usa Node.js 24.x, alinhado com Vercel; foi acrescentado `qa:env-contract` sem colocar secrets de produção em runners de PR.
+- [x] CI #3154 passou: TypeScript, lint, environment contracts, build e smoke QA.
+- [x] Deploy production `dpl_5bsbrvhDppQWQNWhh6jfU6xr6v1i` READY para o commit `8fc9cd6696bad94311bdce739a8ebbb4b40c52d4`, alias `barbers.silentra.me` atualizado.
+- [x] Erros de pré-pagamento MB WAY foram anteriores à migration `20261113174136_restore_mbway_prepayment_booking_rpc`; a função atual mantém `prepayment_pending`, método, estado, valor e expiração.
+- [x] Os pedidos manuais de subscrição atualmente existentes estão pagos; não há pedidos PENDING/PAYMENT_SENT pendentes na fotografia consultada. O erro histórico `MANUAL_SUBSCRIPTION_NOT_FOUND` foi uma recusa de segurança para uma subscrição manual inválida/stale e não foi reproduzido na situação atual.
+- [x] Auditoria Auth: 7 refresh-token requests no intervalo recente terminaram em HTTP 200. Os erros históricos `refresh_token_not_found` não voltaram a aparecer no intervalo consultado; último evento conhecido em 12/11.
+- [x] Vercel: sem runtime errors na última hora consultada.
+
+### Em curso / requer validação posterior
+
+- [ ] PR #273 acrescenta códigos de erro Brevo seguros e logs de cancelamento sem PII. A causa das 26 falhas históricas (11–13/11) não é recuperável pelos logs retidos no plano atual; o transporte atual só registava um marcador genérico. Não foi enviado email de teste nem reenviado email a clientes.
+- [ ] Executar a próxima execução agendada do cron `subscription-expiry-reminders` depois da migration e confirmar um HTTP 200; a função SQL já foi exercitada sem erro numa transação revertida.
+- [ ] Confirmar que o GitHub Actions secret `CRON_SECRET` corresponde ao valor de produção da Vercel. O nome existe nas variáveis Vercel, mas esta integração não permite ler/verificar GitHub Actions secrets.
+- [ ] Confirmar os workflows Marketing Cron e Support Email Retry Cron numa execução agendada/manual; o plano Vercel Hobby não suporta a frequência de 5 minutos usada por estes workflows.
+- [ ] Ativar Leaked Password Protection em Supabase Auth > Password Security. Não existe ação de configuração Auth disponível nesta ligação.
+- [ ] Testes E2E reais de booking, billing, CRM e staff por tenant; não existem contas staff de teste em produção. Executar com fixtures isoladas num ambiente de teste.
+- [ ] Teste de restauro PITR num projeto/ambiente dedicado.
+- [ ] Rever 50 FKs sem cobertura e 74 índices sem utilização após recolha de workload representativo. Não indexar/remover em massa.
+- [ ] Avaliar btree_gist; pg_net é não relocável e não deve ser movido.
+- [ ] Configurar `SENTRY_AUTH_TOKEN` para que os source maps/releases sejam enviados ao Sentry; o build atual passou, mas o upload foi ignorado por falta de token.
