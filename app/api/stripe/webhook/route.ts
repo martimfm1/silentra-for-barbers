@@ -183,19 +183,15 @@ async function processPaidSubscriptionInvoice(invoice: Stripe.Invoice) {
   const subscription = await getStripeClient().subscriptions.retrieve(
     subscriptionId,
   );
-  const metadataMapping = await hydrateBillingMappingFromMetadata(
-    subscription.metadata,
-  );
+  // A subscription carrying a barbershop mapping is never platform revenue.
+  if (subscription.metadata.barbershop_id?.trim()) return;
 
-  if (!metadataMapping) {
-    const customerId = stripeObjectId(fields.customer);
-    if (!customerId) return;
-    const customerMapping =
-      await BarbershopStripeService.findBarbershopByCustomerId(customerId);
-    // An invoice tied to a barbershop customer is operational barbershop revenue,
-    // not revenue earned by the Silentra platform.
-    if (customerMapping) return;
-  }
+  const customerId = stripeObjectId(fields.customer);
+  if (!customerId) return;
+  const customerMapping =
+    await BarbershopStripeService.findBarbershopByCustomerId(customerId);
+  // Customer-linked invoices are operational barbershop revenue, not platform revenue.
+  if (customerMapping) return;
 
   const paidAt =
     fields.status_transitions?.paid_at ??
