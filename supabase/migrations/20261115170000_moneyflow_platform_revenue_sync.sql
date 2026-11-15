@@ -116,6 +116,7 @@ declare
 begin
   if new.document_type <> 'PAYMENT_RECEIPT'
     or new.payment_method <> 'MANUAL'
+    or new.manual_request_id is null
     or new.total <= 0
     or upper(new.currency) <> 'EUR' then
     return new;
