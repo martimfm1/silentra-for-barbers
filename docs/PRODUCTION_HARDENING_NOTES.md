@@ -200,11 +200,11 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Atualizar runner CI para Node.js 24.x, alinhado com o runtime de produção Vercel (PR de CI separado).
 - [x] Confirmado bloqueio de plano para Leaked Password Protection: organização Supabase `Silentra` está em `tier_free`; a funcionalidade HaveIBeenPwned está disponível apenas a partir de Pro. Sem upgrade não pode ser ativada; alternativa gratuita: configurar comprimento mínimo e requisitos de caracteres em Authentication → Sign In / Providers → Email.
 - [ ] Confirmar que o secret `CRON_SECRET` em GitHub Actions coincide com o valor de produção Vercel. O nome existe em Vercel; não foi possível inspecionar o secret GitHub através da ligação disponível.
-- [ ] Validar a recuperação dos workflows Marketing Cron e Support Email Retry Cron através de novas execuções depois de confirmar o secret.
+- [ ] Confirmar execução dos workflows GitHub Actions Marketing Cron e Support Email Retry Cron numa execução agendada/manual. Não há logs destas rotas na última meia hora e esta ligação não expõe o histórico geral dos workflows; os schedules correm no GitHub Actions, não no Vercel Cron.
 - [ ] Analisar 50 FKs sem índice de cobertura e 74 índices sem uso quando existir workload suficiente; não adicionar/remover índices sem evidência.
 - [ ] Avaliar relocação de `btree_gist` após análise das dependências; `pg_net` não é relocável.
 - [ ] Executar teste de restauro PITR num ambiente de recuperação dedicado e testes E2E com fixtures staff em ambiente seguro.
-- [ ] Investigar separadamente os marcadores históricos de falha de email de cancelamento; os logs atuais não distinguem falta de email de erro do fornecedor.
+- [x] Rever as falhas históricas de email de cancelamento e melhorar a telemetria no PR #273; o código atual já diferencia configuração, input inválido, HTTP do Brevo e falha de rede. A causa específica dos 26 eventos antigos não pode ser reconstruída porque o log antigo não guardava esse detalhe.
 
 
 ## Verificação final — 15 de novembro de 2026 (15:00–16:00 UTC)
@@ -221,7 +221,8 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Trigger `trigger_notify_new_review` desativado. A tabela contém apenas 4 entradas antigas `new_review`; nenhuma foi eliminada. A aplicação não contém consumidor para esse tipo de entrada.
 - [x] PR #272 merged: CI usa Node.js 24.x, alinhado com Vercel; foi acrescentado `qa:env-contract` sem colocar secrets de produção em runners de PR.
 - [x] CI #3154 passou: TypeScript, lint, environment contracts, build e smoke QA.
-- [x] Deploy production `dpl_5bsbrvhDppQWQNWhh6jfU6xr6v1i` READY para o commit `8fc9cd6696bad94311bdce739a8ebbb4b40c52d4`, alias `barbers.silentra.me` atualizado.
+- [x] Deploy production `dpl_5bsbrvhDppQWQNWhh6jfU6xr6v1i` READY para o commit `8fc9cd6696bad94311bdce739a8ebbb4b40c52d4`.
+- [x] Deploy final production `dpl_B3UDXPvnrx1CesmRuzDCzB7DyiYc` READY para o commit `899ba60347dbec2b3abcc05c4ba1ba3fbca9653f`; alias `barbers.silentra.me` confirmado neste deployment.
 - [x] Erros de pré-pagamento MB WAY foram anteriores à migration `20261113174136_restore_mbway_prepayment_booking_rpc`; a função atual mantém `prepayment_pending`, método, estado, valor e expiração.
 - [x] Os pedidos manuais de subscrição atualmente existentes estão pagos; não há pedidos PENDING/PAYMENT_SENT pendentes na fotografia consultada. O erro histórico `MANUAL_SUBSCRIPTION_NOT_FOUND` foi uma recusa de segurança para uma subscrição manual inválida/stale e não foi reproduzido na situação atual.
 - [x] Auditoria Auth: 7 refresh-token requests no intervalo recente terminaram em HTTP 200. Os erros históricos `refresh_token_not_found` não voltaram a aparecer no intervalo consultado; último evento conhecido em 12/11.
