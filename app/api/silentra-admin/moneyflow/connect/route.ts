@@ -134,6 +134,27 @@ export async function POST(request: Request) {
       );
 
     if (error) {
+      // The pairing token has been consumed. Revoke the server token remotely
+      // so a failed local credential write cannot leave an orphaned connection.
+      try {
+        const revoke = await fetch(
+          `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${syncToken}` },
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8_000),
+          },
+        );
+        if (!revoke.ok && revoke.status !== 401) {
+          console.error('[MONEYFLOW_CONNECT_ROLLBACK_FAILED]', {
+            status: revoke.status,
+          });
+        }
+      } catch {
+        console.error('[MONEYFLOW_CONNECT_ROLLBACK_UNAVAILABLE]');
+      }
+
       console.error('[MONEYFLOW_CONNECT_STORE_FAILED]', {
         code: error.code ?? 'UNKNOWN',
       });
@@ -170,17 +191,19 @@ export async function DELETE(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
-    const { data: connection } = await admin
+    const { data: connection, error: lookupError } = await admin
       .from('moneyflow_sync_credentials')
       .select('sync_token, status')
       .eq('integration_key', 'silentra-platform')
       .maybeSingle();
+    if (lookupError) throw lookupError;
 
     const syncToken =
       connection?.status === 'connected' ? connection.sync_token : '';
     if (syncToken) {
+      let response: Response;
       try {
-        await fetch(
+        response = await fetch(
           `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
           {
             method: 'POST',
@@ -190,7 +213,17 @@ export async function DELETE(request: Request) {
           },
         );
       } catch {
-        // Disconnect locally even if MoneyFlow is temporarily unavailable.
+        return NextResponse.json(
+          { ok: false, error: 'O MoneyFlow está temporariamente indisponível. A ligação continua ativa; tenta novamente.' },
+          { status: 502 },
+        );
+      }
+
+      if (!response.ok && response.status !== 401) {
+        return NextResponse.json(
+          { ok: false, error: 'O MoneyFlow não confirmou a revogação da ligação.' },
+          { status: 502 },
+        );
       }
     }
 
