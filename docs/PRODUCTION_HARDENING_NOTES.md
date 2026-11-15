@@ -227,6 +227,7 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Os pedidos manuais de subscrição atualmente existentes estão pagos; não há pedidos PENDING/PAYMENT_SENT pendentes na fotografia consultada. O erro histórico `MANUAL_SUBSCRIPTION_NOT_FOUND` foi uma recusa de segurança para uma subscrição manual inválida/stale e não foi reproduzido na situação atual.
 - [x] Auditoria Auth: 7 refresh-token requests no intervalo recente terminaram em HTTP 200. Os erros históricos `refresh_token_not_found` não voltaram a aparecer no intervalo consultado; último evento conhecido em 12/11.
 - [x] Vercel: sem runtime errors na última hora consultada.
+- [x] RLS: as 38 tabelas públicas com RLS ativo e sem policies foram verificadas uma a uma; nenhuma tem SELECT/INSERT/UPDATE/DELETE concedido a `anon` ou `authenticated`, e todas mantêm acesso `service_role`.
 
 ### Em curso / requer validação posterior
 
