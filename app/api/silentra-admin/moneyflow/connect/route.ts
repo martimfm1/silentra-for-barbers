@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
@@ -89,11 +88,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const eventSecret = randomBytes(32).toString('hex');
-    const eventSecretHash = createHash('sha256')
-      .update(eventSecret)
-      .digest('hex');
-
     const response = await fetch(
       `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/pair`,
       {
@@ -101,7 +95,6 @@ export async function POST(request: Request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pairingToken: parsed.data.pairingToken,
-          eventSecretHash,
         }),
         cache: 'no-store',
         signal: AbortSignal.timeout(10_000),
@@ -122,13 +115,21 @@ export async function POST(request: Request) {
       );
     }
 
+    const syncToken = String(payload.syncToken ?? '');
+    if (!/^[a-f0-9]{64}$/i.test(syncToken)) {
+      return NextResponse.json(
+        { ok: false, error: 'O MoneyFlow devolveu uma credencial inválida.' },
+        { status: 502 },
+      );
+    }
+
     const now = new Date().toISOString();
     const { error } = await admin
       .from('moneyflow_sync_credentials')
       .upsert(
         {
           integration_key: 'silentra-platform',
-          sync_token: eventSecret,
+          sync_token: syncToken,
           account_name: String(payload.accountName).slice(0, 120),
           currency_code: String(payload.currencyCode).toUpperCase(),
           status: 'connected',
@@ -189,8 +190,7 @@ export async function DELETE(request: Request) {
           `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ eventSecret: syncToken }),
+            headers: { Authorization: `Bearer ${syncToken}` },
             cache: 'no-store',
             signal: AbortSignal.timeout(8_000),
           },
