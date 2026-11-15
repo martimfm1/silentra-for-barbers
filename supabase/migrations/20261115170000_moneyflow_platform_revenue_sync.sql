@@ -44,6 +44,67 @@ revoke all on public.moneyflow_sync_outbox
 grant all on public.moneyflow_sync_credentials to service_role;
 grant all on public.moneyflow_sync_outbox to service_role;
 
+create or replace function public.enqueue_moneyflow_manual_subscription_request()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_event_key text;
+begin
+  if new.status::text <> 'PAID'
+    or new.paid_at is null
+    or new.price <= 0
+    or upper(new.currency) <> 'EUR' then
+    return new;
+  end if;
+
+  v_event_key := 'manual-payment:' || new.id::text;
+
+  insert into public.moneyflow_sync_outbox (
+    event_key,
+    event_type,
+    payload
+  )
+  values (
+    v_event_key,
+    'subscription_payment',
+    pg_catalog.jsonb_build_object(
+      'eventId', v_event_key,
+      'amount', new.price,
+      'currency', 'EUR',
+      'occurredAt', new.paid_at,
+      'description', pg_catalog.left(
+        'Subscrição Silentra for Barbers — ' ||
+        pg_catalog.initcap(new.plan::text) ||
+        ' (' || new.billing_interval::text || ')',
+        160
+      ),
+      'externalReference', new.id::text
+    )
+  )
+  on conflict (event_key) do nothing;
+
+  return new;
+end;
+$;
+
+revoke all on function public.enqueue_moneyflow_manual_subscription_request()
+  from public, anon, authenticated;
+
+drop trigger if exists subscription_requests_enqueue_moneyflow
+  on public.subscription_requests;
+
+create trigger subscription_requests_enqueue_moneyflow
+after update of status on public.subscription_requests
+for each row
+when (
+  new.status::text = 'PAID'
+  and old.status::text is distinct from 'PAID'
+)
+execute function public.enqueue_moneyflow_manual_subscription_request();
+
 create or replace function public.enqueue_moneyflow_manual_payment()
 returns trigger
 language plpgsql
