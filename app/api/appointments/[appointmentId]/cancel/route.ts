@@ -174,17 +174,14 @@ async function DELETE__unobserved(
         appointment.client_id
           ? tenant.admin
               .from('users')
-              .select('email,name_complete')
+              .select('name_complete')
               .eq('id', appointment.client_id)
               .eq('barbershop_id', tenant.barbershopId)
               .maybeSingle()
           : Promise.resolve({ data: null, error: null }),
       ]);
 
-    const customerEmail =
-      appointment.manual_email?.trim() ||
-      clientResult.data?.email?.trim() ||
-      '';
+    const customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
     const customerName =
       appointment.manual_name?.trim() ||
       clientResult.data?.name_complete?.trim() ||
@@ -203,22 +200,16 @@ async function DELETE__unobserved(
           barbershopName,
           language,
         })
-      : {
-          success: false as const,
-          error:
-            language === 'en'
-              ? 'There is no email address registered for this customer.'
-              : 'Não existe um endereço de email registado para este cliente.',
-        };
+      : null;
 
-    if (!emailResult.success) {
+    if (emailResult && !emailResult.success) {
       console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]', {
         appointmentId: appointment.id,
         reasonCode:
           'errorCode' in emailResult
             ? emailResult.errorCode
             : 'EMAIL_SEND_FAILED',
-        hasRecipient: Boolean(customerEmail),
+        hasRecipient: true,
         // Never log the recipient or a provider response that could contain PII.
       });
     }
@@ -236,8 +227,9 @@ async function DELETE__unobserved(
 
     return NextResponse.json({
       success: true,
-      emailSent: emailResult.success,
-      emailError: emailResult.success ? null : emailResult.error,
+      emailSent: emailResult?.success ?? false,
+      emailSkipped: !customerEmail,
+      emailError: emailResult && !emailResult.success ? emailResult.error : null,
       appointment: {
         id: appointment.id,
         status: 'cancelled',

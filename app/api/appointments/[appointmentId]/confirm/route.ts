@@ -135,12 +135,11 @@ async function POST__unobserved(
 
     let clientRelation: {
       name_complete?: string | null;
-      email?: string | null;
     } | null = null;
     if (appointment.client_id) {
       const { data: client, error: clientError } = await admin
         .from('users')
-        .select('name_complete,email')
+        .select('name_complete')
         .eq('id', appointment.client_id)
         .maybeSingle();
       if (clientError)
@@ -182,10 +181,7 @@ async function POST__unobserved(
         { status: 409 },
       );
 
-    const recipientEmail =
-      appointment.manual_email?.trim().toLowerCase() ||
-      clientRelation?.email?.trim().toLowerCase() ||
-      null;
+    const recipientEmail = appointment.manual_email?.trim().toLowerCase() || null;
     const recipientName =
       appointment.manual_name?.trim() ||
       clientRelation?.name_complete?.trim() ||

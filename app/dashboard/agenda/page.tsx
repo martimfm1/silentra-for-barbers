@@ -353,6 +353,7 @@ export default function AgendaPage() {
           success?: boolean;
           error?: string;
           notificationSent?: boolean;
+          notificationSkipped?: boolean;
         };
         if (!response.ok || payload.success !== true) {
           throw new Error(
@@ -370,6 +371,12 @@ export default function AgendaPage() {
             locale === 'en'
               ? 'Booking updated and email sent to the customer.'
               : 'Marcação alterada e email enviado ao cliente.',
+          );
+        } else if (payload.notificationSkipped === true) {
+          toast.success(
+            locale === 'en'
+              ? 'Booking updated. No customer email was sent.'
+              : 'Marcação alterada. Não foi enviado email ao cliente.',
           );
         } else {
           toast.warning(

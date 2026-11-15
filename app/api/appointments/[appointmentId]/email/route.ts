@@ -87,7 +87,7 @@ async function POST__unobserved(
       appointment.client_id
         ? admin
             .from('users')
-            .select('name_complete,email')
+            .select('name_complete')
             .eq('id', appointment.client_id)
             .eq('barbershop_id', barbershopId)
             .eq('role', 'client')
@@ -114,10 +114,13 @@ async function POST__unobserved(
       });
     }
 
-    const email =
-      appointment.manual_email?.trim().toLowerCase() ||
-      clientResult.data?.email?.trim().toLowerCase() ||
-      '';
+    const email = appointment.manual_email?.trim().toLowerCase() || '';
+    if (!email) {
+      return NextResponse.json(
+        { success: true, emailSent: false, emailSkipped: true },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     if (!EMAIL_PATTERN.test(email)) {
       return NextResponse.json(
         {

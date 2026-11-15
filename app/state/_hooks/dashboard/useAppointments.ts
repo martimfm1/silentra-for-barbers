@@ -191,7 +191,7 @@ export function useAppointments(
           );
           return false;
         }
-        if (!CUSTOMER_EMAIL_PATTERN.test(manualEmail.trim())) {
+        if (manualEmail.trim() && !CUSTOMER_EMAIL_PATTERN.test(manualEmail.trim())) {
           toast.error(
             locale === 'en'
               ? 'Enter a valid customer email address.'
@@ -235,7 +235,7 @@ export function useAppointments(
           professional_id: professionalId,
           manual_name: manualName || null,
           manual_phone: manualPhone || null,
-          manual_email: manualEmail.trim().toLowerCase(),
+          manual_email: manualEmail.trim().toLowerCase() || null,
           manual_birth_date: birthDate || null,
         }));
         const result =
@@ -264,7 +264,7 @@ export function useAppointments(
           ? result.data[0]
           : result.data;
         let emailSent = false;
-        if (firstCreatedAppointment?.id) {
+        if (firstCreatedAppointment?.id && manualEmail.trim()) {
           try {
             const emailResponse = await fetch(
               `/api/appointments/${encodeURIComponent(firstCreatedAppointment.id)}/email`,
@@ -297,12 +297,14 @@ export function useAppointments(
               ? `${bookingCreatedMessage} Email sent to the customer.`
               : `${bookingCreatedMessage} Email enviado ao cliente.`,
           );
-        } else {
+        } else if (manualEmail.trim()) {
           toast.warning(
             locale === 'en'
               ? `${bookingCreatedMessage} The customer email could not be sent.`
               : `${bookingCreatedMessage} Não foi possível enviar o email ao cliente.`,
           );
+        } else {
+          toast.success(bookingCreatedMessage);
         }
         captureProductEvent('agendamento_criado', {
           origem: 'dashboard',
@@ -509,6 +511,12 @@ export function useAppointments(
             locale === 'en'
               ? 'Booking cancelled. The customer was notified by email.'
               : 'Marcação cancelada. O cliente foi avisado por email.',
+          );
+        } else if (payload.emailSkipped === true) {
+          toast.success(
+            locale === 'en'
+              ? 'Booking cancelled. No customer email was sent.'
+              : 'Marcação cancelada. Não foi enviado email ao cliente.',
           );
         } else {
           toast.warning(
