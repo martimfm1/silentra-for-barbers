@@ -54,18 +54,23 @@ function getStorageUrl(
     : null;
 }
 
-const formatDisplayPrice = (rawPrice: unknown): string => {
-  if (rawPrice === null || rawPrice === undefined || rawPrice === '')
-    return '15.00€';
-  if (typeof rawPrice === 'number')
-    return Number.isFinite(rawPrice) ? `${rawPrice.toFixed(2)}€` : '15.00€';
-  if (typeof rawPrice === 'string') {
-    const parsed = parseFloat(
-      rawPrice.replace(',', '.').replace(/[^0-9.]/g, ''),
-    );
-    if (Number.isFinite(parsed)) return `${parsed.toFixed(2)}€`;
-  }
-  return '15.00€';
+const formatDisplayPrice = (
+  rawPrice: unknown,
+  locale: string,
+): string | null => {
+  if (rawPrice === null || rawPrice === undefined || rawPrice === '') return null;
+  const parsed =
+    typeof rawPrice === 'number'
+      ? rawPrice
+      : typeof rawPrice === 'string'
+        ? Number.parseFloat(rawPrice.replace(',', '.').replace(/[^0-9.]/g, ''))
+        : Number.NaN;
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+  }).format(parsed);
 };
 
 export const ShopCard: React.FC<ShopCardProps> = ({
@@ -120,8 +125,8 @@ export const ShopCard: React.FC<ShopCardProps> = ({
       <div className="h-72 w-full animate-pulse rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4" />
     );
 
-  const hasRating = ratingValue > 0;
-  const displayPrice = formatDisplayPrice(shop.price);
+  const hasRating = ratingValue > 0 && totalReviews > 0;
+  const displayPrice = formatDisplayPrice(shop.price, locale);
 
   return (
     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/75 shadow-xl shadow-black/10 backdrop-blur-3xl transition-colors sm:hover:border-white/25">
@@ -161,15 +166,19 @@ export const ShopCard: React.FC<ShopCardProps> = ({
               />
             </div>
             <div className="flex min-h-9 shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-zinc-950/90 px-2.5 py-1 text-xs font-semibold shadow-sm">
-              <Star
-                className={`h-3.5 w-3.5 ${hasRating ? 'fill-white text-white' : 'text-zinc-600'}`}
-              />
-              <span className={hasRating ? 'text-white' : 'text-zinc-400'}>
-                {ratingValue.toFixed(1)}
-              </span>
-              <span className="text-[10px] font-normal text-zinc-500">
-                ({totalReviews})
-              </span>
+              {hasRating ? (
+                <>
+                  <Star className="h-3.5 w-3.5 fill-white text-white" />
+                  <span className="text-white">{ratingValue.toFixed(1)}</span>
+                  <span className="text-[10px] font-normal text-zinc-500">
+                    ({totalReviews})
+                  </span>
+                </>
+              ) : (
+                <span className="text-[10px] text-zinc-400">
+                  {locale === 'pt' ? 'Novo' : 'New'}
+                </span>
+              )}
             </div>
           </div>
           <div className="space-y-2.5">
@@ -229,12 +238,20 @@ export const ShopCard: React.FC<ShopCardProps> = ({
       </button>
       <div className="mt-auto grid grid-cols-1 gap-3 border-t border-white/10 bg-zinc-950/50 p-3.5 sm:grid-cols-[1fr_auto] sm:items-end sm:p-5">
         <div className="min-w-0">
-          <span className="block text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-            A partir de
-          </span>
-          <span className="text-base font-extrabold text-white sm:text-lg">
-            {displayPrice}
-          </span>
+          {displayPrice ? (
+            <>
+              <span className="block text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                {locale === 'pt' ? 'A partir de' : 'From'}
+              </span>
+              <span className="text-base font-extrabold text-white sm:text-lg">
+                {displayPrice}
+              </span>
+            </>
+          ) : (
+            <span className="text-xs font-medium text-zinc-500">
+              {locale === 'pt' ? 'Consultar preços' : 'Prices on request'}
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
           <button
@@ -246,7 +263,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-semibold text-zinc-200 transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:w-auto"
           >
             <Eye className="h-3.5 w-3.5 text-zinc-400" />
-            <span>Detalhes</span>
+            <span>{locale === 'pt' ? 'Detalhes' : 'Details'}</span>
           </button>
           <button
             type="button"
@@ -256,7 +273,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
             }}
             className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-white px-3.5 text-xs font-bold text-zinc-950 transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:w-auto"
           >
-            <span>Agendar</span>
+            <span>{locale === 'pt' ? 'Agendar' : 'Book'}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>

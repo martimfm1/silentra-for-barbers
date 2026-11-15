@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import {
-  CheckCircle2,
-  CircleHelp,
-  ShieldCheck,
-  ArrowRight,
-} from 'lucide-react';
-import Link from 'next/link';
+import { CheckCircle2, CircleHelp, ShieldCheck } from 'lucide-react';
 import { SiteNavbar } from '@/components/site-navbar';
 import { PricingSection } from '@/components/hero/pricing-section';
 import { PlanComparison } from '@/components/billing/plan-comparison';
@@ -36,11 +30,11 @@ const faqs = [
   ],
   [
     'Como funciona a oferta do Pro?',
-    'Novos utilizadores elegíveis recebem a oferta aplicável no checkout. A primeira cobrança só acontece de acordo com as condições apresentadas durante a compra.',
+    'Novos utilizadores elegíveis podem ter o primeiro mês de Pro grátis numa subscrição mensal. A elegibilidade e o valor a pagar são confirmados no checkout antes de concluir.',
   ],
   [
     'Como são tratados os pagamentos?',
-    'Os pagamentos, métodos de pagamento e faturas são processados com segurança pela Stripe através do checkout da Silentra.',
+    'O método disponível é indicado antes de confirmares. No modo manual, recebes as instruções ou o link de pagamento depois de o pedido ser analisado; quando a Stripe está ativa, o pagamento é concluído no checkout seguro.',
   ],
   [
     'O Enterprise inclui uma landing page e domínio?',
@@ -59,11 +53,11 @@ const englishFaqs = [
   ],
   [
     'How does the Pro offer work?',
-    'Eligible new users receive the applicable offer during checkout. The first charge only takes place under the terms shown at purchase.',
+    'Eligible new users may receive their first month of Pro free on a monthly subscription. Eligibility and the amount due are confirmed in checkout before you proceed.',
   ],
   [
     'How are payments handled?',
-    'Payments, payment methods and invoices are securely processed by Stripe through Silentra checkout.',
+    'The available payment method is shown before you confirm. With manual billing, Silentra reviews your request and sends payment instructions or a link; when Stripe is enabled, payment is completed in secure checkout.',
   ],
   [
     'Does Enterprise include a landing page and domain?',
@@ -92,13 +86,13 @@ export default async function PlansPage() {
             </span>
             <h1 className="mt-5 text-[2.45rem] font-semibold leading-[1] tracking-[-0.055em] sm:text-5xl">
               {english
-                ? 'Choose a plan. Compare. Check out.'
-                : 'Escolhe o plano. Compara. Faz o checkout.'}
+                ? 'One platform for your barbershop.'
+                : 'Tudo o que a tua barbearia precisa, num só lugar.'}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
               {english
-                ? 'Compare all Silentra for Barbers plans here and start checkout whenever you are ready.'
-                : 'Esta é a página de decisão da Silentra for Barbers. Aqui encontras a comparação completa e, quando estiveres pronto, inicias o checkout.'}
+                ? 'Manage appointments, customers, your team and growth tools. Compare what each plan unlocks before choosing.'
+                : 'Gere marcações, clientes, equipa e ferramentas de crescimento. Compara o que cada plano desbloqueia antes de escolher.'}
             </p>
             <div className="mt-6 grid gap-2 text-xs text-zinc-500 sm:flex sm:flex-wrap sm:gap-x-5">
               <span className="inline-flex items-center gap-2">
@@ -127,37 +121,8 @@ export default async function PlansPage() {
           <PricingSection destination="checkout" showDecisionHeader={false} />
         </section>
 
-        <section
-          id="comparacao"
-          className="glassmorphism mt-10 scroll-mt-24 rounded-[2rem] border border-white/10 bg-white/[0.02] p-5 sm:mt-14 sm:p-8"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                {english ? 'Full comparison' : 'Comparação completa'}
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-white sm:text-3xl">
-                {english
-                  ? 'Review your choice before you buy.'
-                  : 'Confirma a decisão antes de comprar.'}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                {english
-                  ? 'Compare features and limits in one view, then return to the cards above to check out.'
-                  : 'Compara funcionalidades e limites numa única vista. Depois volta aos cartões acima para iniciar o checkout.'}
-              </p>
-            </div>
-            <Link
-              href="#precos"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.07]"
-            >
-              {english ? 'Back to plans' : 'Voltar aos planos'}{' '}
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-          <div className="mt-7 overflow-x-auto">
-            <PlanComparison />
-          </div>
+        <section id="comparacao" className="mt-10 scroll-mt-24 sm:mt-14">
+          <PlanComparison />
         </section>
 
         <section className="mt-10 sm:mt-14">
@@ -185,32 +150,6 @@ export default async function PlansPage() {
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{answer}</p>
               </article>
             ))}
-          </div>
-        </section>
-        <section className="mt-10 glassmorphism rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:mt-14 sm:p-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300/80">
-                {english ? 'Next step' : 'Próximo passo'}
-              </p>
-              <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
-                {english
-                  ? 'Choose a plan above and continue to checkout.'
-                  : 'Escolhe um plano acima e continua para o checkout.'}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-zinc-500">
-                {english
-                  ? 'Checkout is the only payment step. Your subscription is then linked to the barbershop.'
-                  : 'O checkout é a única etapa de pagamento; depois a subscrição fica associada à barbearia.'}
-              </p>
-            </div>
-            <Link
-              href="#precos"
-              className="inline-flex min-h-12 items-center justify-center gap-2 bg-white px-5 text-sm font-semibold text-zinc-950"
-            >
-              {english ? 'Choose a plan' : 'Escolher plano'}{' '}
-              <ArrowRight className="size-4" />
-            </Link>
           </div>
         </section>
       </main>

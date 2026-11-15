@@ -170,7 +170,7 @@ export function SearchFilterBar({
           </div>
 
           <label className="sr-only" htmlFor="marketplace-date">
-            Escolher data
+            {t('directory.day')}
           </label>
           <input
             id="marketplace-date"
@@ -216,12 +216,12 @@ export function SearchFilterBar({
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                   ) : null}
                   {pill === 'All'
-                    ? 'Todas'
+                    ? t('directory.all')
                     : pill === 'Near Me'
                       ? userLocation
-                        ? 'Perto de si'
-                        : 'Perto de mim'
-                      : 'Melhor avaliadas'}
+                        ? t('directory.nearYou')
+                        : t('directory.nearMe')
+                      : t('directory.topRated')}
                 </button>
               );
             })}

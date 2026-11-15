@@ -21,21 +21,26 @@ const COPY = {
   pro: {
     name: 'Barbers Pro',
     description:
-      'Para barbearias que querem crescer com CRM, automações e marketing.',
+      'Para equipas até 5 profissionais que querem fidelizar clientes e automatizar a operação.',
     features: [
-      'CRM e clientes',
-      'Campanhas e automações',
-      'Fidelização e estatísticas',
+      'Até 5 profissionais e gestão de equipa',
+      'CRM avançado, segmentos e fidelização',
+      'Lembretes, follow-ups e automações de email',
+      'Analytics, relatórios avançados e pré-pagamento MB WAY',
+      'Controlo de visibilidade no diretório',
     ],
   },
   enterprise: {
     name: 'Barbers Enterprise',
     description:
-      'Para operações maiores, várias localizações e gestão avançada.',
+      'Para operações com profissionais e localizações ilimitados e gestão empresarial.',
     features: [
-      'Equipas e localizações',
-      'POS e stock',
-      'Permissões e gestão avançada',
+      'Profissionais e localizações ilimitados',
+      'Lista de espera e recuperação automática de vagas',
+      'POS, stock, comissões e relatórios empresariais',
+      'Dashboard global e permissões avançadas',
+      'Landing page e endereço público Silentra incluídos',
+      'Site próprio com ativação única de 50 €',
     ],
   },
 } as const;
@@ -44,21 +49,26 @@ const COPY_EN = {
   pro: {
     name: 'Barbers Pro',
     description:
-      'For barbershops ready to grow with CRM, automation and marketing.',
+      'For teams of up to 5 barbers that want to retain customers and automate operations.',
     features: [
-      'CRM and customers',
-      'Campaigns and automation',
-      'Loyalty and analytics',
+      'Up to 5 professionals and team management',
+      'Advanced CRM, segments and loyalty',
+      'Reminders, follow-ups and email automations',
+      'Analytics, advanced reports and manual MB WAY prepayment',
+      'Directory visibility controls',
     ],
   },
   enterprise: {
     name: 'Barbers Enterprise',
     description:
-      'For larger operations, multiple locations and advanced management.',
+      'For operations with unlimited professionals and locations and business-grade management.',
     features: [
-      'Teams and locations',
-      'POS and inventory',
-      'Advanced permissions and management',
+      'Unlimited professionals and locations',
+      'Waitlist and automatic cancelled-slot recovery',
+      'POS, inventory, commissions and business reports',
+      'Global dashboard and advanced permissions',
+      'Landing page and public Silentra address included',
+      'Custom website with a one-time €50 setup fee',
     ],
   },
 } as const;
