@@ -35,7 +35,7 @@ begin
     raise exception 'not_authenticated' using errcode = '42501';
   end if;
 
-  v_input := upper(regexp_replace(trim(coalesce(p_code, '')), '\\s+', '', 'g'));
+  v_input := upper(regexp_replace(trim(coalesce(p_code, '')), '\s+', '', 'g'));
 
   if v_input ~ '^BARB-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$' then
     null;
