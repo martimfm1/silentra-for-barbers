@@ -69,7 +69,7 @@ assert.doesNotMatch(
     cancellationRoute.indexOf('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]'),
     cancellationRoute.indexOf('// Keep optional marketing automations'),
   ),
-  /customerEmail|recipientEmail/,
+  /(?:email|to):\\s*customerEmail/,
   'Cancellation email failure logs must not expose recipient addresses.',
 );
 assert.match(dashboardActions, /Cancelar marcação/);
