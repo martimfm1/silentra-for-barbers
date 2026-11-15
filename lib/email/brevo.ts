@@ -1,12 +1,15 @@
 export type EmailAttachment = { content: string; name: string };
 export type EmailSendResult =
-  { success: true; messageId?: string } | { success: false; error: string };
+  | { success: true; messageId?: string }
+  | { success: false; error: string; errorCode: string };
+
 function getBrevoConfig() {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL ?? process.env.BREVO_FROM_EMAIL;
   if (!apiKey || !senderEmail) throw new Error('Brevo is not configured.');
   return { apiKey, senderEmail };
 }
+
 function sanitizeSenderName(name: string) {
   return (
     name
@@ -16,6 +19,7 @@ function sanitizeSenderName(name: string) {
       .slice(0, 70) || 'Silentra'
   );
 }
+
 export async function sendBrevoEmail(input: {
   to: string;
   toName?: string;
@@ -29,22 +33,34 @@ export async function sendBrevoEmail(input: {
     return {
       success: false,
       error: 'Email recipient, subject and content are required.',
+      errorCode: 'EMAIL_INPUT_INVALID',
     };
+
+  let config: ReturnType<typeof getBrevoConfig>;
   try {
-    const { apiKey, senderEmail } = getBrevoConfig();
+    config = getBrevoConfig();
+  } catch {
+    return {
+      success: false,
+      error: 'Brevo is not configured.',
+      errorCode: 'BREVO_CONFIGURATION_MISSING',
+    };
+  }
+
+  try {
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        'api-key': apiKey,
+        'api-key': config.apiKey,
       },
       body: JSON.stringify({
         sender: {
           name: sanitizeSenderName(
             input.senderName ?? process.env.BREVO_FROM_NAME ?? 'Silentra',
           ),
-          email: senderEmail,
+          email: config.senderEmail,
         },
         to: [
           {
@@ -70,20 +86,28 @@ export async function sendBrevoEmail(input: {
           : {}),
       }),
     });
-    const data = (await response.json()) as {
-      messageId?: string;
-      message?: string;
-    };
+
+    const data = (await response.json().catch(() => null)) as
+      | { messageId?: string; message?: string }
+      | null;
+
     if (!response.ok)
       return {
         success: false,
-        error: data.message ?? 'Brevo email request failed.',
+        error: data?.message ?? 'Brevo email request failed.',
+        errorCode: `BREVO_HTTP_${response.status}`,
       };
-    return { success: true, messageId: data.messageId };
+
+    return { success: true, messageId: data?.messageId };
   } catch (error) {
     console.error('[BREVO_EMAIL_ERROR]', {
       reason: error instanceof Error ? error.name : 'UNKNOWN',
+      errorCode: 'BREVO_NETWORK_ERROR',
     });
-    return { success: false, error: 'Unable to send email.' };
+    return {
+      success: false,
+      error: 'Unable to send email.',
+      errorCode: 'BREVO_NETWORK_ERROR',
+    };
   }
 }

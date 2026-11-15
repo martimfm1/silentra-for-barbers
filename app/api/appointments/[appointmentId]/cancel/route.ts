@@ -212,7 +212,15 @@ async function DELETE__unobserved(
         };
 
     if (!emailResult.success) {
-      console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]');
+      console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]', {
+        appointmentId: appointment.id,
+        reasonCode:
+          'errorCode' in emailResult
+            ? emailResult.errorCode
+            : 'EMAIL_SEND_FAILED',
+        hasRecipient: Boolean(customerEmail),
+        // Never log the recipient or a provider response that could contain PII.
+      });
     }
 
     // Keep optional marketing automations separate from the mandatory
