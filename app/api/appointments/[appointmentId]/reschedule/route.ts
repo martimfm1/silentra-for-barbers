@@ -401,17 +401,14 @@ async function PATCH__unobserved(
       appointment.client_id
         ? admin
             .from('users')
-            .select('email,name_complete')
+            .select('name_complete')
             .eq('id', appointment.client_id)
             .eq('barbershop_id', barbershopId)
             .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
     ]);
 
-    const recipientEmail =
-      appointment.manual_email?.trim().toLowerCase() ||
-      client?.email?.trim().toLowerCase() ||
-      '';
+    const recipientEmail = appointment.manual_email?.trim().toLowerCase() || '';
     const recipientName =
       appointment.manual_name?.trim() ||
       client?.name_complete?.trim() ||
@@ -453,7 +450,7 @@ async function PATCH__unobserved(
       },
     });
     return NextResponse.json(
-      { success: true, appointment: updated, notificationSent },
+      { success: true, appointment: updated, notificationSent, notificationSkipped: !recipientEmail },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

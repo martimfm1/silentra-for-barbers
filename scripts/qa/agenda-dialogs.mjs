@@ -133,10 +133,16 @@ assert.ok(
   bookingForm.includes('pb-[calc(0.875rem+env(safe-area-inset-bottom))]'),
 );
 assert.ok(bookingForm.includes('type="search"'));
-assert.match(bookingForm, /id="booking-email"[\s\S]*?type="email"[\s\S]*?required/);
-assert.match(hook, /manual_email: manualEmail\.trim\(\)\.toLowerCase\(\)/);
-assert.match(appointmentsService, /if \(!clientEmail && typeof client\?\.email === 'string'\)/);
-assert.match(hook, /\/api\/appointments\/\$\{encodeURIComponent\(firstCreatedAppointment\.id\)\}\/email/);
+assert.match(bookingForm, /id="booking-email"[\s\S]*?type="email"/);
+const bookingEmailInput = bookingForm.match(/<input[\s\S]*?id="booking-email"[\s\S]*?\/>/)?.[0] ?? '';
+assert.ok(bookingEmailInput, 'Customer email input must exist.');
+assert.doesNotMatch(bookingEmailInput, /\brequired\b/);
+assert.match(hook, /manualEmail\.trim\(\) && !CUSTOMER_EMAIL_PATTERN\.test\(manualEmail\.trim\(\)\)/);
+assert.match(hook, /manual_email: manualEmail\.trim\(\)\.toLowerCase\(\) \|\| null/);
+assert.match(appointmentsService, /const clientEmail = payload\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| null/);
+assert.doesNotMatch(appointmentsService, /clientEmail = client\.email/);
+assert.match(hook, /firstCreatedAppointment\?\.id && manualEmail\.trim\(\)/);
+assert.match(hook, /payload\.emailSkipped === true/);
 assert.match(appointmentEmailRoute, /requireTenantAuthorization/);
 assert.match(appointmentEmailRoute, /sendBookingConfirmationEmail/);
 assert.match(appointmentEmailRoute, /emailSent: true/);

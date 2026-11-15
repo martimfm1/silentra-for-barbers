@@ -43,19 +43,7 @@ export const appointmentService = {
     manual_email?: string | null;
     recurrence_series_id?: string | null;
   }) {
-    let clientEmail = payload.manual_email?.trim().toLowerCase() || null;
-    if (payload.client_id) {
-      const { data: client } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', payload.client_id)
-        .eq('barbershop_id', payload.barbershop_id)
-        .eq('role', 'client')
-        .maybeSingle();
-      if (!clientEmail && typeof client?.email === 'string') {
-        clientEmail = client.email.trim().toLowerCase() || clientEmail;
-      }
-    }
+    const clientEmail = payload.manual_email?.trim().toLowerCase() || null;
 
     let resolvedClientId = payload.client_id;
     if (!resolvedClientId && clientEmail && payload.manual_phone?.trim()) {

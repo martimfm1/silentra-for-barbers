@@ -13,6 +13,11 @@ const [
   customerPortalAppointments,
   appointmentChangeNotifications,
   emailTransport,
+  rescheduleRoute,
+  confirmationRoute,
+  appointmentEmailRoute,
+  appointmentReminderRoute,
+  appointmentAutomations,
 ] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
@@ -25,6 +30,11 @@ const [
   readFile('app/api/customer-portal/appointments/[appointmentId]/route.ts', 'utf8'),
   readFile('lib/brevo/appointment-change-notifications.ts', 'utf8'),
   readFile('lib/email/brevo.ts', 'utf8'),
+  readFile('app/api/appointments/[appointmentId]/reschedule/route.ts', 'utf8'),
+  readFile('app/api/appointments/[appointmentId]/confirm/route.ts', 'utf8'),
+  readFile('app/api/appointments/[appointmentId]/email/route.ts', 'utf8'),
+  readFile('app/api/cron/appointment-reminders/route.ts', 'utf8'),
+  readFile('lib/automations/dispatch-appointment.ts', 'utf8'),
 ]);
 assert.match(bookingRoute, /notifyBarbersOfNewBooking\(/);
 assert.match(bookingRoute, /professionalId:\s*normalizedProfessionalId/);
@@ -52,7 +62,20 @@ assert.match(cancellationRoute, /requireTenantAuthorization\(request, ROLES\)/);
 assert.match(cancellationRoute, /\.update\([\s\S]*?status: 'cancelled'/);
 assert.match(cancellationRoute, /cancelled_at: cancelledAt/);
 assert.match(cancellationRoute, /sendAppointmentCancellationEmail\(/);
-assert.match(cancellationRoute, /emailSent: emailResult\.success/);
+assert.match(cancellationRoute, /emailSent: emailResult\?\.success \?\? false/);
+assert.match(cancellationRoute, /emailSkipped: !customerEmail/);
+assert.doesNotMatch(cancellationRoute, /clientResult\.data\?\.email/);
+assert.match(rescheduleRoute, /const recipientEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
+assert.match(rescheduleRoute, /notificationSkipped: !recipientEmail/);
+assert.doesNotMatch(rescheduleRoute, /client\?\.email/);
+assert.match(confirmationRoute, /const recipientEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| null/);
+assert.doesNotMatch(confirmationRoute, /clientRelation\?\.email/);
+assert.match(appointmentEmailRoute, /const email = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
+assert.doesNotMatch(appointmentEmailRoute, /clientResult\.data\?\.email/);
+assert.match(appointmentEmailRoute, /emailSkipped: true/);
+assert.match(appointmentReminderRoute, /const recipient = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
+assert.doesNotMatch(appointmentReminderRoute, /client\?\.email/);
+assert.doesNotMatch(appointmentAutomations, /client\?\.email/);
 assert.match(cancellationEmail, /A tua marcação foi cancelada pela barbearia/);
 assert.match(
   cancellationEmail,

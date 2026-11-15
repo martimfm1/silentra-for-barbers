@@ -69,11 +69,10 @@ export async function dispatchAppointmentAutomations(
     if (clientId) {
       const { data: client } = await admin
         .from('users')
-        .select('email,name_complete')
+        .select('name_complete')
         .eq('id', clientId)
         .eq('barbershop_id', event.barbershopId)
         .maybeSingle();
-      email = email || client?.email?.trim().toLowerCase() || '';
       name = name || client?.name_complete?.trim() || 'Cliente';
     } else {
       const { data: appointment } = await admin

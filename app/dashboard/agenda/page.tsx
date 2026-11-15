@@ -371,6 +371,12 @@ export default function AgendaPage() {
               ? 'Booking updated and email sent to the customer.'
               : 'Marcação alterada e email enviado ao cliente.',
           );
+        } else if (payload.notificationSkipped === true) {
+          toast.success(
+            locale === 'en'
+              ? 'Booking updated. No customer email was sent.'
+              : 'Marcação alterada. Não foi enviado email ao cliente.',
+          );
         } else {
           toast.warning(
             locale === 'en'

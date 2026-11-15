@@ -153,7 +153,7 @@ async function GET__unobserved(request: Request) {
         const { data: client, error: clientError } = appointment.client_id
           ? await admin
               .from('users')
-              .select('email,name_complete')
+              .select('name_complete')
               .eq('id', appointment.client_id)
               .eq('barbershop_id', event.barbershop_id)
               .maybeSingle()
@@ -168,12 +168,9 @@ async function GET__unobserved(request: Request) {
           continue;
         }
 
-        const recipient =
-          appointment.manual_email?.trim().toLowerCase() ||
-          client?.email?.trim().toLowerCase() ||
-          '';
+        const recipient = appointment.manual_email?.trim().toLowerCase() || '';
         if (!recipient) {
-          await complete('No customer email address');
+          await complete();
           skipped += 1;
           continue;
         }

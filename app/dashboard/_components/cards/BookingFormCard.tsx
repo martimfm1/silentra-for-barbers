@@ -468,7 +468,6 @@ export function BookingForm({
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                required
                 maxLength={254}
                 value={formData.email}
                 onFocus={() => setShowClientResults(false)}
