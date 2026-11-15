@@ -215,9 +215,11 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] PR #271 merged; migration `20261115154352_fix_production_audit_regressions` aplicada no Supabase de produção.
 - [x] `join_barbershop_with_invite`: referência `users.role` qualificada; `anon` não executa, `authenticated` executa.
 - [x] `claim_subscription_expiry_reminder_events`: conflito usa a constraint nomeada; execução reservada a `service_role`. Chamada dentro de transação revertida passou sem erro.
+- [x] `join_barbershop_with_invite`: teste transacional com JWT subject sintético devolveu o erro de validação esperado (`invalid_code`), sem SQLSTATE 42702 e com ROLLBACK.
 - [x] `set_manual_booking_auto_confirmation`: execução anónima removida; autenticados mantidos.
 - [x] `apply_manual_booking_confirmation_setting`: continua associado ao trigger de INSERT em appointments, mas sem EXECUTE direto para qualquer role cliente.
 - [x] Defaults de funções do owner `postgres` em `public`: sem EXECUTE de PUBLIC/anon para novas funções.
+- [x] Auditoria das RPCs SECURITY DEFINER: 17 funções executáveis por `authenticated`, 0 por `anon`; as 17 incluem `auth.uid()` e têm `search_path` fixo. Os endpoints e verificações de tenant/role foram revistos, incluindo onboarding, convites, equipa, agenda, MB WAY e configuração.
 - [x] Trigger `trigger_notify_new_review` desativado. A tabela contém apenas 4 entradas antigas `new_review`; nenhuma foi eliminada. A aplicação não contém consumidor para esse tipo de entrada.
 - [x] PR #272 merged: CI usa Node.js 24.x, alinhado com Vercel; foi acrescentado `qa:env-contract` sem colocar secrets de produção em runners de PR.
 - [x] CI #3154 passou: TypeScript, lint, environment contracts, build e smoke QA.
