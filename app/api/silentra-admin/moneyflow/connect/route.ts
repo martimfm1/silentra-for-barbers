@@ -1,6 +1,8 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
@@ -47,12 +49,11 @@ export async function GET() {
       pendingEvents: pending.count ?? 0,
     });
   } catch (error) {
+    const unauthorized = error instanceof Error && error.name === 'PlatformAdminError';
     return json({
       ok: false,
-      error: error instanceof Error && error.name === 'PlatformAdminError'
-        ? 'Acesso não autorizado.'
-        : 'Não foi possível consultar a ligação ao MoneyFlow.',
-    }, 403);
+      error: unauthorized ? 'Acesso não autorizado.' : 'Não foi possível consultar a ligação ao MoneyFlow.',
+    }, unauthorized ? 403 : 500);
   }
 }
 
@@ -75,15 +76,20 @@ export async function POST(request: Request) {
       return json({ ok: false, error: 'Código de ligação inválido.' }, 400);
     }
 
+    const eventSecret = randomBytes(32).toString('hex');
+    const eventSecretHash = createHash('sha256')
+      .update(eventSecret)
+      .digest('hex');
+
     const response = await fetch(
-      `${MONEYFLOW_API_URL}/api/integrations/silentra/claim`,
+      `${MONEYFLOW_API_URL}/api/integrations/silentra-for-barbers/pair`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
         },
-        body: JSON.stringify({ pairingToken }),
+        body: JSON.stringify({ pairingToken, eventSecretHash }),
         cache: 'no-store',
         signal: AbortSignal.timeout(10_000),
       },
@@ -94,7 +100,6 @@ export async function POST(request: Request) {
       error?: string;
       accountName?: string;
       currencyCode?: string;
-      syncToken?: string;
     } | null;
 
     if (!response.ok || payload?.ok !== true) {
@@ -105,8 +110,6 @@ export async function POST(request: Request) {
     }
 
     if (
-      typeof payload.syncToken !== 'string' ||
-      !/^[a-f0-9]{64}$/i.test(payload.syncToken) ||
       typeof payload.accountName !== 'string' ||
       payload.currencyCode !== 'EUR'
     ) {
@@ -118,7 +121,7 @@ export async function POST(request: Request) {
       .from('moneyflow_sync_credentials')
       .upsert({
         integration_key: 'silentra-platform',
-        sync_token: payload.syncToken,
+        sync_token: eventSecret,
         account_name: payload.accountName.slice(0, 120),
         currency_code: 'EUR',
         status: 'connected',
@@ -128,6 +131,16 @@ export async function POST(request: Request) {
       }, { onConflict: 'integration_key' });
 
     if (error) {
+      await fetch(
+        `${MONEYFLOW_API_URL}/api/integrations/silentra-for-barbers/disconnect`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventSecret }),
+          cache: 'no-store',
+          signal: AbortSignal.timeout(5_000),
+        },
+      ).catch(() => null);
       return json({ ok: false, error: 'A ligação foi validada, mas não foi possível guardar a credencial.' }, 500);
     }
 
@@ -140,14 +153,11 @@ export async function POST(request: Request) {
       lastSyncedAt: null,
     });
   } catch (error) {
-    const isUnauthorized =
-      error instanceof Error && error.name === 'PlatformAdminError';
+    const unauthorized = error instanceof Error && error.name === 'PlatformAdminError';
     return json({
       ok: false,
-      error: isUnauthorized
-        ? 'Acesso não autorizado.'
-        : 'Não foi possível ligar ao MoneyFlow.',
-    }, isUnauthorized ? 403 : 502);
+      error: unauthorized ? 'Acesso não autorizado.' : 'Não foi possível ligar ao MoneyFlow.',
+    }, unauthorized ? 403 : 502);
   }
 }
 
@@ -167,34 +177,37 @@ export async function DELETE(request: Request) {
     }
 
     const response = await fetch(
-      `${MONEYFLOW_API_URL}/api/integrations/silentra/payments`,
+      `${MONEYFLOW_API_URL}/api/integrations/silentra-for-barbers/disconnect`,
       {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${credential.sync_token}` },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventSecret: credential.sync_token }),
         cache: 'no-store',
         signal: AbortSignal.timeout(10_000),
       },
     );
 
-    if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+    if (!response.ok || payload?.ok !== true) {
       return json({ ok: false, error: 'O MoneyFlow não confirmou a revogação da ligação.' }, 502);
     }
 
     const { error } = await admin
       .from('moneyflow_sync_credentials')
-      .update({ status: 'disconnected', sync_token: '0'.repeat(64), updated_at: new Date().toISOString() })
+      .update({
+        status: 'disconnected',
+        sync_token: '0'.repeat(64),
+        updated_at: new Date().toISOString(),
+      })
       .eq('integration_key', 'silentra-platform');
 
     if (error) return json({ ok: false, error: 'Não foi possível atualizar o estado da ligação.' }, 500);
     return json({ ok: true, connected: false });
   } catch (error) {
-    const isUnauthorized =
-      error instanceof Error && error.name === 'PlatformAdminError';
+    const unauthorized = error instanceof Error && error.name === 'PlatformAdminError';
     return json({
       ok: false,
-      error: isUnauthorized
-        ? 'Acesso não autorizado.'
-        : 'Não foi possível desligar o MoneyFlow.',
-    }, isUnauthorized ? 403 : 502);
+      error: unauthorized ? 'Acesso não autorizado.' : 'Não foi possível desligar o MoneyFlow.',
+    }, unauthorized ? 403 : 502);
   }
 }
