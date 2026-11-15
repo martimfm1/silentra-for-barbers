@@ -143,6 +143,68 @@ async function processCheckoutSessionCompleted(
   );
 }
 
+async function enqueueMoneyFlowPaidInvoice(invoice: Stripe.Invoice) {
+  // MoneyFlow represents only actual platform subscription income. Never sync
+  // tenant appointment/POS revenue or unrelated one-off Stripe invoices.
+  if (!invoice.subscription || Number(invoice.amount_paid ?? 0) <= 0) return;
+  if (String(invoice.currency ?? '').toUpperCase() !== 'EUR') return;
+
+  const customerId =
+    typeof invoice.customer === 'string'
+      ? invoice.customer
+      : invoice.customer?.id ?? null;
+  if (!customerId) return;
+
+  const admin = createAdminClient();
+  const { data: billingAccount, error: billingAccountError } = await admin
+    .from('barbershop_billing_accounts')
+    .select('barbershop_id')
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle();
+
+  if (billingAccountError) {
+    throw new BillingError(
+      'Could not resolve the platform subscription billing account.',
+      'DB_READ_FAILED',
+    );
+  }
+
+  // This is not a platform subscription customer managed by this project.
+  if (!billingAccount) return;
+
+  const invoiceId = invoice.id;
+  const eventKey = `stripe-invoice:${invoiceId}`;
+  const paidAt = invoice.status_transitions?.paid_at;
+  const occurredAt = new Date(
+    (paidAt ?? invoice.created) * 1000,
+  ).toISOString();
+  const amount = Math.round(Number(invoice.amount_paid)) / 100;
+
+  const { error } = await admin.from('moneyflow_sync_outbox').upsert(
+    {
+      event_key: eventKey,
+      event_type: 'subscription_payment',
+      payload: {
+        eventId: eventKey,
+        amount,
+        currency: 'EUR',
+        occurredAt,
+        description: 'Subscrição Silentra for Barbers',
+        externalReference: invoiceId,
+      },
+      status: 'pending',
+    },
+    { onConflict: 'event_key', ignoreDuplicates: true },
+  );
+
+  if (error) {
+    throw new BillingError(
+      'Could not queue the confirmed platform subscription payment for MoneyFlow.',
+      'DB_WRITE_FAILED',
+    );
+  }
+}
+
 async function POST__unobserved(request: Request) {
   const signature = request.headers.get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -214,6 +276,8 @@ async function POST__unobserved(request: Request) {
         ].includes(event.type)
       ) {
         await BarbershopStripeService.processWebhookEvent(event);
+      } else if (event.type === 'invoice.paid') {
+        await enqueueMoneyFlowPaidInvoice(event.data.object as Stripe.Invoice);
       }
     } catch (error) {
       await markWebhookFailed(event.id, error);
