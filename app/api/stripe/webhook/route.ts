@@ -144,6 +144,14 @@ async function processCheckoutSessionCompleted(
 }
 
 async function enqueueMoneyFlowStripeInvoice(invoice: Stripe.Invoice) {
+  const subscriptionBillingReasons = new Set([
+    'subscription_create',
+    'subscription_cycle',
+    'subscription_update',
+    'subscription_threshold',
+  ]);
+  if (!subscriptionBillingReasons.has(invoice.billing_reason ?? '')) return;
+
   const amount = Number(invoice.amount_paid ?? 0) / 100;
   const currency = String(invoice.currency ?? '').toUpperCase();
 
