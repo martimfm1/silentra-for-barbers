@@ -27,6 +27,7 @@ type HistoryItem = {
   amount: number;
   currency: string;
   status: string;
+  status_code: string;
   plan: string;
   date: string;
   issued_at: string;
@@ -191,6 +192,7 @@ async function GET__unobserved() {
         amount: Math.round(Number(document.total) * 100),
         currency: String(document.currency ?? 'EUR').toUpperCase(),
         status: 'Pago',
+        status_code: 'paid',
         plan: `${planLabel(String(document.plan ?? 'subscrição'))} · ${intervalLabel}`,
         date: formatDate(issuedAt),
         issued_at: issuedAt.toISOString(),
@@ -270,6 +272,7 @@ async function GET__unobserved() {
               amount: invoice.amount_paid || invoice.amount_due,
               currency: invoice.currency.toUpperCase(),
               status: stripeStatusLabel(invoice.status),
+              status_code: invoice.status ?? 'issued',
               plan:
                 invoice.lines.data
                   .find((line) => Boolean(line.description))

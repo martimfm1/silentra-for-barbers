@@ -38,194 +38,393 @@ export type ManualPaymentDocument = {
   updated_at: string;
 };
 
-const ascii = (v: string) =>
-  v
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/€/g, 'EUR')
-    .replace(/[\u2013\u2014]/g, '-')
-    .replace(/[^\x20-\x7E]/g, '');
-const esc = (v: string) =>
-  ascii(v).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-const money = (v: number, c: string) =>
-  new Intl.NumberFormat('pt-PT', {
-    style: 'currency',
-    currency: c,
-    minimumFractionDigits: 2,
-  })
-    .format(v)
-    .replace('€', 'EUR');
-const date = (v: string) => {
-  const d = new Date(v);
-  return Number.isNaN(d.getTime())
-    ? '—'
-    : new Intl.DateTimeFormat('pt-PT', { dateStyle: 'long' }).format(d);
-};
-const time = (v: string) => {
-  const d = new Date(v);
-  return Number.isNaN(d.getTime())
-    ? '—'
-    : new Intl.DateTimeFormat('pt-PT', { timeStyle: 'short' }).format(d);
-};
-const plan = (v: string) =>
-  v === 'enterprise' ? 'Barbers Enterprise' : 'Barbers Pro';
-const interval = (v: 'month' | 'year') => (v === 'year' ? 'Anual' : 'Mensal');
-const wrap = (v: string, max = 84) => {
-  const words = ascii(v).split(/\s+/).filter(Boolean),
-    out: string[] = [];
-  let line = '';
-  for (const word of words) {
-    const next = line ? line + ' ' + word : word;
-    if (next.length > max && line) {
-      out.push(line);
-      line = word;
-    } else line = next;
-  }
-  if (line) out.push(line);
-  return out;
+const CP1252: Record<string, number> = {
+  '€': 0x80,
+  '‚': 0x82,
+  'ƒ': 0x83,
+  '„': 0x84,
+  '…': 0x85,
+  '†': 0x86,
+  '‡': 0x87,
+  'ˆ': 0x88,
+  '‰': 0x89,
+  'Š': 0x8a,
+  '‹': 0x8b,
+  'Œ': 0x8c,
+  'Ž': 0x8e,
+  '‘': 0x91,
+  '’': 0x92,
+  '“': 0x93,
+  '”': 0x94,
+  '•': 0x95,
+  '–': 0x96,
+  '—': 0x97,
+  '˜': 0x98,
+  '™': 0x99,
+  'š': 0x9a,
+  '›': 0x9b,
+  'œ': 0x9c,
+  'ž': 0x9e,
+  'Ÿ': 0x9f,
 };
 
+function toWinAnsi(value: string): string {
+  return Array.from(value)
+    .map((character) => {
+      const custom = CP1252[character];
+      if (custom !== undefined) return String.fromCharCode(custom);
+      const code = character.codePointAt(0) ?? 0;
+      if (code >= 0x20 && code <= 0xff) return String.fromCharCode(code);
+      if (character === '\t' || character === '\n' || character === '\r')
+        return ' ';
+      return '';
+    })
+    .join('');
+}
+
+function escapePdfText(value: string): string {
+  return toWinAnsi(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function money(value: number, currency: string): string {
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const safeCurrency = /^[A-Z]{3}$/i.test(currency) ? currency.toUpperCase() : 'EUR';
+  try {
+    return new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: safeCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(safeValue);
+  } catch {
+    return safeValue.toFixed(2) + ' ' + safeCurrency;
+  }
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? '—'
+    : new Intl.DateTimeFormat('pt-PT', {
+        dateStyle: 'long',
+        timeZone: 'Europe/Lisbon',
+      }).format(date);
+}
+
+function formatTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? '—'
+    : new Intl.DateTimeFormat('pt-PT', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+        timeZone: 'Europe/Lisbon',
+      }).format(date);
+}
+
+function planLabel(value: string): string {
+  switch (value.toLowerCase()) {
+    case 'enterprise':
+      return 'Barbers Enterprise';
+    case 'pro':
+      return 'Barbers Pro';
+    default:
+      return value.trim() || 'Subscrição Silentra';
+  }
+}
+
+function intervalLabel(value: 'month' | 'year'): string {
+  return value === 'year' ? 'Anual' : 'Mensal';
+}
+
+function wrapText(value: string, maxCharacters: number): string[] {
+  const words = toWinAnsi(value).split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const originalWord of words) {
+    let word = originalWord;
+    while (word.length > maxCharacters) {
+      if (current) {
+        lines.push(current);
+        current = '';
+      }
+      lines.push(word.slice(0, maxCharacters));
+      word = word.slice(maxCharacters);
+    }
+    if (!word) continue;
+
+    const next = current ? current + ' ' + word : word;
+    if (next.length > maxCharacters && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) lines.push(current);
+  return lines;
+}
+
 export function generateManualPaymentReceiptPdf(
-  d: ManualPaymentDocument,
+  document: ManualPaymentDocument,
 ): Buffer {
-  const pageW = 595,
-    pageH = 842,
-    left = 48,
-    right = 547;
-  const content: string[] = [];
-  const rect = (
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const left = 48;
+  const right = 547;
+  const width = right - left;
+  const commands: string[] = [];
+
+  const fillRect = (
     x: number,
     y: number,
     w: number,
     h: number,
-    stroke = true,
-    fill = false,
+    color: string,
   ) => {
-    content.push(fill ? '0.97 0.98 0.99 rg' : '1 1 1 rg');
-    content.push(`${x} ${y} ${w} ${h} ${fill ? 're' : 'S'}`);
-    if (fill) content.push('0.88 0.89 0.91 RG 0.5 w');
+    commands.push('q ' + color + ' rg ' + x + ' ' + y + ' ' + w + ' ' + h + ' re f Q');
   };
-  const text = (
+
+  const strokeLine = (
+    x1: number,
+    y: number,
+    x2: number,
+    color = '0.88 0.89 0.91',
+    thickness = 0.7,
+  ) => {
+    commands.push(
+      'q ' + color + ' RG ' + thickness + ' w ' + x1 + ' ' + y + ' m ' + x2 + ' ' + y + ' l S Q',
+    );
+  };
+
+  const drawText = (
     x: number,
     y: number,
     value: string,
     size = 9,
     bold = false,
+    color = '0.13 0.15 0.18',
   ) => {
-    content.push(
-      `BT /${bold ? 'F2' : 'F1'} ${size} Tf 0.12 0.13 0.16 rg ${x} ${y} Td (${esc(value)}) Tj ET`,
+    const safeText = escapePdfText(value);
+    if (!safeText) return;
+    commands.push(
+      'BT /' + (bold ? 'F2' : 'F1') + ' ' + size + ' Tf ' + color + ' rg ' + x + ' ' + y + ' Td (' + safeText + ') Tj ET',
     );
   };
-  const line = (x1: number, y: number, x2: number) =>
-    content.push(`0.86 0.87 0.89 RG 0.6 w ${x1} ${y} m ${x2} ${y} l S`);
 
-  // Header
-  content.push('0.055 0.055 0.07 rg 0 0 595 842 re f');
-  text(left, 785, d.seller_name || 'Silentra', 25, true);
-  text(left, 765, 'Silentra for Barbers', 10, false);
-  text(left, 746, d.seller_website || 'https://silentra.me', 9, false);
-  text(390, 785, 'COMPROVATIVO', 9, true);
-  text(390, 765, 'DE PAGAMENTO', 9, true);
-  text(390, 744, d.document_number, 9, false);
+  const drawRightText = (
+    rightX: number,
+    y: number,
+    value: string,
+    size = 9,
+    bold = false,
+    color = '0.13 0.15 0.18',
+  ) => {
+    const safeText = toWinAnsi(value);
+    const estimatedWidth = safeText.length * size * (bold ? 0.56 : 0.52);
+    drawText(Math.max(left, rightX - estimatedWidth), y, value, size, bold, color);
+  };
 
-  // Main white sheet
-  content.push('1 1 1 rg 40 80 515 625 re f');
-  text(62, 674, 'Comprovativo de pagamento', 18, true);
-  text(62, 655, 'Documento de pagamento emitido pela Silentra.', 9, false);
-  line(62, 638, 533);
+  const drawWrapped = (
+    x: number,
+    y: number,
+    value: string,
+    maxCharacters: number,
+    size = 8,
+    bold = false,
+    color = '0.35 0.37 0.40',
+    maxLines = 6,
+    lineHeight = 12,
+  ) => {
+    const lines = wrapText(value, maxCharacters);
+    const visibleLines = lines.slice(0, maxLines);
+    visibleLines.forEach((line, index) => {
+      const isLastVisibleLine = index === visibleLines.length - 1;
+      const rendered =
+        isLastVisibleLine && lines.length > maxLines
+          ? line.slice(0, Math.max(1, maxCharacters - 3)) + '...'
+          : line;
+      drawText(x, y - index * lineHeight, rendered, size, bold, color);
+    });
+    return visibleLines.length * lineHeight;
+  };
 
-  // Parties
-  text(62, 615, 'EMITIDO POR', 7, true);
-  text(62, 598, 'Silentra', 10, true);
-  text(62, 582, 'Silentra for Barbers', 9, false);
-  text(62, 567, 'https://silentra.me', 8, false);
-  text(300, 615, 'CLIENTE', 7, true);
-  text(300, 598, d.customer_name || d.barbershop_name, 10, true);
-  text(300, 582, d.customer_email, 8, false);
-  if (d.customer_tax_id)
-    text(300, 567, `NIF / VAT: ${d.customer_tax_id}`, 8, false);
+  const label = (x: number, y: number, value: string) =>
+    drawText(x, y, value.toLocaleUpperCase('pt-PT'), 7, true, '0.43 0.46 0.50');
 
-  let y = 535;
-  const address = [
-    d.customer_address_line1,
-    d.customer_address_line2,
-    [d.customer_postal_code, d.customer_city].filter(Boolean).join(' '),
-    d.customer_country,
-  ].filter(Boolean) as string[];
-  for (const value of address) {
-    for (const l of wrap(value, 38)) {
-      text(300, y, l, 8, false);
-      y -= 11;
-    }
-  }
+  const safeCustomerName =
+    document.customer_name?.trim() ||
+    document.customer_email?.trim() ||
+    'Cliente';
+  const safeSellerName = document.seller_name?.trim() || 'Silentra';
+  const safeWebsite = document.seller_website?.trim() || 'https://silentra.me';
+  const safePlan = planLabel(document.plan);
+  const safeDescription =
+    document.description?.trim() ||
+    'Subscrição Silentra for Barbers — ' + safePlan;
+  const paidAt = formatDate(document.issued_at) + ' · ' + formatTime(document.issued_at);
+  const addressLines = [
+    document.customer_address_line1,
+    document.customer_address_line2,
+    [document.customer_postal_code, document.customer_city]
+      .filter(Boolean)
+      .join(' '),
+    document.customer_country,
+  ].filter((value): value is string => Boolean(value?.trim()));
 
-  // Payment metadata card
-  content.push('0.96 0.97 0.98 rg 62 414 471 88 re f');
-  text(78, 481, 'DETALHES DO PAGAMENTO', 7, true);
-  text(78, 460, 'Serviço', 7, false);
-  text(78, 444, 'Silentra for Barbers - ' + plan(d.plan), 9, true);
-  text(315, 460, 'Periodicidade', 7, false);
-  text(315, 444, interval(d.billing_interval), 9, true);
-  text(78, 426, 'Método', 7, false);
-  text(78, 410, 'Pagamento manual', 9, true);
-  text(315, 426, 'Data', 7, false);
-  text(315, 410, `${date(d.issued_at)} às ${time(d.issued_at)}`, 8, true);
+  // White page with a restrained brand header, designed for both screen and print.
+  fillRect(0, 0, pageWidth, pageHeight, '1 1 1');
+  fillRect(0, 730, pageWidth, 112, '0.075 0.09 0.12');
+  fillRect(left, 730, 4, 112, '0.20 0.78 0.58');
 
-  // Totals
-  text(62, 374, 'RESUMO', 7, true);
-  line(62, 361, 533);
-  text(62, 337, d.description, 9, false);
-  text(430, 337, money(d.subtotal, d.currency), 9, false);
-  text(62, 312, 'Subtotal', 8, false);
-  text(430, 312, money(d.subtotal, d.currency), 8, false);
-  text(62, 291, 'Impostos / IVA', 8, false);
-  text(430, 291, money(d.tax_amount, d.currency), 8, false);
-  content.push('0.055 0.055 0.07 rg 62 238 471 39 re f');
-  text(78, 253, 'TOTAL PAGO', 8, true);
-  content.push(
-    `BT /F2 15 Tf 1 1 1 rg 430 250 Td (${esc(money(d.total, d.currency))}) Tj ET`,
-  );
+  drawText(left + 14, 808, 'SILENTRA', 19, true, '1 1 1');
+  drawText(left + 14, 789, 'Silentra for Barbers', 9, false, '0.80 0.83 0.86');
+  drawText(left + 14, 771, safeWebsite, 8, false, '0.67 0.72 0.77');
 
-  // Footer / legal distinction
-  text(62, 210, 'INFORMAÇÃO', 7, true);
-  let fy = 192;
-  for (const l of wrap(
-    'Este documento é um comprovativo interno de pagamento relativo à subscrição Silentra for Barbers. Não constitui, por si só, uma fatura ou recibo fiscal certificado.',
-    88,
-  )) {
-    text(62, fy, l, 7, false);
-    fy -= 10;
-  }
-  if (d.customer_website)
-    text(62, 150, `Website do cliente: ${d.customer_website}`, 7, false);
-  text(
-    62,
-    112,
-    'Documento gerado automaticamente pela plataforma Silentra.',
-    7,
+  drawRightText(right, 808, 'COMPROVATIVO DE PAGAMENTO', 10, true, '1 1 1');
+  drawRightText(right, 786, document.document_number || '—', 13, true, '1 1 1');
+  fillRect(385, 753, 162, 20, '0.12 0.28 0.24');
+  drawText(397, 760, 'PAGAMENTO CONFIRMADO', 7, true, '0.57 0.94 0.77');
+
+  drawText(left, 695, 'Pagamento recebido e validado', 19, true);
+  drawText(
+    left,
+    676,
+    'Comprovativo interno relativo à subscrição Silentra for Barbers.',
+    9,
     false,
+    '0.42 0.44 0.48',
   );
-  text(62, 98, 'Silentra  ·  silentra.me  ·  barbers.silentra.me', 7, false);
 
-  const stream = content.join('\n');
-  const objs = [
+  // Confirmation metadata.
+  fillRect(left, 620, width, 42, '0.95 0.96 0.97');
+  label(left + 14, 646, 'Data de confirmação');
+  drawText(left + 14, 630, paidAt, 9, true);
+  label(258, 646, 'Método');
+  drawText(258, 630, 'Pagamento manual validado', 9, true);
+  label(440, 646, 'Estado');
+  drawText(440, 630, 'Pago', 9, true, '0.10 0.48 0.34');
+
+  // Issuer and customer details; only source-backed information is shown.
+  label(left, 594, 'Emitido por');
+  drawText(left, 575, safeSellerName, 10, true);
+  drawText(left, 560, 'Silentra for Barbers', 8, false, '0.35 0.37 0.40');
+  drawWrapped(left, 545, safeWebsite, 48, 8, false, '0.35 0.37 0.40', 1);
+
+  label(302, 594, 'Dados do cliente');
+  drawText(302, 575, safeCustomerName, 10, true);
+  let customerY = 560;
+  const contactLine = [document.customer_email, document.customer_phone]
+    .filter((value) => Boolean(value?.trim()))
+    .join(' · ');
+  const addressSummary = addressLines.join(', ');
+  const customerDetails = [
+    document.barbershop_name?.trim()
+      ? { value: 'Barbearia: ' + document.barbershop_name.trim(), lines: 1 }
+      : null,
+    document.customer_tax_id?.trim()
+      ? { value: 'NIF / ID fiscal: ' + document.customer_tax_id.trim(), lines: 1 }
+      : null,
+    contactLine ? { value: contactLine, lines: 2 } : null,
+    addressSummary ? { value: addressSummary, lines: 3 } : null,
+  ].filter((value): value is { value: string; lines: number } => Boolean(value));
+
+  for (const detail of customerDetails) {
+    const used = drawWrapped(
+      302,
+      customerY,
+      detail.value,
+      42,
+      7.5,
+      false,
+      '0.35 0.37 0.40',
+      detail.lines,
+      10,
+    );
+    customerY -= Math.max(11, used);
+  }
+
+  // Subscription detail block.
+  label(left, 474, 'Detalhes da subscrição');
+  fillRect(left, 449, width, 22, '0.93 0.94 0.95');
+  drawText(left + 12, 457, 'DESCRIÇÃO', 7, true, '0.34 0.36 0.39');
+  drawText(333, 457, 'PERIODICIDADE', 7, true, '0.34 0.36 0.39');
+  drawRightText(right - 12, 457, 'VALOR', 7, true, '0.34 0.36 0.39');
+
+  strokeLine(left, 449, right);
+  drawWrapped(left + 12, 429, safeDescription, 48, 8.5, true, '0.13 0.15 0.18', 2, 11);
+  drawText(333, 429, intervalLabel(document.billing_interval), 8.5, false);
+  drawRightText(
+    right - 12,
+    429,
+    money(Number(document.total), document.currency),
+    8.5,
+    true,
+  );
+  strokeLine(left, 401, right);
+
+  // The record stores the confirmed gross amount. No VAT rate or exemption is inferred here.
+  fillRect(left, 315, width, 64, '0.075 0.09 0.12');
+  drawText(left + 16, 354, 'TOTAL CONFIRMADO', 8, true, '0.73 0.77 0.81');
+  drawText(left + 16, 333, 'Valor registado e recebido', 8, false, '0.73 0.77 0.81');
+  drawRightText(
+    right - 16,
+    337,
+    money(Number(document.total), document.currency),
+    17,
+    true,
+    '1 1 1',
+  );
+
+  // Reference and legal clarification.
+  label(left, 285, 'Referência do documento');
+  drawText(left, 267, document.document_number || '—', 9, true);
+  label(302, 285, 'Subscrição');
+  drawText(302, 267, safePlan, 9, true);
+  drawText(302, 251, 'Periodicidade: ' + intervalLabel(document.billing_interval), 8, false, '0.35 0.37 0.40');
+
+  strokeLine(left, 225, right, '0.88 0.89 0.91');
+  label(left, 207, 'Nota sobre este documento');
+  const disclaimer =
+    'Este documento comprova o pagamento registado e validado pela Silentra para a subscrição indicada. É um comprovativo interno e não substitui a fatura ou o recibo fiscal que deva ser emitido pelo prestador de serviços.';
+  drawWrapped(left, 190, disclaimer, 106, 7.5, false, '0.39 0.41 0.44', 3, 11);
+  const recordNote =
+    'Os dados do cliente correspondem à informação de faturação disponível no momento da confirmação do pagamento.';
+  drawWrapped(left, 153, recordNote, 106, 7.5, false, '0.39 0.41 0.44', 2, 11);
+
+  strokeLine(left, 105, right, '0.91 0.92 0.93');
+  drawText(left, 86, 'SILENTRA  ·  barbers.silentra.me', 7, true, '0.48 0.50 0.53');
+  drawRightText(right, 86, 'Documento ' + (document.document_number || '—'), 7, false, '0.48 0.50 0.53');
+
+  const stream = commands.join('\n');
+  const objects = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>',
-    `<< /Length ${Buffer.byteLength(stream, 'latin1')} >>\nstream\n${stream}\nendstream`,
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageWidth + ' ' + pageHeight + '] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>',
+    '<< /Length ' + Buffer.byteLength(stream, 'latin1') + ' >>\nstream\n' + stream + '\nendstream',
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
   ];
-  let out = '%PDF-1.4\n';
+
+  let output = '%PDF-1.4\n';
   const offsets: number[] = [0];
-  objs.forEach((obj, i) => {
-    offsets[i + 1] = Buffer.byteLength(out, 'latin1');
-    out += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  objects.forEach((object, index) => {
+    offsets[index + 1] = Buffer.byteLength(output, 'latin1');
+    output += (index + 1) + ' 0 obj\n' + object + '\nendobj\n';
   });
-  const xref = Buffer.byteLength(out, 'latin1');
-  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
-  for (let i = 1; i <= objs.length; i++)
-    out += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
-  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
-  return Buffer.from(out, 'latin1');
+
+  const xrefOffset = Buffer.byteLength(output, 'latin1');
+  output += 'xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n';
+  for (let index = 1; index <= objects.length; index += 1) {
+    output += String(offsets[index]).padStart(10, '0') + ' 00000 n \n';
+  }
+  output += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF\n';
+
+  return Buffer.from(output, 'latin1');
 }

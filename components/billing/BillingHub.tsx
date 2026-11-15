@@ -28,8 +28,11 @@ interface Invoice {
   status: string | null;
   plan: string;
   date: string;
+  document_number?: string | null;
   invoice_pdf: string | null;
+  hosted_invoice_url?: string | null;
   source?: 'STRIPE' | 'MANUAL';
+  status_code?: string;
   download_url?: string | null;
 }
 
@@ -64,6 +67,23 @@ export function BillingHub() {
   const [openingPortal, setOpeningPortal] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
+
+  const invoiceStatusLabel = (status: string | null | undefined) => {
+    switch (status) {
+      case 'paid':
+        return t('billingHub.paid');
+      case 'open':
+        return t('billingHub.open');
+      case 'draft':
+        return t('billingHub.draft');
+      case 'void':
+        return t('billingHub.void');
+      case 'uncollectible':
+        return t('billingHub.uncollectible');
+      default:
+        return t('billingHub.issued');
+    }
+  };
 
   const isStripeSubscription =
     subscription?.payment_method === 'STRIPE' &&
@@ -534,33 +554,46 @@ export function BillingHub() {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium text-zinc-100">
+                    <p className="text-sm font-semibold text-zinc-100">
                       {invoice.plan}
                     </p>
-                    {invoice.source === 'MANUAL' ? (
-                      <span className="rounded-full border border-sky-400/15 bg-sky-400/[0.06] px-2 py-0.5 text-[10px] text-sky-200">
-                        {t('billingHub.manualReceipt')}
-                      </span>
-                    ) : null}
-                    <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] text-emerald-200">
-                      {invoice.status ?? t('billingHub.processed')}
+                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${invoice.source === 'MANUAL' ? 'border-sky-400/15 bg-sky-400/[0.06] text-sky-200' : 'border-violet-400/15 bg-violet-400/[0.06] text-violet-200'}`}>
+                      {invoice.source === 'MANUAL'
+                        ? t('billingHub.manualReceipt')
+                        : t('billingHub.stripeInvoice')}
+                    </span>
+                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${invoice.status_code === 'paid' ? 'border-emerald-400/15 bg-emerald-400/[0.06] text-emerald-200' : 'border-amber-400/15 bg-amber-400/[0.06] text-amber-200'}`}>
+                      {invoiceStatusLabel(invoice.status_code ?? invoice.status)}
                     </span>
                   </div>
+                  {invoice.document_number ? (
+                    <p className="mt-2 text-[11px] font-medium text-zinc-400">
+                      {t('billingHub.documentNumber')}: <span className="font-mono text-zinc-300">{invoice.document_number}</span>
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs text-zinc-500">
                     {invoice.date} ·{' '}
                     {formatAmount(invoice.amount, invoice.currency, locale)}
                   </p>
                 </div>
-                {invoice.invoice_pdf || invoice.download_url ? (
+                {invoice.invoice_pdf || invoice.download_url || invoice.hosted_invoice_url ? (
                   <a
                     href={
-                      invoice.invoice_pdf ?? invoice.download_url ?? undefined
+                      invoice.invoice_pdf ??
+                      invoice.download_url ??
+                      invoice.hosted_invoice_url ??
+                      undefined
                     }
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08]"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-zinc-200 transition hover:bg-white/[0.08]"
                   >
-                    <Download className="size-3.5" /> {t('billingHub.download')}
+                    <Download className="size-3.5" />
+                    {invoice.source === 'MANUAL'
+                      ? t('billingHub.downloadProof')
+                      : invoice.invoice_pdf
+                        ? t('billingHub.downloadInvoice')
+                        : t('billingHub.viewInvoice')}
                   </a>
                 ) : (
                   <span className="text-xs text-zinc-600">

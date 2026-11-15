@@ -54,6 +54,8 @@ const documentsMigration = read(
 const documentService = read(
   'services/billing/manual-payment-document.service.ts',
 );
+const paymentProofPdf = read('services/billing/manual-payment-document.ts');
+const billingEmailTemplates = read('services/billing/email-templates.ts');
 const billingHistory = read('app/api/billing/history/route.ts');
 const billingHub = read('components/billing/BillingHub.tsx');
 const brevo = read('lib/email/brevo.ts');
@@ -164,6 +166,31 @@ const checks = [
       documentsMigration.includes('create_manual_payment_document'),
   ],
   [
+    'Manual receipt PDF contains a clear confirmation state and document reference',
+    paymentProofPdf.includes('PAGAMENTO CONFIRMADO') &&
+      paymentProofPdf.includes('document.document_number') &&
+      paymentProofPdf.includes('formatDate(document.issued_at)') &&
+      paymentProofPdf.includes('Europe/Lisbon'),
+  ],
+  [
+    'Manual receipt PDF displays customer and barbershop billing details',
+    paymentProofPdf.includes('Dados do cliente') &&
+      paymentProofPdf.includes('Barbearia: ') &&
+      paymentProofPdf.includes('NIF / ID fiscal: ') &&
+      paymentProofPdf.includes('customer_address_line1'),
+  ],
+  [
+    'Manual receipt does not infer or present a VAT rate or exemption',
+    !paymentProofPdf.includes('Impostos / IVA') &&
+      paymentProofPdf.includes('não substitui a fatura ou o recibo fiscal'),
+  ],
+  [
+    'Manual receipt email summarizes the confirmed payment',
+    billingEmailTemplates.includes("['Barbearia', context.barbershopName || '—']") &&
+      billingEmailTemplates.includes("['Método', 'Pagamento manual validado pela Silentra']") &&
+      billingEmailTemplates.includes("['Total confirmado', money(context.price, context.currency)]"),
+  ],
+  [
     'Manual receipt PDF generation exists',
     documentService.includes('generateManualPaymentReceiptPdf'),
   ],
@@ -182,6 +209,19 @@ const checks = [
     'Billing history authenticates the barbershop owner',
     billingHistory.includes('supabase.auth.getUser()') &&
       billingHistory.includes('barbershop.created_by !== user.id'),
+  ],
+  [
+    'Billing history exposes localized status codes and Stripe hosted invoice links',
+    billingHistory.includes("status_code: 'paid'") &&
+      billingHistory.includes("status_code: invoice.status ?? 'issued'") &&
+      billingHistory.includes('hosted_invoice_url: invoice.hosted_invoice_url ?? null'),
+  ],
+  [
+    'Billing history UI shows document number and supports Stripe hosted invoice fallback',
+    billingHub.includes('invoice.document_number') &&
+      billingHub.includes('invoice.hosted_invoice_url') &&
+      billingHub.includes("t('billingHub.downloadProof')") &&
+      billingHub.includes("t('billingHub.viewInvoice')"),
   ],
   [
     'Billing history combines Stripe invoices and manual documents',
