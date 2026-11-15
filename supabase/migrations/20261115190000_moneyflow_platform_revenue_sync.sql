@@ -182,7 +182,7 @@ begin
   end;
 
   update public.moneyflow_sync_outbox
-  set status = case when attempts >= 10 then 'failed' else 'pending' end,
+  set status = case when attempts >= 10 or v_safe_error = 'MONEYFLOW_UNAUTHORIZED' then 'failed' else 'pending' end,
       available_at = now() + make_interval(
         mins => least(360, 5 * (2 ^ least(attempts, 8))::integer)
       ),
