@@ -968,8 +968,40 @@ export class ManualPaymentService {
       }
     }
 
-    // The receipt trigger has already queued the confirmed payment. Try delivery
-    // now for a fast update; the durable outbox cron retries temporary failures.
+    // Queue from the confirmed subscription as a fallback too. The receipt
+    // trigger uses the same event key, so both paths remain idempotent if the
+    // receipt exists or its email delivery fails.
+    const confirmedAmount = Number(confirmation.price);
+    const confirmedCurrency = String(confirmation.currency ?? '').toUpperCase();
+    if (Number.isFinite(confirmedAmount) && confirmedAmount > 0 && confirmedCurrency === 'EUR') {
+      const eventId = `manual-payment:${requestId}`;
+      const { error: syncQueueError } = await admin
+        .from('moneyflow_sync_outbox')
+        .upsert(
+          {
+            event_key: eventId,
+            event_type: 'subscription_payment',
+            payload: {
+              eventId,
+              amount: confirmedAmount,
+              currency: confirmedCurrency,
+              occurredAt: new Date().toISOString(),
+              description: `Subscrição Silentra for Barbers — ${String(confirmation.plan ?? 'pro').toUpperCase()}`,
+              externalReference: requestId,
+            },
+          },
+          { onConflict: 'event_key', ignoreDuplicates: true },
+        );
+
+      if (syncQueueError) {
+        console.error('[MONEYFLOW_MANUAL_PAYMENT_QUEUE_FAILED]', {
+          requestId,
+          code: syncQueueError.code ?? 'UNKNOWN',
+        });
+      }
+    }
+
+    // Try delivery now for a fast update; the durable outbox cron retries failures.
     await dispatchMoneyFlowSyncBatch(1);
 
     return {
