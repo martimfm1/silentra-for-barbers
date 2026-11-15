@@ -112,6 +112,15 @@ as $$
 declare
   v_limit integer := greatest(1, least(coalesce(p_batch_size, 50), 100));
 begin
+  update public.moneyflow_sync_outbox
+  set status = 'failed',
+      locked_at = null,
+      last_error = 'RETRIES_EXHAUSTED',
+      updated_at = now()
+  where status = 'processing'
+    and locked_at < now() - interval '15 minutes'
+    and attempts >= 10;
+
   return query
   with candidates as (
     select o.id
