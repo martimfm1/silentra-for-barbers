@@ -168,6 +168,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // A new capability token can recover events that previously failed because
+    // the old MoneyFlow connection had been revoked or rotated.
+    await admin
+      .from('moneyflow_sync_outbox')
+      .update({
+        status: 'pending',
+        attempts: 0,
+        available_at: now,
+        locked_at: null,
+        last_error: null,
+        updated_at: now,
+      })
+      .eq('status', 'failed')
+      .eq('last_error', 'HTTP_401');
+
     return NextResponse.json(
       { ok: true, connected: true, accountName, currencyCode, connectedAt: now },
       { headers: { 'Cache-Control': 'no-store' } },
