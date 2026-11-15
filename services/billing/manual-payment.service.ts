@@ -21,6 +21,7 @@ import {
 import { BillingError } from '@/types/stripe';
 import { ManualPaymentDocumentService } from '@/services/billing/manual-payment-document.service';
 import { quoteManualPrice } from '@/lib/billing/manual-promotions';
+import { dispatchMoneyFlowSyncBatch } from '@/services/integrations/moneyflow-sync.service';
 
 export type ManualRequestType = 'NEW' | 'RENEWAL' | 'CHANGE';
 export type ManualRequestStatus =
@@ -966,6 +967,10 @@ export class ManualPaymentService {
         emailSent = result.success;
       }
     }
+
+    // The receipt trigger has already queued the confirmed payment. Try delivery
+    // now for a fast update; the durable outbox cron retries temporary failures.
+    await dispatchMoneyFlowSyncBatch(1);
 
     return {
       ...confirmation,
