@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
@@ -15,15 +15,34 @@ function isAuthorized(request: Request) {
   const secret = (
     process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET
   )?.trim();
-  const header = request.headers.get('authorization') ?? '';
-  if (!secret || !header.startsWith('Bearer ')) return false;
+  if (!secret) return false;
 
-  const provided = Buffer.from(header.slice(7));
-  const expected = Buffer.from(secret);
-  return (
-    provided.length === expected.length &&
-    timingSafeEqual(provided, expected)
-  );
+  if (
+    request.headers.get('authorization') === `Bearer ${secret}` ||
+    request.headers.get('x-cron-secret') === secret
+  ) {
+    return true;
+  }
+
+  const timestamp = request.headers.get('x-moneyflow-timestamp') ?? '';
+  const signature = request.headers.get('x-moneyflow-signature') ?? '';
+  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature)) {
+    return false;
+  }
+
+  const seconds = Number(timestamp);
+  if (
+    !Number.isSafeInteger(seconds) ||
+    Math.abs(Date.now() / 1000 - seconds) > 300
+  ) {
+    return false;
+  }
+
+  const expected = createHmac('sha256', secret)
+    .update(`${timestamp}:moneyflow-sync`)
+    .digest();
+  const provided = Buffer.from(signature, 'hex');
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
 }
 
 async function GET__unobserved(request: Request) {
