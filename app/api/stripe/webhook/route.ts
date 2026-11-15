@@ -6,6 +6,7 @@ import { getStripeClient } from '@/lib/stripe/server';
 import { BarbershopStripeService } from '@/services/billing/barbershop-stripe.service';
 import { billingErrorResponse } from '@/services/billing/http';
 import { BillingError } from '@/types/stripe';
+import { dispatchMoneyFlowOutboxBatch } from '@/services/moneyflow/outbox';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -143,6 +144,101 @@ async function processCheckoutSessionCompleted(
   );
 }
 
+type InvoiceMoneyFlowFields = {
+  id: string;
+  amount_paid?: number;
+  currency?: string;
+  created?: number;
+  number?: string | null;
+  customer?: string | { id: string } | null;
+  subscription?: string | { id: string } | null;
+  parent?: {
+    subscription_details?: {
+      subscription?: string | { id: string } | null;
+    } | null;
+  } | null;
+  status_transitions?: { paid_at?: number | null } | null;
+};
+
+function stripeObjectId(value: string | { id: string } | null | undefined) {
+  return typeof value === 'string' ? value : value?.id ?? null;
+}
+
+async function processPaidSubscriptionInvoice(invoice: Stripe.Invoice) {
+  const fields = invoice as unknown as InvoiceMoneyFlowFields;
+  if (!fields.id || !Number.isFinite(fields.amount_paid) || (fields.amount_paid ?? 0) <= 0) {
+    return;
+  }
+
+  // MoneyFlow currently links an EUR account in the Silentra finance context.
+  // Non-EUR invoices are deliberately left out rather than converted silently.
+  if (String(fields.currency ?? '').toUpperCase() !== 'EUR') return;
+
+  const subscriptionId = stripeObjectId(
+    fields.subscription ??
+      fields.parent?.subscription_details?.subscription,
+  );
+  if (!subscriptionId) return;
+
+  const subscription = await getStripeClient().subscriptions.retrieve(
+    subscriptionId,
+  );
+  // A subscription carrying a barbershop mapping is never platform revenue.
+  if (subscription.metadata.barbershop_id?.trim()) return;
+
+  const customerId = stripeObjectId(fields.customer);
+  if (!customerId) return;
+  const customerMapping =
+    await BarbershopStripeService.findBarbershopByCustomerId(customerId);
+  // Customer-linked invoices are operational barbershop revenue, not platform revenue.
+  if (customerMapping) return;
+
+  const paidAt =
+    fields.status_transitions?.paid_at ??
+    fields.created ??
+    Math.floor(Date.now() / 1000);
+  const occurredAt = new Date(paidAt * 1000).toISOString();
+  const plan = subscription.metadata.plan?.trim().toLowerCase();
+  const description = plan
+    ? `Subscrição Silentra for Barbers · ${plan}`
+    : 'Subscrição Silentra for Barbers';
+
+  const admin = createAdminClient();
+  const eventKey = `stripe-invoice:${fields.id}`;
+  const { error } = await admin.from('moneyflow_sync_outbox').upsert(
+    {
+      event_key: eventKey,
+      event_type: 'subscription_payment',
+      payload: {
+        eventId: eventKey,
+        amount: (fields.amount_paid ?? 0) / 100,
+        currency: 'EUR',
+        occurredAt,
+        description,
+        externalReference: fields.number ?? fields.id,
+      },
+    },
+    { onConflict: 'event_key', ignoreDuplicates: true },
+  );
+
+  if (error) {
+    throw new BillingError(
+      'Could not queue the confirmed subscription payment for MoneyFlow.',
+      'DB_WRITE_FAILED',
+    );
+  }
+
+  try {
+    await dispatchMoneyFlowOutboxBatch(10);
+  } catch (error) {
+    // The durable outbox and scheduled retry keep the Stripe webhook independent
+    // from MoneyFlow availability.
+    console.error('[MONEYFLOW_STRIPE_PAYMENT_DISPATCH_FAILED]', {
+      error: error instanceof Error ? error.name : 'UNKNOWN',
+    });
+  }
+}
+
 async function POST__unobserved(request: Request) {
   const signature = request.headers.get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -205,6 +301,10 @@ async function POST__unobserved(request: Request) {
       ) {
         await processCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
+        );
+      } else if (event.type === 'invoice.paid') {
+        await processPaidSubscriptionInvoice(
+          event.data.object as Stripe.Invoice,
         );
       } else if (
         [

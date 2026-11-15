@@ -1,0 +1,250 @@
+import { NextResponse } from 'next/server';
+import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
+import { assertSameOrigin } from '@/services/billing/http';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+function moneyFlowApiUrl() {
+  const value = (
+    process.env.MONEYFLOW_API_URL ?? 'https://moneyflow.silentra.me'
+  ).trim();
+  const url = new URL(value);
+  if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+    throw new Error('MoneyFlow endpoint must use HTTPS.');
+  }
+  return url.toString().replace(/\/$/, '');
+}
+
+export async function GET() {
+  try {
+    const { admin } = await requirePlatformAdmin();
+    const [
+      { data: connection, error },
+      { count: pendingEvents },
+      { count: failedEvents },
+    ] = await Promise.all([
+      admin
+        .from('moneyflow_sync_credentials')
+        .select(
+          'account_name, currency_code, status, connected_at, last_synced_at',
+        )
+        .eq('integration_key', 'silentra-platform')
+        .maybeSingle(),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'processing']),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'failed'),
+    ]);
+
+    if (error) throw error;
+
+    const connected =
+      connection?.status === 'connected' && Boolean(connection.account_name);
+
+    return NextResponse.json(
+      {
+        ok: true,
+        connected,
+        accountName: connected ? connection.account_name : null,
+        currencyCode: connected ? connection.currency_code : null,
+        connectedAt: connected ? connection.connected_at : null,
+        lastSyncedAt: connected ? connection.last_synced_at : null,
+        pendingEvents: pendingEvents ?? 0,
+        failedEvents: failedEvents ?? 0,
+      },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
+  } catch (error) {
+    const status =
+      error instanceof Error && error.name === 'PlatformAdminError' ? 403 : 500;
+    return NextResponse.json(
+      { ok: false, error: 'Não foi possível carregar o estado da ligação.' },
+      { status, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    assertSameOrigin(request);
+    const { admin } = await requirePlatformAdmin();
+    const body = await request.json().catch(() => null) as { pairingToken?: unknown } | null;
+    const pairingToken = body?.pairingToken;
+    if (typeof pairingToken !== 'string' || !/^[a-f0-9]{64}$/i.test(pairingToken)) {
+      return NextResponse.json(
+        { ok: false, error: 'O código de ligação é inválido.' },
+        { status: 400 },
+      );
+    }
+
+    const response = await fetch(
+      `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/pair`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pairingToken,
+        }),
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || payload?.ok !== true) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            typeof payload?.error === 'string'
+              ? payload.error
+              : 'O MoneyFlow não aceitou o código. Gera um novo código e tenta novamente.',
+        },
+        { status: response.status >= 500 ? 502 : 400 },
+      );
+    }
+
+    const syncToken = String(payload.syncToken ?? '');
+    if (!/^[a-f0-9]{64}$/i.test(syncToken)) {
+      return NextResponse.json(
+        { ok: false, error: 'O MoneyFlow devolveu uma credencial inválida.' },
+        { status: 502 },
+      );
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await admin
+      .from('moneyflow_sync_credentials')
+      .upsert(
+        {
+          integration_key: 'silentra-platform',
+          sync_token: syncToken,
+          account_name: String(payload.accountName).slice(0, 120),
+          currency_code: String(payload.currencyCode).toUpperCase(),
+          status: 'connected',
+          connected_at: now,
+          updated_at: now,
+        },
+        { onConflict: 'integration_key' },
+      );
+
+    if (error) {
+      // The pairing token has been consumed. Revoke the server token remotely
+      // so a failed local credential write cannot leave an orphaned connection.
+      try {
+        const revoke = await fetch(
+          `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${syncToken}` },
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8_000),
+          },
+        );
+        if (!revoke.ok && revoke.status !== 401) {
+          console.error('[MONEYFLOW_CONNECT_ROLLBACK_FAILED]', {
+            status: revoke.status,
+          });
+        }
+      } catch {
+        console.error('[MONEYFLOW_CONNECT_ROLLBACK_UNAVAILABLE]');
+      }
+
+      console.error('[MONEYFLOW_CONNECT_STORE_FAILED]', {
+        code: error.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'A ligação foi iniciada mas não pôde ser guardada. Gera um novo código e tenta novamente.',
+        },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        connected: true,
+        accountName: payload.accountName,
+        currencyCode: payload.currencyCode,
+        connectedAt: now,
+      },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
+  } catch (error) {
+    const status =
+      error instanceof Error && error.name === 'PlatformAdminError' ? 403 : 500;
+    return NextResponse.json(
+      { ok: false, error: 'Não foi possível concluir a ligação ao MoneyFlow.' },
+      { status, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    assertSameOrigin(request);
+    const { admin } = await requirePlatformAdmin();
+    const { data: connection, error: lookupError } = await admin
+      .from('moneyflow_sync_credentials')
+      .select('sync_token, status')
+      .eq('integration_key', 'silentra-platform')
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+
+    const syncToken =
+      connection?.status === 'connected' ? connection.sync_token : '';
+    if (syncToken) {
+      let response: Response;
+      try {
+        response = await fetch(
+          `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${syncToken}` },
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8_000),
+          },
+        );
+      } catch {
+        return NextResponse.json(
+          { ok: false, error: 'O MoneyFlow está temporariamente indisponível. A ligação continua ativa; tenta novamente.' },
+          { status: 502 },
+        );
+      }
+
+      if (!response.ok && response.status !== 401) {
+        return NextResponse.json(
+          { ok: false, error: 'O MoneyFlow não confirmou a revogação da ligação.' },
+          { status: 502 },
+        );
+      }
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await admin
+      .from('moneyflow_sync_credentials')
+      .update({
+        status: 'disconnected',
+        sync_token: '',
+        updated_at: now,
+      })
+      .eq('integration_key', 'silentra-platform');
+
+    if (error) throw error;
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const status =
+      error instanceof Error && error.name === 'PlatformAdminError' ? 403 : 500;
+    return NextResponse.json(
+      { ok: false, error: 'Não foi possível desligar o MoneyFlow.' },
+      { status },
+    );
+  }
+}
