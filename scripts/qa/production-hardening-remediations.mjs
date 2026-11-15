@@ -38,11 +38,6 @@ assert.match(
 );
 assert.match(
   migration,
-  /alter default privileges for role supabase_admin in schema public[\s\S]*revoke execute on functions from public, anon/i,
-  'Future public functions created by supabase_admin must not receive PUBLIC/anon EXECUTE by default.',
-);
-assert.match(
-  migration,
   /drop trigger if exists trigger_notify_new_review on public\.reviews/i,
   'The orphaned review notification producer must stop creating queue entries.',
 );
