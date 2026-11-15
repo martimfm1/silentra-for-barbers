@@ -175,6 +175,31 @@ export async function DELETE(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
+    const { data: connection } = await admin
+      .from('moneyflow_sync_credentials')
+      .select('sync_token, status')
+      .eq('integration_key', 'silentra-platform')
+      .maybeSingle();
+
+    const syncToken =
+      connection?.status === 'connected' ? connection.sync_token : '';
+    if (syncToken) {
+      try {
+        await fetch(
+          `${moneyFlowApiUrl()}/api/integrations/silentra-for-barbers/disconnect`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventSecret: syncToken }),
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8_000),
+          },
+        );
+      } catch {
+        // Disconnect locally even if MoneyFlow is temporarily unavailable.
+      }
+    }
+
     const now = new Date().toISOString();
     const { error } = await admin
       .from('moneyflow_sync_credentials')
