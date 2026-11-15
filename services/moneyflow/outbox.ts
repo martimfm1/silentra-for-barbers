@@ -113,7 +113,7 @@ export async function dispatchMoneyFlowOutboxBatch(
         : new Date().toISOString();
     const description =
       typeof payload.description === 'string'
-        ? payload.description.slice(0, 160)
+        ? payload.description.slice(0, 120)
         : 'Subscrição Silentra for Barbers';
 
     if (
@@ -135,9 +135,8 @@ export async function dispatchMoneyFlowOutboxBatch(
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${syncToken}` },
         body: JSON.stringify({
-          eventSecret: syncToken,
           eventId:
             typeof payload.eventId === 'string'
               ? payload.eventId
@@ -148,7 +147,7 @@ export async function dispatchMoneyFlowOutboxBatch(
           description,
           externalReference:
             typeof payload.externalReference === 'string'
-              ? payload.externalReference.slice(0, 200)
+              ? payload.externalReference.slice(0, 120)
               : null,
         }),
         cache: 'no-store',
