@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { requirePlatformAdmin } from '@/lib/internal/platform-admin';
 import { assertSameOrigin } from '@/services/billing/http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const bodySchema = z.object({
-  pairingToken: z.string().regex(/^[a-f0-9]{64}$/i),
-});
 
 function moneyFlowApiUrl() {
   const value = (
@@ -78,10 +73,9 @@ export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
     const { admin } = await requirePlatformAdmin();
-    const body = await request.json().catch(() => null);
-    const parsed = bodySchema.safeParse(body);
-
-    if (!parsed.success) {
+    const body = await request.json().catch(() => null) as { pairingToken?: unknown } | null;
+    const pairingToken = body?.pairingToken;
+    if (typeof pairingToken !== 'string' || !/^[a-f0-9]{64}$/i.test(pairingToken)) {
       return NextResponse.json(
         { ok: false, error: 'O código de ligação é inválido.' },
         { status: 400 },
@@ -94,7 +88,7 @@ export async function POST(request: Request) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pairingToken: parsed.data.pairingToken,
+          pairingToken,
         }),
         cache: 'no-store',
         signal: AbortSignal.timeout(10_000),
