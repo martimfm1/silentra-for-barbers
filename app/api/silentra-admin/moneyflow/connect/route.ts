@@ -17,20 +17,27 @@ function jsonError(message: string, status: number) {
 export async function GET() {
   try {
     const { admin } = await requirePlatformAdmin();
-    const [{ data: connection, error }, { count: pendingCount, error: pendingError }] =
-      await Promise.all([
-        admin
-          .from('moneyflow_sync_credentials')
-          .select('account_name,currency_code,status,connected_at,last_synced_at')
-          .eq('integration_key', 'silentra-platform')
-          .maybeSingle(),
-        admin
-          .from('moneyflow_sync_outbox')
-          .select('id', { count: 'exact', head: true })
-          .in('status', ['pending', 'processing']),
-      ]);
+    const [
+      { data: connection, error },
+      { count: pendingCount, error: pendingError },
+      { count: failedCount, error: failedError },
+    ] = await Promise.all([
+      admin
+        .from('moneyflow_sync_credentials')
+        .select('account_name,currency_code,status,connected_at,last_synced_at')
+        .eq('integration_key', 'silentra-platform')
+        .maybeSingle(),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'processing']),
+      admin
+        .from('moneyflow_sync_outbox')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'failed'),
+    ]);
 
-    if (error || pendingError) {
+    if (error || pendingError || failedError) {
       return jsonError('Não foi possível carregar o estado da ligação.', 503);
     }
 
@@ -43,6 +50,7 @@ export async function GET() {
         connectedAt: connection?.connected_at ?? null,
         lastSyncedAt: connection?.last_synced_at ?? null,
         pendingEvents: pendingCount ?? 0,
+        failedEvents: failedCount ?? 0,
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
