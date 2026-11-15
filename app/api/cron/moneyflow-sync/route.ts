@@ -141,6 +141,12 @@ async function GET__unobserved(request: Request) {
         errorCode = `HTTP_${response.status}`;
         // Invalid token, invalid data or unsupported currency are terminal.
         if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          if (response.status === 401) {
+            await admin
+              .from('moneyflow_sync_credentials')
+              .update({ status: 'disconnected', updated_at: new Date().toISOString() })
+              .eq('integration_key', 'silentra-platform');
+          }
           const { error: updateError } = await admin
             .from('moneyflow_sync_outbox')
             .update({
