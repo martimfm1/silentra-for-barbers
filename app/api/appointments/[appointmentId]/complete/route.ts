@@ -243,7 +243,7 @@ async function POST__unobserved(
       .eq('is_active', true)
       .limit(1)
       .maybeSingle();
-    let customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
+    const customerEmail = appointment.manual_email?.trim().toLowerCase() || '';
     let customerName = appointment.manual_name?.trim() || 'Cliente';
     if (appointment.client_id) {
       const { data: client } = await admin
