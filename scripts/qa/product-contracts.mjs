@@ -1226,7 +1226,6 @@ const checks = [
       ) &&
       source.includes('to service_role'),
   },
-];
   {
     name: 'Invite join permits orphaned owner profiles but blocks owners already linked to a shop',
     file: 'supabase/migrations/20261116235500_allow_orphan_owner_team_join.sql',
@@ -1244,6 +1243,7 @@ const checks = [
       source.includes('status: 409') &&
       source.includes('Esta conta já é proprietária de outra barbearia.'),
   },
+];
 let failed = 0;
 for (const check of checks) {
   try {
