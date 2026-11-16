@@ -1227,6 +1227,23 @@ const checks = [
       source.includes('to service_role'),
   },
 ];
+  {
+    name: 'Invite join permits orphaned owner profiles but blocks owners already linked to a shop',
+    file: 'supabase/migrations/20261116235500_allow_orphan_owner_team_join.sql',
+    test: (source) =>
+      source.includes("and u.role = 'owner'") &&
+      source.includes('and u.barbershop_id is not null') &&
+      source.includes('owner_already_has_barbershop') &&
+      source.includes('grant execute on function public.join_barbershop_with_invite(text)'),
+  },
+  {
+    name: 'Onboarding API explains when an owner account is already linked to another barbershop',
+    file: 'app/api/onboarding/join-v2/route.ts',
+    test: (source) =>
+      source.includes("error.message === 'owner_already_has_barbershop'") &&
+      source.includes('status: 409') &&
+      source.includes('Esta conta já é proprietária de outra barbearia.'),
+  },
 let failed = 0;
 for (const check of checks) {
   try {
