@@ -111,3 +111,56 @@ for (const path of files) {
   );
 }
 console.log('Weekly schedule QA passed: Saturday afternoons, split shifts, breaks, day off and legacy migration.');
+
+
+// Duration-aware public availability must match the atomic booking RPC.
+// A booking without an assigned barber reserves the interval for every barber.
+const bookingAvailability = readFileSync(
+  'app/api/shops/[id]/booking-data/route.ts',
+  'utf8',
+);
+assert.ok(
+  bookingAvailability.includes('appointment.professionalId === null ||'),
+  'Unassigned bookings must block availability for every professional',
+);
+assert.ok(
+  bookingAvailability.includes('appointment.start, appointment.end'),
+  'Availability must compare the full appointment interval, not only its start',
+);
+assert.ok(
+  bookingAvailability.includes('Number(appointment.duration_minutes ?? 30)'),
+  'Existing bookings must reserve their persisted duration',
+);
+assert.ok(
+  bookingAvailability.includes('slotStart + serviceDuration <= periodEnd'),
+  'A new service must fit completely inside a working interval',
+);
+assert.ok(
+  bookingAvailability.includes('slotStart += 30'),
+  'Candidate start times must retain the existing 30-minute booking grid',
+);
+
+const atomicBookingMigration = readFileSync(
+  'supabase/migrations/20261114002250_weekly_barber_schedules.sql',
+  'utf8',
+);
+assert.ok(
+  atomicBookingMigration.includes(
+    'a.date_hour < p_date_hour + make_interval(mins => v_duration)',
+  ),
+  'Atomic booking creation must reserve the exact requested service duration',
+);
+assert.ok(
+  atomicBookingMigration.includes(
+    'a.date_hour + make_interval(\n        mins => greatest(1, least(coalesce(a.duration_minutes, 30), 1440))\n      ) > p_date_hour',
+  ),
+  'Atomic booking conflict checks must use the existing appointment duration',
+);
+
+// Boundary examples: intervals touching at the exact end are valid, while
+// any real overlap (including a 45-minute service) is rejected.
+const intervalOverlaps = (start: number, end: number, otherStart: number, otherEnd: number) =>
+  start < otherEnd && end > otherStart;
+assert.equal(intervalOverlaps(9 * 60, 9 * 60 + 45, 9 * 60 + 30, 10 * 60), true);
+assert.equal(intervalOverlaps(9 * 60, 9 * 60 + 45, 9 * 60 + 45, 10 * 60), false);
+assert.equal(intervalOverlaps(9 * 60, 10 * 60, 9 * 60 + 30, 10 * 60 + 30), true);
