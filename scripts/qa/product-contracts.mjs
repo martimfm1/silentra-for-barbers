@@ -117,6 +117,30 @@ const checks = [
       source.includes('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
   },
   {
+    name: 'Current invite generator samples only from the accepted alphabet',
+    file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
+    test: (source) =>
+      source.includes("v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'") &&
+      source.includes('get_byte(gen_random_bytes(1), 0)') &&
+      source.includes('v_random_byte < (256 / length(v_alphabet)) * length(v_alphabet)') &&
+      source.includes('v_random_byte % length(v_alphabet)') &&
+      source.includes("v_code := 'BARB-'") &&
+      !source.includes("encode(gen_random_bytes(6), 'hex')"),
+  },
+  {
+    name: 'Onboarding API accepts the same invite alphabet as the generator',
+    file: 'app/api/onboarding/join-v2/route.ts',
+    test: (source) =>
+      source.includes('const NEW_INVITE_BODY = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;'),
+  },
+  {
+    name: 'Invite-code UI validates the same alphabet as the onboarding API',
+    file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
+    test: (source) =>
+      source.includes('const INVITE_PATTERN =') &&
+      source.includes('BARB-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}'),
+  },
+  {
     name: 'Marketplace order RPC includes delivery fields used by the API',
     file: 'supabase/migrations/20260830210000_marketplace_sales_channels.sql',
     test: (source) =>
