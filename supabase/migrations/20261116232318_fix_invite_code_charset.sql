@@ -41,14 +41,10 @@ begin
   loop
     v_suffix := '';
 
-    -- Rejection sampling avoids modulo bias while keeping all eight characters
-    -- inside the format accepted by the invite entry flow.
+    -- The alphabet has 32 symbols, so a random byte maps evenly to its index
+    -- range without modulo bias.
     for v_index in 1..8 loop
-      loop
-        v_random_byte := get_byte(gen_random_bytes(1), 0);
-        exit when v_random_byte < (256 / length(v_alphabet)) * length(v_alphabet);
-      end loop;
-
+      v_random_byte := get_byte(gen_random_bytes(1), 0);
       v_suffix := v_suffix || substr(
         v_alphabet,
         (v_random_byte % length(v_alphabet)) + 1,
@@ -91,6 +87,7 @@ grant execute on function public.create_barbershop_invite_code(text)
   to authenticated;
 
 
+
 -- Preserve compatibility with invite codes issued before the generator fix.
 -- Those codes used a hexadecimal body and may contain 0 or 1; they remain
 -- valid until their original expiry, while new codes use the unambiguous alphabet.
@@ -121,15 +118,9 @@ begin
 
   v_input := upper(regexp_replace(trim(coalesce(p_code, '')), '\\s+', '', 'g'));
 
-  if v_input ~ '^BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}
-
-commit;
- then
+  if v_input ~ '^BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}$' then
     null;
-  elsif v_input ~ '^[0-9A-F]{10}
-
-commit;
- then
+  elsif v_input ~ '^[0-9A-F]{10}$' then
     null;
   else
     raise exception 'invalid_code' using errcode = '22023';
