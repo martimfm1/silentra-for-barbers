@@ -78,11 +78,27 @@ async function POST__unobserved(request: Request) {
           { status: 400 },
         );
       }
-      if (error.code === '42501')
+      if (error.code === '42501') {
+        if (error.message === 'owner_already_has_barbershop') {
+          return NextResponse.json(
+            {
+              error:
+                'Esta conta já é proprietária de outra barbearia. Para entrar nesta equipa, primeiro termina a associação à barbearia atual ou utiliza uma conta sem barbearia associada.',
+            },
+            { status: 409 },
+          );
+        }
+        if (error.message === 'not_authenticated') {
+          return NextResponse.json(
+            { error: 'A tua sessão expirou. Inicia sessão novamente.' },
+            { status: 401 },
+          );
+        }
         return NextResponse.json(
-          { error: 'Não tens permissão para entrar nesta equipa.' },
+          { error: 'A tua conta não está autorizada a concluir este convite.' },
           { status: 403 },
         );
+      }
       if (error.code === 'P0002')
         return NextResponse.json(
           { error: 'Não foi possível encontrar o teu perfil.' },
