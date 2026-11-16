@@ -12,7 +12,7 @@ type InviteCodeCardProps = {
 };
 
 const INVITE_PATTERN =
-  /^BARB-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
+  /^BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}$/;
 
 function normalizeInviteCode(value: string): string {
   const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
