@@ -2,7 +2,8 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-const NEW_INVITE_BODY = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
+// Accept newly issued unambiguous codes and already-issued hexadecimal BARB codes.
+const NEW_INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;
 const LEGACY_INVITE_CODE = /^[0-9A-F]{10}$/;
 
 function normalizeInviteCode(value: unknown): string | null {
