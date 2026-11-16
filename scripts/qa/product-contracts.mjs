@@ -131,14 +131,14 @@ const checks = [
     name: 'Onboarding API accepts the same invite alphabet as the generator',
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
-      source.includes('const NEW_INVITE_BODY = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;'),
+      source.includes('const NEW_INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;'),
   },
   {
     name: 'Invite-code UI validates the same alphabet as the onboarding API',
     file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
     test: (source) =>
       source.includes('const INVITE_PATTERN =') &&
-      source.includes('BARB-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}'),
+      source.includes('BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}'),
   },
   {
     name: 'Marketplace order RPC includes delivery fields used by the API',
