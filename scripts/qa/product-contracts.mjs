@@ -117,6 +117,40 @@ const checks = [
       source.includes('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
   },
   {
+    name: 'Current invite generator samples only from the accepted 32-character alphabet',
+    file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
+    test: (source) =>
+      source.includes("v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'") &&
+      source.includes('get_byte(gen_random_bytes(1), 0)') &&
+      source.includes('The alphabet has 32 symbols') &&
+      source.includes('v_random_byte % length(v_alphabet)') &&
+      source.includes("v_code := 'BARB-'") &&
+      !source.includes("encode(gen_random_bytes(6), 'hex')"),
+  },
+  {
+    name: 'Onboarding API accepts new and already-issued hexadecimal BARB codes',
+    file: 'app/api/onboarding/join-v2/route.ts',
+    test: (source) =>
+      source.includes('const INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;') &&
+      source.includes('INVITE_BODY.test(body)'),
+  },
+  {
+    name: 'Invite-code UI accepts new and already-issued hexadecimal BARB codes',
+    file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
+    test: (source) =>
+      source.includes('const INVITE_PATTERN =') &&
+      source.includes('BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}'),
+  },
+  {
+    name: 'Onboarding join RPC preserves compatibility with issued hexadecimal BARB invites',
+    file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
+    test: (source) =>
+      source.includes("v_input ~ '^BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}$'") &&
+      source.includes("v_input ~ '^[0-9A-F]{10}$'") &&
+      source.includes('revoke all on function public.join_barbershop_with_invite(text)') &&
+      source.includes('grant execute on function public.join_barbershop_with_invite(text)'),
+  },
+  {
     name: 'Marketplace order RPC includes delivery fields used by the API',
     file: 'supabase/migrations/20260830210000_marketplace_sales_channels.sql',
     test: (source) =>
