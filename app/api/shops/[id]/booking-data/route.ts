@@ -349,7 +349,11 @@ async function GET__unobserved(
       appointmentIntervals.some((appointment) => {
         if (professionalId)
           return (
-            appointment.professionalId === professionalId &&
+            // Legacy/unassigned bookings reserve the time for every barber.
+            // This mirrors create_booking_atomic, which treats NULL professional
+            // assignments as conflicts for any requested professional.
+            (appointment.professionalId === null ||
+              appointment.professionalId === professionalId) &&
             overlaps(slotStart, slotEnd, appointment.start, appointment.end)
           );
         return (
