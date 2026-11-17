@@ -219,7 +219,8 @@ const requestValidationChecks = [
     file: 'app/api/auth/register/route.ts',
     markers: [
       'readJsonObject(request',
-      "allowedKeys: ['email', 'name_complete', 'num_phone', 'password']",
+      "allowedKeys: ['email', 'name_complete', 'num_phone', 'password', 'redirect']",
+      'sanitizeInviteRedirect(body.redirect)',
       'password.length < 12',
       'password.length > 128',
       'supabase.auth.signUp',
