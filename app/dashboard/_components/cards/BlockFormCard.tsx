@@ -1,16 +1,18 @@
 'use client';
 
-//utils
 import { format } from 'date-fns';
+import {
+  CalendarDays,
+  CalendarOff,
+  Clock3,
+  FileText,
+  UserRound,
+} from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { type BlockScheduleFormProps } from '@/types';
-
-//UI
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -24,7 +26,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarIcon, CalendarOff } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+
+const fieldClassName =
+  'box-border min-h-12 w-full min-w-0 rounded-xl border border-white/[0.09] bg-white/[0.045] px-3.5 text-sm text-zinc-100 shadow-inner shadow-black/10 outline-none transition placeholder:text-zinc-600 hover:border-white/[0.15] focus-visible:border-rose-400/50 focus-visible:ring-2 focus-visible:ring-rose-400/10';
+
+const labelClassName =
+  'mb-2 block text-[11px] font-semibold uppercase tracking-[0.13em] text-zinc-500';
 
 export function BlockScheduleForm({
   professionals,
@@ -36,21 +44,38 @@ export function BlockScheduleForm({
   const { t } = useLanguage();
 
   return (
-    <Card className="border border-red-500/20 bg-black/40 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
-      <CardHeader>
-        <CardTitle className="text-red-400 flex gap-2">
-          <CalendarOff className="size-5" /> {t('agenda.blockTime')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={onSubmit}
-          className="grid min-w-0 gap-6 md:grid-cols-2 lg:grid-cols-5 items-end"
-        >
-          {/* Who is absent */}
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">
-              {t('agenda.blockProfessional')}
+    <div className="relative -m-1 overflow-hidden rounded-2xl bg-zinc-950 sm:-m-2">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top_left,rgba(244,63,94,0.13),transparent_68%)]"
+      />
+      <form
+        onSubmit={onSubmit}
+        className="relative flex min-w-0 flex-col"
+      >
+        <header className="border-b border-white/[0.07] px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
+          <div className="flex items-start gap-3.5">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-400/[0.09] text-rose-300 shadow-[0_8px_30px_rgba(244,63,94,0.08)]">
+              <CalendarOff className="size-5" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <h3 className="text-base font-semibold tracking-tight text-white sm:text-lg">
+                {t('agenda.blockTime')}
+              </h3>
+              <p className="mt-1 max-w-md text-xs leading-5 text-zinc-500">
+                {t('agenda.blockTimeDescription')}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid gap-x-4 gap-y-5 px-4 py-5 sm:grid-cols-2 sm:px-6 sm:py-6">
+          <div className="min-w-0 sm:col-span-2">
+            <label htmlFor="block-professional" className={labelClassName}>
+              <span className="inline-flex items-center gap-2">
+                <UserRound className="size-3.5" aria-hidden="true" />
+                {t('agenda.blockProfessional')}
+              </span>
             </label>
             <Select
               value={blockFormData.professional_id}
@@ -58,14 +83,17 @@ export function BlockScheduleForm({
                 setBlockFormData({ ...blockFormData, professional_id: val })
               }
             >
-              <SelectTrigger className="box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl bg-zinc-900 border-white/10 text-white cursor-pointer">
+              <SelectTrigger
+                id="block-professional"
+                className={cn(fieldClassName, 'cursor-pointer')}
+              >
                 <SelectValue placeholder={t('agenda.selectProfessional')} />
               </SelectTrigger>
-              <SelectContent className="min-w-0 max-w-[calc(100vw-2rem)] bg-zinc-900 border-white/10 text-white">
+              <SelectContent className="max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white">
                 <SelectGroup>
-                  {professionals.map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {b.name}
+                  {professionals.map((professional) => (
+                    <SelectItem key={professional.id} value={professional.id}>
+                      {professional.name}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -73,30 +101,39 @@ export function BlockScheduleForm({
             </Select>
           </div>
 
-          {/* Block Date */}
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">
-              {t('agenda.blockDate')}
+          <div className="min-w-0 sm:col-span-2">
+            <label className={labelClassName}>
+              <span className="inline-flex items-center gap-2">
+                <CalendarDays className="size-3.5" aria-hidden="true" />
+                {t('agenda.blockDate')}
+              </span>
             </label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant="ghost"
+                  type="button"
+                  variant="outline"
                   className={cn(
-                    'justify-start bg-white/5 border border-white/10 text-white hover:bg-white/10 cursor-pointer',
-                    !blockFormData.start_date && 'text-muted-foreground',
+                    fieldClassName,
+                    'justify-start gap-3 font-normal hover:bg-white/[0.07]',
+                    !blockFormData.start_date && 'text-zinc-500',
                   )}
                 >
-                  <CalendarIcon className="mr-2 size-4" />
-                  {blockFormData.start_date
-                    ? format(
-                        new Date(blockFormData.start_date + 'T00:00:00'),
-                        'PPP',
-                      )
-                    : t('agenda.chooseDate')}
+                  <CalendarDays className="size-4 shrink-0 text-rose-300" />
+                  <span className="truncate">
+                    {blockFormData.start_date
+                      ? format(
+                          new Date(blockFormData.start_date + 'T00:00:00'),
+                          'PPP',
+                        )
+                      : t('agenda.chooseDate')}
+                  </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800">
+              <PopoverContent
+                align="start"
+                className="w-auto border-white/10 bg-zinc-900 p-2 text-white shadow-2xl"
+              >
                 <Calendar
                   mode="single"
                   selected={
@@ -104,11 +141,11 @@ export function BlockScheduleForm({
                       ? new Date(blockFormData.start_date + 'T00:00:00')
                       : undefined
                   }
-                  onSelect={(d) =>
-                    d &&
+                  onSelect={(date) =>
+                    date &&
                     setBlockFormData({
                       ...blockFormData,
-                      start_date: format(d, 'yyyy-MM-dd'),
+                      start_date: format(date, 'yyyy-MM-dd'),
                     })
                   }
                 />
@@ -116,70 +153,95 @@ export function BlockScheduleForm({
             </Popover>
           </div>
 
-          {/* Start Time */}
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">
-              {t('agenda.startTime')}
+          <div className="min-w-0">
+            <label htmlFor="block-start-time" className={labelClassName}>
+              <span className="inline-flex items-center gap-2">
+                <Clock3 className="size-3.5" aria-hidden="true" />
+                {t('agenda.startTime')}
+              </span>
             </label>
             <input
+              id="block-start-time"
               type="time"
               required
-              className="color-scheme-dark box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white cursor-pointer"
+              className={cn(fieldClassName, 'color-scheme-dark cursor-pointer')}
               value={blockFormData.start_time}
-              onChange={(e) =>
+              onChange={(event) =>
                 setBlockFormData({
                   ...blockFormData,
-                  start_time: e.target.value,
+                  start_time: event.target.value,
                 })
               }
             />
           </div>
 
-          {/* End Time */}
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">
-              {t('agenda.endTime')}
+          <div className="min-w-0">
+            <label htmlFor="block-end-time" className={labelClassName}>
+              <span className="inline-flex items-center gap-2">
+                <Clock3 className="size-3.5" aria-hidden="true" />
+                {t('agenda.endTime')}
+              </span>
             </label>
             <input
+              id="block-end-time"
               type="time"
               required
-              className="color-scheme-dark box-border block min-h-11 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white cursor-pointer"
+              className={cn(fieldClassName, 'color-scheme-dark cursor-pointer')}
               value={blockFormData.end_time}
-              onChange={(e) =>
-                setBlockFormData({ ...blockFormData, end_time: e.target.value })
+              onChange={(event) =>
+                setBlockFormData({
+                  ...blockFormData,
+                  end_time: event.target.value,
+                })
               }
             />
           </div>
 
-          {/* Reason */}
-          <div className="grid gap-2 md:col-span-2 lg:col-span-2">
-            <label className="text-xs text-zinc-400">
-              {t('agenda.blockReason')}
+          <div className="min-w-0 sm:col-span-2">
+            <label htmlFor="block-reason" className={labelClassName}>
+              <span className="inline-flex items-center gap-2">
+                <FileText className="size-3.5" aria-hidden="true" />
+                {t('agenda.blockReason')}
+                <span className="font-normal normal-case tracking-normal text-zinc-700">
+                  · {t('common.optional')}
+                </span>
+              </span>
             </label>
             <input
+              id="block-reason"
               placeholder={t('agenda.blockReasonPlaceholder')}
-              className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white"
+              className={cn(fieldClassName, 'placeholder:text-zinc-600')}
               value={blockFormData.reason || ''}
-              onChange={(e) =>
-                setBlockFormData({ ...blockFormData, reason: e.target.value })
+              onChange={(event) =>
+                setBlockFormData({
+                  ...blockFormData,
+                  reason: event.target.value,
+                })
               }
             />
           </div>
+        </div>
 
-          {/* Submit */}
+        <footer className="flex justify-end border-t border-white/[0.07] bg-white/[0.015] px-4 py-4 sm:px-6">
           <Button
-            aria-label={
-              loading ? t('agenda.savingBlock') : t('agenda.saveBlock')
-            }
             type="submit"
             disabled={loading}
-            variant="ghost"
-            className="bg-red-600 hover:bg-red-500 text-white h-10 w-full cursor-pointer"
+            className="min-h-11 w-full rounded-xl bg-rose-500 px-5 font-semibold text-white shadow-[0_8px_24px_rgba(244,63,94,0.16)] transition hover:bg-rose-400 disabled:opacity-60 sm:w-auto"
           >
-            {loading ? <Spinner className="mr-2" /> : t('agenda.saveBlock')}
+            {loading ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                {t('agenda.savingBlock')}
+              </>
+            ) : (
+              <>
+                <CalendarOff className="mr-2 size-4" aria-hidden="true" />
+                {t('agenda.saveBlock')}
+              </>
+            )}
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+        </footer>
+      </form>
+    </div>
   );
 }

@@ -825,7 +825,7 @@ export default function AgendaPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
-        <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-zinc-950/95 p-3 sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,900px)] sm:p-5">
+        <DialogContent className="w-[calc(100%-1rem)] max-h-[calc(100dvh-1rem)] max-w-xl overflow-y-auto border-white/10 bg-zinc-950 p-2 shadow-[0_24px_100px_rgba(0,0,0,0.65)] sm:w-[calc(100%-2rem)] sm:max-h-[min(92dvh,760px)] sm:p-3">
           <DialogTitle className="sr-only">{t('agenda.blockTime')}</DialogTitle>
           <DialogDescription className="sr-only">
             {t('agenda.blockTimeDescription')}
