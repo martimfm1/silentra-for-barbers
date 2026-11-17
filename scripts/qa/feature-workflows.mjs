@@ -287,6 +287,38 @@ assert.ok(
   'Automations must provide an idempotent one-click birthday automation setup.',
 );
 
+const appointmentAuditMigration = read(
+  'supabase/migrations/20261117233000_appointment_activity_audit_trail.sql',
+);
+const appointmentHistoryApi = read(
+  'app/api/appointments/[appointmentId]/history/route.ts',
+);
+const appointmentDetailDialog = read(
+  'components/dashboard/appointment-detail-dialog.tsx',
+);
+const appointmentConfirmApi = read(
+  'app/api/appointments/[appointmentId]/confirm/route.ts',
+);
+const appointmentRescheduleApi = read(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+);
+
+assert.match(appointmentAuditMigration, /create or replace function public\.capture_appointment_audit_event/);
+assert.match(appointmentAuditMigration, /security definer[\s\S]*set search_path = ''/);
+assert.match(appointmentAuditMigration, /appointment\.created/);
+assert.match(appointmentAuditMigration, /appointment\.rescheduled/);
+assert.match(appointmentAuditMigration, /appointment\.cancelled/);
+assert.match(appointmentAuditMigration, /revoke all on function public\.capture_appointment_audit_event/);
+assert.match(appointmentHistoryApi, /requireTenantAuthorization/);
+assert.match(appointmentHistoryApi, /\.eq\('barbershop_id', tenant\.barbershopId\)/);
+assert.match(appointmentHistoryApi, /\.contains\('metadata', \{ barbershop_id: tenant\.barbershopId \}\)/);
+assert.match(appointmentHistoryApi, /Cache-Control.*private, no-store/);
+assert.match(appointmentDetailDialog, /Activity history|Histórico de atividade/);
+assert.match(appointmentDetailDialog, /Earlier activity was not recorded|A atividade anterior não foi registada/);
+assert.match(appointmentConfirmApi, /appointment\.confirmed/);
+assert.match(appointmentRescheduleApi, /appointment\.rescheduled/);
+assert.match(appointmentCompleteApi, /appointment\.completed/);
+
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
