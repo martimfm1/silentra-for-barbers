@@ -337,9 +337,9 @@ export function ClientDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-1rem)] gap-5 overflow-y-auto border-white/10 bg-zinc-950 text-zinc-100 sm:max-w-5xl">
+      <DialogContent className="relative isolate max-h-[90dvh] w-[calc(100%-1rem)] gap-5 overflow-y-auto overflow-x-hidden rounded-[1.75rem] border border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_48%),#09090b] text-zinc-100 shadow-[0_24px_100px_-28px_rgba(0,0,0,0.9)] sm:max-w-5xl">
         <DialogHeader className="pr-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
             {t('crmDetail.profile')}
           </p>
           <DialogTitle className="text-xl sm:text-2xl">
@@ -372,7 +372,7 @@ export function ClientDetailsDialog({
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)]">
             <section className="min-w-0 space-y-4">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <Card className="border-white/10 bg-white/[0.03]">
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
                       {t('crmDetail.appointmentHistory')}
@@ -382,7 +382,7 @@ export function ClientDetailsDialog({
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-white/10 bg-white/[0.03]">
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
                       {t('crmDetail.completedBookings')}
@@ -392,7 +392,7 @@ export function ClientDetailsDialog({
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-white/10 bg-white/[0.03]">
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
                       {t('crmDetail.totalSpent')}
@@ -402,7 +402,7 @@ export function ClientDetailsDialog({
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-white/10 bg-white/[0.03]">
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                   <CardContent className="p-4">
                     <p className="text-xs text-zinc-500">
                       {locale === 'pt' ? 'Última visita' : 'Last visit'}
@@ -416,10 +416,10 @@ export function ClientDetailsDialog({
                 </Card>
               </div>
 
-              <Card className="min-w-0 border-white/10 bg-white/[0.03]">
+              <Card className="min-w-0 border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarClock className="size-5 text-blue-400" />
+                    <CalendarClock className="size-5 text-emerald-300" />
                     {t('clientsPage.upcomingAppointments')}
                   </CardTitle>
                 </CardHeader>
@@ -475,10 +475,10 @@ export function ClientDetailsDialog({
                 </CardContent>
               </Card>
 
-              <Card className="min-w-0 border-white/10 bg-white/[0.03]">
+              <Card className="min-w-0 border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarDays className="size-5 text-blue-400" />
+                    <CalendarDays className="size-5 text-emerald-300" />
                     {t('crmDetail.appointmentHistory')}
                   </CardTitle>
                 </CardHeader>
@@ -498,7 +498,7 @@ export function ClientDetailsDialog({
                         return (
                           <article
                             key={appointment.id}
-                            className="flex min-w-0 flex-col gap-2 rounded-xl border border-white/10 bg-black/10 p-3 sm:flex-row sm:items-center sm:justify-between"
+                            className="flex min-w-0 flex-col gap-2 rounded-xl border border-white/[0.08] bg-black/20 transition-colors duration-200 hover:border-emerald-400/20 hover:bg-white/[0.035] p-3 sm:flex-row sm:items-center sm:justify-between"
                           >
                             <div className="min-w-0">
                               <p className="font-medium text-zinc-100">
@@ -560,10 +560,10 @@ export function ClientDetailsDialog({
             </section>
 
             <aside className="min-w-0 space-y-4">
-              <Card className="border-white/10 bg-white/[0.03]">
+              <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <UserRound className="size-5 text-blue-400" />
+                    <UserRound className="size-5 text-emerald-300" />
                     {t('crmDetail.customerData')}
                   </CardTitle>
                 </CardHeader>
@@ -614,10 +614,10 @@ export function ClientDetailsDialog({
               <ClientPlansManager clientId={client.id} />
 
               {client.style_notes?.trim() ? (
-                <Card className="border-white/10 bg-white/[0.03]">
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Scissors className="size-5 text-blue-400" />
+                      <Scissors className="size-5 text-emerald-300" />
                       {t('crmDetail.styleNotes')}
                     </CardTitle>
                   </CardHeader>
@@ -629,10 +629,10 @@ export function ClientDetailsDialog({
                 </Card>
               ) : null}
 
-              <Card className="border-white/10 bg-white/[0.03]">
+              <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Tag className="size-5 text-blue-400" />
+                    <Tag className="size-5 text-emerald-300" />
                     {locale === 'pt' ? 'Etiquetas do cliente' : 'Customer tags'}
                   </CardTitle>
                 </CardHeader>
@@ -726,10 +726,10 @@ export function ClientDetailsDialog({
                   ) : null}
                 </CardContent>
               </Card>
-              <Card className="border-white/10 bg-white/[0.03]">
+              <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <StickyNote className="size-5 text-blue-400" />
+                    <StickyNote className="size-5 text-emerald-300" />
                     {t('crmDetail.internalNotes')}
                   </CardTitle>
                 </CardHeader>
@@ -762,7 +762,7 @@ export function ClientDetailsDialog({
                       notes.map((item) => (
                         <article
                           key={item.id}
-                          className="rounded-xl border border-white/10 bg-black/10 p-3"
+                          className="rounded-xl border border-white/[0.08] bg-black/20 transition-colors duration-200 hover:border-emerald-400/20 hover:bg-white/[0.035] p-3"
                         >
                           <p className="whitespace-pre-wrap break-words text-sm text-zinc-200">
                             {item.content}
