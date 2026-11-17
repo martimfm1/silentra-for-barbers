@@ -112,17 +112,48 @@ async function GET__unobserved(
       );
     }
 
+    const actorIds = [...new Set(
+      (events ?? [])
+        .map((event) => {
+          const metadata =
+            event.metadata && typeof event.metadata === 'object'
+              ? (event.metadata as Record<string, unknown>)
+              : {};
+          return typeof metadata.actor_user_id === 'string'
+            ? metadata.actor_user_id
+            : null;
+        })
+        .filter((id): id is string => Boolean(id)),
+    )];
+    const actorNames = new Map<string, string>();
+    if (actorIds.length > 0) {
+      const { data: actors } = await tenant.admin
+        .from('users')
+        .select('id,name_complete')
+        .eq('barbershop_id', tenant.barbershopId)
+        .in('id', actorIds);
+      for (const actor of actors ?? []) {
+        if (actor.name_complete) actorNames.set(actor.id, actor.name_complete);
+      }
+    }
+
     const safeEvents = (events ?? []).map((event) => {
       const metadata =
         event.metadata && typeof event.metadata === 'object'
           ? (event.metadata as Record<string, unknown>)
           : {};
+      const actorUserId =
+        typeof metadata.actor_user_id === 'string'
+          ? metadata.actor_user_id
+          : null;
       return {
         id: event.id,
         action: event.action,
         createdAt: event.created_at,
         actorType: typeof metadata.actor_type === 'string' ? metadata.actor_type : 'system',
-        actorName: typeof metadata.actor_name === 'string' ? metadata.actor_name : null,
+        actorName:
+          (typeof metadata.actor_name === 'string' ? metadata.actor_name : null) ??
+          (actorUserId ? actorNames.get(actorUserId) ?? null : null),
         fromStatus: typeof metadata.from_status === 'string' ? metadata.from_status : null,
         toStatus: typeof metadata.to_status === 'string' ? metadata.to_status : null,
         fromDateHour: typeof metadata.from_date_hour === 'string' ? metadata.from_date_hour : null,
