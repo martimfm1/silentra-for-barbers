@@ -1236,6 +1236,14 @@ const checks = [
       source.includes('grant execute on function public.join_barbershop_with_invite(text)'),
   },
   {
+    name: 'Invite join qualifies professional barbershop columns to avoid RETURNS TABLE ambiguity',
+    file: 'supabase/migrations/20261117001500_qualify_invite_professional_barbershop_columns.sql',
+    test: (source) =>
+      source.includes('from public.professionals as professional') &&
+      (source.match(/professional\\.barbershop_id = v_invite\\.barbershop_id/g) ?? []).length === 2 &&
+      !source.includes('where barbershop_id = v_invite.barbershop_id'),
+  },
+  {
     name: 'Onboarding API explains when an owner account is already linked to another barbershop',
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
