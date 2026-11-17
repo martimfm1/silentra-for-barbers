@@ -50,18 +50,24 @@ function getErrorMessage(error: unknown): string {
 
 function normalizeInviteCode(value: string): string {
   const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (cleaned.startsWith('SIL')) {
+    const token = cleaned.slice(3);
+    return token.length ? `SIL-${token.slice(0, 32)}` : 'SIL-';
+  }
+
   if (cleaned.startsWith('BARB')) {
-    const body = cleaned.slice(4, 12);
-    return body.length
-      ? `BARB-${body.slice(0, 4)}${body.length > 4 ? `-${body.slice(4)}` : ''}`
-      : 'BARB-';
+    const body = cleaned.slice(4, 16);
+    const groups = body.match(/.{1,4}/g) ?? [];
+    return groups.length ? `BARB-${groups.join('-')}` : 'BARB-';
   }
-  if (/^[A-Z0-9]{1,8}$/.test(cleaned)) {
-    return cleaned.length > 4
-      ? `BARB-${cleaned.slice(0, 4)}-${cleaned.slice(4, 8)}`
-      : cleaned;
+
+  if (/^[0-9A-F]{10}$/.test(cleaned)) return cleaned;
+  if (/^[0-9A-Z]{1,12}$/.test(cleaned)) {
+    const groups = cleaned.match(/.{1,4}/g) ?? [];
+    return `BARB-${groups.join('-')}`;
   }
-  return cleaned.slice(0, 14);
+
+  return cleaned.slice(0, 46);
 }
 
 const inputClass =
@@ -89,6 +95,17 @@ export default function OnboardingPage() {
   const [searchingAddress, setSearchingAddress] = useState(false);
   const [isAddressSelected, setIsAddressSelected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get('invite');
+    if (!invite) return;
+
+    const normalized = normalizeInviteCode(invite);
+    if (!normalized) return;
+    setInviteCode(normalized);
+    setStep('join');
+  }, []);
 
   useEffect(() => {
     if (!address || address.length < 3 || isAddressSelected) {
@@ -847,8 +864,8 @@ export default function OnboardingPage() {
                         onChange={(event) =>
                           setInviteCode(normalizeInviteCode(event.target.value))
                         }
-                        placeholder="BARB-7K4P-9X2M"
-                        maxLength={14}
+                        placeholder="BARB-ABCD-EFGH-JKLM"
+                        maxLength={46}
                         inputMode="text"
                         autoComplete="one-time-code"
                         className="mt-2 min-h-12 text-center font-mono text-lg tracking-[0.25em]"
