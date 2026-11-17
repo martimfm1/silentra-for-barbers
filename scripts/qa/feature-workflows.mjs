@@ -40,6 +40,9 @@ const bookingApi = read('app/api/bookings/route.ts');
 const mbwayBookingDrawer = read(
   'app/barbershops/components/booking-drawer-canonical.tsx',
 );
+const bookingDrawerAvailabilityContext = read(
+  'app/barbershops/components/booking-drawer-canonical.tsx',
+);
 const mbwayConfirmationApi = read(
   'app/api/appointments/[appointmentId]/confirm/route.ts',
 );
@@ -286,6 +289,10 @@ assert.ok(
     marketingWorkspace.includes('birthdayCampaign'),
   'Automations must provide an idempotent one-click birthday automation setup.',
 );
+
+assert.match(bookingDrawerAvailabilityContext, /service\.durationMinutes/);
+assert.match(bookingDrawerAvailabilityContext, /service\.price/);
+assert.match(bookingDrawerAvailabilityContext, /aria-live="polite"/);
 
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
