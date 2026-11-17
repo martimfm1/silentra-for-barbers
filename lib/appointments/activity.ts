@@ -23,23 +23,29 @@ export async function recordAppointmentActivity(
     metadata?: Record<string, string | number | boolean | null>;
   },
 ): Promise<void> {
-  const { error } = await admin.from('audit_logs').insert({
-    action: `appointment.${input.event}`,
-    entity_type: 'appointment',
-    entity_id: input.appointmentId,
-    barbershop_id: input.barbershopId,
-    actor_id: input.actorId ?? null,
-    actor_type: input.actorType,
-    actor_name: input.actorName?.trim().slice(0, 120) || null,
-    metadata: input.metadata ?? {},
-  });
+  try {
+    const { error } = await admin.from('audit_logs').insert({
+      action: `appointment.${input.event}`,
+      entity_type: 'appointment',
+      entity_id: input.appointmentId,
+      barbershop_id: input.barbershopId,
+      actor_id: input.actorId ?? null,
+      actor_type: input.actorType,
+      actor_name: input.actorName?.trim().slice(0, 120) || null,
+      metadata: input.metadata ?? {},
+    });
 
-  if (error) {
-    // Appointment mutations must not be rolled back by a secondary audit write,
-    // but failures are visible to server monitoring for investigation.
+    if (error) {
+      console.error('[APPOINTMENT_ACTIVITY_WRITE_FAILED]', {
+        event: input.event,
+        code: error.code ?? 'UNKNOWN',
+      });
+    }
+  } catch (error) {
+    // An audit outage must not turn a successfully changed booking into an API failure.
     console.error('[APPOINTMENT_ACTIVITY_WRITE_FAILED]', {
       event: input.event,
-      code: error.code ?? 'UNKNOWN',
+      error: error instanceof Error ? error.name : 'UNKNOWN',
     });
   }
 }
