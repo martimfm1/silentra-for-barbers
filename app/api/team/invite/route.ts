@@ -96,6 +96,7 @@ async function POST__unobserved(request: Request) {
       {
         p_method: method,
         p_expires_in_hours: expiresInHours,
+        p_role: 'barber',
       },
     );
 
