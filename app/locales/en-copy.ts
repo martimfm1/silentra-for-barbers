@@ -5,6 +5,7 @@
 export const enCopy = {
   common: {
     loading: 'Loading…',
+    optional: 'optional',
     retry: 'Try again',
     upgrade: 'Change plan',
     comparePlans: 'View plans',
