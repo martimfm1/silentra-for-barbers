@@ -1240,7 +1240,7 @@ const checks = [
     file: 'supabase/migrations/20261117001500_qualify_invite_professional_barbershop_columns.sql',
     test: (source) =>
       source.includes('from public.professionals as professional') &&
-      (source.match(/professional\\.barbershop_id = v_invite\\.barbershop_id/g) ?? []).length === 2 &&
+      (source.split('professional.barbershop_id = v_invite.barbershop_id').length - 1) === 2 &&
       !source.includes('where barbershop_id = v_invite.barbershop_id'),
   },
   {
