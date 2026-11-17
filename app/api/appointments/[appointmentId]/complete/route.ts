@@ -236,6 +236,22 @@ async function POST__unobserved(
       );
     }
 
+    const { error: auditError } = await admin.from('audit_logs').insert({
+      action: 'appointment.completed',
+      entity_type: 'appointment',
+      entity_id: appointmentId,
+      metadata: {
+        barbershop_id: barbershopId,
+        actor_type: 'staff',
+        actor_user_id: tenant.userId,
+        from_status: 'scheduled',
+        to_status: 'completed',
+      },
+    });
+    if (auditError) {
+      console.error('[APPOINTMENT_AUDIT_WRITE_ERROR]', auditError.code ?? 'UNKNOWN');
+    }
+
     const { data: shop } = await admin
       .from('shops')
       .select('id,slug,name')
