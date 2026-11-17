@@ -174,11 +174,21 @@ const checks = [
       source.includes('INVITE_BODY.test(body)'),
   },
   {
-    name: 'Invite-code UI accepts new and already-issued hexadecimal BARB codes',
+    name: 'Invite-code UI validates long BARB codes and secure SIL link tokens',
     file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
     test: (source) =>
-      source.includes('const INVITE_PATTERN =') &&
-      source.includes('BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}'),
+      source.includes('const INVITE_CODE_PATTERN =') &&
+      source.includes('BARB-[0-9A-HJ-NP-Z]{4}') &&
+      source.includes('const LINK_TOKEN_PATTERN = /^SIL-[0-9A-F]{32}$/'),
+  },
+  {
+    name: 'Canonical onboarding join API accepts new invite links and QR tokens',
+    file: 'app/api/onboarding/join-v2/route.ts',
+    test: (source) =>
+      source.includes('const LINK_TOKEN = /^[0-9A-F]{32}$/') &&
+      source.includes("compact.startsWith('SIL')") &&
+      source.includes('[0-9A-HJ-NP-Z]{12}') &&
+      source.includes('LEGACY_INVITE_CODE'),
   },
   {
     name: 'Onboarding join RPC preserves compatibility with issued hexadecimal BARB invites',
