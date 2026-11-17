@@ -39,6 +39,7 @@ import { SiteNavbar } from '@/components/site-navbar';
 import { TermsDrawer } from '@/components/legal/terms-drawer';
 import { useLanguage } from '@/context/LanguageContext';
 import { handleLogin, handleRegister } from './services/auth-handles';
+import { sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 
 export default function LoginPage() {
   const { t, locale } = useLanguage();
@@ -51,6 +52,7 @@ export default function LoginPage() {
   const [isUnconfirmed, setIsUnconfirmed] = useState(false);
   const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
+  const [inviteRedirect, setInviteRedirect] = useState<string | null>(null);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const loginEmailHintId = useId();
@@ -61,6 +63,7 @@ export default function LoginPage() {
     const requestedEmail = params.get('email');
     const status = params.get('status');
     const errorParam = params.get('error');
+    setInviteRedirect(sanitizeInviteRedirect(params.get('redirect')));
 
     if (requestedTab === 'register') setActiveTab('register');
     if (requestedEmail) setLoginEmail(requestedEmail);
@@ -72,6 +75,13 @@ export default function LoginPage() {
       setErrorMsg(t('auth.unconfirmed'));
     }
   }, [t]);
+
+  const confirmEmailParams = new URLSearchParams();
+  if (loginEmail) confirmEmailParams.set('email', loginEmail);
+  if (inviteRedirect) confirmEmailParams.set('redirect', inviteRedirect);
+  const confirmEmailHref = confirmEmailParams.toString()
+    ? `/confirm-email?${confirmEmailParams.toString()}`
+    : '/confirm-email';
 
   const clearMessages = () => {
     setErrorMsg(null);
@@ -178,7 +188,7 @@ export default function LoginPage() {
                         ) : null}
                         {isUnconfirmed ? (
                           <Link
-                            href={`/confirm-email${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
+                            href={confirmEmailHref}
                             className="inline-flex min-h-10 items-center rounded-lg border border-red-400/20 bg-red-400/10 px-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-red-400/20"
                           >
                             {t('auth.resendConfirmation')}
@@ -336,10 +346,13 @@ export default function LoginPage() {
                             acceptedTerms,
                             termsErrorMessage: t('legal.acceptRequired'),
                             successMessage: t('auth.registered'),
-                            onSuccess: () =>
-                              router.push(
-                                `/confirm-email${email ? `?email=${encodeURIComponent(email)}` : ''}`,
-                              ),
+                            redirectPath: inviteRedirect,
+                            onSuccess: () => {
+                              const params = new URLSearchParams();
+                              if (email) params.set('email', email);
+                              if (inviteRedirect) params.set('redirect', inviteRedirect);
+                              router.push(`/confirm-email?${params.toString()}`);
+                            },
                           });
                         }}
                       >

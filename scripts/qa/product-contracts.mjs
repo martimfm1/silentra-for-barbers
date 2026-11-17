@@ -117,6 +117,45 @@ const checks = [
       source.includes('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
   },
   {
+    name: 'Team invite v2 supports expiring code, link and QR tokens with revocation',
+    file: 'supabase/migrations/20261117120000_rework_team_invites_with_links_and_qr.sql',
+    test: (source) =>
+      source.includes('create_barbershop_invite_v2') &&
+      source.includes("p_method not in ('code', 'link', 'qr')") &&
+      source.includes("v_value := 'SIL-'") &&
+      source.includes('gen_random_bytes(16)') &&
+      source.includes('revoked_at is null') &&
+      source.includes('revoke_barbershop_invite'),
+  },
+  {
+    name: 'Team invite API creates, lists and revokes invitations',
+    file: 'app/api/team/invite/route.ts',
+    test: (source) =>
+      /\.rpc\(\s*['"]create_barbershop_invite_v2['"]/.test(source) &&
+      source.includes("from('barbershop_invite_codes')") &&
+      /\.rpc\(\s*['"]revoke_barbershop_invite['"]/.test(source) &&
+      source.includes("export const GET") &&
+      source.includes("export const DELETE"),
+  },
+  {
+    name: 'Team invitation UI supports code, link sharing and QR downloads',
+    file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
+    test: (source) =>
+      source.includes("useState<InviteMethod>('link')") &&
+      source.includes("QRCode.toDataURL") &&
+      source.includes('navigator.share') &&
+      source.includes('download="silentra-convite-equipa.png"') &&
+      source.includes("method: 'DELETE'"),
+  },
+  {
+    name: 'Onboarding pre-fills invitation links and accepts secure SIL tokens',
+    file: 'app/onboarding/page.tsx',
+    test: (source) =>
+      source.includes("params.get('invite')") &&
+      source.includes("cleaned.startsWith('SIL')") &&
+      source.includes('maxLength={46}'),
+  },
+  {
     name: 'Current invite generator samples only from the accepted 32-character alphabet',
     file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
     test: (source) =>
@@ -131,15 +170,55 @@ const checks = [
     name: 'Onboarding API accepts new and already-issued hexadecimal BARB codes',
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
-      source.includes('const INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;') &&
+      source.includes('const INVITE_BODY = /^(?:[0-9A-HJ-NP-Z]{8}|[0-9A-HJ-NP-Z]{12})$/;') &&
       source.includes('INVITE_BODY.test(body)'),
   },
   {
-    name: 'Invite-code UI accepts new and already-issued hexadecimal BARB codes',
+    name: 'Invite-code UI validates long BARB codes and secure SIL link tokens',
     file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
     test: (source) =>
-      source.includes('const INVITE_PATTERN =') &&
-      source.includes('BARB-[0-9A-HJ-NP-Z]{4}-[0-9A-HJ-NP-Z]{4}'),
+      source.includes('const INVITE_CODE_PATTERN =') &&
+      source.includes('BARB-(?:[0-9A-HJ-NP-Z]{4}-){2}') &&
+      source.includes('const LINK_TOKEN_PATTERN = /^SIL-[0-9A-F]{32}$/'),
+  },
+  {
+    name: 'Canonical onboarding join API accepts new invite links and QR tokens',
+    file: 'app/api/onboarding/join-v2/route.ts',
+    test: (source) =>
+      source.includes('const LINK_TOKEN = /^[0-9A-F]{32}$/') &&
+      source.includes("compact.startsWith('SIL')") &&
+      source.includes('[0-9A-HJ-NP-Z]{12}') &&
+      source.includes('LEGACY_INVITE_CODE'),
+  },
+  {
+    name: 'Invite links survive the unauthenticated onboarding redirect',
+    file: 'lib/supabase/proxy.ts',
+    test: (source) =>
+      source.includes("loginUrl.searchParams.set(") &&
+      source.includes("`${pathname}${request.nextUrl.search}`"),
+  },
+  {
+    name: 'Invite destination survives registration and email confirmation safely',
+    file: 'lib/auth/email-confirmation.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect') &&
+      source.includes("target.pathname !== '/onboarding'") &&
+      source.includes('INVITE_LINK_TOKEN') &&
+      source.includes('callback.searchParams.set(\'next\', safeNext)'),
+  },
+  {
+    name: 'Signup and resend-confirmation flows carry the validated invitation destination',
+    file: 'app/api/auth/register/route.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect(body.redirect)') &&
+      source.includes('getAuthCallbackUrl('),
+  },
+  {
+    name: 'Auth callback only accepts a validated invite onboarding redirect',
+    file: 'app/api/auth/callback/route.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect(value)') &&
+      source.includes("'/email-confirmed'"),
   },
   {
     name: 'Onboarding join RPC preserves compatibility with issued hexadecimal BARB invites',

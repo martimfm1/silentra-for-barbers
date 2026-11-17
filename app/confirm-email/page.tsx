@@ -22,6 +22,7 @@ export default function ConfirmEmailPage() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const inviteRedirect = searchParams.get('redirect');
 
   const [isResending, setIsResending] = useState(false);
   const [resendStatus, setResendStatus] = useState<
@@ -42,7 +43,7 @@ export default function ConfirmEmailPage() {
 
     try {
       const supabase = createClient();
-      const emailRedirectTo = getClientAuthCallbackUrl();
+      const emailRedirectTo = getClientAuthCallbackUrl(inviteRedirect);
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,

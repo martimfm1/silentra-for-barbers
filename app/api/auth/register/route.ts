@@ -1,7 +1,7 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getAuthCallbackUrl } from '@/lib/auth/email-confirmation';
+import { getAuthCallbackUrl, sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 import { normalizeText } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 
@@ -9,7 +9,7 @@ async function POST__unobserved(request: Request) {
   try {
     const bodyResult = await readJsonObject(request, {
       maxBytes: 8 * 1024,
-      allowedKeys: ['email', 'name_complete', 'num_phone', 'password'],
+      allowedKeys: ['email', 'name_complete', 'num_phone', 'password', 'redirect'],
     });
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;
@@ -61,7 +61,10 @@ async function POST__unobserved(request: Request) {
       },
     });
 
-    const emailRedirectTo = getAuthCallbackUrl(request);
+    const emailRedirectTo = getAuthCallbackUrl(
+      request,
+      sanitizeInviteRedirect(body.redirect),
+    );
 
     const { data, error } = await supabase.auth.signUp({
       email,

@@ -2,13 +2,11 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 
 function getSafeNext(value: string | null): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) {
-    return '/email-confirmed';
-  }
-
-  return value;
+  if (value === '/email-confirmed' || value === '/reset-password') return value;
+  return sanitizeInviteRedirect(value) ?? '/email-confirmed';
 }
 
 async function GET__unobserved(request: Request) {
