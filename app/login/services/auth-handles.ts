@@ -2,6 +2,7 @@ import { FormEvent } from 'react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { trackMarketingEvent } from '@/lib/analytics/marketing';
+import { sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 
 /**
  * Compatibility handler for Supabase confirmation links that still use the
@@ -82,12 +83,7 @@ export async function handleLogin({
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('redirect')
       : null;
-  const safeNext =
-    requestedNext &&
-    requestedNext.startsWith('/') &&
-    !requestedNext.startsWith('//')
-      ? requestedNext
-      : null;
+  const safeNext = sanitizeInviteRedirect(requestedNext);
 
   try {
     const res = await fetch('/api/auth/login', {
