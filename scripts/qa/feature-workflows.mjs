@@ -311,6 +311,8 @@ assert.ok(appointmentActivityWriter.includes('action: `appointment.${input.event
 assert.ok(appointmentDetailDialog.includes('Histórico de atividade'));
 assert.ok(appointmentDetailDialog.includes('Activity history'));
 assert.ok(appointmentDetailDialog.includes("cache: 'no-store'"));
+assert.ok(appointmentActivityApi.includes('notificationSkipped'));
+assert.ok(appointmentDetailDialog.includes('activityNotificationDetail'));
 
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
