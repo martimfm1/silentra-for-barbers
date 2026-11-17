@@ -414,9 +414,11 @@ export default function AgendaPage() {
 
   const handleDeleteScheduleBlock = useCallback(
     async (blockId: string) => {
-      await deleteBlockAction(blockId);
-      setCalendarBlocksRefreshKey((current) => current + 1);
-      return true;
+      const removed = await deleteBlockAction(blockId);
+      if (removed) {
+        setCalendarBlocksRefreshKey((current) => current + 1);
+      }
+      return removed;
     },
     [deleteBlockAction],
   );
