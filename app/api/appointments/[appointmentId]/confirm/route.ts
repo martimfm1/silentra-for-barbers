@@ -181,6 +181,22 @@ async function POST__unobserved(
         { status: 409 },
       );
 
+    const { error: auditError } = await admin.from('audit_logs').insert({
+      action: 'appointment.confirmed',
+      entity_type: 'appointment',
+      entity_id: appointmentId,
+      metadata: {
+        barbershop_id: barbershopId,
+        actor_type: 'staff',
+        actor_user_id: tenant.userId,
+        from_status: 'pending',
+        to_status: 'scheduled',
+      },
+    });
+    if (auditError) {
+      console.error('[APPOINTMENT_AUDIT_WRITE_ERROR]', auditError.code ?? 'UNKNOWN');
+    }
+
     const recipientEmail = appointment.manual_email?.trim().toLowerCase() || null;
     const recipientName =
       appointment.manual_name?.trim() ||
