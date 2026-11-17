@@ -300,6 +300,7 @@ const appointmentDetailDialog = read(
 );
 assert.ok(appointmentActivityMigration.includes("'appointment.created'"));
 assert.ok(appointmentActivityMigration.includes("'appointment.cancelled'"));
+assert.ok(!appointmentActivityMigration.includes('appointment.updated_at'));
 assert.ok(appointmentActivityMigration.includes('barbershop_id uuid references public.barbershops'));
 assert.ok(appointmentActivityMigration.includes('revoke all on table public.audit_logs from public, anon, authenticated'));
 assert.ok(appointmentActivityApi.includes(".eq('barbershop_id', tenant.barbershopId)"));
