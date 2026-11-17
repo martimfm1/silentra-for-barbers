@@ -59,7 +59,7 @@ async function POST__unobserved(
       appointment.payment_expires_at &&
       new Date(appointment.payment_expires_at).getTime() <= Date.now()
     ) {
-      await admin
+      const { data: expiredAppointment, error: expiryError } = await admin
         .from('appointments')
         .update({
           status: 'cancelled',
@@ -72,7 +72,23 @@ async function POST__unobserved(
         })
         .eq('id', appointmentId)
         .eq('barbershop_id', barbershopId)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle();
+      if (!expiryError && expiredAppointment) {
+        await recordAppointmentActivity(admin, {
+          barbershopId,
+          appointmentId,
+          event: 'cancelled',
+          actorType: 'system',
+          actorName: 'Sistema',
+          metadata: {
+            previousStatus: 'pending',
+            newStatus: 'cancelled',
+            reason: 'mbway_prepayment_expired',
+          },
+        });
+      }
       return NextResponse.json(
         {
           success: false,
