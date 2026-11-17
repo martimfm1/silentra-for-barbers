@@ -1268,8 +1268,6 @@ export const ptCopy = {
     reserving: 'A reservar…',
     confirmBooking: 'Confirmar marcação',
     bookingConfirmed: 'Marcação confirmada',
-    bookingPendingTitle: 'Pedido de marcação recebido',
-    bookingPendingDescription: 'A tua marcação ainda aguarda confirmação da barbearia. Não precisas de fazer mais nada por agora — receberás uma atualização quando for confirmada.',
     finish: 'Concluir',
     with: 'com',
     at: 'às',
