@@ -191,6 +191,36 @@ const checks = [
       source.includes('LEGACY_INVITE_CODE'),
   },
   {
+    name: 'Invite links survive the unauthenticated onboarding redirect',
+    file: 'lib/supabase/proxy.ts',
+    test: (source) =>
+      source.includes("loginUrl.searchParams.set(") &&
+      source.includes("`${pathname}${request.nextUrl.search}`"),
+  },
+  {
+    name: 'Invite destination survives registration and email confirmation safely',
+    file: 'lib/auth/email-confirmation.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect') &&
+      source.includes("target.pathname !== '/onboarding'") &&
+      source.includes('INVITE_LINK_TOKEN') &&
+      source.includes('callback.searchParams.set(\'next\', safeNext)'),
+  },
+  {
+    name: 'Signup and resend-confirmation flows carry the validated invitation destination',
+    file: 'app/api/auth/register/route.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect(body.redirect)') &&
+      source.includes('getAuthCallbackUrl('),
+  },
+  {
+    name: 'Auth callback only accepts a validated invite onboarding redirect',
+    file: 'app/api/auth/callback/route.ts',
+    test: (source) =>
+      source.includes('sanitizeInviteRedirect(value)') &&
+      source.includes("'/email-confirmed'"),
+  },
+  {
     name: 'Onboarding join RPC preserves compatibility with issued hexadecimal BARB invites',
     file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
     test: (source) =>
