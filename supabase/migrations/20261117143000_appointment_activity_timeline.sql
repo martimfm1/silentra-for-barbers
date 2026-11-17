@@ -21,7 +21,7 @@ set
   end,
   actor_name = case
     when log.action like 'customer_portal_%' then 'Cliente'
-    when log.metadata ? 'actorId' then 'Equipa da barbearia'
+    when log.metadata ? 'actorId' then null
     else 'Sistema'
   end
 from public.appointments as appointment
