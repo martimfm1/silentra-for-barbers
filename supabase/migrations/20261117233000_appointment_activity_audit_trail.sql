@@ -16,7 +16,7 @@ declare
   v_actor_type text;
   v_barbershop_id uuid;
 begin
-  v_barbershop_id := coalesce(new.barbershop_id, old.barbershop_id);
+  v_barbershop_id := new.barbershop_id;
 
   if v_actor_id is not null then
     select u.name_complete
