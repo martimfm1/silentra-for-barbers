@@ -8,6 +8,7 @@
 export const ptCopy = {
   common: {
     loading: 'A carregar…',
+    optional: 'opcional',
     retry: 'Tentar novamente',
     upgrade: 'Mudar de plano',
     comparePlans: 'Ver planos',
