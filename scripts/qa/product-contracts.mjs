@@ -117,6 +117,45 @@ const checks = [
       source.includes('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
   },
   {
+    name: 'Team invite v2 supports expiring code, link and QR tokens with revocation',
+    file: 'supabase/migrations/20261117120000_rework_team_invites_with_links_and_qr.sql',
+    test: (source) =>
+      source.includes('create_barbershop_invite_v2') &&
+      source.includes("p_method not in ('code', 'link', 'qr')") &&
+      source.includes("v_value := 'SIL-'") &&
+      source.includes('gen_random_bytes(16)') &&
+      source.includes('revoked_at is null') &&
+      source.includes('revoke_barbershop_invite'),
+  },
+  {
+    name: 'Team invite API creates, lists and revokes invitations',
+    file: 'app/api/team/invite/route.ts',
+    test: (source) =>
+      source.includes("rpc('create_barbershop_invite_v2'") &&
+      source.includes("from('barbershop_invite_codes')") &&
+      source.includes("rpc('revoke_barbershop_invite'") &&
+      source.includes("export const GET") &&
+      source.includes("export const DELETE"),
+  },
+  {
+    name: 'Team invitation UI supports code, link sharing and QR downloads',
+    file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
+    test: (source) =>
+      source.includes("useState<InviteMethod>('link')") &&
+      source.includes("QRCode.toDataURL") &&
+      source.includes('navigator.share') &&
+      source.includes('download="silentra-convite-equipa.png"') &&
+      source.includes("method: 'DELETE'"),
+  },
+  {
+    name: 'Onboarding pre-fills invitation links and accepts secure SIL tokens',
+    file: 'app/onboarding/page.tsx',
+    test: (source) =>
+      source.includes("params.get('invite')") &&
+      source.includes("cleaned.startsWith('SIL')") &&
+      source.includes('maxLength={46}'),
+  },
+  {
     name: 'Current invite generator samples only from the accepted 32-character alphabet',
     file: 'supabase/migrations/20261116232318_fix_invite_code_charset.sql',
     test: (source) =>
