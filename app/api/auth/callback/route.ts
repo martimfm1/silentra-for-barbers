@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 
 function getSafeNext(value: string | null): string {
-  if (value === '/email-confirmed') return value;
+  if (value === '/email-confirmed' || value === '/reset-password') return value;
   return sanitizeInviteRedirect(value) ?? '/email-confirmed';
 }
 
