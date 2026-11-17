@@ -285,6 +285,17 @@ begin
     raise exception 'owner_already_has_barbershop' using errcode = '42501';
   end if;
 
+  -- A profile already associated with a shop cannot move between tenants by
+  -- calling the RPC directly. The frontend redirect is not an authorization rule.
+  if exists (
+    select 1
+    from public.users as u
+    where u.id = v_user
+      and u.barbershop_id is not null
+  ) then
+    raise exception 'already_team_member' using errcode = '22023';
+  end if;
+
   v_hash := encode(digest(v_input, 'sha256'), 'hex');
 
   select *
