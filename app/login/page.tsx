@@ -52,6 +52,7 @@ export default function LoginPage() {
   const [isUnconfirmed, setIsUnconfirmed] = useState(false);
   const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
+  const [inviteRedirect, setInviteRedirect] = useState<string | null>(null);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const loginEmailHintId = useId();
@@ -62,6 +63,7 @@ export default function LoginPage() {
     const requestedEmail = params.get('email');
     const status = params.get('status');
     const errorParam = params.get('error');
+    setInviteRedirect(sanitizeInviteRedirect(params.get('redirect')));
 
     if (requestedTab === 'register') setActiveTab('register');
     if (requestedEmail) setLoginEmail(requestedEmail);
@@ -73,6 +75,13 @@ export default function LoginPage() {
       setErrorMsg(t('auth.unconfirmed'));
     }
   }, [t]);
+
+  const confirmEmailParams = new URLSearchParams();
+  if (loginEmail) confirmEmailParams.set('email', loginEmail);
+  if (inviteRedirect) confirmEmailParams.set('redirect', inviteRedirect);
+  const confirmEmailHref = confirmEmailParams.toString()
+    ? `/confirm-email?${confirmEmailParams.toString()}`
+    : '/confirm-email';
 
   const clearMessages = () => {
     setErrorMsg(null);
@@ -179,7 +188,7 @@ export default function LoginPage() {
                         ) : null}
                         {isUnconfirmed ? (
                           <Link
-                            href={`/confirm-email${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
+                            href={confirmEmailHref}
                             className="inline-flex min-h-10 items-center rounded-lg border border-red-400/20 bg-red-400/10 px-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-red-400/20"
                           >
                             {t('auth.resendConfirmation')}
@@ -330,9 +339,6 @@ export default function LoginPage() {
                         onSubmit={async (event) => {
                           const formData = new FormData(event.currentTarget);
                           const email = String(formData.get('email') ?? '');
-                          const inviteRedirect = sanitizeInviteRedirect(
-                            new URLSearchParams(window.location.search).get('redirect'),
-                          );
                           await handleRegister({
                             event,
                             setIsSubmitting,
