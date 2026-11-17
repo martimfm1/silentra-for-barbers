@@ -18,19 +18,62 @@ function getBaseUrl(request?: Request): string {
   throw new Error('Não foi possível determinar o URL público da aplicação.');
 }
 
+const INVITE_CODE = /^BARB-(?:[0-9A-HJ-NP-Z]{4}-){1,2}[0-9A-HJ-NP-Z]{4}$/;
+const LEGACY_INVITE_CODE = /^[0-9A-F]{10}$/;
+const INVITE_LINK_TOKEN = /^SIL-[0-9A-F]{32}$/;
+
 /**
- * URL único e estável usado pelo Supabase Auth para confirmação de email.
- * O destino final é decidido pelo callback server-side, evitando parâmetros
- * `next` aninhados e dupla codificação no link enviado por email.
+ * Only forwards a same-origin onboarding invitation. Other redirect values
+ * are intentionally discarded so the confirmation flow cannot become an
+ * open redirect.
  */
-export function getAuthCallbackUrl(request?: Request): string {
-  return new URL('/api/auth/callback', getBaseUrl(request)).toString();
+export function sanitizeInviteRedirect(value: unknown): string | null {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
+    return null;
+  }
+
+  try {
+    const target = new URL(value, 'https://silentra.invalid');
+    if (target.origin !== 'https://silentra.invalid' || target.pathname !== '/onboarding') {
+      return null;
+    }
+
+    const invite = (target.searchParams.get('invite') ?? '').toUpperCase();
+    if (
+      !INVITE_CODE.test(invite) &&
+      !LEGACY_INVITE_CODE.test(invite) &&
+      !INVITE_LINK_TOKEN.test(invite)
+    ) {
+      return null;
+    }
+
+    return `/onboarding?invite=${encodeURIComponent(invite)}`;
+  } catch {
+    return null;
+  }
 }
 
-export function getClientAuthCallbackUrl(): string {
+/**
+ * URL único usado pelo Supabase Auth para confirmação de email. O callback
+ * valida o destino novamente antes de redirecionar para um convite.
+ */
+export function getAuthCallbackUrl(
+  request?: Request,
+  next?: unknown,
+): string {
+  const callback = new URL('/api/auth/callback', getBaseUrl(request));
+  const safeNext = sanitizeInviteRedirect(next);
+  if (safeNext) callback.searchParams.set('next', safeNext);
+  return callback.toString();
+}
+
+export function getClientAuthCallbackUrl(next?: unknown): string {
   if (typeof window === 'undefined') {
     throw new Error('getClientAuthCallbackUrl só pode ser usado no browser.');
   }
 
-  return new URL('/api/auth/callback', window.location.origin).toString();
+  const callback = new URL('/api/auth/callback', window.location.origin);
+  const safeNext = sanitizeInviteRedirect(next);
+  if (safeNext) callback.searchParams.set('next', safeNext);
+  return callback.toString();
 }
