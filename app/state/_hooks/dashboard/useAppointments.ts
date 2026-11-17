@@ -480,7 +480,7 @@ export function useAppointments(
       try {
         const { error } = await deleteScheduleBlock(id);
         if (error) throw error;
-        toast.success('Bloqueio de horário removido.');
+        toast.success(t('agenda.blockRemoved'));
         await onRefreshData();
       } catch (error) {
         console.error('[Delete Block Hook Error]:', error);
@@ -489,7 +489,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [onRefreshData],
+    [onRefreshData, t],
   );
   const handleCancelBooking = useCallback(
     async (id: string) => {
