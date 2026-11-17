@@ -1421,10 +1421,10 @@ export function BookingDrawerCanonical({
               aria-labelledby="booking-success-title"
             >
               <div
-                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
+                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions || bookingStatus === 'pending' ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
               >
                 <CheckCircle2
-                  className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
+                  className={`size-8 ${paymentInstructions || bookingStatus === 'pending' ? 'text-amber-300' : 'text-emerald-300'}`}
                   aria-hidden="true"
                 />
               </div>
