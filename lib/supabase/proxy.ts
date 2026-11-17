@@ -30,10 +30,18 @@ export async function proxySupabase(request: NextRequest) {
   } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  if (
-    !user &&
-    (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding'))
-  ) {
+  if (!user && pathname.startsWith('/onboarding')) {
+    // Preserve invite tokens when an unauthenticated recipient is sent to login.
+    // handleLogin validates this as a same-origin relative path before navigating.
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set(
+      'redirect',
+      `${pathname}${request.nextUrl.search}`,
+    );
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
