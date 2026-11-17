@@ -131,9 +131,9 @@ const checks = [
     name: 'Team invite API creates, lists and revokes invitations',
     file: 'app/api/team/invite/route.ts',
     test: (source) =>
-      source.includes("rpc('create_barbershop_invite_v2'") &&
+      /\.rpc\(\s*['"]create_barbershop_invite_v2['"]/.test(source) &&
       source.includes("from('barbershop_invite_codes')") &&
-      source.includes("rpc('revoke_barbershop_invite'") &&
+      /\.rpc\(\s*['"]revoke_barbershop_invite['"]/.test(source) &&
       source.includes("export const GET") &&
       source.includes("export const DELETE"),
   },
