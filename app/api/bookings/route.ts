@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { getClientIp } from '@/lib/security/public-rate-limit';
 import { createHmac } from 'node:crypto';
@@ -542,6 +543,16 @@ async function POST__unobserved(request: Request) {
       );
     }
     // The database RPC reserves the slot and stores all payment metadata in the same transaction.
+    await recordAppointmentActivity(admin, {
+      barbershopId,
+      appointmentId: appointment.id,
+      event: 'created',
+      actorType: 'customer',
+      actorId: existingCustomerId,
+      actorName: name,
+      metadata: { newStatus: appointment.status ?? 'pending' },
+    });
+
     const paymentExpiresAt = isPrepayment
       ? (appointment.payment_expires_at as string | null)
       : null;
