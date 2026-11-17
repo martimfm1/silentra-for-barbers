@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { sendBookingReviewRequestEmail } from '@/lib/brevo/review-email';
 import { UUID_PATTERN } from '@/lib/validation';
@@ -235,6 +236,15 @@ async function POST__unobserved(
         { status: 409 },
       );
     }
+
+    await recordAppointmentActivity(admin, {
+      barbershopId,
+      appointmentId,
+      event: 'completed',
+      actorType: 'staff',
+      actorId: tenant.userId,
+      metadata: { previousStatus: 'scheduled', newStatus: 'completed' },
+    });
 
     const { data: shop } = await admin
       .from('shops')
