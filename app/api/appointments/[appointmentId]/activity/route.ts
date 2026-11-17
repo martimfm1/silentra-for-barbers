@@ -126,7 +126,7 @@ async function GET__unobserved(
     const events = rows.map((row) => {
       const metadata = row.metadata ?? {};
       const safeMetadata: Record<string, unknown> = {};
-      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'reason']) {
+      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'barberEmailsSent', 'barberPushSent', 'reason']) {
         if (metadata[key] !== undefined) safeMetadata[key] = metadata[key];
       }
       return {
