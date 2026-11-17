@@ -1255,6 +1255,8 @@ export const enCopy = {
     reserving: 'Booking…',
     confirmBooking: 'Confirm booking',
     bookingConfirmed: 'Booking confirmed',
+    bookingPendingTitle: 'Booking request received',
+    bookingPendingDescription: 'Your booking is awaiting confirmation from the barbershop. There is nothing else you need to do right now — you will receive an update when it is confirmed.',
     finish: 'Done',
     with: 'with',
     at: 'at',
