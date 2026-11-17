@@ -79,7 +79,7 @@ select
     'newStatus', 'cancelled',
     'reason', appointment.cancellation_reason
   ),
-  coalesce(appointment.cancelled_at, appointment.updated_at, now())
+  appointment.cancelled_at
 from public.appointments as appointment
 where appointment.status::text = 'cancelled'
   and appointment.cancelled_at is not null
