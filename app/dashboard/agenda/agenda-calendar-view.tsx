@@ -10,6 +10,7 @@ import {
   Clock3,
   Coffee,
   Users,
+  Trash2,
 } from 'lucide-react';
 import {
   addMonths,
@@ -105,12 +106,14 @@ export function AgendaCalendarView({
   blocksRefreshKey,
   professionals: allProfessionals,
   onAppointmentClick,
+  onDeleteBlock,
 }: {
   appointments: Appointment[];
   appointmentsLoading: boolean;
   blocksRefreshKey: number;
   professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
+  onDeleteBlock?: (blockId: string) => Promise<boolean>;
 }) {
   const { t, locale } = useLanguage();
   const weekdayLabels =
@@ -747,9 +750,29 @@ export function AgendaCalendarView({
                       <p className="mt-1 text-xs text-zinc-400">
                         {block.reason || t('agendaCalendar.scheduleBlock')}
                       </p>
-                      <p className="mt-1 text-[10px] text-zinc-600">
-                        {block.professionals?.name || t('agendaCalendar.team')}
-                      </p>
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <p className="min-w-0 truncate text-[10px] text-zinc-600">
+                          {block.professionals?.name || t('agendaCalendar.team')}
+                        </p>
+                        {onDeleteBlock ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="min-h-9 shrink-0 gap-1.5 rounded-lg px-2 text-[10px] text-rose-300 hover:bg-rose-400/10 hover:text-rose-200"
+                            aria-label={t('agenda.removeBlock')}
+                            onClick={() => {
+                              if (
+                                !window.confirm(t('agenda.confirmRemoveBlock'))
+                              ) return;
+                              void onDeleteBlock(block.id);
+                            }}
+                          >
+                            <Trash2 className="size-3.5" aria-hidden="true" />
+                            {t('agenda.removeBlock')}
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </>
