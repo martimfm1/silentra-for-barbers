@@ -161,12 +161,12 @@ export function ClientProfileDialog({
 
   return (
     <Dialog open={!!client} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-5xl overflow-y-auto rounded-2xl border-white/10 bg-zinc-950 p-4 text-zinc-100 sm:w-[calc(100%-2rem)] sm:p-6">
+      <DialogContent className="relative isolate max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-5xl overflow-y-auto overflow-x-hidden rounded-[1.75rem] border border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_48%),#09090b] p-4 text-zinc-100 shadow-[0_24px_100px_-28px_rgba(0,0,0,0.9)] sm:w-[calc(100%-2rem)] sm:p-6">
         {client ? (
           <>
             <DialogHeader className="pr-12">
               <div className="flex items-start gap-3">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-400/10 text-lg font-semibold text-blue-200">
+                <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.08] text-lg font-semibold text-emerald-200 shadow-inner shadow-emerald-300/5">
                   {client.name_complete.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -181,7 +181,7 @@ export function ClientProfileDialog({
                   type="button"
                   variant="outline"
                   onClick={() => onEdit(client)}
-                  className="ml-auto min-h-11 shrink-0 gap-2 border-white/10 bg-white/[0.035] px-3 text-xs text-zinc-200 hover:bg-white/[0.08]"
+                  className="ml-auto min-h-11 shrink-0 gap-2 border-white/10 bg-white/[0.04] px-3 text-xs text-zinc-200 shadow-sm transition-all hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-100"
                 >
                   <Pencil className="size-4" aria-hidden="true" />
                   {t('clientsPage.editTitle')}
@@ -199,7 +199,7 @@ export function ClientProfileDialog({
             ) : null}
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3 sm:p-4">
+              <div className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.055] to-white/[0.015] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                   {t('clientsPage.totalBookings')}
                 </p>
@@ -207,7 +207,7 @@ export function ClientProfileDialog({
                   {history.length}
                 </p>
               </div>
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3 sm:p-4">
+              <div className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.055] to-white/[0.015] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                   {t('clientsPage.completedVisits')}
                 </p>
@@ -227,10 +227,10 @@ export function ClientProfileDialog({
 
             <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
               <div className="min-w-0 space-y-4">
-                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+                <section className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-5">
                   <div className="flex items-center gap-2">
                     <CalendarDays
-                      className="size-4 text-blue-300"
+                      className="size-4 text-emerald-300"
                       aria-hidden="true"
                     />
                     <h3 className="font-semibold text-white">
@@ -257,7 +257,7 @@ export function ClientProfileDialog({
                         return (
                           <article
                             key={appointment.id}
-                            className="rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:p-4"
+                            className="rounded-xl border border-white/[0.08] bg-black/20 p-3 transition-colors duration-200 hover:border-emerald-400/20 hover:bg-white/[0.035] sm:p-4"
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0">
@@ -319,10 +319,10 @@ export function ClientProfileDialog({
                   )}
                 </section>
 
-                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+                <section className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-5">
                   <div className="flex items-center gap-2">
                     <MessageSquareText
-                      className="size-4 text-blue-300"
+                      className="size-4 text-emerald-300"
                       aria-hidden="true"
                     />
                     <h3 className="font-semibold text-white">
@@ -370,7 +370,7 @@ export function ClientProfileDialog({
                       {notes.map((item) => (
                         <article
                           key={item.id}
-                          className="rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:p-4"
+                          className="rounded-xl border border-white/[0.08] bg-black/20 p-3 transition-colors duration-200 hover:border-emerald-400/20 hover:bg-white/[0.035] sm:p-4"
                         >
                           <p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">
                             {item.content}
@@ -386,10 +386,10 @@ export function ClientProfileDialog({
               </div>
 
               <aside className="min-w-0 space-y-4">
-                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+                <section className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-5">
                   <div className="flex items-center gap-2">
                     <UserRound
-                      className="size-4 text-blue-300"
+                      className="size-4 text-emerald-300"
                       aria-hidden="true"
                     />
                     <h3 className="font-semibold text-white">
@@ -452,7 +452,7 @@ export function ClientProfileDialog({
                   </dl>
                 </section>
 
-                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+                <section className="rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] sm:p-5">
                   <h3 className="font-semibold text-white">
                     {t('clientsPage.preferences')}
                   </h3>
