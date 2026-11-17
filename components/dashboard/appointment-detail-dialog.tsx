@@ -36,6 +36,49 @@ import { Button } from '@/components/ui/button';
 import { AppointmentCompletionDialog } from './appointment-completion-dialog';
 import type { Appointment } from '@/types';
 
+type AppointmentActivity = {
+  id: string;
+  action: string;
+  actorName: string;
+  actorType: string;
+  createdAt: string;
+  metadata: Record<string, unknown>;
+};
+
+function activityLabel(action: string, isEnglish: boolean): string {
+  const labels: Record<string, [string, string]> = {
+    'appointment.created': ['Marcação criada', 'Booking created'],
+    'appointment.confirmed': ['Marcação confirmada', 'Booking confirmed'],
+    'appointment.rescheduled': ['Marcação reagendada', 'Booking rescheduled'],
+    'appointment.cancelled': ['Marcação cancelada', 'Booking cancelled'],
+    'appointment.completed': ['Atendimento concluído', 'Appointment completed'],
+    professional_appointment_reschedule: ['Marcação reagendada', 'Booking rescheduled'],
+    customer_portal_reschedule: ['Marcação reagendada pelo cliente', 'Booking rescheduled by customer'],
+    customer_portal_cancel: ['Marcação cancelada pelo cliente', 'Booking cancelled by customer'],
+  };
+  const value = labels[action];
+  return value ? value[isEnglish ? 1 : 0] : isEnglish ? 'Booking updated' : 'Marcação atualizada';
+}
+
+function activityDetail(event: AppointmentActivity, isEnglish: boolean): string | null {
+  const from = event.metadata.from;
+  const to = event.metadata.to;
+  if (typeof from === 'string' && typeof to === 'string') {
+    const format = (value: string) =>
+      new Date(value).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    return `${format(from)} → ${format(to)}`;
+  }
+  const previousStatus = event.metadata.previousStatus;
+  const newStatus = event.metadata.newStatus;
+  if (typeof previousStatus === 'string' && typeof newStatus === 'string') {
+    return `${previousStatus} → ${newStatus}`;
+  }
+  return null;
+}
+
 type Props = {
   appointment: Appointment | null;
   open: boolean;
@@ -235,6 +278,9 @@ export function AppointmentDetailDialog({
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
+  const [activityEvents, setActivityEvents] = useState<AppointmentActivity[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityError, setActivityError] = useState(false);
 
   useEffect(() => {
     if (!appointment) return;
@@ -245,6 +291,48 @@ export function AppointmentDetailDialog({
     setIsBookingConfirmationOpen(false);
     setIsConfirmingBooking(false);
   }, [appointment?.id, appointment?.date_hour, open]);
+
+  useEffect(() => {
+    let active = true;
+    if (!open || !appointment?.id) {
+      setActivityEvents([]);
+      setActivityError(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setActivityLoading(true);
+    setActivityError(false);
+    fetch(`/api/appointments/${encodeURIComponent(appointment.id)}/activity`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok || payload.success !== true) {
+          throw new Error('Unable to load appointment activity');
+        }
+        return payload;
+      })
+      .then((payload) => {
+        if (active) {
+          setActivityEvents(
+            Array.isArray(payload.events) ? payload.events : [],
+          );
+        }
+      })
+      .catch(() => {
+        if (active) setActivityError(true);
+      })
+      .finally(() => {
+        if (active) setActivityLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [appointment?.id, open]);
 
   if (!appointment) return null;
   const date = new Date(appointment.date_hour);
@@ -965,6 +1053,61 @@ export function AppointmentDetailDialog({
                   </div>
                 </Section>
               ) : null}
+              <Section title={isEnglish ? 'Activity history' : 'Histórico de atividade'}>
+                {activityLoading ? (
+                  <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.025] p-4" aria-live="polite">
+                    <div className="h-3 w-2/5 animate-pulse rounded bg-white/10" />
+                    <div className="h-3 w-3/5 animate-pulse rounded bg-white/10" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-white/10" />
+                  </div>
+                ) : activityError ? (
+                  <p className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4 text-sm text-rose-200">
+                    {isEnglish
+                      ? 'Activity history could not be loaded. Close and reopen the details to try again.'
+                      : 'Não foi possível carregar o histórico. Fecha e volta a abrir os detalhes para tentar novamente.'}
+                  </p>
+                ) : activityEvents.length === 0 ? (
+                  <p className="rounded-2xl border border-white/8 bg-white/[0.025] p-4 text-sm leading-6 text-zinc-400">
+                    {isEnglish
+                      ? 'No activity has been recorded for this booking yet.'
+                      : 'Ainda não existe atividade registada para esta marcação.'}
+                  </p>
+                ) : (
+                  <ol className="relative space-y-0 rounded-2xl border border-white/8 bg-white/[0.025] p-4">
+                    {activityEvents.map((event, index) => (
+                      <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+                        {index < activityEvents.length - 1 ? (
+                          <span className="absolute left-[7px] top-5 h-[calc(100%-0.25rem)] w-px bg-white/10" aria-hidden="true" />
+                        ) : null}
+                        <span className="relative mt-1 flex size-4 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/10">
+                          <span className="size-1.5 rounded-full bg-emerald-300" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                            <p className="text-sm font-medium text-zinc-100">
+                              {activityLabel(event.action, isEnglish)}
+                            </p>
+                            <time className="text-[11px] tabular-nums text-zinc-500">
+                              {new Date(event.createdAt).toLocaleString(
+                                isEnglish ? 'en-GB' : 'pt-PT',
+                                { dateStyle: 'medium', timeStyle: 'short' },
+                              )}
+                            </time>
+                          </div>
+                          <p className="mt-1 text-xs text-zinc-400">
+                            {isEnglish ? 'By' : 'Por'} {event.actorName}
+                          </p>
+                          {activityDetail(event, isEnglish) ? (
+                            <p className="mt-1 text-xs text-zinc-500">
+                              {activityDetail(event, isEnglish)}
+                            </p>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </Section>
               {appointment.users?.style_notes ||
               appointment.description_products ? (
                 <Section title="Notas">
