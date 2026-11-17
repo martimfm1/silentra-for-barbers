@@ -59,14 +59,9 @@ export function BlockScheduleForm({
               <CalendarOff className="size-5" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-semibold tracking-tight text-white sm:text-lg">
-                  {t('agenda.blockTime')}
-                </h3>
-                <span className="rounded-full border border-rose-400/15 bg-rose-400/[0.07] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-rose-300/90">
-                  {t('agenda.blockTime')}
-                </span>
-              </div>
+              <h3 className="text-base font-semibold tracking-tight text-white sm:text-lg">
+                {t('agenda.blockTime')}
+              </h3>
               <p className="mt-1 max-w-md text-xs leading-5 text-zinc-500">
                 {t('agenda.blockTimeDescription')}
               </p>
@@ -227,10 +222,7 @@ export function BlockScheduleForm({
           </div>
         </div>
 
-        <footer className="flex flex-col-reverse gap-2 border-t border-white/[0.07] bg-white/[0.015] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p className="text-[11px] leading-4 text-zinc-600">
-            {t('agenda.blockTimeDescription')}
-          </p>
+        <footer className="flex justify-end border-t border-white/[0.07] bg-white/[0.015] px-4 py-4 sm:px-6">
           <Button
             type="submit"
             disabled={loading}
