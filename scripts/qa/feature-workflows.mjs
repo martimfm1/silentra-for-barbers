@@ -298,16 +298,16 @@ const appointmentActivityWriter = read('lib/appointments/activity.ts');
 const appointmentDetailDialog = read(
   'components/dashboard/appointment-detail-dialog.tsx',
 );
-assert.match(appointmentActivityMigration, /barbershop_id uuid references public\\.barbershops/);
-assert.match(appointmentActivityMigration, /using \\([\\s\\S]*barbershop_id = public\\.current_barbershop_id\\(\\)/);
-assert.match(appointmentActivityApi, /\\.eq\\('barbershop_id', tenant\\.barbershopId\\)/);
-assert.match(appointmentActivityApi, /safeMetadata/);
-assert.doesNotMatch(appointmentActivityApi, /metadata\\.email/);
-assert.match(appointmentActivityWriter, /actor_id: input\\.actorId/);
-assert.match(appointmentActivityWriter, /action: \`appointment\\.\\$\\{input\\.event\\}\`/);
-assert.match(appointmentDetailDialog, /Histórico de atividade/);
-assert.match(appointmentDetailDialog, /Activity history/);
-assert.match(appointmentDetailDialog, /cache: 'no-store'/);
+assert.ok(appointmentActivityMigration.includes('barbershop_id uuid references public.barbershops'));
+assert.ok(appointmentActivityMigration.includes('barbershop_id = public.current_barbershop_id()'));
+assert.ok(appointmentActivityApi.includes(".eq('barbershop_id', tenant.barbershopId)"));
+assert.ok(appointmentActivityApi.includes('safeMetadata'));
+assert.ok(!appointmentActivityApi.includes('metadata.email'));
+assert.ok(appointmentActivityWriter.includes('actor_id: input.actorId'));
+assert.ok(appointmentActivityWriter.includes('action: `appointment.${input.event}`'));
+assert.ok(appointmentDetailDialog.includes('Histórico de atividade'));
+assert.ok(appointmentDetailDialog.includes('Activity history'));
+assert.ok(appointmentDetailDialog.includes("cache: 'no-store'"));
 
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
