@@ -43,6 +43,8 @@ type AppointmentHistoryEvent = {
   createdAt: string;
   actorType: string;
   actorName: string | null;
+  status: string | null;
+  dateHour: string | null;
   fromStatus: string | null;
   toStatus: string | null;
   fromDateHour: string | null;
@@ -1045,6 +1047,19 @@ export function AppointmentDetailDialog({
                               <p className="mt-1 text-xs text-zinc-400">
                                 {isEnglish ? 'By' : 'Por'} {actorLabel}
                               </p>
+                              {event.fromStatus && event.toStatus ? (
+                                <p className="mt-2 text-xs text-zinc-400">
+                                  {isEnglish ? 'Status: ' : 'Estado: '}
+                                  {event.fromStatus === 'pending' ? (isEnglish ? 'Pending' : 'Pendente') : event.fromStatus === 'scheduled' ? (isEnglish ? 'Confirmed' : 'Confirmada') : event.fromStatus === 'completed' ? (isEnglish ? 'Completed' : 'Concluída') : event.fromStatus === 'cancelled' ? (isEnglish ? 'Cancelled' : 'Cancelada') : event.fromStatus}
+                                  {' → '}
+                                  {event.toStatus === 'pending' ? (isEnglish ? 'Pending' : 'Pendente') : event.toStatus === 'scheduled' ? (isEnglish ? 'Confirmed' : 'Confirmada') : event.toStatus === 'completed' ? (isEnglish ? 'Completed' : 'Concluída') : event.toStatus === 'cancelled' ? (isEnglish ? 'Cancelled' : 'Cancelada') : event.toStatus}
+                                </p>
+                              ) : event.action === 'appointment.created' && event.status ? (
+                                <p className="mt-2 text-xs text-zinc-400">
+                                  {isEnglish ? 'Initial status: ' : 'Estado inicial: '}
+                                  {event.status === 'pending' ? (isEnglish ? 'Pending' : 'Pendente') : event.status === 'scheduled' ? (isEnglish ? 'Confirmed' : 'Confirmada') : event.status}
+                                </p>
+                              ) : null}
                               {event.action === 'appointment.rescheduled' && event.fromDateHour && event.toDateHour ? (
                                 <p className="mt-2 text-xs leading-5 text-zinc-400">
                                   {new Date(event.fromDateHour).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}
