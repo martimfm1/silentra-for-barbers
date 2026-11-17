@@ -60,6 +60,26 @@ function activityLabel(action: string, isEnglish: boolean): string {
   return value ? value[isEnglish ? 1 : 0] : isEnglish ? 'Booking updated' : 'Marcação atualizada';
 }
 
+function activityNotificationDetail(
+  event: AppointmentActivity,
+  isEnglish: boolean,
+): string | null {
+  if (event.metadata.notificationSkipped === true) {
+    return isEnglish ? 'No customer email is associated with this booking' : 'Não existe email associado a esta marcação';
+  }
+  if (typeof event.metadata.notificationSent === 'boolean') {
+    return event.metadata.notificationSent
+      ? isEnglish ? 'Email sent to the customer' : 'Email enviado ao cliente'
+      : isEnglish ? 'Customer email could not be sent' : 'Não foi possível enviar o email ao cliente';
+  }
+  const emailCount = Number(event.metadata.barberEmailsSent ?? 0);
+  const pushCount = Number(event.metadata.barberPushSent ?? 0);
+  if (emailCount > 0 || pushCount > 0) {
+    return isEnglish ? 'Barbershop notification sent' : 'Notificação enviada à barbearia';
+  }
+  return null;
+}
+
 function activityDetail(event: AppointmentActivity, isEnglish: boolean): string | null {
   const from = event.metadata.from;
   const to = event.metadata.to;
@@ -1100,6 +1120,11 @@ export function AppointmentDetailDialog({
                           {activityDetail(event, isEnglish) ? (
                             <p className="mt-1 text-xs text-zinc-500">
                               {activityDetail(event, isEnglish)}
+                            </p>
+                          ) : null}
+                          {activityNotificationDetail(event, isEnglish) ? (
+                            <p className="mt-1 text-xs text-zinc-500">
+                              {activityNotificationDetail(event, isEnglish)}
                             </p>
                           ) : null}
                         </div>
