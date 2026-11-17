@@ -82,7 +82,10 @@ async function POST__unobserved(request: Request) {
       if (error.code === '22023') {
         if (error.message === 'already_team_member')
           return NextResponse.json(
-            { error: 'Já fazes parte da equipa desta barbearia.' },
+            {
+              error:
+                'Esta conta já está associada a uma barbearia. Para entrar noutra equipa, usa uma conta sem associação ativa.',
+            },
             { status: 409 },
           );
         return NextResponse.json(

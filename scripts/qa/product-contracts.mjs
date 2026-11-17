@@ -1315,6 +1315,14 @@ const checks = [
       source.includes('grant execute on function public.join_barbershop_with_invite(text)'),
   },
   {
+    name: 'Invite join blocks linked team members from switching tenants through direct RPC calls',
+    file: 'supabase/migrations/20261117120000_rework_team_invites_with_links_and_qr.sql',
+    test: (source) =>
+      source.includes("raise exception 'already_team_member' using errcode = '22023'") &&
+      source.includes('u.barbershop_id is not null') &&
+      source.includes('The frontend redirect is not an authorization rule'),
+  },
+  {
     name: 'Invite join qualifies professional barbershop columns to avoid RETURNS TABLE ambiguity',
     file: 'supabase/migrations/20261117001500_qualify_invite_professional_barbershop_columns.sql',
     test: (source) =>
@@ -1327,8 +1335,10 @@ const checks = [
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
       source.includes("error.message === 'owner_already_has_barbershop'") &&
+      source.includes("error.message === 'already_team_member'") &&
       source.includes('status: 409') &&
-      source.includes('Esta conta já é proprietária de outra barbearia.'),
+      source.includes('Esta conta já é proprietária de outra barbearia.') &&
+      source.includes('Esta conta já está associada a uma barbearia.'),
   },
 ];
 let failed = 0;
