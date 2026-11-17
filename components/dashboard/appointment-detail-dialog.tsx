@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CalendarX2,
   Check,
+  History,
   Clock3,
   Loader2,
   Mail,
@@ -35,6 +36,19 @@ import { StatusBadge } from '@/app/state/_components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { AppointmentCompletionDialog } from './appointment-completion-dialog';
 import type { Appointment } from '@/types';
+
+type AppointmentHistoryEvent = {
+  id: string;
+  action: string;
+  createdAt: string;
+  actorType: string;
+  actorName: string | null;
+  fromStatus: string | null;
+  toStatus: string | null;
+  fromDateHour: string | null;
+  toDateHour: string | null;
+  cancellationReason: string | null;
+};
 
 type Props = {
   appointment: Appointment | null;
@@ -235,6 +249,10 @@ export function AppointmentDetailDialog({
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
+  const [historyEvents, setHistoryEvents] = useState<AppointmentHistoryEvent[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
+  const [historyRetryKey, setHistoryRetryKey] = useState(0);
 
   useEffect(() => {
     if (!appointment) return;
@@ -245,6 +263,43 @@ export function AppointmentDetailDialog({
     setIsBookingConfirmationOpen(false);
     setIsConfirmingBooking(false);
   }, [appointment?.id, appointment?.date_hour, open]);
+
+  useEffect(() => {
+    if (!open || !appointment) {
+      setHistoryEvents([]);
+      setHistoryLoading(false);
+      setHistoryError(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setHistoryLoading(true);
+    setHistoryError(false);
+
+    fetch(`/api/appointments/${appointment.id}/history`, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.success !== true) {
+          throw new Error('APPOINTMENT_HISTORY_UNAVAILABLE');
+        }
+        setHistoryEvents(
+          Array.isArray(payload.events) ? payload.events : [],
+        );
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        setHistoryError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setHistoryLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [appointment?.id, open, historyRetryKey]);
 
   if (!appointment) return null;
   const date = new Date(appointment.date_hour);
@@ -908,6 +963,108 @@ export function AppointmentDetailDialog({
                   </div>
                 </Section>
               ) : null}
+              <Section title={isEnglish ? 'Activity history' : 'Histórico de atividade'}>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                  {historyLoading ? (
+                    <div className="flex items-center gap-3 py-3 text-sm text-zinc-400" role="status">
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                      {isEnglish ? 'Loading activity…' : 'A carregar atividade…'}
+                    </div>
+                  ) : historyError ? (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-zinc-400">
+                        {isEnglish ? 'Activity history could not be loaded.' : 'Não foi possível carregar o histórico de atividade.'}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-10 border-white/10 bg-white/[0.03]"
+                        onClick={() => setHistoryRetryKey((value) => value + 1)}
+                      >
+                        {isEnglish ? 'Try again' : 'Tentar novamente'}
+                      </Button>
+                    </div>
+                  ) : historyEvents.length === 0 ? (
+                    <div className="flex items-start gap-3 py-2">
+                      <History className="mt-0.5 size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+                      <p className="text-sm leading-6 text-zinc-400">
+                        {isEnglish
+                          ? 'New changes to this booking will appear here. Earlier activity was not recorded.'
+                          : 'As novas alterações desta marcação vão aparecer aqui. A atividade anterior não foi registada.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <ol className="space-y-0">
+                      {historyEvents.map((event, index) => {
+                        const actionLabel = (() => {
+                          switch (event.action) {
+                            case 'appointment.created':
+                              return isEnglish ? 'Booking created' : 'Marcação criada';
+                            case 'appointment.confirmed':
+                              return isEnglish ? 'Booking confirmed' : 'Marcação confirmada';
+                            case 'appointment.rescheduled':
+                              return isEnglish ? 'Booking rescheduled' : 'Marcação reagendada';
+                            case 'appointment.cancelled':
+                              return isEnglish ? 'Booking cancelled' : 'Marcação cancelada';
+                            case 'appointment.completed':
+                              return isEnglish ? 'Booking completed' : 'Marcação concluída';
+                            case 'appointment.professional_changed':
+                              return isEnglish ? 'Professional changed' : 'Profissional alterado';
+                            case 'appointment.service_changed':
+                              return isEnglish ? 'Service changed' : 'Serviço alterado';
+                            default:
+                              return isEnglish ? 'Booking updated' : 'Marcação atualizada';
+                          }
+                        })();
+                        const actorLabel =
+                          event.actorName ||
+                          (event.actorType === 'customer'
+                            ? isEnglish ? 'Customer' : 'Cliente'
+                            : event.actorType === 'staff'
+                              ? isEnglish ? 'Barbershop team' : 'Equipa da barbearia'
+                              : isEnglish ? 'System' : 'Sistema');
+                        const eventDate = new Date(event.createdAt);
+                        const validEventDate = !Number.isNaN(eventDate.getTime());
+                        return (
+                          <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+                            <div className="flex w-4 shrink-0 flex-col items-center">
+                              <span className={`mt-1 size-2.5 rounded-full ${index === 0 ? 'bg-sky-300 ring-4 ring-sky-300/10' : 'bg-zinc-600'}`} />
+                              {index < historyEvents.length - 1 ? (
+                                <span className="mt-2 w-px flex-1 bg-white/10" />
+                              ) : null}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                                <p className="text-sm font-medium text-zinc-100">{actionLabel}</p>
+                                <time className="text-[11px] tabular-nums text-zinc-500">
+                                  {validEventDate
+                                    ? eventDate.toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })
+                                    : ''}
+                                </time>
+                              </div>
+                              <p className="mt-1 text-xs text-zinc-400">
+                                {isEnglish ? 'By' : 'Por'} {actorLabel}
+                              </p>
+                              {event.action === 'appointment.rescheduled' && event.fromDateHour && event.toDateHour ? (
+                                <p className="mt-2 text-xs leading-5 text-zinc-400">
+                                  {new Date(event.fromDateHour).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}
+                                  {' → '}
+                                  {new Date(event.toDateHour).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}
+                                </p>
+                              ) : null}
+                              {event.cancellationReason ? (
+                                <p className="mt-2 text-xs leading-5 text-zinc-400">
+                                  {isEnglish ? 'Reason: ' : 'Motivo: '}{event.cancellationReason}
+                                </p>
+                              ) : null}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  )}
+                </div>
+              </Section>
               {appointment.status === 'cancelled' ? (
                 <Section
                   title={
