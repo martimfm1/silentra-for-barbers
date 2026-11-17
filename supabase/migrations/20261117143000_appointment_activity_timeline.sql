@@ -29,6 +29,68 @@ where log.entity_type = 'appointment'
   and log.entity_id = appointment.id::text
   and log.barbershop_id is null;
 
+-- Give older appointments a visible starting point without inventing a status-change time.
+insert into public.audit_logs (
+  action, entity_type, entity_id, barbershop_id,
+  actor_type, actor_name, metadata, created_at
+)
+select
+  'appointment.created',
+  'appointment',
+  appointment.id::text,
+  appointment.barbershop_id,
+  'system',
+  'Registo anterior',
+  jsonb_build_object('statusSnapshot', appointment.status::text),
+  coalesce(appointment.created_at, now())
+from public.appointments as appointment
+where not exists (
+  select 1
+  from public.audit_logs as existing
+  where existing.entity_type = 'appointment'
+    and existing.entity_id = appointment.id::text
+    and existing.action = 'appointment.created'
+);
+
+-- Recover historic cancellations from the cancellation fields already stored on appointments.
+insert into public.audit_logs (
+  action, entity_type, entity_id, barbershop_id,
+  actor_type, actor_name, metadata, created_at
+)
+select
+  'appointment.cancelled',
+  'appointment',
+  appointment.id::text,
+  appointment.barbershop_id,
+  case
+    when appointment.cancellation_actor = 'customer' then 'customer'
+    when appointment.cancellation_actor = 'staff' then 'staff'
+    else 'system'
+  end,
+  coalesce(
+    nullif(btrim(appointment.cancellation_actor_name), ''),
+    case
+      when appointment.cancellation_actor = 'customer' then 'Cliente'
+      when appointment.cancellation_actor = 'staff' then 'Equipa da barbearia'
+      else 'Sistema'
+    end
+  ),
+  jsonb_build_object(
+    'newStatus', 'cancelled',
+    'reason', appointment.cancellation_reason
+  ),
+  coalesce(appointment.cancelled_at, appointment.updated_at, now())
+from public.appointments as appointment
+where appointment.status::text = 'cancelled'
+  and appointment.cancelled_at is not null
+  and not exists (
+    select 1
+    from public.audit_logs as existing
+    where existing.entity_type = 'appointment'
+      and existing.entity_id = appointment.id::text
+      and existing.action in ('appointment.cancelled', 'customer_portal_cancel')
+  );
+
 create index if not exists audit_logs_appointment_timeline_idx
   on public.audit_logs (barbershop_id, entity_id, created_at asc)
   where entity_type = 'appointment';
