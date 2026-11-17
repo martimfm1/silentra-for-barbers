@@ -449,6 +449,7 @@ async function PATCH__unobserved(
         from: appointment.date_hour,
         to: newDateHour,
         notificationSent,
+        notificationSkipped: !recipientEmail,
       },
     });
     return NextResponse.json(
