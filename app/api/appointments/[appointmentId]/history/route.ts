@@ -154,8 +154,10 @@ async function GET__unobserved(
         actorName:
           (typeof metadata.actor_name === 'string' ? metadata.actor_name : null) ??
           (actorUserId ? actorNames.get(actorUserId) ?? null : null),
+        status: typeof metadata.status === 'string' ? metadata.status : null,
         fromStatus: typeof metadata.from_status === 'string' ? metadata.from_status : null,
         toStatus: typeof metadata.to_status === 'string' ? metadata.to_status : null,
+        dateHour: typeof metadata.date_hour === 'string' ? metadata.date_hour : null,
         fromDateHour: typeof metadata.from_date_hour === 'string' ? metadata.from_date_hour : null,
         toDateHour: typeof metadata.to_date_hour === 'string' ? metadata.to_date_hour : null,
         cancellationReason: typeof metadata.cancellation_reason === 'string' ? metadata.cancellation_reason : null,
