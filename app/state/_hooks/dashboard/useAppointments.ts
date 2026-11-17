@@ -482,9 +482,11 @@ export function useAppointments(
         if (error) throw error;
         toast.success(t('agenda.blockRemoved'));
         await onRefreshData();
+        return true;
       } catch (error) {
         console.error('[Delete Block Hook Error]:', error);
         toast.error(getErrorMessage(error));
+        return false;
       } finally {
         setLoading(false);
       }
