@@ -18,3 +18,12 @@ overrides:
   browserslist: '>=4.28.7'
   sharp: '0.35.5'
   source-map-js: '>=1.2.2'
+
+# Temporary, narrowly scoped exception reviewed on 2026-11-17:
+# GHSA-fc5q-39xc-vjpf has no published patched picomatch version. The only
+# production dependency path is through Sentry's Rollup bundler plugin, which
+# consumes repository-controlled build patterns rather than end-user input.
+# Reassess when Sentry or picomatch publishes an updated dependency/release.
+audit:
+  ignore:
+    - GHSA-fc5q-39xc-vjpf
