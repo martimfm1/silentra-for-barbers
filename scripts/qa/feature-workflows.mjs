@@ -287,6 +287,28 @@ assert.ok(
   'Automations must provide an idempotent one-click birthday automation setup.',
 );
 
+
+const appointmentActivityMigration = read(
+  'supabase/migrations/20261117143000_appointment_activity_timeline.sql',
+);
+const appointmentActivityApi = read(
+  'app/api/appointments/[appointmentId]/activity/route.ts',
+);
+const appointmentActivityWriter = read('lib/appointments/activity.ts');
+const appointmentDetailDialog = read(
+  'components/dashboard/appointment-detail-dialog.tsx',
+);
+assert.match(appointmentActivityMigration, /barbershop_id uuid references public\\.barbershops/);
+assert.match(appointmentActivityMigration, /using \\([\\s\\S]*barbershop_id = public\\.current_barbershop_id\\(\\)/);
+assert.match(appointmentActivityApi, /\\.eq\\('barbershop_id', tenant\\.barbershopId\\)/);
+assert.match(appointmentActivityApi, /safeMetadata/);
+assert.doesNotMatch(appointmentActivityApi, /metadata\\.email/);
+assert.match(appointmentActivityWriter, /actor_id: input\\.actorId/);
+assert.match(appointmentActivityWriter, /action: \`appointment\\.\\$\\{input\\.event\\}\`/);
+assert.match(appointmentDetailDialog, /Histórico de atividade/);
+assert.match(appointmentDetailDialog, /Activity history/);
+assert.match(appointmentDetailDialog, /cache: 'no-store'/);
+
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
