@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
@@ -75,6 +76,28 @@ async function POST__unobserved(
       .in('status', ['pending', 'scheduled'])
       .select('id');
     if (updateError) return NextResponse.json({ success: false, error: 'Não foi possível cancelar a série.' }, { status: 503 });
+
+    const cancelledIds = new Set((cancelled ?? []).map((item) => item.id));
+    await Promise.all(
+      targets
+        .filter((item) => cancelledIds.has(item.id))
+        .map((item) =>
+          recordAppointmentActivity(tenant.admin, {
+            barbershopId: tenant.barbershopId,
+            appointmentId: item.id,
+            event: 'cancelled',
+            actorType: 'staff',
+            actorId: tenant.userId,
+            actorName: cancellingUser?.name_complete?.trim() || null,
+            metadata: {
+              previousStatus: 'pending_or_scheduled',
+              newStatus: 'cancelled',
+              reason: scope === 'all' ? 'recurring_series_all' : 'recurring_series_future',
+              from: item.date_hour,
+            },
+          }),
+        ),
+    );
 
     const awaitingReviewIds = targets
       .filter(item => item.payment_status === 'awaiting_review')
