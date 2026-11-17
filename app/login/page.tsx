@@ -39,6 +39,7 @@ import { SiteNavbar } from '@/components/site-navbar';
 import { TermsDrawer } from '@/components/legal/terms-drawer';
 import { useLanguage } from '@/context/LanguageContext';
 import { handleLogin, handleRegister } from './services/auth-handles';
+import { sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 
 export default function LoginPage() {
   const { t, locale } = useLanguage();
@@ -329,6 +330,9 @@ export default function LoginPage() {
                         onSubmit={async (event) => {
                           const formData = new FormData(event.currentTarget);
                           const email = String(formData.get('email') ?? '');
+                          const inviteRedirect = sanitizeInviteRedirect(
+                            new URLSearchParams(window.location.search).get('redirect'),
+                          );
                           await handleRegister({
                             event,
                             setIsSubmitting,
@@ -336,10 +340,13 @@ export default function LoginPage() {
                             acceptedTerms,
                             termsErrorMessage: t('legal.acceptRequired'),
                             successMessage: t('auth.registered'),
-                            onSuccess: () =>
-                              router.push(
-                                `/confirm-email${email ? `?email=${encodeURIComponent(email)}` : ''}`,
-                              ),
+                            redirectPath: inviteRedirect,
+                            onSuccess: () => {
+                              const params = new URLSearchParams();
+                              if (email) params.set('email', email);
+                              if (inviteRedirect) params.set('redirect', inviteRedirect);
+                              router.push(`/confirm-email?${params.toString()}`);
+                            },
                           });
                         }}
                       >
