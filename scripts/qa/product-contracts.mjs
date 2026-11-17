@@ -1335,8 +1335,10 @@ const checks = [
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
       source.includes("error.message === 'owner_already_has_barbershop'") &&
+      source.includes("error.message === 'already_team_member'") &&
       source.includes('status: 409') &&
-      source.includes('Esta conta já é proprietária de outra barbearia.'),
+      source.includes('Esta conta já é proprietária de outra barbearia.') &&
+      source.includes('Esta conta já está associada a uma barbearia.'),
   },
 ];
 let failed = 0;
