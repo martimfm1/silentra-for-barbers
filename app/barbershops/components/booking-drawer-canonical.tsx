@@ -252,6 +252,7 @@ export function BookingDrawerCanonical({
     setSelectedDayClosed(false);
     setLoadingAvailability(false);
     setSubmitting(false);
+    setBookingStatus(null);
     setError('');
     setRetryKey(0);
     setName('');
