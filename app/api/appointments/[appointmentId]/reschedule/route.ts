@@ -362,6 +362,23 @@ async function PATCH__unobserved(
       .in('status', ['pending', 'scheduled'])
       .select('id,date_hour,status')
       .maybeSingle();
+    if (!updateError && updated) {
+      const { error: auditError } = await admin.from('audit_logs').insert({
+        action: 'appointment.rescheduled',
+        entity_type: 'appointment',
+        entity_id: appointmentId,
+        metadata: {
+          barbershop_id: barbershopId,
+          actor_type: 'staff',
+          actor_user_id: tenant.userId,
+          from_date_hour: appointment.date_hour,
+          to_date_hour: updated.date_hour,
+        },
+      });
+      if (auditError) {
+        console.error('[APPOINTMENT_AUDIT_WRITE_ERROR]', auditError.code ?? 'UNKNOWN');
+      }
+    }
     if (updateError) {
       if (updateError.code === '23P01' || updateError.code === '23505')
         return NextResponse.json(
