@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { getPortalSession } from '@/lib/customer-booking-portal';
 import { readJsonObject } from '@/lib/security/request-validation';
@@ -320,12 +321,15 @@ async function DELETE__unobserved(
       serviceName: service?.name?.trim() || 'Serviço',
       dateHour: appointment.date_hour,
     });
-    await admin.from('audit_logs').insert({
-      action: 'customer_portal_cancel',
-      entity_type: 'appointment',
-      entity_id: appointment.id,
+    await recordAppointmentActivity(admin, {
+      barbershopId: appointment.barbershop_id,
+      appointmentId: appointment.id,
+      event: 'cancelled',
+      actorType: 'customer',
+      actorId: appointment.client_id,
+      actorName: appointment.manual_name?.trim() || appointment.client_name || 'Cliente',
       metadata: {
-        email: session.email,
+        newStatus: 'cancelled',
         barberEmailsSent: barberNotification.emailsSent,
         barberPushSent: barberNotification.pushSent,
       },
@@ -477,12 +481,14 @@ async function PATCH__unobserved(
       previousDateHour: appointment.date_hour,
       newDateHour: updated.date_hour,
     });
-    await admin.from('audit_logs').insert({
-      action: 'customer_portal_reschedule',
-      entity_type: 'appointment',
-      entity_id: appointment.id,
+    await recordAppointmentActivity(admin, {
+      barbershopId: appointment.barbershop_id,
+      appointmentId: appointment.id,
+      event: 'rescheduled',
+      actorType: 'customer',
+      actorId: appointment.client_id,
+      actorName: appointment.manual_name?.trim() || appointment.client_name || 'Cliente',
       metadata: {
-        email: session.email,
         from: appointment.date_hour,
         to: newDateHour,
         barberEmailsSent: barberNotification.emailsSent,
