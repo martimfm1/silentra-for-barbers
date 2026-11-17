@@ -162,6 +162,7 @@ interface RegisterParams {
   termsErrorMessage?: string;
   onSuccess?: () => void;
   successMessage?: string;
+  redirectPath?: string | null;
 }
 
 export async function handleRegister({
@@ -172,6 +173,7 @@ export async function handleRegister({
   termsErrorMessage = 'Deves aceitar os termos e condições.',
   onSuccess,
   successMessage,
+  redirectPath,
 }: RegisterParams) {
   event.preventDefault();
 
@@ -200,6 +202,7 @@ export async function handleRegister({
         email,
         num_phone: phone,
         password,
+        redirect: redirectPath,
       }),
     });
 
