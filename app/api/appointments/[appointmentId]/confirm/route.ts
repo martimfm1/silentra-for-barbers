@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
@@ -180,6 +181,15 @@ async function POST__unobserved(
         },
         { status: 409 },
       );
+
+    await recordAppointmentActivity(admin, {
+      barbershopId,
+      appointmentId,
+      event: 'confirmed',
+      actorType: 'staff',
+      actorId: tenant.userId,
+      metadata: { previousStatus: 'pending', newStatus: 'scheduled' },
+    });
 
     const recipientEmail = appointment.manual_email?.trim().toLowerCase() || null;
     const recipientName =
