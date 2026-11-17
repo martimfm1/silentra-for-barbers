@@ -154,6 +154,7 @@ export default function AgendaPage() {
     finalizeBooking,
     addCompletedAppointmentClient,
     handleCreateBlock: createBlockAction,
+    handleDeleteBlock: deleteBlockAction,
     handleCancelBooking,
   } = useAppointments(barbershopId, fetchInitialData);
 
@@ -411,6 +412,17 @@ export default function AgendaPage() {
     [createBlockAction],
   );
 
+  const handleDeleteScheduleBlock = useCallback(
+    async (blockId: string) => {
+      const removed = await deleteBlockAction(blockId);
+      if (removed) {
+        setCalendarBlocksRefreshKey((current) => current + 1);
+      }
+      return removed;
+    },
+    [deleteBlockAction],
+  );
+
   const handleCancelSelectedAppointment = useCallback(
     (appointmentId: string) => handleCancelBooking(appointmentId),
     [handleCancelBooking],
@@ -526,6 +538,7 @@ export default function AgendaPage() {
               blocksRefreshKey={calendarBlocksRefreshKey}
               professionals={professionals}
               onAppointmentClick={setSelectedAppointment}
+              onDeleteBlock={handleDeleteScheduleBlock}
             />
           </section>
         ) : null}
