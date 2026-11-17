@@ -151,6 +151,7 @@ export function BookingDrawerCanonical({
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [selectedDayClosed, setSelectedDayClosed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState<'pending' | 'scheduled' | null>(null);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
   const [name, setName] = useState('');
@@ -666,6 +667,7 @@ export function BookingDrawerCanonical({
         return;
       }
       const paymentMethod = responseData.payment?.method ?? null;
+      setBookingStatus(responseData.booking?.status === 'scheduled' ? 'scheduled' : 'pending');
       trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
       if (paymentMethod === 'mbway') {
         setPaymentInstructions({
@@ -1436,7 +1438,9 @@ export function BookingDrawerCanonical({
                     ? locale === 'en'
                       ? 'You are on the waitlist'
                       : 'Estás na lista de espera'
-                    : t('bookingDrawer.bookingConfirmed')}
+                    : bookingStatus === 'pending'
+                      ? t('bookingDrawer.bookingPendingTitle')
+                      : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {waitlistOnly ? (
@@ -1453,6 +1457,11 @@ export function BookingDrawerCanonical({
                   </>
                 )}
               </p>
+              {!waitlistOnly && !paymentInstructions && bookingStatus === 'pending' && (
+                <p className="mt-3 max-w-sm rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 text-xs leading-5 text-amber-100/90">
+                  {t('bookingDrawer.bookingPendingDescription')}
+                </p>
+              )}
               {paymentInstructions && (
                 <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
                   <div className="flex items-center justify-between gap-3 text-sm">
