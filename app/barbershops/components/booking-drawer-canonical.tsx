@@ -1078,8 +1078,28 @@ export function BookingDrawerCanonical({
                   {t('bookingDrawer.back')}
                 </Button>
               </div>
+              {service ? (
+                <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-100">
+                      {service.name}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      {professional?.name}
+                      {' · '}
+                      {service.durationMinutes} {locale === 'pt' ? 'minutos' : 'minutes'}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-base font-semibold tabular-nums text-emerald-200">
+                    {new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
+                      style: 'currency',
+                      currency: 'EUR',
+                    }).format(service.price)}
+                  </p>
+                </div>
+              ) : null}
               {loadingAvailability ? (
-                <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-zinc-500">
+                <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-zinc-500" role="status" aria-live="polite">
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                   {t('bookingDrawer.loadingTimes')}
                 </div>
