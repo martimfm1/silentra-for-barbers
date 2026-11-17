@@ -172,4 +172,52 @@ on public.appointments
 for each row
 execute function public.capture_appointment_audit_event();
 
+-- The automatic completion worker uses the service role, so its changes
+-- are not attributed by auth.uid(). Record those transitions explicitly.
+create or replace function public.process_automatic_booking_completion()
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_updated integer := 0;
+begin
+  with completed_appointments as (
+    update public.appointments as a
+    set status = 'completed'
+    from public.barbershops as b
+    where a.barbershop_id = b.id
+      and coalesce(b.auto_complete_bookings, false) = true
+      and a.status = 'scheduled'
+      and a.date_hour
+        + pg_catalog.make_interval(mins => greatest(1, least(coalesce(a.duration_minutes, 30), 1440)))
+        <= pg_catalog.now()
+    returning a.id, a.barbershop_id
+  )
+  insert into public.audit_logs (action, entity_type, entity_id, metadata, created_at)
+  select
+    'appointment.completed',
+    'appointment',
+    completed.id::text,
+    pg_catalog.jsonb_build_object(
+      'barbershop_id', completed.barbershop_id,
+      'actor_type', 'system',
+      'actor_name', 'Sistema',
+      'from_status', 'scheduled',
+      'to_status', 'completed'
+    ),
+    pg_catalog.now()
+  from completed_appointments as completed;
+
+  get diagnostics v_updated = row_count;
+  return v_updated;
+end;
+$function$;
+
+revoke all on function public.process_automatic_booking_completion()
+  from public, anon, authenticated;
+grant execute on function public.process_automatic_booking_completion()
+  to service_role;
+
 commit;
