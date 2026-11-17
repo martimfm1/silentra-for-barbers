@@ -178,7 +178,7 @@ const checks = [
     file: 'app/dashboard/_components/team/InviteCodeCard.tsx',
     test: (source) =>
       source.includes('const INVITE_CODE_PATTERN =') &&
-      source.includes('BARB-[0-9A-HJ-NP-Z]{4}') &&
+      source.includes('BARB-(?:[0-9A-HJ-NP-Z]{4}-){2}') &&
       source.includes('const LINK_TOKEN_PATTERN = /^SIL-[0-9A-F]{32}$/'),
   },
   {
