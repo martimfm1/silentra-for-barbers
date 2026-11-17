@@ -80,16 +80,26 @@ async function POST__unobserved(request: Request) {
     const body: unknown = await request.json().catch(() => ({}));
     const candidate =
       body && typeof body === 'object' ? (body as Record<string, unknown>) : {};
-    const method = INVITE_METHODS.includes(candidate.method as InviteMethod)
-      ? (candidate.method as InviteMethod)
-      : 'code';
+    if (
+      candidate.method !== undefined &&
+      !INVITE_METHODS.includes(candidate.method as InviteMethod)
+    ) {
+      return NextResponse.json({ error: 'Método de convite inválido.' }, { status: 400 });
+    }
+    if (
+      candidate.expiresInHours !== undefined &&
+      (typeof candidate.expiresInHours !== 'number' ||
+        !INVITE_EXPIRY_HOURS.includes(
+          candidate.expiresInHours as (typeof INVITE_EXPIRY_HOURS)[number],
+        ))
+    ) {
+      return NextResponse.json({ error: 'Validade do convite inválida.' }, { status: 400 });
+    }
+
+    const method = (candidate.method as InviteMethod | undefined) ?? 'code';
     const expiresInHours =
-      typeof candidate.expiresInHours === 'number' &&
-      INVITE_EXPIRY_HOURS.includes(
-        candidate.expiresInHours as (typeof INVITE_EXPIRY_HOURS)[number],
-      )
-        ? candidate.expiresInHours
-        : 168;
+      (candidate.expiresInHours as (typeof INVITE_EXPIRY_HOURS)[number] | undefined) ??
+      168;
 
     const { data, error } = await supabase.rpc(
       'create_barbershop_invite_v2',
