@@ -2,20 +2,32 @@ import { withApiObservability } from '@/lib/observability/api';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-// Accept newly issued unambiguous codes and already-issued hexadecimal BARB codes.
-const INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;
+// Keep legacy codes working while accepting the longer codes and bearer
+// tokens used by links and QR invitations.
+const INVITE_BODY = /^(?:[0-9A-HJ-NP-Z]{8}|[0-9A-HJ-NP-Z]{12})$/;
+const LINK_TOKEN = /^[0-9A-F]{32}$/;
 const LEGACY_INVITE_CODE = /^[0-9A-F]{10}$/;
+
+function formatBarberCode(body: string): string {
+  return `BARB-${body.match(/.{1,4}/g)?.join('-') ?? body}`;
+}
 
 function normalizeInviteCode(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const compact = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  if (compact.startsWith('SIL')) {
+    const token = compact.slice(3);
+    return LINK_TOKEN.test(token) ? `SIL-${token}` : null;
+  }
+
   if (compact.startsWith('BARB')) {
     const body = compact.slice(4);
     if (!INVITE_BODY.test(body)) return null;
-    return `BARB-${body.slice(0, 4)}-${body.slice(4)}`;
+    return formatBarberCode(body);
   }
-  if (INVITE_BODY.test(compact))
-    return `BARB-${compact.slice(0, 4)}-${compact.slice(4)}`;
+
+  if (INVITE_BODY.test(compact)) return formatBarberCode(compact);
   if (LEGACY_INVITE_CODE.test(compact)) return compact;
   return null;
 }
