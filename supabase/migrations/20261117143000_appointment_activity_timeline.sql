@@ -1,7 +1,7 @@
 -- Tenant-scoped activity history for appointment lifecycle events.
 alter table public.audit_logs
   add column if not exists barbershop_id uuid references public.barbershops(id) on delete cascade,
-  add column if not exists actor_id uuid references auth.users(id) on delete set null,
+  add column if not exists actor_id uuid,
   add column if not exists actor_type text not null default 'system',
   add column if not exists actor_name text;
 
