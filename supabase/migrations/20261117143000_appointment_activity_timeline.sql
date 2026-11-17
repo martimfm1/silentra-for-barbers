@@ -35,15 +35,9 @@ create index if not exists audit_logs_appointment_timeline_idx
 
 alter table public.audit_logs enable row level security;
 
+-- Keep the audit table server-only. The guarded activity API performs
+-- explicit tenant and agenda-permission checks before using the service role.
 drop policy if exists "Barbershop members can read appointment activity" on public.audit_logs;
-create policy "Barbershop members can read appointment activity"
-  on public.audit_logs
-  for select
-  to authenticated
-  using (
-    entity_type = 'appointment'
-    and barbershop_id is not null
-    and barbershop_id = public.current_barbershop_id()
-  );
+revoke all on table public.audit_logs from public, anon, authenticated;
 
--- Activity records are written only by trusted server routes using service role.
+-- Activity records are written and read only by trusted server routes.
