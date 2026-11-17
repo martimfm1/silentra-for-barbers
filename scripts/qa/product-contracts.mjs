@@ -170,7 +170,7 @@ const checks = [
     name: 'Onboarding API accepts new and already-issued hexadecimal BARB codes',
     file: 'app/api/onboarding/join-v2/route.ts',
     test: (source) =>
-      source.includes('const INVITE_BODY = /^[0-9A-HJ-NP-Z]{8}$/;') &&
+      source.includes('const INVITE_BODY = /^(?:[0-9A-HJ-NP-Z]{8}|[0-9A-HJ-NP-Z]{12})$/;') &&
       source.includes('INVITE_BODY.test(body)'),
   },
   {
