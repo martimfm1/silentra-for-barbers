@@ -25,7 +25,8 @@ create index if not exists barbershop_invite_codes_pending_idx
 
 create or replace function public.create_barbershop_invite_v2(
   p_method text default 'code',
-  p_expires_in_hours integer default 168
+  p_expires_in_hours integer default 168,
+  p_role text default 'barber'
 )
 returns table (
   invite_id uuid,
@@ -63,6 +64,10 @@ begin
 
   if p_expires_in_hours is null or p_expires_in_hours not in (24, 72, 168) then
     raise exception 'invalid_invite_expiry' using errcode = '22023';
+  end if;
+
+  if p_role is null or p_role not in ('admin', 'manager', 'barber', 'receptionist') then
+    raise exception 'invalid_role' using errcode = '22023';
   end if;
 
   select u.barbershop_id
@@ -139,7 +144,7 @@ begin
   values (
     v_barbershop_id,
     v_hash,
-    'barber',
+    p_role,
     v_expires,
     v_user,
     p_method
@@ -147,13 +152,13 @@ begin
   returning id into v_invite_id;
 
   return query
-    select v_invite_id, v_value, v_expires, 'barber'::text, p_method;
+    select v_invite_id, v_value, v_expires, p_role, p_method;
 end;
 $function$;
 
-revoke all on function public.create_barbershop_invite_v2(text, integer)
+revoke all on function public.create_barbershop_invite_v2(text, integer, text)
   from public, anon, authenticated;
-grant execute on function public.create_barbershop_invite_v2(text, integer)
+grant execute on function public.create_barbershop_invite_v2(text, integer, text)
   to authenticated;
 
 -- Keep the old RPC signature working, but route it through the single invite
@@ -167,13 +172,9 @@ as $function$
 declare
   v_invite record;
 begin
-  if p_role is distinct from 'barber' then
-    raise exception 'invalid_role' using errcode = '22023';
-  end if;
-
   select *
     into v_invite
-  from public.create_barbershop_invite_v2('code', 168);
+  from public.create_barbershop_invite_v2('code', 168, p_role);
 
   return query
     select v_invite.invite_value, v_invite.expires_at, v_invite.role;
