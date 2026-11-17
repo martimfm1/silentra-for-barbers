@@ -192,7 +192,7 @@ const requestValidationChecks = [
       ".eq('barbershop_id', barbershopId)",
       "['pending', 'scheduled']",
       "from('schedule_blocks')",
-      'professional_appointment_reschedule',
+      'appointment.rescheduled',
       'sendCustomerAppointmentRescheduledEmail',
       'notificationSent',
       'toLisbonISOString(date, time)',
