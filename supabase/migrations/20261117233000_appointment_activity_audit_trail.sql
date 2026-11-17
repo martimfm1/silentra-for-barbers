@@ -27,6 +27,14 @@ begin
   end if;
 
   if tg_op = 'INSERT' then
+    if v_actor_id is null and new.client_id is not null then
+      select u.name_complete
+        into v_actor_name
+      from public.users as u
+      where u.id = new.client_id
+        and u.barbershop_id = v_barbershop_id;
+    end if;
+
     v_actor_type := case
       when v_actor_id is not null then 'staff'
       when new.client_id is not null or nullif(trim(coalesce(new.manual_name, '')), '') is not null then 'customer'
