@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { UUID_PATTERN, isValidDate } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
@@ -438,14 +439,15 @@ async function PATCH__unobserved(
         console.error('[PRO_APPOINTMENT_RESCHEDULE_EMAIL_FAILED]');
     }
 
-    await admin.from('audit_logs').insert({
-      action: 'professional_appointment_reschedule',
-      entity_type: 'appointment',
-      entity_id: appointmentId,
+    await recordAppointmentActivity(admin, {
+      barbershopId,
+      appointmentId,
+      event: 'rescheduled',
+      actorType: 'staff',
+      actorId: tenant.userId,
       metadata: {
         from: appointment.date_hour,
         to: newDateHour,
-        actorId: tenant.userId,
         notificationSent,
       },
     });
