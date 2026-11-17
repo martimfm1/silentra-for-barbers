@@ -288,7 +288,7 @@ assert.ok(
 );
 
 const appointmentAuditMigration = read(
-  'supabase/migrations/20261117233000_appointment_activity_audit_trail.sql',
+  'supabase/migrations/20261117231000_appointment_activity_audit_trail.sql',
 );
 const appointmentHistoryApi = read(
   'app/api/appointments/[appointmentId]/history/route.ts',
