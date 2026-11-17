@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
@@ -86,7 +87,7 @@ async function DELETE__unobserved(
     const { data: currentAppointment, error: currentAppointmentError } =
       await tenant.admin
         .from('appointments')
-        .select('payment_status')
+        .select('status,date_hour,payment_status')
         .eq('id', appointmentId)
         .eq('barbershop_id', tenant.barbershopId)
         .in('status', ['pending', 'scheduled'])
@@ -147,6 +148,20 @@ async function DELETE__unobserved(
         { success: false, error: 'Marcação não encontrada ou já processada.' },
         { status: 409 },
       );
+
+    await recordAppointmentActivity(tenant.admin, {
+      barbershopId: tenant.barbershopId,
+      appointmentId: appointment.id,
+      event: 'cancelled',
+      actorType: 'staff',
+      actorId: tenant.userId,
+      actorName: cancellingUser?.name_complete?.trim() || null,
+      metadata: {
+        previousStatus: currentAppointment?.status ?? null,
+        newStatus: 'cancelled',
+        from: currentAppointment?.date_hour ?? null,
+      },
+    });
 
     const [shopResult, serviceResult, professionalResult, clientResult] =
       await Promise.all([
