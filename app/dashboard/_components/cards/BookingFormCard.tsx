@@ -195,14 +195,15 @@ export function BookingForm({
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-950/95 sm:h-auto">
-      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-white/[0.07] px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-6 sm:pt-5">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-zinc-950/95 sm:h-auto">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(ellipse_at_top_left,rgba(16,185,129,0.13),transparent_68%)]" />
+      <header className="relative flex shrink-0 items-start justify-between gap-4 border-b border-white/[0.07] bg-white/[0.012] px-4 pb-5 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-6 sm:pb-6 sm:pt-5">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+          <span className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.09] text-emerald-300 shadow-[0_8px_30px_rgba(16,185,129,0.08)]">
             <Plus className="size-5" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold tracking-tight text-zinc-50 sm:text-xl">
+            <h2 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
               {t('bookingForm.title')}
             </h2>
             <p className="mt-1 max-w-xl text-xs leading-5 text-zinc-500 sm:text-sm">
@@ -227,14 +228,14 @@ export function BookingForm({
         </DialogClose>
       </header>
 
-      <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 sm:space-y-5 sm:px-6 sm:py-5">
+      <form onSubmit={onSubmit} className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 sm:space-y-5 sm:px-6 sm:py-6">
           <section
-            className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-3.5 sm:p-5"
+            className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.045] to-white/[0.015] p-3.5 shadow-inner shadow-black/10 sm:p-5"
             aria-labelledby="booking-client-section"
           >
-            <div className="mb-4 flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
+            <div className="mb-4 flex items-center gap-3 border-b border-white/[0.06] pb-3.5">
+              <span className="flex size-9 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[0.08] text-emerald-300">
                 <UserRound className="size-4" aria-hidden="true" />
               </span>
               <div className="min-w-0">
@@ -518,11 +519,11 @@ export function BookingForm({
           </section>
 
           <section
-            className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-3.5 sm:p-5"
+            className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.045] to-white/[0.015] p-3.5 shadow-inner shadow-black/10 sm:p-5"
             aria-labelledby="booking-service-section"
           >
-            <div className="mb-4 flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300">
+            <div className="mb-4 flex items-center gap-3 border-b border-white/[0.06] pb-3.5">
+              <span className="flex size-9 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[0.08] text-emerald-300">
                 <Scissors className="size-4" aria-hidden="true" />
               </span>
               <div>
@@ -672,11 +673,11 @@ export function BookingForm({
           </section>
 
           <section
-            className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-3.5 sm:p-5"
+            className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.045] to-white/[0.015] p-3.5 shadow-inner shadow-black/10 sm:p-5"
             aria-labelledby="booking-time-section"
           >
-            <div className="mb-4 flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-sky-400/10 text-sky-300">
+            <div className="mb-4 flex items-center gap-3 border-b border-white/[0.06] pb-3.5">
+              <span className="flex size-9 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[0.08] text-emerald-300">
                 <CalendarClock className="size-4" aria-hidden="true" />
               </span>
               <div>
@@ -846,7 +847,7 @@ export function BookingForm({
           </section>
         </div>
 
-        <footer className="flex shrink-0 flex-col gap-3 border-t border-white/[0.08] bg-zinc-950/95 px-4 pb-[calc(0.875rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+        <footer className="relative z-[1] flex shrink-0 flex-col gap-3 border-t border-white/[0.08] bg-zinc-950/95 px-4 pb-[calc(0.875rem+env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
           <div
             className="min-w-0 text-xs leading-5 text-zinc-500"
             aria-live="polite"
@@ -872,7 +873,7 @@ export function BookingForm({
             disabled={
               loading || services.length === 0 || professionals.length === 0
             }
-            className="silentra-action-primary min-h-12 w-full shrink-0 rounded-xl bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 shadow-[0_8px_24px_rgba(52,211,153,0.15)] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-48"
+            className="silentra-action-primary min-h-12 w-full shrink-0 rounded-xl bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 shadow-[0_10px_28px_rgba(16,185,129,0.18)] transition hover:bg-emerald-400 hover:shadow-[0_12px_32px_rgba(16,185,129,0.24)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-48"
           >
             {loading ? (
               <Spinner className="mr-2" />
