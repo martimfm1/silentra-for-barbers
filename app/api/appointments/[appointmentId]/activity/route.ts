@@ -98,6 +98,7 @@ async function GET__unobserved(
       .eq('entity_type', 'appointment')
       .eq('entity_id', appointmentId)
       .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
       .limit(100);
 
     if (error) {
@@ -126,7 +127,7 @@ async function GET__unobserved(
     const events = rows.map((row) => {
       const metadata = row.metadata ?? {};
       const safeMetadata: Record<string, unknown> = {};
-      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'barberEmailsSent', 'barberPushSent', 'reason']) {
+      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'notificationRetryInProgress', 'notificationRetryStartedAt', 'barberEmailsSent', 'barberPushSent', 'reason']) {
         if (metadata[key] !== undefined) safeMetadata[key] = metadata[key];
       }
       return {
