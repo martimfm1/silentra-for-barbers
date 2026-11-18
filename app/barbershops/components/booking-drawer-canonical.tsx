@@ -50,6 +50,11 @@ type ManualPrepaymentInstructions = {
   whatsappPhone: string;
   expiresAt: string;
 };
+
+type BookingReceipt = {
+  id: string | null;
+  status: 'pending' | 'scheduled';
+};
 function normalizeWhatsAppNumber(value: string): string {
   let digits = value.replace(/\D/g, '');
   if (digits.startsWith('00')) digits = digits.slice(2);
@@ -168,6 +173,8 @@ export function BookingDrawerCanonical({
   const [waitlistConsent, setWaitlistConsent] = useState(false);
   const [paymentInstructions, setPaymentInstructions] =
     useState<ManualPrepaymentInstructions | null>(null);
+  const [bookingReceipt, setBookingReceipt] =
+    useState<BookingReceipt | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const customerControllerRef = useRef<AbortController | null>(null);
   const cacheRef = useRef(
@@ -263,6 +270,7 @@ export function BookingDrawerCanonical({
     setManualPrepayment(null);
     setPrepaymentSelected(false);
     setPaymentInstructions(null);
+    setBookingReceipt(null);
     setWaitlistOnly(false);
     setWaitlistConsent(false);
     controllerRef.current?.abort();
@@ -657,6 +665,7 @@ export function BookingDrawerCanonical({
       if (waitlistOnly) {
         trackWaitlistJoined(appearance);
         setPaymentInstructions(null);
+        setBookingReceipt(null);
         toast.success(
           locale === 'en'
             ? 'You are on the waitlist.'
@@ -665,6 +674,14 @@ export function BookingDrawerCanonical({
         setStep(4);
         return;
       }
+      const bookingData =
+        responseData.booking && typeof responseData.booking === 'object'
+          ? responseData.booking
+          : null;
+      setBookingReceipt({
+        id: typeof bookingData?.id === 'string' ? bookingData.id : null,
+        status: bookingData?.status === 'scheduled' ? 'scheduled' : 'pending',
+      });
       const paymentMethod = responseData.payment?.method ?? null;
       trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
       if (paymentMethod === 'mbway') {
@@ -681,15 +698,6 @@ export function BookingDrawerCanonical({
         toast.success(t('bookingDrawer.bookingSuccess'));
       }
       setStep(4);
-      if (paymentMethod !== 'mbway') {
-        onSuccess?.({
-          shopName: shop.name,
-          serviceName: service.name,
-          date: currentDay.dateStr,
-          time: selectedSlot ?? '',
-          customerEmail: email.trim(),
-        });
-      }
     } catch (reason) {
       const message =
         reason instanceof Error
@@ -720,6 +728,10 @@ export function BookingDrawerCanonical({
   const whatsappProofUrl = whatsappDigits
     ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(whatsappMessage)}`
     : '';
+  const bookingConfirmed =
+    !waitlistOnly &&
+    !paymentInstructions &&
+    bookingReceipt?.status === 'scheduled';
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -785,7 +797,11 @@ export function BookingDrawerCanonical({
                       ? locale === 'en'
                         ? 'You are on the waitlist'
                         : 'Estás na lista de espera'
-                      : t('bookingDrawer.bookingConfirmed')
+                      : bookingConfirmed
+                        ? t('bookingDrawer.bookingConfirmed')
+                        : locale === 'en'
+                          ? 'Request received — awaiting confirmation'
+                          : 'Pedido recebido — aguarda confirmação'
                   : shop.name}
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
@@ -809,7 +825,13 @@ export function BookingDrawerCanonical({
                           ? locale === 'en'
                             ? 'The barbershop may contact you if a suitable opening becomes available.'
                             : 'A barbearia poderá contactar-te se surgir uma vaga adequada.'
-                          : t('bookingDrawer.slotReserved')}
+                          : bookingConfirmed
+                            ? locale === 'en'
+                              ? 'The barbershop has confirmed your appointment.'
+                              : 'A barbearia confirmou a tua marcação.'
+                            : locale === 'en'
+                              ? 'Your request was received. The appointment is not confirmed yet.'
+                              : 'Recebemos o teu pedido. A marcação ainda não está confirmada.'}
               </p>
             </div>
             <button
@@ -1419,12 +1441,19 @@ export function BookingDrawerCanonical({
               aria-labelledby="booking-success-title"
             >
               <div
-                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
+                className={`flex size-16 items-center justify-center rounded-full border ${bookingConfirmed || waitlistOnly ? 'border-emerald-400/25 bg-emerald-400/10' : 'border-amber-400/25 bg-amber-400/10'}`}
               >
-                <CheckCircle2
-                  className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
-                  aria-hidden="true"
-                />
+                {bookingConfirmed || waitlistOnly ? (
+                  <CheckCircle2
+                    className="size-8 text-emerald-300"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Clock3
+                    className="size-8 text-amber-300"
+                    aria-hidden="true"
+                  />
+                )}
               </div>
               <h3
                 id="booking-success-title"
@@ -1436,7 +1465,11 @@ export function BookingDrawerCanonical({
                     ? locale === 'en'
                       ? 'You are on the waitlist'
                       : 'Estás na lista de espera'
-                    : t('bookingDrawer.bookingConfirmed')}
+                    : bookingConfirmed
+                      ? t('bookingDrawer.bookingConfirmed')
+                      : locale === 'en'
+                        ? 'Request received — awaiting confirmation'
+                        : 'Pedido recebido — aguarda confirmação'}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {waitlistOnly ? (
@@ -1453,6 +1486,82 @@ export function BookingDrawerCanonical({
                   </>
                 )}
               </p>
+              {!waitlistOnly ? (
+                <>
+                  <div
+                    className={`mt-5 w-full rounded-2xl border p-4 text-left ${bookingConfirmed ? 'border-emerald-400/20 bg-emerald-400/[.035]' : 'border-amber-400/20 bg-amber-400/[.045]'}`}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <p className={`text-sm font-semibold ${bookingConfirmed ? 'text-emerald-200' : 'text-amber-100'}`}>
+                      {paymentInstructions
+                        ? locale === 'en'
+                          ? 'Payment proof pending review'
+                          : 'Comprovativo pendente de validação'
+                        : bookingConfirmed
+                          ? locale === 'en'
+                            ? 'Your appointment is confirmed'
+                            : 'A tua marcação está confirmada'
+                          : locale === 'en'
+                            ? 'Waiting for the barbershop to confirm'
+                            : 'À espera da confirmação da barbearia'}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-400">
+                      {paymentInstructions
+                        ? locale === 'en'
+                          ? 'Send the MB WAY proof using the WhatsApp button below. The booking remains pending until the barbershop validates the payment.'
+                          : 'Envia o comprovativo MB WAY pelo botão do WhatsApp. A marcação permanece pendente até a barbearia validar o pagamento.'
+                        : bookingConfirmed
+                          ? locale === 'en'
+                            ? 'The selected time is reserved for you.'
+                            : 'O horário escolhido está reservado para ti.'
+                          : locale === 'en'
+                            ? 'Your request has been recorded, but the selected time is not confirmed yet. You can follow its status in your customer area.'
+                            : 'O teu pedido ficou registado, mas o horário ainda não está confirmado. Podes acompanhar o estado na tua área de cliente.'}
+                    </p>
+                    {bookingReceipt?.id ? (
+                      <p className="mt-3 break-all border-t border-white/10 pt-3 text-[11px] text-zinc-500">
+                        {locale === 'en' ? 'Booking reference' : 'Referência da marcação'}:{' '}
+                        <span className="font-mono text-zinc-300">{bookingReceipt.id}</span>
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-3 grid w-full grid-cols-2 gap-2 text-left">
+                    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                      <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Date' : 'Data'}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-100">{currentDay?.fullDateFormatted}</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                      <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Time' : 'Hora'}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-100">{selectedSlot}</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                      <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Duration' : 'Duração'}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-100">{service?.durationMinutes ?? 0} min</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                      <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Service price' : 'Preço do serviço'}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-100">{Number(service?.price ?? 0).toFixed(2)} €</p>
+                    </div>
+                  </div>
+
+                  {bookingReceipt?.id ? (
+                    <a
+                      href={`/my-bookings?email=${encodeURIComponent(email.trim())}`}
+                      className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]"
+                    >
+                      {locale === 'en' ? 'Open customer area' : 'Abrir área de cliente'}
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </a>
+                  ) : null}
+                  <p className="mt-2 text-center text-[11px] leading-5 text-zinc-500">
+                    {locale === 'en'
+                      ? 'Use the same email to access your bookings. We will send a one-time code to verify it.'
+                      : 'Usa o mesmo email para consultar as tuas marcações. Enviaremos um código de utilização única para o confirmar.'}
+                  </p>
+                </>
+              ) : null}
               {paymentInstructions && (
                 <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
                   <div className="flex items-center justify-between gap-3 text-sm">
@@ -1505,7 +1614,7 @@ export function BookingDrawerCanonical({
                 type="button"
                 className="mt-6 w-full"
                 onClick={() => {
-                  if (paymentInstructions) {
+                  if (!waitlistOnly) {
                     onSuccess?.({
                       shopName: shop.name,
                       serviceName: service?.name || 'Serviço',
