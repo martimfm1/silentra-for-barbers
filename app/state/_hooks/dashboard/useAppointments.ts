@@ -339,6 +339,44 @@ export function useAppointments(
     [barbershopId, bookingFormData, locale, onRefreshData, t],
   );
 
+  const resendBookingEmail = useCallback(
+    async (appointmentId: string) => {
+      try {
+        const response = await fetch(
+          `/api/appointments/${encodeURIComponent(appointmentId)}/email`,
+          { method: 'POST', cache: 'no-store' },
+        );
+        const result = await response.json().catch(() => null);
+        if (!response.ok || result?.success !== true || result?.emailSent !== true) {
+          if (result?.emailSkipped === true) {
+            throw new Error(
+              locale === 'en'
+                ? 'No customer email is saved on this booking.'
+                : 'Esta marcação não tem um email de cliente guardado.',
+            );
+          }
+          throw new Error(
+            result?.error ||
+              (locale === 'en'
+                ? 'The booking email could not be sent.'
+                : 'Não foi possível enviar o email da marcação.'),
+          );
+        }
+        toast.success(
+          locale === 'en'
+            ? 'Booking email sent successfully.'
+            : 'Email da marcação enviado com sucesso.',
+        );
+        return true;
+      } catch (error) {
+        console.error('[RESEND_BOOKING_EMAIL_ERROR]', error);
+        toast.error(getErrorMessage(error));
+        return false;
+      }
+    },
+    [locale],
+  );
+
   const confirmBooking = useCallback(
     async (appointmentId: string) => {
       setLoading(true);
@@ -557,6 +595,7 @@ export function useAppointments(
     setBlockFormData,
     handleCreateBooking,
     confirmBooking,
+    resendBookingEmail,
     finalizeBooking,
     addCompletedAppointmentClient,
     handleCreateBlock,
