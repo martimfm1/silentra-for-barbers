@@ -799,6 +799,7 @@ export default function OnboardingPage() {
                               {t('onboarding.closingHint')}
                             </p>
                           </div>
+                        </div>
                         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(150px,0.6fr)]">
                           <div className="grid gap-2">
                             <Label htmlFor="first-service-name">
