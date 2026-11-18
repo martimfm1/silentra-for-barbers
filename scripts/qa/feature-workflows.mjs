@@ -290,3 +290,35 @@ assert.ok(
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
+
+
+// Public booking completion must show the API-confirmed state before dismissing the drawer.
+const publicBookingDrawer = read(
+  'app/barbershops/components/booking-drawer-canonical.tsx',
+);
+const publicBookingApi = read('app/api/bookings/route.ts');
+const publicBookingSubmitStart = publicBookingDrawer.indexOf('async function submit()');
+const publicBookingSubmitEnd = publicBookingDrawer.indexOf('if (!shop) return null;', publicBookingSubmitStart);
+assert.ok(publicBookingSubmitStart >= 0 && publicBookingSubmitEnd > publicBookingSubmitStart);
+const publicBookingSubmit = publicBookingDrawer.slice(
+  publicBookingSubmitStart,
+  publicBookingSubmitEnd,
+);
+assert.ok(publicBookingSubmit.includes('setBookingReceipt({'));
+assert.ok(publicBookingSubmit.includes("bookingData?.status === 'scheduled' ? 'scheduled' : 'pending'"));
+assert.ok(!publicBookingSubmit.includes('onSuccess?.('), 'The drawer must not close before the receipt is shown.');
+assert.ok(publicBookingApi.includes('status: appointment.status,'));
+assert.ok(publicBookingDrawer.includes('Request received — awaiting confirmation'));
+assert.ok(publicBookingDrawer.includes('Pedido recebido — aguarda confirmação'));
+assert.ok(publicBookingDrawer.includes('A marcação ainda não está confirmada.'));
+assert.ok(publicBookingDrawer.includes('bookingReceipt?.id'));
+assert.ok(publicBookingDrawer.includes('Booking reference'));
+assert.ok(publicBookingDrawer.includes('Referência da marcação'));
+assert.ok(publicBookingDrawer.includes('/my-bookings?email='));
+assert.ok(publicBookingDrawer.includes('service?.durationMinutes'));
+assert.ok(publicBookingDrawer.includes('service?.price'));
+assert.match(
+  publicBookingDrawer,
+  /onClick=\{\(\) => \{\s*if \(!waitlistOnly\) \{\s*onSuccess\?\.\(/,
+);
+console.log('[PUBLIC_BOOKING_RECEIPT_QA] Server-driven confirmation, receipt summary and customer-area handoff passed.');
