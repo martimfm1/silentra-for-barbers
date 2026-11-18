@@ -1594,7 +1594,7 @@ export function BookingDrawerCanonical({
 
                   <div
                     className="mt-3 grid w-full grid-cols-2 gap-2 text-left"
-                    aria-label={locale === 'pt' ? 'Resumo da marcação' : 'Booking summary'}
+                    aria-label={locale === 'pt' ? 'Resumo do serviço e da marcação' : 'Service summary and booking details'}
                   >
                     <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
                       <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Date' : 'Data'}</p>
