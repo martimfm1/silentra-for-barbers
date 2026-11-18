@@ -382,7 +382,7 @@ console.log('[PUBLIC_BOOKING_RECEIPT_QA] Server-driven confirmation, receipt sum
 
 const onboardingPage = read('app/onboarding/page.tsx');
 const onboardingCreateApi = read('app/api/onboarding/create/route.ts');
-const onboardingPersistenceMigration = read('supabase/migrations/20261118182600_onboarding_persist_initial_service_professional.sql');
+const onboardingPersistenceMigration = read('supabase/migrations/20261118200006_onboarding_persist_initial_service_professional.sql');
 
 assert.ok(onboardingPage.includes('firstServiceName'));
 assert.ok(onboardingPage.includes('firstServiceDuration'));
