@@ -127,8 +127,17 @@ async function GET__unobserved(
     const events = rows.map((row) => {
       const metadata = row.metadata ?? {};
       const safeMetadata: Record<string, unknown> = {};
-      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'notificationRetryInProgress', 'notificationRetryStartedAt', 'barberEmailsSent', 'barberPushSent', 'reason']) {
+      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'notificationRetryStartedAt', 'barberEmailsSent', 'barberPushSent', 'reason']) {
         if (metadata[key] !== undefined) safeMetadata[key] = metadata[key];
+      }
+      if (typeof metadata.notificationRetryInProgress === 'boolean') {
+        const retryLeaseUntil = typeof metadata.notificationRetryLeaseUntil === 'string'
+          ? Date.parse(metadata.notificationRetryLeaseUntil)
+          : Number.NaN;
+        safeMetadata.notificationRetryInProgress =
+          metadata.notificationRetryInProgress &&
+          Number.isFinite(retryLeaseUntil) &&
+          retryLeaseUntil > Date.now();
       }
       return {
         id: row.id,
