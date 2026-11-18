@@ -223,6 +223,7 @@ export function MyBookingsPage({
       toast.success('Marcação cancelada. O estado já foi atualizado.');
       void load({ showLoading: false, silent: true });
     } catch (error) {
+      void load({ showLoading: false, silent: true });
       toast.error(
         error instanceof Error ? error.message : 'Não foi possível cancelar.',
       );
@@ -331,6 +332,8 @@ export function MyBookingsPage({
     setCode('');
     setDetails(null);
     setReschedule(null);
+    setLoadError(null);
+    setAvailabilityError(null);
   }
 
   return (
