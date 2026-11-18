@@ -19,7 +19,6 @@ overrides:
   sharp: '0.35.5'
   source-map-js: '>=1.2.2'
 
- 
 # Temporary, reviewed exception: GHSA-fc5q-39xc-vjpf has no patched release.
 # The only production path is Sentry's build-time Rollup CommonJS wrapper; its
 # glob patterns come from trusted application build configuration, not requests.
