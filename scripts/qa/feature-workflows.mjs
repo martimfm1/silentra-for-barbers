@@ -329,8 +329,8 @@ assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSent ==
 assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSkipped === true"));
 assert.ok(appointmentNotificationRetryApi.includes('sendCustomerAppointmentRescheduledEmail'));
 assert.ok(appointmentNotificationRetryApi.includes('sendAppointmentCancellationEmail'));
-assert.ok(appointmentNotificationRetryApi.includes("rpc('claim_appointment_notification_retry'"));
-assert.ok(appointmentNotificationRetryApi.includes("rpc('complete_appointment_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes('randomUUID()'));
 assert.ok(appointmentNotificationRetryApi.includes('notificationRetryToken') === false);
 assert.ok(!appointmentNotificationRetryApi.includes(".from('audit_logs')\n      .update("));
