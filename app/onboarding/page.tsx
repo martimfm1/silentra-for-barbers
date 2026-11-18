@@ -193,23 +193,26 @@ export default function OnboardingPage() {
     [tagsInput],
   );
 
-  const createProgress = useMemo(() => {
-    // Only ask for the information needed to create the shop.
-    // Pricing, opening hours and discovery tags already have sensible defaults
-    // and can be adjusted later from the dashboard.
-    const requiredFields = [shopName.trim(), address.trim(), city.trim()];
-    const completed = requiredFields.filter(Boolean).length;
-    return 35 + Math.round((completed / requiredFields.length) * 55);
-  }, [shopName, address, city]);
+  const requiredFieldsCompleted = useMemo(
+    () =>
+      [shopName.trim(), address.trim(), city.trim()].filter(Boolean).length,
+    [shopName, address, city],
+  );
 
+  // Progress reflects only information the user has actually supplied.
+  // We deliberately avoid suggesting that the setup is 35% complete before
+  // any required details have been entered.
   const progress =
-    step === 'selection'
-      ? 20
-      : step === 'join'
-        ? inviteCode
-          ? 90
-          : 45
-        : createProgress;
+    step === 'join'
+      ? (inviteCode.trim() ? 100 : 0)
+      : Math.round((requiredFieldsCompleted / 3) * 100);
+
+  const progressDescription =
+    step === 'join'
+      ? inviteCode.trim()
+        ? 'Código de convite introduzido'
+        : 'Introduza o código de convite'
+      : `${requiredFieldsCompleted} de 3 dados essenciais`;
 
   const selectStep = (next: Exclude<Step, 'selection'>) => {
     setStep(next);
@@ -332,25 +335,29 @@ export default function OnboardingPage() {
               </div>
               <div className="flex shrink-0 items-center gap-3">
                 <LanguageSwitcher />
-                <span className="font-medium tabular-nums text-zinc-400">
-                  {progress}%
-                </span>
+                {step !== 'selection' && (
+                  <span className="max-w-40 text-right font-medium text-zinc-400">
+                    {progressDescription}
+                  </span>
+                )}
               </div>
             </div>
-            <div
-              className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10"
-              aria-label={`Progresso do onboarding: ${progress}%`}
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progress}
-            >
-              <motion.div
-                className="h-full rounded-full bg-emerald-400"
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.35 }}
-              />
-            </div>
+            {step !== 'selection' && (
+              <div
+                className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10"
+                aria-label={`Progresso: ${progressDescription}`}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
+              >
+                <motion.div
+                  className="h-full rounded-full bg-emerald-400"
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.35 }}
+                />
+              </div>
+            )}
 
             <motion.div
               layout
@@ -807,7 +814,7 @@ export default function OnboardingPage() {
                         loading ? 'A criar barbearia' : 'Criar barbearia'
                       }
                       type="submit"
-                      disabled={loading || createProgress < 90}
+                      disabled={loading}
                       className="min-h-12 w-full rounded-xl bg-zinc-50 font-semibold text-zinc-950 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
                       {loading ? (
