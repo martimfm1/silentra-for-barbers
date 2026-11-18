@@ -297,7 +297,7 @@ assert.ok(
 
 
 const appointmentActivityMigration = read(
-  'supabase/migrations/20261117143000_appointment_activity_timeline.sql',
+  'supabase/migrations/20261118173900_appointment_activity_timeline.sql',
 );
 const appointmentActivityApi = read(
   'app/api/appointments/[appointmentId]/activity/route.ts',
