@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Clock3,
   Eye,
+  Info,
   LogOut,
   Mail,
   MapPin,
@@ -27,6 +28,8 @@ type Appointment = {
   professionalName: string | null;
   barbershopName: string;
   barbershopAddress: string | null;
+  cancellationReason?: string | null;
+  cancelledAt?: string | null;
 };
 type Availability = {
   date: string;
@@ -52,10 +55,28 @@ const formatShortDate = (value: string) =>
 const statusLabel = (value: string) =>
   ({
     scheduled: 'Confirmada',
-    pending: 'Pendente',
+    pending: 'À espera de confirmação',
     cancelled: 'Cancelada',
     completed: 'Concluída',
   })[value] ?? value;
+
+const statusDescription = (value: string) =>
+  ({
+    scheduled: 'A barbearia confirmou o teu horário. A marcação está reservada.',
+    pending:
+      'O teu pedido foi recebido, mas ainda aguarda confirmação da barbearia. O horário só fica confirmado quando o estado mudar para «Confirmada».',
+    cancelled: 'Esta marcação foi cancelada e já não ocupa o horário.',
+    completed: 'Este atendimento já foi concluído.',
+  })[value] ?? 'Consulta os detalhes da marcação para ver o estado atual.';
+
+const statusTone = (value: string) =>
+  value === 'scheduled'
+    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+    : value === 'pending'
+      ? 'border-amber-400/20 bg-amber-400/[0.08] text-amber-200'
+      : value === 'cancelled'
+        ? 'border-rose-500/20 bg-rose-500/[0.08] text-rose-300'
+        : 'border-white/10 bg-white/[0.04] text-zinc-400';
 
 export function MyBookingsPage({
   initialEmail = '',
@@ -69,23 +90,33 @@ export function MyBookingsPage({
   const [upcoming, setUpcoming] = useState<Appointment[]>([]);
   const [past, setPast] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [details, setDetails] = useState<Appointment | null>(null);
   const [reschedule, setReschedule] = useState<Appointment | null>(null);
   const [date, setDate] = useState('');
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
-  async function load() {
-    setLoading(true);
+  async function load(options: { showLoading?: boolean; silent?: boolean } = {}) {
+    const showLoading = options.showLoading ?? true;
+    if (showLoading) setLoading(true);
+    else setRefreshing(true);
+
     try {
       const response = await fetch('/api/customer-portal/appointments', {
         cache: 'no-store',
+        headers: { Accept: 'application/json' },
       });
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) {
         setSessionEmail(null);
-        return;
+        setUpcoming([]);
+        setPast([]);
+        setLoadError(null);
+        return true;
       }
       if (!response.ok)
         throw new Error(
@@ -94,19 +125,24 @@ export function MyBookingsPage({
       setSessionEmail(data.email ?? null);
       setUpcoming(data.upcoming ?? []);
       setPast(data.past ?? []);
+      setLoadError(null);
+      return true;
     } catch (error) {
-      toast.error(
+      const message =
         error instanceof Error
           ? error.message
-          : 'Não foi possível carregar as marcações.',
-      );
+          : 'Não foi possível carregar as marcações.';
+      setLoadError(message);
+      if (!options.silent) toast.error(message);
+      return false;
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
+      else setRefreshing(false);
     }
   }
 
   useEffect(() => {
-    void load();
+    void load({ showLoading: true });
   }, []);
 
   async function requestCode(event: FormEvent) {
@@ -146,7 +182,7 @@ export function MyBookingsPage({
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Código inválido.');
       setCode('');
-      await load();
+      await load({ showLoading: false, silent: true });
       toast.success('Email confirmado.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Código inválido.');
@@ -163,12 +199,31 @@ export function MyBookingsPage({
         method: 'DELETE',
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok)
+      if (!response.ok || data.success !== true)
         throw new Error(data.error || 'Não foi possível cancelar.');
-      await load();
+
+      const cancelledAt = new Date().toISOString();
+      const current =
+        upcoming.find((item) => item.id === id) ??
+        past.find((item) => item.id === id);
+      setUpcoming((items) => items.filter((item) => item.id !== id));
+      if (current) {
+        setPast((items) =>
+          [
+            ...items.filter((item) => item.id !== id),
+            { ...current, status: 'cancelled', cancelledAt },
+          ].sort(
+            (a, b) =>
+              new Date(b.dateHour).getTime() - new Date(a.dateHour).getTime(),
+          ),
+        );
+      }
       setDetails(null);
-      toast.success('Marcação cancelada.');
+      setLoadError(null);
+      toast.success('Marcação cancelada. O estado já foi atualizado.');
+      void load({ showLoading: false, silent: true });
     } catch (error) {
+      void load({ showLoading: false, silent: true });
       toast.error(
         error instanceof Error ? error.message : 'Não foi possível cancelar.',
       );
@@ -179,6 +234,8 @@ export function MyBookingsPage({
 
   async function getAvailability(item: Appointment, nextDate: string) {
     setAvailabilityLoading(true);
+    setAvailabilityError(null);
+    setAvailability(null);
     try {
       const response = await fetch(
         `/api/customer-portal/appointments/${item.id}?date=${encodeURIComponent(nextDate)}`,
@@ -195,7 +252,7 @@ export function MyBookingsPage({
       });
     } catch (error) {
       setAvailability(null);
-      toast.error(
+      setAvailabilityError(
         error instanceof Error
           ? error.message
           : 'Não foi possível carregar os horários.',
@@ -211,12 +268,14 @@ export function MyBookingsPage({
     setReschedule(item);
     setDate(initial);
     setAvailability(null);
+    setAvailabilityError(null);
     void getAvailability(item, initial);
   }
 
   async function rescheduleTo(slot: string) {
     if (!reschedule) return;
     setActionId(reschedule.id);
+    let responseStatus = 0;
     try {
       const response = await fetch(
         `/api/customer-portal/appointments/${reschedule.id}`,
@@ -226,17 +285,39 @@ export function MyBookingsPage({
           body: JSON.stringify({ date, slot }),
         },
       );
+      responseStatus = response.status;
       const data = await response.json().catch(() => ({}));
-      if (!response.ok)
-        throw new Error(data.error || 'Não foi possível reagendar.');
+      if (!response.ok || data.success !== true || typeof data.dateHour !== 'string')
+        throw new Error(data.error || 'Não foi possível confirmar o novo horário.');
+
+      const updatedDateHour = data.dateHour as string;
+      setUpcoming((items) =>
+        items
+          .map((item) =>
+            item.id === reschedule.id
+              ? { ...item, dateHour: updatedDateHour }
+              : item,
+          )
+          .sort(
+            (a, b) =>
+              new Date(a.dateHour).getTime() - new Date(b.dateHour).getTime(),
+          ),
+      );
+      setDetails(null);
       setReschedule(null);
       setAvailability(null);
-      await load();
-      toast.success('Marcação reagendada.');
+      setAvailabilityError(null);
+      setLoadError(null);
+      toast.success('Marcação reagendada. O novo horário já está atualizado.');
+      void load({ showLoading: false, silent: true });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : 'Não foi possível reagendar.',
       );
+      void load({ showLoading: false, silent: true });
+      if (responseStatus === 409) {
+        void getAvailability(reschedule, date);
+      }
     } finally {
       setActionId(null);
     }
@@ -251,6 +332,8 @@ export function MyBookingsPage({
     setCode('');
     setDetails(null);
     setReschedule(null);
+    setLoadError(null);
+    setAvailabilityError(null);
   }
 
   return (
@@ -282,7 +365,28 @@ export function MyBookingsPage({
           )}
         </header>
 
-        {!sessionEmail ? (
+        {!sessionEmail && loadError ? (
+          <section
+            className="glassmorphism rounded-[2rem] border border-rose-400/15 bg-rose-400/[0.035] p-6 sm:p-8"
+            role="alert"
+          >
+            <p className="text-sm font-semibold text-zinc-100">
+              Não foi possível verificar a tua sessão.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
+              {loadError}. Tenta novamente antes de introduzires os teus dados.
+            </p>
+            <button
+              type="button"
+              onClick={() => void load({ showLoading: false })}
+              disabled={refreshing}
+              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:opacity-50"
+            >
+              <RefreshCw className={`size-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Tentar novamente
+            </button>
+          </section>
+        ) : !sessionEmail ? (
           <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_0.58fr]">
             <div className="glassmorphism rounded-[2rem] border border-white/10 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.25)] sm:p-8">
               {step === 'email' ? (
@@ -411,12 +515,35 @@ export function MyBookingsPage({
                 </p>
               </div>
               <button
-                onClick={() => void load()}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-xs text-zinc-300 hover:bg-white/5"
+                type="button"
+                onClick={() => void load({ showLoading: false })}
+                disabled={refreshing}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-xs text-zinc-300 hover:bg-white/5 disabled:opacity-50"
               >
-                <RefreshCw className="size-3.5" /> Atualizar
+                <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'A atualizar…' : 'Atualizar'}
               </button>
             </div>
+
+            {loadError ? (
+              <div
+                className="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-400/15 bg-amber-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between"
+                role="status"
+              >
+                <p className="text-sm leading-6 text-amber-100/90">
+                  Não foi possível atualizar todas as marcações. Os últimos dados carregados continuam visíveis.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void load({ showLoading: false })}
+                  disabled={refreshing}
+                  className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-300/20 px-3 text-xs font-semibold text-amber-100 disabled:opacity-50"
+                >
+                  <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                  Tentar novamente
+                </button>
+              </div>
+            ) : null}
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
               <section className="min-w-0">
@@ -474,11 +601,17 @@ export function MyBookingsPage({
                               {item.serviceName}
                             </h3>
                           </div>
-                          <span className="w-fit shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                          <span className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-medium ${statusTone(item.status)}`}>
                             {statusLabel(item.status)}
                           </span>
                         </div>
-                        <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                        <div className="mt-3 flex items-start gap-2 rounded-xl border border-white/8 bg-white/[0.02] px-3 py-2.5">
+                          <Info className="mt-0.5 size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+                          <p className="text-xs leading-5 text-zinc-400">
+                            {statusDescription(item.status)}
+                          </p>
+                        </div>
+                        <div className="mt-4 grid gap-2 sm:grid-cols-3">
                           <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-300">
                             <CalendarDays className="size-4 shrink-0 text-emerald-400" />
                             <span className="truncate">
@@ -634,12 +767,31 @@ export function MyBookingsPage({
                   </p>
                 </div>
               )}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
-                <p className="text-xs text-zinc-500">Estado</p>
-                <p className="mt-1 text-sm font-medium text-zinc-100">
+              <div className={`rounded-2xl border p-4 ${statusTone(details.status)}`}>
+                <p className="text-xs font-medium opacity-80">Estado da marcação</p>
+                <p className="mt-1 text-sm font-semibold">
                   {statusLabel(details.status)}
                 </p>
+                <p className="mt-2 text-xs leading-5 opacity-80">
+                  {statusDescription(details.status)}
+                </p>
               </div>
+              {details.status === 'cancelled' && details.cancellationReason ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+                  <p className="text-xs text-zinc-500">Motivo do cancelamento</p>
+                  <p className="mt-1 text-sm leading-6 text-zinc-200">
+                    {details.cancellationReason}
+                  </p>
+                </div>
+              ) : null}
+              {details.status === 'cancelled' && details.cancelledAt ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+                  <p className="text-xs text-zinc-500">Cancelada em</p>
+                  <p className="mt-1 text-sm text-zinc-200">
+                    {formatDate(details.cancelledAt)}
+                  </p>
+                </div>
+              ) : null}
             </div>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
               {details.status !== 'cancelled' &&
@@ -704,14 +856,29 @@ export function MyBookingsPage({
                 value={date}
                 onChange={(event) => {
                   setDate(event.target.value);
+                  setAvailability(null);
+                  setAvailabilityError(null);
                   void getAvailability(reschedule, event.target.value);
                 }}
                 className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-zinc-100 outline-none focus:border-white/30"
               />
             </label>
             {availabilityLoading ? (
-              <div className="py-10 text-center text-sm text-zinc-500">
+              <div className="py-10 text-center text-sm text-zinc-500" role="status" aria-live="polite">
+                <RefreshCw className="mx-auto mb-2 size-4 animate-spin" aria-hidden="true" />
                 A procurar horários…
+              </div>
+            ) : availabilityError ? (
+              <div className="mt-5 rounded-2xl border border-rose-400/15 bg-rose-400/[0.045] p-4" role="alert">
+                <p className="text-sm leading-6 text-rose-100">{availabilityError}</p>
+                <button
+                  type="button"
+                  onClick={() => void getAvailability(reschedule, date)}
+                  className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-300/20 px-3 text-xs font-semibold text-rose-100"
+                >
+                  <RefreshCw className="size-3.5" aria-hidden="true" />
+                  Tentar novamente
+                </button>
               </div>
             ) : availability?.closedDay ? (
               <div className="mt-5 rounded-2xl border border-amber-400/15 bg-amber-400/[0.06] p-4 text-sm text-amber-100">
