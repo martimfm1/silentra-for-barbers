@@ -15,6 +15,10 @@ import { appointmentService } from '@/app/dashboard/_services/appointments.servi
 import { servicesService } from '@/app/dashboard/_services/services.service';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import { authService } from '@/app/dashboard/_services/auth.service';
+import {
+  getBarbershopConfig,
+  type BarbershopConfigPayload,
+} from '@/app/dashboard/_services/barbershop.service';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -47,6 +51,44 @@ import {
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 import { useDashboardCustomization } from '@/app/dashboard/_components/DashboardCustomization';
 
+type PublicProfileSetup = {
+  slug: string | null;
+  public_profile_enabled: boolean | null;
+  city: string | null;
+};
+
+function hasConfiguredWorkingHours(
+  config: BarbershopConfigPayload | null,
+): boolean {
+  if (!config) return false;
+
+  const isValidInterval = (start: string, end: string) => {
+    const normalizedStart = start.slice(0, 5);
+    const normalizedEnd = end.slice(0, 5);
+    return (
+      /^([01]\\d|2[0-3]):[0-5]\\d$/.test(normalizedStart) &&
+      /^([01]\\d|2[0-3]):[0-5]\\d$/.test(normalizedEnd) &&
+      normalizedStart < normalizedEnd
+    );
+  };
+
+  if (config.weekly_schedule) {
+    return Object.values(config.weekly_schedule).some(
+      (day) =>
+        !day.day_off &&
+        day.work_intervals.some((interval) =>
+          isValidInterval(interval.start, interval.end),
+        ),
+    );
+  }
+
+  return Boolean(
+    config.opening_time &&
+      config.closing_time &&
+      isValidInterval(config.opening_time, config.closing_time),
+  );
+}
+
 export default function DashboardPage() {
   const { locale, t } = useLanguage();
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
@@ -58,6 +100,11 @@ export default function DashboardPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingSetupData, setLoadingSetupData] = useState(true);
+  const [setupBarbershopConfig, setSetupBarbershopConfig] =
+    useState<BarbershopConfigPayload | null>(null);
+  const [setupPublicProfile, setSetupPublicProfile] =
+    useState<PublicProfileSetup | null>(null);
 
   const fetchInitialData = useCallback(async () => {
     if (!barbershopId) {
@@ -131,6 +178,71 @@ export default function DashboardPage() {
     }
     queueMicrotask(() => void fetchInitialData());
   }, [barbershopId, fetchInitialData, isLoadingBarbershop]);
+
+  useEffect(() => {
+    if (isLoadingBarbershop) return;
+    if (!barbershopId) {
+      setSetupBarbershopConfig(null);
+      setSetupPublicProfile(null);
+      setLoadingSetupData(false);
+      return;
+    }
+
+    let cancelled = false;
+    async function loadPersistedSetupData() {
+      setLoadingSetupData(true);
+      const [configResult, publicProfileResult] = await Promise.allSettled([
+        getBarbershopConfig(barbershopId),
+        fetch('/api/barbershops/public-profile', { cache: 'no-store' }).then(
+          async (response) => {
+            if (!response.ok) return null;
+            const payload: unknown = await response.json().catch(() => null);
+            if (
+              !payload ||
+              typeof payload !== 'object' ||
+              !('data' in payload) ||
+              !payload.data ||
+              typeof payload.data !== 'object'
+            ) {
+              return null;
+            }
+            return payload.data as PublicProfileSetup;
+          },
+        ),
+      ]);
+
+      if (cancelled) return;
+
+      const savedConfig =
+        configResult.status === 'fulfilled' && !configResult.value.error
+          ? configResult.value.data
+          : null;
+      const savedPublicProfile =
+        publicProfileResult.status === 'fulfilled'
+          ? publicProfileResult.value
+          : null;
+
+      if (!savedConfig || !savedPublicProfile) {
+        console.error('[Dashboard Setup Progress] Could not verify all saved setup data.');
+      }
+
+      setSetupBarbershopConfig(savedConfig);
+      setSetupPublicProfile(savedPublicProfile);
+      setLoadingSetupData(false);
+    }
+
+    void loadPersistedSetupData().catch((error) => {
+      console.error('[Dashboard Setup Progress Error]:', error);
+      if (cancelled) return;
+      setSetupBarbershopConfig(null);
+      setSetupPublicProfile(null);
+      setLoadingSetupData(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [barbershopId, isLoadingBarbershop]);
 
   useEffect(() => {
     let cancelled = false;
@@ -217,21 +329,44 @@ export default function DashboardPage() {
   );
 
   const nextAppointment = upcomingAppointments[0];
-  const hasBusinessSetup = services.length > 0 && professionals.length > 0;
   const setupSteps = [
     {
+      label: t('dashboard.setupBusinessProfile'),
+      done: Boolean(
+        setupBarbershopConfig?.name.trim() &&
+          setupBarbershopConfig.address?.trim() &&
+          setupPublicProfile?.city?.trim(),
+      ),
+      href: '/dashboard/settings',
+    },
+    {
+      label: t('dashboard.setupWorkingHours'),
+      done: hasConfiguredWorkingHours(setupBarbershopConfig),
+      href: '/dashboard/settings',
+    },
+    {
+      label: t('dashboard.setupPublicPage'),
+      done: Boolean(
+        setupPublicProfile?.slug &&
+          setupPublicProfile.public_profile_enabled !== false,
+      ),
+      href: '/dashboard/settings/public-profile',
+    },
+    {
       label: t('dashboard.addService'),
-      done: services.length > 0,
+      done: services.some((service) => service.is_active !== false),
       href: '/dashboard/servicos',
     },
     {
       label: t('dashboard.addBarber'),
-      done: professionals.length > 0,
+      done: professionals.some((professional) => professional.active !== false),
       href: '/dashboard/equipa',
     },
     {
       label: t('dashboard.firstBooking'),
-      done: appointments.some((appointment) => appointment.status !== 'cancelled'),
+      done: appointments.some(
+        (appointment) => appointment.status !== 'cancelled',
+      ),
       href: '/dashboard/agenda',
     },
   ];
@@ -383,7 +518,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {!loadingInitial && nextSetupStep && (
+          {!loadingInitial && !loadingSetupData && nextSetupStep && (
             <section
               className="mb-6 overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.05] p-5 backdrop-blur-xl sm:p-6"
               aria-labelledby="setup-title"
