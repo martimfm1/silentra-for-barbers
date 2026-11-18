@@ -294,6 +294,12 @@ const appointmentActivityMigration = read(
 const appointmentActivityApi = read(
   'app/api/appointments/[appointmentId]/activity/route.ts',
 );
+const appointmentNotificationRetryApi = read(
+  'app/api/appointments/[appointmentId]/notifications/retry/route.ts',
+);
+const appointmentCancellationApi = read(
+  'app/api/appointments/[appointmentId]/cancel/route.ts',
+);
 const appointmentActivityWriter = read('lib/appointments/activity.ts');
 const appointmentDetailDialog = read(
   'components/dashboard/appointment-detail-dialog.tsx',
@@ -310,6 +316,15 @@ assert.ok(appointmentActivityWriter.includes('actor_id: input.actorId'));
 assert.ok(appointmentActivityWriter.includes('action: `appointment.${input.event}`'));
 assert.ok(appointmentDetailDialog.includes('Histórico de atividade'));
 assert.ok(appointmentDetailDialog.includes('Activity history'));
+assert.ok(appointmentNotificationRetryApi.includes("latestActivity.actor_type !== 'staff'"));
+assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSent === true"));
+assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSkipped === true"));
+assert.ok(appointmentNotificationRetryApi.includes('sendCustomerAppointmentRescheduledEmail'));
+assert.ok(appointmentNotificationRetryApi.includes('sendAppointmentCancellationEmail'));
+assert.ok(appointmentCancellationApi.includes('notificationRetryCount: 0'));
+assert.ok(appointmentActivityApi.includes('notificationRetryCount'));
+assert.ok(appointmentDetailDialog.includes('Reenviar email'));
+assert.ok(appointmentDetailDialog.includes('/notifications/retry'));
 assert.ok(appointmentDetailDialog.includes("cache: 'no-store'"));
 assert.ok(appointmentActivityApi.includes('notificationSkipped'));
 assert.ok(appointmentDetailDialog.includes('activityNotificationDetail'));
