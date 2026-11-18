@@ -84,12 +84,14 @@ begin
 
   insert into public.professionals (
     barbershop_id,
+    user_id,
     name,
     commission_percentage,
     active
   )
   values (
     v_barbershop_id,
+    auth.uid(),
     v_professional_name,
     100,
     true
