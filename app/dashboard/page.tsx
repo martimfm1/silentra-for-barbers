@@ -188,11 +188,12 @@ export default function DashboardPage() {
       return;
     }
 
+    const currentBarbershopId = barbershopId;
     let cancelled = false;
     async function loadPersistedSetupData() {
       setLoadingSetupData(true);
       const [configResult, publicProfileResult] = await Promise.allSettled([
-        getBarbershopConfig(barbershopId),
+        getBarbershopConfig(currentBarbershopId),
         fetch('/api/barbershops/public-profile', { cache: 'no-store' }).then(
           async (response) => {
             if (!response.ok) return null;
