@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { UUID_PATTERN } from '@/lib/validation';
@@ -14,6 +15,18 @@ function hasAgendaGrant(value: unknown): boolean {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const permissions = value as Record<string, unknown>;
   return permissions.agenda === true || permissions.appointments === true;
+}
+
+function isAmbiguousEmailFailure(result: { success: boolean; errorCode?: string }): boolean {
+  if (result.success) return false;
+  const errorCode = result.errorCode ?? '';
+  const httpStatus = Number(/^BREVO_HTTP_([0-9]{3})$/.exec(errorCode)?.[1] ?? 0);
+  return (
+    errorCode === 'BREVO_NETWORK_ERROR' ||
+    !errorCode ||
+    httpStatus === 408 ||
+    httpStatus >= 500
+  );
 }
 
 async function POST__unobserved(
@@ -106,6 +119,7 @@ async function POST__unobserved(
       .eq('entity_type', 'appointment')
       .eq('entity_id', appointmentId)
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -230,7 +244,38 @@ async function POST__unobserved(
     const barbershopName = shopResult.data.name?.trim() || 'A tua barbearia';
     const serviceName = serviceResult.data?.name?.trim() || 'Serviço';
     const language = shopResult.data.default_language === 'en' ? 'en' : 'pt';
+    const claimToken = randomUUID();
+    const { data: claimResult, error: claimError } = await tenant.admin.rpc(
+      'claim_appointment_notification_retry',
+      {
+        p_audit_log_id: latestActivity.id,
+        p_barbershop_id: tenant.barbershopId,
+        p_appointment_id: appointment.id,
+        p_action: action,
+        p_claim_token: claimToken,
+      },
+    );
+
+    if (claimError) {
+      console.error('[APPOINTMENT_NOTIFICATION_RETRY_CLAIM_FAILED]', {
+        code: claimError.code ?? 'UNKNOWN',
+      });
+      return NextResponse.json(
+        { success: false, error: 'Não foi possível reservar o reenvio. Tenta novamente.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    const retryCount = Number(claimResult);
+    if (!Number.isSafeInteger(retryCount) || retryCount < 1) {
+      return NextResponse.json(
+        { success: false, error: 'Este email já está a ser enviado ou a alteração deixou de ser a mais recente.' },
+        { status: 409, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
     let emailSent = false;
+    let deliveryOutcomeUnknown = false;
 
     try {
       if (action === 'rescheduled') {
@@ -246,6 +291,7 @@ async function POST__unobserved(
           language,
         });
         emailSent = result.success;
+        deliveryOutcomeUnknown = isAmbiguousEmailFailure(result);
       } else {
         const result = await sendAppointmentCancellationEmail({
           to: customerEmail,
@@ -258,41 +304,56 @@ async function POST__unobserved(
           language,
         });
         emailSent = result.success;
+        deliveryOutcomeUnknown = isAmbiguousEmailFailure(result);
       }
     } catch (sendError) {
+      deliveryOutcomeUnknown = true;
       console.error('[APPOINTMENT_NOTIFICATION_RETRY_SEND_FAILED]', {
         action,
         error: sendError instanceof Error ? sendError.name : 'UNKNOWN',
       });
     }
 
-    const retryCount = Math.max(0, Number(metadata.notificationRetryCount ?? 0)) + 1;
-    const lastAttemptAt = new Date().toISOString();
-    const { error: updateError } = await tenant.admin
-      .from('audit_logs')
-      .update({
-        metadata: {
-          ...metadata,
-          notificationSent: emailSent,
-          notificationSkipped: false,
-          notificationRetryCount: retryCount,
-          notificationLastAttemptAt: lastAttemptAt,
-          notificationRetryFailed: !emailSent,
+    if (deliveryOutcomeUnknown) {
+      // Keep the lease active: the provider may have accepted the email even
+      // though the response was lost or ambiguous. A retry can resume after
+      // the lease expires, avoiding an immediate duplicate.
+      return NextResponse.json(
+        {
+          success: false,
+          emailSent: false,
+          retryPending: true,
+          retryCount,
+          error: 'Não foi possível confirmar se o email foi aceite. O reenvio ficará temporariamente bloqueado para evitar duplicados.',
         },
-      })
-      .eq('id', latestActivity.id)
-      .eq('barbershop_id', tenant.barbershopId);
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
 
-    if (updateError) {
-      console.error('[APPOINTMENT_NOTIFICATION_RETRY_AUDIT_UPDATE_FAILED]', {
-        code: updateError.code ?? 'UNKNOWN',
+    const { data: completed, error: completionError } = await tenant.admin.rpc(
+      'complete_appointment_notification_retry',
+      {
+        p_audit_log_id: latestActivity.id,
+        p_barbershop_id: tenant.barbershopId,
+        p_claim_token: claimToken,
+        p_email_sent: emailSent,
+      },
+    );
+
+    if (completionError || completed !== true) {
+      console.error('[APPOINTMENT_NOTIFICATION_RETRY_COMPLETION_FAILED]', {
+        code: completionError?.code ?? 'CLAIM_NOT_OWNED',
       });
+      return NextResponse.json(
+        { success: false, emailSent, retryCount, error: 'O envio foi iniciado, mas não foi possível guardar o resultado. O estado será reconciliado automaticamente.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     if (!emailSent) {
       return NextResponse.json(
         { success: false, emailSent: false, retryCount, error: 'O fornecedor de email não confirmou o envio. Podes tentar novamente.' },
-        { status: 502 },
+        { status: 502, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
