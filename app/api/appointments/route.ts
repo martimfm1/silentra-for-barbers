@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
@@ -485,6 +486,15 @@ async function POST__unobserved(request: Request) {
         { status: 500 },
       );
     }
+
+    await recordAppointmentActivity(admin, {
+      barbershopId,
+      appointmentId: appointment.id,
+      event: 'created',
+      actorType: 'staff',
+      actorId: tenant.userId,
+      metadata: { newStatus: appointment.status ?? 'pending' },
+    });
 
     void notifyBarbersOfNewBooking(
       {

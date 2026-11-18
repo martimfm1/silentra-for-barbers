@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
@@ -86,7 +87,7 @@ async function DELETE__unobserved(
     const { data: currentAppointment, error: currentAppointmentError } =
       await tenant.admin
         .from('appointments')
-        .select('payment_status')
+        .select('status,date_hour,payment_status')
         .eq('id', appointmentId)
         .eq('barbershop_id', tenant.barbershopId)
         .in('status', ['pending', 'scheduled'])
@@ -148,6 +149,20 @@ async function DELETE__unobserved(
         { status: 409 },
       );
 
+    await recordAppointmentActivity(tenant.admin, {
+      barbershopId: tenant.barbershopId,
+      appointmentId: appointment.id,
+      event: 'cancelled',
+      actorType: 'staff',
+      actorId: tenant.userId,
+      actorName: cancellingUser?.name_complete?.trim() || null,
+      metadata: {
+        previousStatus: currentAppointment?.status ?? null,
+        newStatus: 'cancelled',
+        from: currentAppointment?.date_hour ?? null,
+      },
+    });
+
     const [shopResult, serviceResult, professionalResult, clientResult] =
       await Promise.all([
         tenant.admin
@@ -201,6 +216,42 @@ async function DELETE__unobserved(
           language,
         })
       : null;
+
+    const { data: cancellationActivity, error: cancellationActivityError } =
+      await tenant.admin
+        .from('audit_logs')
+        .select('id,metadata')
+        .eq('barbershop_id', tenant.barbershopId)
+        .eq('entity_type', 'appointment')
+        .eq('entity_id', appointment.id)
+        .eq('action', 'appointment.cancelled')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (cancellationActivityError) {
+      console.error('[APPOINTMENT_CANCELLATION_ACTIVITY_LOOKUP_FAILED]', {
+        code: cancellationActivityError.code ?? 'UNKNOWN',
+      });
+    } else if (cancellationActivity) {
+      const { error: activityUpdateError } = await tenant.admin
+        .from('audit_logs')
+        .update({
+          metadata: {
+            ...((cancellationActivity.metadata ?? {}) as Record<string, unknown>),
+            notificationSent: emailResult?.success ?? false,
+            notificationSkipped: !customerEmail,
+            notificationRetryCount: 0,
+          },
+        })
+        .eq('id', cancellationActivity.id)
+        .eq('barbershop_id', tenant.barbershopId);
+      if (activityUpdateError) {
+        console.error('[APPOINTMENT_CANCELLATION_ACTIVITY_UPDATE_FAILED]', {
+          code: activityUpdateError.code ?? 'UNKNOWN',
+        });
+      }
+    }
 
     if (emailResult && !emailResult.success) {
       console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]', {

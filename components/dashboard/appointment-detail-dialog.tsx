@@ -36,6 +36,69 @@ import { Button } from '@/components/ui/button';
 import { AppointmentCompletionDialog } from './appointment-completion-dialog';
 import type { Appointment } from '@/types';
 
+type AppointmentActivity = {
+  id: string;
+  action: string;
+  actorName: string;
+  actorType: string;
+  createdAt: string;
+  metadata: Record<string, unknown>;
+};
+
+function activityLabel(action: string, isEnglish: boolean): string {
+  const labels: Record<string, [string, string]> = {
+    'appointment.created': ['Marcação criada', 'Booking created'],
+    'appointment.confirmed': ['Marcação confirmada', 'Booking confirmed'],
+    'appointment.rescheduled': ['Marcação reagendada', 'Booking rescheduled'],
+    'appointment.cancelled': ['Marcação cancelada', 'Booking cancelled'],
+    'appointment.completed': ['Atendimento concluído', 'Appointment completed'],
+    professional_appointment_reschedule: ['Marcação reagendada', 'Booking rescheduled'],
+    customer_portal_reschedule: ['Marcação reagendada pelo cliente', 'Booking rescheduled by customer'],
+    customer_portal_cancel: ['Marcação cancelada pelo cliente', 'Booking cancelled by customer'],
+  };
+  const value = labels[action];
+  return value ? value[isEnglish ? 1 : 0] : isEnglish ? 'Booking updated' : 'Marcação atualizada';
+}
+
+function activityNotificationDetail(
+  event: AppointmentActivity,
+  isEnglish: boolean,
+): string | null {
+  if (event.metadata.notificationSkipped === true) {
+    return isEnglish ? 'No customer email is associated with this booking' : 'Não existe email associado a esta marcação';
+  }
+  if (typeof event.metadata.notificationSent === 'boolean') {
+    return event.metadata.notificationSent
+      ? isEnglish ? 'Email sent to the customer' : 'Email enviado ao cliente'
+      : isEnglish ? 'Customer email could not be sent' : 'Não foi possível enviar o email ao cliente';
+  }
+  const emailCount = Number(event.metadata.barberEmailsSent ?? 0);
+  const pushCount = Number(event.metadata.barberPushSent ?? 0);
+  if (emailCount > 0 || pushCount > 0) {
+    return isEnglish ? 'Barbershop notification sent' : 'Notificação enviada à barbearia';
+  }
+  return null;
+}
+
+function activityDetail(event: AppointmentActivity, isEnglish: boolean): string | null {
+  const from = event.metadata.from;
+  const to = event.metadata.to;
+  if (typeof from === 'string' && typeof to === 'string') {
+    const format = (value: string) =>
+      new Date(value).toLocaleString(isEnglish ? 'en-GB' : 'pt-PT', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    return `${format(from)} → ${format(to)}`;
+  }
+  const previousStatus = event.metadata.previousStatus;
+  const newStatus = event.metadata.newStatus;
+  if (typeof previousStatus === 'string' && typeof newStatus === 'string') {
+    return `${previousStatus} → ${newStatus}`;
+  }
+  return null;
+}
+
 type Props = {
   appointment: Appointment | null;
   open: boolean;
@@ -235,6 +298,11 @@ export function AppointmentDetailDialog({
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
+  const [activityEvents, setActivityEvents] = useState<AppointmentActivity[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityError, setActivityError] = useState(false);
+  const [retryingActivityId, setRetryingActivityId] = useState<string | null>(null);
+  const [activityRetryErrorId, setActivityRetryErrorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!appointment) return;
@@ -245,6 +313,118 @@ export function AppointmentDetailDialog({
     setIsBookingConfirmationOpen(false);
     setIsConfirmingBooking(false);
   }, [appointment?.id, appointment?.date_hour, open]);
+
+  useEffect(() => {
+    let active = true;
+    if (!open || !appointment?.id) {
+      setActivityEvents([]);
+      setActivityError(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setActivityLoading(true);
+    setActivityError(false);
+    fetch(`/api/appointments/${encodeURIComponent(appointment.id)}/activity`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok || payload.success !== true) {
+          throw new Error('Unable to load appointment activity');
+        }
+        return payload;
+      })
+      .then((payload) => {
+        if (active) {
+          setActivityEvents(
+            Array.isArray(payload.events) ? payload.events : [],
+          );
+        }
+      })
+      .catch(() => {
+        if (active) setActivityError(true);
+      })
+      .finally(() => {
+        if (active) setActivityLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [appointment?.id, open]);
+
+  const handleRetryActivityNotification = async (event: AppointmentActivity) => {
+    if (!appointment || retryingActivityId) return;
+    const action = event.action === 'appointment.rescheduled'
+      ? 'rescheduled'
+      : event.action === 'appointment.cancelled'
+        ? 'cancelled'
+        : null;
+    if (!action || event.actorType !== 'staff') return;
+
+    setRetryingActivityId(event.id);
+    setActivityRetryErrorId(null);
+    try {
+      const response = await fetch(
+        `/api/appointments/${encodeURIComponent(appointment.id)}/notifications/retry`,
+        {
+          method: 'POST',
+          cache: 'no-store',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action }),
+        },
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true || payload?.emailSent !== true) {
+        throw new Error(
+          typeof payload?.error === 'string'
+            ? payload.error
+            : isEnglish
+              ? 'The customer email could not be resent.'
+              : 'Não foi possível reenviar o email ao cliente.',
+        );
+      }
+
+      setActivityEvents((current) =>
+        current.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                metadata: {
+                  ...item.metadata,
+                  notificationSent: true,
+                  notificationSkipped: false,
+                  notificationRetryCount:
+                    Number(payload.retryCount ?? item.metadata.notificationRetryCount ?? 0),
+                  notificationRetryFailed: false,
+                },
+              }
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error('[APPOINTMENT_NOTIFICATION_RETRY_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
+      setActivityRetryErrorId(event.id);
+      setActivityEvents((current) =>
+        current.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                metadata: { ...item.metadata, notificationRetryFailed: true },
+              }
+            : item,
+        ),
+      );
+    } finally {
+      setRetryingActivityId(null);
+    }
+  };
 
   if (!appointment) return null;
   const date = new Date(appointment.date_hour);
@@ -965,6 +1145,93 @@ export function AppointmentDetailDialog({
                   </div>
                 </Section>
               ) : null}
+              <Section title={isEnglish ? 'Activity history' : 'Histórico de atividade'}>
+                {activityLoading ? (
+                  <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.025] p-4" aria-live="polite">
+                    <div className="h-3 w-2/5 animate-pulse rounded bg-white/10" />
+                    <div className="h-3 w-3/5 animate-pulse rounded bg-white/10" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-white/10" />
+                  </div>
+                ) : activityError ? (
+                  <p className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4 text-sm text-rose-200">
+                    {isEnglish
+                      ? 'Activity history could not be loaded. Close and reopen the details to try again.'
+                      : 'Não foi possível carregar o histórico. Fecha e volta a abrir os detalhes para tentar novamente.'}
+                  </p>
+                ) : activityEvents.length === 0 ? (
+                  <p className="rounded-2xl border border-white/8 bg-white/[0.025] p-4 text-sm leading-6 text-zinc-400">
+                    {isEnglish
+                      ? 'No activity has been recorded for this booking yet.'
+                      : 'Ainda não existe atividade registada para esta marcação.'}
+                  </p>
+                ) : (
+                  <ol className="relative space-y-0 rounded-2xl border border-white/8 bg-white/[0.025] p-4">
+                    {activityEvents.map((event, index) => (
+                      <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+                        {index < activityEvents.length - 1 ? (
+                          <span className="absolute left-[7px] top-5 h-[calc(100%-0.25rem)] w-px bg-white/10" aria-hidden="true" />
+                        ) : null}
+                        <span className="relative mt-1 flex size-4 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/10">
+                          <span className="size-1.5 rounded-full bg-emerald-300" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                            <p className="text-sm font-medium text-zinc-100">
+                              {activityLabel(event.action, isEnglish)}
+                            </p>
+                            <time className="text-[11px] tabular-nums text-zinc-500">
+                              {new Date(event.createdAt).toLocaleString(
+                                isEnglish ? 'en-GB' : 'pt-PT',
+                                { dateStyle: 'medium', timeStyle: 'short' },
+                              )}
+                            </time>
+                          </div>
+                          <p className="mt-1 text-xs text-zinc-400">
+                            {isEnglish ? 'By' : 'Por'} {event.actorName}
+                          </p>
+                          {activityDetail(event, isEnglish) ? (
+                            <p className="mt-1 text-xs text-zinc-500">
+                              {activityDetail(event, isEnglish)}
+                            </p>
+                          ) : null}
+                          {activityNotificationDetail(event, isEnglish) ? (
+                            <p className="mt-1 text-xs text-zinc-500">
+                              {activityNotificationDetail(event, isEnglish)}
+                            </p>
+                          ) : null}
+                          {event.id === activityEvents[activityEvents.length - 1]?.id &&
+                          event.actorType === 'staff' &&
+                          ['appointment.rescheduled', 'appointment.cancelled'].includes(event.action) &&
+                          event.metadata.notificationSent === false &&
+                          event.metadata.notificationSkipped !== true ? (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={retryingActivityId !== null}
+                                onClick={() => void handleRetryActivityNotification(event)}
+                              >
+                                {retryingActivityId === event.id ? (
+                                  <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
+                                ) : (
+                                  <Mail className="mr-2 size-3.5" aria-hidden="true" />
+                                )}
+                                {isEnglish ? 'Resend email' : 'Reenviar email'}
+                              </Button>
+                              {activityRetryErrorId === event.id ? (
+                                <span className="text-xs text-rose-300">
+                                  {isEnglish ? 'Retry failed. You can try again.' : 'O reenvio falhou. Podes tentar novamente.'}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </Section>
               {appointment.users?.style_notes ||
               appointment.description_products ? (
                 <Section title="Notas">
