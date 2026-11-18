@@ -51,3 +51,24 @@ assert.match(rescheduleRoute, /updated\.status === 'scheduled'/);
 assert.match(rescheduleRoute, /notificationSent/);
 
 console.log('Appointment rescheduling contracts passed.');
+
+
+const customerPortalPage = await readFile(
+  'components/customer-portal/my-bookings-page.tsx',
+  'utf8',
+);
+assert.match(customerPortalPage, /À espera de confirmação/);
+assert.match(customerPortalPage, /horário só fica confirmado/);
+assert.match(customerPortalPage, /statusDescription\(item\.status\)/);
+assert.match(customerPortalPage, /statusTone\(details\.status\)/);
+assert.match(customerPortalPage, /load\(options: \{ showLoading\?: boolean; silent\?: boolean \}/);
+assert.match(customerPortalPage, /Os últimos dados carregados continuam visíveis/);
+assert.match(customerPortalPage, /Tentar novamente/);
+assert.match(customerPortalPage, /setUpcoming\(\(items\) =>/);
+assert.match(customerPortalPage, /status: 'cancelled'/);
+assert.match(customerPortalPage, /data\.dateHour/);
+assert.match(customerPortalPage, /void load\(\{ showLoading: false, silent: true \}\)/);
+assert.match(customerPortalPage, /availabilityError/);
+assert.match(customerPortalPage, /Motivo do cancelamento/);
+
+console.log('Customer portal booking state and recovery contracts passed.');
