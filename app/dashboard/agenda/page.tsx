@@ -151,6 +151,7 @@ export default function AgendaPage() {
     setBlockFormData,
     handleCreateBooking,
     confirmBooking,
+    resendBookingEmail,
     finalizeBooking,
     addCompletedAppointmentClient,
     handleCreateBlock: createBlockAction,
@@ -846,6 +847,7 @@ export default function AgendaPage() {
         appointment={selectedAppointment}
         open={Boolean(selectedAppointment)}
         confirmBooking={confirmBooking}
+        onResendBookingEmail={resendBookingEmail}
         valueProducts={valueProducts}
         setValueProducts={setValueProducts}
         descriptionProducts={descriptionProducts}
