@@ -329,13 +329,21 @@ assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSent ==
 assert.ok(appointmentNotificationRetryApi.includes("metadata.notificationSkipped === true"));
 assert.ok(appointmentNotificationRetryApi.includes('sendCustomerAppointmentRescheduledEmail'));
 assert.ok(appointmentNotificationRetryApi.includes('sendAppointmentCancellationEmail'));
+assert.ok(appointmentNotificationRetryApi.includes("rpc('claim_appointment_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes("rpc('complete_appointment_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes('randomUUID()'));
+assert.ok(appointmentNotificationRetryApi.includes('notificationRetryToken') === false);
+assert.ok(!appointmentNotificationRetryApi.includes(".from('audit_logs')\n      .update("));
+assert.ok(appointmentNotificationRetryApi.includes('status: 409'));
 assert.ok(appointmentCancellationApi.includes('notificationRetryCount: 0'));
 assert.ok(appointmentActivityApi.includes('notificationRetryCount'));
+assert.ok(appointmentActivityApi.includes('notificationRetryInProgress'));
 assert.ok(appointmentDetailDialog.includes('Reenviar email'));
 assert.ok(appointmentDetailDialog.includes('/notifications/retry'));
 assert.ok(appointmentDetailDialog.includes("cache: 'no-store'"));
+assert.ok(appointmentDetailDialog.includes('notificationRetryInProgress'));
+assert.ok(appointmentDetailDialog.includes('Sending email…'));
 assert.ok(appointmentActivityApi.includes('notificationSkipped'));
-assert.ok(appointmentDetailDialog.includes('activityNotificationDetail'));
 
 // Keep the selected service, duration and price visible while availability is checked.
 const bookingDrawerAvailabilityContext = read(
@@ -440,6 +448,19 @@ for (const key of ['setupBusinessProfile', 'setupWorkingHours', 'setupPublicPage
   assert.ok(onboardingEnglish.includes(`${key}:`), `Missing en-GB ${key}`);
 }
 console.log('[LAW13_ONBOARDING_PROGRESS_QA] Profile, working hours, public page, services, team and first booking are derived from saved records.');
+
+const notificationRetryMigration = read(
+  'supabase/migrations/20261118203046_atomic_appointment_notification_retry_claims.sql',
+);
+assert.ok(notificationRetryMigration.includes('public.claim_appointment_notification_retry'));
+assert.ok(notificationRetryMigration.includes('public.complete_appointment_notification_retry'));
+assert.ok(notificationRetryMigration.includes('security invoker'));
+assert.ok(notificationRetryMigration.includes("from public, anon, authenticated"));
+assert.ok(notificationRetryMigration.includes('to service_role'));
+assert.ok(notificationRetryMigration.includes('notificationRetryLeaseUntil'));
+assert.ok(notificationRetryMigration.includes('notificationRetryToken'));
+console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lease ownership and provider result persistence are enforced.');
+
 
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
