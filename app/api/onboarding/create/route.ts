@@ -50,11 +50,22 @@ async function POST__unobserved(request: Request) {
     const [rawOpen = '09:00', rawClose = '19:00'] = rawHours
       .split('-')
       .map((part) => part.trim());
-    const openingTime = parseTime(rawOpen) ?? '09:00:00';
-    const closingTime = parseTime(rawClose) ?? '19:00:00';
+    const openingTime = parseTime(rawOpen);
+    const closingTime = parseTime(rawClose);
+    if (!openingTime || !closingTime || openingTime >= closingTime) {
+      return NextResponse.json(
+        { error: 'A hora de fecho tem de ser posterior à hora de abertura.' },
+        { status: 400 },
+      );
+    }
 
     const numericPrice =
       typeof body.price === 'number' ? body.price : Number(body.price);
+    const serviceName = normalizeText(body.serviceName, 100);
+    const serviceDuration =
+      typeof body.serviceDuration === 'number'
+        ? body.serviceDuration
+        : Number(body.serviceDuration);
     const latitude =
       body.lat == null || body.lat === '' ? null : Number(body.lat);
     const longitude =
@@ -67,10 +78,22 @@ async function POST__unobserved(request: Request) {
       (latitude !== null &&
         (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) ||
       (longitude !== null &&
-        (!Number.isFinite(longitude) || longitude < -180 || longitude > 180))
+        (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)) ||
+      (latitude === null) !== (longitude === null)
     ) {
       return NextResponse.json(
         { error: 'Os dados de preço ou localização são inválidos.' },
+        { status: 400 },
+      );
+    }
+    if (
+      !serviceName ||
+      !Number.isInteger(serviceDuration) ||
+      serviceDuration < 1 ||
+      serviceDuration > 1440
+    ) {
+      return NextResponse.json(
+        { error: 'Indica um serviço e uma duração entre 1 e 1440 minutos.' },
         { status: 400 },
       );
     }
@@ -83,8 +106,8 @@ async function POST__unobserved(request: Request) {
           .slice(0, 12)
       : [];
 
-    const { data: barbershopId, error: onboardingError } = await supabase.rpc(
-      'create_barbershop_onboarding',
+    const { data: onboardingResult, error: onboardingError } = await supabase.rpc(
+      'create_barbershop_onboarding_with_defaults',
       {
         p_name: normalizedName,
         p_address: normalizedAddress,
@@ -95,10 +118,12 @@ async function POST__unobserved(request: Request) {
         p_tags: tags,
         p_lat: latitude,
         p_lng: longitude,
+        p_service_name: serviceName,
+        p_service_duration: serviceDuration,
       },
     );
 
-    if (onboardingError || !barbershopId) {
+    if (onboardingError || !isRecord(onboardingResult)) {
       console.error('[ONBOARDING_CREATE_FAIL]', onboardingError);
 
       const code = onboardingError?.code;
@@ -122,10 +147,28 @@ async function POST__unobserved(request: Request) {
       );
     }
 
+    const barbershopId = onboardingResult.barbershop_id;
+    const serviceId = onboardingResult.service_id;
+    const professionalId = onboardingResult.professional_id;
+    if (
+      typeof barbershopId !== 'string' ||
+      typeof serviceId !== 'string' ||
+      typeof professionalId !== 'string'
+    ) {
+      console.error('[ONBOARDING_CREATE_INVALID_RESULT]');
+      return NextResponse.json(
+        { error: 'O onboarding não confirmou todos os dados iniciais.' },
+        { status: 500 },
+      );
+    }
+
     return NextResponse.json({
       success: true,
       barbershopId,
+      serviceId,
+      professionalId,
       role: 'owner',
+      persisted: true,
     });
   } catch (error) {
     console.error('[ONBOARDING_CRITICAL_ERROR]', error);

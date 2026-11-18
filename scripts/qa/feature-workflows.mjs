@@ -380,6 +380,32 @@ assert.match(
 );
 console.log('[PUBLIC_BOOKING_RECEIPT_QA] Server-driven confirmation, receipt summary and customer-area handoff passed.');
 
+const onboardingPage = read('app/onboarding/page.tsx');
+const onboardingCreateApi = read('app/api/onboarding/create/route.ts');
+const onboardingPersistenceMigration = read('supabase/migrations/20261118200006_onboarding_persist_initial_service_professional.sql');
+
+assert.ok(onboardingPage.includes('firstServiceName'));
+assert.ok(onboardingPage.includes('firstServiceDuration'));
+assert.ok(onboardingPage.includes('serviceName: firstServiceName.trim()'));
+assert.ok(onboardingPage.includes('serviceDuration,'));
+assert.ok(onboardingCreateApi.includes('create_barbershop_onboarding_with_defaults'));
+assert.ok(onboardingCreateApi.includes('p_service_name: serviceName'));
+assert.ok(onboardingCreateApi.includes('p_service_duration: serviceDuration'));
+assert.ok(onboardingCreateApi.includes("typeof serviceId !== 'string'"));
+assert.ok(onboardingPersistenceMigration.includes('public.create_barbershop_onboarding('));
+assert.ok(onboardingPersistenceMigration.includes('p_opening_time >= p_closing_time'));
+assert.ok(onboardingPersistenceMigration.includes('p_price > 10000'));
+assert.ok(onboardingPersistenceMigration.includes('(p_lat is null) <> (p_lng is null)'));
+assert.ok(onboardingPersistenceMigration.includes('insert into public.services'));
+assert.ok(onboardingPersistenceMigration.includes('insert into public.professionals'));
+assert.ok(onboardingPersistenceMigration.includes('user_id,\n    name,'));
+assert.ok(onboardingPersistenceMigration.includes('auth.uid(),'));
+assert.ok(onboardingPersistenceMigration.includes('popular_service_id = v_service_id'));
+assert.ok(onboardingPersistenceMigration.includes("'barbershop_id', v_barbershop_id"));
+assert.ok(onboardingPersistenceMigration.includes("'service_id', v_service_id"));
+assert.ok(onboardingPersistenceMigration.includes("'professional_id', v_professional_id"));
+console.log('[ONBOARDING_PERSISTENCE_QA] Owner, first service, primary professional and public popular service are persisted atomically.');
+
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
