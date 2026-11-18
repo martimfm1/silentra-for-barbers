@@ -37,6 +37,23 @@ begin
     raise exception using errcode = '22023', message = 'INVALID_INITIAL_SERVICE';
   end if;
 
+  -- The RPC is callable by authenticated clients, so enforce the same input
+  -- contract here rather than relying exclusively on the HTTP route.
+  if p_opening_time is null
+    or p_closing_time is null
+    or p_opening_time >= p_closing_time
+  then
+    raise exception using errcode = '22023', message = 'INVALID_INITIAL_OPENING_HOURS';
+  end if;
+
+  if p_price is null or p_price < 0 or p_price > 10000 then
+    raise exception using errcode = '22023', message = 'INVALID_INITIAL_SERVICE_PRICE';
+  end if;
+
+  if (p_lat is null) <> (p_lng is null) then
+    raise exception using errcode = '22023', message = 'INVALID_INITIAL_LOCATION';
+  end if;
+
   -- This existing RPC validates the owner and creates the barbershop, public
   -- shop profile, legacy opening hours and owner membership atomically.
   v_barbershop_id := public.create_barbershop_onboarding(
