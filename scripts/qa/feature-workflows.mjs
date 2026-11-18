@@ -310,6 +310,8 @@ assert.ok(!publicBookingSubmit.includes('onSuccess?.('), 'The drawer must not cl
 assert.ok(publicBookingApi.includes('status: appointment.status,'));
 assert.ok(publicBookingDrawer.includes('Request received — awaiting confirmation'));
 assert.ok(publicBookingDrawer.includes('Pedido recebido — aguarda confirmação'));
+assert.ok(publicBookingDrawer.includes('Booking request received. Waiting for the barbershop to confirm.'));
+assert.ok(publicBookingDrawer.includes('Pedido de marcação recebido. Aguarda a confirmação da barbearia.'));
 assert.ok(publicBookingDrawer.includes('A marcação ainda não está confirmada.'));
 assert.ok(publicBookingDrawer.includes('bookingReceipt?.id'));
 assert.ok(publicBookingDrawer.includes('Booking reference'));
