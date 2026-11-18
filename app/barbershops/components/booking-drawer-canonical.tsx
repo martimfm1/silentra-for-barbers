@@ -695,7 +695,15 @@ export function BookingDrawerCanonical({
         toast.success(t('bookingDrawer.prepaymentSubmitted'));
       } else {
         setPaymentInstructions(null);
-        toast.success(t('bookingDrawer.bookingSuccess'));
+        if (bookingData?.status === 'scheduled') {
+          toast.success(t('bookingDrawer.bookingSuccess'));
+        } else {
+          toast.success(
+            locale === 'en'
+              ? 'Booking request received. Waiting for the barbershop to confirm.'
+              : 'Pedido de marcação recebido. Aguarda a confirmação da barbearia.',
+          );
+        }
       }
       setStep(4);
     } catch (reason) {
