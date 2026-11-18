@@ -64,6 +64,9 @@ function activityNotificationDetail(
   event: AppointmentActivity,
   isEnglish: boolean,
 ): string | null {
+  if (event.metadata.notificationRetryInProgress === true) {
+    return isEnglish ? 'Customer email is being resent' : 'A reenviar email ao cliente';
+  }
   if (event.metadata.notificationSkipped === true) {
     return isEnglish ? 'No customer email is associated with this booking' : 'Não existe email associado a esta marcação';
   }
@@ -371,6 +374,20 @@ export function AppointmentDetailDialog({
 
     setRetryingActivityId(event.id);
     setActivityRetryErrorId(null);
+    setActivityEvents((current) =>
+      current.map((item) =>
+        item.id === event.id
+          ? {
+              ...item,
+              metadata: {
+                ...item.metadata,
+                notificationRetryInProgress: true,
+                notificationRetryFailed: false,
+              },
+            }
+          : item,
+      ),
+    );
     try {
       const response = await fetch(
         `/api/appointments/${encodeURIComponent(appointment.id)}/notifications/retry`,
@@ -426,6 +443,22 @@ export function AppointmentDetailDialog({
         ),
       );
     } finally {
+      try {
+        const refreshResponse = await fetch(
+          `/api/appointments/${encodeURIComponent(appointment.id)}/activity`,
+          { cache: 'no-store', headers: { Accept: 'application/json' } },
+        );
+        const refreshPayload = await refreshResponse.json().catch(() => null);
+        if (
+          refreshResponse.ok &&
+          refreshPayload?.success === true &&
+          Array.isArray(refreshPayload.events)
+        ) {
+          setActivityEvents(refreshPayload.events);
+        }
+      } catch {
+        // Keep the last known activity snapshot if the refresh is unavailable.
+      }
       setRetryingActivityId(null);
     }
   };
@@ -1251,15 +1284,21 @@ export function AppointmentDetailDialog({
                                 type="button"
                                 size="sm"
                                 variant="outline"
-                                disabled={retryingActivityId !== null}
+                                disabled={
+                                  retryingActivityId !== null ||
+                                  event.metadata.notificationRetryInProgress === true
+                                }
                                 onClick={() => void handleRetryActivityNotification(event)}
                               >
-                                {retryingActivityId === event.id ? (
+                                {retryingActivityId === event.id ||
+                                event.metadata.notificationRetryInProgress === true ? (
                                   <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
                                 ) : (
                                   <Mail className="mr-2 size-3.5" aria-hidden="true" />
                                 )}
-                                {isEnglish ? 'Resend email' : 'Reenviar email'}
+                                {event.metadata.notificationRetryInProgress === true
+                                  ? isEnglish ? 'Sending email…' : 'A reenviar email…'
+                                  : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (
                                 <span className="text-xs text-rose-300">
