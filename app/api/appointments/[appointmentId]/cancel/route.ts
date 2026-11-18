@@ -217,6 +217,42 @@ async function DELETE__unobserved(
         })
       : null;
 
+    const { data: cancellationActivity, error: cancellationActivityError } =
+      await tenant.admin
+        .from('audit_logs')
+        .select('id,metadata')
+        .eq('barbershop_id', tenant.barbershopId)
+        .eq('entity_type', 'appointment')
+        .eq('entity_id', appointment.id)
+        .eq('action', 'appointment.cancelled')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (cancellationActivityError) {
+      console.error('[APPOINTMENT_CANCELLATION_ACTIVITY_LOOKUP_FAILED]', {
+        code: cancellationActivityError.code ?? 'UNKNOWN',
+      });
+    } else if (cancellationActivity) {
+      const { error: activityUpdateError } = await tenant.admin
+        .from('audit_logs')
+        .update({
+          metadata: {
+            ...((cancellationActivity.metadata ?? {}) as Record<string, unknown>),
+            notificationSent: emailResult?.success ?? false,
+            notificationSkipped: !customerEmail,
+            notificationRetryCount: 0,
+          },
+        })
+        .eq('id', cancellationActivity.id)
+        .eq('barbershop_id', tenant.barbershopId);
+      if (activityUpdateError) {
+        console.error('[APPOINTMENT_CANCELLATION_ACTIVITY_UPDATE_FAILED]', {
+          code: activityUpdateError.code ?? 'UNKNOWN',
+        });
+      }
+    }
+
     if (emailResult && !emailResult.success) {
       console.error('[APPOINTMENT_CANCELLATION_EMAIL_FAILED]', {
         appointmentId: appointment.id,
