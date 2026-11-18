@@ -231,7 +231,7 @@ export default function DashboardPage() {
     },
     {
       label: t('dashboard.firstBooking'),
-      done: appointments.length > 0,
+      done: appointments.some((appointment) => appointment.status !== 'cancelled'),
       href: '/dashboard/agenda',
     },
   ];
@@ -383,7 +383,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {!loadingInitial && nextSetupStep && !hasBusinessSetup && (
+          {!loadingInitial && nextSetupStep && (
             <section
               className="mb-6 overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.05] p-5 backdrop-blur-xl sm:p-6"
               aria-labelledby="setup-title"
