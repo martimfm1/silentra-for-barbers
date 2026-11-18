@@ -337,7 +337,7 @@ export function ClientDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="relative isolate max-h-[90dvh] w-[calc(100%-1rem)] gap-5 overflow-y-auto overflow-x-hidden rounded-[1.75rem] border border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_48%),#09090b] text-zinc-100 shadow-[0_24px_100px_-28px_rgba(0,0,0,0.9)] sm:max-w-5xl">
+      <DialogContent className="isolate max-h-[90dvh] w-[calc(100%-1rem)] gap-5 overflow-y-auto overflow-x-hidden rounded-[1.75rem] border border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_48%),#09090b] text-zinc-100 shadow-[0_24px_100px_-28px_rgba(0,0,0,0.9)] sm:max-w-5xl">
         <DialogHeader className="pr-10">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
             {t('crmDetail.profile')}
