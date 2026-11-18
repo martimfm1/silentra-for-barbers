@@ -395,6 +395,8 @@ assert.ok(onboardingCreateApi.includes("typeof serviceId !== 'string'"));
 assert.ok(onboardingPersistenceMigration.includes('public.create_barbershop_onboarding('));
 assert.ok(onboardingPersistenceMigration.includes('insert into public.services'));
 assert.ok(onboardingPersistenceMigration.includes('insert into public.professionals'));
+assert.ok(onboardingPersistenceMigration.includes('user_id,\n    name,'));
+assert.ok(onboardingPersistenceMigration.includes('auth.uid(),'));
 assert.ok(onboardingPersistenceMigration.includes('popular_service_id = v_service_id'));
 assert.ok(onboardingPersistenceMigration.includes("'barbershop_id', v_barbershop_id"));
 assert.ok(onboardingPersistenceMigration.includes("'service_id', v_service_id"));
