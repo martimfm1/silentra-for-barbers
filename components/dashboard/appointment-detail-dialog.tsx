@@ -65,7 +65,7 @@ function activityNotificationDetail(
   isEnglish: boolean,
 ): string | null {
   if (event.metadata.notificationRetryInProgress === true) {
-    return isEnglish ? 'Customer email is being resent' : 'A reenviar email ao cliente';
+    return isEnglish ? 'Confirming email delivery' : 'A confirmar o resultado do envio do email';
   }
   if (event.metadata.notificationSkipped === true) {
     return isEnglish ? 'No customer email is associated with this booking' : 'Não existe email associado a esta marcação';
@@ -1338,7 +1338,7 @@ export function AppointmentDetailDialog({
                                   <Mail className="mr-2 size-3.5" aria-hidden="true" />
                                 )}
                                 {event.metadata.notificationRetryInProgress === true
-                                  ? isEnglish ? 'Sending email…' : 'A reenviar email…'
+                                  ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
                                   : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (
