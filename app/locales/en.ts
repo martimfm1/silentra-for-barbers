@@ -73,6 +73,9 @@ export const en = {
     setupSubtitle:
       'Your barbershop is up and running. Let’s finish the essentials.',
     setupProgress: '{completed} of {total} steps completed.',
+    setupBusinessProfile: 'Complete the barbershop profile',
+    setupWorkingHours: 'Set working hours',
+    setupPublicPage: 'Activate the public page',
     setupNextStep: 'Complete the next step to start accepting bookings.',
     quickActions: 'Quick actions',
     nextAppointment: 'Next booking',
