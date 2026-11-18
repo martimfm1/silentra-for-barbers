@@ -72,6 +72,9 @@ export const pt = {
     setupTitle: 'Configuração inicial',
     setupSubtitle: 'A tua barbearia já começou. Vamos acabar o essencial.',
     setupProgress: '{completed} de {total} passos concluídos.',
+    setupBusinessProfile: 'Completar o perfil da barbearia',
+    setupWorkingHours: 'Definir os horários de funcionamento',
+    setupPublicPage: 'Ativar a página pública',
     setupNextStep:
       'Só falta completar o próximo passo para começares a aceitar marcações.',
     quickActions: 'Ações rápidas',

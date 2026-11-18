@@ -406,6 +406,41 @@ assert.ok(onboardingPersistenceMigration.includes("'service_id', v_service_id"))
 assert.ok(onboardingPersistenceMigration.includes("'professional_id', v_professional_id"));
 console.log('[ONBOARDING_PERSISTENCE_QA] Owner, first service, primary professional and public popular service are persisted atomically.');
 
+// Law 13 activation checklist must reflect values saved in the database,
+// not the values that happened to be typed into the initial onboarding form.
+const onboardingDashboard = read('app/dashboard/page.tsx');
+const onboardingConfigService = read(
+  'app/dashboard/_services/barbershop.service.ts',
+);
+const onboardingPublicProfileApi = read(
+  'app/api/barbershops/public-profile/route.ts',
+);
+const onboardingPortuguese = read('app/locales/pt.ts');
+const onboardingEnglish = read('app/locales/en.ts');
+
+assert.ok(onboardingDashboard.includes('getBarbershopConfig(currentBarbershopId)'));
+assert.ok(onboardingDashboard.includes("fetch('/api/barbershops/public-profile'"));
+assert.ok(onboardingDashboard.includes('function hasConfiguredWorkingHours'));
+assert.ok(onboardingDashboard.includes('config.weekly_schedule'));
+assert.ok(onboardingDashboard.includes('config.opening_time'));
+assert.ok(onboardingDashboard.includes('setupBarbershopConfig?.name.trim()'));
+assert.ok(onboardingDashboard.includes('setupBarbershopConfig.address?.trim()'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile?.city?.trim()'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile?.slug'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled !== false'));
+assert.ok(onboardingDashboard.includes('services.some((service) => service.is_active !== false)'));
+assert.ok(onboardingDashboard.includes('professionals.some((professional) => professional.active !== false)'));
+assert.ok(onboardingDashboard.includes("appointment.status !== 'cancelled'"));
+assert.ok(onboardingDashboard.includes('!loadingSetupData && nextSetupStep'));
+assert.ok(onboardingConfigService.includes('weekly_schedule'));
+assert.ok(onboardingConfigService.includes('opening_time, closing_time'));
+assert.ok(onboardingPublicProfileApi.includes("'id, slug, custom_slug, city, price, tags, public_profile_enabled"));
+for (const key of ['setupBusinessProfile', 'setupWorkingHours', 'setupPublicPage']) {
+  assert.ok(onboardingPortuguese.includes(`${key}:`), `Missing pt-PT ${key}`);
+  assert.ok(onboardingEnglish.includes(`${key}:`), `Missing en-GB ${key}`);
+}
+console.log('[LAW13_ONBOARDING_PROGRESS_QA] Profile, working hours, public page, services, team and first booking are derived from saved records.');
+
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
