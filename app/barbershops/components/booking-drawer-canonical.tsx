@@ -156,7 +156,6 @@ export function BookingDrawerCanonical({
   const [loadingBookingData, setLoadingBookingData] = useState(false);
   const [selectedDayClosed, setSelectedDayClosed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [bookingStatus, setBookingStatus] = useState<'pending' | 'scheduled' | null>(null);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
   const [name, setName] = useState('');
@@ -260,7 +259,6 @@ export function BookingDrawerCanonical({
     setLoadingAvailability(false);
     setLoadingBookingData(false);
     setSubmitting(false);
-    setBookingStatus(null);
     setError('');
     setRetryKey(0);
     setName('');
@@ -694,7 +692,6 @@ export function BookingDrawerCanonical({
         id: typeof bookingData?.id === 'string' ? bookingData.id : null,
         status: bookingData?.status === 'scheduled' ? 'scheduled' : 'pending',
       });
-      setBookingStatus(bookingData?.status === 'scheduled' ? 'scheduled' : 'pending');
       const paymentMethod = responseData.payment?.method ?? null;
       trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
       if (paymentMethod === 'mbway') {
