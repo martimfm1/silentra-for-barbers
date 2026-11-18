@@ -66,8 +66,8 @@ function hasConfiguredWorkingHours(
     const normalizedStart = start.slice(0, 5);
     const normalizedEnd = end.slice(0, 5);
     return (
-      /^([01]\\d|2[0-3]):[0-5]\\d$/.test(normalizedStart) &&
-      /^([01]\\d|2[0-3]):[0-5]\\d$/.test(normalizedEnd) &&
+      /^([01]\d|2[0-3]):[0-5]\d$/.test(normalizedStart) &&
+      /^([01]\d|2[0-3]):[0-5]\d$/.test(normalizedEnd) &&
       normalizedStart < normalizedEnd
     );
   };
