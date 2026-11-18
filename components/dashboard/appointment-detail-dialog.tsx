@@ -301,6 +301,8 @@ export function AppointmentDetailDialog({
   const [activityEvents, setActivityEvents] = useState<AppointmentActivity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityError, setActivityError] = useState(false);
+  const [retryingActivityId, setRetryingActivityId] = useState<string | null>(null);
+  const [activityRetryErrorId, setActivityRetryErrorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!appointment) return;
@@ -353,6 +355,76 @@ export function AppointmentDetailDialog({
       active = false;
     };
   }, [appointment?.id, open]);
+
+  const handleRetryActivityNotification = async (event: AppointmentActivity) => {
+    if (!appointment || retryingActivityId) return;
+    const action = event.action === 'appointment.rescheduled'
+      ? 'rescheduled'
+      : event.action === 'appointment.cancelled'
+        ? 'cancelled'
+        : null;
+    if (!action || event.actorType !== 'staff') return;
+
+    setRetryingActivityId(event.id);
+    setActivityRetryErrorId(null);
+    try {
+      const response = await fetch(
+        `/api/appointments/${encodeURIComponent(appointment.id)}/notifications/retry`,
+        {
+          method: 'POST',
+          cache: 'no-store',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action }),
+        },
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true || payload?.emailSent !== true) {
+        throw new Error(
+          typeof payload?.error === 'string'
+            ? payload.error
+            : isEnglish
+              ? 'The customer email could not be resent.'
+              : 'Não foi possível reenviar o email ao cliente.',
+        );
+      }
+
+      setActivityEvents((current) =>
+        current.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                metadata: {
+                  ...item.metadata,
+                  notificationSent: true,
+                  notificationSkipped: false,
+                  notificationRetryCount:
+                    Number(payload.retryCount ?? item.metadata.notificationRetryCount ?? 0),
+                  notificationRetryFailed: false,
+                },
+              }
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error('[APPOINTMENT_NOTIFICATION_RETRY_ERROR]', error instanceof Error ? error.name : 'UNKNOWN');
+      setActivityRetryErrorId(event.id);
+      setActivityEvents((current) =>
+        current.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                metadata: { ...item.metadata, notificationRetryFailed: true },
+              }
+            : item,
+        ),
+      );
+    } finally {
+      setRetryingActivityId(null);
+    }
+  };
 
   if (!appointment) return null;
   const date = new Date(appointment.date_hour);
@@ -1126,6 +1198,32 @@ export function AppointmentDetailDialog({
                             <p className="mt-1 text-xs text-zinc-500">
                               {activityNotificationDetail(event, isEnglish)}
                             </p>
+                          ) : null}
+                          {event.actorType === 'staff' &&
+                          ['appointment.rescheduled', 'appointment.cancelled'].includes(event.action) &&
+                          event.metadata.notificationSent === false &&
+                          event.metadata.notificationSkipped !== true ? (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={retryingActivityId !== null}
+                                onClick={() => void handleRetryActivityNotification(event)}
+                              >
+                                {retryingActivityId === event.id ? (
+                                  <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
+                                ) : (
+                                  <Mail className="mr-2 size-3.5" aria-hidden="true" />
+                                )}
+                                {isEnglish ? 'Resend email' : 'Reenviar email'}
+                              </Button>
+                              {activityRetryErrorId === event.id ? (
+                                <span className="text-xs text-rose-300">
+                                  {isEnglish ? 'Retry failed. You can try again.' : 'O reenvio falhou. Podes tentar novamente.'}
+                                </span>
+                              ) : null}
+                            </div>
                           ) : null}
                         </div>
                       </li>
