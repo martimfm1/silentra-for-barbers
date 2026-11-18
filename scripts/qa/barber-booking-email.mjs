@@ -19,6 +19,7 @@ const [
   appointmentReminderRoute,
   appointmentAutomations,
   appointmentCompletionRoute,
+  appointmentDetailDialog,
 ] = await Promise.all([
   readFile('app/api/bookings/route.ts', 'utf8'),
   readFile('lib/brevo/barber-booking-notification.ts', 'utf8'),
@@ -37,6 +38,7 @@ const [
   readFile('app/api/cron/appointment-reminders/route.ts', 'utf8'),
   readFile('lib/automations/dispatch-appointment.ts', 'utf8'),
   readFile('app/api/appointments/[appointmentId]/complete/route.ts', 'utf8'),
+  readFile('components/dashboard/appointment-detail-dialog.tsx', 'utf8'),
 ]);
 assert.match(bookingRoute, /notifyBarbersOfNewBooking\(/);
 assert.match(bookingRoute, /professionalId:\s*normalizedProfessionalId/);
@@ -75,6 +77,14 @@ assert.doesNotMatch(confirmationRoute, /clientRelation\?\.email/);
 assert.match(appointmentEmailRoute, /const email = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
 assert.doesNotMatch(appointmentEmailRoute, /clientResult\.data\?\.email/);
 assert.match(appointmentEmailRoute, /emailSkipped: true/);
+assert.match(appointmentsHook, /const resendBookingEmail = useCallback/);
+assert.match(appointmentsHook, /\/api\/appointments\/\$\{encodeURIComponent\(appointmentId\)\}\/email/);
+assert.match(appointmentsHook, /result\?\.emailSent !== true/);
+assert.match(appointmentDetailDialog, /onResendBookingEmail/);
+assert.match(appointmentDetailDialog, /const canResendBookingEmail/);
+assert.match(appointmentDetailDialog, /\['pending', 'scheduled'\]\.includes\(appointment\.status\)/);
+assert.match(appointmentDetailDialog, /appointment\.manual_email\?\.trim\(\)/);
+assert.match(appointmentDetailDialog, /Reenviar email/);
 assert.match(appointmentReminderRoute, /const recipient = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
 assert.doesNotMatch(appointmentReminderRoute, /client\?\.email/);
 assert.match(appointmentCompletionRoute, /const customerEmail = appointment\.manual_email\?\.trim\(\)\.toLowerCase\(\) \|\| ''/);
