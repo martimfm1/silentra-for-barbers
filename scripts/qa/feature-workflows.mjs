@@ -338,11 +338,15 @@ assert.ok(appointmentNotificationRetryApi.includes('status: 409'));
 assert.ok(appointmentCancellationApi.includes('notificationRetryCount: 0'));
 assert.ok(appointmentActivityApi.includes('notificationRetryCount'));
 assert.ok(appointmentActivityApi.includes('notificationRetryInProgress'));
+assert.ok(appointmentActivityApi.includes('notificationRetryLeaseUntil'));
+assert.ok(appointmentActivityApi.includes('Date.now()'));
 assert.ok(appointmentDetailDialog.includes('Reenviar email'));
 assert.ok(appointmentDetailDialog.includes('/notifications/retry'));
 assert.ok(appointmentDetailDialog.includes("cache: 'no-store'"));
 assert.ok(appointmentDetailDialog.includes('notificationRetryInProgress'));
 assert.ok(appointmentDetailDialog.includes('Sending email…'));
+assert.ok(appointmentDetailDialog.includes('window.setInterval'));
+assert.ok(appointmentDetailDialog.includes('window.clearInterval'));
 assert.ok(appointmentActivityApi.includes('notificationSkipped'));
 
 // Keep the selected service, duration and price visible while availability is checked.
