@@ -74,7 +74,7 @@ const inputClass =
   'min-h-11 rounded-xl border-white/10 bg-white/[0.04] text-sm text-zinc-50 placeholder:text-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50';
 
 export default function OnboardingPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const router = useRouter();
   const [step, setStep] = useState<Step>('selection');
   const [businessMode, setBusinessMode] = useState<'solo' | 'team'>('solo');
@@ -87,6 +87,8 @@ export default function OnboardingPage() {
   const [openTime, setOpenTime] = useState('09:00');
   const [closeTime, setCloseTime] = useState('19:00');
   const [price, setPrice] = useState<number | ''>(15);
+  const [firstServiceName, setFirstServiceName] = useState('Corte de cabelo');
+  const [firstServiceDuration, setFirstServiceDuration] = useState('30');
   const [tagsInput, setTagsInput] = useState('Corte, Barba');
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -195,8 +197,13 @@ export default function OnboardingPage() {
 
   const requiredFieldsCompleted = useMemo(
     () =>
-      [shopName.trim(), address.trim(), city.trim()].filter(Boolean).length,
-    [shopName, address, city],
+      [
+        shopName.trim(),
+        address.trim(),
+        city.trim(),
+        firstServiceName.trim(),
+      ].filter(Boolean).length,
+    [shopName, address, city, firstServiceName],
   );
 
   // Progress reflects only information the user has actually supplied.
@@ -205,14 +212,14 @@ export default function OnboardingPage() {
   const progress =
     step === 'join'
       ? (inviteCode.trim() ? 100 : 0)
-      : Math.round((requiredFieldsCompleted / 3) * 100);
+      : Math.round((requiredFieldsCompleted / 4) * 100);
 
   const progressDescription =
     step === 'join'
       ? inviteCode.trim()
         ? 'Código de convite introduzido'
         : 'Introduza o código de convite'
-      : `${requiredFieldsCompleted} de 3 dados essenciais`;
+      : `${requiredFieldsCompleted} de 4 dados essenciais`;
 
   const selectStep = (next: Exclude<Step, 'selection'>) => {
     setStep(next);
@@ -235,9 +242,42 @@ export default function OnboardingPage() {
 
   async function handleCreateShop(event: React.FormEvent) {
     event.preventDefault();
+    const serviceDuration = Number(firstServiceDuration);
+    const servicePrice = price === '' ? 15 : Number(price);
     if (!shopName.trim() || !address.trim() || !city.trim()) {
       toast.error(
         'Indique o nome e a localização da sua barbearia para continuar.',
+      );
+      return;
+    }
+    if (!firstServiceName.trim() || firstServiceName.trim().length > 100) {
+      toast.error(
+        locale === 'pt'
+          ? 'Indica o nome do primeiro serviço (até 100 caracteres).'
+          : 'Enter the first service name (up to 100 characters).',
+      );
+      return;
+    }
+    if (
+      !Number.isFinite(servicePrice) ||
+      servicePrice < 0 ||
+      servicePrice > 10000 ||
+      !Number.isInteger(serviceDuration) ||
+      serviceDuration < 1 ||
+      serviceDuration > 1440
+    ) {
+      toast.error(
+        locale === 'pt'
+          ? 'Confirma o preço e uma duração entre 1 e 1440 minutos.'
+          : 'Check the price and a duration between 1 and 1440 minutes.',
+      );
+      return;
+    }
+    if (!openTime || !closeTime || openTime >= closeTime) {
+      toast.error(
+        locale === 'pt'
+          ? 'A hora de fecho tem de ser posterior à hora de abertura.'
+          : 'Closing time must be later than opening time.',
       );
       return;
     }
@@ -254,10 +294,12 @@ export default function OnboardingPage() {
           address: fullAddress,
           city: city.trim(),
           hours: `${openTime} - ${closeTime}`,
-          price: price === '' ? 15 : Number(price),
+          price: servicePrice,
+          serviceName: firstServiceName.trim(),
+          serviceDuration,
           tags: formattedTags,
-          lat: lat ?? 0,
-          lng: lng ?? 0,
+          lat,
+          lng,
         }),
       });
 
@@ -684,7 +726,7 @@ export default function OnboardingPage() {
                         <div className="grid gap-4 sm:grid-cols-3">
                           <div className="grid gap-2">
                             <Label htmlFor="price">
-                              {t('onboarding.referencePrice')}
+                              {locale === 'pt' ? 'Preço do primeiro serviço (€)' : 'First service price (€)'}
                             </Label>
                             <div className="relative">
                               <Euro
@@ -757,7 +799,44 @@ export default function OnboardingPage() {
                               {t('onboarding.closingHint')}
                             </p>
                           </div>
+                        <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(150px,0.6fr)]">
+                          <div className="grid gap-2">
+                            <Label htmlFor="first-service-name">
+                              {locale === 'pt' ? 'Primeiro serviço' : 'First service'}
+                            </Label>
+                            <Input
+                              id="first-service-name"
+                              required
+                              maxLength={100}
+                              value={firstServiceName}
+                              onChange={(event) => setFirstServiceName(event.target.value)}
+                              placeholder={locale === 'pt' ? 'Ex.: Corte de cabelo' : 'e.g. Haircut'}
+                              className={inputClass}
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="first-service-duration">
+                              {locale === 'pt' ? 'Duração (minutos)' : 'Duration (minutes)'}
+                            </Label>
+                            <Input
+                              id="first-service-duration"
+                              type="number"
+                              inputMode="numeric"
+                              min="1"
+                              max="1440"
+                              step="5"
+                              required
+                              value={firstServiceDuration}
+                              onChange={(event) => setFirstServiceDuration(event.target.value)}
+                              className={inputClass}
+                            />
+                          </div>
                         </div>
+                        <p className="mt-2 text-[11px] leading-5 text-zinc-500">
+                          {locale === 'pt'
+                            ? 'O serviço, o preço e a duração ficam guardados no catálogo e disponíveis para marcações. Podes alterá-los no painel.'
+                            : 'The service, price and duration are saved to the catalogue and made available for bookings. You can edit them in the dashboard.'}
+                        </p>
                       </div>
 
                       <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
@@ -776,7 +855,7 @@ export default function OnboardingPage() {
                           </div>
                         </div>
                         <Label htmlFor="tags">
-                          {t('onboarding.servicesFeatures')}
+                          {locale === 'pt' ? 'Etiquetas do diretório público' : 'Public directory tags'}
                         </Label>
                         <Input
                           id="tags"
