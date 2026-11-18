@@ -17,6 +17,18 @@ function hasAgendaGrant(value: unknown): boolean {
   return permissions.agenda === true || permissions.appointments === true;
 }
 
+function isAmbiguousEmailFailure(result: { success: boolean; errorCode?: string }): boolean {
+  if (result.success) return false;
+  const errorCode = result.errorCode ?? '';
+  const httpStatus = Number(/^BREVO_HTTP_(\\d{3})$/.exec(errorCode)?.[1] ?? 0);
+  return (
+    errorCode === 'BREVO_NETWORK_ERROR' ||
+    !errorCode ||
+    httpStatus === 408 ||
+    httpStatus >= 500
+  );
+}
+
 async function POST__unobserved(
   request: Request,
   context: { params: Promise<{ appointmentId: string }> },
@@ -263,6 +275,7 @@ async function POST__unobserved(
     }
 
     let emailSent = false;
+    let deliveryOutcomeUnknown = false;
 
     try {
       if (action === 'rescheduled') {
@@ -278,6 +291,7 @@ async function POST__unobserved(
           language,
         });
         emailSent = result.success;
+        deliveryOutcomeUnknown = isAmbiguousEmailFailure(result);
       } else {
         const result = await sendAppointmentCancellationEmail({
           to: customerEmail,
@@ -290,12 +304,30 @@ async function POST__unobserved(
           language,
         });
         emailSent = result.success;
+        deliveryOutcomeUnknown = isAmbiguousEmailFailure(result);
       }
     } catch (sendError) {
+      deliveryOutcomeUnknown = true;
       console.error('[APPOINTMENT_NOTIFICATION_RETRY_SEND_FAILED]', {
         action,
         error: sendError instanceof Error ? sendError.name : 'UNKNOWN',
       });
+    }
+
+    if (deliveryOutcomeUnknown) {
+      // Keep the lease active: the provider may have accepted the email even
+      // though the response was lost or ambiguous. A retry can resume after
+      // the lease expires, avoiding an immediate duplicate.
+      return NextResponse.json(
+        {
+          success: false,
+          emailSent: false,
+          retryPending: true,
+          retryCount,
+          error: 'Não foi possível confirmar se o email foi aceite. O reenvio ficará temporariamente bloqueado para evitar duplicados.',
+        },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     const { data: completed, error: completionError } = await tenant.admin.rpc(
