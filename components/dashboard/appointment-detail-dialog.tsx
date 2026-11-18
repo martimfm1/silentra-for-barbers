@@ -363,6 +363,43 @@ export function AppointmentDetailDialog({
     };
   }, [appointment?.id, open]);
 
+  useEffect(() => {
+    const hasInProgressRetry = activityEvents.some(
+      (event) => event.metadata.notificationRetryInProgress === true,
+    );
+    if (!open || !appointment?.id || !hasInProgressRetry) return;
+
+    let active = true;
+    const refreshActivity = async () => {
+      try {
+        const response = await fetch(
+          `/api/appointments/${encodeURIComponent(appointment.id)}/activity`,
+          { cache: 'no-store', headers: { Accept: 'application/json' } },
+        );
+        const payload = await response.json().catch(() => null);
+        if (
+          active &&
+          response.ok &&
+          payload?.success === true &&
+          Array.isArray(payload.events)
+        ) {
+          setActivityEvents(payload.events);
+        }
+      } catch {
+        // Keep the last known activity state and retry on the next interval.
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshActivity();
+    }, 15_000);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [activityEvents, appointment?.id, open]);
+
   const handleRetryActivityNotification = async (event: AppointmentActivity) => {
     if (!appointment || retryingActivityId) return;
     const action = event.action === 'appointment.rescheduled'
