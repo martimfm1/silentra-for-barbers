@@ -1199,7 +1199,8 @@ export function AppointmentDetailDialog({
                               {activityNotificationDetail(event, isEnglish)}
                             </p>
                           ) : null}
-                          {event.actorType === 'staff' &&
+                          {event.id === activityEvents[activityEvents.length - 1]?.id &&
+                          event.actorType === 'staff' &&
                           ['appointment.rescheduled', 'appointment.cancelled'].includes(event.action) &&
                           event.metadata.notificationSent === false &&
                           event.metadata.notificationSkipped !== true ? (
