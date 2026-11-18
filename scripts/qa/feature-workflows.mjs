@@ -392,7 +392,7 @@ const onboardingPublicProfileApi = read(
 const onboardingPortuguese = read('app/locales/pt.ts');
 const onboardingEnglish = read('app/locales/en.ts');
 
-assert.ok(onboardingDashboard.includes('getBarbershopConfig(barbershopId)'));
+assert.ok(onboardingDashboard.includes('getBarbershopConfig(currentBarbershopId)'));
 assert.ok(onboardingDashboard.includes("fetch('/api/barbershops/public-profile'"));
 assert.ok(onboardingDashboard.includes('function hasConfiguredWorkingHours'));
 assert.ok(onboardingDashboard.includes('config.weekly_schedule'));
