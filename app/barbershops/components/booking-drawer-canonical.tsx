@@ -152,6 +152,7 @@ export function BookingDrawerCanonical({
   const [loadingBookingData, setLoadingBookingData] = useState(false);
   const [selectedDayClosed, setSelectedDayClosed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState<'pending' | 'scheduled' | null>(null);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
   const [name, setName] = useState('');
@@ -253,6 +254,7 @@ export function BookingDrawerCanonical({
     setLoadingAvailability(false);
     setLoadingBookingData(false);
     setSubmitting(false);
+    setBookingStatus(null);
     setError('');
     setRetryKey(0);
     setName('');
@@ -677,6 +679,7 @@ export function BookingDrawerCanonical({
         return;
       }
       const paymentMethod = responseData.payment?.method ?? null;
+      setBookingStatus(responseData.booking?.status === 'scheduled' ? 'scheduled' : 'pending');
       trackBookingCompleted(appearance, prepaymentSelected, paymentMethod);
       if (paymentMethod === 'mbway') {
         setPaymentInstructions({
@@ -877,15 +880,9 @@ export function BookingDrawerCanonical({
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
               {loadingBookingData ? (
-                <div
-                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-xs text-zinc-400"
-                  role="status"
-                  aria-live="polite"
-                >
+                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-xs text-zinc-400" role="status" aria-live="polite">
                   <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                  {locale === 'pt'
-                    ? 'A carregar barbeiros e serviços…'
-                    : 'Loading barbers and services…'}
+                  {locale === 'pt' ? 'A carregar barbeiros e serviços…' : 'Loading barbers and services…'}
                 </div>
               ) : null}
               {(appearance !== 'agenda' || professionals.length !== 1) &&
@@ -1105,19 +1102,11 @@ export function BookingDrawerCanonical({
                 <div className="min-h-48 space-y-3" role="status" aria-live="polite">
                   <p className="flex items-center justify-center gap-2 text-sm text-zinc-500">
                     <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                    {locale === 'pt'
-                      ? 'A consultar horários para este serviço…'
-                      : 'Checking times for this service…'}
+                    {locale === 'pt' ? 'A consultar horários para este serviço…' : 'Checking times for this service…'}
                   </p>
-                  <div
-                    className="grid grid-cols-3 gap-2 sm:grid-cols-4"
-                    aria-hidden="true"
-                  >
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" aria-hidden="true">
                     {Array.from({ length: 8 }, (_, index) => (
-                      <div
-                        key={index}
-                        className="h-12 animate-pulse rounded-xl border border-white/10 bg-white/[0.035]"
-                      />
+                      <div key={index} className="h-12 animate-pulse rounded-xl border border-white/10 bg-white/[0.035]" />
                     ))}
                   </div>
                 </div>
@@ -1457,10 +1446,10 @@ export function BookingDrawerCanonical({
               aria-labelledby="booking-success-title"
             >
               <div
-                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
+                className={`flex size-16 items-center justify-center rounded-full border ${paymentInstructions || bookingStatus === 'pending' ? 'border-amber-400/25 bg-amber-400/10' : 'border-emerald-400/25 bg-emerald-400/10'}`}
               >
                 <CheckCircle2
-                  className={`size-8 ${paymentInstructions ? 'text-amber-300' : 'text-emerald-300'}`}
+                  className={`size-8 ${paymentInstructions || bookingStatus === 'pending' ? 'text-amber-300' : 'text-emerald-300'}`}
                   aria-hidden="true"
                 />
               </div>
@@ -1474,7 +1463,9 @@ export function BookingDrawerCanonical({
                     ? locale === 'en'
                       ? 'You are on the waitlist'
                       : 'Estás na lista de espera'
-                    : t('bookingDrawer.bookingConfirmed')}
+                    : bookingStatus === 'pending'
+                      ? t('bookingDrawer.bookingPendingTitle')
+                      : t('bookingDrawer.bookingConfirmed')}
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
                 {waitlistOnly ? (
@@ -1491,26 +1482,23 @@ export function BookingDrawerCanonical({
                   </>
                 )}
               </p>
+              {!waitlistOnly && !paymentInstructions && bookingStatus === 'pending' && (
+                <p className="mt-3 max-w-sm rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 text-xs leading-5 text-amber-100/90">
+                  {t('bookingDrawer.bookingPendingDescription')}
+                </p>
+              )}
               {!waitlistOnly && service ? (
                 <div
                   className="mt-4 grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-left"
                   aria-label={locale === 'pt' ? 'Resumo do serviço' : 'Service summary'}
                 >
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                      {locale === 'pt' ? 'Duração' : 'Duration'}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-zinc-100">
-                      {service.durationMinutes} min
-                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{locale === 'pt' ? 'Duração' : 'Duration'}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-100">{service.durationMinutes} min</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                      {locale === 'pt' ? 'Preço' : 'Price'}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-zinc-100">
-                      {Number(service.price).toFixed(2)} €
-                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{locale === 'pt' ? 'Preço' : 'Price'}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-100">{Number(service.price).toFixed(2)} €</p>
                   </div>
                 </div>
               ) : null}
