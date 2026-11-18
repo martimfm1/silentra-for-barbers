@@ -41,6 +41,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   confirmBooking: (appointmentId: string) => Promise<boolean>;
+  onResendBookingEmail: (appointmentId: string) => Promise<boolean>;
   onReschedule: (
     appointmentId: string,
     date: string,
@@ -209,6 +210,7 @@ export function AppointmentDetailDialog({
   open,
   onOpenChange,
   confirmBooking,
+  onResendBookingEmail,
   onReschedule,
   onCancel,
   onCancelSeries,
@@ -232,6 +234,7 @@ export function AppointmentDetailDialog({
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
   const [isConfirmingBooking, setIsConfirmingBooking] = useState(false);
+  const [isResendingBookingEmail, setIsResendingBookingEmail] = useState(false);
   const [seriesCancelScope, setSeriesCancelScope] = useState<
     'future' | 'all' | null
   >(null);
@@ -244,6 +247,7 @@ export function AppointmentDetailDialog({
     setIsCompletionOpen(false);
     setIsBookingConfirmationOpen(false);
     setIsConfirmingBooking(false);
+    setIsResendingBookingEmail(false);
   }, [appointment?.id, appointment?.date_hour, open]);
 
   if (!appointment) return null;
@@ -326,6 +330,20 @@ export function AppointmentDetailDialog({
       }
     } finally {
       setIsCancelling(false);
+    }
+  };
+
+  const canResendBookingEmail =
+    ['pending', 'scheduled'].includes(appointment.status) &&
+    Boolean(appointment.manual_email?.trim());
+
+  const handleResendBookingEmail = async () => {
+    if (!canResendBookingEmail || isResendingBookingEmail) return;
+    setIsResendingBookingEmail(true);
+    try {
+      await onResendBookingEmail(appointment.id);
+    } finally {
+      setIsResendingBookingEmail(false);
     }
   };
 
@@ -730,6 +748,30 @@ export function AppointmentDetailDialog({
                     {appointment.client_id ? 'Sim' : 'Não'}
                   </DetailItem>
                 </div>
+                {canResendBookingEmail ? (
+                  <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/8 bg-white/[0.02] p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs leading-5 text-zinc-400">
+                      {isEnglish
+                        ? 'Need to send the booking details again? This will not change the appointment.'
+                        : 'Precisas de voltar a enviar os detalhes? Esta ação não altera a marcação.'}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={() => void handleResendBookingEmail()}
+                      disabled={isResendingBookingEmail}
+                    >
+                      {isResendingBookingEmail ? (
+                        <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Mail className="mr-2 size-3.5" aria-hidden="true" />
+                      )}
+                      {isEnglish ? 'Resend booking email' : 'Reenviar email'}
+                    </Button>
+                  </div>
+                ) : null}
               </Section>
               {canCancel ? (
                 <Section
