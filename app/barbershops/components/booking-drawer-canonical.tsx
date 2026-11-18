@@ -581,7 +581,11 @@ export function BookingDrawerCanonical({
   }
 
   const canContinueOne = Boolean(
-    currentDay && professional && service && !currentDayClosed && !loadingBookingData,
+    currentDay &&
+      professional &&
+      service &&
+      !currentDayClosed &&
+      !loadingBookingData,
   );
   const canContinueTwo = Boolean(selectedSlot);
 
@@ -873,9 +877,15 @@ export function BookingDrawerCanonical({
           ) : step === 1 ? (
             <section className="space-y-6" aria-labelledby="booking-step-one">
               {loadingBookingData ? (
-                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-xs text-zinc-400" role="status" aria-live="polite">
+                <div
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-xs text-zinc-400"
+                  role="status"
+                  aria-live="polite"
+                >
                   <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                  {locale === 'pt' ? 'A carregar barbeiros e serviços…' : 'Loading barbers and services…'}
+                  {locale === 'pt'
+                    ? 'A carregar barbeiros e serviços…'
+                    : 'Loading barbers and services…'}
                 </div>
               ) : null}
               {(appearance !== 'agenda' || professionals.length !== 1) &&
@@ -1095,11 +1105,19 @@ export function BookingDrawerCanonical({
                 <div className="min-h-48 space-y-3" role="status" aria-live="polite">
                   <p className="flex items-center justify-center gap-2 text-sm text-zinc-500">
                     <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                    {locale === 'pt' ? 'A consultar horários para este serviço…' : 'Checking times for this service…'}
+                    {locale === 'pt'
+                      ? 'A consultar horários para este serviço…'
+                      : 'Checking times for this service…'}
                   </p>
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" aria-hidden="true">
+                  <div
+                    className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+                    aria-hidden="true"
+                  >
                     {Array.from({ length: 8 }, (_, index) => (
-                      <div key={index} className="h-12 animate-pulse rounded-xl border border-white/10 bg-white/[0.035]" />
+                      <div
+                        key={index}
+                        className="h-12 animate-pulse rounded-xl border border-white/10 bg-white/[0.035]"
+                      />
                     ))}
                   </div>
                 </div>
