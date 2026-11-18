@@ -75,6 +75,7 @@ assert.match(clientsCard, /common\.edit/);
 assert.match(clientsCard, /common\.delete/);
 
 // Profile shows customer data, booking history, summary metrics and staff notes.
+assert.doesNotMatch(clientProfile, /<DialogContent className="relative\\b/);
 assert.match(clientProfile, /appointmentHistory/);
 assert.match(clientProfile, /internalNotes/);
 assert.match(clientProfile, /completedAppointments/);
