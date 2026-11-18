@@ -332,6 +332,13 @@ assert.ok(appointmentNotificationRetryApi.includes('sendAppointmentCancellationE
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes('randomUUID()'));
+assert.ok(appointmentNotificationRetryApi.includes("errorCode === 'BREVO_NETWORK_ERROR'"));
+assert.ok(appointmentNotificationRetryApi.includes('BREVO_HTTP_'));
+assert.ok(appointmentNotificationRetryApi.includes('deliveryOutcomeUnknown = true'));
+assert.ok(appointmentNotificationRetryApi.includes('retryPending: true'));
+assert.ok(appointmentNotificationRetryApi.includes('O reenvio ficará temporariamente bloqueado'));
+assert.ok(appointmentDetailDialog.includes('A confirmar o resultado do envio do email'));
+assert.ok(appointmentDetailDialog.includes('Confirming email…'));
 assert.ok(appointmentNotificationRetryApi.includes('notificationRetryToken') === false);
 assert.ok(!appointmentNotificationRetryApi.includes(".from('audit_logs')\n      .update("));
 assert.ok(appointmentNotificationRetryApi.includes('status: 409'));
