@@ -18,3 +18,13 @@ overrides:
   browserslist: '>=4.28.7'
   sharp: '0.35.5'
   source-map-js: '>=1.2.2'
+
+ 
+# Temporary, reviewed exception: GHSA-fc5q-39xc-vjpf has no patched release.
+# The affected transitive path is the trusted build-time Sentry/Rollup wrapper;
+# glob patterns originate in application build configuration, not public requests.
+# Remove this exception as soon as upstream publishes a fixed version.
+audit:
+  level: high
+  ignore:
+    - GHSA-fc5q-39xc-vjpf
