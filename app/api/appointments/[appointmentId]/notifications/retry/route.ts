@@ -20,7 +20,7 @@ function hasAgendaGrant(value: unknown): boolean {
 function isAmbiguousEmailFailure(result: { success: boolean; errorCode?: string }): boolean {
   if (result.success) return false;
   const errorCode = result.errorCode ?? '';
-  const httpStatus = Number(/^BREVO_HTTP_(\\d{3})$/.exec(errorCode)?.[1] ?? 0);
+  const httpStatus = Number(/^BREVO_HTTP_([0-9]{3})$/.exec(errorCode)?.[1] ?? 0);
   return (
     errorCode === 'BREVO_NETWORK_ERROR' ||
     !errorCode ||
