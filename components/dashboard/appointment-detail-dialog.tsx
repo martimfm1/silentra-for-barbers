@@ -437,7 +437,11 @@ export function AppointmentDetailDialog({
           item.id === event.id
             ? {
                 ...item,
-                metadata: { ...item.metadata, notificationRetryFailed: true },
+                metadata: {
+                  ...item.metadata,
+                  notificationRetryFailed: true,
+                  notificationRetryInProgress: false,
+                },
               }
             : item,
         ),
