@@ -1491,6 +1491,29 @@ export function BookingDrawerCanonical({
                   </>
                 )}
               </p>
+              {!waitlistOnly && service ? (
+                <div
+                  className="mt-4 grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-left"
+                  aria-label={locale === 'pt' ? 'Resumo do serviço' : 'Service summary'}
+                >
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                      {locale === 'pt' ? 'Duração' : 'Duration'}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-100">
+                      {service.durationMinutes} min
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                      {locale === 'pt' ? 'Preço' : 'Price'}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-100">
+                      {Number(service.price).toFixed(2)} €
+                    </p>
+                  </div>
+                </div>
+              ) : null}
               {paymentInstructions && (
                 <div className="mt-5 w-full space-y-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.035] p-4 text-left">
                   <div className="flex items-center justify-between gap-3 text-sm">
