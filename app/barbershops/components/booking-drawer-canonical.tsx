@@ -1610,7 +1610,7 @@ export function BookingDrawerCanonical({
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
                       <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Service price' : 'Preço do serviço'}</p>
-                      <p className="mt-1 text-sm font-medium text-zinc-100">{Number(service?.price ?? 0).toFixed(2)} €</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-100">{service ? Number(service.price).toFixed(2) : '—'} €</p>
                     </div>
                   </div>
 
