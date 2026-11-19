@@ -253,3 +253,24 @@ assert.match(
   /rollback[\s\S]*drop trigger if exists zz_enforce_appointment_capacity_overlap[\s\S]*drop function if exists public\.enforce_appointment_capacity_overlap/i,
   'The database guard migration must document its rollback path',
 );
+
+
+const expiredMbwayCapacityMigration = readFileSync(
+  'supabase/migrations/20261119233600_ignore_expired_mbway_holds_in_capacity_guard.sql',
+  'utf8',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /new\.payment_status = 'awaiting_review'[\s\S]*new\.payment_expires_at is not null[\s\S]*new\.payment_expires_at <= now\(\)/i,
+  'An expired MB WAY booking being inserted or updated must no longer reserve capacity',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /a\.payment_status = 'awaiting_review'[\s\S]*a\.payment_expires_at is not null[\s\S]*a\.payment_expires_at <= now\(\)/i,
+  'Existing expired MB WAY holds must be ignored by the overlap check',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /re-apply the previous CREATE OR REPLACE FUNCTION definition[\s\S]*20261119232316_enforce_cross_lane_appointment_capacity\.sql/i,
+  'The expiry-rule migration must document how to restore the prior trigger function',
+);
