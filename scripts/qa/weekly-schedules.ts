@@ -143,7 +143,7 @@ const bookingAvailability = readFileSync(
   'utf8',
 );
 assert.ok(
-  bookingAvailability.includes('appointment.professionalId === null ||'),
+  bookingAvailability.includes('appointmentsShareProfessionalCapacity('),
   'Unassigned bookings must block availability for every professional',
 );
 assert.ok(
