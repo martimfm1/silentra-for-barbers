@@ -248,3 +248,8 @@ assert.match(
   /create trigger zz_enforce_appointment_capacity_overlap/i,
   'The cross-lane guard must be attached to appointments',
 );
+assert.match(
+  crossLaneCapacityMigration,
+  /rollback[\\s\\S]*drop trigger if exists zz_enforce_appointment_capacity_overlap[\\s\\S]*drop function if exists public\\.enforce_appointment_capacity_overlap/i,
+  'The database guard migration must document its rollback path',
+);
