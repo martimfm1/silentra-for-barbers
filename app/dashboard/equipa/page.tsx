@@ -53,6 +53,32 @@ export default function EquipaPage() {
   const [showAddProfessionalForm, setShowAddProfessionalForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [activeTab, setActiveTab] = useState<TeamTab>('professionals');
+
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (
+      requestedTab === 'professionals' ||
+      requestedTab === 'members' ||
+      requestedTab === 'invite'
+    ) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
+
+  const selectTab = useCallback((nextTab: TeamTab) => {
+    setActiveTab(nextTab);
+    const url = new URL(window.location.href);
+    if (nextTab === 'professionals') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', nextTab);
+    }
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }, []);
   const [teamSeats, setTeamSeats] = useState<TeamSeatState>({
     used: 0,
     limit: 1,
@@ -187,7 +213,7 @@ export default function EquipaPage() {
         <AnimatedTabList
           tabs={teamTabs}
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={selectTab}
           ariaLabel={t('teamPage.sections')}
           layoutId="team-tab-indicator"
           className="grid grid-cols-3 overflow-visible"
