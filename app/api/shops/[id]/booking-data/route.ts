@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 import {
+  appointmentsShareProfessionalCapacity,
   getDailySchedule,
   isSlotWithinDailySchedule,
   normalizeWeeklySchedule,
@@ -352,9 +353,10 @@ async function GET__unobserved(
             // Legacy/unassigned bookings reserve the time for every barber.
             // This mirrors create_booking_atomic, which treats NULL professional
             // assignments as conflicts for any requested professional.
-            (appointment.professionalId === null ||
-              appointment.professionalId === professionalId) &&
-            overlaps(slotStart, slotEnd, appointment.start, appointment.end)
+            appointmentsShareProfessionalCapacity(
+              professionalId,
+              appointment.professionalId,
+            ) && overlaps(slotStart, slotEnd, appointment.start, appointment.end)
           );
         return (
           appointment.professionalId === null &&

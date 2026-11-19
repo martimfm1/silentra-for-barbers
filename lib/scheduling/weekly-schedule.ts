@@ -210,6 +210,22 @@ export function intervalsOverlap(
   return start < otherEnd && end > otherStart;
 }
 
+/**
+ * An appointment without a professional reserves capacity across the whole
+ * barbershop. A specific professional is blocked by their own bookings and by
+ * unassigned bookings, but not by bookings assigned to another professional.
+ */
+export function appointmentsShareProfessionalCapacity(
+  candidateProfessionalId: string | null,
+  existingProfessionalId: string | null,
+): boolean {
+  return (
+    candidateProfessionalId === null ||
+    existingProfessionalId === null ||
+    candidateProfessionalId === existingProfessionalId
+  );
+}
+
 export function isSlotWithinDailySchedule(
   day: DailySchedule,
   start: number,
