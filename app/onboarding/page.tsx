@@ -29,6 +29,13 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { captureProductEvent } from '@/lib/observability/posthog';
 import { toast } from 'sonner';
+import {
+  WEEKDAY_KEYS,
+  createDefaultWeeklySchedule,
+  validateWeeklySchedule,
+  type WeeklySchedule,
+  type WeekdayKey,
+} from '@/lib/scheduling/weekly-schedule';
 
 type Step = 'selection' | 'create' | 'join';
 
@@ -84,8 +91,9 @@ export default function OnboardingPage() {
   const [doorNumber, setDoorNumber] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
-  const [openTime, setOpenTime] = useState('09:00');
-  const [closeTime, setCloseTime] = useState('19:00');
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>(() =>
+    createDefaultWeeklySchedule(),
+  );
   const [price, setPrice] = useState<number | ''>(15);
   const [firstServiceName, setFirstServiceName] = useState('Corte de cabelo');
   const [firstServiceDuration, setFirstServiceDuration] = useState('30');
@@ -97,6 +105,61 @@ export default function OnboardingPage() {
   const [searchingAddress, setSearchingAddress] = useState(false);
   const [isAddressSelected, setIsAddressSelected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const weekdayLabels: Record<WeekdayKey, string> =
+    locale === 'pt'
+      ? {
+          monday: 'Segunda-feira',
+          tuesday: 'Terça-feira',
+          wednesday: 'Quarta-feira',
+          thursday: 'Quinta-feira',
+          friday: 'Sexta-feira',
+          saturday: 'Sábado',
+          sunday: 'Domingo',
+        }
+      : {
+          monday: 'Monday',
+          tuesday: 'Tuesday',
+          wednesday: 'Wednesday',
+          thursday: 'Thursday',
+          friday: 'Friday',
+          saturday: 'Saturday',
+          sunday: 'Sunday',
+        };
+
+  const updateWorkingTime = (
+    dayKey: WeekdayKey,
+    field: 'start' | 'end',
+    value: string,
+  ) => {
+    setWeeklySchedule((current) => {
+      const interval = current[dayKey].work_intervals[0] ?? {
+        start: '09:00',
+        end: '19:00',
+      };
+      return {
+        ...current,
+        [dayKey]: {
+          ...current[dayKey],
+          work_intervals: [{ ...interval, [field]: value }],
+        },
+      };
+    });
+  };
+
+  const updateDayOff = (dayKey: WeekdayKey, dayOff: boolean) => {
+    setWeeklySchedule((current) => ({
+      ...current,
+      [dayKey]: {
+        ...current[dayKey],
+        day_off: dayOff,
+        work_intervals: dayOff
+          ? current[dayKey].work_intervals
+          : current[dayKey].work_intervals.length
+            ? current[dayKey].work_intervals
+            : [{ start: '09:00', end: '19:00' }],
+      },
+    }));
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -273,11 +336,19 @@ export default function OnboardingPage() {
       );
       return;
     }
-    if (!openTime || !closeTime || openTime >= closeTime) {
+    const scheduleError = validateWeeklySchedule(
+      weeklySchedule,
+      locale === 'pt' ? 'pt' : 'en',
+    );
+    if (scheduleError) {
+      toast.error(scheduleError);
+      return;
+    }
+    if (!WEEKDAY_KEYS.some((dayKey) => !weeklySchedule[dayKey].day_off)) {
       toast.error(
         locale === 'pt'
-          ? 'A hora de fecho tem de ser posterior à hora de abertura.'
-          : 'Closing time must be later than opening time.',
+          ? 'Define pelo menos um dia de funcionamento.'
+          : 'Set at least one working day.',
       );
       return;
     }
@@ -293,7 +364,7 @@ export default function OnboardingPage() {
           name: shopName.trim(),
           address: fullAddress,
           city: city.trim(),
-          hours: `${openTime} - ${closeTime}`,
+          weeklySchedule,
           price: servicePrice,
           serviceName: firstServiceName.trim(),
           serviceDuration,
@@ -723,8 +794,8 @@ export default function OnboardingPage() {
                             </h2>
                           </div>
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-3">
-                          <div className="grid gap-2">
+                        <div className="grid gap-4">
+                          <div className="grid max-w-sm gap-2">
                             <Label htmlFor="price">
                               {locale === 'pt' ? 'Preço do primeiro serviço (€)' : 'First service price (€)'}
                             </Label>
@@ -753,51 +824,100 @@ export default function OnboardingPage() {
                               {t('onboarding.priceHint')}
                             </p>
                           </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="open-time">
-                              {t('onboarding.opening')}
-                            </Label>
-                            <div className="relative">
-                              <Clock3
-                                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
-                                aria-hidden="true"
-                              />
-                              <Input
-                                id="open-time"
-                                type="time"
-                                value={openTime}
-                                onChange={(event) =>
-                                  setOpenTime(event.target.value)
-                                }
-                                className={`${inputClass} pl-10`}
-                              />
+                        </div>
+                        <div className="mt-5 rounded-2xl border border-white/8 bg-black/10 p-3 sm:p-4">
+                          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <h3 className="text-sm font-semibold text-zinc-100">
+                                {locale === 'pt' ? 'Horário semanal' : 'Weekly opening hours'}
+                              </h3>
+                              <p className="text-xs text-zinc-500">
+                                {locale === 'pt'
+                                  ? 'Define a abertura e o fecho de cada dia. Podes alterar estes horários mais tarde nas definições.'
+                                  : 'Set opening and closing times for each day. You can change them later in settings.'}
+                              </p>
                             </div>
-                            <p className="text-[11px] text-zinc-600">
-                              {t('onboarding.openingHint')}
-                            </p>
+                            <span className="text-[11px] text-zinc-500">
+                              {locale === 'pt' ? 'Hora local da barbearia' : 'Barbershop local time'}
+                            </span>
                           </div>
                           <div className="grid gap-2">
-                            <Label htmlFor="close-time">
-                              {t('onboarding.closing')}
-                            </Label>
-                            <div className="relative">
-                              <Clock3
-                                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
-                                aria-hidden="true"
-                              />
-                              <Input
-                                id="close-time"
-                                type="time"
-                                value={closeTime}
-                                onChange={(event) =>
-                                  setCloseTime(event.target.value)
-                                }
-                                className={`${inputClass} pl-10`}
-                              />
-                            </div>
-                            <p className="text-[11px] text-zinc-600">
-                              {t('onboarding.closingHint')}
-                            </p>
+                            {WEEKDAY_KEYS.map((dayKey) => {
+                              const day = weeklySchedule[dayKey];
+                              const interval = day.work_intervals[0] ?? {
+                                start: '09:00',
+                                end: '19:00',
+                              };
+                              return (
+                                <div
+                                  key={dayKey}
+                                  className="grid gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:grid-cols-[minmax(150px,0.8fr)_minmax(0,1.2fr)] sm:items-center"
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="text-sm font-medium text-zinc-200">
+                                      {weekdayLabels[dayKey]}
+                                    </span>
+                                    <label
+                                      htmlFor={`onboarding-${dayKey}-day-off`}
+                                      className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-xs text-zinc-400 hover:bg-white/[0.04]"
+                                    >
+                                      <input
+                                        id={`onboarding-${dayKey}-day-off`}
+                                        type="checkbox"
+                                        checked={day.day_off}
+                                        onChange={(event) =>
+                                          updateDayOff(dayKey, event.target.checked)
+                                        }
+                                        className="size-4 rounded border-white/20 bg-zinc-900 accent-emerald-400"
+                                      />
+                                      {locale === 'pt' ? 'Folga' : 'Closed'}
+                                    </label>
+                                  </div>
+                                  {day.day_off ? (
+                                    <p className="text-xs text-zinc-600 sm:text-right">
+                                      {locale === 'pt' ? 'Sem atendimento' : 'Closed all day'}
+                                    </p>
+                                  ) : (
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="grid gap-1.5">
+                                        <Label
+                                          htmlFor={`onboarding-${dayKey}-start`}
+                                          className="text-[11px] text-zinc-500"
+                                        >
+                                          {locale === 'pt' ? 'Abre' : 'Opens'}
+                                        </Label>
+                                        <Input
+                                          id={`onboarding-${dayKey}-start`}
+                                          type="time"
+                                          value={interval.start}
+                                          onChange={(event) =>
+                                            updateWorkingTime(dayKey, 'start', event.target.value)
+                                          }
+                                          className={`${inputClass} min-h-10`}
+                                        />
+                                      </div>
+                                      <div className="grid gap-1.5">
+                                        <Label
+                                          htmlFor={`onboarding-${dayKey}-end`}
+                                          className="text-[11px] text-zinc-500"
+                                        >
+                                          {locale === 'pt' ? 'Fecha' : 'Closes'}
+                                        </Label>
+                                        <Input
+                                          id={`onboarding-${dayKey}-end`}
+                                          type="time"
+                                          value={interval.end}
+                                          onChange={(event) =>
+                                            updateWorkingTime(dayKey, 'end', event.target.value)
+                                          }
+                                          className={`${inputClass} min-h-10`}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(150px,0.6fr)]">
