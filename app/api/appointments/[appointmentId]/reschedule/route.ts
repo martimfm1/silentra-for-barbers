@@ -8,6 +8,7 @@ import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendCustomerAppointmentRescheduledEmail } from '@/lib/brevo/appointment-change-notifications';
 import {
+  appointmentsShareProfessionalCapacity,
   getDailySchedule,
   isSlotWithinDailySchedule,
   normalizeWeeklySchedule,
@@ -337,7 +338,13 @@ async function PATCH__unobserved(
         { status: 409 },
       );
     const conflict = (others ?? []).some((item) => {
-      if (item.professional_id !== appointment.professional_id) return false;
+      if (
+        !appointmentsShareProfessionalCapacity(
+          appointment.professional_id,
+          item.professional_id,
+        )
+      )
+        return false;
       const local = getLisbonParts(String(item.date_hour ?? ''));
       if (local.date !== date) return false;
       const otherStart = minutes(local.time);
