@@ -474,6 +474,10 @@ const onboardingPublicProfileApi = read(
 );
 const onboardingPortuguese = read('app/locales/pt.ts');
 const onboardingEnglish = read('app/locales/en.ts');
+const onboardingTeamPage = read('app/dashboard/equipa/page.tsx');
+const onboardingInviteCard = read('app/dashboard/_components/team/InviteCodeCard.tsx');
+const onboardingInviteApi = read('app/api/team/invite/route.ts');
+const onboardingPublicPageApi = read('app/api/public/barbershops/[slug]/route.ts');
 
 assert.ok(onboardingDashboard.includes('getBarbershopConfig(currentBarbershopId)'));
 assert.ok(onboardingDashboard.includes("fetch('/api/barbershops/public-profile'"));
@@ -484,7 +488,7 @@ assert.ok(onboardingDashboard.includes('setupBarbershopConfig?.name.trim()'));
 assert.ok(onboardingDashboard.includes('setupBarbershopConfig.address?.trim()'));
 assert.ok(onboardingDashboard.includes('setupPublicProfile?.city?.trim()'));
 assert.ok(onboardingDashboard.includes('setupPublicProfile?.slug'));
-assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled !== false'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled === true'));
 assert.ok(onboardingDashboard.includes('services.some((service) => service.is_active !== false)'));
 assert.ok(onboardingDashboard.includes('professionals.some((professional) => professional.active !== false)'));
 assert.ok(onboardingDashboard.includes("appointment.status !== 'cancelled'"));
@@ -497,6 +501,30 @@ for (const key of ['setupBusinessProfile', 'setupWorkingHours', 'setupPublicPage
   assert.ok(onboardingEnglish.includes(`${key}:`), `Missing en-GB ${key}`);
 }
 console.log('[LAW13_ONBOARDING_PROGRESS_QA] Profile, working hours, public page, services, team and first booking are derived from saved records.');
+
+assert.ok(onboardingPage.includes("'/dashboard/equipa?tab=invite'"));
+assert.ok(onboardingTeamPage.includes("new URLSearchParams(window.location.search).get('tab')"));
+assert.ok(onboardingTeamPage.includes("url.searchParams.set('tab', nextTab)"));
+assert.ok(onboardingTeamPage.includes('window.history.replaceState'));
+assert.ok(onboardingTeamPage.includes('onValueChange={selectTab}'));
+assert.ok(onboardingInviteCard.includes("fetch('/api/team/invite'"));
+assert.ok(onboardingInviteCard.includes('Active invitations are restored from the server after refresh'));
+assert.ok(onboardingInviteCard.includes('Os convites ativos são recuperados do servidor'));
+assert.ok(!onboardingInviteCard.includes('localStorage'));
+assert.ok(onboardingInviteApi.includes(".from('barbershop_invite_codes')"));
+assert.ok(onboardingInviteApi.includes(".is('used_at', null)"));
+assert.ok(onboardingInviteApi.includes(".is('revoked_at', null)"));
+assert.ok(onboardingInviteApi.includes(".gt('expires_at', new Date().toISOString())"));
+assert.ok(onboardingDashboard.includes('/api/public/barbershops/'));
+assert.ok(onboardingDashboard.includes('publicPageReachable'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile.publicPageReachable'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled === true'));
+assert.ok(onboardingPublicProfileApi.includes("from('shops')"));
+assert.ok(onboardingPublicProfileApi.includes('.update(updates)'));
+assert.ok(onboardingPublicProfileApi.includes('public_profile_updated_at'));
+assert.ok(onboardingPublicPageApi.includes('getPublicProfileBySlug(slug)'));
+assert.ok(onboardingPublicPageApi.includes("status: 404"));
+console.log('[LAW13_ONBOARDING_RESUME_QA] Team invite tab survives refresh; active invites restore from server; public page activation requires a persisted and reachable public profile.');
 
 const notificationRetryMigration = read(
   'supabase/migrations/20261118203046_atomic_appointment_notification_retry_claims.sql',

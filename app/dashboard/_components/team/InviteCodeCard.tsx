@@ -55,7 +55,7 @@ const EXPIRY_OPTIONS = [
 ] as const;
 
 export function InviteCodeCard({ seats }: InviteCodeCardProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [method, setMethod] = useState<InviteMethod>('link');
   const [expiresInHours, setExpiresInHours] = useState(168);
   const [invite, setInvite] = useState<GeneratedInvite | null>(null);
@@ -482,6 +482,17 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
               {t('inviteCode.refresh')}
             </Button>
           </div>
+
+          {!loadingInvites && activeInvites.length > 0 && (
+            <p
+              role="status"
+              className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.035] p-3 text-xs leading-5 text-zinc-400"
+            >
+              {locale === 'en'
+                ? 'Active invitations are restored from the server after refresh. For security, the full code or link is only shown once when created. If you did not save it, revoke this invitation and create a new one.'
+                : 'Os convites ativos são recuperados do servidor depois de atualizar a página. Por segurança, o código ou link completo só é mostrado uma vez, no momento da criação. Se não o guardaste, revoga este convite e cria outro.'}
+            </p>
+          )}
 
           {loadingInvites ? (
             <div className="flex items-center gap-2 py-3 text-xs text-zinc-500">
