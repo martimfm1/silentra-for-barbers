@@ -53,8 +53,10 @@ import { useDashboardCustomization } from '@/app/dashboard/_components/Dashboard
 
 type PublicProfileSetup = {
   slug: string | null;
+  custom_slug?: string | null;
   public_profile_enabled: boolean | null;
   city: string | null;
+  publicPageReachable: boolean;
 };
 
 function hasConfiguredWorkingHours(
@@ -207,7 +209,37 @@ export default function DashboardPage() {
             ) {
               return null;
             }
-            return payload.data as PublicProfileSetup;
+
+            const profile = payload.data as Omit<PublicProfileSetup, 'publicPageReachable'>;
+            const publicSlug = (profile.custom_slug || profile.slug || '').trim();
+            let publicPageReachable = false;
+
+            if (publicSlug && profile.public_profile_enabled === true) {
+              try {
+                const publicPageResponse = await fetch(
+                  `/api/public/barbershops/${encodeURIComponent(publicSlug)}`,
+                  { cache: 'no-store' },
+                );
+                if (publicPageResponse.ok) {
+                  const publicPagePayload: unknown = await publicPageResponse
+                    .json()
+                    .catch(() => null);
+                  publicPageReachable = Boolean(
+                    publicPagePayload &&
+                      typeof publicPagePayload === 'object' &&
+                      'data' in publicPagePayload &&
+                      publicPagePayload.data &&
+                      typeof publicPagePayload.data === 'object' &&
+                      'slug' in publicPagePayload.data &&
+                      typeof publicPagePayload.data.slug === 'string',
+                  );
+                }
+              } catch {
+                publicPageReachable = false;
+              }
+            }
+
+            return { ...profile, publicPageReachable };
           },
         ),
       ]);
@@ -348,8 +380,10 @@ export default function DashboardPage() {
     {
       label: t('dashboard.setupPublicPage'),
       done: Boolean(
-        setupPublicProfile?.slug &&
-          setupPublicProfile.public_profile_enabled !== false,
+        (setupPublicProfile?.custom_slug || setupPublicProfile?.slug)?.trim() &&
+          setupPublicProfile.city?.trim() &&
+          setupPublicProfile.public_profile_enabled === true &&
+          setupPublicProfile.publicPageReachable,
       ),
       href: '/dashboard/settings/public-profile',
     },
