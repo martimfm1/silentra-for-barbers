@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
+  appointmentsShareProfessionalCapacity,
   createDefaultWeeklySchedule,
   createWeeklyScheduleFromLegacy,
   getDailySchedule,
@@ -8,6 +9,28 @@ import {
   validateWeeklySchedule,
   type WeeklySchedule,
 } from '../../lib/scheduling/weekly-schedule';
+
+// Unassigned appointments reserve capacity across the entire barbershop.
+assert.equal(
+  appointmentsShareProfessionalCapacity(null, 'barber-a'),
+  true,
+  'An unassigned appointment must block a specific barber',
+);
+assert.equal(
+  appointmentsShareProfessionalCapacity('barber-a', null),
+  true,
+  'A specific appointment must respect an existing unassigned booking',
+);
+assert.equal(
+  appointmentsShareProfessionalCapacity('barber-a', 'barber-a'),
+  true,
+  'Appointments assigned to the same barber must conflict',
+);
+assert.equal(
+  appointmentsShareProfessionalCapacity('barber-a', 'barber-b'),
+  false,
+  'Appointments assigned to different barbers may use the same time',
+);
 
 const defaultSchedule = createDefaultWeeklySchedule();
 assert.equal(
@@ -164,3 +187,20 @@ const intervalOverlaps = (start: number, end: number, otherStart: number, otherE
 assert.equal(intervalOverlaps(9 * 60, 9 * 60 + 45, 9 * 60 + 30, 10 * 60), true);
 assert.equal(intervalOverlaps(9 * 60, 9 * 60 + 45, 9 * 60 + 45, 10 * 60), false);
 assert.equal(intervalOverlaps(9 * 60, 10 * 60, 9 * 60 + 30, 10 * 60 + 30), true);
+
+const teamRescheduleSource = readFileSync(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+  'utf8',
+);
+const customerPortalSource = readFileSync(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+  'utf8',
+);
+assert.ok(
+  teamRescheduleSource.includes('appointmentsShareProfessionalCapacity('),
+  'Team rescheduling must respect unassigned bookings across the barbershop',
+);
+assert.ok(
+  customerPortalSource.includes('appointmentsShareProfessionalCapacity('),
+  'Customer portal rescheduling must respect unassigned bookings across the barbershop',
+);
