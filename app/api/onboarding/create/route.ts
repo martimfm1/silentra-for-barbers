@@ -2,18 +2,31 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isRecord, normalizeText } from '@/lib/validation';
+import {
+  WEEKDAY_KEYS,
+  validateWeeklySchedule,
+  type WeeklySchedule,
+} from '@/lib/scheduling/weekly-schedule';
 
-function parseTime(value: string): string | null {
-  const trimmed = value.trim();
-  const match = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(trimmed);
-  if (!match) return null;
-
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const second = Number(match[3] ?? '0');
-
-  if (hour > 23 || minute > 59 || second > 59) return null;
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+function isWeeklySchedule(value: unknown): value is WeeklySchedule {
+  if (!isRecord(value)) return false;
+  return WEEKDAY_KEYS.every((dayKey) => {
+    const day = value[dayKey];
+    if (
+      !isRecord(day) ||
+      typeof day.day_off !== 'boolean' ||
+      !Array.isArray(day.work_intervals) ||
+      !Array.isArray(day.break_intervals)
+    ) {
+      return false;
+    }
+    return [...day.work_intervals, ...day.break_intervals].every(
+      (interval) =>
+        isRecord(interval) &&
+        typeof interval.start === 'string' &&
+        typeof interval.end === 'string',
+    );
+  });
 }
 
 async function POST__unobserved(request: Request) {
@@ -45,16 +58,17 @@ async function POST__unobserved(request: Request) {
       );
     }
 
-    const rawHours =
-      typeof body.hours === 'string' ? body.hours : '09:00-19:00';
-    const [rawOpen = '09:00', rawClose = '19:00'] = rawHours
-      .split('-')
-      .map((part) => part.trim());
-    const openingTime = parseTime(rawOpen);
-    const closingTime = parseTime(rawClose);
-    if (!openingTime || !closingTime || openingTime >= closingTime) {
+    const weeklySchedule = body.weeklySchedule;
+    if (!isWeeklySchedule(weeklySchedule)) {
       return NextResponse.json(
-        { error: 'A hora de fecho tem de ser posterior à hora de abertura.' },
+        { error: 'Os horários semanais são inválidos.' },
+        { status: 400 },
+      );
+    }
+    const scheduleError = validateWeeklySchedule(weeklySchedule, 'pt');
+    if (scheduleError || !WEEKDAY_KEYS.some((dayKey) => !weeklySchedule[dayKey].day_off)) {
+      return NextResponse.json(
+        { error: scheduleError ?? 'Define pelo menos um dia de funcionamento.' },
         { status: 400 },
       );
     }
@@ -107,19 +121,18 @@ async function POST__unobserved(request: Request) {
       : [];
 
     const { data: onboardingResult, error: onboardingError } = await supabase.rpc(
-      'create_barbershop_onboarding_with_defaults',
+      'create_barbershop_onboarding_with_weekly_schedule',
       {
         p_name: normalizedName,
         p_address: normalizedAddress,
         p_city: normalizedCity,
-        p_opening_time: openingTime,
-        p_closing_time: closingTime,
         p_price: numericPrice,
         p_tags: tags,
         p_lat: latitude,
         p_lng: longitude,
         p_service_name: serviceName,
         p_service_duration: serviceDuration,
+        p_weekly_schedule: weeklySchedule,
       },
     );
 
@@ -141,6 +154,13 @@ async function POST__unobserved(request: Request) {
         );
       }
 
+      if (code === '22023') {
+        return NextResponse.json(
+          { error: 'Os horários semanais ou os dados do primeiro serviço são inválidos.' },
+          { status: 400 },
+        );
+      }
+
       return NextResponse.json(
         { error: 'Não foi possível criar a barbearia. Tenta novamente.' },
         { status: 500 },
@@ -153,7 +173,8 @@ async function POST__unobserved(request: Request) {
     if (
       typeof barbershopId !== 'string' ||
       typeof serviceId !== 'string' ||
-      typeof professionalId !== 'string'
+      typeof professionalId !== 'string' ||
+      onboardingResult.weekly_schedule_persisted !== true
     ) {
       console.error('[ONBOARDING_CREATE_INVALID_RESULT]');
       return NextResponse.json(
