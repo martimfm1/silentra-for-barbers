@@ -211,36 +211,36 @@ const crossLaneCapacityMigration = readFileSync(
 );
 assert.match(
   crossLaneCapacityMigration,
-  /create or replace function public\\.enforce_appointment_capacity_overlap\\(\\)/i,
+  /create or replace function public\.enforce_appointment_capacity_overlap\(\)/i,
 );
 assert.match(
   crossLaneCapacityMigration,
-  /returns trigger[\\s\\S]*language plpgsql[\\s\\S]*volatile[\\s\\S]*security definer[\\s\\S]*set search_path = ''/i,
+  /returns trigger[\s\S]*language plpgsql[\s\S]*volatile[\s\S]*security definer[\s\S]*set search_path = ''/i,
   'The trigger must use a fresh snapshot and a pinned search_path while seeing all tenant bookings',
 );
 assert.match(
   crossLaneCapacityMigration,
-  /pg_catalog\\.pg_advisory_xact_lock\\([\\s\\S]*pg_catalog\\.hashtextextended\\(new\\.barbershop_id::text, 0\\)/i,
+  /pg_catalog\.pg_advisory_xact_lock\([\s\S]*pg_catalog\.hashtextextended\(new\.barbershop_id::text, 0\)/i,
   'All appointment writes must share the same barbershop transaction lock',
 );
 assert.match(
   crossLaneCapacityMigration,
-  /after insert or update of[\\s\\S]*professional_id[\\s\\S]*date_hour[\\s\\S]*duration_minutes[\\s\\S]*status[\\s\\S]*on public\\.appointments/i,
+  /after insert or update of[\s\S]*professional_id[\s\S]*date_hour[\s\S]*duration_minutes[\s\S]*status[\s\S]*on public\.appointments/i,
   'The final-row guard must cover creation, rescheduling and capacity changes',
 );
 assert.match(
   crossLaneCapacityMigration,
-  /a\\.id is distinct from new\\.id[\\s\\S]*a\\.date_hour < new\\.date_hour[\\s\\S]*a\\.professional_id is null[\\s\\S]*a\\.professional_id = new\\.professional_id/i,
+  /a\.id is distinct from new\.id[\s\S]*a\.date_hour < new\.date_hour[\s\S]*a\.professional_id is null[\s\S]*a\.professional_id = new\.professional_id/i,
   'The conflict check must exclude the row being updated and apply unassigned capacity globally',
 );
 assert.match(
   crossLaneCapacityMigration,
-  /errcode = '23P01'[\\s\\S]*message = 'BOOKING_CONFLICT'/i,
+  /errcode = '23P01'[\s\S]*message = 'BOOKING_CONFLICT'/i,
   'Database overlap failures must use the existing API conflict contract',
 );
 assert.match(
   crossLaneCapacityMigration,
-  /revoke all on function public\\.enforce_appointment_capacity_overlap\\(\\)[\\s\\S]*from public, anon, authenticated, service_role/i,
+  /revoke all on function public\.enforce_appointment_capacity_overlap\(\)[\s\S]*from public, anon, authenticated, service_role/i,
   'The SECURITY DEFINER trigger function must not be directly callable by API roles',
 );
 assert.match(
