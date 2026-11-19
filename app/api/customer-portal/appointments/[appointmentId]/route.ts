@@ -6,6 +6,7 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
 import {
+  appointmentsShareProfessionalCapacity,
   getDailySchedule,
   isSlotWithinDailySchedule,
   normalizeWeeklySchedule,
@@ -142,7 +143,12 @@ async function getAvailability(
     .neq('id', appointment.id);
   if (appointmentsError) throw new Error('APPOINTMENT_LOOKUP_FAILED');
   const occupied = (existingAppointments ?? [])
-    .filter((item: any) => item.professional_id === appointment.professional_id)
+    .filter((item: any) =>
+      appointmentsShareProfessionalCapacity(
+        appointment.professional_id,
+        item.professional_id,
+      ),
+    )
     .map((item: any) => {
       const raw = String(item.date_hour || '');
       const parts = raw.includes('T') ? raw.split('T') : raw.split(' ');
