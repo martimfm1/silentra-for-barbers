@@ -206,7 +206,7 @@ assert.ok(
 );
 
 const crossLaneCapacityMigration = readFileSync(
-  'supabase/migrations/20261119231000_enforce_cross_lane_appointment_capacity.sql',
+  'supabase/migrations/20261119232316_enforce_cross_lane_appointment_capacity.sql',
   'utf8',
 );
 assert.match(
