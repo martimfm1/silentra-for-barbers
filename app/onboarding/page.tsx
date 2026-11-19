@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
+  AlertCircle,
   Building2,
   CheckCircle2,
   Clock3,
@@ -38,6 +39,23 @@ import {
 } from '@/lib/scheduling/weekly-schedule';
 
 type Step = 'selection' | 'create' | 'join';
+type DraftSaveStatus = 'loading' | 'idle' | 'saving' | 'saved' | 'error';
+
+type OnboardingDraft = {
+  businessMode: 'solo' | 'team';
+  shopName: string;
+  address: string;
+  doorNumber: string;
+  postalCode: string;
+  city: string;
+  weeklySchedule: WeeklySchedule;
+  price: number | '';
+  firstServiceName: string;
+  firstServiceDuration: string;
+  tagsInput: string;
+  lat: number | null;
+  lng: number | null;
+};
 
 interface AddressSuggestion {
   id: string;
@@ -86,6 +104,9 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('selection');
   const [businessMode, setBusinessMode] = useState<'solo' | 'team'>('solo');
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftStatus, setDraftStatus] = useState<DraftSaveStatus>('loading');
+  const [draftWasRestored, setDraftWasRestored] = useState(false);
   const [shopName, setShopName] = useState('');
   const [address, setAddress] = useState('');
   const [doorNumber, setDoorNumber] = useState('');
@@ -105,6 +126,10 @@ export default function OnboardingPage() {
   const [searchingAddress, setSearchingAddress] = useState(false);
   const [isAddressSelected, setIsAddressSelected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const draftSaveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const draftSaveTimerRef = useRef<number | null>(null);
+  const draftSequenceRef = useRef(0);
+  const draftCompletedRef = useRef(false);
   const weekdayLabels: Record<WeekdayKey, string> =
     locale === 'pt'
       ? {
@@ -170,6 +195,64 @@ export default function OnboardingPage() {
     if (!normalized) return;
     setInviteCode(normalized);
     setStep('join');
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('invite')) {
+      setDraftStatus('idle');
+      setDraftReady(true);
+      return () => {
+        active = false;
+      };
+    }
+
+    const restoreDraft = async () => {
+      try {
+        const response = await fetch('/api/onboarding/draft', {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.success !== true) {
+          throw new Error('DRAFT_RESTORE_FAILED');
+        }
+
+        const draft = payload.draft as OnboardingDraft | null;
+        if (!active) return;
+        if (draft) {
+          setBusinessMode(draft.businessMode);
+          setShopName(draft.shopName);
+          setAddress(draft.address);
+          setDoorNumber(draft.doorNumber);
+          setPostalCode(draft.postalCode);
+          setCity(draft.city);
+          setWeeklySchedule(draft.weeklySchedule);
+          setPrice(draft.price);
+          setFirstServiceName(draft.firstServiceName);
+          setFirstServiceDuration(draft.firstServiceDuration);
+          setTagsInput(draft.tagsInput);
+          setLat(draft.lat);
+          setLng(draft.lng);
+          setIsAddressSelected(draft.lat !== null && draft.lng !== null);
+          setStep('create');
+          setDraftWasRestored(true);
+          setDraftStatus('saved');
+        } else {
+          setDraftStatus('idle');
+        }
+      } catch {
+        if (active) setDraftStatus('error');
+      } finally {
+        if (active) setDraftReady(true);
+      }
+    };
+
+    void restoreDraft();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -257,6 +340,103 @@ export default function OnboardingPage() {
         .filter(Boolean),
     [tagsInput],
   );
+
+  const onboardingDraft = useMemo<OnboardingDraft>(
+    () => ({
+      businessMode,
+      shopName,
+      address,
+      doorNumber,
+      postalCode,
+      city,
+      weeklySchedule,
+      price,
+      firstServiceName,
+      firstServiceDuration,
+      tagsInput,
+      lat,
+      lng,
+    }),
+    [
+      businessMode,
+      shopName,
+      address,
+      doorNumber,
+      postalCode,
+      city,
+      weeklySchedule,
+      price,
+      firstServiceName,
+      firstServiceDuration,
+      tagsInput,
+      lat,
+      lng,
+    ],
+  );
+
+  const enqueueDraftSave = useCallback(
+    (snapshot: OnboardingDraft, sequence: number): Promise<boolean> => {
+      let saved = false;
+      const queued = draftSaveQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          try {
+            const response = await fetch('/api/onboarding/draft', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ draft: snapshot }),
+            });
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || payload?.success !== true) {
+              throw new Error('DRAFT_SAVE_FAILED');
+            }
+            saved = true;
+            if (sequence === draftSequenceRef.current) {
+              setDraftStatus('saved');
+            }
+          } catch {
+            if (sequence === draftSequenceRef.current) {
+              setDraftStatus('error');
+            }
+          }
+        });
+
+      draftSaveQueueRef.current = queued;
+      return queued.then(() => saved);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (
+      !draftReady ||
+      step !== 'create' ||
+      loading ||
+      draftCompletedRef.current
+    ) {
+      return;
+    }
+
+    const snapshot = onboardingDraft;
+    const sequence = ++draftSequenceRef.current;
+    const timeoutId = window.setTimeout(() => {
+      if (draftSaveTimerRef.current === timeoutId) {
+        draftSaveTimerRef.current = null;
+      }
+      if (sequence === draftSequenceRef.current) {
+        setDraftStatus('saving');
+      }
+      void enqueueDraftSave(snapshot, sequence);
+    }, 750);
+    draftSaveTimerRef.current = timeoutId;
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (draftSaveTimerRef.current === timeoutId) {
+        draftSaveTimerRef.current = null;
+      }
+    };
+  }, [draftReady, step, loading, onboardingDraft, enqueueDraftSave]);
 
   const requiredFieldsCompleted = useMemo(
     () =>
@@ -355,6 +535,17 @@ export default function OnboardingPage() {
 
     setLoading(true);
     try {
+      if (draftSaveTimerRef.current !== null) {
+        window.clearTimeout(draftSaveTimerRef.current);
+        draftSaveTimerRef.current = null;
+      }
+      const finalDraftSequence = ++draftSequenceRef.current;
+      const draftSaved = await enqueueDraftSave(
+        onboardingDraft,
+        finalDraftSequence,
+      );
+      if (!draftSaved) setDraftStatus('error');
+
       const formattedTags = parsedTags.slice(0, 8);
       const fullAddress = `${address.trim()}${doorNumber.trim() ? ` ${doorNumber.trim()}` : ''}${postalCode.trim() ? `, ${postalCode.trim()}` : ''}`;
       const response = await fetch('/api/onboarding/create', {
@@ -382,6 +573,13 @@ export default function OnboardingPage() {
             : t('onboarding.unexpectedError'),
         );
       }
+
+      draftCompletedRef.current = true;
+      if (draftSaveTimerRef.current !== null) {
+        window.clearTimeout(draftSaveTimerRef.current);
+        draftSaveTimerRef.current = null;
+      }
+      await fetch('/api/onboarding/draft', { method: 'DELETE' }).catch(() => undefined);
 
       captureProductEvent('onboarding_shop_created', {
         business_mode: businessMode,
@@ -455,6 +653,35 @@ export default function OnboardingPage() {
                 )}
               </div>
             </div>
+            {step === 'create' && draftReady && (
+              <p
+                className="mb-3 flex items-center gap-2 px-1 text-xs text-zinc-500"
+                role="status"
+                aria-live="polite"
+              >
+                {draftStatus === 'saving' ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    {locale === 'pt' ? 'A guardar o rascunho…' : 'Saving draft…'}
+                  </>
+                ) : draftStatus === 'saved' ? (
+                  <>
+                    <CheckCircle2 className="size-3.5 text-emerald-400" aria-hidden="true" />
+                    {locale === 'pt' ? 'Rascunho guardado automaticamente' : 'Draft saved automatically'}
+                  </>
+                ) : draftStatus === 'error' ? (
+                  <>
+                    <AlertCircle className="size-3.5 text-amber-400" aria-hidden="true" />
+                    {locale === 'pt' ? 'Não foi possível guardar. Vamos tentar novamente ao editar.' : 'Could not save. We will retry when you edit.'}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="size-3.5 text-zinc-500" aria-hidden="true" />
+                    {locale === 'pt' ? 'Podes continuar mais tarde' : 'You can continue later'}
+                  </>
+                )}
+              </p>
+            )}
             {step !== 'selection' && (
               <div
                 className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10"
@@ -502,6 +729,7 @@ export default function OnboardingPage() {
                     <div className="grid gap-3 sm:grid-cols-2">
                       <button
                         type="button"
+                        disabled={!draftReady}
                         onClick={() => selectStep('create')}
                         className="group min-h-40 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-5 text-left transition hover:border-emerald-400/50 hover:bg-emerald-500/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                       >
@@ -527,6 +755,7 @@ export default function OnboardingPage() {
 
                       <button
                         type="button"
+                        disabled={!draftReady}
                         onClick={() => selectStep('join')}
                         className="group min-h-40 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-white/20 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                       >
@@ -600,6 +829,16 @@ export default function OnboardingPage() {
                         alterados no painel quando quiser.
                       </CardDescription>
                     </CardHeader>
+                    {draftWasRestored && (
+                      <div className="flex items-start gap-2 rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] px-3 py-2.5 text-xs leading-5 text-zinc-300">
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                        <span>
+                          {locale === 'pt'
+                            ? 'Recuperámos o teu rascunho. Podes continuar exatamente de onde ficaste.'
+                            : 'We restored your draft. You can continue exactly where you left off.'}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="space-y-5">
                       <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.035] p-4 sm:p-5">
