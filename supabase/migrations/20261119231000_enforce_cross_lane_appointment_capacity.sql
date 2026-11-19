@@ -1,3 +1,7 @@
+-- Rollback, if this migration needs to be reverted:
+-- drop trigger if exists zz_enforce_appointment_capacity_overlap on public.appointments;
+-- drop function if exists public.enforce_appointment_capacity_overlap();
+
 begin;
 
 -- The GiST exclusion constraint reserves a separate lane for NULL professional
