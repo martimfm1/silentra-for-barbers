@@ -401,6 +401,8 @@ console.log('[PUBLIC_BOOKING_RECEIPT_QA] Server-driven confirmation, receipt sum
 
 const onboardingPage = read('app/onboarding/page.tsx');
 const onboardingCreateApi = read('app/api/onboarding/create/route.ts');
+const onboardingDraftApi = read('app/api/onboarding/draft/route.ts');
+const onboardingDraftMigration = read('supabase/migrations/20261119214223_onboarding_save_and_resume_draft.sql');
 const onboardingPersistenceMigration = read('supabase/migrations/20261118200006_onboarding_persist_initial_service_professional.sql');
 const onboardingWeeklyScheduleMigration = read('supabase/migrations/20261119212133_onboarding_persist_weekly_schedule.sql');
 
@@ -408,6 +410,27 @@ assert.ok(onboardingPage.includes('firstServiceName'));
 assert.ok(onboardingPage.includes('firstServiceDuration'));
 assert.ok(onboardingPage.includes('serviceName: firstServiceName.trim()'));
 assert.ok(onboardingPage.includes('serviceDuration,'));
+assert.ok(onboardingPage.includes("fetch('/api/onboarding/draft'"));
+assert.ok(onboardingPage.includes("method: 'PUT'"));
+assert.ok(onboardingPage.includes("method: 'DELETE'"));
+assert.ok(onboardingPage.includes('draftWasRestored'));
+assert.ok(onboardingPage.includes('draftSaveQueueRef'));
+assert.ok(onboardingPage.includes('draftCompletedRef.current'));
+assert.ok(onboardingPage.includes('Rascunho guardado automaticamente'));
+assert.ok(onboardingPage.includes('Draft saved automatically'));
+assert.ok(onboardingDraftApi.includes("assertSameOrigin(request)"));
+assert.ok(onboardingDraftApi.includes("from('onboarding_drafts')"));
+assert.ok(onboardingDraftApi.includes("eq('user_id', user.id)"));
+assert.ok(onboardingDraftApi.includes('normalizeDraft'));
+assert.ok(onboardingDraftApi.includes('readJsonObject'));
+assert.ok(onboardingDraftApi.includes('30 * 24 * 60 * 60 * 1000'));
+assert.ok(!onboardingDraftApi.includes('createAdminClient'));
+assert.ok(onboardingDraftMigration.includes('references auth.users(id) on delete cascade'));
+assert.ok(onboardingDraftMigration.includes('enable row level security'));
+assert.ok(onboardingDraftMigration.includes('revoke all on table public.onboarding_drafts from public, anon'));
+assert.ok(onboardingDraftMigration.includes('to authenticated'));
+assert.ok(onboardingDraftMigration.includes('auth.uid()) = user_id'));
+assert.ok(onboardingDraftMigration.includes("interval '30 days'"));
 assert.ok(onboardingPage.includes('weeklySchedule'));
 assert.ok(onboardingPage.includes('WEEKDAY_KEYS.map'));
 assert.ok(onboardingPage.includes('updateDayOff'));
