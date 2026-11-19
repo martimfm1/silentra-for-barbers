@@ -488,7 +488,7 @@ assert.ok(onboardingDashboard.includes('setupBarbershopConfig?.name.trim()'));
 assert.ok(onboardingDashboard.includes('setupBarbershopConfig.address?.trim()'));
 assert.ok(onboardingDashboard.includes('setupPublicProfile?.city?.trim()'));
 assert.ok(onboardingDashboard.includes('setupPublicProfile?.slug'));
-assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled !== false'));
+assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enabled === true'));
 assert.ok(onboardingDashboard.includes('services.some((service) => service.is_active !== false)'));
 assert.ok(onboardingDashboard.includes('professionals.some((professional) => professional.active !== false)'));
 assert.ok(onboardingDashboard.includes("appointment.status !== 'cancelled'"));
