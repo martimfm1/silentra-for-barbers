@@ -585,7 +585,7 @@ export default function OnboardingPage() {
         business_mode: businessMode,
       });
       toast.success('Barbearia criada. Vamos abrir o seu painel.');
-      router.push(businessMode === 'team' ? '/dashboard/equipa' : '/dashboard');
+      router.push(businessMode === 'team' ? '/dashboard/equipa?tab=invite' : '/dashboard');
     } catch (error) {
       console.error(error);
       toast.error(getErrorMessage(error));
