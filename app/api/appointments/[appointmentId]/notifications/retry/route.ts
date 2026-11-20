@@ -139,7 +139,7 @@ async function POST__unobserved(
         { status: 503 },
       );
     }
-    if (!latestActivity || latestActivity.action !== `appointment.${action}` || latestActivity.actor_type !== 'staff') {
+    if (!latestActivity || latestActivity.action !== `appointment.${action}` || (audience === 'customer' && latestActivity.actor_type !== 'staff') || (audience === 'barbershop' && latestActivity.actor_type !== 'customer')) {
       return NextResponse.json(
         { success: false, error: 'Esta notificação já não corresponde à última alteração da marcação.' },
         { status: 409 },
