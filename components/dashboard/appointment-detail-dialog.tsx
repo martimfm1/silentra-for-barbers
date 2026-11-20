@@ -76,9 +76,23 @@ function activityNotificationDetail(
       : isEnglish ? 'Customer email could not be sent' : 'Não foi possível enviar o email ao cliente';
   }
   const emailCount = Number(event.metadata.barberEmailsSent ?? 0);
+  const emailFailed = Number(event.metadata.barberEmailsFailed ?? 0);
+  const emailAttempted = Number(event.metadata.barberEmailsAttempted ?? emailCount + emailFailed);
   const pushCount = Number(event.metadata.barberPushSent ?? 0);
-  if (emailCount > 0 || pushCount > 0) {
-    return isEnglish ? 'Barbershop notification sent' : 'Notificação enviada à barbearia';
+  const pushFailed = Number(event.metadata.barberPushFailed ?? 0);
+  const hasChannelResults =
+    event.metadata.barberEmailStatus !== undefined ||
+    event.metadata.barberPushStatus !== undefined;
+  if (hasChannelResults || emailCount > 0 || pushCount > 0 || emailFailed > 0 || pushFailed > 0) {
+    const emailSummary = emailAttempted > 0
+      ? isEnglish
+        ? `Email: ${emailCount} sent, ${emailFailed} failed`
+        : `Email: ${emailCount} enviados, ${emailFailed} falharam`
+      : isEnglish ? 'Email: no recipient address' : 'Email: sem endereço de destino';
+    const pushSummary = isEnglish
+      ? `Push: ${pushCount} delivered, ${pushFailed} failed`
+      : `Push: ${pushCount} entregues, ${pushFailed} falharam`;
+    return `${emailSummary} · ${pushSummary}`;
   }
   return null;
 }

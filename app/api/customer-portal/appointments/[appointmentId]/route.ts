@@ -337,7 +337,19 @@ async function DELETE__unobserved(
       metadata: {
         newStatus: 'cancelled',
         barberEmailsSent: barberNotification.emailsSent,
+        barberEmailsFailed: barberNotification.emailsFailed,
+        barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
+        barberPushFailed: barberNotification.pushFailed,
+        barberPushTargets: barberNotification.pushTargets,
+        barberEmailStatus: barberNotification.emailsAttempted === 0
+          ? 'no_target'
+          : barberNotification.emailsFailed > 0
+            ? barberNotification.emailsSent > 0 ? 'partial' : 'failed'
+            : 'sent',
+        barberPushStatus: barberNotification.pushSent > 0
+          ? barberNotification.pushFailed > 0 ? 'partial' : 'sent'
+          : barberNotification.pushFailed > 0 ? 'failed' : 'no_delivery',
       },
     });
     void dispatchAppointmentAutomations('booking_cancelled', {
@@ -450,10 +462,13 @@ async function PATCH__unobserved(
       return jsonError('Este horário já não está disponível.', 409);
     }
     const newDateHour = `${date}T${slot}:00`;
+    if (new Date(appointment.date_hour).getTime() === new Date(newDateHour).getTime())
+      return jsonError('A marcação já está neste horário.', 409);
     const { data: updated, error: updateError } = await admin
       .from('appointments')
       .update({ date_hour: newDateHour })
       .eq('id', appointment.id)
+      .eq('date_hour', appointment.date_hour)
       .in('status', ['pending', 'scheduled'])
       .select('id,date_hour')
       .maybeSingle();
@@ -498,7 +513,19 @@ async function PATCH__unobserved(
         from: appointment.date_hour,
         to: newDateHour,
         barberEmailsSent: barberNotification.emailsSent,
+        barberEmailsFailed: barberNotification.emailsFailed,
+        barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
+        barberPushFailed: barberNotification.pushFailed,
+        barberPushTargets: barberNotification.pushTargets,
+        barberEmailStatus: barberNotification.emailsAttempted === 0
+          ? 'no_target'
+          : barberNotification.emailsFailed > 0
+            ? barberNotification.emailsSent > 0 ? 'partial' : 'failed'
+            : 'sent',
+        barberPushStatus: barberNotification.pushSent > 0
+          ? barberNotification.pushFailed > 0 ? 'partial' : 'sent'
+          : barberNotification.pushFailed > 0 ? 'failed' : 'no_delivery',
       },
     });
     return NextResponse.json({

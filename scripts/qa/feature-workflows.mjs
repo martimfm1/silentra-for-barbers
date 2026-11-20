@@ -356,6 +356,36 @@ assert.ok(appointmentDetailDialog.includes('window.setInterval'));
 assert.ok(appointmentDetailDialog.includes('window.clearInterval'));
 assert.ok(appointmentActivityApi.includes('notificationSkipped'));
 
+const appointmentRescheduleApi = read(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+);
+const customerPortalAppointmentsApi = read(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+);
+for (const [name, source] of [
+  ['reschedule', appointmentRescheduleApi],
+  ['cancel', appointmentCancellationApi],
+  ['notification retry', appointmentNotificationRetryApi],
+  ['activity', appointmentActivityApi],
+]) {
+  assert.ok(
+    source.includes('requireTenantAuthorization'),
+    `Staff appointment ${name} endpoint must authorize the active tenant`,
+  );
+  assert.ok(
+    source.includes(".eq('barbershop_id', tenant.barbershopId)"),
+    `Staff appointment ${name} queries must be scoped to the active barbershop`,
+  );
+}
+assert.ok(customerPortalAppointmentsApi.includes('getPortalSession(request)'));
+assert.ok(customerPortalAppointmentsApi.includes('ownsAppointment'));
+assert.ok(customerPortalAppointmentsApi.includes('appointment.manual_email?.trim().toLowerCase() === session.email'));
+assert.ok(customerPortalAppointmentsApi.includes('client?.email?.trim().toLowerCase() === session.email'));
+assert.ok(customerPortalAppointmentsApi.includes(".eq('id', appointmentId)"));
+console.log('[APPOINTMENT_TENANT_ISOLATION_QA] Staff routes enforce active-tenant scoping; customer portal access requires matching verified email ownership.');
+
+// Keep the selected service, duration and price visible while availability is checked.
+
 // Keep the selected service, duration and price visible while availability is checked.
 const bookingDrawerAvailabilityContext = read(
   'app/barbershops/components/booking-drawer-canonical.tsx',
@@ -536,6 +566,27 @@ assert.ok(notificationRetryMigration.includes("from public, anon, authenticated"
 assert.ok(notificationRetryMigration.includes('to service_role'));
 assert.ok(notificationRetryMigration.includes('notificationRetryLeaseUntil'));
 assert.ok(notificationRetryMigration.includes('notificationRetryToken'));
+
+const barberNotificationHelper = read('lib/brevo/appointment-change-notifications.ts');
+const customerPortalAppointmentApi = read(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+);
+assert.ok(barberNotificationHelper.includes('emailsAttempted: number'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: number'));
+assert.ok(barberNotificationHelper.includes('pushTargets: number'));
+assert.ok(barberNotificationHelper.includes('pushFailed: number'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((success) => !success).length'));
+assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
+assert.ok(customerPortalAppointmentApi.includes('barberEmailsFailed: barberNotification.emailsFailed'));
+assert.ok(customerPortalAppointmentApi.includes('barberPushFailed: barberNotification.pushFailed'));
+assert.ok(customerPortalAppointmentApi.includes(".eq('date_hour', appointment.date_hour)"));
+assert.ok(customerPortalAppointmentApi.includes('A marcação já está neste horário.'));
+assert.ok(appointmentActivityApi.includes('barberEmailStatus'));
+assert.ok(appointmentActivityApi.includes('barberPushStatus'));
+assert.ok(appointmentDetailDialog.includes('barberEmailsFailed'));
+assert.ok(appointmentDetailDialog.includes('barberPushFailed'));
+assert.ok(appointmentDetailDialog.includes('Email:'));
+assert.ok(appointmentDetailDialog.includes('Push:'));
 console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lease ownership and provider result persistence are enforced.');
 
 

@@ -23,8 +23,12 @@ export type BarberAppointmentChange =
 
 export type BarberAppointmentChangeResult = {
   recipients: number;
+  emailsAttempted: number;
   emailsSent: number;
+  emailsFailed: number;
+  pushTargets: number;
   pushSent: number;
+  pushFailed: number;
 };
 
 type Language = 'pt' | 'en';
@@ -204,7 +208,15 @@ export async function notifyBarberOfAppointmentChange(
         '[BARBER_APPOINTMENT_CHANGE_SHOP_LOOKUP_FAILED]',
         shopError?.code ?? 'UNKNOWN',
       );
-      return { recipients: 0, emailsSent: 0, pushSent: 0 };
+      return {
+        recipients: 0,
+        emailsAttempted: 0,
+        emailsSent: 0,
+        emailsFailed: 0,
+        pushTargets: 0,
+        pushSent: 0,
+        pushFailed: 0,
+      };
     }
 
     const uniqueRecipients = [
@@ -212,7 +224,15 @@ export async function notifyBarberOfAppointmentChange(
     ];
     if (uniqueRecipients.length === 0) {
       console.warn('[BARBER_APPOINTMENT_CHANGE_NO_RECIPIENT]');
-      return { recipients: 0, emailsSent: 0, pushSent: 0 };
+      return {
+        recipients: 0,
+        emailsAttempted: 0,
+        emailsSent: 0,
+        emailsFailed: 0,
+        pushTargets: 0,
+        pushSent: 0,
+        pushFailed: 0,
+      };
     }
 
     const language: Language = String(shop.default_language ?? '')
@@ -253,15 +273,27 @@ export async function notifyBarberOfAppointmentChange(
 
     return {
       recipients: uniqueRecipients.length,
+      emailsAttempted: emailResults.length,
       emailsSent: emailResults.filter(Boolean).length,
+      emailsFailed: emailResults.filter((success) => !success).length,
+      pushTargets: uniqueRecipients.length,
       pushSent: push.sent,
+      pushFailed: push.failed,
     };
   } catch (error) {
     console.error(
       '[BARBER_APPOINTMENT_CHANGE_NOTIFICATION_ERROR]',
       error instanceof Error ? error.name : 'UNKNOWN',
     );
-    return { recipients: 0, emailsSent: 0, pushSent: 0 };
+    return {
+        recipients: 0,
+        emailsAttempted: 0,
+        emailsSent: 0,
+        emailsFailed: 0,
+        pushTargets: 0,
+        pushSent: 0,
+        pushFailed: 0,
+      };
   }
 }
 
