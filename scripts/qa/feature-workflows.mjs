@@ -597,6 +597,16 @@ assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
 assert.ok(appointmentDetailDialog.includes('barberEmailStatus === \'failed\''));
 assert.ok(appointmentDetailDialog.includes('Repetir email à equipa'));
 assert.ok(appointmentDetailDialog.includes('Retry team email'));
+assert.ok(appointmentDetailDialog.includes('barberEmailsUnknown'));
+assert.ok(appointmentActivityApi.includes('barberEmailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes("const retryEmail = metadata.barberEmailStatus === 'failed'"));
+assert.ok(appointmentNotificationRetryApi.includes('p_emails_unknown: notification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
+assert.ok(barberNotificationHelperForRetry.includes('emailsUnknown: number'));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_HTTP_408'"));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode.startsWith('BREVO_HTTP_5')"));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('Rollback: drop the 11-argument completion function'));
+
 
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
