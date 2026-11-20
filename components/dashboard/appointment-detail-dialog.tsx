@@ -1353,10 +1353,12 @@ export function AppointmentDetailDialog({
                             </p>
                           ) : null}
                           {event.id === activityEvents[activityEvents.length - 1]?.id &&
-                          event.actorType === 'staff' &&
                           ['appointment.rescheduled', 'appointment.cancelled'].includes(event.action) &&
-                          event.metadata.notificationSent === false &&
-                          event.metadata.notificationSkipped !== true ? (
+                          ((event.actorType === 'staff' &&
+                            event.metadata.notificationSent === false &&
+                            event.metadata.notificationSkipped !== true) ||
+                            (event.actorType === 'customer' &&
+                              event.metadata.barberPushStatus === 'failed')) ? (
                             <div className="mt-2 flex flex-wrap items-center gap-2">
                               <Button
                                 type="button"
@@ -1364,19 +1366,25 @@ export function AppointmentDetailDialog({
                                 variant="outline"
                                 disabled={
                                   retryingActivityId !== null ||
-                                  event.metadata.notificationRetryInProgress === true
+                                  event.metadata.notificationRetryInProgress === true ||
+                                  event.metadata.barberNotificationRetryInProgress === true
                                 }
                                 onClick={() => void handleRetryActivityNotification(event)}
                               >
                                 {retryingActivityId === event.id ||
-                                event.metadata.notificationRetryInProgress === true ? (
+                                event.metadata.notificationRetryInProgress === true ||
+                                event.metadata.barberNotificationRetryInProgress === true ? (
                                   <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
                                 ) : (
                                   <Mail className="mr-2 size-3.5" aria-hidden="true" />
                                 )}
-                                {event.metadata.notificationRetryInProgress === true
-                                  ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
-                                  : isEnglish ? 'Resend email' : 'Reenviar email'}
+                                {event.metadata.barberNotificationRetryInProgress === true
+                                  ? isEnglish ? 'Retrying push…' : 'A repetir push…'
+                                  : event.metadata.notificationRetryInProgress === true
+                                    ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
+                                    : event.actorType === 'customer'
+                                      ? isEnglish ? 'Retry push notification' : 'Repetir notificação push'
+                                      : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (
                                 <span className="text-xs text-rose-300">
