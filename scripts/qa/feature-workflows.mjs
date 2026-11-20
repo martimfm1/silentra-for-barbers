@@ -576,7 +576,8 @@ assert.ok(barberNotificationRetryMigration.includes('public.complete_appointment
 assert.ok(barberNotificationRetryMigration.includes("event.actor_type = 'customer'"));
 assert.ok(barberNotificationRetryMigration.includes("event.metadata ->> 'barberPushStatus' = 'failed'"));
 assert.ok(barberNotificationRetryMigration.includes("interval '10 minutes'"));
-assert.match(barberNotificationRetryMigration, /Partial delivery[\\s\\S]*recipient-level receipts/);
+assert.ok(barberNotificationRetryMigration.includes('Partial delivery'));
+assert.ok(barberNotificationRetryMigration.includes('recipient-level receipts'));
 assert.ok(barberNotificationRetryMigration.includes('to service_role'));
 assert.ok(barberNotificationRetryMigration.includes('Rollback: drop complete_appointment_barber_notification_retry'));
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
