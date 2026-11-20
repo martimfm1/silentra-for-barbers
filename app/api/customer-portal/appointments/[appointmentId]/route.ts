@@ -136,7 +136,7 @@ async function getAvailability(
   );
   const { data: existingAppointments, error: appointmentsError } = await admin
     .from('appointments')
-    .select('id,date_hour,duration_minutes,professional_id')
+    .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
     .eq('barbershop_id', appointment.barbershop_id)
     .gte('date_hour', `${date}T00:00:00`)
     .lte('date_hour', `${date}T23:59:59`)
