@@ -271,7 +271,7 @@ assert.match(
 );
 assert.match(
   expiredMbwayCapacityMigration,
-  /re-apply the previous CREATE OR REPLACE FUNCTION definition[\s\S]*20261119232316_enforce_cross_lane_appointment_capacity\.sql/i,
+  /restore the previous enforce_appointment_capacity_overlap\(\) definition[\s\S]*20261119232316_enforce_cross_lane_appointment_capacity\.sql/i,
   'The expiry-rule migration must document how to restore the prior trigger function',
 );
 assert.match(
