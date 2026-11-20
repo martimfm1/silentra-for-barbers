@@ -356,6 +356,36 @@ assert.ok(appointmentDetailDialog.includes('window.setInterval'));
 assert.ok(appointmentDetailDialog.includes('window.clearInterval'));
 assert.ok(appointmentActivityApi.includes('notificationSkipped'));
 
+const appointmentRescheduleApi = read(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+);
+const customerPortalAppointmentsApi = read(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+);
+for (const [name, source] of [
+  ['reschedule', appointmentRescheduleApi],
+  ['cancel', appointmentCancellationApi],
+  ['notification retry', appointmentNotificationRetryApi],
+  ['activity', appointmentActivityApi],
+]) {
+  assert.ok(
+    source.includes('requireTenantAuthorization'),
+    `Staff appointment ${name} endpoint must authorize the active tenant`,
+  );
+  assert.ok(
+    source.includes(".eq('barbershop_id', tenant.barbershopId)"),
+    `Staff appointment ${name} queries must be scoped to the active barbershop`,
+  );
+}
+assert.ok(customerPortalAppointmentsApi.includes('getPortalSession(request)'));
+assert.ok(customerPortalAppointmentsApi.includes('ownsAppointment'));
+assert.ok(customerPortalAppointmentsApi.includes('appointment.manual_email?.trim().toLowerCase() === session.email'));
+assert.ok(customerPortalAppointmentsApi.includes('client?.email?.trim().toLowerCase() === session.email'));
+assert.ok(customerPortalAppointmentsApi.includes(".eq('id', appointmentId)"));
+console.log('[APPOINTMENT_TENANT_ISOLATION_QA] Staff routes enforce active-tenant scoping; customer portal access requires matching verified email ownership.');
+
+// Keep the selected service, duration and price visible while availability is checked.
+
 // Keep the selected service, duration and price visible while availability is checked.
 const bookingDrawerAvailabilityContext = read(
   'app/barbershops/components/booking-drawer-canonical.tsx',
