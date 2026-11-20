@@ -567,6 +567,28 @@ assert.ok(notificationRetryMigration.includes('to service_role'));
 assert.ok(notificationRetryMigration.includes('notificationRetryLeaseUntil'));
 assert.ok(notificationRetryMigration.includes('notificationRetryToken'));
 
+const barberNotificationRetryMigration = read(
+  'supabase/migrations/20261120170000_retry_failed_barber_notifications.sql',
+);
+assert.ok(barberNotificationRetryMigration.includes('public.claim_appointment_barber_notification_retry'));
+assert.ok(barberNotificationRetryMigration.includes('public.complete_appointment_barber_notification_retry'));
+assert.ok(barberNotificationRetryMigration.includes("event.actor_type = 'customer'"));
+assert.ok(barberNotificationRetryMigration.includes("event.metadata ->> 'barberPushStatus' = 'failed'"));
+assert.ok(barberNotificationRetryMigration.includes('ten minutes'));
+assert.ok(barberNotificationRetryMigration.includes('Partial delivery is deliberately not retried'));
+assert.ok(barberNotificationRetryMigration.includes('to service_role'));
+assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
+assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
+assert.ok(appointmentNotificationRetryApi.includes('channels: { email: false, push: true }'));
+assert.ok(barberNotificationHelper.includes('channels?: { email?: boolean; push?: boolean }'));
+assert.ok(barberNotificationHelper.includes('input.channels?.push === false'));
+assert.ok(appointmentActivityApi.includes('barberNotificationRetryLeaseUntil'));
+assert.ok(appointmentDetailDialog.includes('barberNotificationRetryInProgress'));
+assert.ok(appointmentDetailDialog.includes('Repetir notificação push'));
+assert.ok(appointmentDetailDialog.includes('Retry push notification'));
+console.log('[BARBER_NOTIFICATION_RETRY_QA] Fully failed push deliveries can be retried under an atomic lease; partial delivery is never replayed.');
+
 const barberNotificationHelper = read('lib/brevo/appointment-change-notifications.ts');
 const customerPortalAppointmentApi = read(
   'app/api/customer-portal/appointments/[appointmentId]/route.ts',
