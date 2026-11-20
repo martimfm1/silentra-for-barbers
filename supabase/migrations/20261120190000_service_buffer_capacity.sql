@@ -601,6 +601,22 @@ end;
 $function$
 
 
+drop trigger if exists zz_enforce_appointment_capacity_overlap on public.appointments;
+create trigger zz_enforce_appointment_capacity_overlap
+after insert or update of
+  barbershop_id, professional_id, service_id, date_hour, duration_minutes, buffer_minutes, status
+on public.appointments
+for each row
+execute function public.enforce_appointment_capacity_overlap();
+
+drop trigger if exists b_enforce_appointment_schedule_block_capacity on public.appointments;
+create trigger b_enforce_appointment_schedule_block_capacity
+before insert or update of
+  barbershop_id, professional_id, service_id, date_hour, duration_minutes, buffer_minutes, status
+on public.appointments
+for each row
+execute function public.enforce_appointment_schedule_block_capacity();
+
 revoke all on function public.serialize_service_buffer_update()
   from public, anon, authenticated, service_role;
 revoke all on function public.populate_appointment_service_buffer()
