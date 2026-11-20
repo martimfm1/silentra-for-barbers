@@ -67,6 +67,9 @@ function activityNotificationDetail(
   if (event.metadata.barberNotificationRetryInProgress === true) {
     return isEnglish ? 'Retrying the barbershop push notification' : 'A repetir a notificação push da barbearia';
   }
+  if (event.metadata.barberNotificationRetryFailed === true) {
+    return isEnglish ? 'The push notification retry failed' : 'A repetição da notificação push falhou';
+  }
   if (event.metadata.notificationRetryInProgress === true) {
     return isEnglish ? 'Confirming email delivery' : 'A confirmar o resultado do envio do email';
   }
