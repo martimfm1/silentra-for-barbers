@@ -354,9 +354,9 @@ async function POST__unobserved(
       action === 'rescheduled' &&
       (!['pending', 'scheduled'].includes(appointment.status) ||
         typeof metadata.to !== 'string' ||
-        metadata.to !== appointment.date_hour ||
+        Date.parse(metadata.to) !== Date.parse(appointment.date_hour) ||
         typeof metadata.from !== 'string' ||
-        metadata.from === metadata.to)
+        Date.parse(metadata.from) === Date.parse(metadata.to))
     ) {
       return NextResponse.json(
         { success: false, error: 'O horário da marcação já foi alterado novamente.' },
