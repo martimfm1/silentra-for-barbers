@@ -339,15 +339,18 @@ async function DELETE__unobserved(
         newStatus: 'cancelled',
         barberEmailsSent: barberNotification.emailsSent,
         barberEmailsFailed: barberNotification.emailsFailed,
+        barberEmailsUnknown: barberNotification.emailsUnknown,
         barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
         barberPushFailed: barberNotification.pushFailed,
         barberPushTargets: barberNotification.pushTargets,
         barberEmailStatus: barberNotification.emailsAttempted === 0
           ? 'no_target'
-          : barberNotification.emailsFailed > 0
-            ? barberNotification.emailsSent > 0 ? 'partial' : 'failed'
-            : 'sent',
+          : barberNotification.emailsUnknown > 0
+            ? 'unknown'
+            : barberNotification.emailsFailed > 0
+              ? barberNotification.emailsSent > 0 ? 'partial' : 'failed'
+              : 'sent',
         barberPushStatus: barberNotification.pushSent > 0
           ? barberNotification.pushFailed > 0 ? 'partial' : 'sent'
           : barberNotification.pushFailed > 0 ? 'failed' : 'no_delivery',
@@ -515,6 +518,7 @@ async function PATCH__unobserved(
         to: newDateHour,
         barberEmailsSent: barberNotification.emailsSent,
         barberEmailsFailed: barberNotification.emailsFailed,
+        barberEmailsUnknown: barberNotification.emailsUnknown,
         barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
         barberPushFailed: barberNotification.pushFailed,
