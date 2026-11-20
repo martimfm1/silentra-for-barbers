@@ -1,5 +1,7 @@
 begin;
 
+-- Rollback: drop the 11-argument completion function and recreate the previous 10-argument definition from migration 20261120170000_retry_failed_barber_notifications.sql.
+
 -- Replace the original completion signature so ambiguous provider outcomes are
 -- persisted as "unknown" and can never be retried automatically.
 drop function if exists public.complete_appointment_barber_notification_retry(
