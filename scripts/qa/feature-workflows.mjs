@@ -577,6 +577,7 @@ assert.ok(barberNotificationRetryMigration.includes("event.metadata ->> 'barberP
 assert.ok(barberNotificationRetryMigration.includes("interval '10 minutes'"));
 assert.ok(barberNotificationRetryMigration.includes('Partial delivery is deliberately not retried'));
 assert.ok(barberNotificationRetryMigration.includes('to service_role'));
+assert.ok(barberNotificationRetryMigration.includes('Rollback: drop complete_appointment_barber_notification_retry'));
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
