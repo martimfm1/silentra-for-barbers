@@ -550,6 +550,7 @@ assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
 assert.ok(customerPortalAppointmentApi.includes('barberEmailsFailed: barberNotification.emailsFailed'));
 assert.ok(customerPortalAppointmentApi.includes('barberPushFailed: barberNotification.pushFailed'));
 assert.ok(customerPortalAppointmentApi.includes(".eq('date_hour', appointment.date_hour)"));
+assert.ok(customerPortalAppointmentApi.includes('A marcação já está neste horário.'));
 assert.ok(appointmentActivityApi.includes('barberEmailStatus'));
 assert.ok(appointmentActivityApi.includes('barberPushStatus'));
 assert.ok(appointmentDetailDialog.includes('barberEmailsFailed'));
