@@ -308,6 +308,8 @@ async function POST__unobserved(
           {
             success: false,
             retryCount,
+            emailRetried: retryEmail,
+            pushRetried: retryPush,
             emailsAttempted: notification.emailsAttempted,
             emailsSent: notification.emailsSent,
             emailsFailed: notification.emailsFailed,
@@ -324,6 +326,8 @@ async function POST__unobserved(
         {
           success: true,
           retryCount,
+          emailRetried: retryEmail,
+          pushRetried: retryPush,
           emailsAttempted: notification.emailsAttempted,
           emailsSent: notification.emailsSent,
           emailsFailed: notification.emailsFailed,
