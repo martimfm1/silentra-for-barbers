@@ -611,7 +611,7 @@ assert.ok(ambiguousBarberEmailRetryMigration.includes('Rollback: drop the 11-arg
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
-assert.ok(appointmentNotificationRetryApi.includes('channels: { email: false, push: true }'));
+assert.ok(appointmentNotificationRetryApi.includes('channels: { email: retryEmail, push: retryPush }'));
 assert.ok(barberNotificationHelperForRetry.includes('channels?: { email?: boolean; push?: boolean }'));
 assert.ok(barberNotificationHelperForRetry.includes('input.channels?.push === false'));
 assert.ok(appointmentActivityApi.includes('barberNotificationRetryLeaseUntil'));
