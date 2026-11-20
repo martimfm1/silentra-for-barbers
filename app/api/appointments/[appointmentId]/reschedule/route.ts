@@ -194,7 +194,7 @@ async function PATCH__unobserved(
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
-        'id,status,date_hour,duration_minutes,professional_id,service_id,manual_email,manual_name,client_id',
+        'id,status,date_hour,duration_minutes,buffer_minutes,professional_id,service_id,manual_email,manual_name,client_id',
       )
       .eq('id', appointmentId)
       .eq('barbershop_id', barbershopId)
