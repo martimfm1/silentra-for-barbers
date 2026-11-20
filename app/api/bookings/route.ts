@@ -389,7 +389,8 @@ async function POST__unobserved(request: Request) {
       Math.max(Number(selectedService.duration ?? 30), 1),
       1440,
     );
-    const requestedEnd = requestedStart + durationMinutes;
+    const bufferMinutes = Math.max(0, Math.min(120, Number(selectedService.buffer_minutes ?? 0)));
+    const requestedEnd = requestedStart + durationMinutes + bufferMinutes;
     if (daySchedule.day_off)
       return NextResponse.json(
         {
