@@ -8,6 +8,7 @@ type AppointmentChangeBase = {
   professionalId: string | null;
   customerName: string;
   serviceName: string;
+  channels?: { email?: boolean; push?: boolean };
 };
 
 export type BarberAppointmentChange =
@@ -248,7 +249,9 @@ export async function notifyBarberOfAppointmentChange(
       ).values(),
     ];
 
-    const emailResults = await Promise.all(emailRecipients.map(async (recipient) => {
+    const emailResults = input.channels?.email === false
+      ? []
+      : await Promise.all(emailRecipients.map(async (recipient) => {
       const result = await sendBrevoEmail({
         to: recipient.email!,
         toName: recipient.name,
@@ -261,7 +264,9 @@ export async function notifyBarberOfAppointmentChange(
       return result.success;
     }));
 
-    const push = await sendWebPushToUsers(
+    const push = input.channels?.push === false
+      ? { sent: 0, failed: 0 }
+      : await sendWebPushToUsers(
       uniqueRecipients.map((recipient) => recipient.userId),
       {
         title: email.title,
@@ -276,7 +281,7 @@ export async function notifyBarberOfAppointmentChange(
       emailsAttempted: emailResults.length,
       emailsSent: emailResults.filter(Boolean).length,
       emailsFailed: emailResults.filter((success) => !success).length,
-      pushTargets: uniqueRecipients.length,
+      pushTargets: input.channels?.push === false ? 0 : uniqueRecipients.length,
       pushSent: push.sent,
       pushFailed: push.failed,
     };
