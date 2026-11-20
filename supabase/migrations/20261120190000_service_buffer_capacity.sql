@@ -235,6 +235,24 @@ begin
       end;
   end if;
 
+  -- Lock the tenant before reading service buffer settings so a concurrent
+  -- service-buffer edit cannot race with a new booking.
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(p_barbershop_id::text, 0)
+  );
+
+  select
+    coalesce(s.price, 0)::numeric(12,2),
+    greatest(0, least(coalesce(s.buffer_minutes, 0), 120))
+    into v_payment_amount, v_buffer
+  from public.services s
+  where s.id = p_service_id
+    and s.barbershop_id = p_barbershop_id;
+
+  if not found then
+    raise exception using errcode = '22023', message = 'BOOKING_SERVICE_NOT_AVAILABLE';
+  end if;
+
   v_requested_start :=
     extract(hour from (p_date_hour at time zone 'Europe/Lisbon'))::integer * 60
     + extract(minute from (p_date_hour at time zone 'Europe/Lisbon'))::integer;
@@ -290,23 +308,6 @@ begin
     v_status := 'scheduled'::public.appointment_status;
   end if;
 
-  -- Lock the tenant before reading service buffer settings so a concurrent
-  -- service-buffer edit cannot race with a new booking.
-  perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended(p_barbershop_id::text, 0)
-  );
-
-  select
-    coalesce(s.price, 0)::numeric(12,2),
-    greatest(0, least(coalesce(s.buffer_minutes, 0), 120))
-    into v_payment_amount, v_buffer
-  from public.services s
-  where s.id = p_service_id
-    and s.barbershop_id = p_barbershop_id;
-
-  if not found then
-    raise exception using errcode = '22023', message = 'BOOKING_SERVICE_NOT_AVAILABLE';
-  end if;
 
   if v_is_prepayment and coalesce(v_payment_amount, 0) <= 0 then
     raise exception using errcode = '22023', message = 'BOOKING_PREPAYMENT_AMOUNT_INVALID';
