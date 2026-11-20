@@ -156,12 +156,13 @@ async function POST__unobserved(
         );
       }
 
-      // Only a fully failed push channel is retried. Partial delivery is not
-      // replayed because we do not persist per-subscription receipts.
+      // Retry only channels that failed for every recipient. Partial delivery
+      // is never replayed; ambiguous email outcomes are marked unknown.
+      const retryEmail = metadata.barberEmailStatus === 'failed';
       const retryPush = metadata.barberPushStatus === 'failed';
-      if (!retryPush) {
+      if (!retryEmail && !retryPush) {
         return NextResponse.json(
-          { success: false, error: 'Não existe uma notificação push totalmente falhada que possa ser repetida em segurança.' },
+          { success: false, error: 'Não existe um canal totalmente falhado que possa ser repetido em segurança.' },
           { status: 409 },
         );
       }
@@ -239,7 +240,7 @@ async function POST__unobserved(
           code: claimError.code ?? 'UNKNOWN',
         });
         return NextResponse.json(
-          { success: false, error: 'Não foi possível reservar o reenvio push.' },
+          { success: false, error: 'Não foi possível reservar o reenvio.' },
           { status: 503, headers: { 'Cache-Control': 'no-store' } },
         );
       }
@@ -261,7 +262,7 @@ async function POST__unobserved(
             customerName: latestActivity.actor_name?.trim() || barberAppointment.manual_name?.trim() || 'Cliente',
             serviceName: service?.name?.trim() || 'Serviço',
             dateHour: barberAppointment.date_hour,
-            channels: { email: false, push: true },
+            channels: { email: retryEmail, push: retryPush },
           })
         : await notifyBarberOfAppointmentChange({
             event: 'rescheduled',
@@ -272,7 +273,7 @@ async function POST__unobserved(
             serviceName: service?.name?.trim() || 'Serviço',
             previousDateHour: metadata.from as string,
             newDateHour: barberAppointment.date_hour,
-            channels: { email: false, push: true },
+            channels: { email: retryEmail, push: retryPush },
           });
 
       const { data: completed, error: completionError } = await tenant.admin.rpc(
@@ -281,11 +282,12 @@ async function POST__unobserved(
           p_audit_log_id: latestActivity.id,
           p_barbershop_id: tenant.barbershopId,
           p_claim_token: claimToken,
-          p_retry_email: false,
-          p_emails_attempted: 0,
-          p_emails_sent: 0,
-          p_emails_failed: 0,
-          p_retry_push: true,
+          p_retry_email: retryEmail,
+          p_emails_attempted: notification.emailsAttempted,
+          p_emails_sent: notification.emailsSent,
+          p_emails_failed: notification.emailsFailed,
+          p_emails_unknown: notification.emailsUnknown,
+          p_retry_push: retryPush,
           p_push_sent: notification.pushSent,
           p_push_failed: notification.pushFailed,
         },
@@ -296,20 +298,43 @@ async function POST__unobserved(
           code: completionError?.code ?? 'CLAIM_NOT_OWNED',
         });
         return NextResponse.json(
-          { success: false, retryPending: true, retryCount, error: 'O push foi tentado, mas não foi possível guardar o resultado.' },
+          { success: false, retryPending: true, retryCount, error: 'A notificação foi tentada, mas não foi possível guardar o resultado.' },
           { status: 503, headers: { 'Cache-Control': 'no-store' } },
         );
       }
 
-      if (notification.pushSent === 0) {
+      if (notification.emailsSent === 0 && notification.pushSent === 0) {
         return NextResponse.json(
-          { success: false, retryCount, pushSent: 0, pushFailed: notification.pushFailed, error: 'Não foi possível entregar a notificação push.' },
+          {
+            success: false,
+            retryCount,
+            emailRetried: retryEmail,
+            pushRetried: retryPush,
+            emailsAttempted: notification.emailsAttempted,
+            emailsSent: notification.emailsSent,
+            emailsFailed: notification.emailsFailed,
+            emailsUnknown: notification.emailsUnknown,
+            pushSent: notification.pushSent,
+            pushFailed: notification.pushFailed,
+            error: 'Não foi possível confirmar a entrega da notificação.',
+          },
           { status: 502, headers: { 'Cache-Control': 'no-store' } },
         );
       }
 
       return NextResponse.json(
-        { success: true, retryCount, pushSent: notification.pushSent, pushFailed: notification.pushFailed },
+        {
+          success: true,
+          retryCount,
+          emailRetried: retryEmail,
+          pushRetried: retryPush,
+          emailsAttempted: notification.emailsAttempted,
+          emailsSent: notification.emailsSent,
+          emailsFailed: notification.emailsFailed,
+          emailsUnknown: notification.emailsUnknown,
+          pushSent: notification.pushSent,
+          pushFailed: notification.pushFailed,
+        },
         { headers: { 'Cache-Control': 'no-store' } },
       );
     }

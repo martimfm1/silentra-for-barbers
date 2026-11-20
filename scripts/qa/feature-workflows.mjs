@@ -571,6 +571,7 @@ const barberNotificationRetryMigration = read(
   'supabase/migrations/20261120170000_retry_failed_barber_notifications.sql',
 );
 const barberNotificationHelperForRetry = read('lib/brevo/appointment-change-notifications.ts');
+const customerPortalAppointmentApiForRetry = read('app/api/customer-portal/appointments/[appointmentId]/route.ts');
 assert.ok(barberNotificationRetryMigration.includes('public.claim_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes('public.complete_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes("event.actor_type = 'customer'"));
@@ -580,10 +581,38 @@ assert.ok(barberNotificationRetryMigration.includes('Partial delivery'));
 assert.ok(barberNotificationRetryMigration.includes('recipient-level receipts'));
 assert.ok(barberNotificationRetryMigration.includes('to service_role'));
 assert.ok(barberNotificationRetryMigration.includes('Rollback: drop complete_appointment_barber_notification_retry'));
+
+const ambiguousBarberEmailRetryMigration = read(
+  'supabase/migrations/20261120180000_track_ambiguous_barber_email_retry.sql',
+);
+assert.ok(ambiguousBarberEmailRetryMigration.includes('p_emails_unknown integer'));
+assert.ok(ambiguousBarberEmailRetryMigration.includes("when p_emails_unknown > 0 then 'unknown'"));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('drop function if exists public.complete_appointment_barber_notification_retry'));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('to service_role'));
+assert.ok(barberNotificationHelperForRetry.includes('emailsUnknown: number'));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_NETWORK_ERROR'"));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_HTTP_408'"));
+assert.ok(customerPortalAppointmentApiForRetry.includes('barberEmailsUnknown: barberNotification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('p_emails_unknown: notification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
+assert.ok(appointmentDetailDialog.includes('barberEmailStatus === \'failed\''));
+assert.ok(appointmentDetailDialog.includes('Repetir email à equipa'));
+assert.ok(appointmentDetailDialog.includes('Retry team email'));
+assert.ok(appointmentDetailDialog.includes('barberEmailsUnknown'));
+assert.ok(appointmentActivityApi.includes('barberEmailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes("const retryEmail = metadata.barberEmailStatus === 'failed'"));
+assert.ok(appointmentNotificationRetryApi.includes('p_emails_unknown: notification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
+assert.ok(barberNotificationHelperForRetry.includes('emailsUnknown: number'));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_HTTP_408'"));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode.startsWith('BREVO_HTTP_5')"));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('Rollback: drop the 11-argument completion function'));
+
+
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
-assert.ok(appointmentNotificationRetryApi.includes('channels: { email: false, push: true }'));
+assert.ok(appointmentNotificationRetryApi.includes('channels: { email: retryEmail, push: retryPush }'));
 assert.ok(barberNotificationHelperForRetry.includes('channels?: { email?: boolean; push?: boolean }'));
 assert.ok(barberNotificationHelperForRetry.includes('input.channels?.push === false'));
 assert.ok(appointmentActivityApi.includes('barberNotificationRetryLeaseUntil'));
@@ -600,9 +629,10 @@ const customerPortalAppointmentApi = read(
 );
 assert.ok(barberNotificationHelper.includes('emailsAttempted: number'));
 assert.ok(barberNotificationHelper.includes('emailsFailed: number'));
+assert.ok(barberNotificationHelper.includes('emailsUnknown: number'));
 assert.ok(barberNotificationHelper.includes('pushTargets: number'));
 assert.ok(barberNotificationHelper.includes('pushFailed: number'));
-assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((success) => !success).length'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((result) => !result.success).length'));
 assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
 assert.ok(customerPortalAppointmentApi.includes('barberEmailsFailed: barberNotification.emailsFailed'));
 assert.ok(customerPortalAppointmentApi.includes('barberPushFailed: barberNotification.pushFailed'));

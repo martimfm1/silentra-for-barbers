@@ -83,6 +83,7 @@ function activityNotificationDetail(
   }
   const emailCount = Number(event.metadata.barberEmailsSent ?? 0);
   const emailFailed = Number(event.metadata.barberEmailsFailed ?? 0);
+  const emailUnknown = Number(event.metadata.barberEmailsUnknown ?? 0);
   const emailAttempted = Number(event.metadata.barberEmailsAttempted ?? emailCount + emailFailed);
   const pushCount = Number(event.metadata.barberPushSent ?? 0);
   const pushFailed = Number(event.metadata.barberPushFailed ?? 0);
@@ -92,7 +93,7 @@ function activityNotificationDetail(
   if (hasChannelResults || emailCount > 0 || pushCount > 0 || emailFailed > 0 || pushFailed > 0) {
     const emailSummary = emailAttempted > 0
       ? isEnglish
-        ? `Email: ${emailCount} sent, ${emailFailed} failed`
+        ? `Email: ${emailCount} sent, ${emailFailed} failed, ${emailUnknown} uncertain`
         : `Email: ${emailCount} enviados, ${emailFailed} falharam`
       : isEnglish ? 'Email: no recipient address' : 'Email: sem endereço de destino';
     const pushSummary = isEnglish
@@ -466,7 +467,7 @@ export function AppointmentDetailDialog({
       );
       const payload = await response.json().catch(() => null);
       const deliveryConfirmed = audience === 'barbershop'
-        ? Number(payload?.pushSent ?? 0) > 0
+        ? Number(payload?.emailsSent ?? 0) + Number(payload?.pushSent ?? 0) > 0
         : payload?.emailSent === true;
       if (!response.ok || payload?.success !== true || !deliveryConfirmed) {
         throw new Error(
@@ -486,11 +487,33 @@ export function AppointmentDetailDialog({
                 metadata: audience === 'barbershop'
                   ? {
                       ...item.metadata,
-                      barberPushSent: Number(item.metadata.barberPushSent ?? 0) + Number(payload.pushSent ?? 0),
-                      barberPushFailed: Number(payload.pushFailed ?? 0),
-                      barberPushStatus: Number(payload.pushFailed ?? 0) > 0 ? 'partial' : 'sent',
+                      ...(payload.emailRetried === true
+                        ? {
+                            barberEmailsAttempted: Number(item.metadata.barberEmailsAttempted ?? 0) + Number(payload.emailsAttempted ?? 0),
+                            barberEmailsSent: Number(item.metadata.barberEmailsSent ?? 0) + Number(payload.emailsSent ?? 0),
+                            barberEmailsFailed: Number(payload.emailsFailed ?? 0),
+                            barberEmailsUnknown: Number(payload.emailsUnknown ?? 0),
+                            barberEmailStatus: Number(payload.emailsUnknown ?? 0) > 0
+                              ? 'unknown'
+                              : Number(payload.emailsFailed ?? 0) > 0
+                                ? Number(payload.emailsSent ?? 0) > 0 ? 'partial' : 'failed'
+                                : Number(payload.emailsAttempted ?? 0) === 0 ? 'no_target' : 'sent',
+                          }
+                        : {}),
+                      ...(payload.pushRetried === true
+                        ? {
+                            barberPushSent: Number(item.metadata.barberPushSent ?? 0) + Number(payload.pushSent ?? 0),
+                            barberPushFailed: Number(payload.pushFailed ?? 0),
+                            barberPushStatus: Number(payload.pushFailed ?? 0) > 0
+                              ? Number(payload.pushSent ?? 0) > 0 ? 'partial' : 'failed'
+                              : Number(payload.pushSent ?? 0) > 0 ? 'sent' : 'no_delivery',
+                          }
+                        : {}),
                       barberNotificationRetryInProgress: false,
-                      barberNotificationRetryFailed: false,
+                      barberNotificationRetryFailed:
+                        (payload.emailRetried === true &&
+                          (Number(payload.emailsFailed ?? 0) > 0 || Number(payload.emailsUnknown ?? 0) > 0)) ||
+                        (payload.pushRetried === true && Number(payload.pushFailed ?? 0) > 0),
                       barberNotificationRetryCount: Number(payload.retryCount ?? item.metadata.barberNotificationRetryCount ?? 0),
                     }
                   : {
@@ -1361,7 +1384,8 @@ export function AppointmentDetailDialog({
                             event.metadata.notificationSent === false &&
                             event.metadata.notificationSkipped !== true) ||
                             (event.actorType === 'customer' &&
-                              event.metadata.barberPushStatus === 'failed')) ? (
+                              (event.metadata.barberPushStatus === 'failed' ||
+                                event.metadata.barberEmailStatus === 'failed'))) ? (
                             <div className="mt-2 flex flex-wrap items-center gap-2">
                               <Button
                                 type="button"
@@ -1386,7 +1410,11 @@ export function AppointmentDetailDialog({
                                   : event.metadata.notificationRetryInProgress === true
                                     ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
                                     : event.actorType === 'customer'
-                                      ? isEnglish ? 'Retry push notification' : 'Repetir notificação push'
+                                      ? event.metadata.barberEmailStatus === 'failed' && event.metadata.barberPushStatus === 'failed'
+                                        ? isEnglish ? 'Retry email and push' : 'Repetir email e push'
+                                        : event.metadata.barberEmailStatus === 'failed'
+                                          ? isEnglish ? 'Retry team email' : 'Repetir email à equipa'
+                                          : isEnglish ? 'Retry push notification' : 'Repetir notificação push'
                                       : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (

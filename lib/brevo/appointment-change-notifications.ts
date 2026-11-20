@@ -27,6 +27,7 @@ export type BarberAppointmentChangeResult = {
   emailsAttempted: number;
   emailsSent: number;
   emailsFailed: number;
+  emailsUnknown: number;
   pushTargets: number;
   pushSent: number;
   pushFailed: number;
@@ -214,6 +215,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
+        emailsUnknown: 0,
         pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
@@ -230,6 +232,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
+        emailsUnknown: 0,
         pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
@@ -260,9 +263,16 @@ export async function notifyBarberOfAppointmentChange(
               subject: email.subject,
               htmlContent: email.htmlContent,
             });
+            const errorCode = result.success ? '' : result.errorCode ?? 'UNKNOWN';
             if (!result.success)
-              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]');
-            return result.success;
+              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]', errorCode);
+            const unknown =
+              !result.success &&
+              (errorCode === 'UNKNOWN' ||
+                errorCode === 'BREVO_NETWORK_ERROR' ||
+                errorCode === 'BREVO_HTTP_408' ||
+                errorCode.startsWith('BREVO_HTTP_5'));
+            return { success: result.success, unknown };
           }),
         );
 
@@ -281,8 +291,9 @@ export async function notifyBarberOfAppointmentChange(
     return {
       recipients: uniqueRecipients.length,
       emailsAttempted: emailResults.length,
-      emailsSent: emailResults.filter(Boolean).length,
-      emailsFailed: emailResults.filter((success) => !success).length,
+      emailsSent: emailResults.filter((result) => result.success).length,
+      emailsFailed: emailResults.filter((result) => !result.success).length,
+      emailsUnknown: emailResults.filter((result) => result.unknown).length,
       pushTargets: input.channels?.push === false ? 0 : uniqueRecipients.length,
       pushSent: push.sent,
       pushFailed: push.failed,
@@ -297,6 +308,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
+        emailsUnknown: 0,
         pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
