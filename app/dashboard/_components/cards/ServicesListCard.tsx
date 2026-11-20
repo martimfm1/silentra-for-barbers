@@ -302,7 +302,7 @@ function AddServiceForm({
   setShowAddServiceForm,
   loading,
 }: AddServiceFormProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   async function submit(event: React.FormEvent) {
     const created = await handleCreateService(event);
     if (created) setShowAddServiceForm(false);
