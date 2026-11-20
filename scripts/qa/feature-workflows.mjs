@@ -571,6 +571,7 @@ const barberNotificationRetryMigration = read(
   'supabase/migrations/20261120170000_retry_failed_barber_notifications.sql',
 );
 const barberNotificationHelperForRetry = read('lib/brevo/appointment-change-notifications.ts');
+const customerPortalAppointmentApiForRetry = read('app/api/customer-portal/appointments/[appointmentId]/route.ts');
 assert.ok(barberNotificationRetryMigration.includes('public.claim_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes('public.complete_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes("event.actor_type = 'customer'"));
@@ -591,7 +592,7 @@ assert.ok(ambiguousBarberEmailRetryMigration.includes('to service_role'));
 assert.ok(barberNotificationHelperForRetry.includes('emailsUnknown: number'));
 assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_NETWORK_ERROR'"));
 assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_HTTP_408'"));
-assert.ok(customerPortalAppointmentApi.includes('barberEmailsUnknown: barberNotification.emailsUnknown'));
+assert.ok(customerPortalAppointmentApiForRetry.includes('barberEmailsUnknown: barberNotification.emailsUnknown'));
 assert.ok(appointmentNotificationRetryApi.includes('p_emails_unknown: notification.emailsUnknown'));
 assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
 assert.ok(appointmentDetailDialog.includes('barberEmailStatus === \'failed\''));
