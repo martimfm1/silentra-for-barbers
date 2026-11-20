@@ -543,7 +543,7 @@ const customerPortalAppointmentApi = read(
 );
 assert.ok(barberNotificationHelper.includes('emailsAttempted: number'));
 assert.ok(barberNotificationHelper.includes('emailsFailed: number'));
-assert.ok(barberNotificationHelper.includes('pushAttempted: number'));
+assert.ok(barberNotificationHelper.includes('pushTargets: number'));
 assert.ok(barberNotificationHelper.includes('pushFailed: number'));
 assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((success) => !success).length'));
 assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
