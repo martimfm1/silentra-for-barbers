@@ -18,6 +18,7 @@ export interface Service {
   name: string;
   price: string;
   duration: string | number;
+  buffer_minutes?: number;
   min_duration?: string | number;
   is_active?: boolean;
 }
