@@ -267,6 +267,7 @@ export async function notifyBarberOfAppointmentChange(
               console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]', result.errorCode ?? 'UNKNOWN');
             const errorCode = result.errorCode ?? 'UNKNOWN';
             const unknown =
+              errorCode === 'UNKNOWN' ||
               errorCode === 'BREVO_NETWORK_ERROR' ||
               errorCode === 'BREVO_HTTP_408' ||
               errorCode.startsWith('BREVO_HTTP_5');
