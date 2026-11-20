@@ -133,7 +133,46 @@ for (const path of files) {
     `Expected weekly schedule integration in ${path}`,
   );
 }
-console.log('Weekly schedule QA passed: Saturday afternoons, split shifts, breaks, day off and legacy migration.');
+const scheduleBlockCapacityMigration = readFileSync(
+  'supabase/migrations/20261120173000_enforce_schedule_block_capacity.sql',
+  'utf8',
+);
+assert.match(
+  scheduleBlockCapacityMigration,
+  /create trigger b_enforce_appointment_schedule_block_capacity[\\s\\S]*before insert or update[\\s\\S]*on public\\.appointments/i,
+);
+assert.match(
+  scheduleBlockCapacityMigration,
+  /create trigger b_enforce_schedule_block_no_appointment_overlap[\\s\\S]*before insert or update[\\s\\S]*on public\\.schedule_blocks/i,
+);
+assert.match(
+  scheduleBlockCapacityMigration,
+  /pg_advisory_xact_lock[\\s\\S]*hashtextextended\\(new\\.barbershop_id::text, 0\\)/i,
+);
+assert.ok(scheduleBlockCapacityMigration.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
+assert.ok(scheduleBlockCapacityMigration.includes('BOOKING_CONFLICT'));
+assert.ok(scheduleBlockCapacityMigration.includes('Rollback: drop the two triggers'));
+
+const publicBookingData = readFileSync(
+  'app/api/shops/[id]/booking-data/route.ts',
+  'utf8',
+);
+const publicBookingApi = readFileSync('app/api/bookings/route.ts', 'utf8');
+const teamRescheduleApi = readFileSync(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+  'utf8',
+);
+const customerPortalAppointmentApi = readFileSync(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+  'utf8',
+);
+assert.ok(publicBookingData.includes('professionals.every('));
+assert.ok(publicBookingData.includes('professionalAvailability[professionals[0].id]'));
+assert.ok(publicBookingApi.includes('normalizedProfessionalId &&'));
+assert.ok(teamRescheduleApi.includes('!appointment.professional_id ||'));
+assert.ok(customerPortalAppointmentApi.includes('!appointment.professional_id ||'));
+
+console.log('Weekly schedule QA passed: split shifts, breaks, duration, day off, shop-wide unassigned capacity and database-enforced schedule blocks.');
 
 
 // Duration-aware public availability must match the atomic booking RPC.
