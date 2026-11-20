@@ -166,6 +166,12 @@ assert.ok(publicBookingData.includes('professionalAvailability[professionals[0].
 assert.ok(publicBookingApi.includes('normalizedProfessionalId &&'));
 assert.ok(teamRescheduleApi.includes('!appointment.professional_id ||'));
 assert.ok(customerPortalAppointmentApi.includes('!appointment.professional_id ||'));
+const appointmentDashboardHook = readFileSync(
+  'app/state/_hooks/dashboard/useAppointments.ts',
+  'utf8',
+);
+assert.ok(appointmentDashboardHook.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
+assert.ok(appointmentDashboardHook.includes('Não podes bloquear um horário que já tem uma marcação ativa.'));
 
 console.log('Weekly schedule QA passed: split shifts, breaks, duration, day off, shop-wide unassigned capacity and database-enforced schedule blocks.');
 
