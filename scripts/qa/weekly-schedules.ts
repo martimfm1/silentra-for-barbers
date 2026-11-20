@@ -274,3 +274,28 @@ assert.match(
   /re-apply the previous CREATE OR REPLACE FUNCTION definition[\s\S]*20261119232316_enforce_cross_lane_appointment_capacity\.sql/i,
   'The expiry-rule migration must document how to restore the prior trigger function',
 );
+assert.match(
+  expiredMbwayCapacityMigration,
+  /create trigger a_release_expired_mbway_holds_before_capacity_check[\s\S]*before insert or update[\s\S]*execute function public\.release_expired_mbway_holds_before_capacity_check/i,
+  'Expired holds must be released before the appointments exclusion constraint is evaluated',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /pg_catalog\.pg_trigger_depth\(\) > 1[\s\S]*return new/i,
+  'The expiry cleanup trigger must guard against recursive updates',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /status = 'cancelled'[\s\S]*payment_status = 'expired'[\s\S]*cancelled_at = pg_catalog\.now\(\)[\s\S]*cancellation_reason/i,
+  'Automatic expiry must preserve the existing cancellation transition and waitlist side effects',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /message = 'MBWAY_PREPAYMENT_EXPIRED'/i,
+  'An expired MB WAY hold must not be revived by an appointment update',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /pg_advisory_xact_lock[\s\S]*hashtextextended\(new\.barbershop_id::text, 0\)/i,
+  'Expiry cleanup must serialize with public booking creation per barbershop',
+);
