@@ -253,3 +253,55 @@ assert.match(
   /rollback[\s\S]*drop trigger if exists zz_enforce_appointment_capacity_overlap[\s\S]*drop function if exists public\.enforce_appointment_capacity_overlap/i,
   'The database guard migration must document its rollback path',
 );
+
+
+const expiredMbwayCapacityMigration = readFileSync(
+  'supabase/migrations/20261119233600_ignore_expired_mbway_holds_in_capacity_guard.sql',
+  'utf8',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /new\.payment_status = 'awaiting_review'[\s\S]*new\.payment_expires_at is not null[\s\S]*new\.payment_expires_at <= (?:pg_catalog\.)?now\(\)/i,
+  'An expired MB WAY booking being inserted or updated must no longer reserve capacity',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /a\.payment_status = 'awaiting_review'[\s\S]*a\.payment_expires_at is not null[\s\S]*a\.payment_expires_at <= (?:pg_catalog\.)?now\(\)/i,
+  'Existing expired MB WAY holds must be ignored by the overlap check',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /restore the previous enforce_appointment_capacity_overlap\(\) definition[\s\S]*20261119232316_enforce_cross_lane_appointment_capacity\.sql/i,
+  'The expiry-rule migration must document how to restore the prior trigger function',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /create trigger a_release_expired_mbway_holds_before_capacity_check[\s\S]*before insert or update[\s\S]*execute function public\.release_expired_mbway_holds_before_capacity_check/i,
+  'Expired holds must be released before the appointments exclusion constraint is evaluated',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /pg_catalog\.pg_trigger_depth\(\) > 1[\s\S]*return new/i,
+  'The expiry cleanup trigger must guard against recursive updates',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /status = 'cancelled'[\s\S]*payment_status = 'expired'[\s\S]*cancelled_at = pg_catalog\.now\(\)[\s\S]*cancellation_reason/i,
+  'Automatic expiry must preserve the existing cancellation transition and waitlist side effects',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /message = 'MBWAY_PREPAYMENT_EXPIRED'/i,
+  'An expired MB WAY hold must not be revived by an appointment update',
+);
+assert.match(
+  expiredMbwayCapacityMigration,
+  /pg_advisory_xact_lock[\s\S]*hashtextextended\(new\.barbershop_id::text, 0\)/i,
+  'Expiry cleanup must serialize with public booking creation per barbershop',
+);
+
+assert.match(
+  expiredMbwayCapacityMigration,
+  /old\.payment_method = 'mbway'[\s\S]*old\.payment_status in \('awaiting_review', 'expired'\)/i,
+  'Expired MB WAY holds must not be revived after the cleanup has marked them expired',
+);
