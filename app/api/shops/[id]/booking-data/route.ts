@@ -385,7 +385,7 @@ async function GET__unobserved(
         const periodEnd = scheduleTimeToMinutes(period.end);
         for (
           let slotStart = periodStart;
-          slotStart + serviceDuration <= periodEnd;
+          slotStart + reservedDuration <= periodEnd;
           slotStart += 30
         ) {
           const slotEnd = slotStart + serviceDuration;
