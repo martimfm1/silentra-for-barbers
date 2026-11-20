@@ -341,7 +341,7 @@ async function DELETE__unobserved(
         barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
         barberPushFailed: barberNotification.pushFailed,
-        barberPushAttempted: barberNotification.pushAttempted,
+        barberPushTargets: barberNotification.pushAttempted,
         barberEmailStatus: barberNotification.emailsAttempted === 0
           ? 'no_target'
           : barberNotification.emailsFailed > 0
@@ -515,7 +515,7 @@ async function PATCH__unobserved(
         barberEmailsAttempted: barberNotification.emailsAttempted,
         barberPushSent: barberNotification.pushSent,
         barberPushFailed: barberNotification.pushFailed,
-        barberPushAttempted: barberNotification.pushAttempted,
+        barberPushTargets: barberNotification.pushAttempted,
         barberEmailStatus: barberNotification.emailsAttempted === 0
           ? 'no_target'
           : barberNotification.emailsFailed > 0
