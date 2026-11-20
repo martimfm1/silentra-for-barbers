@@ -263,14 +263,15 @@ export async function notifyBarberOfAppointmentChange(
               subject: email.subject,
               htmlContent: email.htmlContent,
             });
+            const errorCode = result.success ? '' : result.errorCode ?? 'UNKNOWN';
             if (!result.success)
-              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]', result.errorCode ?? 'UNKNOWN');
-            const errorCode = result.errorCode ?? 'UNKNOWN';
+              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]', errorCode);
             const unknown =
-              errorCode === 'UNKNOWN' ||
-              errorCode === 'BREVO_NETWORK_ERROR' ||
-              errorCode === 'BREVO_HTTP_408' ||
-              errorCode.startsWith('BREVO_HTTP_5');
+              !result.success &&
+              (errorCode === 'UNKNOWN' ||
+                errorCode === 'BREVO_NETWORK_ERROR' ||
+                errorCode === 'BREVO_HTTP_408' ||
+                errorCode.startsWith('BREVO_HTTP_5'));
             return { success: result.success, unknown };
           }),
         );
