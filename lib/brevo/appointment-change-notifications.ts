@@ -251,30 +251,32 @@ export async function notifyBarberOfAppointmentChange(
 
     const emailResults = input.channels?.email === false
       ? []
-      : await Promise.all(emailRecipients.map(async (recipient) => {
-      const result = await sendBrevoEmail({
-        to: recipient.email!,
-        toName: recipient.name,
-        senderName: shopName,
-        subject: email.subject,
-        htmlContent: email.htmlContent,
-      });
-      if (!result.success)
-        console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]');
-      return result.success;
-    }));
+      : await Promise.all(
+          emailRecipients.map(async (recipient) => {
+            const result = await sendBrevoEmail({
+              to: recipient.email!,
+              toName: recipient.name,
+              senderName: shopName,
+              subject: email.subject,
+              htmlContent: email.htmlContent,
+            });
+            if (!result.success)
+              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]');
+            return result.success;
+          }),
+        );
 
     const push = input.channels?.push === false
       ? { sent: 0, failed: 0 }
       : await sendWebPushToUsers(
-      uniqueRecipients.map((recipient) => recipient.userId),
-      {
-        title: email.title,
-        body: email.pushBody,
-        url: '/dashboard/agenda',
-        tag: `appointment-change-${input.appointmentId}`,
-      },
-    );
+          uniqueRecipients.map((recipient) => recipient.userId),
+          {
+            title: email.title,
+            body: email.pushBody,
+            url: '/dashboard/agenda',
+            tag: `appointment-change-${input.appointmentId}`,
+          },
+        );
 
     return {
       recipients: uniqueRecipients.length,
