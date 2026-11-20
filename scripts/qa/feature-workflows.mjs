@@ -570,6 +570,7 @@ assert.ok(notificationRetryMigration.includes('notificationRetryToken'));
 const barberNotificationRetryMigration = read(
   'supabase/migrations/20261120170000_retry_failed_barber_notifications.sql',
 );
+const barberNotificationHelperForRetry = read('lib/brevo/appointment-change-notifications.ts');
 assert.ok(barberNotificationRetryMigration.includes('public.claim_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes('public.complete_appointment_barber_notification_retry'));
 assert.ok(barberNotificationRetryMigration.includes("event.actor_type = 'customer'"));
@@ -582,8 +583,8 @@ assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"))
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes('channels: { email: false, push: true }'));
-assert.ok(barberNotificationHelper.includes('channels?: { email?: boolean; push?: boolean }'));
-assert.ok(barberNotificationHelper.includes('input.channels?.push === false'));
+assert.ok(barberNotificationHelperForRetry.includes('channels?: { email?: boolean; push?: boolean }'));
+assert.ok(barberNotificationHelperForRetry.includes('input.channels?.push === false'));
 assert.ok(appointmentActivityApi.includes('barberNotificationRetryLeaseUntil'));
 assert.ok(appointmentDetailDialog.includes('barberNotificationRetryInProgress'));
 assert.ok(appointmentDetailDialog.includes('Repetir notificação push'));
