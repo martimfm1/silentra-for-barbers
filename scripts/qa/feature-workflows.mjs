@@ -587,6 +587,8 @@ assert.ok(barberNotificationHelperForRetry.includes('channels?: { email?: boolea
 assert.ok(barberNotificationHelperForRetry.includes('input.channels?.push === false'));
 assert.ok(appointmentActivityApi.includes('barberNotificationRetryLeaseUntil'));
 assert.ok(appointmentDetailDialog.includes('barberNotificationRetryInProgress'));
+assert.ok(appointmentDetailDialog.includes('The push notification retry failed'));
+assert.ok(appointmentDetailDialog.includes('A repetição da notificação push falhou'));
 assert.ok(appointmentDetailDialog.includes('Repetir notificação push'));
 assert.ok(appointmentDetailDialog.includes('Retry push notification'));
 console.log('[BARBER_NOTIFICATION_RETRY_QA] Fully failed push deliveries can be retried under an atomic lease; partial delivery is never replayed.');
