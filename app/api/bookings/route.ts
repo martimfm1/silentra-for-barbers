@@ -363,7 +363,7 @@ async function POST__unobserved(request: Request) {
     const requestedStart = timeToMinutes(bookingTime);
     const { data: selectedService, error: serviceError } = await supabase
       .from('services')
-      .select('id,name,duration,price')
+      .select('id,name,duration,buffer_minutes,price')
       .eq('id', service)
       .eq('barbershop_id', barbershopId)
       .eq('is_active', true)
