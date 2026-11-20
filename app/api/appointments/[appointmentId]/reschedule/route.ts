@@ -268,7 +268,7 @@ async function PATCH__unobserved(
         const bounds = getLisbonDayBounds(date);
         return admin
           .from('appointments')
-          .select('id,date_hour,duration_minutes,professional_id')
+          .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
           .eq('barbershop_id', barbershopId)
           .gte('date_hour', bounds.start)
           .lt('date_hour', bounds.endExclusive)
