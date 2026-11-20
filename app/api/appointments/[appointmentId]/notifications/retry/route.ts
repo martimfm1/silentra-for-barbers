@@ -252,21 +252,28 @@ async function POST__unobserved(
         );
       }
 
-      const notification = await notifyBarberOfAppointmentChange({
-        event: action,
-        appointmentId: barberAppointment.id,
-        barbershopId: tenant.barbershopId,
-        professionalId: barberAppointment.professional_id,
-        customerName: latestActivity.actor_name?.trim() || barberAppointment.manual_name?.trim() || 'Cliente',
-        serviceName: service?.name?.trim() || 'Serviço',
-        ...(action === 'cancelled'
-          ? { dateHour: barberAppointment.date_hour }
-          : {
-              previousDateHour: metadata.from as string,
-              newDateHour: barberAppointment.date_hour,
-            }),
-        channels: { email: false, push: true },
-      });
+      const notification = action === 'cancelled'
+        ? await notifyBarberOfAppointmentChange({
+            event: 'cancelled',
+            appointmentId: barberAppointment.id,
+            barbershopId: tenant.barbershopId,
+            professionalId: barberAppointment.professional_id,
+            customerName: latestActivity.actor_name?.trim() || barberAppointment.manual_name?.trim() || 'Cliente',
+            serviceName: service?.name?.trim() || 'Serviço',
+            dateHour: barberAppointment.date_hour,
+            channels: { email: false, push: true },
+          })
+        : await notifyBarberOfAppointmentChange({
+            event: 'rescheduled',
+            appointmentId: barberAppointment.id,
+            barbershopId: tenant.barbershopId,
+            professionalId: barberAppointment.professional_id,
+            customerName: latestActivity.actor_name?.trim() || barberAppointment.manual_name?.trim() || 'Cliente',
+            serviceName: service?.name?.trim() || 'Serviço',
+            previousDateHour: metadata.from as string,
+            newDateHour: barberAppointment.date_hour,
+            channels: { email: false, push: true },
+          });
 
       const { data: completed, error: completionError } = await tenant.admin.rpc(
         'complete_appointment_barber_notification_retry',
