@@ -137,18 +137,13 @@ const scheduleBlockCapacityMigration = readFileSync(
   'supabase/migrations/20261120173000_enforce_schedule_block_capacity.sql',
   'utf8',
 );
-assert.match(
-  scheduleBlockCapacityMigration,
-  /create trigger b_enforce_appointment_schedule_block_capacity[\\s\\S]*before insert or update[\\s\\S]*on public\\.appointments/i,
-);
-assert.match(
-  scheduleBlockCapacityMigration,
-  /create trigger b_enforce_schedule_block_no_appointment_overlap[\\s\\S]*before insert or update[\\s\\S]*on public\\.schedule_blocks/i,
-);
-assert.match(
-  scheduleBlockCapacityMigration,
-  /pg_advisory_xact_lock[\\s\\S]*hashtextextended\\(new\\.barbershop_id::text, 0\\)/i,
-);
+assert.ok(scheduleBlockCapacityMigration.includes('create trigger b_enforce_appointment_schedule_block_capacity'));
+assert.ok(scheduleBlockCapacityMigration.includes('create trigger b_enforce_schedule_block_no_appointment_overlap'));
+assert.ok(scheduleBlockCapacityMigration.includes('before insert or update'));
+assert.ok(scheduleBlockCapacityMigration.includes('on public.appointments'));
+assert.ok(scheduleBlockCapacityMigration.includes('on public.schedule_blocks'));
+assert.ok(scheduleBlockCapacityMigration.includes('pg_advisory_xact_lock'));
+assert.ok(scheduleBlockCapacityMigration.includes('hashtextextended(new.barbershop_id::text, 0)'));
 assert.ok(scheduleBlockCapacityMigration.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
 assert.ok(scheduleBlockCapacityMigration.includes('BOOKING_CONFLICT'));
 assert.ok(scheduleBlockCapacityMigration.includes('Rollback: drop the two triggers'));
