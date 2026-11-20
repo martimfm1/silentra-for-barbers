@@ -26,7 +26,7 @@ export type BarberAppointmentChangeResult = {
   emailsAttempted: number;
   emailsSent: number;
   emailsFailed: number;
-  pushAttempted: number;
+  pushTargets: number;
   pushSent: number;
   pushFailed: number;
 };
@@ -213,7 +213,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
-        pushAttempted: 0,
+        pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
       };
@@ -229,7 +229,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
-        pushAttempted: 0,
+        pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
       };
@@ -276,7 +276,7 @@ export async function notifyBarberOfAppointmentChange(
       emailsAttempted: emailResults.length,
       emailsSent: emailResults.filter(Boolean).length,
       emailsFailed: emailResults.filter((success) => !success).length,
-      pushAttempted: uniqueRecipients.length,
+      pushTargets: uniqueRecipients.length,
       pushSent: push.sent,
       pushFailed: push.failed,
     };
@@ -290,7 +290,7 @@ export async function notifyBarberOfAppointmentChange(
         emailsAttempted: 0,
         emailsSent: 0,
         emailsFailed: 0,
-        pushAttempted: 0,
+        pushTargets: 0,
         pushSent: 0,
         pushFailed: 0,
       };
