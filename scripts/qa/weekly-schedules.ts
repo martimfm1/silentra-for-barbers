@@ -261,12 +261,12 @@ const expiredMbwayCapacityMigration = readFileSync(
 );
 assert.match(
   expiredMbwayCapacityMigration,
-  /new\.payment_status = 'awaiting_review'[\s\S]*new\.payment_expires_at is not null[\s\S]*new\\.payment_expires_at <= (?:pg_catalog\\.)?now\\(\\)/i,
+  /new\.payment_status = 'awaiting_review'[\s\S]*new\.payment_expires_at is not null[\s\S]*new\.payment_expires_at <= (?:pg_catalog\.)?now\(\)/i,
   'An expired MB WAY booking being inserted or updated must no longer reserve capacity',
 );
 assert.match(
   expiredMbwayCapacityMigration,
-  /a\.payment_status = 'awaiting_review'[\s\S]*a\.payment_expires_at is not null[\s\S]*a\\.payment_expires_at <= (?:pg_catalog\\.)?now\\(\\)/i,
+  /a\.payment_status = 'awaiting_review'[\s\S]*a\.payment_expires_at is not null[\s\S]*a\.payment_expires_at <= (?:pg_catalog\.)?now\(\)/i,
   'Existing expired MB WAY holds must be ignored by the overlap check',
 );
 assert.match(
