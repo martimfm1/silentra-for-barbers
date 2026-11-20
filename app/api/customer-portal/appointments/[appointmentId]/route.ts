@@ -445,7 +445,8 @@ async function PATCH__unobserved(
       const slotStart = timeToMinutes(slot);
       const slotEnd =
         slotStart +
-        Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440);
+        Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440) +
+        Math.max(0, Number(appointment.buffer_minutes ?? 0));
       const block = availability.blockedIntervals.find(
         (item) =>
           item.startTime &&
