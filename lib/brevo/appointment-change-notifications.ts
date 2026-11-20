@@ -216,7 +216,7 @@ export async function notifyBarberOfAppointmentChange(
     ];
     if (uniqueRecipients.length === 0) {
       console.warn('[BARBER_APPOINTMENT_CHANGE_NO_RECIPIENT]');
-      return { recipients: 0, emailsSent: 0, pushSent: 0 };
+      return { recipients: 0, emailsAttempted: 0, emailsSent: 0, emailsFailed: 0, pushAttempted: 0, pushSent: 0, pushFailed: 0 };
     }
 
     const language: Language = String(shop.default_language ?? '')
@@ -269,7 +269,7 @@ export async function notifyBarberOfAppointmentChange(
       '[BARBER_APPOINTMENT_CHANGE_NOTIFICATION_ERROR]',
       error instanceof Error ? error.name : 'UNKNOWN',
     );
-    return { recipients: 0, emailsSent: 0, pushSent: 0 };
+    return { recipients: 0, emailsAttempted: 0, emailsSent: 0, emailsFailed: 0, pushAttempted: 0, pushSent: 0, pushFailed: 0 };
   }
 }
 
