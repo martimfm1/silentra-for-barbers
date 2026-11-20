@@ -86,7 +86,7 @@ async function POST__unobserved(
       }
       if (!allowed) {
         return NextResponse.json(
-          { success: false, error: 'Sem permissão para reenviar emails da agenda.' },
+          { success: false, error: 'Sem permissão para repetir notificações da agenda.' },
           { status: 403 },
         );
       }
