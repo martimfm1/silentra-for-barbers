@@ -7,6 +7,7 @@ export interface CreateServicePayload {
   name: string;
   price: number;
   duration: number;
+  buffer_minutes: number;
   barbershop_id: string;
 }
 
