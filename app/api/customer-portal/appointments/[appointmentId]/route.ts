@@ -158,7 +158,8 @@ async function getAvailability(
             start: timeToMinutes(parts[1]),
             end:
               timeToMinutes(parts[1]) +
-              Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440),
+              Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
+              Math.max(0, Number(item.buffer_minutes ?? 0)),
           }
         : null;
     })
