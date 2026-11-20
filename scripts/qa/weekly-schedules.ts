@@ -299,3 +299,9 @@ assert.match(
   /pg_advisory_xact_lock[\s\S]*hashtextextended\(new\.barbershop_id::text, 0\)/i,
   'Expiry cleanup must serialize with public booking creation per barbershop',
 );
+
+assert.match(
+  expiredMbwayCapacityMigration,
+  /old\.payment_method = 'mbway'[\s\S]*old\.payment_status in \('awaiting_review', 'expired'\)/i,
+  'Expired MB WAY holds must not be revived after the cleanup has marked them expired',
+);
