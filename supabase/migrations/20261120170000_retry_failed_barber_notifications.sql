@@ -1,5 +1,7 @@
 begin;
 
+-- Rollback: drop complete_appointment_barber_notification_retry(uuid, uuid, text, boolean, integer, integer, integer, boolean, integer, integer), then drop claim_appointment_barber_notification_retry(uuid, uuid, uuid, text, text).
+
 create or replace function public.claim_appointment_barber_notification_retry(
   p_audit_log_id uuid,
   p_barbershop_id uuid,
