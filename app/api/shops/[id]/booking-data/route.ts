@@ -14,6 +14,7 @@ import {
 type AppointmentRow = {
   date_hour: string | null;
   duration_minutes: number | null;
+  buffer_minutes: number | null;
   professional_id: string | null;
   status: string | null;
   payment_status?: string | null;
@@ -133,7 +134,7 @@ async function GET__unobserved(
       admin
         .from('appointments')
         .select(
-          'date_hour, duration_minutes, professional_id, status, payment_status, payment_expires_at',
+          'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
         )
         .eq('barbershop_id', barbershopId)
         .gte('date_hour', dayStart)
@@ -205,6 +206,7 @@ async function GET__unobserved(
         1,
         Number(service.duration || service.duration_minutes || 30),
       ),
+      bufferMinutes: Math.max(0, Math.min(120, Number(service.buffer_minutes ?? 0))),
     }));
 
     // The live professionals table contains only id/barbershop_id/name/commission/active/created_at.
@@ -296,6 +298,8 @@ async function GET__unobserved(
       Math.max(Number(selectedService?.durationMinutes ?? 30), 1),
       1440,
     );
+    const serviceBuffer = Math.max(0, Math.min(120, Number(selectedService?.bufferMinutes ?? 0)));
+    const reservedDuration = serviceDuration + serviceBuffer;
     const activeAppointments = (
       (appointments ?? []) as AppointmentRow[]
     ).filter(
@@ -317,7 +321,7 @@ async function GET__unobserved(
             Math.min(
               Math.max(Number(appointment.duration_minutes ?? 30), 1),
               1440,
-            ),
+            ) + Math.max(0, Number(appointment.buffer_minutes ?? 0)),
           professionalId: appointment.professional_id,
         };
       })
@@ -388,7 +392,7 @@ async function GET__unobserved(
           slotStart + reservedDuration <= periodEnd;
           slotStart += 30
         ) {
-          const slotEnd = slotStart + serviceDuration;
+          const slotEnd = slotStart + reservedDuration;
           if (
             (isToday && slotStart <= currentMinutesNow) ||
             isBeforeMinimumBookingNotice(
