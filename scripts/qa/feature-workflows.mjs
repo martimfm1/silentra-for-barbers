@@ -536,6 +536,26 @@ assert.ok(notificationRetryMigration.includes("from public, anon, authenticated"
 assert.ok(notificationRetryMigration.includes('to service_role'));
 assert.ok(notificationRetryMigration.includes('notificationRetryLeaseUntil'));
 assert.ok(notificationRetryMigration.includes('notificationRetryToken'));
+
+const barberNotificationHelper = read('lib/brevo/appointment-change-notifications.ts');
+const customerPortalAppointmentApi = read(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+);
+assert.ok(barberNotificationHelper.includes('emailsAttempted: number'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: number'));
+assert.ok(barberNotificationHelper.includes('pushAttempted: number'));
+assert.ok(barberNotificationHelper.includes('pushFailed: number'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((success) => !success).length'));
+assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
+assert.ok(customerPortalAppointmentApi.includes('barberEmailsFailed: barberNotification.emailsFailed'));
+assert.ok(customerPortalAppointmentApi.includes('barberPushFailed: barberNotification.pushFailed'));
+assert.ok(customerPortalAppointmentApi.includes(".eq('date_hour', appointment.date_hour)"));
+assert.ok(appointmentActivityApi.includes('barberEmailStatus'));
+assert.ok(appointmentActivityApi.includes('barberPushStatus'));
+assert.ok(appointmentDetailDialog.includes('barberEmailsFailed'));
+assert.ok(appointmentDetailDialog.includes('barberPushFailed'));
+assert.ok(appointmentDetailDialog.includes('Email:'));
+assert.ok(appointmentDetailDialog.includes('Push:'));
 console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lease ownership and provider result persistence are enforced.');
 
 
