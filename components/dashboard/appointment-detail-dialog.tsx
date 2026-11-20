@@ -1384,7 +1384,8 @@ export function AppointmentDetailDialog({
                             event.metadata.notificationSent === false &&
                             event.metadata.notificationSkipped !== true) ||
                             (event.actorType === 'customer' &&
-                              event.metadata.barberPushStatus === 'failed')) ? (
+                              (event.metadata.barberPushStatus === 'failed' ||
+                                event.metadata.barberEmailStatus === 'failed'))) ? (
                             <div className="mt-2 flex flex-wrap items-center gap-2">
                               <Button
                                 type="button"
@@ -1409,7 +1410,11 @@ export function AppointmentDetailDialog({
                                   : event.metadata.notificationRetryInProgress === true
                                     ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
                                     : event.actorType === 'customer'
-                                      ? isEnglish ? 'Retry push notification' : 'Repetir notificação push'
+                                      ? event.metadata.barberEmailStatus === 'failed' && event.metadata.barberPushStatus === 'failed'
+                                        ? isEnglish ? 'Retry email and push' : 'Repetir email e push'
+                                        : event.metadata.barberEmailStatus === 'failed'
+                                          ? isEnglish ? 'Retry team email' : 'Repetir email à equipa'
+                                          : isEnglish ? 'Retry push notification' : 'Repetir notificação push'
                                       : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (
