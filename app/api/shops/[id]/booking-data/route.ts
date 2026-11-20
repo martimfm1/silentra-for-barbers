@@ -427,7 +427,13 @@ async function GET__unobserved(
         : shopDaySchedule.day_off;
     const availableSlots = requestedProfessionalId
       ? (professionalAvailability[requestedProfessionalId] ?? [])
-      : Array.from(new Set(Object.values(professionalAvailability).flat())).sort();
+      : professionals.length > 0
+        ? (professionalAvailability[professionals[0].id] ?? []).filter((slot) =>
+            professionals.every((professional) =>
+              (professionalAvailability[professional.id] ?? []).includes(slot),
+            ),
+          )
+        : [];
     const visibleBlockedIntervals = requestedProfessionalId
       ? blockedIntervals.filter(
           (block) =>
