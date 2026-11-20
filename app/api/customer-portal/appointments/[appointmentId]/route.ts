@@ -50,7 +50,7 @@ async function getAuthorizedAppointment(
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,buffer_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
