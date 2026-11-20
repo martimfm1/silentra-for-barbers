@@ -462,6 +462,8 @@ async function PATCH__unobserved(
       return jsonError('Este horário já não está disponível.', 409);
     }
     const newDateHour = `${date}T${slot}:00`;
+    if (new Date(appointment.date_hour).getTime() === new Date(newDateHour).getTime())
+      return jsonError('A marcação já está neste horário.', 409);
     const { data: updated, error: updateError } = await admin
       .from('appointments')
       .update({ date_hour: newDateHour })
