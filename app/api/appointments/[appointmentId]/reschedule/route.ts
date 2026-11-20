@@ -351,7 +351,8 @@ async function PATCH__unobserved(
       const otherStart = minutes(local.time);
       const otherEnd =
         otherStart +
-        Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440);
+        Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
+        Math.max(0, Number(item.buffer_minutes ?? 0));
       return startMinutes < otherEnd && endMinutes > otherStart;
     });
     if (conflict)
