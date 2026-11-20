@@ -37,7 +37,8 @@ begin
 
   -- An expired MB WAY payment cannot be revived by moving its appointment.
   if tg_op = 'UPDATE'
-    and old.payment_status = 'awaiting_review'
+    and old.payment_method = 'mbway'
+    and old.payment_status in ('awaiting_review', 'expired')
     and old.payment_expires_at is not null
     and old.payment_expires_at <= pg_catalog.now()
   then
