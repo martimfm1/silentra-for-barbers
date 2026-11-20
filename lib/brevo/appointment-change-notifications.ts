@@ -8,6 +8,7 @@ type AppointmentChangeBase = {
   professionalId: string | null;
   customerName: string;
   serviceName: string;
+  channels?: { email?: boolean; push?: boolean };
 };
 
 export type BarberAppointmentChange =
@@ -248,35 +249,41 @@ export async function notifyBarberOfAppointmentChange(
       ).values(),
     ];
 
-    const emailResults = await Promise.all(emailRecipients.map(async (recipient) => {
-      const result = await sendBrevoEmail({
-        to: recipient.email!,
-        toName: recipient.name,
-        senderName: shopName,
-        subject: email.subject,
-        htmlContent: email.htmlContent,
-      });
-      if (!result.success)
-        console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]');
-      return result.success;
-    }));
+    const emailResults = input.channels?.email === false
+      ? []
+      : await Promise.all(
+          emailRecipients.map(async (recipient) => {
+            const result = await sendBrevoEmail({
+              to: recipient.email!,
+              toName: recipient.name,
+              senderName: shopName,
+              subject: email.subject,
+              htmlContent: email.htmlContent,
+            });
+            if (!result.success)
+              console.error('[BARBER_APPOINTMENT_CHANGE_EMAIL_FAILED]');
+            return result.success;
+          }),
+        );
 
-    const push = await sendWebPushToUsers(
-      uniqueRecipients.map((recipient) => recipient.userId),
-      {
-        title: email.title,
-        body: email.pushBody,
-        url: '/dashboard/agenda',
-        tag: `appointment-change-${input.appointmentId}`,
-      },
-    );
+    const push = input.channels?.push === false
+      ? { sent: 0, failed: 0 }
+      : await sendWebPushToUsers(
+          uniqueRecipients.map((recipient) => recipient.userId),
+          {
+            title: email.title,
+            body: email.pushBody,
+            url: '/dashboard/agenda',
+            tag: `appointment-change-${input.appointmentId}`,
+          },
+        );
 
     return {
       recipients: uniqueRecipients.length,
       emailsAttempted: emailResults.length,
       emailsSent: emailResults.filter(Boolean).length,
       emailsFailed: emailResults.filter((success) => !success).length,
-      pushTargets: uniqueRecipients.length,
+      pushTargets: input.channels?.push === false ? 0 : uniqueRecipients.length,
       pushSent: push.sent,
       pushFailed: push.failed,
     };

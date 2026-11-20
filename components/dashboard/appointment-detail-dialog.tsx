@@ -64,6 +64,12 @@ function activityNotificationDetail(
   event: AppointmentActivity,
   isEnglish: boolean,
 ): string | null {
+  if (event.metadata.barberNotificationRetryInProgress === true) {
+    return isEnglish ? 'Retrying the barbershop push notification' : 'A repetir a notificação push da barbearia';
+  }
+  if (event.metadata.barberNotificationRetryFailed === true) {
+    return isEnglish ? 'The push notification retry failed' : 'A repetição da notificação push falhou';
+  }
   if (event.metadata.notificationRetryInProgress === true) {
     return isEnglish ? 'Confirming email delivery' : 'A confirmar o resultado do envio do email';
   }
@@ -421,7 +427,12 @@ export function AppointmentDetailDialog({
       : event.action === 'appointment.cancelled'
         ? 'cancelled'
         : null;
-    if (!action || event.actorType !== 'staff') return;
+    const audience = event.actorType === 'customer' ? 'barbershop' : 'customer';
+    if (
+      !action ||
+      (audience === 'customer' && event.actorType !== 'staff') ||
+      (audience === 'barbershop' && event.actorType !== 'customer')
+    ) return;
 
     setRetryingActivityId(event.id);
     setActivityRetryErrorId(null);
@@ -432,8 +443,9 @@ export function AppointmentDetailDialog({
               ...item,
               metadata: {
                 ...item.metadata,
-                notificationRetryInProgress: true,
-                notificationRetryFailed: false,
+                ...(audience === 'customer'
+                  ? { notificationRetryInProgress: true, notificationRetryFailed: false }
+                  : { barberNotificationRetryInProgress: true, barberNotificationRetryFailed: false }),
               },
             }
           : item,
@@ -449,17 +461,20 @@ export function AppointmentDetailDialog({
             Accept: 'application/json',
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ action }),
+          body: JSON.stringify({ action, audience }),
         },
       );
       const payload = await response.json().catch(() => null);
-      if (!response.ok || payload?.success !== true || payload?.emailSent !== true) {
+      const deliveryConfirmed = audience === 'barbershop'
+        ? Number(payload?.pushSent ?? 0) > 0
+        : payload?.emailSent === true;
+      if (!response.ok || payload?.success !== true || !deliveryConfirmed) {
         throw new Error(
           typeof payload?.error === 'string'
             ? payload.error
-            : isEnglish
-              ? 'The customer email could not be resent.'
-              : 'Não foi possível reenviar o email ao cliente.',
+            : audience === 'barbershop'
+              ? isEnglish ? 'The push notification could not be resent.' : 'Não foi possível repetir a notificação push.'
+              : isEnglish ? 'The customer email could not be resent.' : 'Não foi possível reenviar o email ao cliente.',
         );
       }
 
@@ -468,14 +483,24 @@ export function AppointmentDetailDialog({
           item.id === event.id
             ? {
                 ...item,
-                metadata: {
-                  ...item.metadata,
-                  notificationSent: true,
-                  notificationSkipped: false,
-                  notificationRetryCount:
-                    Number(payload.retryCount ?? item.metadata.notificationRetryCount ?? 0),
-                  notificationRetryFailed: false,
-                },
+                metadata: audience === 'barbershop'
+                  ? {
+                      ...item.metadata,
+                      barberPushSent: Number(item.metadata.barberPushSent ?? 0) + Number(payload.pushSent ?? 0),
+                      barberPushFailed: Number(payload.pushFailed ?? 0),
+                      barberPushStatus: Number(payload.pushFailed ?? 0) > 0 ? 'partial' : 'sent',
+                      barberNotificationRetryInProgress: false,
+                      barberNotificationRetryFailed: false,
+                      barberNotificationRetryCount: Number(payload.retryCount ?? item.metadata.barberNotificationRetryCount ?? 0),
+                    }
+                  : {
+                      ...item.metadata,
+                      notificationSent: true,
+                      notificationSkipped: false,
+                      notificationRetryCount:
+                        Number(payload.retryCount ?? item.metadata.notificationRetryCount ?? 0),
+                      notificationRetryFailed: false,
+                    },
               }
             : item,
         ),
@@ -490,8 +515,9 @@ export function AppointmentDetailDialog({
                 ...item,
                 metadata: {
                   ...item.metadata,
-                  notificationRetryFailed: true,
-                  notificationRetryInProgress: false,
+                  ...(audience === 'customer'
+                    ? { notificationRetryFailed: true, notificationRetryInProgress: false }
+                    : { barberNotificationRetryFailed: true, barberNotificationRetryInProgress: false }),
                 },
               }
             : item,
@@ -1330,10 +1356,12 @@ export function AppointmentDetailDialog({
                             </p>
                           ) : null}
                           {event.id === activityEvents[activityEvents.length - 1]?.id &&
-                          event.actorType === 'staff' &&
                           ['appointment.rescheduled', 'appointment.cancelled'].includes(event.action) &&
-                          event.metadata.notificationSent === false &&
-                          event.metadata.notificationSkipped !== true ? (
+                          ((event.actorType === 'staff' &&
+                            event.metadata.notificationSent === false &&
+                            event.metadata.notificationSkipped !== true) ||
+                            (event.actorType === 'customer' &&
+                              event.metadata.barberPushStatus === 'failed')) ? (
                             <div className="mt-2 flex flex-wrap items-center gap-2">
                               <Button
                                 type="button"
@@ -1341,19 +1369,25 @@ export function AppointmentDetailDialog({
                                 variant="outline"
                                 disabled={
                                   retryingActivityId !== null ||
-                                  event.metadata.notificationRetryInProgress === true
+                                  event.metadata.notificationRetryInProgress === true ||
+                                  event.metadata.barberNotificationRetryInProgress === true
                                 }
                                 onClick={() => void handleRetryActivityNotification(event)}
                               >
                                 {retryingActivityId === event.id ||
-                                event.metadata.notificationRetryInProgress === true ? (
+                                event.metadata.notificationRetryInProgress === true ||
+                                event.metadata.barberNotificationRetryInProgress === true ? (
                                   <Loader2 className="mr-2 size-3.5 animate-spin" aria-hidden="true" />
                                 ) : (
                                   <Mail className="mr-2 size-3.5" aria-hidden="true" />
                                 )}
-                                {event.metadata.notificationRetryInProgress === true
-                                  ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
-                                  : isEnglish ? 'Resend email' : 'Reenviar email'}
+                                {event.metadata.barberNotificationRetryInProgress === true
+                                  ? isEnglish ? 'Retrying push…' : 'A repetir push…'
+                                  : event.metadata.notificationRetryInProgress === true
+                                    ? isEnglish ? 'Confirming email…' : 'A confirmar envio…'
+                                    : event.actorType === 'customer'
+                                      ? isEnglish ? 'Retry push notification' : 'Repetir notificação push'
+                                      : isEnglish ? 'Resend email' : 'Reenviar email'}
                               </Button>
                               {activityRetryErrorId === event.id ? (
                                 <span className="text-xs text-rose-300">
