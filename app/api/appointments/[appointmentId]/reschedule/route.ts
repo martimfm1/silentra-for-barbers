@@ -242,7 +242,7 @@ async function PATCH__unobserved(
     const duration = Math.min(
       Math.max(Number(appointment.duration_minutes ?? 30), 1),
       1440,
-    );
+    ) + Math.max(0, Number(appointment.buffer_minutes ?? 0));
     const startMinutes = minutes(time);
     const endMinutes = startMinutes + duration;
 
