@@ -629,9 +629,10 @@ const customerPortalAppointmentApi = read(
 );
 assert.ok(barberNotificationHelper.includes('emailsAttempted: number'));
 assert.ok(barberNotificationHelper.includes('emailsFailed: number'));
+assert.ok(barberNotificationHelper.includes('emailsUnknown: number'));
 assert.ok(barberNotificationHelper.includes('pushTargets: number'));
 assert.ok(barberNotificationHelper.includes('pushFailed: number'));
-assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((success) => !success).length'));
+assert.ok(barberNotificationHelper.includes('emailsFailed: emailResults.filter((result) => !result.success).length'));
 assert.ok(barberNotificationHelper.includes('pushFailed: push.failed'));
 assert.ok(customerPortalAppointmentApi.includes('barberEmailsFailed: barberNotification.emailsFailed'));
 assert.ok(customerPortalAppointmentApi.includes('barberPushFailed: barberNotification.pushFailed'));
