@@ -580,6 +580,24 @@ assert.ok(barberNotificationRetryMigration.includes('Partial delivery'));
 assert.ok(barberNotificationRetryMigration.includes('recipient-level receipts'));
 assert.ok(barberNotificationRetryMigration.includes('to service_role'));
 assert.ok(barberNotificationRetryMigration.includes('Rollback: drop complete_appointment_barber_notification_retry'));
+
+const ambiguousBarberEmailRetryMigration = read(
+  'supabase/migrations/20261120180000_track_ambiguous_barber_email_retry.sql',
+);
+assert.ok(ambiguousBarberEmailRetryMigration.includes('p_emails_unknown integer'));
+assert.ok(ambiguousBarberEmailRetryMigration.includes("when p_emails_unknown > 0 then 'unknown'"));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('drop function if exists public.complete_appointment_barber_notification_retry'));
+assert.ok(ambiguousBarberEmailRetryMigration.includes('to service_role'));
+assert.ok(barberNotificationHelperForRetry.includes('emailsUnknown: number'));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_NETWORK_ERROR'"));
+assert.ok(barberNotificationHelperForRetry.includes("errorCode === 'BREVO_HTTP_408'"));
+assert.ok(customerPortalAppointmentApi.includes('barberEmailsUnknown: barberNotification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('p_emails_unknown: notification.emailsUnknown'));
+assert.ok(appointmentNotificationRetryApi.includes('emailRetried: retryEmail'));
+assert.ok(appointmentDetailDialog.includes('barberEmailStatus === \'failed\''));
+assert.ok(appointmentDetailDialog.includes('Repetir email à equipa'));
+assert.ok(appointmentDetailDialog.includes('Retry team email'));
+
 assert.ok(appointmentNotificationRetryApi.includes("audience === 'barbershop'"));
 assert.ok(appointmentNotificationRetryApi.includes("'claim_appointment_barber_notification_retry'"));
 assert.ok(appointmentNotificationRetryApi.includes("'complete_appointment_barber_notification_retry'"));
