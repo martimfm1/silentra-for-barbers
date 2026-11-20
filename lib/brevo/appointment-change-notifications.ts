@@ -269,7 +269,7 @@ export async function notifyBarberOfAppointmentChange(
             const unknown =
               errorCode === 'BREVO_NETWORK_ERROR' ||
               errorCode === 'BREVO_HTTP_408' ||
-              /^BREVO_HTTP_5\\d\\d$/.test(errorCode);
+              errorCode.startsWith('BREVO_HTTP_5');
             return { success: result.success, unknown };
           }),
         );
