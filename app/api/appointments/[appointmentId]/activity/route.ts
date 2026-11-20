@@ -127,8 +127,17 @@ async function GET__unobserved(
     const events = rows.map((row) => {
       const metadata = row.metadata ?? {};
       const safeMetadata: Record<string, unknown> = {};
-      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'notificationRetryStartedAt', 'barberEmailsAttempted', 'barberEmailsSent', 'barberEmailsFailed', 'barberEmailStatus', 'barberPushTargets', 'barberPushSent', 'barberPushFailed', 'barberPushStatus', 'reason']) {
+      for (const key of ['from', 'to', 'previousStatus', 'newStatus', 'notificationSent', 'notificationSkipped', 'notificationRetryCount', 'notificationLastAttemptAt', 'notificationRetryFailed', 'notificationRetryStartedAt', 'barberEmailsAttempted', 'barberEmailsSent', 'barberEmailsFailed', 'barberEmailStatus', 'barberPushTargets', 'barberPushSent', 'barberPushFailed', 'barberPushStatus', 'barberNotificationRetryCount', 'barberNotificationLastAttemptAt', 'barberNotificationRetryFailed', 'barberNotificationRetryStartedAt', 'reason']) {
         if (metadata[key] !== undefined) safeMetadata[key] = metadata[key];
+      }
+      if (typeof metadata.barberNotificationRetryInProgress === 'boolean') {
+        const retryLeaseUntil = typeof metadata.barberNotificationRetryLeaseUntil === 'string'
+          ? Date.parse(metadata.barberNotificationRetryLeaseUntil)
+          : Number.NaN;
+        safeMetadata.barberNotificationRetryInProgress =
+          metadata.barberNotificationRetryInProgress &&
+          Number.isFinite(retryLeaseUntil) &&
+          retryLeaseUntil > Date.now();
       }
       if (typeof metadata.notificationRetryInProgress === 'boolean') {
         const retryLeaseUntil = typeof metadata.notificationRetryLeaseUntil === 'string'
