@@ -322,7 +322,8 @@ async function PATCH__unobserved(
 
     const block = (blocks ?? []).find(
       (item) =>
-        (!item.professional_id ||
+        (!appointment.professional_id ||
+          !item.professional_id ||
           item.professional_id === appointment.professional_id) &&
         (!item.start_time ||
           !item.end_time ||

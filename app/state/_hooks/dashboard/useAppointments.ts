@@ -490,7 +490,21 @@ export function useAppointments(
           end_time,
           reason: reason || 'Bloqueio de Agenda',
         });
-        if (error) throw error;
+        if (error) {
+          const databaseError = error as Error & { code?: string };
+          if (
+            databaseError.code === '23P01' ||
+            databaseError.message.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT')
+          ) {
+            toast.error(
+              locale === 'en'
+                ? 'This block overlaps an active booking.'
+                : 'Não podes bloquear um horário que já tem uma marcação ativa.',
+            );
+            return false;
+          }
+          throw error;
+        }
         toast.success('Bloqueio de horário criado com sucesso.');
         setBlockFormData({
           professional_id: '',
@@ -509,7 +523,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [barbershopId, blockFormData, onRefreshData],
+    [barbershopId, blockFormData, locale, onRefreshData],
   );
 
   const handleDeleteBlock = useCallback(

@@ -130,6 +130,7 @@ async function getAvailability(
     throw new Error('BLOCK_LOOKUP_FAILED');
   const visibleBlocks = (blocks ?? []).filter(
     (block: any) =>
+      !appointment.professional_id ||
       !block.professional_id ||
       block.professional_id === appointment.professional_id,
   );

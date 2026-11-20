@@ -428,6 +428,7 @@ async function POST__unobserved(request: Request) {
     }
     const matchingBlock = (blocks ?? []).find((block: any) => {
       if (
+        normalizedProfessionalId &&
         block.professional_id &&
         block.professional_id !== normalizedProfessionalId
       )

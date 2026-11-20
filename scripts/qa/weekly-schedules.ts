@@ -133,7 +133,47 @@ for (const path of files) {
     `Expected weekly schedule integration in ${path}`,
   );
 }
-console.log('Weekly schedule QA passed: Saturday afternoons, split shifts, breaks, day off and legacy migration.');
+const scheduleBlockCapacityMigration = readFileSync(
+  'supabase/migrations/20261120173000_enforce_schedule_block_capacity.sql',
+  'utf8',
+);
+assert.ok(scheduleBlockCapacityMigration.includes('create trigger b_enforce_appointment_schedule_block_capacity'));
+assert.ok(scheduleBlockCapacityMigration.includes('create trigger b_enforce_schedule_block_no_appointment_overlap'));
+assert.ok(scheduleBlockCapacityMigration.includes('before insert or update'));
+assert.ok(scheduleBlockCapacityMigration.includes('on public.appointments'));
+assert.ok(scheduleBlockCapacityMigration.includes('on public.schedule_blocks'));
+assert.ok(scheduleBlockCapacityMigration.includes('pg_advisory_xact_lock'));
+assert.ok(scheduleBlockCapacityMigration.includes('hashtextextended(new.barbershop_id::text, 0)'));
+assert.ok(scheduleBlockCapacityMigration.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
+assert.ok(scheduleBlockCapacityMigration.includes('BOOKING_CONFLICT'));
+assert.ok(scheduleBlockCapacityMigration.includes('Rollback: drop the two triggers'));
+
+const publicBookingData = readFileSync(
+  'app/api/shops/[id]/booking-data/route.ts',
+  'utf8',
+);
+const publicBookingApi = readFileSync('app/api/bookings/route.ts', 'utf8');
+const teamRescheduleApi = readFileSync(
+  'app/api/appointments/[appointmentId]/reschedule/route.ts',
+  'utf8',
+);
+const customerPortalAppointmentApi = readFileSync(
+  'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+  'utf8',
+);
+assert.ok(publicBookingData.includes('professionals.every('));
+assert.ok(publicBookingData.includes('professionalAvailability[professionals[0].id]'));
+assert.ok(publicBookingApi.includes('normalizedProfessionalId &&'));
+assert.ok(teamRescheduleApi.includes('!appointment.professional_id ||'));
+assert.ok(customerPortalAppointmentApi.includes('!appointment.professional_id ||'));
+const appointmentDashboardHook = readFileSync(
+  'app/state/_hooks/dashboard/useAppointments.ts',
+  'utf8',
+);
+assert.ok(appointmentDashboardHook.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
+assert.ok(appointmentDashboardHook.includes('Não podes bloquear um horário que já tem uma marcação ativa.'));
+
+console.log('Weekly schedule QA passed: split shifts, breaks, duration, day off, shop-wide unassigned capacity and database-enforced schedule blocks.');
 
 
 // Duration-aware public availability must match the atomic booking RPC.
