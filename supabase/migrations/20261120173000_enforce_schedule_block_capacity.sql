@@ -41,7 +41,7 @@ begin
     select 1
     from public.schedule_blocks as block
     where block.barbershop_id = new.barbershop_id
-      and block.date = v_start::date
+      and block.date between v_start::date and v_end::date
       -- An unassigned booking reserves capacity across the entire shop.
       -- An assigned booking only conflicts with its own professional's block.
       and (
