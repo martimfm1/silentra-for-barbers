@@ -161,6 +161,7 @@ export function BookingDrawerCanonical({
     Record<string, { available: boolean; closedDay: boolean }>
   >({});
   const [loadingDayAvailability, setLoadingDayAvailability] = useState(false);
+  const [dayAvailabilityReady, setDayAvailabilityReady] = useState(false);
   const [dayAvailabilityError, setDayAvailabilityError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -237,16 +238,39 @@ export function BookingDrawerCanonical({
   const currentDayAvailability = currentDay
     ? dayAvailability[currentDay.dateStr]
     : undefined;
-  const currentDayUnavailable = Boolean(
-    currentDayClosed || currentDayAvailability?.available === false,
-  );
   const getDayStatus = (day: BookingDayOption) => {
     const availability = dayAvailability[day.dateStr];
     const dayOff =
       isDayOffForBookingDay(day) || availability?.closedDay === true;
     const noSlots = availability?.available === false && !dayOff;
-    return { dayOff, noSlots, unavailable: dayOff || noSlots };
+    const needsService = !serviceId;
+    const checking = Boolean(serviceId && loadingDayAvailability);
+    const unverified = Boolean(
+      serviceId &&
+        !dayAvailabilityReady &&
+        !loadingDayAvailability &&
+        !dayAvailabilityError,
+    );
+    const verificationFailed = Boolean(serviceId && dayAvailabilityError);
+    return {
+      dayOff,
+      noSlots,
+      needsService,
+      checking,
+      unverified,
+      verificationFailed,
+      unavailable: dayOff || noSlots,
+      disabled:
+        dayOff ||
+        noSlots ||
+        needsService ||
+        checking ||
+        unverified ||
+        verificationFailed,
+    };
   };
+  const currentDayStatus = currentDay ? getDayStatus(currentDay) : null;
+  const currentDayUnavailable = currentDayStatus?.disabled ?? true;
 
   useEffect(() => {
     if (!isOpen || professionals.length === 0) return;
@@ -429,6 +453,7 @@ export function BookingDrawerCanonical({
     ) {
       setDayAvailability({});
       setLoadingDayAvailability(false);
+      setDayAvailabilityReady(false);
       setDayAvailabilityError(false);
       return;
     }
@@ -442,6 +467,7 @@ export function BookingDrawerCanonical({
     if (professional?.id) query.set('professionalId', professional.id);
 
     setDayAvailability({});
+    setDayAvailabilityReady(false);
     setDayAvailabilityError(false);
     setLoadingDayAvailability(true);
     void fetch(
@@ -463,7 +489,26 @@ export function BookingDrawerCanonical({
       })
       .then((responseData) => {
         if (controller.signal.aborted) return;
-        setDayAvailability(responseData.dayAvailability ?? {});
+        const overview = responseData.dayAvailability;
+        const hasCompleteOverview = Boolean(
+          overview &&
+            days.every((day) => {
+              const status = overview[day.dateStr];
+              return (
+                status &&
+                typeof status.available === 'boolean' &&
+                typeof status.closedDay === 'boolean'
+              );
+            }),
+        );
+        if (!hasCompleteOverview)
+          throw new Error(
+            locale === 'pt'
+              ? 'Não foi possível confirmar a disponibilidade para todos os dias.'
+              : 'Could not verify availability for every day.',
+          );
+        setDayAvailability(overview!);
+        setDayAvailabilityReady(true);
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError') {
@@ -479,6 +524,7 @@ export function BookingDrawerCanonical({
   }, [
     days,
     isOpen,
+    locale,
     professional?.id,
     professionals.length,
     retryKey,
@@ -729,13 +775,25 @@ export function BookingDrawerCanonical({
       service &&
       !currentDayUnavailable &&
       !loadingBookingData &&
-      !loadingDayAvailability,
+      !loadingDayAvailability &&
+      dayAvailabilityReady &&
+      !dayAvailabilityError,
   );
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
+    if (
+      loadingDayAvailability ||
+      !dayAvailabilityReady ||
+      dayAvailabilityError
+    )
+      return toast.error(
+        locale === 'pt'
+          ? 'Ainda não foi possível confirmar as vagas. Tenta novamente.'
+          : 'Availability has not been verified yet. Please retry.',
+      );
     if (currentDayUnavailable)
       return toast.error(
         currentDayClosed
@@ -1193,23 +1251,31 @@ export function BookingDrawerCanonical({
                             aria-pressed={dayIndex === index}
                             aria-label={
                               day.fullDateFormatted +
-                              (dayStatus.unavailable
-                                ? dayStatus.dayOff
+                              (dayStatus.dayOff
+                                ? locale === 'pt'
+                                  ? ', folga'
+                                  : ', day off'
+                                : dayStatus.noSlots
                                   ? locale === 'pt'
-                                    ? ', folga'
-                                    : ', day off'
-                                  : locale === 'pt'
                                     ? ', sem horários disponíveis'
                                     : ', no available times'
-                                : '')
+                                  : dayStatus.needsService
+                                    ? locale === 'pt'
+                                      ? ', escolhe primeiro um serviço'
+                                      : ', choose a service first'
+                                    : dayStatus.disabled
+                                      ? locale === 'pt'
+                                        ? ', disponibilidade por confirmar'
+                                        : ', availability not yet verified'
+                                      : '')
                             }
                             onClick={() => {
-                              if (isUnavailable || loadingDayAvailability) return;
+                              if (dayStatus.disabled) return;
                               setDayIndex(index);
                               setSelectedSlot(null);
                             }}
-                            disabled={isUnavailable || loadingDayAvailability}
-                            className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isUnavailable ? 'cursor-not-allowed border-rose-400/35 bg-rose-400/[0.08] text-rose-200 opacity-70' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                            disabled={dayStatus.disabled}
+                            className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isUnavailable ? 'cursor-not-allowed border-rose-400/35 bg-rose-400/[0.08] text-rose-200 opacity-70' : dayStatus.disabled ? 'cursor-not-allowed border-amber-400/20 bg-amber-400/[0.035] text-zinc-500 opacity-70' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                           >
                             <span className="block text-[10px] font-semibold text-zinc-500">
                               {day.isToday
@@ -1232,12 +1298,31 @@ export function BookingDrawerCanonical({
                                   ? locale === 'pt'
                                     ? 'Sem vagas'
                                     : 'Fully booked'
-                                  : (day.fullDateFormatted.split(' ')[2] ?? '')}
+                                  : dayStatus.needsService
+                                    ? locale === 'pt'
+                                      ? 'Escolhe serviço'
+                                      : 'Choose service'
+                                    : dayStatus.checking || dayStatus.unverified
+                                      ? locale === 'pt'
+                                        ? 'A verificar'
+                                        : 'Checking'
+                                      : dayStatus.verificationFailed
+                                        ? locale === 'pt'
+                                          ? 'Por confirmar'
+                                          : 'Unverified'
+                                        : (day.fullDateFormatted.split(' ')[2] ?? '')}
                             </span>
                           </button>
                         );
                       })}
                     </div>
+                    {!serviceId ? (
+                      <p className="mt-2 text-[11px] text-zinc-500" role="note">
+                        {locale === 'pt'
+                          ? 'Escolhe primeiro um serviço para desbloquear a consulta das vagas.'
+                          : 'Choose a service first to check which days have openings.'}
+                      </p>
+                    ) : null}
                     {loadingDayAvailability ? (
                       <p
                         className="mt-2 flex items-center gap-2 text-[11px] text-zinc-500"
@@ -1259,11 +1344,23 @@ export function BookingDrawerCanonical({
                       </p>
                     ) : null}
                     {dayAvailabilityError ? (
-                      <p className="mt-2 text-[11px] text-amber-300" role="status">
-                        {locale === 'pt'
-                          ? 'Não foi possível confirmar todas as vagas. Volta a tentar antes de continuar.'
-                          : 'Could not verify all openings. Please try again before continuing.'}
-                      </p>
+                      <div
+                        className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-amber-300"
+                        role="status"
+                      >
+                        <p>
+                          {locale === 'pt'
+                            ? 'Não foi possível confirmar todas as vagas. As datas ficam bloqueadas por segurança.'
+                            : 'Could not verify all openings. Dates stay disabled until availability is confirmed.'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setRetryKey((value) => value + 1)}
+                          className="rounded-lg px-2 py-1 font-semibold text-amber-200 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                        >
+                          {locale === 'pt' ? 'Tentar novamente' : 'Retry'}
+                        </button>
+                      </div>
                     ) : null}
                   </>
                 ) : (
