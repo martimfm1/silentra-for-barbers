@@ -1020,7 +1020,14 @@ const checks = [
       return (
         normalized.includes('const availableDays = days;') &&
         normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) || dayAvailability[currentDay.dateStr]?.closedDay === true : false') &&
-        normalized.includes('disabled={isUnavailable || loadingDayAvailability}') &&
+        normalized.includes('disabled={dayStatus.disabled}') &&
+        normalized.includes('const [dayAvailabilityReady, setDayAvailabilityReady] = useState(false)') &&
+        normalized.includes('days.every((day) => {') &&
+        normalized.includes('setDayAvailabilityReady(true)') &&
+        normalized.includes('!dayAvailabilityReady ||') &&
+        normalized.includes('dayStatus.needsService') &&
+        normalized.includes('Dates stay disabled until availability is confirmed.') &&
+        normalized.includes('setRetryKey((value) => value + 1)') &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
         normalized.includes("availabilityOverview: '1'") &&
         normalized.includes('dayAvailability[day.dateStr]?.available === true') &&
