@@ -113,6 +113,16 @@ assert.match(serviceHook, /is_active: service\.is_active === false/);
 assert.match(serviceRepository, /linkedAppointments/);
 assert.match(serviceRepository, /SERVICE_HAS_BOOKINGS/);
 assert.match(serviceTypes, /is_active\?: boolean/);
+assert.match(serviceTypes, /buffer_minutes\?: number/);
+assert.match(serviceRepository, /buffer_minutes/);
+assert.match(serviceHook, /bufferMinutes > 120/);
+assert.match(serviceHook, /buffer_minutes: bufferMinutes/);
+assert.match(serviceCard, /new-service-buffer/);
+assert.match(servicePage, /edit-service-buffer/);
+assert.match(bookingDataApi, /service\.buffer_minutes/);
+assert.match(bookingDataApi, /reservedDuration/);
+assert.match(bookingApi, /selectedService\.buffer_minutes/);
+
 
 for (const source of [
   bookingApi,
