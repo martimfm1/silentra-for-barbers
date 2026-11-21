@@ -1021,6 +1021,10 @@ const checks = [
         normalized.includes('const availableDays = days;') &&
         normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) || dayAvailability[currentDay.dateStr]?.closedDay === true : false') &&
         normalized.includes('disabled={isUnavailable || loadingDayAvailability}') &&
+        normalized.includes('!dayAvailabilityError') &&
+        normalized.includes('if (dayAvailabilityError)') &&
+        normalized.includes('setRetryKey((value) => value + 1)') &&
+        normalized.includes("t('bookingDrawer.retry')") &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
         normalized.includes("availabilityOverview: '1'") &&
         normalized.includes('dayAvailability[day.dateStr]?.available === true') &&
