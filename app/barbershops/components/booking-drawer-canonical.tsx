@@ -161,7 +161,8 @@ export function BookingDrawerCanonical({
     Record<string, { available: boolean; closedDay: boolean }>
   >({});
   const [loadingDayAvailability, setLoadingDayAvailability] = useState(false);
-  const [dayAvailabilityReady, setDayAvailabilityReady] = useState(false);
+  const [verifiedDayAvailabilityKey, setVerifiedDayAvailabilityKey] =
+    useState<string | null>(null);
   const [dayAvailabilityError, setDayAvailabilityError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -231,6 +232,14 @@ export function BookingDrawerCanonical({
   const availableDays = days;
   const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
+  const dayAvailabilityRequestKey = [
+    shop?.id ?? '',
+    serviceId ?? '',
+    professional?.id ?? 'all-professionals',
+    days[0]?.dateStr ?? '',
+  ].join('|');
+  const dayAvailabilityReady =
+    verifiedDayAvailabilityKey === dayAvailabilityRequestKey;
   const currentProfessionalSchedule = professional?.weekly_schedule;
   const currentDaySchedule =
     currentDay && currentProfessionalSchedule
@@ -466,7 +475,7 @@ export function BookingDrawerCanonical({
     ) {
       setDayAvailability({});
       setLoadingDayAvailability(false);
-      setDayAvailabilityReady(false);
+      setVerifiedDayAvailabilityKey(null);
       setDayAvailabilityError(false);
       return;
     }
@@ -480,7 +489,7 @@ export function BookingDrawerCanonical({
     if (professional?.id) query.set('professionalId', professional.id);
 
     setDayAvailability({});
-    setDayAvailabilityReady(false);
+    setVerifiedDayAvailabilityKey(null);
     setDayAvailabilityError(false);
     setLoadingDayAvailability(true);
     void fetch(
@@ -521,12 +530,12 @@ export function BookingDrawerCanonical({
           );
         }
         setDayAvailability(overview);
-        setDayAvailabilityReady(true);
+        setVerifiedDayAvailabilityKey(dayAvailabilityRequestKey);
       })
       .catch((reason) => {
         if (reason?.name !== 'AbortError') {
           setDayAvailability({});
-          setDayAvailabilityReady(false);
+          setVerifiedDayAvailabilityKey(null);
           setDayAvailabilityError(true);
         }
       })
@@ -537,6 +546,7 @@ export function BookingDrawerCanonical({
     return () => controller.abort();
   }, [
     days,
+    dayAvailabilityRequestKey,
     isOpen,
     locale,
     professional?.id,
