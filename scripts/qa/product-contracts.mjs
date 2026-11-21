@@ -1038,7 +1038,9 @@ const checks = [
           source.indexOf('bookingDrawer.stepTwoDay') &&
         source.includes(
           'Select a service so we can check which days still have openings.',
-        )
+        ) &&
+        source.includes("value={serviceId ?? ''}") &&
+        source.includes('item.durationMinutes')
       );
     },
   },
