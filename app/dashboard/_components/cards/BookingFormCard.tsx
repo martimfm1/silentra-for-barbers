@@ -428,16 +428,18 @@ export function BookingForm({
                     className="absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 shadow-2xl shadow-black/50"
                   >
                     {matchingClients.map((client, index) => (
-                      <div
+                      <button
                         key={client.id}
                         id={`booking-client-option-${index}`}
+                        type="button"
                         role="option"
                         aria-selected={activeClientIndex === index}
+                        tabIndex={-1}
                         onMouseDown={(event) => event.preventDefault()}
                         onMouseEnter={() => setActiveClientIndex(index)}
                         onClick={() => chooseClient(client.id)}
                         className={cn(
-                          'flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition motion-reduce:transition-none',
+                          'flex min-h-12 w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
                           activeClientIndex === index
                             ? 'bg-white/[0.09]'
                             : 'hover:bg-white/[0.06]',
@@ -463,7 +465,7 @@ export function BookingForm({
                           className="size-4 shrink-0 text-emerald-300"
                           aria-hidden="true"
                         />
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </>
