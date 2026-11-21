@@ -1267,12 +1267,8 @@ export function BookingDrawerCanonical({
                       </p>
                     ) : null}
                     {dayAvailabilityError ? (
-                      <div
-                        className="mt-2 flex flex-col gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[0.04] p-3 text-[11px] text-amber-300"
-                        role="status"
-                        aria-live="polite"
-                      >
-                        <p>
+                      <div className="mt-2 flex flex-col gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[0.04] p-3 text-[11px] text-amber-300">
+                        <p role="status" aria-live="polite">
                           {locale === 'pt'
                             ? 'Não foi possível confirmar todas as vagas. Tenta novamente antes de continuar.'
                             : 'Could not verify all openings. Please retry before continuing.'}
