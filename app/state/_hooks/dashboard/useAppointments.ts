@@ -283,25 +283,32 @@ export function useAppointments(
           }
         }
 
+        const appointmentDateLabel = new Intl.DateTimeFormat(
+          locale === 'en' ? 'en-GB' : 'pt-PT',
+          { dateStyle: 'medium' },
+        ).format(new Date(`${date}T12:00:00`));
         const bookingCreatedMessage =
           recurrence === 'none'
-            ? locale === 'en'
-              ? 'Booking created successfully.'
-              : 'Marcação criada com sucesso.'
-            : t('bookingForm.recurringCreated', {
+            ? t('agenda.bookingCreatedFor', {
+                name: manualName.trim(),
+                date: appointmentDateLabel,
+                time,
+              })
+            : t('agenda.recurringBookingsCreatedFor', {
                 count: generatedDates.dates.length,
+                name: manualName.trim(),
               });
         if (emailSent) {
           toast.success(
-            locale === 'en'
-              ? `${bookingCreatedMessage} Email sent to the customer.`
-              : `${bookingCreatedMessage} Email enviado ao cliente.`,
+            t('agenda.bookingCreatedWithEmail', {
+              message: bookingCreatedMessage,
+            }),
           );
         } else if (manualEmail.trim()) {
           toast.warning(
-            locale === 'en'
-              ? `${bookingCreatedMessage} The customer email could not be sent.`
-              : `${bookingCreatedMessage} Não foi possível enviar o email ao cliente.`,
+            t('agenda.bookingCreatedEmailFailed', {
+              message: bookingCreatedMessage,
+            }),
           );
         } else {
           toast.success(bookingCreatedMessage);
@@ -391,17 +398,13 @@ export function useAppointments(
             result?.error || 'Não foi possível confirmar a marcação.',
           );
         if (result.prepaymentConfirmed)
-          toast.success('Pré-pagamento MB WAY validado e marcação confirmada.');
+          toast.success(t('agenda.bookingConfirmedMbway'));
         else if (result.emailSent)
-          toast.success('Marcação confirmada e e-mail enviado.');
+          toast.success(t('agenda.bookingConfirmedEmailSent'));
         else if (result.emailError)
-          toast.warning(
-            'Marcação confirmada, mas não foi possível enviar o e-mail.',
-          );
+          toast.warning(t('agenda.bookingConfirmedEmailFailed'));
         else
-          toast.success(
-            'Marcação confirmada. O cliente não tem e-mail associado.',
-          );
+          toast.success(t('agenda.bookingConfirmedNoEmail'));
         await onRefreshData();
         return true;
       } catch (error) {
@@ -439,16 +442,18 @@ export function useAppointments(
         if (!response.ok || !result?.success)
           throw new Error(result?.error || 'Erro ao concluir o serviço.');
 
-        const emailMessage = result.reviewEmailSent
-          ? ' Foi enviado um e-mail ao cliente com o pedido de avaliação.'
-          : '';
-        toast.success(`Serviço concluído com sucesso.${emailMessage}`, {
-          duration: 10000,
-          action: {
-            label: 'Adicionar aos clientes',
-            onClick: () => void addCompletedAppointmentClient(appointmentId),
+        toast.success(
+          result.reviewEmailSent
+            ? t('agenda.bookingCompletedReviewEmailSent')
+            : t('agenda.bookingCompleted'),
+          {
+            duration: 10000,
+            action: {
+              label: t('agenda.addToClients'),
+              onClick: () => void addCompletedAppointmentClient(appointmentId),
+            },
           },
-        });
+        );
         setFinishingBookingId(null);
         setValueProducts('');
         setDescriptionProducts('');
@@ -561,24 +566,11 @@ export function useAppointments(
         }
 
         if (payload.emailSent === true) {
-          toast.success(
-            locale === 'en'
-              ? 'Booking cancelled. The customer was notified by email.'
-              : 'Marcação cancelada. O cliente foi avisado por email.',
-          );
+          toast.success(t('agenda.bookingCancelledEmailSent'));
         } else if (payload.emailSkipped === true) {
-          toast.success(
-            locale === 'en'
-              ? 'Booking cancelled. No customer email was sent.'
-              : 'Marcação cancelada. Não foi enviado email ao cliente.',
-          );
+          toast.success(t('agenda.bookingCancelledEmailSkipped'));
         } else {
-          toast.warning(
-            payload.emailError ||
-              (locale === 'en'
-                ? 'Booking cancelled, but the customer email could not be sent.'
-                : 'Marcação cancelada, mas não foi possível enviar o email ao cliente.'),
-          );
+          toast.warning(t('agenda.bookingCancelledEmailFailed'));
         }
 
         await onRefreshData();
