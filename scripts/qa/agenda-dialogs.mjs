@@ -54,6 +54,28 @@ assert.ok(
   'The layout must not mount a detached calendar without the page detail handler.',
 );
 assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
+assert.ok(
+  agendaCalendar.includes('<div\n                  key={key}'),
+  'Calendar day cells must be non-interactive containers, not buttons.',
+);
+assert.ok(
+  agendaCalendar.includes('className="absolute inset-0 z-0 rounded-[inherit]'),
+  'Day selection must use a dedicated button separate from appointment actions.',
+);
+assert.ok(agendaCalendar.includes('className="pointer-events-none relative z-10"'));
+assert.ok(
+  agendaCalendar.includes('pointer-events-auto flex w-full min-w-0 cursor-pointer'),
+  'Appointment actions must remain independently clickable above the day-selection button.',
+);
+assert.match(
+  agendaCalendar,
+  /<button\s+key=\{appointment\.id\}\s+type="button"[\s\S]*?aria-label=\{t\('agendaCalendar\.appointmentAriaLabel'/,
+);
+assert.doesNotMatch(
+  agendaCalendar,
+  /role="button"|tabIndex=\{0\}/,
+  'Calendar cells and appointments must use native buttons rather than simulated button roles.',
+);
 assert.ok(agenda.includes('appointments={appointments}'));
 assert.ok(agenda.includes('appointmentsLoading={loadingInitial}'));
 assert.ok(agendaCalendar.includes('appointmentsLoading: boolean'));
