@@ -612,7 +612,8 @@ assert.ok(onboardingInviteCard.includes("navigator.clipboard.writeText"));
 assert.ok(!onboardingInviteCard.includes("localStorage.setItem"));
 assert.ok(!onboardingInviteCard.includes("sessionStorage.setItem"));
 
-assert.ok(onboardingInviteApi.includes("const { data: { user }, error: authError }"));
+assert.ok(onboardingInviteApi.includes('error: authError'));
+assert.ok(onboardingInviteApi.includes('supabase.auth.getUser()'));
 assert.ok(onboardingInviteApi.includes("INVITE_METHODS.includes"));
 assert.ok(onboardingInviteApi.includes("INVITE_EXPIRY_HOURS.includes"));
 assert.ok(onboardingInviteApi.includes("p_method: method"));
