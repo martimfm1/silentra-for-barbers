@@ -39,9 +39,12 @@ import {
 } from '@/lib/scheduling/weekly-schedule';
 
 type Step = 'selection' | 'create' | 'join';
+type OnboardingCreateStep = 1 | 2 | 3 | 4 | 5;
+const ONBOARDING_CREATE_STEP_COUNT = 5;
 type DraftSaveStatus = 'loading' | 'idle' | 'saving' | 'saved' | 'error';
 
 type OnboardingDraft = {
+  createStep: OnboardingCreateStep;
   businessMode: 'solo' | 'team';
   shopName: string;
   address: string;
@@ -102,6 +105,7 @@ export default function OnboardingPage() {
   const { t, locale } = useLanguage();
   const router = useRouter();
   const [step, setStep] = useState<Step>('selection');
+  const [createStep, setCreateStep] = useState<OnboardingCreateStep>(1);
   const [businessMode, setBusinessMode] = useState<'solo' | 'team'>('solo');
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
@@ -222,6 +226,7 @@ export default function OnboardingPage() {
         const draft = payload.draft as OnboardingDraft | null;
         if (!active) return;
         if (draft) {
+          setCreateStep(draft.createStep ?? 1);
           setBusinessMode(draft.businessMode);
           setShopName(draft.shopName);
           setAddress(draft.address);
@@ -343,6 +348,7 @@ export default function OnboardingPage() {
 
   const onboardingDraft = useMemo<OnboardingDraft>(
     () => ({
+      createStep,
       businessMode,
       shopName,
       address,
@@ -358,6 +364,7 @@ export default function OnboardingPage() {
       lng,
     }),
     [
+      createStep,
       businessMode,
       shopName,
       address,
@@ -438,31 +445,37 @@ export default function OnboardingPage() {
     };
   }, [draftReady, step, loading, onboardingDraft, enqueueDraftSave]);
 
-  const requiredFieldsCompleted = useMemo(
-    () =>
-      [
-        shopName.trim(),
-        address.trim(),
-        city.trim(),
-        firstServiceName.trim(),
-      ].filter(Boolean).length,
-    [shopName, address, city, firstServiceName],
-  );
-
-  // Progress reflects only information the user has actually supplied.
-  // We deliberately avoid suggesting that the setup is 35% complete before
-  // any required details have been entered.
   const progress =
     step === 'join'
       ? (inviteCode.trim() ? 100 : 0)
-      : Math.round((requiredFieldsCompleted / 4) * 100);
+      : step === 'create'
+        ? Math.round((createStep / ONBOARDING_CREATE_STEP_COUNT) * 100)
+        : 0;
 
   const progressDescription =
     step === 'join'
       ? inviteCode.trim()
-        ? 'Código de convite introduzido'
-        : 'Introduza o código de convite'
-      : `${requiredFieldsCompleted} de 4 dados essenciais`;
+        ? (locale === 'pt' ? 'Convite introduzido' : 'Invite entered')
+        : (locale === 'pt' ? 'Código de convite' : 'Invite code')
+      : locale === 'pt'
+        ? `Passo ${createStep} de ${ONBOARDING_CREATE_STEP_COUNT}`
+        : `Step ${createStep} of ${ONBOARDING_CREATE_STEP_COUNT}`;
+
+  const createStepTitle = {
+    1: t('onboarding.createStepIdentity'),
+    2: t('onboarding.createStepLocation'),
+    3: t('onboarding.createStepService'),
+    4: t('onboarding.createStepHours'),
+    5: t('onboarding.createStepPresence'),
+  }[createStep];
+
+  const createStepDescription = {
+    1: t('onboarding.createStepIdentityDescription'),
+    2: t('onboarding.createStepLocationDescription'),
+    3: t('onboarding.createStepServiceDescription'),
+    4: t('onboarding.createStepHoursDescription'),
+    5: t('onboarding.createStepPresenceDescription'),
+  }[createStep];
 
   const selectStep = (next: Exclude<Step, 'selection'>) => {
     setStep(next);
@@ -592,6 +605,97 @@ export default function OnboardingPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function changeCreateStep(nextStep: OnboardingCreateStep) {
+    setCreateStep(nextStep);
+    if (draftReady && step === 'create' && !draftCompletedRef.current) {
+      const sequence = ++draftSequenceRef.current;
+      void enqueueDraftSave(
+        { ...onboardingDraft, createStep: nextStep },
+        sequence,
+      );
+    }
+    const focusIds: Record<OnboardingCreateStep, string> = {
+      1: 'shop-name',
+      2: 'address',
+      3: 'first-service-name',
+      4: 'onboarding-monday-start',
+      5: 'tags',
+    };
+    const firstWorkingDay = WEEKDAY_KEYS.find(
+      (dayKey) => !weeklySchedule[dayKey].day_off,
+    );
+    const focusId =
+      nextStep === 4 && firstWorkingDay
+        ? 'onboarding-' + firstWorkingDay + '-start'
+        : focusIds[nextStep];
+    window.requestAnimationFrame(() => {
+      document.getElementById(focusId)?.focus();
+    });
+  }
+
+  function handleCreateBack() {
+    if (createStep > 1) {
+      changeCreateStep((createStep - 1) as OnboardingCreateStep);
+      return;
+    }
+    goBack();
+  }
+
+  function validateCreateStep(targetStep: OnboardingCreateStep): boolean {
+    if (targetStep === 1 && !shopName.trim()) {
+      toast.error(t('onboarding.validationShopName'));
+      return false;
+    }
+    if (targetStep === 2 && (!address.trim() || !city.trim())) {
+      toast.error(t('onboarding.validationLocation'));
+      return false;
+    }
+    if (targetStep === 3) {
+      const serviceDuration = Number(firstServiceDuration);
+      const servicePrice = price === '' ? 15 : Number(price);
+      if (!firstServiceName.trim() || firstServiceName.trim().length > 100) {
+        toast.error(t('onboarding.validationServiceName'));
+        return false;
+      }
+      if (
+        !Number.isFinite(servicePrice) ||
+        servicePrice < 0 ||
+        servicePrice > 10000 ||
+        !Number.isInteger(serviceDuration) ||
+        serviceDuration < 1 ||
+        serviceDuration > 1440
+      ) {
+        toast.error(t('onboarding.validationPriceDuration'));
+        return false;
+      }
+    }
+    if (targetStep === 4) {
+      const scheduleError = validateWeeklySchedule(
+        weeklySchedule,
+        locale === 'pt' ? 'pt' : 'en',
+      );
+      if (scheduleError) {
+        toast.error(scheduleError);
+        return false;
+      }
+      if (!WEEKDAY_KEYS.some((dayKey) => !weeklySchedule[dayKey].day_off)) {
+        toast.error(t('onboarding.validationWorkingDay'));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function handleCreateWizardSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!validateCreateStep(createStep)) return;
+    if (createStep < ONBOARDING_CREATE_STEP_COUNT) {
+      changeCreateStep((createStep + 1) as OnboardingCreateStep);
+      return;
+    }
+    void handleCreateShop(event);
   }
 
   async function handleJoinShop(event: React.FormEvent) {
@@ -805,28 +909,26 @@ export default function OnboardingPage() {
                     initial={{ opacity: 0, x: 14 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -14 }}
-                    onSubmit={handleCreateShop}
+                    onSubmit={handleCreateWizardSubmit}
                     className="space-y-6"
                   >
                     <button
                       type="button"
-                      onClick={goBack}
+                      onClick={handleCreateBack}
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
                       <ArrowLeft className="size-4" aria-hidden="true" />
-                      Voltar
+                      {t('onboarding.back')}
                     </button>
                     <CardHeader className="p-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                        {t('onboarding.stepTwo')}
+                        {createStepTitle}
                       </p>
                       <CardTitle className="mt-2 font-heading text-2xl tracking-tight text-zinc-50">
                         {t('onboarding.prepareYourShop')}
                       </CardTitle>
                       <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
-                        Só precisa do nome e da localização. Os horários, preços
-                        e serviços começam com valores sugeridos e podem ser
-                        alterados no painel quando quiser.
+                        {createStepDescription}
                       </CardDescription>
                     </CardHeader>
                     {draftWasRestored && (
@@ -840,99 +942,103 @@ export default function OnboardingPage() {
                       </div>
                     )}
 
-                    <div className="space-y-5">
-                      <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.035] p-4 sm:p-5">
-                        <div className="mb-3">
-                          <h2 className="font-semibold text-zinc-100">
-                            {t('onboarding.workModeTitle')}
-                          </h2>
-                          <p className="mt-1 text-xs leading-5 text-zinc-500">
-                            {t('onboarding.workModeDescription')}
-                          </p>
+
+                    {createStep === 1 && (
+                      <div className="space-y-5">
+                        <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.035] p-4 sm:p-5">
+                          <div className="mb-3">
+                            <h2 className="font-semibold text-zinc-100">
+                              {t('onboarding.workModeTitle')}
+                            </h2>
+                            <p className="mt-1 text-xs leading-5 text-zinc-500">
+                              {t('onboarding.workModeDescription')}
+                            </p>
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <button
+                              type="button"
+                              aria-pressed={businessMode === 'solo'}
+                              onClick={() => setBusinessMode('solo')}
+                              className={'min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ' + (businessMode === 'solo' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]')}
+                            >
+                              <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                                <UserPlus className="size-4 text-emerald-300" aria-hidden="true" />
+                                {t('onboarding.soloMode')}
+                              </span>
+                              <span className="mt-2 block text-xs leading-5 text-zinc-500">
+                                {t('onboarding.soloModeDescription')}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              aria-pressed={businessMode === 'team'}
+                              onClick={() => setBusinessMode('team')}
+                              className={'min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ' + (businessMode === 'team' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]')}
+                            >
+                              <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                                <Users className="size-4 text-emerald-300" aria-hidden="true" />
+                                {t('onboarding.teamMode')}
+                              </span>
+                              <span className="mt-2 block text-xs leading-5 text-zinc-500">
+                                {t('onboarding.teamModeDescription')}
+                              </span>
+                            </button>
+                          </div>
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <button
-                            type="button"
-                            aria-pressed={businessMode === 'solo'}
-                            onClick={() => setBusinessMode('solo')}
-                            className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'solo' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}
-                          >
-                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
-                              <UserPlus className="size-4 text-emerald-300" />
-                              {t('onboarding.soloMode')}
-                            </span>
-                            <span className="mt-2 block text-xs leading-5 text-zinc-500">
-                              {t('onboarding.soloModeDescription')}
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            aria-pressed={businessMode === 'team'}
-                            onClick={() => setBusinessMode('team')}
-                            className={`min-h-24 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${businessMode === 'team' ? 'border-emerald-400/40 bg-emerald-400/[.08]' : 'border-white/10 bg-white/[.02] hover:bg-white/[.04]'}`}
-                          >
-                            <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
-                              <Users className="size-4 text-emerald-300" />
-                              {t('onboarding.teamMode')}
-                            </span>
-                            <span className="mt-2 block text-xs leading-5 text-zinc-500">
-                              {t('onboarding.teamModeDescription')}
-                            </span>
-                          </button>
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                          <div className="mb-4 flex items-start gap-3">
+                            <Building2 className="mt-0.5 size-5 text-emerald-400" aria-hidden="true" />
+                            <div>
+                              <h2 className="font-semibold text-zinc-100">
+                                {t('onboarding.identity')}
+                              </h2>
+                              <p className="text-xs text-zinc-500">
+                                {t('onboarding.identityDescription')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="shop-name">{t('onboarding.barbershopName')}</Label>
+                            <Input
+                              id="shop-name"
+                              required
+                              maxLength={120}
+                              value={shopName}
+                              onChange={(event) => setShopName(event.target.value)}
+                              placeholder={t('onboarding.shopNamePlaceholder')}
+                              className={inputClass}
+                            />
+                          </div>
                         </div>
                       </div>
+                    )}
+
+                    {createStep === 2 && (
                       <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                         <div className="mb-4 flex items-start gap-3">
-                          <Building2
-                            className="mt-0.5 size-5 text-emerald-400"
-                            aria-hidden="true"
-                          />
+                          <MapPin className="mt-0.5 size-5 text-emerald-400" aria-hidden="true" />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
-                              {t('onboarding.identity')}
+                              {t('onboarding.stepLocationTitle')}
                             </h2>
                             <p className="text-xs text-zinc-500">
-                              {t('onboarding.identityDescription')}
+                              {t('onboarding.createStepLocationDescription')}
                             </p>
                           </div>
                         </div>
                         <div className="grid gap-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="shop-name">
-                              {t('onboarding.barbershopName')}
-                            </Label>
-                            <Input
-                              id="shop-name"
-                              required
-                              value={shopName}
-                              onChange={(event) =>
-                                setShopName(event.target.value)
-                              }
-                              placeholder="Ex.: Barbearia Central"
-                              className={inputClass}
-                            />
-                          </div>
-                          <div
-                            ref={dropdownRef}
-                            className="relative grid gap-2"
-                          >
+                          <div ref={dropdownRef} className="relative grid gap-2">
                             <div className="flex items-center justify-between gap-2">
-                              <Label htmlFor="address">Morada</Label>
+                              <Label htmlFor="address">{t('onboarding.shopAddress')}</Label>
                               {isAddressSelected && (
                                 <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
-                                  <CheckCircle2
-                                    className="size-3.5"
-                                    aria-hidden="true"
-                                  />
-                                  Confirmada
+                                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                                  {t('onboarding.addressConfirmed')}
                                 </span>
                               )}
                             </div>
                             <div className="relative">
-                              <MapPin
-                                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
-                                aria-hidden="true"
-                              />
+                              <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
                               <Input
                                 id="address"
                                 required
@@ -943,13 +1049,13 @@ export default function OnboardingPage() {
                                   setLat(null);
                                   setLng(null);
                                 }}
-                                placeholder="Ex.: Rua Garrett"
-                                className={`${inputClass} pl-10 pr-10`}
+                                placeholder={t('onboarding.addressPlaceholder')}
+                                className={inputClass + ' pl-10 pr-10'}
                               />
                               {searchingAddress && (
                                 <Loader2
                                   className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-zinc-500"
-                                  aria-label="A pesquisar morada"
+                                  aria-label={t('onboarding.searchingAddress')}
                                 />
                               )}
                             </div>
@@ -966,8 +1072,7 @@ export default function OnboardingPage() {
                                     className="flex min-h-11 w-full flex-col items-start rounded-lg px-3 py-2 text-left hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                                   >
                                     <span className="w-full truncate text-sm font-medium text-zinc-100">
-                                      {item.streetWithNumber ||
-                                        item.fullAddress}
+                                      {item.streetWithNumber || item.fullAddress}
                                     </span>
                                     <span className="w-full truncate text-xs text-zinc-500">
                                       {item.fullAddress}
@@ -979,32 +1084,25 @@ export default function OnboardingPage() {
                           </div>
                           <div className="grid gap-4 sm:grid-cols-[1fr_160px]">
                             <div className="grid gap-2">
-                              <Label htmlFor="city">
-                                {t('onboarding.cityTown')}
-                              </Label>
+                              <Label htmlFor="city">{t('onboarding.cityTown')}</Label>
                               <Input
                                 id="city"
                                 required
                                 value={city}
-                                onChange={(event) =>
-                                  setCity(event.target.value)
-                                }
-                                placeholder="Ex.: Lisboa"
+                                onChange={(event) => setCity(event.target.value)}
+                                placeholder={t('onboarding.cityPlaceholder')}
                                 className={inputClass}
                               />
                             </div>
                             <div className="grid gap-2">
                               <Label htmlFor="door-number">
-                                N.º da porta{' '}
+                                {t('onboarding.doorNumber')}{' '}
                                 <span className="font-normal text-zinc-600">
                                   ({t('onboarding.optional')})
                                 </span>
                               </Label>
                               <div className="relative">
-                                <Hash
-                                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
-                                  aria-hidden="true"
-                                />
+                                <Hash className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
                                 <Input
                                   id="door-number"
                                   value={doorNumber}
@@ -1013,156 +1111,32 @@ export default function OnboardingPage() {
                                     setIsAddressSelected(false);
                                   }}
                                   placeholder="12"
-                                  className={`${inputClass} pl-10`}
+                                  className={inputClass + ' pl-10'}
                                 />
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
+                    )}
 
+                    {createStep === 3 && (
                       <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-                        <div className="mb-6 flex items-start gap-3">
-                          <Clock3
-                            className="mt-0.5 size-5 text-blue-400"
-                            aria-hidden="true"
-                          />
+                        <div className="mb-4 flex items-start gap-3">
+                          <PlusCircle className="mt-0.5 size-5 text-emerald-400" aria-hidden="true" />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
                               {t('onboarding.initialSetup')}
                             </h2>
-                          </div>
-                        </div>
-                        <div className="grid gap-4">
-                          <div className="grid max-w-sm gap-2">
-                            <Label htmlFor="price">
-                              {locale === 'pt' ? 'Preço do primeiro serviço (€)' : 'First service price (€)'}
-                            </Label>
-                            <div className="relative">
-                              <Euro
-                                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
-                                aria-hidden="true"
-                              />
-                              <Input
-                                id="price"
-                                type="number"
-                                min="0"
-                                step="0.5"
-                                value={price}
-                                onChange={(event) =>
-                                  setPrice(
-                                    event.target.value === ''
-                                      ? ''
-                                      : Number(event.target.value),
-                                  )
-                                }
-                                className={`${inputClass} pl-10`}
-                              />
-                            </div>
-                            <p className="text-[11px] text-zinc-600">
-                              {t('onboarding.priceHint')}
+                            <p className="text-xs text-zinc-500">
+                              {t('onboarding.createStepServiceDescription')}
                             </p>
                           </div>
                         </div>
-                        <div className="mt-5 rounded-2xl border border-white/8 bg-black/10 p-3 sm:p-4">
-                          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                              <h3 className="text-sm font-semibold text-zinc-100">
-                                {locale === 'pt' ? 'Horário semanal' : 'Weekly opening hours'}
-                              </h3>
-                              <p className="text-xs text-zinc-500">
-                                {locale === 'pt'
-                                  ? 'Define a abertura e o fecho de cada dia. Podes alterar estes horários mais tarde nas definições.'
-                                  : 'Set opening and closing times for each day. You can change them later in settings.'}
-                              </p>
-                            </div>
-                            <span className="text-[11px] text-zinc-500">
-                              {locale === 'pt' ? 'Hora local da barbearia' : 'Barbershop local time'}
-                            </span>
-                          </div>
-                          <div className="grid gap-2">
-                            {WEEKDAY_KEYS.map((dayKey) => {
-                              const day = weeklySchedule[dayKey];
-                              const interval = day.work_intervals[0] ?? {
-                                start: '09:00',
-                                end: '19:00',
-                              };
-                              return (
-                                <div
-                                  key={dayKey}
-                                  className="grid gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:grid-cols-[minmax(150px,0.8fr)_minmax(0,1.2fr)] sm:items-center"
-                                >
-                                  <div className="flex items-center justify-between gap-3">
-                                    <span className="text-sm font-medium text-zinc-200">
-                                      {weekdayLabels[dayKey]}
-                                    </span>
-                                    <label
-                                      htmlFor={`onboarding-${dayKey}-day-off`}
-                                      className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-xs text-zinc-400 hover:bg-white/[0.04]"
-                                    >
-                                      <input
-                                        id={`onboarding-${dayKey}-day-off`}
-                                        type="checkbox"
-                                        checked={day.day_off}
-                                        onChange={(event) =>
-                                          updateDayOff(dayKey, event.target.checked)
-                                        }
-                                        className="size-4 rounded border-white/20 bg-zinc-900 accent-emerald-400"
-                                      />
-                                      {locale === 'pt' ? 'Folga' : 'Closed'}
-                                    </label>
-                                  </div>
-                                  {day.day_off ? (
-                                    <p className="text-xs text-zinc-600 sm:text-right">
-                                      {locale === 'pt' ? 'Sem atendimento' : 'Closed all day'}
-                                    </p>
-                                  ) : (
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="grid gap-1.5">
-                                        <Label
-                                          htmlFor={`onboarding-${dayKey}-start`}
-                                          className="text-[11px] text-zinc-500"
-                                        >
-                                          {locale === 'pt' ? 'Abre' : 'Opens'}
-                                        </Label>
-                                        <Input
-                                          id={`onboarding-${dayKey}-start`}
-                                          type="time"
-                                          value={interval.start}
-                                          onChange={(event) =>
-                                            updateWorkingTime(dayKey, 'start', event.target.value)
-                                          }
-                                          className={`${inputClass} min-h-10`}
-                                        />
-                                      </div>
-                                      <div className="grid gap-1.5">
-                                        <Label
-                                          htmlFor={`onboarding-${dayKey}-end`}
-                                          className="text-[11px] text-zinc-500"
-                                        >
-                                          {locale === 'pt' ? 'Fecha' : 'Closes'}
-                                        </Label>
-                                        <Input
-                                          id={`onboarding-${dayKey}-end`}
-                                          type="time"
-                                          value={interval.end}
-                                          onChange={(event) =>
-                                            updateWorkingTime(dayKey, 'end', event.target.value)
-                                          }
-                                          className={`${inputClass} min-h-10`}
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(150px,0.6fr)]">
+                        <div className="grid gap-4">
                           <div className="grid gap-2">
                             <Label htmlFor="first-service-name">
-                              {locale === 'pt' ? 'Primeiro serviço' : 'First service'}
+                              {t('onboarding.firstServiceName')}
                             </Label>
                             <Input
                               id="first-service-name"
@@ -1174,37 +1148,149 @@ export default function OnboardingPage() {
                               className={inputClass}
                             />
                           </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="first-service-duration">
-                              {locale === 'pt' ? 'Duração (minutos)' : 'Duration (minutes)'}
-                            </Label>
-                            <Input
-                              id="first-service-duration"
-                              type="number"
-                              inputMode="numeric"
-                              min="1"
-                              max="1440"
-                              step="5"
-                              required
-                              value={firstServiceDuration}
-                              onChange={(event) => setFirstServiceDuration(event.target.value)}
-                              className={inputClass}
-                            />
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-2">
+                              <Label htmlFor="price">{t('onboarding.firstServicePrice')}</Label>
+                              <div className="relative">
+                                <Euro className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+                                <Input
+                                  id="price"
+                                  type="number"
+                                  min="0"
+                                  max="10000"
+                                  step="0.5"
+                                  value={price}
+                                  onChange={(event) =>
+                                    setPrice(event.target.value === '' ? '' : Number(event.target.value))
+                                  }
+                                  className={inputClass + ' pl-10'}
+                                />
+                              </div>
+                              <p className="text-[11px] text-zinc-600">
+                                {t('onboarding.priceHint')}
+                              </p>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="first-service-duration">
+                                {t('onboarding.firstServiceDuration')}
+                              </Label>
+                              <Input
+                                id="first-service-duration"
+                                type="number"
+                                inputMode="numeric"
+                                min="1"
+                                max="1440"
+                                step="5"
+                                required
+                                value={firstServiceDuration}
+                                onChange={(event) => setFirstServiceDuration(event.target.value)}
+                                className={inputClass}
+                              />
+                            </div>
                           </div>
                         </div>
-                        <p className="mt-2 text-[11px] leading-5 text-zinc-500">
+                        <p className="mt-3 text-xs leading-5 text-zinc-500">
                           {locale === 'pt'
-                            ? 'O serviço, o preço e a duração ficam guardados no catálogo e disponíveis para marcações. Podes alterá-los no painel.'
-                            : 'The service, price and duration are saved to the catalogue and made available for bookings. You can edit them in the dashboard.'}
+                            ? 'Este primeiro serviço fica guardado no catálogo e disponível para receber marcações. Podes acrescentar os restantes depois.'
+                            : 'This first service is saved to your catalogue and made available for bookings. You can add the rest later.'}
                         </p>
                       </div>
+                    )}
 
+                    {createStep === 4 && (
                       <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
                         <div className="mb-4 flex items-start gap-3">
-                          <Tag
-                            className="mt-0.5 size-5 text-amber-400"
-                            aria-hidden="true"
-                          />
+                          <Clock3 className="mt-0.5 size-5 text-blue-400" aria-hidden="true" />
+                          <div>
+                            <h2 className="font-semibold text-zinc-100">
+                              {t('onboarding.stepHoursTitle')}
+                            </h2>
+                            <p className="text-xs text-zinc-500">
+                              {t('onboarding.createStepHoursDescription')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-zinc-500">
+                            {locale === 'pt' ? 'Hora local da barbearia' : 'Barbershop local time'}
+                          </span>
+                          <span className="text-[11px] text-zinc-500">
+                            {locale === 'pt' ? 'Podes alterar mais tarde' : 'You can change this later'}
+                          </span>
+                        </div>
+                        <div className="grid gap-2">
+                          {WEEKDAY_KEYS.map((dayKey) => {
+                            const day = weeklySchedule[dayKey];
+                            const interval = day.work_intervals[0] ?? {
+                              start: '09:00',
+                              end: '19:00',
+                            };
+                            return (
+                              <div
+                                key={dayKey}
+                                className="grid gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:grid-cols-[minmax(150px,0.8fr)_minmax(0,1.2fr)] sm:items-center"
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="text-sm font-medium text-zinc-200">
+                                    {weekdayLabels[dayKey]}
+                                  </span>
+                                  <label
+                                    htmlFor={'onboarding-' + dayKey + '-day-off'}
+                                    className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-xs text-zinc-400 hover:bg-white/[0.04]"
+                                  >
+                                    <input
+                                      id={'onboarding-' + dayKey + '-day-off'}
+                                      type="checkbox"
+                                      checked={day.day_off}
+                                      onChange={(event) => updateDayOff(dayKey, event.target.checked)}
+                                      className="size-4 rounded border-white/20 bg-zinc-900 accent-emerald-400"
+                                    />
+                                    {locale === 'pt' ? 'Folga' : 'Closed'}
+                                  </label>
+                                </div>
+                                {day.day_off ? (
+                                  <p className="text-xs text-zinc-600 sm:text-right">
+                                    {locale === 'pt' ? 'Sem atendimento' : 'Closed all day'}
+                                  </p>
+                                ) : (
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid gap-1.5">
+                                      <Label htmlFor={'onboarding-' + dayKey + '-start'} className="text-[11px] text-zinc-500">
+                                        {locale === 'pt' ? 'Abre' : 'Opens'}
+                                      </Label>
+                                      <Input
+                                        id={'onboarding-' + dayKey + '-start'}
+                                        type="time"
+                                        value={interval.start}
+                                        onChange={(event) => updateWorkingTime(dayKey, 'start', event.target.value)}
+                                        className={inputClass + ' min-h-10'}
+                                      />
+                                    </div>
+                                    <div className="grid gap-1.5">
+                                      <Label htmlFor={'onboarding-' + dayKey + '-end'} className="text-[11px] text-zinc-500">
+                                        {locale === 'pt' ? 'Fecha' : 'Closes'}
+                                      </Label>
+                                      <Input
+                                        id={'onboarding-' + dayKey + '-end'}
+                                        type="time"
+                                        value={interval.end}
+                                        onChange={(event) => updateWorkingTime(dayKey, 'end', event.target.value)}
+                                        className={inputClass + ' min-h-10'}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {createStep === 5 && (
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+                        <div className="mb-4 flex items-start gap-3">
+                          <Tag className="mt-0.5 size-5 text-amber-400" aria-hidden="true" />
                           <div>
                             <h2 className="font-semibold text-zinc-100">
                               {t('onboarding.visibility')}
@@ -1214,60 +1300,56 @@ export default function OnboardingPage() {
                             </p>
                           </div>
                         </div>
-                        <Label htmlFor="tags">
-                          {locale === 'pt' ? 'Etiquetas do diretório público' : 'Public directory tags'}
-                        </Label>
+                        <Label htmlFor="tags">{t('onboarding.publicTagsLabel')}</Label>
                         <Input
                           id="tags"
                           value={tagsInput}
                           onChange={(event) => setTagsInput(event.target.value)}
-                          placeholder="Corte, Barba, Toalha quente"
-                          className={`${inputClass} mt-2`}
+                          placeholder={t('onboarding.publicTagsPlaceholder')}
+                          className={inputClass + ' mt-2'}
                         />
                         <div className="mt-3 flex flex-wrap gap-1.5">
                           {parsedTags.slice(0, 8).map((tag, index) => (
                             <span
-                              key={`${tag}-${index}`}
+                              key={tag + '-' + index}
                               className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-xs text-zinc-300"
                             >
                               #{tag}
                             </span>
                           ))}
                         </div>
+                        <p className="mt-3 rounded-xl border border-white/8 bg-white/[0.02] p-3 text-xs leading-5 text-zinc-500">
+                          {t('onboarding.publicTagsOptionalHint')}
+                        </p>
                       </div>
+                    )}
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs leading-5 text-zinc-500">
+                        {t('onboarding.stepSaveHint')}
+                      </p>
+                      <Button
+                        aria-label={createStep === ONBOARDING_CREATE_STEP_COUNT ? t('onboarding.createMyShop') : t('onboarding.continue')}
+                        type="submit"
+                        disabled={loading}
+                        className="min-h-12 w-full rounded-xl bg-zinc-50 font-semibold text-zinc-950 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-400 sm:w-auto sm:min-w-48"
+                      >
+                        {loading ? (
+                          <Spinner className="size-4" />
+                        ) : createStep === ONBOARDING_CREATE_STEP_COUNT ? (
+                          <>
+                            <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                            {t('onboarding.createMyShop')}
+                          </>
+                        ) : (
+                          <>
+                            {t('onboarding.continue')}
+                            <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                          </>
+                        )}
+                      </Button>
                     </div>
 
-                    <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 text-sm text-zinc-300">
-                      <p className="font-medium text-zinc-100">
-                        {t('onboarding.almostReady')}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-zinc-500">
-                        {businessMode === 'team'
-                          ? t('onboarding.teamNextStep')
-                          : t('onboarding.soloNextStep')}{' '}
-                        {t('onboarding.editLater')}
-                      </p>
-                    </div>
-                    <Button
-                      aria-label={
-                        loading ? 'A criar barbearia' : 'Criar barbearia'
-                      }
-                      type="submit"
-                      disabled={loading}
-                      className="min-h-12 w-full rounded-xl bg-zinc-50 font-semibold text-zinc-950 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-400"
-                    >
-                      {loading ? (
-                        <Spinner className="size-4" />
-                      ) : (
-                        <>
-                          <Sparkles
-                            className="mr-2 size-4"
-                            aria-hidden="true"
-                          />
-                          {t('onboarding.createMyShop')}
-                        </>
-                      )}
-                    </Button>
                   </motion.form>
                 )}
 
