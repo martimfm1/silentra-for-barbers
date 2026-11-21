@@ -14,6 +14,7 @@ const settingsPage = read('app/dashboard/settings/settings-page.tsx');
 const publicProfileResolver = read('lib/barbershops/public-profile.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
 const publicProfileApi = read('app/api/public/barbershops/[slug]/route.ts');
+const publicProfileSettingsApi = read('app/api/barbershops/public-profile/route.ts');
 const pricing = read('components/hero/pricing-section.tsx');
 const comparison = read('components/billing/plan-comparison.tsx');
 const apiAudit = read('scripts/qa/api-audit.mjs');
@@ -94,9 +95,9 @@ assert.match(landingConfig, /facebook\.com/);
 assert.match(landingConfig, /tiktok\.com/);
 assert.match(landingConfig, /parsed\.protocol !== 'https:'/);
 assert.match(landingConfig, /#\[0-9a-f\]\{6\}/);
-assert.match(publicProfileApi, /validateEnterpriseLandingPageConfig/);
-assert.match(publicProfileApi, /A personalização avançada do site está disponível no plano Enterprise/);
-assert.match(publicProfileApi, /updates\.theme_config = validation\.config/);
+assert.match(publicProfileSettingsApi, /validateEnterpriseLandingPageConfig/);
+assert.match(publicProfileSettingsApi, /A personalização avançada do site está disponível no plano Enterprise/);
+assert.match(publicProfileSettingsApi, /updates\.theme_config = validation\.config/);
 assert.match(publicProfileResolver, /normalizeEnterpriseLandingPageConfig\(shop\?\.theme_config\)/);
 
 for (const source of [landingPage]) {
