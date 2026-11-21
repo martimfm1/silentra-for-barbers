@@ -607,6 +607,90 @@ export default function OnboardingPage() {
     }
   }
 
+  function changeCreateStep(nextStep: OnboardingCreateStep) {
+    setCreateStep(nextStep);
+    if (draftReady && step === 'create' && !draftCompletedRef.current) {
+      const sequence = ++draftSequenceRef.current;
+      void enqueueDraftSave(
+        { ...onboardingDraft, createStep: nextStep },
+        sequence,
+      );
+    }
+    const focusIds: Record<OnboardingCreateStep, string> = {
+      1: 'shop-name',
+      2: 'address',
+      3: 'first-service-name',
+      4: 'onboarding-monday-start',
+      5: 'tags',
+    };
+    window.requestAnimationFrame(() => {
+      document.getElementById(focusIds[nextStep])?.focus();
+    });
+  }
+
+  function handleCreateBack() {
+    if (createStep > 1) {
+      changeCreateStep((createStep - 1) as OnboardingCreateStep);
+      return;
+    }
+    goBack();
+  }
+
+  function validateCreateStep(targetStep: OnboardingCreateStep): boolean {
+    if (targetStep === 1 && !shopName.trim()) {
+      toast.error(t('onboarding.validationShopName'));
+      return false;
+    }
+    if (targetStep === 2 && (!address.trim() || !city.trim())) {
+      toast.error(t('onboarding.validationLocation'));
+      return false;
+    }
+    if (targetStep === 3) {
+      const serviceDuration = Number(firstServiceDuration);
+      const servicePrice = price === '' ? 15 : Number(price);
+      if (!firstServiceName.trim() || firstServiceName.trim().length > 100) {
+        toast.error(t('onboarding.validationServiceName'));
+        return false;
+      }
+      if (
+        !Number.isFinite(servicePrice) ||
+        servicePrice < 0 ||
+        servicePrice > 10000 ||
+        !Number.isInteger(serviceDuration) ||
+        serviceDuration < 1 ||
+        serviceDuration > 1440
+      ) {
+        toast.error(t('onboarding.validationPriceDuration'));
+        return false;
+      }
+    }
+    if (targetStep === 4) {
+      const scheduleError = validateWeeklySchedule(
+        weeklySchedule,
+        locale === 'pt' ? 'pt' : 'en',
+      );
+      if (scheduleError) {
+        toast.error(scheduleError);
+        return false;
+      }
+      if (!WEEKDAY_KEYS.some((dayKey) => !weeklySchedule[dayKey].day_off)) {
+        toast.error(t('onboarding.validationWorkingDay'));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function handleCreateWizardSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!validateCreateStep(createStep)) return;
+    if (createStep < ONBOARDING_CREATE_STEP_COUNT) {
+      changeCreateStep((createStep + 1) as OnboardingCreateStep);
+      return;
+    }
+    void handleCreateShop(event);
+  }
+
   async function handleJoinShop(event: React.FormEvent) {
     event.preventDefault();
     if (!inviteCode.trim()) {
@@ -818,12 +902,12 @@ export default function OnboardingPage() {
                     initial={{ opacity: 0, x: 14 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -14 }}
-                    onSubmit={handleCreateShop}
+                    onSubmit={handleCreateWizardSubmit}
                     className="space-y-6"
                   >
                     <button
                       type="button"
-                      onClick={goBack}
+                      onClick={handleCreateBack}
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
                       <ArrowLeft className="size-4" aria-hidden="true" />
@@ -831,15 +915,13 @@ export default function OnboardingPage() {
                     </button>
                     <CardHeader className="p-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                        {t('onboarding.stepTwo')}
+                        {createStepTitle}
                       </p>
                       <CardTitle className="mt-2 font-heading text-2xl tracking-tight text-zinc-50">
                         {t('onboarding.prepareYourShop')}
                       </CardTitle>
                       <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
-                        Só precisa do nome e da localização. Os horários, preços
-                        e serviços começam com valores sugeridos e podem ser
-                        alterados no painel quando quiser.
+                        {createStepDescription}
                       </CardDescription>
                     </CardHeader>
                     {draftWasRestored && (
