@@ -619,7 +619,7 @@ async function GET__unobserved(
                 available: hasAvailableSlot,
                 closedDay: selectedDayIsClosed,
               },
-            ];
+            ] as const;
           }),
         )
       : undefined;
