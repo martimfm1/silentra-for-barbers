@@ -1019,7 +1019,7 @@ const checks = [
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
         normalized.includes('const availableDays = days;') &&
-        normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) : false') &&
+        normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) || dayAvailability[currentDay.dateStr]?.closedDay === true : false') &&
         normalized.includes('disabled={isUnavailable || loadingDayAvailability}') &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
         normalized.includes("availabilityOverview: '1'") &&
