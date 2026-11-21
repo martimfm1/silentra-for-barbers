@@ -229,7 +229,7 @@ async function GET__unobserved(request: Request) {
           .eq('active', true),
         admin
           .from('appointments')
-          .select('barbershop_id,professional_id,date_hour,duration_minutes')
+          .select('barbershop_id,professional_id,date_hour,duration_minutes,buffer_minutes')
           .in('barbershop_id', barbershopIds)
           .in('status', ['pending', 'scheduled'])
           .gte('date_hour', `${date}T00:00:00`)
