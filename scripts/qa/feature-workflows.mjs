@@ -429,6 +429,31 @@ assert.match(
 );
 console.log('[PUBLIC_BOOKING_RECEIPT_QA] Server-driven confirmation, receipt summary and customer-area handoff passed.');
 
+const publicBookingPolicyPage = read('app/barbershops/[slug]/page.tsx');
+const publicBookingPolicyProPage = read('app/barbershops/[slug]/pro-booking-page.tsx');
+const publicBookingPolicyFreePage = read('app/barbershops/[slug]/public-barbershop-page-final.tsx');
+const victorBookingPolicyRoute = read('app/agendadovictor/page.tsx');
+const victorBookingPolicyPage = read('app/agendadovictor/agenda-do-victor-page.tsx');
+assert.ok(publicBookingDrawer.includes('cancellationWindowHours = 24'));
+assert.ok(publicBookingDrawer.includes('minimumBookingNoticeMinutes = 0'));
+assert.ok(publicBookingDrawer.includes('Resumo da marcação'));
+assert.ok(publicBookingDrawer.includes('Booking summary'));
+assert.ok(publicBookingDrawer.includes('Podes cancelar online até'));
+assert.ok(publicBookingDrawer.includes('You can cancel online up to'));
+assert.ok(publicBookingDrawer.includes('Antecedência mínima:'));
+assert.ok(publicBookingDrawer.includes('Minimum notice:'));
+assert.ok(publicBookingDrawer.includes('É necessária uma data de nascimento'));
+assert.ok(publicBookingDrawer.includes('A date of birth is required'));
+assert.ok(publicBookingPolicyPage.includes('time_limit_cancellation_hours, minimum_booking_notice_minutes'));
+assert.ok(publicBookingPolicyPage.includes('cancellationWindowHours={initialData.time_limit_cancellation_hours ?? 24}'));
+assert.ok(publicBookingPolicyProPage.includes('cancellationWindowHours={cancellationWindowHours}'));
+assert.ok(publicBookingPolicyProPage.includes('minimumBookingNoticeMinutes={minimumBookingNoticeMinutes}'));
+assert.ok(publicBookingPolicyFreePage.includes('cancellationWindowHours={shop.time_limit_cancellation_hours ?? 24}'));
+assert.ok(victorBookingPolicyRoute.includes('time_limit_cancellation_hours,minimum_booking_notice_minutes'));
+assert.ok(victorBookingPolicyPage.includes('cancellationWindowHours={shop.time_limit_cancellation_hours ?? 24}'));
+assert.ok(victorBookingPolicyPage.includes('minimumBookingNoticeMinutes={shop.minimum_booking_notice_minutes ?? 0}'));
+console.log('[PUBLIC_BOOKING_POLICY_CONTEXT_QA] Duration, price, cancellation window, minimum notice and configured requirements are visible before submission on standard and Pro booking flows.');
+
 const onboardingPage = read('app/onboarding/page.tsx');
 const onboardingCreateApi = read('app/api/onboarding/create/route.ts');
 const onboardingDraftApi = read('app/api/onboarding/draft/route.ts');
