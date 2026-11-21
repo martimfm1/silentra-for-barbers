@@ -415,7 +415,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [onRefreshData],
+    [onRefreshData, t],
   );
 
   const finalizeBooking = useCallback(
@@ -472,6 +472,7 @@ export function useAppointments(
       descriptionProducts,
       addCompletedAppointmentClient,
       onRefreshData,
+      t,
     ],
   );
 
@@ -583,7 +584,7 @@ export function useAppointments(
         setLoading(false);
       }
     },
-    [locale, onRefreshData],
+    [locale, onRefreshData, t],
   );
 
   return {
