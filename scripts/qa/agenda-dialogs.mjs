@@ -3,7 +3,6 @@ import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(path, 'utf8').replace(/\r\n?/g, '\n');
 const agenda = read('app/dashboard/agenda/page.tsx');
-const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 const agendaLayout = read('app/dashboard/agenda/layout.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 
