@@ -417,7 +417,7 @@ begin
 
   return v_appointment;
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.enforce_appointment_capacity_overlap()
@@ -475,7 +475,7 @@ begin
 
   return new;
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.enforce_appointment_schedule_block_capacity()
@@ -543,7 +543,7 @@ begin
 
   return new;
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.enforce_schedule_block_no_appointment_overlap()
@@ -607,7 +607,7 @@ begin
 
   return new;
 end;
-$function$
+$function$;
 
 
 drop trigger if exists zz_enforce_appointment_capacity_overlap on public.appointments;
