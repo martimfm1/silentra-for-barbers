@@ -31,7 +31,7 @@ for (const source of [communication, messages, marketingPage]) {
 assert.match(sidebar, /automationItems/);
 assert.doesNotMatch(
   sidebar,
-  /Ferramentas e crescimento|Tools & growth|toolsOverviewItems|dashboard\\/ferramentas/,
+  /Ferramentas e crescimento|Tools & growth|toolsOverviewItems|dashboard[/]ferramentas/,
   'The tools and growth overview must not appear in dashboard navigation.',
 );
 assert.match(sidebar, /Experiência do cliente/);
