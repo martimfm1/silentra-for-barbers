@@ -4,7 +4,10 @@ begin;
 -- columns, then restore create_booking_atomic from
 -- 20261114002250_weekly_barber_schedules.sql, the capacity trigger from
 -- 20261119232316_enforce_cross_lane_appointment_capacity.sql, and the schedule
--- block trigger functions from 20261120173000_enforce_schedule_block_capacity.sql.
+-- block trigger functions from 20261120173000_enforce_schedule_block_capacity.sql,
+-- and restore enqueue_booking_waitlist_vacancy(), sync_booking_waitlist_vacancies(),
+-- and claim_booking_waitlist_vacancies(integer) from
+-- 20261104133930_automatic_booking_waitlist_offers.sql.
 
 alter table public.services
   add column if not exists buffer_minutes smallint not null default 0;
@@ -1000,8 +1003,8 @@ begin
 end;
 $function$;
 
-revoke all on function public.enqueue_booking_waitlist_vacancy() from public, anon, authenticated;
-revoke all on function public.sync_booking_waitlist_vacancies() from public, anon, authenticated;
+revoke all on function public.enqueue_booking_waitlist_vacancy() from public, anon, authenticated, service_role;
+revoke all on function public.sync_booking_waitlist_vacancies() from public, anon, authenticated, service_role;
 revoke all on function public.claim_booking_waitlist_vacancies(integer) from public, anon, authenticated;
 grant execute on function public.claim_booking_waitlist_vacancies(integer) to service_role;
 
@@ -1022,6 +1025,7 @@ revoke all on function public.enforce_schedule_block_no_appointment_overlap()
 
 comment on column public.services.buffer_minutes is 'Additional minutes reserved after the service for preparation or cleanup.';
 comment on column public.appointments.buffer_minutes is 'Snapshot of the service buffer reserved when this appointment was created.';
+comment on column public.booking_waitlist_vacancies.duration_minutes is 'Reserved waitlist slot length, including the cancelled appointment service buffer.';
 
 notify pgrst, 'reload schema';
 commit;
