@@ -171,6 +171,27 @@ assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailFailed'"));
 assert.ok(agenda.includes("t('agenda.bookingSeriesCancelled'"));
 assert.ok(agenda.includes('newDateLabel'));
 
+for (const key of [
+  'daySummary',
+  'cancelledTooltip',
+  'appointmentAriaLabel',
+  'cancelledStatus',
+  'more',
+  'moreBlockedTimes',
+  'eventSingular',
+  'eventPlural',
+  'viewDetails',
+  'activeProfessional',
+  'activeProfessionals',
+]) {
+  assert.ok(
+    agendaCalendar.includes(`t('agendaCalendar.${key}'`),
+    `Calendar must use the localized ${key} copy.`,
+  );
+  assert.ok(ptCopy.includes(`${key}:`), `pt-PT copy is missing ${key}.`);
+  assert.ok(enCopy.includes(`${key}:`), `en-GB copy is missing ${key}.`);
+}
+
 
 assert.match(
   agenda,
