@@ -373,28 +373,32 @@ export function AgendaCalendarView({
               const blockPreview = dayBlocks.slice(0, 1);
 
               return (
-                <button
+                <div
                   key={key}
-                  type="button"
-                  onClick={() => setSelectedDate(date)}
-                  aria-current={isToday(date) ? 'date' : undefined}
-                  aria-pressed={selected}
-                  aria-label={t('agendaCalendar.daySummary', {
-                    date: format(date, locale === 'pt' ? "EEEE, d 'de' MMMM" : 'EEEE, MMMM d', { locale: dateLocale }),
-                    availability: isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t),
-                    appointments: activeCount,
-                    cancelled: cancelledCount,
-                    blocks: dayBlocks.length,
-                  })}
                   className={cn(
-                    'group relative min-h-24 bg-zinc-950/95 p-1.5 text-left transition-[background,box-shadow,transform] duration-200 hover:bg-white/[0.035] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:scale-[0.995] sm:min-h-36 sm:p-3',
+                    'group relative min-h-24 bg-zinc-950/95 p-1.5 transition-colors duration-200 sm:min-h-36 sm:p-3',
                     !inMonth && 'opacity-35',
                     selected &&
                       'bg-white/[0.06] ring-1 ring-inset ring-emerald-400/30',
                     isClosed && 'bg-amber-400/[0.025]',
                   )}
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate(date)}
+                    aria-current={isToday(date) ? 'date' : undefined}
+                    aria-pressed={selected}
+                    aria-label={t('agendaCalendar.daySummary', {
+                      date: format(date, locale === 'pt' ? "EEEE, d 'de' MMMM" : 'EEEE, MMMM d', { locale: dateLocale }),
+                      availability: isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t),
+                      appointments: activeCount,
+                      cancelled: cancelledCount,
+                      blocks: dayBlocks.length,
+                    })}
+                    className="absolute inset-0 z-0 rounded-[inherit] transition-colors duration-200 hover:bg-white/[0.035] focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:bg-white/[0.06]"
+                  />
+                  <div className="pointer-events-none relative z-10">
+                    <div className="flex items-center justify-between gap-1">
                     <span
                       className={cn(
                         'flex size-7 items-center justify-center rounded-lg text-xs font-semibold tabular-nums',
@@ -443,22 +447,12 @@ export function AgendaCalendarView({
 
                   <div className="mt-1.5 space-y-1 sm:mt-2">
                     {preview.map((appointment) => (
-                      <div
+                      <button
                         key={appointment.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={(event) => {
-                          event.stopPropagation();
+                        type="button"
+                        onClick={() => {
                           setSelectedDate(date);
                           onAppointmentClick?.(appointment);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            setSelectedDate(date);
-                            onAppointmentClick?.(appointment);
-                          }
                         }}
                         aria-label={t('agendaCalendar.appointmentAriaLabel', {
                           client: appointmentName(appointment, t),
@@ -466,7 +460,7 @@ export function AgendaCalendarView({
                           status: appointment.status === 'cancelled' ? t('agendaCalendar.cancelledStatus') : '',
                         })}
                         className={cn(
-                          'flex min-w-0 cursor-pointer items-center gap-1 rounded-md border px-1 py-1 transition hover:border-emerald-300/30 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300/70 sm:gap-1.5 sm:px-1.5',
+                          'pointer-events-auto flex w-full min-w-0 cursor-pointer items-center gap-1 rounded-md border px-1 py-1 text-left transition hover:border-emerald-300/30 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300/70 sm:gap-1.5 sm:px-1.5',
                           appointment.status === 'cancelled'
                             ? 'border-rose-400/15 bg-rose-400/[0.06]'
                             : 'border-white/[0.04] bg-white/[0.02]',
@@ -500,7 +494,7 @@ export function AgendaCalendarView({
                         >
                           {format(new Date(appointment.date_hour), 'HH:mm')}
                         </span>
-                      </div>
+                      </button>
                     ))}
                     {dayAppointments.length > 2 ? (
                       <span className="hidden px-1 text-[9px] font-medium text-zinc-600 sm:block">
@@ -545,7 +539,8 @@ export function AgendaCalendarView({
                       </div>
                     ) : null}
                   </div>
-                </button>
+                  </div>
+                </div>
               );
             })}
           </div>
