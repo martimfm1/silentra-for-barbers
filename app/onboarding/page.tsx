@@ -39,9 +39,12 @@ import {
 } from '@/lib/scheduling/weekly-schedule';
 
 type Step = 'selection' | 'create' | 'join';
+type OnboardingCreateStep = 1 | 2 | 3 | 4 | 5;
+const ONBOARDING_CREATE_STEP_COUNT = 5;
 type DraftSaveStatus = 'loading' | 'idle' | 'saving' | 'saved' | 'error';
 
 type OnboardingDraft = {
+  createStep: OnboardingCreateStep;
   businessMode: 'solo' | 'team';
   shopName: string;
   address: string;
@@ -102,6 +105,7 @@ export default function OnboardingPage() {
   const { t, locale } = useLanguage();
   const router = useRouter();
   const [step, setStep] = useState<Step>('selection');
+  const [createStep, setCreateStep] = useState<OnboardingCreateStep>(1);
   const [businessMode, setBusinessMode] = useState<'solo' | 'team'>('solo');
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
@@ -222,6 +226,7 @@ export default function OnboardingPage() {
         const draft = payload.draft as OnboardingDraft | null;
         if (!active) return;
         if (draft) {
+          setCreateStep(draft.createStep ?? 1);
           setBusinessMode(draft.businessMode);
           setShopName(draft.shopName);
           setAddress(draft.address);
@@ -343,6 +348,7 @@ export default function OnboardingPage() {
 
   const onboardingDraft = useMemo<OnboardingDraft>(
     () => ({
+      createStep,
       businessMode,
       shopName,
       address,
@@ -358,6 +364,7 @@ export default function OnboardingPage() {
       lng,
     }),
     [
+      createStep,
       businessMode,
       shopName,
       address,
@@ -438,31 +445,37 @@ export default function OnboardingPage() {
     };
   }, [draftReady, step, loading, onboardingDraft, enqueueDraftSave]);
 
-  const requiredFieldsCompleted = useMemo(
-    () =>
-      [
-        shopName.trim(),
-        address.trim(),
-        city.trim(),
-        firstServiceName.trim(),
-      ].filter(Boolean).length,
-    [shopName, address, city, firstServiceName],
-  );
-
-  // Progress reflects only information the user has actually supplied.
-  // We deliberately avoid suggesting that the setup is 35% complete before
-  // any required details have been entered.
   const progress =
     step === 'join'
       ? (inviteCode.trim() ? 100 : 0)
-      : Math.round((requiredFieldsCompleted / 4) * 100);
+      : step === 'create'
+        ? Math.round((createStep / ONBOARDING_CREATE_STEP_COUNT) * 100)
+        : 0;
 
   const progressDescription =
     step === 'join'
       ? inviteCode.trim()
-        ? 'Código de convite introduzido'
-        : 'Introduza o código de convite'
-      : `${requiredFieldsCompleted} de 4 dados essenciais`;
+        ? (locale === 'pt' ? 'Convite introduzido' : 'Invite entered')
+        : (locale === 'pt' ? 'Código de convite' : 'Invite code')
+      : locale === 'pt'
+        ? `Passo ${createStep} de ${ONBOARDING_CREATE_STEP_COUNT}`
+        : `Step ${createStep} of ${ONBOARDING_CREATE_STEP_COUNT}`;
+
+  const createStepTitle = {
+    1: t('onboarding.createStepIdentity'),
+    2: t('onboarding.createStepLocation'),
+    3: t('onboarding.createStepService'),
+    4: t('onboarding.createStepHours'),
+    5: t('onboarding.createStepPresence'),
+  }[createStep];
+
+  const createStepDescription = {
+    1: t('onboarding.createStepIdentityDescription'),
+    2: t('onboarding.createStepLocationDescription'),
+    3: t('onboarding.createStepServiceDescription'),
+    4: t('onboarding.createStepHoursDescription'),
+    5: t('onboarding.createStepPresenceDescription'),
+  }[createStep];
 
   const selectStep = (next: Exclude<Step, 'selection'>) => {
     setStep(next);
