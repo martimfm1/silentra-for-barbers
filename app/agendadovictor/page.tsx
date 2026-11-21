@@ -73,7 +73,7 @@ export default async function AgendaDoVictorRoute() {
       .maybeSingle(),
     database
       .from('barbershops')
-      .select('opening_time,closing_time,closed_days')
+      .select('opening_time,closing_time,closed_days,time_limit_cancellation_hours,minimum_booking_notice_minutes')
       .eq('id', profile.barbershop_id)
       .maybeSingle(),
   ]);
@@ -103,6 +103,8 @@ export default async function AgendaDoVictorRoute() {
         opening_time: hours.opening_time,
         closing_time: hours.closing_time,
         closed_days: hours.closed_days,
+        time_limit_cancellation_hours: hours.time_limit_cancellation_hours,
+        minimum_booking_notice_minutes: hours.minimum_booking_notice_minutes,
       }}
       services={services.map((service) => ({
         id: service.id,

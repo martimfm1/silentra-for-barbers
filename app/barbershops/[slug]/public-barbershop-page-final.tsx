@@ -535,6 +535,8 @@ export default function BarbershopPublicPageFinal({
         selectedTime={activeBookingOffer?.time}
         selectedProfessionalId={activeBookingOffer?.professionalId}
         requireBirthDate={shop.require_birth_date !== false}
+        cancellationWindowHours={shop.time_limit_cancellation_hours ?? 24}
+        minimumBookingNoticeMinutes={shop.minimum_booking_notice_minutes ?? 0}
       />
     </main>
   );

@@ -183,7 +183,7 @@ async function getInitialPublicDetails(
     database
       .from('barbershops')
       .select(
-        'opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, require_birth_date',
+        'opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, require_birth_date, time_limit_cancellation_hours, minimum_booking_notice_minutes',
       )
       .eq('id', barbershopId)
       .maybeSingle(),
@@ -241,6 +241,14 @@ async function getInitialPublicDetails(
     closed_days: barbershop?.closed_days ?? null,
     weekly_schedule: barbershop?.weekly_schedule ?? null,
     require_birth_date: barbershop?.require_birth_date !== false,
+    time_limit_cancellation_hours: Math.max(
+      0,
+      Math.min(720, Number(barbershop?.time_limit_cancellation_hours ?? 24)),
+    ),
+    minimum_booking_notice_minutes: Math.max(
+      0,
+      Math.min(43200, Number(barbershop?.minimum_booking_notice_minutes ?? 0)),
+    ),
   } as BarbershopPublicDetails;
 }
 
@@ -392,6 +400,8 @@ export default async function BarbershopPage({
           closingTime={initialData.closing_time ?? null}
           closedDays={initialData.closed_days ?? null}
           requireBirthDate={initialData.require_birth_date !== false}
+          cancellationWindowHours={initialData.time_limit_cancellation_hours ?? 24}
+          minimumBookingNoticeMinutes={initialData.minimum_booking_notice_minutes ?? 0}
         />
       </>
     );

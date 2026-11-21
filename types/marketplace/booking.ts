@@ -40,6 +40,10 @@ export interface BookingDrawerProps {
   hideClosedDays?: boolean;
   /** Whether public booking requires the customer's date of birth. */
   requireBirthDate?: boolean;
+  /** Public online-cancellation window configured by the barbershop, in hours. */
+  cancellationWindowHours?: number;
+  /** Minimum advance notice configured by the barbershop, in minutes. */
+  minimumBookingNoticeMinutes?: number;
 }
 
 export interface BookingSuccessData {
