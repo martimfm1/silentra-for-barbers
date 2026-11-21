@@ -359,12 +359,12 @@ assert.ok(serviceBufferMigration.includes('p_date_hour + make_interval(mins => v
 assert.ok(serviceBufferMigration.includes('coalesce(a.buffer_minutes, 0)'));
 assert.ok(serviceBufferMigration.includes('coalesce(new.buffer_minutes, 0)'));
 assert.ok(serviceBufferMigration.includes('new.buffer_minutes := v_buffer'));
+assert.ok(serviceBufferMigration.includes('greatest(0, least(coalesce(service.buffer_minutes, 0), 120))'));
+assert.ok(serviceBufferMigration.includes('update public.booking_waitlist_vacancies as vacancy'));
 assert.ok(serviceBufferMigration.includes('before insert or update of service_id, barbershop_id, buffer_minutes on public.appointments'));
 assert.ok(serviceBufferMigration.includes('duration_minutes, buffer_minutes, status'));
 assert.ok(serviceBufferMigration.includes('appointment.duration_minutes, 30), 1440)) + greatest(0, coalesce(appointment.buffer_minutes, 0))'));
-assert.ok(serviceBufferMigration.includes('set buffer_minutes = least('));
 assert.ok(serviceBufferMigration.includes('duration_minutes = excluded.duration_minutes'));
-assert.ok(serviceBufferMigration.includes('when service.buffer_minutes'));
 
 assert.ok(serviceBufferMigration.includes('a_serialize_service_buffer_update'));
 assert.ok(serviceBufferMigration.includes('appointment.duration_minutes, 30), 1440)) + greatest(0, coalesce(appointment.buffer_minutes, 0))'));
