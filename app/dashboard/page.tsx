@@ -407,6 +407,72 @@ export default function DashboardPage() {
   ];
   const setupCompleted = setupSteps.filter((step) => step.done).length;
   const nextSetupStep = setupSteps.find((step) => !step.done);
+  const publicSlugForGrowth = (
+    setupPublicProfile?.custom_slug ||
+    setupPublicProfile?.slug ||
+    ''
+  ).trim();
+  const publicPageReadyForGrowth = Boolean(
+    publicSlugForGrowth &&
+      setupPublicProfile?.public_profile_enabled === true &&
+      setupPublicProfile.publicPageReachable &&
+      setupBarbershopConfig?.allow_online_bookings !== false,
+  );
+  const nonCancelledBookings = appointments.filter(
+    (appointment) => appointment.status !== 'cancelled',
+  );
+  const completedAppointmentCount = appointments.filter(
+    (appointment) => appointment.status === 'completed',
+  ).length;
+  const clientsWithBookings = new Set(
+    nonCancelledBookings
+      .map((appointment) => appointment.client_id)
+      .filter((clientId): clientId is string => Boolean(clientId)),
+  );
+  const clientsMissingEmailCount = clients.filter(
+    (client) => clientsWithBookings.has(client.id) && !client.email?.trim(),
+  ).length;
+  const growthSuggestion =
+    loadingInitial || loadingSetupData || nextSetupStep
+      ? null
+      : (plan === 'pro' || plan === 'enterprise') &&
+          upcomingAppointments.length > 0 &&
+          setupBarbershopConfig?.auto_reminders !== true
+        ? 'reminders'
+        : publicPageReadyForGrowth &&
+            completedAppointmentCount > 0 &&
+            clientsMissingEmailCount > 0
+          ? 'reviews'
+          : publicPageReadyForGrowth &&
+              nonCancelledBookings.length > 0 &&
+              nonCancelledBookings.length <= 5
+            ? 'share'
+            : null;
+  const GrowthSuggestionIcon =
+    growthSuggestion === 'reminders'
+      ? Clock
+      : growthSuggestion === 'reviews'
+        ? Users
+        : Globe;
+  const growthSuggestionHref =
+    growthSuggestion === 'reminders'
+      ? '/dashboard/settings#settings-rules'
+      : '/dashboard/clientes';
+
+  const handleCopyPublicPageLink = useCallback(async () => {
+    if (!publicSlugForGrowth) return;
+    const publicUrl = new URL(
+      `/barbershops/${encodeURIComponent(publicSlugForGrowth)}`,
+      window.location.origin,
+    ).toString();
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('CLIPBOARD_UNAVAILABLE');
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success(t('dashboard.growthShareCopied'));
+    } catch {
+      toast.error(t('dashboard.growthShareCopyFailed'));
+    }
+  }, [publicSlugForGrowth, t]);
 
   const iconVariants = {
     emerald: 'bg-emerald-500/20 text-emerald-400',
@@ -605,6 +671,76 @@ export default function DashboardPage() {
                   {nextSetupStep.label}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
+              </div>
+            </section>
+          )}
+
+          {growthSuggestion && (
+            <section
+              className="mb-5 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
+              aria-labelledby="growth-suggestion-title"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-300">
+                    <GrowthSuggestionIcon className="size-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      {t('dashboard.growthEyebrow')}
+                    </p>
+                    <h2
+                      id="growth-suggestion-title"
+                      className="mt-1 text-sm font-semibold text-zinc-100 sm:text-base"
+                    >
+                      {growthSuggestion === 'reminders'
+                        ? t('dashboard.growthReminderTitle')
+                        : growthSuggestion === 'reviews'
+                          ? t('dashboard.growthReviewsTitle')
+                          : t('dashboard.growthShareTitle')}
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-400 sm:text-sm">
+                      {growthSuggestion === 'reminders'
+                        ? t('dashboard.growthReminderDescription', {
+                            count: upcomingAppointments.length,
+                          })
+                        : growthSuggestion === 'reviews'
+                          ? t('dashboard.growthReviewsDescription', {
+                              count: clientsMissingEmailCount,
+                            })
+                          : t('dashboard.growthShareDescription')}
+                    </p>
+                  </div>
+                </div>
+                {growthSuggestion === 'share' ? (
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleCopyPublicPageLink()}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-zinc-50 px-4 py-2 text-xs font-semibold text-zinc-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      {t('dashboard.growthShareAction')}
+                    </button>
+                    <Link
+                      href={`/barbershops/${encodeURIComponent(publicSlugForGrowth)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-medium text-zinc-200 transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      {t('dashboard.growthShareOpen')}
+                    </Link>
+                  </div>
+                ) : (
+                  <Link
+                    href={growthSuggestionHref}
+                    className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-100 transition hover:border-white/20 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  >
+                    {growthSuggestion === 'reminders'
+                      ? t('dashboard.growthReminderAction')
+                      : t('dashboard.growthReviewsAction')}
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                )}
               </div>
             </section>
           )}
