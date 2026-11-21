@@ -413,7 +413,7 @@ const WEEKDAY_LABELS: Record<WeekdayKey, { pt: string; en: string }> = {
   tuesday: { pt: 'Terça-feira', en: 'Tuesday' },
   wednesday: { pt: 'Quarta-feira', en: 'Wednesday' },
   thursday: { pt: 'Quinta-feira', en: 'Thursday' },
-  friday: { pt: 'Sexta-feira', en: 'Saturday' },
+  friday: { pt: 'Sexta-feira', en: 'Friday' },
   saturday: { pt: 'Sábado', en: 'Saturday' },
   sunday: { pt: 'Domingo', en: 'Sunday' },
 };
