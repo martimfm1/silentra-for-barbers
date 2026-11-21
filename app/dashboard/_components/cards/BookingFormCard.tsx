@@ -79,6 +79,7 @@ export function BookingForm({
 
   const [clientQuery, setClientQuery] = useState('');
   const [showClientResults, setShowClientResults] = useState(false);
+  const [activeClientIndex, setActiveClientIndex] = useState(-1);
   const clientSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export function BookingForm({
         !clientSearchRef.current?.contains(event.target)
       ) {
         setShowClientResults(false);
+        setActiveClientIndex(-1);
       }
     };
     document.addEventListener('pointerdown', handlePointerDown);
@@ -166,6 +168,7 @@ export function BookingForm({
     }));
     setClientQuery(client.name_complete);
     setShowClientResults(false);
+    setActiveClientIndex(-1);
   };
 
   const clearSelectedClient = () => {
@@ -179,6 +182,7 @@ export function BookingForm({
     }));
     setClientQuery('');
     setShowClientResults(false);
+    setActiveClientIndex(-1);
   };
 
   const setQuickDate = (offset: number) => {
@@ -282,6 +286,7 @@ export function BookingForm({
                   onFocus={() => setShowClientResults(true)}
                   onChange={(event) => {
                     setClientQuery(event.target.value);
+                    setActiveClientIndex(-1);
                     setFormData((previous) =>
                       previous.clientId
                         ? {
@@ -297,24 +302,63 @@ export function BookingForm({
                     setShowClientResults(true);
                   }}
                   onKeyDown={(event) => {
-                    if (event.key === 'Escape') setShowClientResults(false);
-                    if (
-                      event.key === 'ArrowDown' &&
-                      matchingClients.length > 0
-                    ) {
+                    const hasResults = matchingClients.length > 0;
+                    const listIsOpen = showClientResults && hasResults;
+
+                    if (event.key === 'Escape' && showClientResults) {
                       event.preventDefault();
-                      document
-                        .getElementById('booking-client-results')
-                        ?.querySelector<HTMLButtonElement>('button')
-                        ?.focus();
+                      setShowClientResults(false);
+                      setActiveClientIndex(-1);
+                      return;
                     }
-                    if (event.key === 'Enter') {
+
+                    if (event.key === 'ArrowDown' && hasResults) {
                       event.preventDefault();
-                      if (matchingClients.length > 0) {
-                        chooseClient(matchingClients[0].id);
-                      } else {
-                        setShowClientResults(false);
-                      }
+                      setShowClientResults(true);
+                      setActiveClientIndex((current) =>
+                        current >= matchingClients.length - 1 ? 0 : current + 1,
+                      );
+                      return;
+                    }
+
+                    if (event.key === 'ArrowUp' && hasResults) {
+                      event.preventDefault();
+                      setShowClientResults(true);
+                      setActiveClientIndex((current) =>
+                        current <= 0 ? matchingClients.length - 1 : current - 1,
+                      );
+                      return;
+                    }
+
+                    if (event.key === 'Home' && listIsOpen) {
+                      event.preventDefault();
+                      setActiveClientIndex(0);
+                      return;
+                    }
+
+                    if (event.key === 'End' && listIsOpen) {
+                      event.preventDefault();
+                      setActiveClientIndex(matchingClients.length - 1);
+                      return;
+                    }
+
+                    if (event.key === 'Enter' && showClientResults) {
+                      event.preventDefault();
+                      const selectedIndex =
+                        activeClientIndex >= 0 ? activeClientIndex : 0;
+                      const selectedClient = matchingClients[selectedIndex];
+                      if (selectedClient) chooseClient(selectedClient.id);
+                      else setShowClientResults(false);
+                    }
+                  }}
+                  onBlur={(event) => {
+                    const nextTarget = event.relatedTarget;
+                    if (
+                      !(nextTarget instanceof Node) ||
+                      !clientSearchRef.current?.contains(nextTarget)
+                    ) {
+                      setShowClientResults(false);
+                      setActiveClientIndex(-1);
                     }
                   }}
                   placeholder={t('bookingForm.searchCustomer')}
@@ -326,6 +370,16 @@ export function BookingForm({
                   aria-controls={
                     showClientResults && matchingClients.length > 0
                       ? 'booking-client-results'
+                      : undefined
+                  }
+                  aria-activedescendant={
+                    showClientResults && activeClientIndex >= 0
+                      ? `booking-client-option-${activeClientIndex}`
+                      : undefined
+                  }
+                  aria-describedby={
+                    showClientResults && matchingClients.length > 0
+                      ? 'booking-client-results-status'
                       : undefined
                   }
                   className="min-h-12 w-full rounded-xl border border-white/10 bg-zinc-900/80 pl-10 pr-11 text-base text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] placeholder:text-zinc-600"
@@ -347,25 +401,48 @@ export function BookingForm({
               </div>
 
               {showClientResults && matchingClients.length > 0 ? (
-                <div
-                  id="booking-client-results"
-                  role="listbox"
-                  aria-label={
-                    locale === 'en'
-                      ? 'Matching customers'
-                      : 'Clientes encontrados'
-                  }
-                  className="absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 shadow-2xl shadow-black/50"
-                >
-                  {matchingClients.map((client) => (
-                    <button
-                      key={client.id}
-                      type="button"
-                      role="option"
-                      aria-selected={false}
-                      onClick={() => chooseClient(client.id)}
-                      className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-white/[0.06] focus-visible:bg-white/[0.06] focus-visible:outline-none"
-                    >
+                <>
+                  <p
+                    id="booking-client-results-status"
+                    className="sr-only"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    {locale === 'en'
+                      ? matchingClients.length === 1
+                        ? '1 matching customer. Use the arrow keys to navigate.'
+                        : `${matchingClients.length} matching customers. Use the arrow keys to navigate.`
+                      : matchingClients.length === 1
+                        ? '1 cliente encontrado. Usa as setas para navegar.'
+                        : `${matchingClients.length} clientes encontrados. Usa as setas para navegar.`}
+                  </p>
+                  <div
+                    id="booking-client-results"
+                    role="listbox"
+                    aria-label={
+                      locale === 'en'
+                        ? 'Matching customers'
+                        : 'Clientes encontrados'
+                    }
+                    className="absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 shadow-2xl shadow-black/50"
+                  >
+                    {matchingClients.map((client, index) => (
+                      <div
+                        key={client.id}
+                        id={`booking-client-option-${index}`}
+                        role="option"
+                        aria-selected={activeClientIndex === index}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onMouseEnter={() => setActiveClientIndex(index)}
+                        onClick={() => chooseClient(client.id)}
+                        className={cn(
+                          'flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition motion-reduce:transition-none',
+                          activeClientIndex === index
+                            ? 'bg-white/[0.09]'
+                            : 'hover:bg-white/[0.06]',
+                        )}
+                      >
                       <span className="flex min-w-0 items-center gap-2.5">
                         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-zinc-300">
                           {client.name_complete
@@ -386,9 +463,10 @@ export function BookingForm({
                         className="size-4 shrink-0 text-emerald-300"
                         aria-hidden="true"
                       />
-                    </button>
-                  ))}
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               ) : null}
               {showClientResults &&
               clientQuery.trim().length >= 2 &&
