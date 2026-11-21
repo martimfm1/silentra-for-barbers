@@ -587,6 +587,42 @@ assert.ok(onboardingPublicPageApi.includes('getPublicProfileBySlug(slug)'));
 assert.ok(onboardingPublicPageApi.includes("status: 404"));
 console.log('[LAW13_ONBOARDING_RESUME_QA] Team invite tab survives refresh; active invites restore from server; public page activation requires a persisted and reachable public profile.');
 
+// Growth recommendations must be grounded in persisted configuration and real activity,
+// appear only after setup is complete, and expose one relevant next action at a time.
+const law13GrowthDashboard = read('app/dashboard/page.tsx');
+const law13GrowthPortuguese = read('app/locales/pt.ts');
+const law13GrowthEnglish = read('app/locales/en.ts');
+assert.ok(law13GrowthDashboard.includes('setupBarbershopConfig?.auto_reminders !== true'));
+assert.ok(law13GrowthDashboard.includes("(plan === 'pro' || plan === 'enterprise')"));
+assert.ok(law13GrowthDashboard.includes('upcomingAppointments.length > 0'));
+assert.ok(law13GrowthDashboard.includes('setupPublicProfile.publicPageReachable'));
+assert.ok(law13GrowthDashboard.includes("appointment.status === 'completed'"));
+assert.ok(law13GrowthDashboard.includes('clientsMissingEmailCount > 0'));
+assert.ok(law13GrowthDashboard.includes("nonCancelledBookings.length <= 5"));
+assert.ok(law13GrowthDashboard.includes('loadingInitial || loadingSetupData || nextSetupStep'));
+assert.ok(law13GrowthDashboard.includes('navigator.clipboard.writeText(publicUrl)'));
+assert.ok(law13GrowthDashboard.includes("'/dashboard/settings#settings-rules'"));
+assert.ok(law13GrowthDashboard.includes("'/dashboard/clientes'"));
+for (const key of [
+  'growthEyebrow',
+  'growthReminderTitle',
+  'growthReminderDescription',
+  'growthReminderAction',
+  'growthReviewsTitle',
+  'growthReviewsDescription',
+  'growthReviewsAction',
+  'growthShareTitle',
+  'growthShareDescription',
+  'growthShareAction',
+  'growthShareOpen',
+  'growthShareCopied',
+  'growthShareCopyFailed',
+]) {
+  assert.ok(law13GrowthPortuguese.includes(`    ${key}:`), `Missing pt-PT growth copy: ${key}`);
+  assert.ok(law13GrowthEnglish.includes(`    ${key}:`), `Missing en-GB growth copy: ${key}`);
+}
+console.log('[LAW13_GROWTH_SUGGESTIONS_QA] Public sharing, reminders and review-contact suggestions are conditional, localized and based on persisted state.');
+
 const notificationRetryMigration = read(
   'supabase/migrations/20261118203046_atomic_appointment_notification_retry_claims.sql',
 );

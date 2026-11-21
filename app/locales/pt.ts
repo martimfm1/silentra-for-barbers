@@ -77,6 +77,23 @@ export const pt = {
     setupPublicPage: 'Ativar a página pública',
     setupNextStep:
       'Só falta completar o próximo passo para começares a aceitar marcações.',
+    growthEyebrow: 'Próximo passo de crescimento',
+    growthReminderTitle: 'Prepara os clientes para as próximas marcações',
+    growthReminderDescription:
+      '{count} marcações futuras estão na agenda. Ativa os lembretes automáticos para avisar os clientes antes do atendimento.',
+    growthReminderAction: 'Ativar lembretes',
+    growthReviewsTitle: 'Não percas futuros pedidos de avaliação',
+    growthReviewsDescription:
+      '{count} clientes com marcações ainda não têm email na ficha. Completa os contactos para poderem receber pedidos de avaliação após os próximos atendimentos.',
+    growthReviewsAction: 'Atualizar clientes',
+    growthShareTitle: 'A tua página pública pode trazer mais marcações',
+    growthShareDescription:
+      'A página está ativa e já tens as primeiras marcações. Partilha o link para chegar a mais clientes.',
+    growthShareAction: 'Copiar link',
+    growthShareOpen: 'Ver página',
+    growthShareCopied: 'Link da página pública copiado.',
+    growthShareCopyFailed:
+      'Não foi possível copiar o link. Verifica as permissões do navegador.',
     quickActions: 'Ações rápidas',
     nextAppointment: 'Próxima marcação',
     service: 'Serviço',

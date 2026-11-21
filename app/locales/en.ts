@@ -77,6 +77,23 @@ export const en = {
     setupWorkingHours: 'Set working hours',
     setupPublicPage: 'Activate the public page',
     setupNextStep: 'Complete the next step to start accepting bookings.',
+    growthEyebrow: 'Next growth step',
+    growthReminderTitle: 'Prepare customers for upcoming bookings',
+    growthReminderDescription:
+      '{count} upcoming bookings are on your calendar. Enable automatic reminders to notify customers before their visit.',
+    growthReminderAction: 'Enable reminders',
+    growthReviewsTitle: 'Do not miss future review requests',
+    growthReviewsDescription:
+      '{count} customers with bookings do not have an email saved. Complete their contact details so they can receive review requests after future visits.',
+    growthReviewsAction: 'Update customers',
+    growthShareTitle: 'Your public page can bring in more bookings',
+    growthShareDescription:
+      'Your page is active and you have received your first bookings. Share the link to reach more customers.',
+    growthShareAction: 'Copy link',
+    growthShareOpen: 'View page',
+    growthShareCopied: 'Public page link copied.',
+    growthShareCopyFailed:
+      'Could not copy the link. Check your browser permissions.',
     quickActions: 'Quick actions',
     nextAppointment: 'Next booking',
     service: 'Service',
