@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(path, 'utf8').replace(/\r\n?/g, '\n');
 const agenda = read('app/dashboard/agenda/page.tsx');
+const agendaCalendar = read('app/dashboard/agenda/agenda-calendar-view.tsx');
 const agendaLayout = read('app/dashboard/agenda/layout.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 
@@ -170,6 +171,27 @@ assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailSkipped'"));
 assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailFailed'"));
 assert.ok(agenda.includes("t('agenda.bookingSeriesCancelled'"));
 assert.ok(agenda.includes('newDateLabel'));
+
+for (const key of [
+  'daySummary',
+  'cancelledTooltip',
+  'appointmentAriaLabel',
+  'cancelledStatus',
+  'more',
+  'moreBlockedTimes',
+  'eventSingular',
+  'eventPlural',
+  'viewDetails',
+  'activeProfessional',
+  'activeProfessionals',
+]) {
+  assert.ok(
+    agendaCalendar.includes(`t('agendaCalendar.${key}'`),
+    `Calendar must use the localized ${key} copy.`,
+  );
+  assert.ok(ptCopy.includes(`${key}:`), `pt-PT copy is missing ${key}.`);
+  assert.ok(enCopy.includes(`${key}:`), `en-GB copy is missing ${key}.`);
+}
 
 
 assert.match(
