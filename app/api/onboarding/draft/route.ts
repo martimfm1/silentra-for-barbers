@@ -83,7 +83,7 @@ function normalizeDraft(value: unknown): OnboardingDraft | null {
     lng,
   } = value;
 
-  const normalizedCreateStep =
+  const normalizedCreateStep: OnboardingDraft['createStep'] | null =
     createStep === undefined
       ? 1
       : typeof createStep === 'number' &&
