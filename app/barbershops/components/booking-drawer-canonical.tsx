@@ -231,7 +231,8 @@ export function BookingDrawerCanonical({
   const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
   const currentDayClosed = currentDay
-    ? isDayOffForBookingDay(currentDay)
+    ? isDayOffForBookingDay(currentDay) ||
+      dayAvailability[currentDay.dateStr]?.closedDay === true
     : false;
   const currentDayAvailability = currentDay
     ? dayAvailability[currentDay.dateStr]
