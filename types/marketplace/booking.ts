@@ -58,6 +58,10 @@ export interface MarketplaceBookingResponse {
   plan?: 'free' | 'pro' | 'enterprise';
   services: MarketplaceService[];
   availableSlots: string[];
+  dayAvailability?: Record<
+    string,
+    { available: boolean; closedDay: boolean }
+  >;
   isClosed: boolean;
   closedDay?: boolean;
   blockedIntervals?: BookingBlockedInterval[];
