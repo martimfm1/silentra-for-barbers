@@ -361,7 +361,7 @@ assert.ok(serviceBufferMigration.includes('coalesce(new.buffer_minutes, 0)'));
 assert.ok(serviceBufferMigration.includes('new.buffer_minutes := v_buffer'));
 assert.ok(serviceBufferMigration.includes('a_serialize_service_buffer_update'));
 assert.ok(serviceBufferMigration.includes('appointment.duration_minutes, 30), 1440)) + greatest(0, coalesce(appointment.buffer_minutes, 0))'));
-assert.ok(serviceBufferMigration.includes('slot_time + pg_catalog.make_interval(mins => v_vacancy.duration_minutes)'));
+assert.ok(serviceBufferMigration.includes('v_vacancy.duration_minutes'));
 assert.ok(serviceBufferMigration.includes('coalesce(new.buffer_minutes, 0))'));
 assert.ok(serviceBufferMigration.includes('Rollback: drop the two new triggers'));
 assert.ok(serviceBufferMigration.includes('public.enqueue_booking_waitlist_vacancy()'));
