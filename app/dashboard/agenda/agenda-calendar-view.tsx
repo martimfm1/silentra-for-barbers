@@ -504,6 +504,7 @@ export function AgendaCalendarView({
                     {blockPreview.map((block) => (
                       <div
                         key={block.id}
+                        role="note"
                         title={[
                           `${formatTime(block.start_time)}–${formatTime(block.end_time)}`,
                           block.reason,
