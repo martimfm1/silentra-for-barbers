@@ -350,7 +350,7 @@ assert.match(
 // Service buffers are configured per service and snapshotted on each booking.
 // Every availability and database capacity path must reserve duration + buffer.
 const serviceBufferMigration = readFileSync(
-  'supabase/migrations/20261120190000_service_buffer_capacity.sql',
+  'supabase/migrations/20261121183504_service_buffer_capacity.sql',
   'utf8',
 );
 assert.ok(serviceBufferMigration.includes('add column if not exists buffer_minutes smallint not null default 0'));
