@@ -479,6 +479,23 @@ assert.ok(onboardingPage.includes('draftSaveQueueRef'));
 assert.ok(onboardingPage.includes('draftCompletedRef.current'));
 assert.ok(onboardingPage.includes('Rascunho guardado automaticamente'));
 assert.ok(onboardingPage.includes('Draft saved automatically'));
+assert.ok(onboardingPage.includes('type OnboardingCreateStep = 1 | 2 | 3 | 4 | 5'));
+assert.ok(onboardingPage.includes('ONBOARDING_CREATE_STEP_COUNT = 5'));
+assert.ok(onboardingPage.includes('handleCreateWizardSubmit'));
+assert.ok(onboardingPage.includes('setCreateStep(draft.createStep ?? 1)'));
+assert.ok(onboardingPage.includes('createStep: nextStep'));
+for (const step of [1, 2, 3, 4, 5]) {
+  assert.ok(onboardingPage.includes('createStep === ' + step));
+}
+assert.ok(onboardingDraftApi.includes('createStep'));
+assert.ok(onboardingDraftApi.includes('createStep === undefined'));
+const onboardingPtLocale = read('app/locales/pt.ts');
+const onboardingEnLocale = read('app/locales/en.ts');
+for (const key of ['createStepIdentity', 'createStepLocation', 'createStepService', 'createStepHours', 'createStepPresence', 'validationLocation', 'validationWorkingDay']) {
+  assert.ok(onboardingPtLocale.includes(key + ':'), 'Missing pt-PT onboarding key: ' + key);
+  assert.ok(onboardingEnLocale.includes(key + ':'), 'Missing en-GB onboarding key: ' + key);
+}
+console.log('[ONBOARDING_MULTI_STEP_QA] Five onboarding steps validate independently, preserve their current step in the autosaved draft and provide pt-PT/en-GB copy.');
 assert.ok(onboardingDraftApi.includes("assertSameOrigin(request)"));
 assert.ok(onboardingDraftApi.includes("from('onboarding_drafts')"));
 assert.ok(onboardingDraftApi.includes("eq('user_id', user.id)"));
