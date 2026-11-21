@@ -43,6 +43,8 @@ export type ProBookingPageProps = {
   closedDays?: string | null;
   hideClosedDays?: boolean;
   requireBirthDate?: boolean;
+  cancellationWindowHours?: number;
+  minimumBookingNoticeMinutes?: number;
   /** Desktop split hero used by the dedicated Agenda do Victor page. */
   agendaHeroLayout?: boolean;
 };
@@ -70,6 +72,8 @@ export default function ProBookingPage({
   closingTime,
   closedDays,
   requireBirthDate = true,
+  cancellationWindowHours = 24,
+  minimumBookingNoticeMinutes = 0,
   hideClosedDays = false,
   agendaHeroLayout = false,
 }: ProBookingPageProps) {
@@ -479,6 +483,8 @@ export default function ProBookingPage({
         appearance="agenda"
         hideClosedDays={hideClosedDays}
         requireBirthDate={requireBirthDate}
+        cancellationWindowHours={cancellationWindowHours}
+        minimumBookingNoticeMinutes={minimumBookingNoticeMinutes}
         onSuccess={() => {
           setBookingOpen(false);
           setActiveBookingOffer(null);
