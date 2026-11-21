@@ -539,6 +539,7 @@ const onboardingTeamPage = read('app/dashboard/equipa/page.tsx');
 const onboardingInviteCard = read('app/dashboard/_components/team/InviteCodeCard.tsx');
 const onboardingInviteApi = read('app/api/team/invite/route.ts');
 const onboardingPublicPageApi = read('app/api/public/barbershops/[slug]/route.ts');
+const onboardingPublicProfileLookup = read('lib/barbershops/public-profile.ts');
 
 assert.ok(onboardingDashboard.includes('getBarbershopConfig(currentBarbershopId)'));
 assert.ok(onboardingDashboard.includes("fetch('/api/barbershops/public-profile'"));
@@ -586,6 +587,54 @@ assert.ok(onboardingPublicProfileApi.includes('public_profile_updated_at'));
 assert.ok(onboardingPublicPageApi.includes('getPublicProfileBySlug(slug)'));
 assert.ok(onboardingPublicPageApi.includes("status: 404"));
 console.log('[LAW13_ONBOARDING_RESUME_QA] Team invite tab survives refresh; active invites restore from server; public page activation requires a persisted and reachable public profile.');
+
+assert.ok(onboardingPage.includes("const params = new URLSearchParams(window.location.search)"));
+assert.ok(onboardingPage.includes("const invite = params.get('invite')"));
+assert.ok(onboardingPage.includes("setInviteCode(normalized)"));
+assert.ok(onboardingPage.includes("setStep('join')"));
+assert.ok(onboardingPage.includes("if (params.has('invite'))"));
+assert.ok(onboardingPage.includes("body: JSON.stringify({ inviteCode: normalizeInviteCode(inviteCode) })"));
+assert.ok(onboardingPage.includes("router.push('/dashboard')"));
+
+assert.ok(onboardingTeamPage.includes("requestedTab === 'invite'"));
+assert.ok(onboardingTeamPage.includes("window.history.replaceState"));
+assert.ok(onboardingTeamPage.includes("`${url.pathname}${url.search}${url.hash}`"));
+
+assert.ok(onboardingInviteCard.includes("const loadInvites = useCallback(async () =>"));
+assert.ok(onboardingInviteCard.includes("cache: 'no-store'"));
+assert.ok(onboardingInviteCard.includes("void loadInvites()"));
+assert.ok(onboardingInviteCard.includes("setActiveInvites(Array.isArray(data.invites) ? data.invites : [])"));
+assert.ok(onboardingInviteCard.includes("setInvite({"));
+assert.ok(onboardingInviteCard.includes("await loadInvites()"));
+assert.ok(onboardingInviteCard.includes("QRCode.toDataURL"));
+assert.ok(onboardingInviteCard.includes("navigator.share"));
+assert.ok(onboardingInviteCard.includes("navigator.clipboard.writeText"));
+assert.ok(!onboardingInviteCard.includes("localStorage.setItem"));
+assert.ok(!onboardingInviteCard.includes("sessionStorage.setItem"));
+
+assert.ok(onboardingInviteApi.includes('error: authError'));
+assert.ok(onboardingInviteApi.includes('supabase.auth.getUser()'));
+assert.ok(onboardingInviteApi.includes("INVITE_METHODS.includes"));
+assert.ok(onboardingInviteApi.includes("INVITE_EXPIRY_HOURS.includes"));
+assert.ok(onboardingInviteApi.includes("p_method: method"));
+assert.ok(onboardingInviteApi.includes("p_role: 'barber'"));
+assert.ok(onboardingInviteApi.includes("Cache-Control': 'no-store'"));
+assert.ok(onboardingInviteApi.includes("requireTenantAuthorization(request, ['owner', 'admin'])"));
+assert.ok(onboardingInviteApi.includes(".eq('barbershop_id', tenant.barbershopId)"));
+assert.ok(onboardingInviteApi.includes(".limit(20)"));
+assert.ok(!onboardingInviteApi.includes(".select('id, role, invite_method, code_hash"));
+assert.ok(onboardingInviteApi.includes("supabase.rpc('revoke_barbershop_invite'"));
+
+assert.ok(onboardingPublicProfileLookup.includes("const PUBLIC_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/"));
+assert.ok(onboardingPublicProfileLookup.includes("if (profile.public_profile_enabled === false) return null"));
+assert.ok(onboardingPublicProfileLookup.includes("getPublicProfileBySlug"));
+assert.ok(onboardingPublicPageApi.includes("await requireTenantAuthorization({ barbershopId, allowPublicTenant: true })"));
+assert.ok(onboardingPublicPageApi.includes(".eq('barbershop_id', barbershopId)"));
+assert.ok(onboardingPublicPageApi.includes("const { owner_user_id: ownerUserId, ...publicProfile } = profile"));
+assert.ok(onboardingPublicPageApi.includes("data: {\n          ...publicProfile"));
+
+console.log('[ONBOARDING_INVITE_PUBLIC_PAGE_QA] Code/link/QR acceptance, tenant-owned invite listing, secret handling, refresh restoration and public profile fail-closed contracts verified.');
+
 
 // Growth recommendations must be grounded in persisted configuration and real activity,
 // appear only after setup is complete, and expose one relevant next action at a time.
