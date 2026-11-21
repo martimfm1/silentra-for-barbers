@@ -623,8 +623,15 @@ export default function OnboardingPage() {
       4: 'onboarding-monday-start',
       5: 'tags',
     };
+    const firstWorkingDay = WEEKDAY_KEYS.find(
+      (dayKey) => !weeklySchedule[dayKey].day_off,
+    );
+    const focusId =
+      nextStep === 4 && firstWorkingDay
+        ? 'onboarding-' + firstWorkingDay + '-start'
+        : focusIds[nextStep];
     window.requestAnimationFrame(() => {
-      document.getElementById(focusIds[nextStep])?.focus();
+      document.getElementById(focusId)?.focus();
     });
   }
 
@@ -911,7 +918,7 @@ export default function OnboardingPage() {
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
                       <ArrowLeft className="size-4" aria-hidden="true" />
-                      Voltar
+                      {t('onboarding.back')}
                     </button>
                     <CardHeader className="p-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
