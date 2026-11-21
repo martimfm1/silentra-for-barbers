@@ -19,6 +19,7 @@ assert.match(bookingForm, /aria-describedby=\{[\s\S]*?booking-client-results-sta
 assert.match(bookingForm, /role="listbox"/);
 assert.match(bookingForm, /role="option"/);
 assert.match(bookingForm, /aria-selected=\{activeClientIndex === index\}/);
+assert.match(bookingForm, /tabIndex=\{-1\}/);
 assert.match(bookingForm, /onMouseDown=\{\(event\) => event\.preventDefault\(\)\}/);
 assert.match(bookingForm, /onClick=\{\(\) => chooseClient\(client\.id\)\}/);
 assert.match(bookingForm, /event\.key === 'ArrowDown'/);
@@ -29,10 +30,10 @@ assert.match(bookingForm, /event\.key === 'Enter'/);
 assert.match(bookingForm, /event\.key === 'Escape'/);
 assert.match(bookingForm, /role="status"[\s\S]*?aria-live="polite"[\s\S]*?aria-atomic="true"/);
 assert.match(bookingForm, /setActiveClientIndex\(\(current\)/);
-assert.doesNotMatch(
+assert.match(
   bookingForm,
-  /<button[^>]*role="option"/,
-  'Combobox options must not move focus away from the controlling input.',
+  /<button[\\s\\S]*?role="option"[\\s\\S]*?tabIndex=\\{-1\\}/,
+  'Combobox options must remain outside the normal Tab order.',
 );
 
 assert.match(dialog, /DialogPrimitive\.Content/);
