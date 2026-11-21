@@ -117,7 +117,7 @@ async function getAvailability(
       1,
     ),
     1440,
-  );
+  ) + Math.max(0, Math.min(120, Number(appointment.buffer_minutes ?? 0)));
   if (daySchedule.day_off)
     return { availableSlots: [], closedDay: true, blockedIntervals: [] };
   const { data: blocks, error: blocksError } = await admin
