@@ -116,7 +116,7 @@ for (const source of [landingPage]) {
   assert.match(source, /heroAlignment/);
   assert.match(source, /aggregateRating/);
   assert.match(source, /OpeningHoursSpecification/);
-  assert.match(source, /Google\.com\/maps\/search/);
+  assert.match(source, /google\.com\/maps\/search/);
   assert.match(source, /\?booking=1/);
 }
 
