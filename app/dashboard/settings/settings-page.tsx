@@ -679,7 +679,7 @@ export default function SettingsPageOrganized() {
       </span>
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Information' : 'Informações'}</span>
-        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Business details, location and appearance.' : 'Dados da barbearia, localização e apresentação.'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Business details and location.' : 'Dados da barbearia e localização.'}</span>
       </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
@@ -860,110 +860,115 @@ export default function SettingsPageOrganized() {
               </div>
             </section>
 </div>
-<details data-settings-subcategory className="settings-subaccordion group mt-4 min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-transparent">
+  </div>
+</details>
+
+<details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="flex min-w-0 items-center gap-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/[.06] text-violet-300" aria-hidden="true">
-        <Palette className="size-4" />
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/[.07] text-violet-300" aria-hidden="true">
+        <Palette className="size-5" />
       </span>
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Appearance' : 'Aparência'}</span>
-        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Manage your barbershop identity and personalize the dashboard and agenda.' : 'Gere a identidade da barbearia e personaliza a dashboard e a agenda.'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Visual identity, colours and how your dashboard and agenda look.' : 'Identidade visual, cores e apresentação da dashboard e da agenda.'}</span>
       </span>
     </span>
     <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
   </summary>
-  <div className="settings-accordion-content space-y-4 border-t border-white/[.07] px-4 py-4 sm:px-5">
-    <section id="settings-appearance">
-              <Card className={CARD_CLASS}>
-                <CardHeader className="hidden">
-                  <CardTitle>{t('settingsPage.appearance')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
-                    <div className="relative h-52">
-                      <Image
-                        src={
-                          bannerPreviewError
-                            ? DEFAULT_BARBERSHOP_BANNER
-                            : bannerDraftUrl || banner || DEFAULT_BARBERSHOP_BANNER
-                        }
-                        alt={t('settingsPage.bannerAlt')}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        onError={() => setBannerPreviewError(true)}
-                      />
-                      <div className="absolute inset-x-4 bottom-4 flex items-end justify-between">
-                        <div className="flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800">
-                          <Image
-                            src={
-                              avatarPreviewError
-                                ? DEFAULT_BARBERSHOP_AVATAR
-                                : avatarDraftUrl || avatar || DEFAULT_BARBERSHOP_AVATAR
-                            }
-                            alt={t('settingsPage.avatarAlt')}
-                            width={128}
-                            height={128}
-                            className="h-full w-full object-cover"
-                            unoptimized
-                            onError={() => setAvatarPreviewError(true)}
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => bannerRef.current?.click()}
-                            disabled={saving}
-                          >
-                            <ImageIcon className="mr-2 size-4" />
-                            {t('settingsPage.cover')}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => avatarRef.current?.click()}
-                            disabled={saving}
-                          >
-                            <Camera className="mr-2 size-4" />
-                            {t('settingsPage.logo')}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <input
-                    ref={avatarRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) queueImage('avatar', f);
-                      e.currentTarget.value = '';
-                    }}
-                  />
-                  <input
-                    ref={bannerRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) queueImage('banner', f);
-                      e.currentTarget.value = '';
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </section>
-    <Card className={CARD_CLASS}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">{locale === 'en' ? 'Dashboard customization' : 'Personalização da dashboard'}</CardTitle>
-        <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose shortcuts, visible sections and the dashboard accent colour.' : 'Escolhe os atalhos, as secções visíveis e a cor de destaque da dashboard.'}</p>
-      </CardHeader>
-      <CardContent>
+  <div className="settings-accordion-content space-y-5 border-t border-white/[.07] px-4 py-5 sm:px-5">
+    <section id="settings-appearance" className="space-y-3">
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Barbershop identity' : 'Identidade da barbearia'}</h3>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Preview the cover image and logo customers will see on your public page.' : 'Pré-visualiza a imagem de capa e o logótipo que os clientes vão ver na tua página pública.'}</p>
+      </div>
+      <div className="rounded-2xl border border-white/[.08] bg-white/[.02] p-3 sm:p-4">
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
+          <div className="relative h-44 sm:h-52">
+            <Image
+              src={
+                bannerPreviewError
+                  ? DEFAULT_BARBERSHOP_BANNER
+                  : bannerDraftUrl || banner || DEFAULT_BARBERSHOP_BANNER
+              }
+              alt={t('settingsPage.bannerAlt')}
+              fill
+              className="object-cover"
+              unoptimized
+              onError={() => setBannerPreviewError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/65 via-transparent to-transparent" aria-hidden="true" />
+            <div className="absolute bottom-3 left-3 flex size-16 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-zinc-800 shadow-xl sm:bottom-4 sm:left-4">
+              <Image
+                src={
+                  avatarPreviewError
+                    ? DEFAULT_BARBERSHOP_AVATAR
+                    : avatarDraftUrl || avatar || DEFAULT_BARBERSHOP_AVATAR
+                }
+                alt={t('settingsPage.avatarAlt')}
+                width={128}
+                height={128}
+                className="h-full w-full object-cover"
+                unoptimized
+                onError={() => setAvatarPreviewError(true)}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => bannerRef.current?.click()}
+            disabled={saving}
+            className="h-11 w-full justify-start rounded-xl border-white/10 bg-white/[.035] text-zinc-200 hover:bg-white/[.07]"
+          >
+            <ImageIcon className="mr-2 size-4 text-zinc-400" />
+            {locale === 'en' ? 'Change cover image' : 'Alterar imagem de capa'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => avatarRef.current?.click()}
+            disabled={saving}
+            className="h-11 w-full justify-start rounded-xl border-white/10 bg-white/[.035] text-zinc-200 hover:bg-white/[.07]"
+          >
+            <Camera className="mr-2 size-4 text-zinc-400" />
+            {locale === 'en' ? 'Change logo' : 'Alterar logótipo'}
+          </Button>
+        </div>
+        <p className="mt-3 text-[11px] leading-5 text-zinc-500">{locale === 'en' ? 'Use a wide image for the cover and a square image for the logo.' : 'Usa uma imagem horizontal para a capa e uma imagem quadrada para o logótipo.'}</p>
+      </div>
+      <input
+        ref={avatarRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) queueImage('avatar', f);
+          e.currentTarget.value = '';
+        }}
+      />
+      <input
+        ref={bannerRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) queueImage('banner', f);
+          e.currentTarget.value = '';
+        }}
+      />
+    </section>
+
+    <section className="space-y-3 border-t border-white/[.08] pt-5">
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Dashboard customization' : 'Personalização da dashboard'}</h3>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose shortcuts, visible sections and the dashboard accent colour.' : 'Escolhe os atalhos, as secções visíveis e a cor de destaque da dashboard.'}</p>
+      </div>
+      <div className="rounded-2xl border border-white/[.08] bg-white/[.02] p-3 sm:p-4">
         <DashboardCustomizationDialog
           config={dashboardConfig}
           setConfig={setDashboardConfig}
@@ -976,23 +981,22 @@ export default function SettingsPageOrganized() {
           customization={customization}
           locale={locale}
           disabled={saving || customization.loading}
-/>
-      </CardContent>
-    </Card>
-    <Card className={CARD_CLASS}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">{locale === 'en' ? 'Agenda layout' : 'Layout da agenda'}</CardTitle>
-        <p className="text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose how appointments are displayed by default.' : 'Escolhe como queres ver as marcações por defeito.'}</p>
-      </CardHeader>
-      <CardContent>
+        />
+      </div>
+    </section>
+
+    <section className="space-y-3 border-t border-white/[.08] pt-5">
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Agenda layout' : 'Layout da agenda'}</h3>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose how appointments are displayed by default.' : 'Escolhe como queres ver as marcações por defeito.'}</p>
+      </div>
+      <div className="rounded-2xl border border-white/[.08] bg-white/[.02] p-3 sm:p-4">
         <AgendaViewSettings view={agendaView} onChange={setAgendaView} />
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   </div>
 </details>
-  </div>
-</details>
-            
+
             <details data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="flex min-w-0 items-center gap-3">
