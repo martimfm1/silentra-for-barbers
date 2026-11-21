@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { cache } from 'react';
+import { cache, type CSSProperties } from 'react';
 import SilentraDemoBarbershop from '@/app/silentra/silentra-demo-barbershop';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizeBarbershopAmenities, type BarbershopAmenities } from '@/lib/barbershops/amenities';
+import { normalizeWeeklySchedule, WEEKDAY_KEYS, type WeeklySchedule, type WeekdayKey } from '@/lib/scheduling/weekly-schedule';
+import { resolveEnterpriseLandingPalette, type EnterpriseLandingPageConfig } from '@/lib/barbershops/enterprise-landing-page-config';
 import {
   getPublicProfileBySlug,
   isValidPublicProfileSlug,
@@ -21,11 +24,31 @@ interface LandingService {
   popular: boolean | null;
 }
 
+interface LandingReview {
+  id: string;
+  client_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
+interface LandingProfessional {
+  id: string;
+  name: string;
+}
+
 interface LandingPageData {
   profile: PublicProfileRecord;
   services: LandingService[];
-  openingTime: string | null;
-  closingTime: string | null;
+  professionals: LandingProfessional[];
+  reviews: LandingReview[];
+  rating: number;
+  reviewsCount: number;
+  weeklySchedule: WeeklySchedule;
+  amenities: BarbershopAmenities;
+  latitude: number | null;
+  longitude: number | null;
+  language: 'pt' | 'en';
   coverUrl: string | null;
   avatarUrl: string | null;
 }
@@ -56,25 +79,19 @@ const getLandingPageData = cache(
 
     const barbershopId = profile.barbershop_id ?? profile.id;
     const database = createAdminClient();
-    const { data: entitlement, error: entitlementError } = await database
-      .from('barbershop_landing_pages')
-      .select('status, template_version')
-      .eq('barbershop_id', barbershopId)
-      .maybeSingle();
-
-    if (entitlementError) {
-      console.error('[ENTERPRISE_LANDING_PAGE_LOOKUP_FAILED]', {
-        operation: 'entitlement',
-        code: entitlementError.code ?? 'UNKNOWN',
-      });
-      return null;
-    }
-    if (!entitlement || entitlement.status !== 'active') return null;
-
     const [
+      { data: entitlement, error: entitlementError },
       { data: services, error: servicesError },
       { data: hours, error: hoursError },
+      { data: shop, error: shopError },
+      { data: reviews, error: reviewsError },
+      { data: professionals, error: professionalsError },
     ] = await Promise.all([
+      database
+        .from('barbershop_landing_pages')
+        .select('status, template_version')
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle(),
       database
         .from('services')
         .select('id, name, price, duration, popular')
@@ -85,25 +102,98 @@ const getLandingPageData = cache(
         .limit(50),
       database
         .from('barbershops')
-        .select('opening_time, closing_time')
+        .select(
+          'opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, default_language',
+        )
         .eq('id', barbershopId)
         .maybeSingle(),
+      database
+        .from('shops')
+        .select('amenities, lat, lng, rating, reviews_count')
+        .eq('barbershop_id', barbershopId)
+        .maybeSingle(),
+      database
+        .from('reviews')
+        .select('id, client_name, rating, comment, created_at')
+        .eq('barbershop_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(6),
+      database
+        .from('professionals')
+        .select('id, name')
+        .eq('barbershop_id', barbershopId)
+        .eq('active', true)
+        .order('name', { ascending: true })
+        .limit(20),
     ]);
 
-    if (servicesError || hoursError) {
+    if (entitlementError) {
+      console.error('[ENTERPRISE_LANDING_PAGE_LOOKUP_FAILED]', {
+        operation: 'entitlement',
+        code: entitlementError.code ?? 'UNKNOWN',
+      });
+      return null;
+    }
+    if (!entitlement || entitlement.status !== 'active') return null;
+
+    if (
+      servicesError ||
+      hoursError ||
+      shopError ||
+      reviewsError ||
+      professionalsError
+    ) {
       console.error('[ENTERPRISE_LANDING_PAGE_LOOKUP_FAILED]', {
         operation: 'public_content',
         services: servicesError?.code ?? null,
         hours: hoursError?.code ?? null,
+        shop: shopError?.code ?? null,
+        reviews: reviewsError?.code ?? null,
+        professionals: professionalsError?.code ?? null,
       });
       return null;
     }
 
+    const reviewItems = (reviews ?? []) as LandingReview[];
+    const calculatedRating = reviewItems.length
+      ? reviewItems.reduce((sum, review) => sum + Number(review.rating || 0), 0) /
+        reviewItems.length
+      : 0;
+    const storedRating = Number(shop?.rating ?? 0);
+    const rating =
+      Number.isFinite(storedRating) && storedRating > 0
+        ? Number(storedRating.toFixed(1))
+        : Number(calculatedRating.toFixed(1));
+    const storedReviewsCount = Number(shop?.reviews_count ?? 0);
+
     return {
       profile,
       services: (services ?? []) as LandingService[],
-      openingTime: hours?.opening_time ?? null,
-      closingTime: hours?.closing_time ?? null,
+      professionals: (professionals ?? []) as LandingProfessional[],
+      reviews: reviewItems,
+      rating,
+      reviewsCount:
+        Number.isFinite(storedReviewsCount) && storedReviewsCount > 0
+          ? storedReviewsCount
+          : reviewItems.length,
+      weeklySchedule: normalizeWeeklySchedule(
+        hours?.weekly_schedule,
+        hours ?? undefined,
+      ),
+      amenities: normalizeBarbershopAmenities(shop?.amenities),
+      latitude:
+        typeof shop?.lat === 'number' &&
+        typeof shop?.lng === 'number' &&
+        (shop.lat !== 0 || shop.lng !== 0)
+          ? shop.lat
+          : null,
+      longitude:
+        typeof shop?.lat === 'number' &&
+        typeof shop?.lng === 'number' &&
+        (shop.lat !== 0 || shop.lng !== 0)
+          ? shop.lng
+          : null,
+      language: hours?.default_language === 'en' ? 'en' : 'pt',
       coverUrl: safeHttpsUrl(profile.cover_url),
       avatarUrl: safeHttpsUrl(profile.avatar_url),
     };
