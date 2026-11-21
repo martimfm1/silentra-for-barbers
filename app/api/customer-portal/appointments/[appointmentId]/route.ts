@@ -50,7 +50,7 @@ async function getAuthorizedAppointment(
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,buffer_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
@@ -117,7 +117,7 @@ async function getAvailability(
       1,
     ),
     1440,
-  );
+  ) + Math.max(0, Math.min(120, Number(appointment.buffer_minutes ?? 0)));
   if (daySchedule.day_off)
     return { availableSlots: [], closedDay: true, blockedIntervals: [] };
   const { data: blocks, error: blocksError } = await admin
@@ -136,7 +136,7 @@ async function getAvailability(
   );
   const { data: existingAppointments, error: appointmentsError } = await admin
     .from('appointments')
-    .select('id,date_hour,duration_minutes,professional_id')
+    .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
     .eq('barbershop_id', appointment.barbershop_id)
     .gte('date_hour', `${date}T00:00:00`)
     .lte('date_hour', `${date}T23:59:59`)
@@ -158,7 +158,8 @@ async function getAvailability(
             start: timeToMinutes(parts[1]),
             end:
               timeToMinutes(parts[1]) +
-              Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440),
+              Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
+              Math.max(0, Number(item.buffer_minutes ?? 0)),
           }
         : null;
     })
@@ -444,7 +445,8 @@ async function PATCH__unobserved(
       const slotStart = timeToMinutes(slot);
       const slotEnd =
         slotStart +
-        Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440);
+        Math.min(Math.max(Number(appointment.duration_minutes ?? 30), 1), 1440) +
+        Math.max(0, Number(appointment.buffer_minutes ?? 0));
       const block = availability.blockedIntervals.find(
         (item) =>
           item.startTime &&

@@ -110,6 +110,7 @@ export function ServicesListCard({
       name: `${service.name} (${locale === 'pt' ? 'cópia' : 'copy'})`,
       price: Number(service.price),
       duration: Number(service.duration ?? (service as any).min_duration ?? 30),
+      bufferMinutes: Number(service.buffer_minutes ?? 0),
     });
     setShowAddServiceForm(true);
   };
@@ -301,7 +302,7 @@ function AddServiceForm({
   setShowAddServiceForm,
   loading,
 }: AddServiceFormProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   async function submit(event: React.FormEvent) {
     const created = await handleCreateService(event);
     if (created) setShowAddServiceForm(false);
@@ -403,6 +404,43 @@ function AddServiceForm({
           </div>
         </div>
 
+        <div className="grid gap-1.5">
+          <label
+            htmlFor="new-service-buffer"
+            className="text-xs font-medium text-zinc-400"
+          >
+            {locale === 'pt' ? 'Buffer após o serviço' : 'Buffer after service'}
+          </label>
+          <div className="relative">
+            <Clock3 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-600" />
+            <Input
+              id="new-service-buffer"
+              disabled={loading}
+              type="number"
+              min="0"
+              max="120"
+              step="5"
+              placeholder="0"
+              className="min-h-11 bg-zinc-950/70 pl-9 pr-12"
+              value={newServiceData.bufferMinutes ?? 0}
+              onChange={(e) =>
+                setNewServiceData({
+                  ...newServiceData,
+                  bufferMinutes: e.target.value === '' ? '' : parseInt(e.target.value, 10),
+                })
+              }
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-600">
+              min
+            </span>
+          </div>
+          <p className="text-[11px] text-zinc-500">
+            {locale === 'pt'
+              ? 'Tempo adicional reservado depois da marcação.'
+              : 'Extra time reserved after the appointment.'}
+          </p>
+        </div>
+
         <Button
           aria-label={loading ? 'A guardar serviço' : 'Guardar serviço'}
           type="submit"
@@ -466,6 +504,11 @@ function ServiceItemCard({
         <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
           <Clock3 className="size-3.5" />
           {service.duration ?? (service as any).min_duration ?? '—'} min
+          {Number(service.buffer_minutes ?? 0) > 0 ? (
+            <span className="text-amber-300">
+              + {Number(service.buffer_minutes)} min {locale === 'pt' ? 'buffer' : 'buffer'}
+            </span>
+          ) : null}
         </div>
       </div>
 

@@ -97,12 +97,14 @@ export interface ServicesListCardProps {
     name: string;
     price: string | number;
     duration: string | number;
+    bufferMinutes: string | number;
   };
   setNewServiceData: Dispatch<
     SetStateAction<{
       name: string;
       price: string | number;
       duration: string | number;
+      bufferMinutes: string | number;
     }>
   >;
   handleCreateService: (event: FormEvent) => Promise<boolean> | boolean;

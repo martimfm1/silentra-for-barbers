@@ -80,4 +80,5 @@ export interface MarketplaceService {
   name: string;
   price: number;
   durationMinutes: number;
+  bufferMinutes?: number;
 }

@@ -185,7 +185,7 @@ async function GET__unobserved(request: Request) {
     let query = tenant.admin
       .from('appointments')
       .select(
-        'id,date_hour,duration_minutes,status,manual_name,manual_phone,manual_email,client_id,professional_id,service_id,users(name_complete,num_phone,email),services(name,price,duration),professionals(name)',
+        'id,date_hour,duration_minutes,buffer_minutes,status,manual_name,manual_phone,manual_email,client_id,professional_id,service_id,users(name_complete,num_phone,email),services(name,price,duration),professionals(name)',
         { count: 'exact' },
       )
       .eq('barbershop_id', tenant.barbershopId)
@@ -222,6 +222,7 @@ async function GET__unobserved(request: Request) {
         duration_minutes: Number(
           appointment.duration_minutes ?? service?.duration ?? 30,
         ),
+        buffer_minutes: Number(appointment.buffer_minutes ?? 0),
         status: appointment.status,
         clientName:
           appointment.manual_name?.trim() ||

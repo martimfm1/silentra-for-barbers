@@ -134,7 +134,7 @@ function EditServiceDialog({
   handleUpdateService,
   loadingService,
 }: EditServiceDialogProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   if (!editingService) return null;
 
   return (
@@ -226,6 +226,42 @@ function EditServiceDialog({
                 min
               </span>
             </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <label
+              htmlFor="edit-service-buffer"
+              className="text-xs font-medium text-zinc-400"
+            >
+              {locale === 'pt' ? 'Buffer após o serviço' : 'Buffer after service'}
+            </label>
+            <div className="relative">
+              <Clock3 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+              <Input
+                id="edit-service-buffer"
+                disabled={loadingService}
+                type="number"
+                min="0"
+                max="120"
+                step="5"
+                className="min-h-11 bg-zinc-900/80 pl-9 pr-12"
+                value={editingService.buffer_minutes ?? 0}
+                onChange={(e) =>
+                  setEditingService({
+                    ...editingService,
+                    buffer_minutes: e.target.value === '' ? 0 : Number(e.target.value),
+                  })
+                }
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
+                min
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-500">
+              {locale === 'pt'
+                ? 'Tempo adicional reservado depois da marcação.'
+                : 'Extra time reserved after the appointment.'}
+            </p>
           </div>
 
           <DialogFooter className="mt-2">

@@ -1103,7 +1103,9 @@ export function BookingDrawerCanonical({
                   <option value="">{t('bookingDrawer.selectService')}</option>
                   {services.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item.name} · {item.durationMinutes} min · €
+                      {item.name} · {item.durationMinutes} min{Number(item.bufferMinutes ?? 0) > 0
+                        ? ` + ${Number(item.bufferMinutes)} min ${locale === 'pt' ? 'preparação' : 'buffer'}`
+                        : ''} · €
                       {Number(item.price).toFixed(2)}
                     </option>
                   ))}
@@ -1157,6 +1159,11 @@ export function BookingDrawerCanonical({
                       {professional?.name}
                       {' · '}
                       {service.durationMinutes} {locale === 'pt' ? 'minutos' : 'minutes'}
+                      {Number(service.bufferMinutes ?? 0) > 0 ? (
+                        <span className="ml-1 text-amber-300">
+                          · + {Number(service.bufferMinutes)} {locale === 'pt' ? 'min de preparação' : 'min buffer'}
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                   <p className="shrink-0 text-base font-semibold tabular-nums text-emerald-200">
@@ -1301,6 +1308,11 @@ export function BookingDrawerCanonical({
                       <p className="mt-1 text-xs text-zinc-400">
                         {professional?.name ? `${professional.name} · ` : ''}
                         {service.durationMinutes} {locale === 'en' ? 'min' : 'min'}
+                        {Number(service.bufferMinutes ?? 0) > 0 ? (
+                          <span className="ml-1 text-amber-300">
+                            · + {Number(service.bufferMinutes)} {locale === 'en' ? 'min buffer' : 'min de preparação'}
+                          </span>
+                        ) : null}
                       </p>
                     </div>
                     <p className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">
@@ -1687,6 +1699,11 @@ export function BookingDrawerCanonical({
                     <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
                       <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Duration' : 'Duração'}</p>
                       <p className="mt-1 text-sm font-medium text-zinc-100">{service?.durationMinutes ?? 0} min</p>
+                      {Number(service?.bufferMinutes ?? 0) > 0 ? (
+                        <p className="mt-1 text-[11px] text-amber-300">
+                          + {Number(service?.bufferMinutes)} min {locale === 'pt' ? 'de preparação' : 'buffer'}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
                       <p className="text-[11px] text-zinc-500">{locale === 'en' ? 'Service price' : 'Preço do serviço'}</p>

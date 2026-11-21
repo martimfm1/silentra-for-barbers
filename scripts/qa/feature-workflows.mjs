@@ -393,6 +393,12 @@ const bookingDrawerAvailabilityContext = read(
 assert.ok(bookingDrawerAvailabilityContext.includes('new Intl.NumberFormat'));
 assert.ok(bookingDrawerAvailabilityContext.includes('service.durationMinutes'));
 assert.ok(bookingDrawerAvailabilityContext.includes('service.price'));
+assert.ok(bookingDrawerAvailabilityContext.includes('service.bufferMinutes'));
+assert.ok(bookingDrawerAvailabilityContext.includes('item.bufferMinutes'));
+assert.ok(bookingDrawerAvailabilityContext.includes('min de preparação'));
+assert.ok(bookingDrawerAvailabilityContext.includes('min buffer'));
+assert.ok(read('types/marketplace/shops.ts').includes('bufferMinutes?: number;'));
+
 assert.ok(bookingDrawerAvailabilityContext.includes('aria-live="polite"'));
 assert.ok(bookingDrawerAvailabilityContext.includes('Checking times for this service'));
 

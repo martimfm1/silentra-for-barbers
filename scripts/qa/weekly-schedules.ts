@@ -195,7 +195,7 @@ assert.ok(
   'Existing bookings must reserve their persisted duration',
 );
 assert.ok(
-  bookingAvailability.includes('slotStart + serviceDuration <= periodEnd'),
+  bookingAvailability.includes('slotStart + reservedDuration <= periodEnd'),
   'A new service must fit completely inside a working interval',
 );
 assert.ok(
@@ -345,3 +345,60 @@ assert.match(
   /old\.payment_method = 'mbway'[\s\S]*old\.payment_status in \('awaiting_review', 'expired'\)/i,
   'Expired MB WAY holds must not be revived after the cleanup has marked them expired',
 );
+
+
+// Service buffers are configured per service and snapshotted on each booking.
+// Every availability and database capacity path must reserve duration + buffer.
+const serviceBufferMigration = readFileSync(
+  'supabase/migrations/20261120190000_service_buffer_capacity.sql',
+  'utf8',
+);
+assert.ok(serviceBufferMigration.includes('add column if not exists buffer_minutes smallint not null default 0'));
+assert.ok(serviceBufferMigration.includes('v_requested_end := v_requested_start + v_duration + v_buffer'));
+assert.ok(serviceBufferMigration.includes('p_date_hour + make_interval(mins => v_duration + v_buffer)'));
+assert.ok(serviceBufferMigration.includes('coalesce(a.buffer_minutes, 0)'));
+assert.ok(serviceBufferMigration.includes('coalesce(new.buffer_minutes, 0)'));
+assert.ok(serviceBufferMigration.includes('new.buffer_minutes := v_buffer'));
+assert.ok(serviceBufferMigration.includes('greatest(0, least(coalesce(service.buffer_minutes, 0), 120))'));
+assert.ok(serviceBufferMigration.includes('update public.booking_waitlist_vacancies as vacancy'));
+assert.ok(serviceBufferMigration.includes('before insert or update of service_id, barbershop_id, buffer_minutes on public.appointments'));
+assert.ok(serviceBufferMigration.includes('duration_minutes, buffer_minutes, status'));
+assert.ok(serviceBufferMigration.includes('appointment.duration_minutes, 30), 1440)) + greatest(0, coalesce(appointment.buffer_minutes, 0))'));
+assert.ok(serviceBufferMigration.includes('duration_minutes = excluded.duration_minutes'));
+
+assert.ok(serviceBufferMigration.includes('a_serialize_service_buffer_update'));
+assert.ok(serviceBufferMigration.includes('appointment.duration_minutes, 30), 1440)) + greatest(0, coalesce(appointment.buffer_minutes, 0))'));
+assert.ok(serviceBufferMigration.includes('v_vacancy.duration_minutes'));
+assert.ok(serviceBufferMigration.includes('coalesce(new.buffer_minutes, 0))'));
+assert.ok(serviceBufferMigration.includes('Rollback: drop the two new triggers'));
+assert.ok(serviceBufferMigration.includes('public.enqueue_booking_waitlist_vacancy()'));
+assert.ok(serviceBufferMigration.includes('public.sync_booking_waitlist_vacancies()'));
+assert.ok(serviceBufferMigration.includes('public.claim_booking_waitlist_vacancies(integer)'));
+
+const serviceEditor = readFileSync(
+  'app/dashboard/_components/cards/ServicesListCard.tsx',
+  'utf8',
+);
+const serviceEditPage = readFileSync('app/dashboard/servicos/page.tsx', 'utf8');
+const servicesHook = readFileSync('app/state/_hooks/dashboard/useServices.ts', 'utf8');
+assert.ok(serviceEditor.includes('new-service-buffer'));
+assert.ok(serviceEditor.includes('service.buffer_minutes'));
+assert.ok(serviceEditPage.includes('edit-service-buffer'));
+assert.ok(servicesHook.includes('buffer_minutes: bufferMinutes'));
+assert.ok(publicBookingData.includes('serviceBuffer'));
+assert.ok(publicBookingData.includes('reservedDuration'));
+assert.ok(publicBookingApi.includes('selectedService.buffer_minutes'));
+assert.ok(teamRescheduleApi.includes('appointment.buffer_minutes'));
+assert.ok(customerPortalAppointmentApi.includes('appointment.buffer_minutes'));
+assert.ok(customerPortalAppointmentApi.includes('item.buffer_minutes'));
+assert.ok(appointmentDashboardHook.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
+
+// A 60-minute service with a 30-minute buffer reserves 90 minutes.
+// A start at minute 60 still overlaps; the exact minute-90 boundary is free.
+const reservedInterval = (start: number, duration: number, buffer: number) => ({
+  start,
+  end: start + duration + buffer,
+});
+const bufferedAppointment = reservedInterval(9 * 60, 60, 30);
+assert.equal(intervalOverlaps(10 * 60, 10 * 60 + 30, bufferedAppointment.start, bufferedAppointment.end), true);
+assert.equal(intervalOverlaps(10 * 60 + 30, 11 * 60, bufferedAppointment.start, bufferedAppointment.end), false);

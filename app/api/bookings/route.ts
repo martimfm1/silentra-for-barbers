@@ -363,7 +363,7 @@ async function POST__unobserved(request: Request) {
     const requestedStart = timeToMinutes(bookingTime);
     const { data: selectedService, error: serviceError } = await supabase
       .from('services')
-      .select('id,name,duration,price')
+      .select('id,name,duration,buffer_minutes,price')
       .eq('id', service)
       .eq('barbershop_id', barbershopId)
       .eq('is_active', true)
@@ -389,7 +389,8 @@ async function POST__unobserved(request: Request) {
       Math.max(Number(selectedService.duration ?? 30), 1),
       1440,
     );
-    const requestedEnd = requestedStart + durationMinutes;
+    const bufferMinutes = Math.max(0, Math.min(120, Number(selectedService.buffer_minutes ?? 0)));
+    const requestedEnd = requestedStart + durationMinutes + bufferMinutes;
     if (daySchedule.day_off)
       return NextResponse.json(
         {

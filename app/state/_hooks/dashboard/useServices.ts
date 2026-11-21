@@ -17,10 +17,12 @@ export function useServices(
     name: string;
     price: string | number;
     duration: string | number;
+    bufferMinutes: string | number;
   }>({
     name: '',
     price: '',
     duration: '30',
+    bufferMinutes: 0,
   });
 
   const handleCreateService = useCallback(
@@ -30,6 +32,7 @@ export function useServices(
 
       const price = Number(newServiceData.price);
       const duration = Number(newServiceData.duration);
+      const bufferMinutes = Number(newServiceData.bufferMinutes);
       if (
         !newServiceData.name.trim() ||
         newServiceData.price === '' ||
@@ -37,7 +40,10 @@ export function useServices(
         price < 0 ||
         !Number.isInteger(duration) ||
         duration < 1 ||
-        duration > 1440
+        duration > 1440 ||
+        !Number.isInteger(bufferMinutes) ||
+        bufferMinutes < 0 ||
+        bufferMinutes > 120
       ) {
         toast.error(
           isPortuguese
@@ -53,6 +59,7 @@ export function useServices(
           name: newServiceData.name.trim(),
           price,
           duration,
+          buffer_minutes: bufferMinutes,
           barbershop_id: barbershopId,
         });
 
@@ -63,7 +70,7 @@ export function useServices(
             ? 'Serviço criado com sucesso!'
             : 'Service created successfully.',
         );
-        setNewServiceData({ name: '', price: '', duration: '30' });
+        setNewServiceData({ name: '', price: '', duration: '30', bufferMinutes: 0 });
         await onRefreshData();
         return true;
       } catch (error) {
@@ -85,6 +92,7 @@ export function useServices(
       const duration = Number(
         editingService.duration ?? editingService.min_duration,
       );
+      const bufferMinutes = Number(editingService.buffer_minutes ?? 0);
       if (
         !editingService.name.trim() ||
         editingService.price === '' ||
@@ -92,7 +100,10 @@ export function useServices(
         price < 0 ||
         !Number.isInteger(duration) ||
         duration < 1 ||
-        duration > 1440
+        duration > 1440 ||
+        !Number.isInteger(bufferMinutes) ||
+        bufferMinutes < 0 ||
+        bufferMinutes > 120
       ) {
         toast.error(
           isPortuguese
@@ -108,6 +119,7 @@ export function useServices(
           name: editingService.name.trim(),
           price,
           duration,
+          buffer_minutes: bufferMinutes,
         });
 
         if (error) throw error;

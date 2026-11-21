@@ -18,6 +18,7 @@ export interface Service {
   name: string;
   price: string;
   duration: string | number;
+  buffer_minutes?: number;
   min_duration?: string | number;
   is_active?: boolean;
 }
@@ -32,6 +33,8 @@ export interface Professional {
 export interface Appointment {
   id: string;
   date_hour: string;
+  duration_minutes?: number;
+  buffer_minutes?: number;
   recurrence_series_id?: string | null;
   status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
   manual_name?: string | null;

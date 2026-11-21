@@ -194,7 +194,7 @@ async function PATCH__unobserved(
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
-        'id,status,date_hour,duration_minutes,professional_id,service_id,manual_email,manual_name,client_id',
+        'id,status,date_hour,duration_minutes,buffer_minutes,professional_id,service_id,manual_email,manual_name,client_id',
       )
       .eq('id', appointmentId)
       .eq('barbershop_id', barbershopId)
@@ -242,7 +242,7 @@ async function PATCH__unobserved(
     const duration = Math.min(
       Math.max(Number(appointment.duration_minutes ?? 30), 1),
       1440,
-    );
+    ) + Math.max(0, Number(appointment.buffer_minutes ?? 0));
     const startMinutes = minutes(time);
     const endMinutes = startMinutes + duration;
 
@@ -268,7 +268,7 @@ async function PATCH__unobserved(
         const bounds = getLisbonDayBounds(date);
         return admin
           .from('appointments')
-          .select('id,date_hour,duration_minutes,professional_id')
+          .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
           .eq('barbershop_id', barbershopId)
           .gte('date_hour', bounds.start)
           .lt('date_hour', bounds.endExclusive)
@@ -351,7 +351,8 @@ async function PATCH__unobserved(
       const otherStart = minutes(local.time);
       const otherEnd =
         otherStart +
-        Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440);
+        Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
+        Math.max(0, Number(item.buffer_minutes ?? 0));
       return startMinutes < otherEnd && endMinutes > otherStart;
     });
     if (conflict)

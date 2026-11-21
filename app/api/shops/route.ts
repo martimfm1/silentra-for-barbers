@@ -217,6 +217,7 @@ async function GET__unobserved(request: Request) {
       professional_id: string | null;
       date_hour: string;
       duration_minutes: number | null;
+      buffer_minutes: number | null;
     }[] = [];
 
     if (barbershopIds.length > 0) {
@@ -228,7 +229,7 @@ async function GET__unobserved(request: Request) {
           .eq('active', true),
         admin
           .from('appointments')
-          .select('barbershop_id,professional_id,date_hour,duration_minutes')
+          .select('barbershop_id,professional_id,date_hour,duration_minutes,buffer_minutes')
           .in('barbershop_id', barbershopIds)
           .in('status', ['pending', 'scheduled'])
           .gte('date_hour', `${date}T00:00:00`)
@@ -263,7 +264,7 @@ async function GET__unobserved(request: Request) {
       const [hours, minutesPart] = time.split(':').map(Number);
       if (!Number.isFinite(hours) || !Number.isFinite(minutesPart)) continue;
       const start = hours * 60 + minutesPart;
-      const duration = Math.max(1, Number(appointment.duration_minutes ?? 30));
+      const duration = Math.max(1, Number(appointment.duration_minutes ?? 30)) + Math.max(0, Number(appointment.buffer_minutes ?? 0));
       const current = bookedByShop.get(appointment.barbershop_id) ?? [];
       current.push({
         professionalId: appointment.professional_id ?? null,
