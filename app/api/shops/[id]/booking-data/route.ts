@@ -38,6 +38,15 @@ function minutesToTime(totalMinutes: number): string {
   const minutes = totalMinutes % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
+function addDaysToDate(dateValue: string, days: number): string {
+  const date = new Date(`${dateValue}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+    String(date.getUTCDate()).padStart(2, '0'),
+  ].join('-');
+}
 function parseDateHour(
   value: string | null,
 ): { date: string; minutes: number } | null {
@@ -76,6 +85,10 @@ async function GET__unobserved(
         { error: 'Profissional inválido.' },
         { status: 400 },
       );
+    const availabilityOverview = searchParams.get('availabilityOverview') === '1';
+    const availabilityEndDate = availabilityOverview
+      ? addDaysToDate(date, 13)
+      : date;
 
     const admin = createAdminClient();
     const { data: shopRecord, error: shopError } = await admin
@@ -125,21 +138,39 @@ async function GET__unobserved(
         .eq('barbershop_id', barbershopId)
         .eq('active', true)
         .order('name', { ascending: true }),
-      admin
-        .from('schedule_blocks')
-        .select('id, professional_id, date, start_time, end_time, reason')
-        .eq('barbershop_id', barbershopId)
-        .eq('date', date)
-        .order('start_time', { ascending: true }),
-      admin
-        .from('appointments')
-        .select(
-          'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
-        )
-        .eq('barbershop_id', barbershopId)
-        .gte('date_hour', dayStart)
-        .lte('date_hour', dayEnd)
-        .in('status', ['pending', 'scheduled']),
+      availabilityOverview
+        ? admin
+            .from('schedule_blocks')
+            .select('id, professional_id, date, start_time, end_time, reason')
+            .eq('barbershop_id', barbershopId)
+            .gte('date', date)
+            .lte('date', availabilityEndDate)
+            .order('start_time', { ascending: true })
+        : admin
+            .from('schedule_blocks')
+            .select('id, professional_id, date, start_time, end_time, reason')
+            .eq('barbershop_id', barbershopId)
+            .eq('date', date)
+            .order('start_time', { ascending: true }),
+      availabilityOverview
+        ? admin
+            .from('appointments')
+            .select(
+              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
+            )
+            .eq('barbershop_id', barbershopId)
+            .gte('date_hour', dayStart)
+            .lte('date_hour', `${availabilityEndDate}T23:59:59`)
+            .in('status', ['pending', 'scheduled'])
+        : admin
+            .from('appointments')
+            .select(
+              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
+            )
+            .eq('barbershop_id', barbershopId)
+            .gte('date_hour', dayStart)
+            .lte('date_hour', dayEnd)
+            .in('status', ['pending', 'scheduled']),
     ]);
     const effectivePlan = planResult.data;
     const resolvedPlan = ['free', 'pro', 'enterprise'].includes(
@@ -257,16 +288,16 @@ async function GET__unobserved(
         { status: 503 },
       );
     }
-    const blockedIntervals = ((blockRows ?? []) as ScheduleBlockRow[]).map(
-      (block) => ({
+    const blockedIntervals = ((blockRows ?? []) as ScheduleBlockRow[])
+      .filter((block) => block.date === date)
+      .map((block) => ({
         id: block.id,
         professionalId: block.professional_id,
         startTime: block.start_time ? block.start_time.slice(0, 5) : null,
         endTime: block.end_time ? block.end_time.slice(0, 5) : null,
         reason: block.reason?.trim() || 'Horário bloqueado',
         allDay: !block.start_time || !block.end_time,
-      }),
-    );
+      }));
 
     if (appointmentsError) {
       console.error(
@@ -447,6 +478,151 @@ async function GET__unobserved(
       : blockedIntervals;
     const isClosed =
       isClosedDay || professionals.length === 0 || availableSlots.length === 0;
+    const dayAvailability: Record<
+      string,
+      { available: boolean; closedDay: boolean }
+    > | undefined = availabilityOverview
+      ? Object.fromEntries(
+          Array.from({ length: 14 }, (_, index) => {
+            const availabilityDate = addDaysToDate(date, index);
+            const weekday = new Date(`${availabilityDate}T12:00:00`).getDay();
+            const dateIsToday = availabilityDate === todayPortugal;
+            const dayBlockedIntervals = (
+              (blockRows ?? []) as ScheduleBlockRow[]
+            )
+              .filter((block) => block.date === availabilityDate)
+              .map((block) => ({
+                professionalId: block.professional_id,
+                startTime: block.start_time ? block.start_time.slice(0, 5) : null,
+                endTime: block.end_time ? block.end_time.slice(0, 5) : null,
+                allDay: !block.start_time || !block.end_time,
+              }));
+            const dayAppointmentIntervals = activeAppointments
+              .map((appointment) => {
+                const parsed = parseDateHour(appointment.date_hour);
+                if (!parsed || parsed.date !== availabilityDate) return null;
+                return {
+                  start: parsed.minutes,
+                  end:
+                    parsed.minutes +
+                    Math.min(
+                      Math.max(Number(appointment.duration_minutes ?? 30), 1),
+                      1440,
+                    ) +
+                    Math.max(0, Number(appointment.buffer_minutes ?? 0)),
+                  professionalId: appointment.professional_id,
+                };
+              })
+              .filter(Boolean) as Array<{
+              start: number;
+              end: number;
+              professionalId: string | null;
+            }>;
+            const dayIsBlocked = (
+              slotStart: number,
+              slotEnd: number,
+              professionalId: string,
+            ) =>
+              dayBlockedIntervals.some((block) => {
+                if (
+                  block.professionalId &&
+                  block.professionalId !== professionalId
+                )
+                  return false;
+                if (block.allDay) return true;
+                return overlaps(
+                  slotStart,
+                  slotEnd,
+                  timeToMinutes(block.startTime!),
+                  timeToMinutes(block.endTime!),
+                );
+              });
+            const dayIsBooked = (
+              slotStart: number,
+              slotEnd: number,
+              professionalId: string,
+            ) =>
+              dayAppointmentIntervals.some(
+                (appointment) =>
+                  appointmentsShareProfessionalCapacity(
+                    professionalId,
+                    appointment.professionalId,
+                  ) &&
+                  overlaps(
+                    slotStart,
+                    slotEnd,
+                    appointment.start,
+                    appointment.end,
+                  ),
+              );
+            const daySlotsByProfessional: Record<string, string[]> = {};
+            for (const item of professionals) {
+              daySlotsByProfessional[item.id] = [];
+              const schedule =
+                professionalSchedules.get(item.id) ?? shopSchedule;
+              const dailySchedule = getDailySchedule(schedule, weekday);
+              if (dailySchedule.day_off) continue;
+
+              for (const period of dailySchedule.work_intervals) {
+                const periodStart = scheduleTimeToMinutes(period.start);
+                const periodEnd = scheduleTimeToMinutes(period.end);
+                for (
+                  let slotStart = periodStart;
+                  slotStart + reservedDuration <= periodEnd;
+                  slotStart += 30
+                ) {
+                  const slotEnd = slotStart + reservedDuration;
+                  if (
+                    (dateIsToday && slotStart <= currentMinutesNow) ||
+                    isBeforeMinimumBookingNotice(
+                      availabilityDate,
+                      minutesToTime(slotStart),
+                      minimumNoticeMinutes,
+                    ) ||
+                    !isSlotWithinDailySchedule(
+                      dailySchedule,
+                      slotStart,
+                      slotEnd,
+                    ) ||
+                    dayIsBlocked(slotStart, slotEnd, item.id) ||
+                    dayIsBooked(slotStart, slotEnd, item.id)
+                  )
+                    continue;
+                  daySlotsByProfessional[item.id].push(
+                    minutesToTime(slotStart),
+                  );
+                }
+              }
+            }
+            const selectedDayIsClosed = requestedProfessionalId
+              ? getDailySchedule(
+                  professionalSchedules.get(requestedProfessionalId) ??
+                    shopSchedule,
+                  weekday,
+                ).day_off
+              : professionals.length > 0
+                ? professionals.every((item) =>
+                    getDailySchedule(
+                      professionalSchedules.get(item.id) ?? shopSchedule,
+                      weekday,
+                    ).day_off,
+                  )
+                : getDailySchedule(shopSchedule, weekday).day_off;
+            const hasAvailableSlot = requestedProfessionalId
+              ? (daySlotsByProfessional[requestedProfessionalId] ?? []).length > 0
+              : professionals.some(
+                  (item) => (daySlotsByProfessional[item.id] ?? []).length > 0,
+                );
+            return [
+              availabilityDate,
+              {
+                available: hasAvailableSlot,
+                closedDay: selectedDayIsClosed,
+              },
+            ] as const;
+          }),
+        )
+      : undefined;
     return NextResponse.json(
       {
         plan: resolvedPlan,
@@ -459,6 +635,7 @@ async function GET__unobserved(
         blockedIntervals: visibleBlockedIntervals,
         selectedProfessionalId: requestedProfessionalId,
         manualPrepayment,
+        ...(dayAvailability ? { dayAvailability } : {}),
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );
