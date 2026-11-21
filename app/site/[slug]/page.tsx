@@ -375,6 +375,7 @@ export async function generateMetadata({
     data.profile.seo_title?.trim() || data.profile.name + ' | Website oficial';
   const description =
     data.profile.seo_description?.trim() ||
+    data.profile.theme_config.description ||
     'Conhece os serviços, preços e horários da ' +
       data.profile.name +
       ' e agenda a tua próxima visita online.';
