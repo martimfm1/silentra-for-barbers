@@ -1033,7 +1033,12 @@ const checks = [
         normalized.includes('selectedDayClosed') &&
         normalized.includes('O barbeiro está de folga neste dia.') &&
         normalized.includes('Escolhe outro dia para veres os horários disponíveis.') &&
-        normalized.includes('data-booking-theme={appearance}')
+        normalized.includes('data-booking-theme={appearance}') &&
+        source.indexOf('bookingDrawer.stepThreeService') <
+          source.indexOf('bookingDrawer.stepTwoDay') &&
+        source.includes(
+          'Select a service so we can check which days still have openings.',
+        )
       );
     },
   },
