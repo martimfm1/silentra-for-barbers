@@ -11,6 +11,10 @@ const offersMigration = read(
   'supabase/migrations/20261104133930_automatic_booking_waitlist_offers.sql',
 );
 const offersWorker = read('app/api/cron/booking-waitlist-offers/route.ts');
+const waitlistClaimFixMigration = read(
+  'supabase/migrations/20261121191000_fix_waitlist_claim_attempts_ambiguity.sql',
+);
+
 const declineApi = read('app/api/shops/[id]/waitlist/decline/route.ts');
 const declinePage = read('app/waitlist/decline/page.tsx');
 const declineClient = read('app/waitlist/decline/waitlist-decline-client.tsx');
@@ -158,5 +162,17 @@ assert.match(dashboardPage, /Mark booked|Marcar reservada/);
 assert.match(sidebar, /\/dashboard\/espera/);
 assert.match(read('docs/WAITLIST.md'), /20 minutos/);
 assert.match(read('docs/WAITLIST.md'), /não fica reservada/);
+
+
+assert.match(
+  waitlistClaimFixMigration,
+  /attempts = claimed_vacancy\.attempts \+ 1/,
+);
+assert.match(waitlistClaimFixMigration, /service\.name::text/);
+assert.match(waitlistClaimFixMigration, /professional\.name::text/);
+assert.match(waitlistClaimFixMigration, /shop\.name::text/);
+assert.match(waitlistClaimFixMigration, /coalesce\(barbershop\.default_language, 'pt'\)::text/);
+assert.doesNotMatch(waitlistClaimFixMigration, /attempts = attempts \+ 1/);
+assert.match(waitlistClaimFixMigration, /Rollback: restore the previous/);
 
 console.log('Customer waitlist contracts passed.');
