@@ -132,6 +132,7 @@ async function GET__unobserved(request: Request) {
       dateHour: appointment.date_hour,
       durationMinutes:
         appointment.duration_minutes ?? appointment.services?.duration ?? 30,
+      bufferMinutes: Number(appointment.buffer_minutes ?? 0),
       status: appointment.status,
       serviceName: appointment.services?.name ?? 'Serviço',
       servicePrice: Number(appointment.services?.price ?? 0),
