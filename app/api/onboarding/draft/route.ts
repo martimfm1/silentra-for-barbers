@@ -11,6 +11,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type OnboardingDraft = {
+  createStep: 1 | 2 | 3 | 4 | 5;
   businessMode: 'solo' | 'team';
   shopName: string;
   address: string;
@@ -66,6 +67,7 @@ function normalizeDraft(value: unknown): OnboardingDraft | null {
   if (!isRecord(value)) return null;
 
   const {
+    createStep,
     businessMode,
     shopName,
     address,
@@ -81,7 +83,18 @@ function normalizeDraft(value: unknown): OnboardingDraft | null {
     lng,
   } = value;
 
+  const normalizedCreateStep =
+    createStep === undefined
+      ? 1
+      : typeof createStep === 'number' &&
+          Number.isInteger(createStep) &&
+          createStep >= 1 &&
+          createStep <= 5
+        ? (createStep as 1 | 2 | 3 | 4 | 5)
+        : null;
+
   if (
+    normalizedCreateStep === null ||
     (businessMode !== 'solo' && businessMode !== 'team') ||
     !isBoundedString(shopName, { min: 0, max: 120 }) ||
     !isBoundedString(address, { min: 0, max: 240 }) ||
@@ -112,6 +125,7 @@ function normalizeDraft(value: unknown): OnboardingDraft | null {
   }
 
   return {
+    createStep: normalizedCreateStep,
     businessMode,
     shopName,
     address,
