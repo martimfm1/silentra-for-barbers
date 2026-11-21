@@ -14,6 +14,10 @@ import {
 } from '@/lib/barbershops/amenities';
 import { BillingError } from '@/types/stripe';
 import { readJsonObject } from '@/lib/security/request-validation';
+import {
+  normalizeEnterpriseLandingPageConfig,
+  validateEnterpriseLandingPageConfig,
+} from '@/lib/barbershops/enterprise-landing-page-config';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -67,6 +71,7 @@ async function GET__unobserved() {
       {
         data: {
           ...shop,
+          theme_config: normalizeEnterpriseLandingPageConfig(shop?.theme_config),
           amenities: normalizeBarbershopAmenities(shop?.amenities),
           plan,
           canCustomizeSlug: planSupportsCustomSlug(plan),
@@ -235,18 +240,11 @@ async function PATCH__unobserved(request: Request) {
         updates.og_image_url = value;
       }
       if (body.themeConfig !== undefined) {
-        if (
-          !body.themeConfig ||
-          typeof body.themeConfig !== 'object' ||
-          Array.isArray(body.themeConfig)
-        )
-          return jsonError('Configuração visual inválida.', 400);
-        if (JSON.stringify(body.themeConfig).length > 5000)
-          return jsonError(
-            'A configuração visual excede o limite permitido.',
-            400,
-          );
-        updates.theme_config = body.themeConfig;
+        const validation = validateEnterpriseLandingPageConfig(
+          body.themeConfig,
+        );
+        if (!validation.ok) return jsonError(validation.error, 400);
+        updates.theme_config = validation.config;
       }
     }
 
