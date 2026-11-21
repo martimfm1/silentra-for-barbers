@@ -256,28 +256,31 @@ assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="sett
 assert.equal(settingsPage.lastIndexOf('<details', settingsPage.indexOf('id="settings-danger"')), accountSecurityDetailsStart);
 assert.match(settingsPage, /window\.location\.hash\.slice\(1\)/, 'Settings hash links must open the containing category.');
 assert.match(settingsPage, /target\?\.closest\([\s\S]*?details\[data-settings-category\]/);
-assert.ok(settingsPage.includes('data-settings-subcategory'));
-assert.ok(
-  settingsPage.includes("locale === 'en' ? 'Appearance' : 'Aparência'"),
-  'Appearance must be nested under Information.',
-);
+const informationLabelIndex = settingsPage.indexOf("locale === 'en' ? 'Information' : 'Informações'");
+const appearanceLabelIndex = settingsPage.indexOf("locale === 'en' ? 'Appearance' : 'Aparência'");
+const informationAccordionStart = settingsPage.lastIndexOf('<details', informationLabelIndex);
+const informationAccordionEnd = settingsPage.indexOf('</details>', informationAccordionStart);
+const appearanceAccordionStart = settingsPage.lastIndexOf('<details', appearanceLabelIndex);
+const appearanceAccordionEnd = settingsPage.indexOf('</details>', appearanceAccordionStart);
+assert.ok(informationAccordionStart >= 0 && informationAccordionEnd > informationAccordionStart);
+assert.ok(appearanceAccordionStart > informationAccordionEnd, 'Appearance must be a top-level accordion outside Information.');
+assert.ok(appearanceAccordionEnd > appearanceAccordionStart, 'Appearance accordion must have a closing details element.');
+const appearanceAccordion = settingsPage.slice(appearanceAccordionStart, appearanceAccordionEnd);
+assert.match(appearanceAccordion, /<details data-settings-category className="settings-accordion/);
+assert.match(appearanceAccordion, /id="settings-appearance"/);
+assert.doesNotMatch(settingsPage, /data-settings-subcategory|settings-subaccordion/);
+assert.ok(appearanceAccordion.includes('Barbershop identity') && appearanceAccordion.includes('Identidade da barbearia'));
+assert.ok(appearanceAccordion.includes('Dashboard customization') && appearanceAccordion.includes('Personalização da dashboard'));
+assert.ok(appearanceAccordion.includes('Agenda layout') && appearanceAccordion.includes('Layout da agenda'));
+assert.match(appearanceAccordion, /border-t border-white\/\[\.08\] pt-5/);
 assert.ok(settingsPage.includes('<AgendaViewSettings view={agendaView} onChange={setAgendaView} />'));
 assert.match(settingsPage, /settings-accordion-content/);
-assert.doesNotMatch(
-  settingsPage,
-  /settings-subaccordion[^>]*bg-black\/15/,
-  'The nested Appearance accordion must use the same neutral surface as its parent.',
-);
 assert.match(
   dashboardShell,
   /\.settings-accordion\[open\][\s\S]*?var\(--dashboard-accent/,
   'The active Settings category must use the dashboard customization color.',
 );
-assert.match(
-  dashboardShell,
-  /\.settings-subaccordion\[open\][\s\S]*?var\(--dashboard-accent/,
-  'The active nested Settings accordion must use the dashboard customization color.',
-);
+assert.doesNotMatch(dashboardShell, /settings-subaccordion/);
 assert.match(
   dashboardShell,
   /settings-accordion\[open\] > summary > span > span:first-child[\s\S]*?color: var\(--dashboard-accent/,
@@ -338,9 +341,8 @@ assert.ok(
   'Location settings must be nested under Information.',
 );
 assert.ok(
-  settingsPage.indexOf("'Appearance' : 'Aparência'") >
-    settingsPage.indexOf("'Information' : 'Informações'"),
-  'Appearance settings must be nested under Information.',
+  appearanceAccordionStart > informationAccordionEnd,
+  'Appearance settings must stay separate from Information.',
 );
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'lines'\}/);
 assert.match(agendaLayoutSettings, /aria-pressed=\{view === 'calendar'\}/);
