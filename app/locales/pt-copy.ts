@@ -90,6 +90,8 @@ export const ptCopy = {
     generateError: 'Não foi possível gerar o convite.',
     invalidFormat: 'O convite gerado tem um formato inválido.',
     loadError: 'Não foi possível carregar os convites ativos.',
+    loadErrorHint: 'A lista não foi confirmada. Tenta novamente antes de assumires que um convite está ativo ou foi removido.',
+    retry: 'Tentar novamente',
     revokeError: 'Não foi possível revogar este convite.',
     qrError: 'Não foi possível gerar o QR code.',
     created: 'Convite criado.',

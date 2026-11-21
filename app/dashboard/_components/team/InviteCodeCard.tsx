@@ -64,6 +64,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
   const [origin, setOrigin] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingInvites, setLoadingInvites] = useState(true);
+  const [inviteLoadError, setInviteLoadError] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -84,6 +85,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
 
   const loadInvites = useCallback(async () => {
     setLoadingInvites(true);
+    setInviteLoadError(null);
     try {
       const response = await fetch('/api/team/invite', {
         cache: 'no-store',
@@ -92,9 +94,10 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
       if (!response.ok) throw new Error(data.error || t('inviteCode.loadError'));
       setActiveInvites(Array.isArray(data.invites) ? data.invites : []);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t('inviteCode.loadError'),
-      );
+      const message =
+        error instanceof Error ? error.message : t('inviteCode.loadError');
+      setInviteLoadError(message);
+      toast.error(message);
     } finally {
       setLoadingInvites(false);
     }
@@ -225,7 +228,7 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
   }
 
   const formatExpiry = (value: string) =>
-    new Intl.DateTimeFormat(undefined, {
+    new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(new Date(value));
@@ -495,9 +498,34 @@ export function InviteCodeCard({ seats }: InviteCodeCardProps) {
           )}
 
           {loadingInvites ? (
-            <div className="flex items-center gap-2 py-3 text-xs text-zinc-500">
+            <div className="flex items-center gap-2 py-3 text-xs text-zinc-500" role="status" aria-live="polite">
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               {t('inviteCode.loading')}
+            </div>
+          ) : inviteLoadError ? (
+            <div
+              className="grid gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.045] p-4"
+              role="alert"
+              aria-live="assertive"
+            >
+              <div>
+                <p className="text-sm font-semibold text-amber-100">
+                  {t('inviteCode.loadError')}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-amber-100/70">
+                  {t('inviteCode.loadErrorHint')}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void loadInvites()}
+                className="min-h-10 w-fit border-amber-400/20 bg-transparent text-amber-50 hover:bg-amber-400/10"
+              >
+                <RefreshCw className="mr-2 size-3.5" aria-hidden="true" />
+                {t('inviteCode.retry')}
+              </Button>
             </div>
           ) : activeInvites.length === 0 ? (
             <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-zinc-500">
