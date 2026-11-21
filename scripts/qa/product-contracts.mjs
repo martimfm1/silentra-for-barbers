@@ -1020,9 +1020,12 @@ const checks = [
       return (
         normalized.includes('const availableDays = days;') &&
         normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) : false') &&
-        normalized.includes('disabled={isDayOff}') &&
+        normalized.includes('disabled={isUnavailable || loadingDayAvailability}') &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
-        normalized.includes('Dia de folga — indisponível para marcação') &&
+        normalized.includes("availabilityOverview: '1'") &&
+        normalized.includes('dayAvailability[day.dateStr]?.available === true') &&
+        normalized.includes("'Sem vagas'") &&
+        normalized.includes('A vermelho: dia de folga ou sem horários disponíveis') &&
         normalized.includes('booking-data?date=') &&
         normalized.includes('professional.id') &&
         normalized.includes('setSelectedDayClosed(responseData.closedDay === true)') &&
@@ -1033,6 +1036,19 @@ const checks = [
         normalized.includes('data-booking-theme={appearance}')
       );
     },
+  },
+  {
+    name: 'Booking calendar availability overview checks 14 days using live booking constraints',
+    file: 'app/api/shops/[id]/booking-data/route.ts',
+    test: (source) =>
+      source.includes("searchParams.get('availabilityOverview') === '1'") &&
+      source.includes('addDaysToDate(date, 13)') &&
+      source.includes(".gte('date', date)") &&
+      source.includes('.lte(\'date\', availabilityEndDate)') &&
+      source.includes("`${availabilityEndDate}T23:59:59`") &&
+      source.includes('appointmentsShareProfessionalCapacity') &&
+      source.includes('isBeforeMinimumBookingNotice') &&
+      source.includes('dayAvailability'),
   },
   {
     name: 'Marketplace availability uses shop defaults and per-barber weekly schedules',
