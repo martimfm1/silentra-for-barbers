@@ -222,6 +222,7 @@ async function GET__unobserved(request: Request) {
         duration_minutes: Number(
           appointment.duration_minutes ?? service?.duration ?? 30,
         ),
+        buffer_minutes: Number(appointment.buffer_minutes ?? 0),
         status: appointment.status,
         clientName:
           appointment.manual_name?.trim() ||
