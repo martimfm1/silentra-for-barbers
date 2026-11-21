@@ -230,6 +230,22 @@ export function BookingDrawerCanonical({
   const availableDays = days;
   const firstOpenDayIndex = 0;
   const currentDay = availableDays[dayIndex] ?? null;
+  const currentProfessionalSchedule = professional?.weekly_schedule;
+  const currentDaySchedule =
+    currentDay && currentProfessionalSchedule
+      ? getDailySchedule(
+          currentProfessionalSchedule,
+          new Date(`${currentDay.dateStr}T12:00:00`).getDay(),
+        )
+      : null;
+  const currentDayWorkEnd =
+    currentDaySchedule && !currentDaySchedule.day_off
+      ? currentDaySchedule.work_intervals.reduce<string | null>(
+          (latestEnd, interval) =>
+            !latestEnd || interval.end > latestEnd ? interval.end : latestEnd,
+          null,
+        )
+      : null;
   const currentDayClosed = currentDay
     ? isDayOffForBookingDay(currentDay) ||
       dayAvailability[currentDay.dateStr]?.closedDay === true
@@ -1424,6 +1440,24 @@ export function BookingDrawerCanonical({
                   ) : null}
                 </div>
               )}
+              {currentDayWorkEnd ? (
+                <div
+                  role="note"
+                  aria-label={`${locale === 'pt' ? 'Fim do horário de trabalho' : 'Workday ends at'} ${currentDayWorkEnd}`}
+                  className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-zinc-400"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+                    <span>{locale === 'pt' ? 'Fim do horário de trabalho' : 'Workday ends at'}</span>
+                  </span>
+                  <time
+                    dateTime={currentDayWorkEnd}
+                    className="shrink-0 font-semibold tabular-nums text-zinc-200"
+                  >
+                    {currentDayWorkEnd}
+                  </time>
+                </div>
+              ) : null}
               <Button
                 type="button"
                 disabled={!canContinueTwo}
