@@ -116,6 +116,20 @@ async function PATCH__unobserved(request: Request) {
     });
     if (!bodyResult.ok) return bodyResult.response;
     const body = bodyResult.value;
+    if (
+      !canCustomizeEnterprise &&
+      [
+        'seoTitle',
+        'seoDescription',
+        'ogImageUrl',
+        'themeConfig',
+      ].some((key) => body[key] !== undefined)
+    ) {
+      return jsonError(
+        'A personalização avançada do site está disponível no plano Enterprise.',
+        403,
+      );
+    }
     const database = createAdminClient();
     const { data: currentShop, error: currentError } = await database
       .from('shops')
