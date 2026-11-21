@@ -379,7 +379,13 @@ export function AgendaCalendarView({
                   onClick={() => setSelectedDate(date)}
                   aria-current={isToday(date) ? 'date' : undefined}
                   aria-pressed={selected}
-                  aria-label={`${format(date, locale === 'pt' ? "EEEE, d 'de' MMMM" : 'EEEE, MMMM d', { locale: dateLocale })}. ${isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t)}. ${activeCount} marcações. ${dayBlocks.length} bloqueios.`}
+                  aria-label={t('agendaCalendar.daySummary', {
+                    date: format(date, locale === 'pt' ? "EEEE, d 'de' MMMM" : 'EEEE, MMMM d', { locale: dateLocale }),
+                    availability: isClosed ? t('agendaCalendar.dayOff') : occupancyLabel(level, t),
+                    appointments: activeCount,
+                    cancelled: cancelledCount,
+                    blocks: dayBlocks.length,
+                  })}
                   className={cn(
                     'group relative min-h-24 bg-zinc-950/95 p-1.5 text-left transition-[background,box-shadow,transform] duration-200 hover:bg-white/[0.035] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:scale-[0.995] sm:min-h-36 sm:p-3',
                     !inMonth && 'opacity-35',
@@ -410,7 +416,7 @@ export function AgendaCalendarView({
                       {cancelledCount > 0 ? (
                         <span
                           className="rounded-md bg-rose-400/10 px-1 py-0.5 text-[8px] font-semibold tabular-nums text-rose-300 sm:text-[9px]"
-                          title={`${cancelledCount} canceladas`}
+                          title={t('agendaCalendar.cancelledTooltip', { count: cancelledCount })}
                         >
                           −{cancelledCount}
                         </span>
@@ -454,7 +460,11 @@ export function AgendaCalendarView({
                             onAppointmentClick?.(appointment);
                           }
                         }}
-                        aria-label={`Ver marcação de ${appointmentName(appointment, t)} às ${format(new Date(appointment.date_hour), 'HH:mm')}${appointment.status === 'cancelled' ? ', cancelada' : ''}`}
+                        aria-label={t('agendaCalendar.appointmentAriaLabel', {
+                          client: appointmentName(appointment, t),
+                          time: format(new Date(appointment.date_hour), 'HH:mm'),
+                          status: appointment.status === 'cancelled' ? t('agendaCalendar.cancelledStatus') : '',
+                        })}
                         className={cn(
                           'flex min-w-0 cursor-pointer items-center gap-1 rounded-md border px-1 py-1 transition hover:border-emerald-300/30 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300/70 sm:gap-1.5 sm:px-1.5',
                           appointment.status === 'cancelled'
@@ -494,7 +504,7 @@ export function AgendaCalendarView({
                     ))}
                     {dayAppointments.length > 2 ? (
                       <span className="hidden px-1 text-[9px] font-medium text-zinc-600 sm:block">
-                        +{dayAppointments.length - 2} mais
+                        +{dayAppointments.length - 2} {t('agendaCalendar.more')}
                       </span>
                     ) : null}
                     {blockPreview.map((block) => (
@@ -525,7 +535,7 @@ export function AgendaCalendarView({
                     {dayBlocks.length > blockPreview.length ? (
                       <span className="block truncate px-1 text-[8px] font-medium text-rose-300/80 sm:text-[9px]">
                         +{dayBlocks.length - blockPreview.length}{' '}
-                        {locale === 'en' ? 'more blocked times' : 'bloqueios'}
+                        {t('agendaCalendar.moreBlockedTimes')}
                       </span>
                     ) : null}
                     {generalDay.break_intervals.length > 0 && !isClosed ? (
@@ -666,8 +676,10 @@ export function AgendaCalendarView({
               </p>
               {selectedAppointments.length > 0 ? (
                 <span className="text-[10px] font-medium text-zinc-600">
-                  {selectedAppointments.length} evento
-                  {selectedAppointments.length === 1 ? '' : 's'}
+                  {selectedAppointments.length}{' '}
+                  {selectedAppointments.length === 1
+                    ? t('agendaCalendar.eventSingular')
+                    : t('agendaCalendar.eventPlural')}
                 </span>
               ) : null}
             </div>
@@ -726,7 +738,7 @@ export function AgendaCalendarView({
                       </p>
                       {onAppointmentClick ? (
                         <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-300/80">
-                          Ver detalhes{' '}
+                          {t('agendaCalendar.viewDetails')}{' '}
                           <ChevronRight className="size-3" aria-hidden="true" />
                         </span>
                       ) : null}
@@ -787,7 +799,9 @@ export function AgendaCalendarView({
             </p>
             <p className="mt-2 text-xs leading-5 text-zinc-600">
               {professionals.length
-                ? `${professionals.length} profissional${professionals.length === 1 ? '' : 'is'} ativo${professionals.length === 1 ? '' : 's'}.`
+                ? professionals.length === 1
+                  ? t('agendaCalendar.activeProfessional', { count: professionals.length })
+                  : t('agendaCalendar.activeProfessionals', { count: professionals.length })
                 : t('agendaCalendar.noActiveProfessionals')}
             </p>
           </div>
