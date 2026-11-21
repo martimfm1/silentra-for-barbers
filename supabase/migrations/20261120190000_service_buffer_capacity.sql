@@ -83,7 +83,7 @@ for each row execute function public.serialize_service_buffer_update();
 
 drop trigger if exists a_populate_appointment_service_buffer on public.appointments;
 create trigger a_populate_appointment_service_buffer
-before insert or update of service_id, barbershop_id on public.appointments
+before insert or update of service_id, barbershop_id, buffer_minutes on public.appointments
 for each row execute function public.populate_appointment_service_buffer();
 
 CREATE OR REPLACE FUNCTION public.create_booking_atomic(p_barbershop_id uuid, p_service_id uuid, p_professional_id uuid, p_date_hour timestamp with time zone, p_duration_minutes integer, p_manual_name text, p_manual_phone text, p_manual_email text, p_manual_birth_date date, p_status text DEFAULT 'scheduled'::text)
