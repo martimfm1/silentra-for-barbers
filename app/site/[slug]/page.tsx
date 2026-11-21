@@ -105,6 +105,7 @@ const getLandingPageData = cache(
       { data: shop, error: shopError },
       { data: reviews, error: reviewsError },
       { data: professionals, error: professionalsError },
+      { data: bannerFiles, error: bannerFilesError },
     ] = await Promise.all([
       database
         .from('barbershop_landing_pages')
