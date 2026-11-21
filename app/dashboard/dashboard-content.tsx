@@ -130,31 +130,14 @@ const dashboardSurfaceStyles = `
     color: var(--dashboard-accent, #34d399);
   }
 
-  /* Nested Settings accordions use the same accent with a quieter emphasis. */
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] {
-    border-color: color-mix(in srgb, var(--dashboard-accent, #34d399) 34%, rgb(255 255 255 / 0.08)) !important;
-    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 3%, transparent) !important;
-  }
-
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary {
-    background: color-mix(in srgb, var(--dashboard-accent, #34d399) 6%, transparent);
-  }
-
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary > span > span:first-child,
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary > svg {
-    color: var(--dashboard-accent, #34d399);
-  }
-
   /* All Settings accordions share the account and security header treatment. */
-  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary,
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion > summary {
+  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary {
     position: relative;
     min-height: 5.25rem;
     transition: background 180ms ease, color 180ms ease;
   }
 
-  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary::before,
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion > summary::before {
+  .silentra-dashboard-shell .dashboard-page .settings-accordion > summary::before {
     position: absolute;
     inset-block: 1rem;
     left: 0;
@@ -165,8 +148,7 @@ const dashboardSurfaceStyles = `
     transition: background 180ms ease, inset-block 180ms ease;
   }
 
-  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary::before,
-  .silentra-dashboard-shell .dashboard-page .settings-subaccordion[open] > summary::before {
+  .silentra-dashboard-shell .dashboard-page .settings-accordion[open] > summary::before {
     inset-block: 0.65rem;
     background: var(--dashboard-accent, #34d399);
   }
@@ -318,10 +300,6 @@ const dashboardSurfaceStyles = `
   .silentra-dashboard-shell .dashboard-page .settings-accordion-content [data-slot="select-trigger"],
   .silentra-dashboard-shell .dashboard-page .settings-accordion-content select {
     background-color: rgb(255 255 255 / 0.035);
-  }
-
-  .silentra-dashboard-shell .dashboard-page .settings-accordion-content .settings-subaccordion {
-    background: transparent;
   }
 
   /* Mobile viewport guard: dashboard content must not inherit desktop canvas widths. */
