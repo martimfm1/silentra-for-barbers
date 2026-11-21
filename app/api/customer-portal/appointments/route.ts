@@ -80,6 +80,7 @@ async function GET__unobserved(request: Request) {
         id,
         date_hour,
         duration_minutes,
+        buffer_minutes,
         status,
         manual_email,
         cancellation_reason,
