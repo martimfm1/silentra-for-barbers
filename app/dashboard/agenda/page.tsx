@@ -368,23 +368,30 @@ export default function AgendaPage() {
 
         await fetchInitialData();
         setSelectedAppointment(null);
+        const newDateLabel = new Intl.DateTimeFormat(
+          locale === 'en' ? 'en-GB' : 'pt-PT',
+          { dateStyle: 'medium' },
+        ).format(new Date(`${date}T12:00:00`));
         if (payload.notificationSent) {
           toast.success(
-            locale === 'en'
-              ? 'Booking updated and email sent to the customer.'
-              : 'Marcação alterada e email enviado ao cliente.',
+            t('agenda.bookingRescheduledEmailSent', {
+              date: newDateLabel,
+              time,
+            }),
           );
         } else if (payload.notificationSkipped === true) {
           toast.success(
-            locale === 'en'
-              ? 'Booking updated. No customer email was sent.'
-              : 'Marcação alterada. Não foi enviado email ao cliente.',
+            t('agenda.bookingRescheduledEmailSkipped', {
+              date: newDateLabel,
+              time,
+            }),
           );
         } else {
           toast.warning(
-            locale === 'en'
-              ? 'Booking updated, but the email could not be sent. Check the customer email and Brevo configuration.'
-              : 'Marcação alterada, mas não foi possível enviar o email. Confirma o email do cliente e a configuração do Brevo.',
+            t('agenda.bookingRescheduledEmailFailed', {
+              date: newDateLabel,
+              time,
+            }),
           );
         }
         return true;
@@ -445,11 +452,7 @@ export default function AgendaPage() {
           throw new Error(payload.error || 'Não foi possível cancelar a série.');
         }
         const count = Number(payload.cancelledCount || 0);
-        toast.success(
-          locale === 'en'
-            ? `${count} recurring bookings cancelled.`
-            : `${count} marcações recorrentes canceladas.`,
-        );
+        toast.success(t('agenda.bookingSeriesCancelled', { count }));
         await fetchInitialData();
         return true;
       } catch (error) {
