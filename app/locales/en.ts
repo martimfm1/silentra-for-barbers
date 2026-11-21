@@ -506,7 +506,7 @@ export const en = {
     validationLocation: 'Enter your address and city to continue.',
     validationServiceName: 'Enter your first service name (up to 100 characters).',
     validationPriceDuration: 'Check the price and a duration between 1 and 1440 minutes.',
-    validationWorkingDay: 'Set at least one working day.'
+    validationWorkingDay: 'Set at least one working day.',
     essentialOnly:
       'Fill in only the essentials. You can adjust the remaining details in the dashboard later.',
     identity: 'Identity',
