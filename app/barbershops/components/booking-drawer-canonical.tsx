@@ -135,6 +135,8 @@ export function BookingDrawerCanonical({
   selectedProfessionalId = null,
   appearance = 'default',
   requireBirthDate = true,
+  cancellationWindowHours = 24,
+  minimumBookingNoticeMinutes = 0,
 }: BookingDrawerProps) {
   const { t, locale } = useLanguage();
   const days = useMemo(() => buildDays(locale), [locale]);
@@ -189,6 +191,21 @@ export function BookingDrawerCanonical({
   }, [isOpen, step]);
 
   const service = services.find((item) => item.id === serviceId) ?? null;
+  const safeCancellationWindowHours = Math.max(
+    0,
+    Math.min(720, Math.round(Number(cancellationWindowHours) || 0)),
+  );
+  const safeMinimumBookingNoticeMinutes = Math.max(
+    0,
+    Math.min(43200, Math.round(Number(minimumBookingNoticeMinutes) || 0)),
+  );
+  const minimumNoticeLabel = (() => {
+    const hours = Math.floor(safeMinimumBookingNoticeMinutes / 60);
+    const minutes = safeMinimumBookingNoticeMinutes % 60;
+    if (hours && minutes) return locale === 'en' ? `${hours} h ${minutes} min` : `${hours} h ${minutes} min`;
+    if (hours) return `${hours} h`;
+    return `${minutes} min`;
+  })();
   // Day-off state is derived from the selected barber's effective weekly
   // schedule. Before a barber is selected, a date is closed only if every
   // available barber is off that weekday.
@@ -1086,11 +1103,9 @@ export function BookingDrawerCanonical({
                   <option value="">{t('bookingDrawer.selectService')}</option>
                   {services.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item.name} · {item.durationMinutes} min
-                      {Number(item.bufferMinutes ?? 0) > 0
-                        ? ` + ${Number(item.bufferMinutes)} min buffer`
-                        : ''}
-                      {' · €'}
+                      {item.name} · {item.durationMinutes} min{Number(item.bufferMinutes ?? 0) > 0
+                        ? ` + ${Number(item.bufferMinutes)} min ${locale === 'pt' ? 'preparação' : 'buffer'}`
+                        : ''} · €
                       {Number(item.price).toFixed(2)}
                     </option>
                   ))}
@@ -1272,6 +1287,74 @@ export function BookingDrawerCanonical({
                   Voltar
                 </Button>
               </div>
+              {!waitlistOnly && service ? (
+                <div
+                  className="mb-4 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.035] p-4"
+                  role="note"
+                  aria-label={
+                    locale === 'en'
+                      ? 'Booking summary and cancellation policy'
+                      : 'Resumo da marcação e política de cancelamento'
+                  }
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                        {locale === 'en' ? 'Booking summary' : 'Resumo da marcação'}
+                      </p>
+                      <p className="mt-1 truncate text-sm font-semibold text-zinc-100">
+                        {service.name}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-400">
+                        {professional?.name ? `${professional.name} · ` : ''}
+                        {service.durationMinutes} {locale === 'en' ? 'min' : 'min'}
+                        {Number(service.bufferMinutes ?? 0) > 0 ? (
+                          <span className="ml-1 text-amber-300">
+                            · + {Number(service.bufferMinutes)} {locale === 'en' ? 'min buffer' : 'min de preparação'}
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-sm font-semibold tabular-nums text-emerald-200">
+                      {new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      }).format(service.price)}
+                    </p>
+                  </div>
+                  <div className="mt-3 space-y-2 border-t border-white/[0.08] pt-3 text-xs leading-5 text-zinc-300">
+                    <p>
+                      <span className="font-semibold text-zinc-100">
+                        {locale === 'en' ? 'Cancellation:' : 'Cancelamento:'}
+                      </span>{' '}
+                      {safeCancellationWindowHours === 0
+                        ? locale === 'en'
+                          ? 'You can cancel online until the appointment starts.'
+                          : 'Podes cancelar online até à hora de início da marcação.'
+                        : locale === 'en'
+                          ? `You can cancel online up to ${safeCancellationWindowHours} h before. After that, contact the barbershop directly.`
+                          : `Podes cancelar online até ${safeCancellationWindowHours} h antes. Depois, contacta diretamente a barbearia.`}
+                    </p>
+                    {safeMinimumBookingNoticeMinutes > 0 ? (
+                      <p>
+                        <span className="font-semibold text-zinc-100">
+                          {locale === 'en' ? 'Minimum notice:' : 'Antecedência mínima:'}
+                        </span>{' '}
+                        {locale === 'en'
+                          ? `At least ${minimumNoticeLabel} is required for new bookings. Times that do not meet this rule are hidden.`
+                          : `São necessárias pelo menos ${minimumNoticeLabel} de antecedência para novas marcações. Os horários que não cumprem esta regra não são apresentados.`}
+                      </p>
+                    ) : null}
+                    {requireBirthDate ? (
+                      <p>
+                        {locale === 'en'
+                          ? 'A date of birth is required to complete this booking.'
+                          : 'É necessária uma data de nascimento para concluir a marcação.'}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
               <div className="space-y-4">
                 <label className="grid gap-1.5 text-xs text-zinc-400">
                   <span>{t('bookingDrawer.name')} *</span>
