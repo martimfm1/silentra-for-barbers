@@ -217,6 +217,7 @@ async function GET__unobserved(request: Request) {
       professional_id: string | null;
       date_hour: string;
       duration_minutes: number | null;
+      buffer_minutes: number | null;
     }[] = [];
 
     if (barbershopIds.length > 0) {
