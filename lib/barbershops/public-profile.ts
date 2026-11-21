@@ -1,6 +1,11 @@
 import type { BillingPlan } from '@/types/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { UUID_PATTERN } from '@/lib/validation';
+import {
+  DEFAULT_ENTERPRISE_LANDING_PAGE_CONFIG,
+  normalizeEnterpriseLandingPageConfig,
+  type EnterpriseLandingPageConfig,
+} from '@/lib/barbershops/enterprise-landing-page-config';
 
 const PUBLIC_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -37,7 +42,7 @@ export interface PublicProfileRecord {
   seo_title: string | null;
   seo_description: string | null;
   og_image_url: string | null;
-  theme_config: Record<string, unknown>;
+  theme_config: EnterpriseLandingPageConfig;
   plan: BillingPlan;
   owner_user_id?: string | null;
   landing_page_url?: string | null;
@@ -226,13 +231,9 @@ function buildPublicProfile(
     '';
   const effectiveSlug =
     planSupportsCustomSlug(plan) && customSlug ? customSlug : baseSlug;
-  const themeConfig =
-    planSupportsEnterpriseCustomization(plan) &&
-    shop?.theme_config &&
-    typeof shop.theme_config === 'object' &&
-    !Array.isArray(shop.theme_config)
-      ? (shop.theme_config as Record<string, unknown>)
-      : {};
+  const themeConfig = planSupportsEnterpriseCustomization(plan)
+    ? normalizeEnterpriseLandingPageConfig(shop?.theme_config)
+    : DEFAULT_ENTERPRISE_LANDING_PAGE_CONFIG;
 
   return {
     id: shop?.id ?? barbershop.id,

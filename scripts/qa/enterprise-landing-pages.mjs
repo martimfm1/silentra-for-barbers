@@ -8,8 +8,13 @@ const migration = read(
 );
 const features = read('lib/billing/plan-features.ts');
 const landingPage = read('app/site/[slug]/page.tsx');
+const landingConfig = read('lib/barbershops/enterprise-landing-page-config.ts');
+const landingSettings = read('app/dashboard/settings/enterprise-landing-page-settings-card.tsx');
+const settingsPage = read('app/dashboard/settings/settings-page.tsx');
+const publicProfileResolver = read('lib/barbershops/public-profile.ts');
 const publicApi = read('app/api/v1/public/barbershops/[slug]/route.ts');
 const publicProfileApi = read('app/api/public/barbershops/[slug]/route.ts');
+const publicProfileSettingsApi = read('app/api/barbershops/public-profile/route.ts');
 const pricing = read('components/hero/pricing-section.tsx');
 const comparison = read('components/billing/plan-comparison.tsx');
 const apiAudit = read('scripts/qa/api-audit.mjs');
@@ -81,5 +86,55 @@ assert.match(apiDocumentation, /temporariamente desativada/);
 assert.doesNotMatch(navbar, /\/documentation/);
 assert.doesNotMatch(dashboardSidebar, /\/documentation/);
 assert.doesNotMatch(sitemap, /\/documentation/);
+
+
+assert.match(landingConfig, /'midnight'[\s\S]*?'forest'[\s\S]*?'sand'[\s\S]*?'espresso'/);
+assert.match(landingConfig, /validateEnterpriseLandingPageConfig/);
+assert.match(landingConfig, /instagram\.com/);
+assert.match(landingConfig, /facebook\.com/);
+assert.match(landingConfig, /tiktok\.com/);
+assert.match(landingConfig, /parsed\.protocol !== 'https:'/);
+assert.match(landingConfig, /#\[0-9a-f\]\{6\}/);
+assert.match(publicProfileSettingsApi, /validateEnterpriseLandingPageConfig/);
+assert.match(publicProfileSettingsApi, /A personalização avançada do site está disponível no plano Enterprise/);
+assert.match(publicProfileSettingsApi, /updates\.theme_config = validation\.config/);
+assert.match(publicProfileResolver, /normalizeEnterpriseLandingPageConfig\(shop\?\.theme_config\)/);
+
+for (const source of [landingPage]) {
+  assert.match(source, /\.from\('services'\)/);
+  assert.match(source, /\.from\('professionals'\)/);
+  assert.match(source, /\.from\('reviews'\)/);
+  assert.match(source, /\.from\('barbershops'\)/);
+  assert.match(source, /\.from\('shops'\)/);
+  assert.match(source, /normalizeWeeklySchedule/);
+  assert.match(source, /normalizeBarbershopAmenities/);
+  assert.match(source, /showTeam/);
+  assert.match(source, /showReviews/);
+  assert.match(source, /showAmenities/);
+  assert.match(source, /instagramUrl/);
+  assert.match(source, /facebookUrl/);
+  assert.match(source, /tiktokUrl/);
+  assert.match(source, /heroAlignment/);
+  assert.match(source, /aggregateRating/);
+  assert.match(source, /OpeningHoursSpecification/);
+  assert.match(source, /google\.com\/maps\/search/);
+  assert.match(source, /\?booking=1/);
+}
+
+assert.match(landingSettings, /ENTERPRISE_LANDING_PAGE_THEMES\.map/);
+assert.match(landingSettings, /type="color"/);
+assert.match(landingSettings, /Description \/ About us|Descrição \/ Sobre nós/);
+assert.match(landingSettings, /Instagram/);
+assert.match(landingSettings, /Facebook/);
+assert.match(landingSettings, /TikTok/);
+assert.match(landingSettings, /showTeam/);
+assert.match(landingSettings, /showReviews/);
+assert.match(landingSettings, /showAmenities/);
+assert.match(landingSettings, /heroAlignment/);
+assert.match(landingSettings, /mailto:contact\.silentra@gmail\.com/);
+assert.match(settingsPage, /EnterpriseLandingPageSettingsCard/);
+assert.match(settingsPage, /plan === 'enterprise' \?/);
+assert.match(settingsPage, /enterpriseLandingDirty/);
+assert.match(settingsPage, /themeConfig: enterpriseLandingDraft/);
 
 console.log('Enterprise landing-page and public API contracts passed.');
