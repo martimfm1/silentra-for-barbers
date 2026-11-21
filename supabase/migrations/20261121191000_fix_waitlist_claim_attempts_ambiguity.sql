@@ -198,10 +198,10 @@ begin
       offered_waitlist.customer_name,
       offered_waitlist.customer_email,
       offered_waitlist.customer_phone,
-      service.name,
-      professional.name,
-      shop.name,
-      coalesce(barbershop.default_language, 'pt'),
+      service.name::text,
+      professional.name::text,
+      shop.name::text,
+      coalesce(barbershop.default_language, 'pt')::text,
       v_vacancy.attempts + 1
     from public.booking_waitlist as offered_waitlist
     join public.services as service on service.id = offered_waitlist.service_id
