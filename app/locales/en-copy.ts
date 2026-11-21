@@ -86,6 +86,8 @@ export const enCopy = {
     generateError: 'Unable to generate the invite.',
     invalidFormat: 'The generated invite has an invalid format.',
     loadError: 'Unable to load active invites.',
+    loadErrorHint: 'The list could not be verified. Try again before assuming an invitation is still active or has been removed.',
+    retry: 'Try again',
     revokeError: 'Unable to revoke this invite.',
     qrError: 'Unable to generate the QR code.',
     created: 'Invite created.',
