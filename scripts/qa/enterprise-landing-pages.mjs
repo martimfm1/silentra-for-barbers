@@ -109,7 +109,7 @@ for (const source of [landingPage]) {
   assert.match(source, /normalizeWeeklySchedule/);
   assert.match(source, /normalizeBarbershopAmenities/);
   assert.match(source, /avatar_url, updated_at/);
-  assert.match(source, /\.storage\.from\('banner'\)/);
+  assert.match(source, /\.storage\s*\.from\('banner'\)/);
   assert.match(source, /\.list\(barbershopId, \{ limit: 100, search: 'banner\.webp' \}\)/);
   assert.match(source, /settingsBannerUrl/);
   assert.match(source, /settingsBannerFile\?\.updated_at/);
