@@ -49,6 +49,7 @@ export function EnterpriseLandingPageSettingsCard({
   const [loadError, setLoadError] = useState(false);
   const [initial, setInitial] =
     useState<EnterpriseLandingPageConfig | null>(null);
+  const [appliedSaveVersion, setAppliedSaveVersion] = useState(saveVersion);
   const [draft, setDraft] = useState<EnterpriseLandingPageConfig>(
     DEFAULT_ENTERPRISE_LANDING_PAGE_CONFIG,
   );
@@ -90,10 +91,10 @@ export function EnterpriseLandingPageSettingsCard({
   }, [draft, dirty, initial, onDraftChange]);
 
   useEffect(() => {
-    if (saveVersion > 0 && initial && dirty) {
-      setInitial(draft);
-    }
-  }, [saveVersion, initial, dirty, draft]);
+    if (saveVersion === appliedSaveVersion || !initial) return;
+    setInitial(draft);
+    setAppliedSaveVersion(saveVersion);
+  }, [saveVersion, appliedSaveVersion, initial, draft]);
 
   const update = (patch: Partial<EnterpriseLandingPageConfig>) =>
     setDraft((current) => ({ ...current, ...patch }));
