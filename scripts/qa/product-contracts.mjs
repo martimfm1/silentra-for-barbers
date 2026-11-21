@@ -999,8 +999,10 @@ const checks = [
     name: 'Agenda do Victor passes barbershop closed weekdays to the booking drawer',
     file: 'app/agendadovictor/page.tsx',
     test: (source) =>
-      source.includes(".select('opening_time,closing_time,closed_days')") &&
-      source.includes('closed_days: hours.closed_days'),
+      source.includes(".select('opening_time,closing_time,closed_days,time_limit_cancellation_hours,minimum_booking_notice_minutes')") &&
+      source.includes('closed_days: hours.closed_days') &&
+      source.includes('time_limit_cancellation_hours: hours.time_limit_cancellation_hours') &&
+      source.includes('minimum_booking_notice_minutes: hours.minimum_booking_notice_minutes'),
   },
   {
     name: 'Shared Pro booking drawer uses the light theme and preserves closed days',
