@@ -1028,7 +1028,7 @@ const checks = [
         normalized.includes('days.every((day) => {') &&
         normalized.includes('typeof status.available === \'boolean\'') &&
         normalized.includes('typeof status.closedDay === \'boolean\'') &&
-        normalized.includes('setDayAvailabilityReady(true)') &&
+        normalized.includes('setVerifiedDayAvailabilityKey(dayAvailabilityRequestKey)') &&
         normalized.includes('!dayAvailabilityReady &&') &&
         normalized.includes('disabled={dayStatus.disabled}') &&
         normalized.includes('dayStatus.needsService') &&
@@ -1036,7 +1036,7 @@ const checks = [
         normalized.includes('Availability has not been fully verified yet. Please retry.') &&
         normalized.includes('Could not verify availability for every day.') &&
         normalized.includes('!dayAvailabilityError') &&
-        normalized.includes('if (dayAvailabilityError)') &&
+        normalized.includes('!dayAvailabilityReady ||') &&
         normalized.includes('setRetryKey((value) => value + 1)') &&
         normalized.includes("t('bookingDrawer.retry')") &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
