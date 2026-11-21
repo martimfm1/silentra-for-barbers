@@ -65,6 +65,8 @@ import {
   type PublicProfileSettingsDraft,
 } from '@/app/dashboard/settings/public-profile/public-profile-settings-card';
 import { WeeklyScheduleSettings } from '@/components/dashboard/weekly-schedule-settings';
+import { EnterpriseLandingPageSettingsCard } from '@/app/dashboard/settings/enterprise-landing-page-settings-card';
+import type { EnterpriseLandingPageConfig } from '@/lib/barbershops/enterprise-landing-page-config';
 import type {
   DashboardCustomizationConfig,
   DashboardCustomizationPreset,
@@ -157,6 +159,11 @@ export default function SettingsPageOrganized() {
     useState<PublicProfileSettingsDraft | null>(null);
   const [publicProfileDirty, setPublicProfileDirty] = useState(false);
   const [publicProfileSaveVersion, setPublicProfileSaveVersion] = useState(0);
+  const [enterpriseLandingDraft, setEnterpriseLandingDraft] =
+    useState<EnterpriseLandingPageConfig | null>(null);
+  const [enterpriseLandingDirty, setEnterpriseLandingDirty] = useState(false);
+  const [enterpriseLandingSaveVersion, setEnterpriseLandingSaveVersion] =
+    useState(0);
   const { hasFeature, loading: planLoading, plan } = useFeatureAccess();
   const canDirectory = hasFeature('directory_visibility');
   const canManualMbway = hasFeature('manual_mbway_prepayment');
@@ -264,6 +271,7 @@ export default function SettingsPageOrganized() {
       JSON.stringify(config) !== JSON.stringify(initial) ||
       suggestion !== null ||
       publicProfileDirty ||
+      enterpriseLandingDirty ||
       dashboardCustomizationDirty ||
       agendaViewDirty ||
       pendingAvatar !== null ||
@@ -273,6 +281,7 @@ export default function SettingsPageOrganized() {
       initial,
       suggestion,
       publicProfileDirty,
+      enterpriseLandingDirty,
       dashboardCustomizationDirty,
       agendaViewDirty,
       pendingAvatar,
@@ -285,6 +294,13 @@ export default function SettingsPageOrganized() {
     (draft: PublicProfileSettingsDraft, hasUnsavedChanges: boolean) => {
       setPublicProfileDraft(draft);
       setPublicProfileDirty(hasUnsavedChanges);
+    },
+    [],
+  );
+  const handleEnterpriseLandingDraftChange = useCallback(
+    (draft: EnterpriseLandingPageConfig, hasUnsavedChanges: boolean) => {
+      setEnterpriseLandingDraft(draft);
+      setEnterpriseLandingDirty(hasUnsavedChanges);
     },
     [],
   );
@@ -367,11 +383,22 @@ export default function SettingsPageOrganized() {
           throw new Error(body.error || t('settingsPage.locationUpdateFailed'));
       }
 
-      if (publicProfileDirty && publicProfileDraft) {
+      if (
+        (publicProfileDirty && publicProfileDraft) ||
+        (enterpriseLandingDirty && enterpriseLandingDraft)
+      ) {
+        const profilePayload = {
+          ...(publicProfileDirty && publicProfileDraft
+            ? publicProfileDraft
+            : {}),
+          ...(enterpriseLandingDirty && enterpriseLandingDraft
+            ? { themeConfig: enterpriseLandingDraft }
+            : {}),
+        };
         const response = await fetch('/api/barbershops/public-profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(publicProfileDraft),
+          body: JSON.stringify(profilePayload),
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok)
@@ -465,6 +492,10 @@ export default function SettingsPageOrganized() {
       if (publicProfileDirty && publicProfileDraft) {
         setPublicProfileDirty(false);
         setPublicProfileSaveVersion((version) => version + 1);
+      }
+      if (enterpriseLandingDirty && enterpriseLandingDraft) {
+        setEnterpriseLandingDirty(false);
+        setEnterpriseLandingSaveVersion((version) => version + 1);
       }
 
       toast.success(t('settingsPage.saved'));
@@ -994,6 +1025,29 @@ export default function SettingsPageOrganized() {
         <AgendaViewSettings view={agendaView} onChange={setAgendaView} />
       </div>
     </section>
+
+    {plan === 'enterprise' ? (
+      <section className="space-y-3 border-t border-white/[.08] pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-100">
+              {locale === 'en' ? 'Enterprise landing page' : 'Landing page Enterprise'}
+            </h3>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              {locale === 'en'
+                ? 'Manage the standard website included with your plan.'
+                : 'Gere o site padrão incluído no teu plano.'}
+            </p>
+          </div>
+          <FeaturePlanBadge feature="landing_page" />
+        </div>
+        <EnterpriseLandingPageSettingsCard
+          onDraftChange={handleEnterpriseLandingDraftChange}
+          saveVersion={enterpriseLandingSaveVersion}
+          saving={saving || planLoading}
+        />
+      </section>
+    ) : null}
   </div>
 </details>
 
