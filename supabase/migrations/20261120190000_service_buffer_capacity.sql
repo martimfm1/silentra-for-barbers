@@ -520,9 +520,15 @@ begin
         or block.professional_id = new.professional_id
       )
       and (
-        (block.start_time is null or block.end_time is null)
+        (
+          (block.start_time is null or block.end_time is null)
+          and block.date::timestamp < v_end
+          and (block.date + 1)::timestamp > v_start
+        )
         or (
-          (block.date + block.start_time) < v_end
+          block.start_time is not null
+          and block.end_time is not null
+          and (block.date + block.start_time) < v_end
           and (block.date + block.end_time) > v_start
         )
       )
