@@ -69,6 +69,25 @@ function safeHttpsUrl(value: string | null | undefined): string | null {
   }
 }
 
+function withCacheVersion(
+  value: string | null | undefined,
+  version: string | null | undefined,
+): string | null {
+  const safeUrl = safeHttpsUrl(value);
+  if (!safeUrl || !version) return safeUrl;
+  try {
+    const parsed = new URL(safeUrl);
+    const timestamp = Date.parse(version);
+    parsed.searchParams.set(
+      'v',
+      Number.isFinite(timestamp) ? String(timestamp) : version,
+    );
+    return parsed.toString();
+  } catch {
+    return safeUrl;
+  }
+}
+
 const getLandingPageData = cache(
   async (requestedSlug: string): Promise<LandingPageData | null> => {
     const slug = requestedSlug.trim().toLowerCase();
@@ -103,7 +122,7 @@ const getLandingPageData = cache(
       database
         .from('barbershops')
         .select(
-          'opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, default_language',
+          'opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, default_language, avatar_url, updated_at',
         )
         .eq('id', barbershopId)
         .maybeSingle(),
@@ -125,6 +144,9 @@ const getLandingPageData = cache(
         .eq('active', true)
         .order('name', { ascending: true })
         .limit(20),
+      database.storage
+        .from('banner')
+        .list(barbershopId, { limit: 100, search: 'banner.webp' }),
     ]);
 
     if (entitlementError) {
@@ -165,6 +187,19 @@ const getLandingPageData = cache(
         ? Number(storedRating.toFixed(1))
         : Number(calculatedRating.toFixed(1));
     const storedReviewsCount = Number(shop?.reviews_count ?? 0);
+    const settingsBannerFile = !bannerFilesError
+      ? (bannerFiles ?? []).find((file) => file.name === 'banner.webp')
+      : null;
+    const supabaseStorageOrigin = (
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || ''
+    ).replace(/\/$/, '');
+    const settingsBannerUrl =
+      settingsBannerFile && supabaseStorageOrigin
+        ? supabaseStorageOrigin +
+          '/storage/v1/object/public/banner/' +
+          encodeURIComponent(barbershopId) +
+          '/banner.webp'
+        : null;
 
     return {
       profile,
@@ -194,8 +229,17 @@ const getLandingPageData = cache(
           ? shop.lng
           : null,
       language: hours?.default_language === 'en' ? 'en' : 'pt',
-      coverUrl: safeHttpsUrl(profile.cover_url),
-      avatarUrl: safeHttpsUrl(profile.avatar_url),
+      // Settings uploads use canonical tenant-owned Storage objects. Prefer
+      // these assets over legacy shops metadata so public pages reflect the
+      // branding configured in Dashboard > Settings > Appearance.
+      coverUrl:
+        withCacheVersion(
+          settingsBannerUrl,
+          settingsBannerFile?.updated_at ?? null,
+        ) || safeHttpsUrl(profile.cover_url),
+      avatarUrl:
+        withCacheVersion(hours?.avatar_url, hours?.updated_at ?? null) ||
+        safeHttpsUrl(profile.avatar_url),
     };
   },
 );
