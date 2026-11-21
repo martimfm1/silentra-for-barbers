@@ -137,7 +137,9 @@ assert.doesNotMatch(agendaPage, /<AgendaViewSettings|<AgendaCancellationPolicyPa
 assert.match(sidebar, /const teamItems: SidebarItem\[\]/);
 assert.match(sidebar, /const automationItems: SidebarItem\[\]/);
 assert.doesNotMatch(sidebar, /communicationItems|dashboard\/mensagens|dashboard\/marketing/);
-assert.match(sidebar, /const toolsItems: SidebarItem\[\]/);
+assert.match(sidebar, /const customerExperienceItems: SidebarItem\[\]/);
+assert.match(sidebar, /const businessGrowthItems: SidebarItem\[\]/);
+assert.doesNotMatch(sidebar, /const toolsItems: SidebarItem\[\]|Ferramentas e crescimento|Tools & growth/);
 assert.match(sidebar, /const secondaryItems: SidebarItem\[\]/);
 assert.match(
   sidebar,

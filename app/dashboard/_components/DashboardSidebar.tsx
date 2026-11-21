@@ -24,7 +24,6 @@ import {
   ScanLine,
   X,
   Zap,
-  LayoutGrid,
   type LucideIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -84,10 +83,6 @@ const automationItems: SidebarItem[] = [
   },
 ];
 
-const toolsOverviewItems: SidebarItem[] = [
-  { href: '/dashboard/ferramentas', label: 'Visão geral', icon: LayoutGrid },
-];
-
 const customerExperienceItems: SidebarItem[] = [
   { href: '/dashboard/qr-code', label: 'QR Code', icon: QrCode },
   {
@@ -119,12 +114,6 @@ const customerExperienceItems: SidebarItem[] = [
 const businessGrowthItems: SidebarItem[] = [
   { href: '/dashboard/pos', label: 'Vendas', icon: CreditCard, feature: 'pos' },
   { href: '/dashboard/website', label: 'Site próprio', icon: Globe2 },
-];
-
-const toolsItems: SidebarItem[] = [
-  ...toolsOverviewItems,
-  ...customerExperienceItems,
-  ...businessGrowthItems,
 ];
 
 const secondaryItems: SidebarItem[] = [
@@ -273,7 +262,8 @@ export function DashboardSidebar() {
     ...managementItems,
     ...teamItems,
     ...automationItems,
-    ...toolsItems,
+    ...customerExperienceItems,
+    ...businessGrowthItems,
     ...secondaryItems,
   ];
   const moreActive = moreItems.some(isActive);
@@ -502,24 +492,18 @@ export function DashboardSidebar() {
               </div>
             </section>
             <section>
-              {sectionTitle('Ferramentas e crescimento', 'Tools & growth')}
+              {sectionTitle('Experiência do cliente', 'Customer experience')}
               <div className="grid gap-1">
-                {toolsOverviewItems.map(renderItem)}
+                {customerExperienceItems.map(renderItem)}
               </div>
-              <div className="mt-3">
-                {sectionTitle('Experiência do cliente', 'Customer experience')}
-                <div className="grid gap-1">
-                  {customerExperienceItems.map(renderItem)}
-                </div>
-              </div>
-              <div className="mt-3">
-                {sectionTitle(
-                  'Vendas e presença digital',
-                  'Sales & online presence',
-                )}
-                <div className="grid gap-1">
-                  {businessGrowthItems.map(renderItem)}
-                </div>
+            </section>
+            <section>
+              {sectionTitle(
+                'Vendas e presença digital',
+                'Sales & online presence',
+              )}
+              <div className="grid gap-1">
+                {businessGrowthItems.map(renderItem)}
               </div>
             </section>
           </nav>
@@ -725,35 +709,26 @@ export function DashboardSidebar() {
                   </section>
                   <section>
                     {sectionTitle(
-                      'Ferramentas e crescimento',
-                      'Tools & growth',
+                      'Experiência do cliente',
+                      'Customer experience',
                     )}
                     <div className="grid gap-1.5">
-                      {toolsOverviewItems.map(renderItem)}
-                    </div>
-                    <div className="mt-5">
-                      {sectionTitle(
-                        'Experiência do cliente',
-                        'Customer experience',
-                      )}
-                      <div className="grid gap-1.5">
-                        {customerExperienceItems.map(renderItem)}
-                      </div>
-                    </div>
-                    <div className="mt-5">
-                      {sectionTitle(
-                        'Vendas e presença digital',
-                        'Sales & online presence',
-                      )}
-                      <div className="grid gap-1.5">
-                        {businessGrowthItems.map(renderItem)}
-                      </div>
+                      {customerExperienceItems.map(renderItem)}
                     </div>
                   </section>
                   <section>
-                    {sectionTitle('Conta e ajuda', 'Account & support')}
+                    {sectionTitle(
+                      'Vendas e presença digital',
+                      'Sales & online presence',
+                    )}
                     <div className="grid gap-1.5">
-                      {secondaryItems.map(renderItem)}
+                      {businessGrowthItems.map(renderItem)}
+                    </div>
+                    <div className="mt-5">
+                      {sectionTitle('Conta e ajuda', 'Account & support')}
+                      <div className="grid gap-1.5">
+                        {secondaryItems.map(renderItem)}
+                      </div>
                     </div>
                   </section>
                 </div>
