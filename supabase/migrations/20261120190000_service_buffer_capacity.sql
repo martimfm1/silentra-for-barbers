@@ -623,6 +623,388 @@ on public.appointments
 for each row
 execute function public.enforce_appointment_schedule_block_capacity();
 
+-- Keep cancelled slots and subsequent waitlist offers reserved for the full
+-- service duration plus the original appointment's buffer snapshot.
+update public.booking_waitlist_vacancies as vacancy
+set duration_minutes = least(
+  1440,
+  greatest(1, coalesce(appointment.duration_minutes, 30) + coalesce(appointment.buffer_minutes, 0))
+)
+from public.appointments as appointment
+where appointment.id = vacancy.appointment_id;
+
+create or replace function public.enqueue_booking_waitlist_vacancy()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_shop_id uuid;
+  v_slot_date date;
+  v_slot_time time;
+begin
+  if new.status::text <> 'cancelled'
+     or (tg_op = 'UPDATE' and old.status::text = 'cancelled')
+     or new.service_id is null
+     or new.date_hour <= pg_catalog.now() then
+    return new;
+  end if;
+
+  select shop.id
+    into v_shop_id
+  from public.shops as shop
+  where shop.barbershop_id = new.barbershop_id
+  limit 1;
+
+  if v_shop_id is null then
+    return new;
+  end if;
+
+  v_slot_date := (new.date_hour at time zone 'UTC')::date;
+  v_slot_time := (new.date_hour at time zone 'UTC')::time;
+
+  insert into public.booking_waitlist_vacancies (
+    appointment_id,
+    barbershop_id,
+    shop_id,
+    service_id,
+    professional_id,
+    slot_date,
+    slot_time,
+    duration_minutes,
+    status,
+    available_at
+  )
+  values (
+    new.id,
+    new.barbershop_id,
+    v_shop_id,
+    new.service_id,
+    new.professional_id,
+    v_slot_date,
+    v_slot_time,
+    least(
+      1440,
+      greatest(1, coalesce(new.duration_minutes, 30) + coalesce(new.buffer_minutes, 0))
+    ),
+    'pending',
+    pg_catalog.now()
+  )
+  on conflict (appointment_id) do update
+  set barbershop_id = excluded.barbershop_id,
+      shop_id = excluded.shop_id,
+      service_id = excluded.service_id,
+      professional_id = excluded.professional_id,
+      slot_date = excluded.slot_date,
+      slot_time = excluded.slot_time,
+      duration_minutes = excluded.duration_minutes,
+      status = 'pending',
+      waitlist_id = null,
+      offer_expires_at = null,
+      available_at = pg_catalog.now(),
+      locked_at = null,
+      sent_at = null,
+      attempts = 0,
+      last_error = null,
+      updated_at = pg_catalog.now()
+  where public.booking_waitlist_vacancies.status in ('completed', 'no_match', 'failed');
+
+  return new;
+end;
+$function$;
+
+create or replace function public.sync_booking_waitlist_vacancies()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_vacancy record;
+  v_local_date date;
+  v_local_time time;
+begin
+  if new.status::text not in ('pending', 'scheduled') then
+    return new;
+  end if;
+
+  v_local_date := (new.date_hour at time zone 'UTC')::date;
+  v_local_time := (new.date_hour at time zone 'UTC')::time;
+
+  for v_vacancy in
+    select vacancy.*
+    from public.booking_waitlist_vacancies as vacancy
+    where vacancy.barbershop_id = new.barbershop_id
+      and vacancy.status in ('pending', 'dispatching', 'offered')
+      and vacancy.slot_date = v_local_date
+      and (
+        vacancy.professional_id is null
+        or new.professional_id is null
+        or vacancy.professional_id = new.professional_id
+      )
+      and new.date_hour <
+        ((vacancy.slot_date::text || ' ' || vacancy.slot_time::text)::timestamp at time zone 'UTC')
+          + pg_catalog.make_interval(mins => vacancy.duration_minutes)
+      and new.date_hour + pg_catalog.make_interval(
+        mins => greatest(1, least(coalesce(new.duration_minutes, 30), 1440))
+          + greatest(0, coalesce(new.buffer_minutes, 0))
+      ) >
+        ((vacancy.slot_date::text || ' ' || vacancy.slot_time::text)::timestamp at time zone 'UTC')
+    for update
+  loop
+    if v_vacancy.waitlist_id is not null then
+      if v_local_time = v_vacancy.slot_time
+         and new.service_id = v_vacancy.service_id
+         and lower(coalesce(new.manual_email, '')) = (
+           select lower(waitlist.customer_email)
+           from public.booking_waitlist as waitlist
+           where waitlist.id = v_vacancy.waitlist_id
+         ) then
+        update public.booking_waitlist
+        set status = 'booked',
+            linked_appointment_id = new.id,
+            offer_expires_at = null,
+            updated_at = pg_catalog.now()
+        where id = v_vacancy.waitlist_id
+          and status = 'offered';
+      else
+        update public.booking_waitlist
+        set status = 'waiting',
+            offered_date = null,
+            offered_time = null,
+            offer_expires_at = null,
+            updated_at = pg_catalog.now()
+        where id = v_vacancy.waitlist_id
+          and status = 'offered';
+      end if;
+    end if;
+
+    update public.booking_waitlist_vacancies
+    set status = 'completed',
+        offer_expires_at = null,
+        locked_at = null,
+        updated_at = pg_catalog.now(),
+        last_error = null
+    where id = v_vacancy.id;
+  end loop;
+
+  return new;
+end;
+$function$;
+
+create or replace function public.claim_booking_waitlist_vacancies(p_batch_size integer default 25)
+returns table (
+  vacancy_id uuid,
+  waitlist_id uuid,
+  shop_id uuid,
+  service_id uuid,
+  professional_id uuid,
+  barbershop_id uuid,
+  preferred_date date,
+  offered_time time,
+  offer_expires_at timestamptz,
+  customer_name text,
+  customer_email text,
+  customer_phone text,
+  service_name text,
+  professional_name text,
+  shop_name text,
+  default_language text,
+  attempts integer
+)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_vacancy record;
+  v_waitlist_id uuid;
+  v_expiry timestamptz;
+  v_retry_at timestamptz;
+begin
+  perform public.recover_stale_booking_waitlist_offers();
+
+  for v_vacancy in
+    select vacancy.*
+    from public.booking_waitlist_vacancies as vacancy
+    where vacancy.status = 'pending'
+      and vacancy.available_at <= pg_catalog.now()
+      and vacancy.slot_date <= (pg_catalog.now() at time zone 'Europe/Lisbon')::date + 13
+      and vacancy.attempts < 5
+    order by vacancy.created_at asc, vacancy.id asc
+    limit greatest(1, least(coalesce(p_batch_size, 25), 100))
+    for update skip locked
+  loop
+    v_retry_at := null;
+
+    select max(coalesce(other.offer_expires_at, pg_catalog.now() + interval '1 minute'))
+      into v_retry_at
+    from public.booking_waitlist_vacancies as other
+    where other.id <> v_vacancy.id
+      and other.barbershop_id = v_vacancy.barbershop_id
+      and other.slot_date = v_vacancy.slot_date
+      and other.slot_time < v_vacancy.slot_time
+        + pg_catalog.make_interval(mins => v_vacancy.duration_minutes)
+      and other.slot_time + pg_catalog.make_interval(mins => other.duration_minutes)
+        > v_vacancy.slot_time
+      and (
+        other.professional_id is null
+        or v_vacancy.professional_id is null
+        or other.professional_id = v_vacancy.professional_id
+      )
+      and other.status in ('dispatching', 'offered')
+      and coalesce(other.offer_expires_at, pg_catalog.now() + interval '1 minute') > pg_catalog.now();
+
+    if v_retry_at is not null then
+      update public.booking_waitlist_vacancies
+      set status = 'pending',
+          available_at = v_retry_at,
+          updated_at = pg_catalog.now(),
+          last_error = 'An overlapping offer is still active'
+      where id = v_vacancy.id;
+      continue;
+    end if;
+
+    if exists (
+      select 1
+      from public.appointments as appointment
+      where appointment.barbershop_id = v_vacancy.barbershop_id
+        and appointment.id <> v_vacancy.appointment_id
+        and appointment.status::text in ('pending', 'scheduled')
+        and appointment.date_hour <
+          ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'UTC')
+            + pg_catalog.make_interval(mins => v_vacancy.duration_minutes)
+        and appointment.date_hour + pg_catalog.make_interval(
+          mins => greatest(1, least(coalesce(appointment.duration_minutes, 30), 1440))
+            + greatest(0, coalesce(appointment.buffer_minutes, 0))
+        ) >
+          ((v_vacancy.slot_date::text || ' ' || v_vacancy.slot_time::text)::timestamp at time zone 'UTC')
+        and (
+          v_vacancy.professional_id is null
+          or appointment.professional_id is null
+          or appointment.professional_id = v_vacancy.professional_id
+        )
+    ) or exists (
+      select 1
+      from public.schedule_blocks as block
+      where block.barbershop_id = v_vacancy.barbershop_id
+        and block.date = v_vacancy.slot_date
+        and (block.professional_id is null or block.professional_id = v_vacancy.professional_id)
+        and (
+          block.start_time is null
+          or block.end_time is null
+          or (
+            v_vacancy.slot_time < block.end_time
+            and v_vacancy.slot_time
+              + pg_catalog.make_interval(mins => v_vacancy.duration_minutes) > block.start_time
+          )
+        )
+    ) then
+      update public.booking_waitlist_vacancies
+      set status = 'completed',
+          updated_at = pg_catalog.now(),
+          last_error = 'Slot is no longer available'
+      where id = v_vacancy.id;
+      continue;
+    end if;
+
+    v_waitlist_id := null;
+
+    select waitlist.id
+      into v_waitlist_id
+    from public.booking_waitlist as waitlist
+    join public.services as service
+      on service.id = waitlist.service_id
+     and service.barbershop_id = waitlist.barbershop_id
+     and service.is_active = true
+    left join public.professionals as professional
+      on professional.id = waitlist.professional_id
+     and professional.barbershop_id = waitlist.barbershop_id
+     and professional.active = true
+    where waitlist.barbershop_id = v_vacancy.barbershop_id
+      and waitlist.shop_id = v_vacancy.shop_id
+      and waitlist.service_id = v_vacancy.service_id
+      and waitlist.preferred_date = v_vacancy.slot_date
+      and waitlist.status = 'waiting'
+      and (waitlist.professional_id is null or waitlist.professional_id = v_vacancy.professional_id)
+      and (waitlist.professional_id is null or professional.id is not null)
+      and (
+        waitlist.preferred_time_start is null
+        or (
+          v_vacancy.slot_time >= waitlist.preferred_time_start
+          and v_vacancy.slot_time < waitlist.preferred_time_end
+        )
+      )
+    order by waitlist.created_at asc, waitlist.id asc
+    limit 1
+    for update of waitlist skip locked;
+
+    if v_waitlist_id is null then
+      update public.booking_waitlist_vacancies
+      set status = 'no_match',
+          updated_at = pg_catalog.now(),
+          last_error = null
+      where id = v_vacancy.id;
+      continue;
+    end if;
+
+    v_expiry := pg_catalog.now() + interval '20 minutes';
+
+    update public.booking_waitlist
+    set status = 'offered',
+        offered_date = v_vacancy.slot_date,
+        offered_time = v_vacancy.slot_time,
+        offer_expires_at = v_expiry,
+        last_contacted_at = pg_catalog.now(),
+        updated_at = pg_catalog.now()
+    where id = v_waitlist_id
+      and status = 'waiting';
+
+    update public.booking_waitlist_vacancies
+    set status = 'dispatching',
+        waitlist_id = v_waitlist_id,
+        offer_expires_at = v_expiry,
+        locked_at = pg_catalog.now(),
+        attempts = attempts + 1,
+        updated_at = pg_catalog.now(),
+        last_error = null
+    where id = v_vacancy.id;
+
+    return query
+    select
+      v_vacancy.id,
+      waitlist.id,
+      waitlist.shop_id,
+      waitlist.service_id,
+      v_vacancy.professional_id,
+      waitlist.barbershop_id,
+      waitlist.offered_date,
+      waitlist.offered_time,
+      waitlist.offer_expires_at,
+      waitlist.customer_name,
+      waitlist.customer_email,
+      waitlist.customer_phone,
+      service.name,
+      professional.name,
+      shop.name,
+      coalesce(barbershop.default_language, 'pt'),
+      v_vacancy.attempts + 1
+    from public.booking_waitlist as waitlist
+    join public.services as service on service.id = waitlist.service_id
+    left join public.professionals as professional on professional.id = v_vacancy.professional_id
+    join public.shops as shop on shop.id = waitlist.shop_id
+    join public.barbershops as barbershop on barbershop.id = waitlist.barbershop_id
+    where waitlist.id = v_waitlist_id;
+  end loop;
+end;
+$function$;
+
+revoke all on function public.enqueue_booking_waitlist_vacancy() from public, anon, authenticated;
+revoke all on function public.sync_booking_waitlist_vacancies() from public, anon, authenticated;
+revoke all on function public.claim_booking_waitlist_vacancies(integer) from public, anon, authenticated;
+grant execute on function public.claim_booking_waitlist_vacancies(integer) to service_role;
+
 revoke all on function public.serialize_service_buffer_update()
   from public, anon, authenticated, service_role;
 revoke all on function public.populate_appointment_service_buffer()
