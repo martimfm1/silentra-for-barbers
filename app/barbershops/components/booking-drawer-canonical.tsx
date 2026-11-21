@@ -235,9 +235,6 @@ export function BookingDrawerCanonical({
     ? isDayOffForBookingDay(currentDay) ||
       dayAvailability[currentDay.dateStr]?.closedDay === true
     : false;
-  const currentDayAvailability = currentDay
-    ? dayAvailability[currentDay.dateStr]
-    : undefined;
   const getDayStatus = (day: BookingDayOption) => {
     const availability = dayAvailability[day.dateStr];
     const dayOff =
