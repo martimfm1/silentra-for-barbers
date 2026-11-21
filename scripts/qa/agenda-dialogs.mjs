@@ -123,6 +123,55 @@ assert.ok(hook.includes('const handleCancelBooking = useCallback'));
 assert.ok(hook.includes('await onRefreshData();\n        return true;'));
 assert.ok(hook.includes('return false;'));
 
+const outcomeCopyKeys = [
+  'bookingCreatedFor',
+  'recurringBookingsCreatedFor',
+  'bookingCreatedWithEmail',
+  'bookingCreatedEmailFailed',
+  'bookingConfirmedMbway',
+  'bookingConfirmedEmailSent',
+  'bookingConfirmedEmailFailed',
+  'bookingConfirmedNoEmail',
+  'bookingCompleted',
+  'bookingCompletedReviewEmailSent',
+  'addToClients',
+  'bookingCancelledEmailSent',
+  'bookingCancelledEmailSkipped',
+  'bookingCancelledEmailFailed',
+  'bookingRescheduledEmailSent',
+  'bookingRescheduledEmailSkipped',
+  'bookingRescheduledEmailFailed',
+  'bookingSeriesCancelled',
+];
+for (const key of outcomeCopyKeys) {
+  assert.ok(pt.includes(`    ${key}:`), `Missing pt-PT agenda outcome copy: ${key}`);
+  assert.ok(en.includes(`    ${key}:`), `Missing en-GB agenda outcome copy: ${key}`);
+}
+for (const key of [
+  'bookingCreatedFor',
+  'recurringBookingsCreatedFor',
+  'bookingCreatedWithEmail',
+  'bookingCreatedEmailFailed',
+  'bookingConfirmedMbway',
+  'bookingConfirmedEmailSent',
+  'bookingConfirmedEmailFailed',
+  'bookingConfirmedNoEmail',
+  'bookingCompleted',
+  'bookingCompletedReviewEmailSent',
+  'addToClients',
+  'bookingCancelledEmailSent',
+  'bookingCancelledEmailSkipped',
+  'bookingCancelledEmailFailed',
+]) {
+  assert.ok(hook.includes(`t('agenda.${key}'`) || hook.includes(`t("agenda.${key}"`), `Hook is missing localized outcome ${key}`);
+}
+assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailSent'"));
+assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailSkipped'"));
+assert.ok(agenda.includes("t('agenda.bookingRescheduledEmailFailed'"));
+assert.ok(agenda.includes("t('agenda.bookingSeriesCancelled'"));
+assert.ok(agenda.includes('newDateLabel'));
+
+
 assert.match(
   agenda,
   /<Dialog open=\{bookingDialogOpen\} onOpenChange=\{setBookingDialogOpen\}>/,
