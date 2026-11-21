@@ -729,13 +729,21 @@ export function BookingDrawerCanonical({
       service &&
       !currentDayUnavailable &&
       !loadingBookingData &&
-      !loadingDayAvailability,
+      !loadingDayAvailability &&
+      !dayAvailabilityError,
   );
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
+    if (loadingDayAvailability) return;
+    if (dayAvailabilityError)
+      return toast.error(
+        locale === 'pt'
+          ? 'Não foi possível confirmar as vagas. Tenta novamente antes de continuar.'
+          : 'We could not verify availability. Try again before continuing.',
+      );
     if (currentDayUnavailable)
       return toast.error(
         currentDayClosed
@@ -1259,11 +1267,23 @@ export function BookingDrawerCanonical({
                       </p>
                     ) : null}
                     {dayAvailabilityError ? (
-                      <p className="mt-2 text-[11px] text-amber-300" role="status">
-                        {locale === 'pt'
-                          ? 'Não foi possível confirmar todas as vagas. Volta a tentar antes de continuar.'
-                          : 'Could not verify all openings. Please try again before continuing.'}
-                      </p>
+                      <div className="mt-2 flex flex-col gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[0.04] p-3 text-[11px] text-amber-300">
+                        <p role="status" aria-live="polite">
+                          {locale === 'pt'
+                            ? 'Não foi possível confirmar todas as vagas. Tenta novamente antes de continuar.'
+                            : 'Could not verify all openings. Please retry before continuing.'}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="min-h-9 w-fit border-amber-300/20 text-amber-200 hover:bg-amber-300/10"
+                          onClick={() => setRetryKey((value) => value + 1)}
+                          disabled={loadingDayAvailability}
+                        >
+                          {t('bookingDrawer.retry')}
+                        </Button>
+                      </div>
                     ) : null}
                   </>
                 ) : (
