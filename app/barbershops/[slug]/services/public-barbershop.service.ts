@@ -33,6 +33,8 @@ export interface BarbershopPublicDetails extends PublicProfileRecord {
   closed_days?: string | null;
   weekly_schedule?: WeeklySchedule | null;
   require_birth_date?: boolean;
+  time_limit_cancellation_hours?: number;
+  minimum_booking_notice_minutes?: number;
   off_days?: number[];
   price?: number | string | null;
   rating_avg?: number;
