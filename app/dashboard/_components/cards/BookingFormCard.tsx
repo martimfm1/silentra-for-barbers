@@ -443,26 +443,26 @@ export function BookingForm({
                             : 'hover:bg-white/[0.06]',
                         )}
                       >
-                      <span className="flex min-w-0 items-center gap-2.5">
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-zinc-300">
-                          {client.name_complete
-                            .trim()
-                            .slice(0, 1)
-                            .toUpperCase()}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-zinc-100">
-                            {client.name_complete}
+                        <span className="flex min-w-0 items-center gap-2.5">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-semibold text-zinc-300">
+                            {client.name_complete
+                              .trim()
+                              .slice(0, 1)
+                              .toUpperCase()}
                           </span>
-                          <span className="mt-0.5 block truncate text-xs text-zinc-500">
-                            {client.num_phone}
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-medium text-zinc-100">
+                              {client.name_complete}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-zinc-500">
+                              {client.num_phone}
+                            </span>
                           </span>
                         </span>
-                      </span>
-                      <Plus
-                        className="size-4 shrink-0 text-emerald-300"
-                        aria-hidden="true"
-                      />
+                        <Plus
+                          className="size-4 shrink-0 text-emerald-300"
+                          aria-hidden="true"
+                        />
                       </div>
                     ))}
                   </div>
