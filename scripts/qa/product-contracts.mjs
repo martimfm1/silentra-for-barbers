@@ -1073,6 +1073,19 @@ const checks = [
       source.includes('professionalsByShop'),
   },
   {
+    name: 'Public booking drawer displays the selected workday end as a non-selectable schedule note',
+    file: 'app/barbershops/components/booking-drawer-canonical.tsx',
+    test: (source) =>
+      source.includes('currentProfessionalSchedule') &&
+      source.includes('getDailySchedule(') &&
+      source.includes('currentDayWorkEnd') &&
+      source.includes('work_intervals.reduce<string | null>') &&
+      source.includes('Fim do horário de trabalho') &&
+      source.includes('Workday ends at') &&
+      source.includes('role="note"') &&
+      source.includes('dateTime={currentDayWorkEnd}'),
+  },
+  {
     name: 'iCalendar feed tokens are purpose-scoped and timing-safe verified',
     file: 'lib/calendar/feed-token.ts',
     test: (source) =>
