@@ -157,6 +157,11 @@ export function BookingDrawerCanonical({
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [loadingBookingData, setLoadingBookingData] = useState(false);
   const [selectedDayClosed, setSelectedDayClosed] = useState(false);
+  const [dayAvailability, setDayAvailability] = useState<
+    Record<string, { available: boolean; closedDay: boolean }>
+  >({});
+  const [loadingDayAvailability, setLoadingDayAvailability] = useState(false);
+  const [dayAvailabilityError, setDayAvailabilityError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
@@ -228,6 +233,19 @@ export function BookingDrawerCanonical({
   const currentDayClosed = currentDay
     ? isDayOffForBookingDay(currentDay)
     : false;
+  const currentDayAvailability = currentDay
+    ? dayAvailability[currentDay.dateStr]
+    : undefined;
+  const currentDayUnavailable = Boolean(
+    currentDayClosed || currentDayAvailability?.available === false,
+  );
+  const getDayStatus = (day: BookingDayOption) => {
+    const availability = dayAvailability[day.dateStr];
+    const dayOff =
+      isDayOffForBookingDay(day) || availability?.closedDay === true;
+    const noSlots = availability?.available === false && !dayOff;
+    return { dayOff, noSlots, unavailable: dayOff || noSlots };
+  };
 
   useEffect(() => {
     if (!isOpen || professionals.length === 0) return;
@@ -248,6 +266,38 @@ export function BookingDrawerCanonical({
       setSelectedSlot(null);
     }
   }, [dayIndex, days, isOpen, professional, professionals]);
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      step !== 1 ||
+      loadingDayAvailability ||
+      !currentDay ||
+      !Object.keys(dayAvailability).length
+    )
+      return;
+    if (dayAvailability[currentDay.dateStr]?.available !== false) return;
+
+    const nextAvailableIndex = days.findIndex(
+      (day) =>
+        dayAvailability[day.dateStr]?.available === true &&
+        !isDayOffForBookingDay(day),
+    );
+    if (nextAvailableIndex >= 0 && nextAvailableIndex !== dayIndex) {
+      setDayIndex(nextAvailableIndex);
+      setSelectedSlot(null);
+    }
+  }, [
+    currentDay?.dateStr,
+    dayAvailability,
+    dayIndex,
+    days,
+    isOpen,
+    loadingDayAvailability,
+    step,
+    professional,
+    professionals,
+  ]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -307,12 +357,12 @@ export function BookingDrawerCanonical({
   ]);
 
   useEffect(() => {
-    if (!isOpen || !shop || !currentDay) return;
+    if (!isOpen || !shop || !days[0]) return;
     const controller = new AbortController();
     setLoadingBookingData(true);
     setError('');
     void fetch(
-      `/api/shops/${shop.id}/booking-data?date=${encodeURIComponent(currentDay.dateStr)}`,
+      `/api/shops/${shop.id}/booking-data?date=${encodeURIComponent(days[0].dateStr)}`,
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (response) => {
@@ -361,11 +411,79 @@ export function BookingDrawerCanonical({
     return () => controller.abort();
   }, [
     appearance,
-    currentDay?.dateStr,
+    days,
     isOpen,
     retryKey,
     selectedProfessionalId,
     shop,
+  ]);
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      step !== 1 ||
+      !shop ||
+      !serviceId ||
+      professionals.length === 0
+    ) {
+      setDayAvailability({});
+      setLoadingDayAvailability(false);
+      setDayAvailabilityError(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const query = new URLSearchParams({
+      date: days[0].dateStr,
+      serviceId,
+      availabilityOverview: '1',
+    });
+    if (professional?.id) query.set('professionalId', professional.id);
+
+    setDayAvailability({});
+    setDayAvailabilityError(false);
+    setLoadingDayAvailability(true);
+    void fetch(
+      `/api/shops/${shop.id}/booking-data?${query.toString()}`,
+      { signal: controller.signal, cache: 'no-store' },
+    )
+      .then(async (response) => {
+        const responseData = await response.json().catch(() => ({}));
+        if (!response.ok)
+          throw new Error(
+            responseData?.error || t('bookingDrawer.loadTimesError'),
+          );
+        return responseData as MarketplaceBookingResponse & {
+          dayAvailability?: Record<
+            string,
+            { available: boolean; closedDay: boolean }
+          >;
+        };
+      })
+      .then((responseData) => {
+        if (controller.signal.aborted) return;
+        setDayAvailability(responseData.dayAvailability ?? {});
+      })
+      .catch((reason) => {
+        if (reason?.name !== 'AbortError') {
+          setDayAvailability({});
+          setDayAvailabilityError(true);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadingDayAvailability(false);
+      });
+
+    return () => controller.abort();
+  }, [
+    days,
+    isOpen,
+    professional?.id,
+    professionals.length,
+    retryKey,
+    serviceId,
+    shop?.id,
+    step,
   ]);
 
   useEffect(() => {
@@ -608,19 +726,24 @@ export function BookingDrawerCanonical({
     currentDay &&
       professional &&
       service &&
-      !currentDayClosed &&
-      !loadingBookingData,
+      !currentDayUnavailable &&
+      !loadingBookingData &&
+      !loadingDayAvailability,
   );
   const canContinueTwo = Boolean(selectedSlot);
 
   function continueOne() {
     if (!professional) return toast.error(t('bookingDrawer.chooseBarber'));
     if (!service) return toast.error(t('bookingDrawer.chooseService'));
-    if (currentDayClosed)
+    if (currentDayUnavailable)
       return toast.error(
-        locale === 'pt'
-          ? 'O barbeiro está de folga neste dia. Escolhe outra data.'
-          : 'This barber is off on this day. Choose another date.',
+        currentDayClosed
+          ? locale === 'pt'
+            ? 'O barbeiro está de folga neste dia. Escolhe outra data.'
+            : 'This barber is off on this day. Choose another date.'
+          : locale === 'pt'
+            ? 'Este dia já não tem horários disponíveis. Escolhe outra data.'
+            : 'There are no available times on this day. Choose another date.',
       );
     setStep(2);
   }
@@ -816,6 +939,10 @@ export function BookingDrawerCanonical({
             [data-booking-theme="agenda"] [class~="border-amber-400/20"] { border-color: #eadcc7 !important; }
             [data-booking-theme="agenda"] [class~="bg-amber-400/[0.05]"] { background-color: #faf7f1 !important; }
             [data-booking-theme="agenda"] .text-amber-100 { color: #76572d !important; }
+            [data-booking-theme="agenda"] [class~="border-rose-400/35"] { border-color: #efcaca !important; }
+            [data-booking-theme="agenda"] [class~="bg-rose-400/[0.08]"] { background-color: #fff1f1 !important; }
+            [data-booking-theme="agenda"] .text-rose-200,
+            [data-booking-theme="agenda"] .text-rose-300 { color: #963c3c !important; }
           `}</style>
         )}
         <header className="shrink-0 border-b border-white/10 px-4 py-4 sm:px-5">
@@ -1023,7 +1150,8 @@ export function BookingDrawerCanonical({
                   <>
                     <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {availableDays.map((day, index) => {
-                        const isDayOff = isDayOffForBookingDay(day);
+                        const dayStatus = getDayStatus(day);
+                        const isUnavailable = dayStatus.unavailable;
                         return (
                           <button
                             key={day.dateStr}
@@ -1031,19 +1159,23 @@ export function BookingDrawerCanonical({
                             aria-pressed={dayIndex === index}
                             aria-label={
                               day.fullDateFormatted +
-                              (isDayOff
-                                ? locale === 'pt'
-                                  ? ', folga'
-                                  : ', day off'
+                              (dayStatus.unavailable
+                                ? dayStatus.dayOff
+                                  ? locale === 'pt'
+                                    ? ', folga'
+                                    : ', day off'
+                                  : locale === 'pt'
+                                    ? ', sem horários disponíveis'
+                                    : ', no available times'
                                 : '')
                             }
                             onClick={() => {
-                              if (isDayOff) return;
+                              if (isUnavailable || loadingDayAvailability) return;
                               setDayIndex(index);
                               setSelectedSlot(null);
                             }}
-                            disabled={isDayOff}
-                            className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isDayOff ? 'border-rose-400/35 bg-rose-400/[0.08] text-rose-200 hover:border-rose-300/50' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
+                            disabled={isUnavailable || loadingDayAvailability}
+                            className={`min-w-[70px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isUnavailable ? 'cursor-not-allowed border-rose-400/35 bg-rose-400/[0.08] text-rose-200 opacity-70' : dayIndex === index ? 'border-emerald-400/40 bg-emerald-400/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
                           >
                             <span className="block text-[10px] font-semibold text-zinc-500">
                               {day.isToday
@@ -1056,24 +1188,47 @@ export function BookingDrawerCanonical({
                               {day.dayNumeric}
                             </span>
                             <span
-                              className={`mt-1 block text-[10px] ${isDayOff ? 'font-semibold text-rose-300' : 'text-zinc-500'}`}
+                              className={`mt-1 block text-[10px] ${isUnavailable ? 'font-semibold text-rose-300' : 'text-zinc-500'}`}
                             >
-                              {isDayOff
+                              {dayStatus.dayOff
                                 ? locale === 'pt'
                                   ? 'Folga'
                                   : 'Day off'
-                                : (day.fullDateFormatted.split(' ')[2] ?? '')}
+                                : dayStatus.noSlots
+                                  ? locale === 'pt'
+                                    ? 'Sem vagas'
+                                    : 'Fully booked'
+                                  : (day.fullDateFormatted.split(' ')[2] ?? '')}
                             </span>
                           </button>
                         );
                       })}
                     </div>
-                    {availableDays.some(isDayOffForBookingDay) ? (
+                    {loadingDayAvailability ? (
+                      <p
+                        className="mt-2 flex items-center gap-2 text-[11px] text-zinc-500"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+                        {locale === 'pt'
+                          ? 'A verificar horários disponíveis…'
+                          : 'Checking available times…'}
+                      </p>
+                    ) : null}
+                    {availableDays.some((day) => getDayStatus(day).unavailable) ? (
                       <p className="mt-2 flex items-center gap-2 text-[11px] text-rose-300" role="note">
                         <span className="size-2 shrink-0 rounded-full bg-rose-400" aria-hidden="true" />
                         {locale === 'pt'
-                          ? 'Dia de folga — indisponível para marcação'
-                          : 'Day off — unavailable for booking'}
+                          ? 'A vermelho: dia de folga ou sem horários disponíveis'
+                          : 'In red: day off or no available times'}
+                      </p>
+                    ) : null}
+                    {dayAvailabilityError ? (
+                      <p className="mt-2 text-[11px] text-amber-300" role="status">
+                        {locale === 'pt'
+                          ? 'Não foi possível confirmar todas as vagas. Volta a tentar antes de continuar.'
+                          : 'Could not verify all openings. Please try again before continuing.'}
                       </p>
                     ) : null}
                   </>
