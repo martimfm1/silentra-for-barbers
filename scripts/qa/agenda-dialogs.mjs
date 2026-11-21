@@ -105,7 +105,7 @@ assert.ok(appointmentDetail.includes('na conta MB WAY da barbearia'));
 assert.ok(agenda.includes('confirmBooking={confirmBooking}'));
 assert.ok(appointmentConfirmRoute.includes("payment_status: 'confirmed'"));
 assert.ok(appointmentConfirmRoute.includes('prepaymentConfirmed: isPrepaymentReview'));
-assert.ok(hook.includes('Pré-pagamento MB WAY validado e marcação confirmada.'));
+assert.ok(hook.includes("t('agenda.bookingConfirmedMbway')"));
 assert.ok(appointmentDetail.includes('<AppointmentCompletionDialog'));
 assert.match(appointmentDetail, /appointment\.status === 'scheduled'/);
 assert.ok(agenda.includes('finalizeBooking={finalizeBooking}'));
