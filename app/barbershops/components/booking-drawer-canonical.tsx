@@ -1137,6 +1137,39 @@ export function BookingDrawerCanonical({
                   </div>
                 ))}
 
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Scissors
+                    className="size-4 text-zinc-400"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-sm font-semibold">
+                    {t('bookingDrawer.stepThreeService')}
+                  </h3>
+                </div>
+                <select
+                  value={serviceId ?? ''}
+                  onChange={(event) => setServiceId(event.target.value || null)}
+                  aria-label={t('bookingDrawer.chooseServiceAria')}
+                  className="min-h-11 w-full rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                >
+                  <option value="">{t('bookingDrawer.selectService')}</option>
+                  {services.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} · {item.durationMinutes} min{Number(item.bufferMinutes ?? 0) > 0
+                        ? ` + ${Number(item.bufferMinutes)} min ${locale === 'pt' ? 'preparação' : 'buffer'}`
+                        : ''} · €
+                      {Number(item.price).toFixed(2)}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-zinc-500">
+                  {locale === 'pt'
+                    ? 'Seleciona o serviço para verificarmos em que dias ainda existem vagas.'
+                    : 'Select a service so we can check which days still have openings.'}
+                </p>
+              </div>
+
               <div>
                 <div className="mb-3 flex items-center gap-2">
                   <CalendarDays
@@ -1238,34 +1271,6 @@ export function BookingDrawerCanonical({
                     {t('bookingDrawer.noOpenDays')}
                   </p>
                 )}
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <Scissors
-                    className="size-4 text-zinc-400"
-                    aria-hidden="true"
-                  />
-                  <h3 className="text-sm font-semibold">
-                    {t('bookingDrawer.stepThreeService')}
-                  </h3>
-                </div>
-                <select
-                  value={serviceId ?? ''}
-                  onChange={(event) => setServiceId(event.target.value || null)}
-                  aria-label={t('bookingDrawer.chooseServiceAria')}
-                  className="min-h-11 w-full rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                >
-                  <option value="">{t('bookingDrawer.selectService')}</option>
-                  {services.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} · {item.durationMinutes} min{Number(item.bufferMinutes ?? 0) > 0
-                        ? ` + ${Number(item.bufferMinutes)} min ${locale === 'pt' ? 'preparação' : 'buffer'}`
-                        : ''} · €
-                      {Number(item.price).toFixed(2)}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <Button
