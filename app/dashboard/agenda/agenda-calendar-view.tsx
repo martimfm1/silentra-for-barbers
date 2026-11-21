@@ -395,7 +395,7 @@ export function AgendaCalendarView({
                       cancelled: cancelledCount,
                       blocks: dayBlocks.length,
                     })}
-                    className="absolute inset-0 z-0 rounded-[inherit] transition-colors duration-200 hover:bg-white/[0.035] focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:bg-white/[0.06]"
+                    className="absolute inset-0 z-0 rounded-[inherit] transition-colors duration-200 hover:bg-white/[0.035] focus-visible:z-20 focus-visible:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400/70 active:bg-white/[0.06]"
                   />
                   <div className="pointer-events-none relative z-10">
                     <div className="flex items-center justify-between gap-1">
