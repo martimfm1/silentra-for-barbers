@@ -406,7 +406,7 @@ export default function AgendaPage() {
         return false;
       }
     },
-    [fetchInitialData, locale],
+    [fetchInitialData, locale, t],
   );
 
   const handleCreateBlock = useCallback(
@@ -460,7 +460,7 @@ export default function AgendaPage() {
         return false;
       }
     },
-    [fetchInitialData, locale],
+    [fetchInitialData, locale, t],
   );
 
   const actionProps = {
