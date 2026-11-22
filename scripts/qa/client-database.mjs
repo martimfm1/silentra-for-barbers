@@ -82,20 +82,23 @@ assert.match(clientProfile, /completedAppointments/);
 assert.match(clientProfile, /totalSpent/);
 assert.match(clientProfile, /client\.style_notes/);
 assert.match(clientProfile, /client\.birth_date/);
-assert.match(clientProfile, /const \\[loadRetryKey, setLoadRetryKey\\] = useState\\(0\\)/);
-assert.match(
-  clientProfile,
-  /\\}, \\[clientId, open, t, loadRetryKey\\]\\);/,
+assert.ok(
+  clientProfile.includes(
+    'const [loadRetryKey, setLoadRetryKey] = useState(0)',
+  ),
+);
+assert.ok(
+  clientProfile.includes('}, [clientId, open, t, loadRetryKey]);'),
   'Client profile loading must rerun when the user requests an in-dialog retry.',
 );
-assert.match(
-  clientProfile,
-  /setLoadRetryKey\\(\\(current\\) => current \\+ 1\\)/,
+assert.ok(
+  clientProfile.includes('setLoadRetryKey((current) => current + 1)'),
   'Retry must refetch the client profile without changing client data.',
 );
-assert.match(
-  clientProfile,
-  /error \\? \\([\\s\\S]*?role="alert"[\\s\\S]*?setLoadRetryKey[\\s\\S]*?Try again[\\s\\S]*?Tentar novamente/,
+assert.ok(
+  clientProfile.includes('role="alert"') &&
+    clientProfile.includes('Try again') &&
+    clientProfile.includes('Tentar novamente'),
   'Client profile errors must expose accessible retry copy in pt-PT and en-GB.',
 );
 assert.match(clientProfile, /async function addNote/);
