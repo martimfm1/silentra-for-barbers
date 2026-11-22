@@ -47,9 +47,14 @@ export const guestMetadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
 
-  verification: process.env.GOOGLE_SITE_VERIFICATION?.trim()
-    ? { google: process.env.GOOGLE_SITE_VERIFICATION.trim() }
-    : undefined,
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION?.trim()
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION.trim() }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION?.trim()
+      ? { other: { 'msvalidate.01': process.env.BING_SITE_VERIFICATION.trim() } }
+      : {}),
+  },
 
   robots: {
     index: true,
