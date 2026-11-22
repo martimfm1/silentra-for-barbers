@@ -34,7 +34,7 @@ function authorized(request: Request) {
 
   const timestamp = request.headers.get('x-marketing-timestamp') ?? '';
   const signature = request.headers.get('x-marketing-signature') ?? '';
-  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
+  if (!/^\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
     return false;
 
   const seconds = Number(timestamp);
