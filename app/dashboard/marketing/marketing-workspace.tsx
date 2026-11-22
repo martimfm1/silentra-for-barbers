@@ -630,6 +630,7 @@ export function MarketingWorkspace({
                 Nova campanha
               </Button>
             )}
+            </div>
           </div>
         </header>
 
@@ -1011,7 +1012,7 @@ export function MarketingWorkspace({
                   </div>
                 </CardContent>
               </Card>
-            </Card>
+            )}
             <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
               {!selected ? (
                 <Card className="border-white/10 bg-white/[0.02]">
