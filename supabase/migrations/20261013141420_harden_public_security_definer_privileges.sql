@@ -74,17 +74,33 @@ $function_privileges$;
 
 -- These helpers are used by authenticated authorization/RLS checks. They
 -- must not be callable by anon; keep authenticated and trusted server access.
-revoke all on function public.get_my_barbershop_id() from public, anon;
-grant execute on function public.get_my_barbershop_id() to authenticated, service_role;
-
-revoke all on function public.is_admin() from public, anon;
-grant execute on function public.is_admin() to authenticated, service_role;
-
-revoke all on function public.complete_barbershop_onboarding(uuid) from public, anon;
-grant execute on function public.complete_barbershop_onboarding(uuid) to authenticated, service_role;
-
-revoke all on function public.set_barbershop_avatar_url(uuid, text) from public, anon;
-grant execute on function public.set_barbershop_avatar_url(uuid, text) to authenticated, service_role;
+-- Some legacy helpers are present in the schema snapshot but absent from the
+-- ordered migration history. Apply permissions only when each function exists.
+DO $authenticated_helpers$
+DECLARE
+  v_function text;
+BEGIN
+  FOR v_function IN
+    SELECT unnest(ARRAY[
+      'public.get_my_barbershop_id()',
+      'public.is_admin()',
+      'public.complete_barbershop_onboarding(uuid)',
+      'public.set_barbershop_avatar_url(uuid, text)'
+    ])
+  LOOP
+    IF pg_catalog.to_regprocedure(v_function) IS NOT NULL THEN
+      EXECUTE pg_catalog.format(
+        'REVOKE ALL ON FUNCTION %s FROM public, anon',
+        v_function
+      );
+      EXECUTE pg_catalog.format(
+        'GRANT EXECUTE ON FUNCTION %s TO authenticated, service_role',
+        v_function
+      );
+    END IF;
+  END LOOP;
+END
+$authenticated_helpers$;
 
 -- Pin search_path when the referenced trigger/helper function exists.
 -- Some legacy functions are recreated by later migrations; the follow-up
