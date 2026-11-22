@@ -1,6 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   MarketplaceBarbershopRelation,
@@ -174,9 +173,8 @@ async function GET__unobserved(request: Request) {
       );
     const canMeasureDistance = isValidCoordinates(latitude, longitude);
 
-    const supabase = await createClient();
     const admin = createAdminClient();
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from('shops')
       .select(
         `id, barbershop_id, slug, city, price, tags, lat, lng, is_active, rating, reviews_count, public_profile_enabled, barbershops!inner ( name, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, is_public_in_directory )`,

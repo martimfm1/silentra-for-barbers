@@ -362,7 +362,7 @@ export function SiteNavbar() {
         ? pathname === '/'
         : pathname === href || pathname.startsWith(`${href}/`);
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     setDropdownOpen(false);
     setOpen(false);
     setNavigationRole('client');

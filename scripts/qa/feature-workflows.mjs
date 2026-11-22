@@ -98,7 +98,7 @@ const adminReportsMigration = read(
 );
 const marketingCronWorkflow = read('.github/workflows/marketing-cron.yml');
 const marketingScheduleMigration = read(
-  'supabase/migrations/20261122134000_schedule_marketing_cron.sql',
+  'supabase/migrations/20261122140747_schedule_marketing_cron.sql',
 );
 
 assert.match(

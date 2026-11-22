@@ -182,16 +182,19 @@ async function GET__unobserved(
     const { data: appointments, error: appointmentsError } = appointmentsResult;
     const mbwayPhone = String(relation.mbway_phone ?? '').trim();
     const whatsappPhone = String(relation.phone ?? '').trim();
+    const manualPrepaymentEnabled =
+      relation.mbway_enabled === true &&
+      ['pro', 'enterprise'].includes(
+        String(effectivePlan ?? '').toLowerCase(),
+      ) &&
+      mbwayPhone.replace(/\D/g, '').length >= 9 &&
+      whatsappPhone.replace(/\D/g, '').length >= 9;
     const manualPrepayment = {
-      enabled:
-        relation.mbway_enabled === true &&
-        ['pro', 'enterprise'].includes(
-          String(effectivePlan ?? '').toLowerCase(),
-        ) &&
-        mbwayPhone.replace(/\D/g, '').length >= 9 &&
-        whatsappPhone.replace(/\D/g, '').length >= 9,
-      mbwayPhone,
-      whatsappPhone,
+      enabled: manualPrepaymentEnabled,
+      // Payment destination numbers are returned only while the feature is
+      // configured and available on this shop's current plan.
+      mbwayPhone: manualPrepaymentEnabled ? mbwayPhone : '',
+      whatsappPhone: manualPrepaymentEnabled ? whatsappPhone : '',
     };
     const shopSchedule = normalizeWeeklySchedule(
       relation.weekly_schedule,

@@ -858,7 +858,7 @@ const checks = [
   },
   {
     name: 'Marketing worker is scheduled through Supabase Cron with the Vault HMAC secret',
-    file: 'supabase/migrations/20261122134000_schedule_marketing_cron.sql',
+    file: 'supabase/migrations/20261122140747_schedule_marketing_cron.sql',
     test: (source) =>
       source.includes("'silentra-marketing'") &&
       source.includes("'*/5 * * * *'") &&
