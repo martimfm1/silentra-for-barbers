@@ -130,6 +130,9 @@ jobs:
       - name: Appointment accessibility contracts
         run: pnpm qa:appointment-accessibility
 
+      - name: Custom dialog focus and keyboard contracts
+        run: pnpm qa:dialog-accessibility
+
       - name: Haptic feedback contracts
         run: pnpm qa:haptics
 
