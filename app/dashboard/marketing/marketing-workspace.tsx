@@ -77,6 +77,7 @@ type Campaign = {
   next_run_at?: string | null;
   event_name?: string | null;
   birthday_offset_days?: number | null;
+  birthday_last_run_date?: string | null;
   birthday_reward_type?: 'none' | 'free_service' | null;
   birthday_reward_service_id?: string | null;
   active?: boolean | null;
@@ -89,6 +90,12 @@ type Service = {
   name: string;
   price: number;
   duration: number | null;
+};
+type BirthdayAudience = {
+  totalClients: number;
+  withBirthDate: number;
+  withEmail: number;
+  birthdayReady: number;
 };
 type Metric = { label: string; value: number; Icon: LucideIcon; tone: string };
 type FormState = {
@@ -178,6 +185,8 @@ export function MarketingWorkspace({
   const [view, setView] = useState<View>(initialView);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [birthdayAudience, setBirthdayAudience] =
+    useState<BirthdayAudience | null>(null);
   const [events, setEvents] = useState<EventKey[]>(
     Object.keys(EVENT_LABELS) as EventKey[],
   );
@@ -214,6 +223,10 @@ export function MarketingWorkspace({
     EDITABLE_STATUSES.includes(
       campaign.status as (typeof EDITABLE_STATUSES)[number],
     );
+  const canManageAutomation = (campaign: Campaign) =>
+    campaign.channel === 'email' &&
+    Boolean(campaign.trigger_type && campaign.trigger_type !== 'manual') &&
+    campaign.status !== 'cancelled';
 
   const load = useCallback(async () => {
     if (!allowed) return;
@@ -248,6 +261,9 @@ export function MarketingWorkspace({
         );
       setCampaigns(merged);
       setServices((automationData.services ?? []) as Service[]);
+      setBirthdayAudience(
+        (automationData.birthdayAudience ?? null) as BirthdayAudience | null,
+      );
       setEvents(
         (automationData.events ?? Object.keys(EVENT_LABELS)) as EventKey[],
       );
@@ -578,31 +594,36 @@ export function MarketingWorkspace({
         <div className="sr-only" aria-live="polite">
           {liveMessage}
         </div>
-        <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Sparkles className="size-3.5" aria-hidden="true" />{' '}
-              {isAutomationOnly ? 'Automações' : 'Marketing'}
+        <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.025] to-transparent p-5 sm:p-7 lg:p-8">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-24 size-72 rounded-full bg-amber-300/[0.08] blur-3xl"
+          />
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                <Sparkles className="size-3.5" aria-hidden="true" />
+                {isAutomationOnly ? 'Experiência do cliente' : 'Marketing'}
+              </div>
+              <h1
+                id="marketing-title"
+                className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl"
+              >
+                {isAutomationOnly ? 'Automações de clientes' : 'Marketing'}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                {isAutomationOnly
+                  ? 'Mensagens automáticas que mantêm a relação com os teus clientes, sem tarefas manuais.'
+                  : 'Cria, gere, automatiza e acompanha campanhas num só lugar.'}
+              </p>
             </div>
-            <h1
-              id="marketing-title"
-              className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl"
-            >
-              {isAutomationOnly ? 'Automações' : 'Marketing'}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              {isAutomationOnly
-                ? 'Configura lembretes e mensagens automáticas acionadas por eventos da barbearia.'
-                : 'Cria, gere, automatiza e acompanha campanhas num só lugar.'}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
-                Dashboard
-              </Link>
-            </Button>
+            <div className="relative flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" asChild className="border-white/10 bg-black/10">
+                <Link href="/dashboard">
+                  <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+                  Dashboard
+                </Link>
+              </Button>
             {!isAutomationOnly && (
               <Button onClick={openCreate}>
                 <Plus className="mr-2 size-4" aria-hidden="true" />
@@ -652,7 +673,7 @@ export function MarketingWorkspace({
               {item === 'campaigns'
                 ? 'Campanhas'
                 : item === 'automation'
-                  ? 'Automação'
+                  ? 'Automações de clientes'
                   : 'Desempenho'}
             </button>
           ))}
@@ -891,38 +912,46 @@ export function MarketingWorkspace({
 
         {view === 'automation' && (
           <>
-            <Card className="overflow-hidden border-amber-400/20 bg-gradient-to-br from-amber-400/[0.09] via-white/[0.025] to-white/[0.015]">
-              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                    <Cake className="size-5" aria-hidden="true" />
+            <Card className="relative overflow-hidden border-amber-300/20 bg-gradient-to-br from-[#201b16] via-[#171719] to-[#111318] shadow-lg shadow-black/20">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-12 -top-20 size-64 rounded-full bg-amber-300/[0.10] blur-3xl"
+              />
+              <CardContent className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+                <div className="flex min-w-0 items-start gap-4">
+                  <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-amber-300/20 bg-amber-300/[0.10] text-amber-200 shadow-inner shadow-amber-200/5">
+                    <Cake className="size-6" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
-                    <h2 className="font-semibold text-zinc-100">
-                      Automação de aniversário
-                    </h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
-                      Cria automaticamente uma mensagem de aniversário por
-                      email, configurada para ser enviada no próprio dia. Podes
-                      editar o texto e escolher uma recompensa depois.
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <h2 className="text-lg font-semibold tracking-tight text-zinc-50">
+                        Aniversários
+                      </h2>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-200">
+                        <span className="size-1.5 rounded-full bg-emerald-300" />
+                        {birthdayCampaign ? 'Ativa' : 'Por configurar'}
+                      </span>
+                    </div>
+                    <p className="max-w-2xl text-sm leading-6 text-zinc-300/80">
+                      Envia uma mensagem personalizada por email no aniversário do cliente, com a possibilidade de oferecer um serviço como recompensa.
                     </p>
-                    {birthdayCampaign && (
-                      <p className="mt-2 text-xs font-medium text-emerald-300">
-                        Já existe uma automação de aniversário ativa.
-                      </p>
-                    )}
+                    <p className="mt-2 text-xs text-zinc-500">
+                      Execução diária · Fuso horário Europe/Lisbon
+                    </p>
                   </div>
                 </div>
                 <Button
                   onClick={() => void createBirthdayAutomation()}
                   disabled={creatingBirthday || loading}
-                  className="min-h-11 shrink-0"
+                  className="min-h-11 shrink-0 rounded-xl"
                 >
                   {creatingBirthday ? (
                     <Loader2
                       className="mr-2 size-4 animate-spin"
                       aria-hidden="true"
                     />
+                  ) : birthdayCampaign ? (
+                    <Settings2 className="mr-2 size-4" aria-hidden="true" />
                   ) : (
                     <Plus className="mr-2 size-4" aria-hidden="true" />
                   )}
@@ -930,9 +959,58 @@ export function MarketingWorkspace({
                     ? 'A configurar…'
                     : birthdayCampaign
                       ? 'Abrir automação'
-                      : 'Adicionar automaticamente'}
+                      : 'Ativar automação'}
                 </Button>
               </CardContent>
+            </Card>
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Preparação da audiência de aniversário">
+              {[
+                { label: 'Clientes', value: birthdayAudience?.totalClients ?? 0, detail: 'Na base da barbearia' },
+                { label: 'Com nascimento', value: birthdayAudience?.withBirthDate ?? 0, detail: 'Data de nascimento registada' },
+                { label: 'Com email', value: birthdayAudience?.withEmail ?? 0, detail: 'Endereço disponível' },
+                { label: 'Prontos para receber', value: birthdayAudience?.birthdayReady ?? 0, detail: 'Data + email preenchidos' },
+              ].map((item, index) => (
+                <Card key={item.label} className="border-white/10 bg-white/[0.025]">
+                  <CardContent className="p-4 sm:p-5">
+                    <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-zinc-100">
+                      {loading && !birthdayAudience ? '—' : item.value}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">{item.detail}</p>
+                    <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className={index === 3 ? 'h-full rounded-full bg-emerald-300/70' : 'h-full rounded-full bg-primary/60'}
+                        style={{
+                          width: `${birthdayAudience?.totalClients ? Math.min(100, (item.value / birthdayAudience.totalClients) * 100) : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+            {birthdayAudience && (
+              <Card className={`border ${birthdayAudience.birthdayReady > 0 ? 'border-emerald-300/15 bg-emerald-300/[0.035]' : 'border-amber-300/20 bg-amber-300/[0.04]'}`}>
+                <CardContent className="flex items-start gap-3 p-4 sm:p-5">
+                  {birthdayAudience.birthdayReady > 0 ? (
+                    <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-300" aria-hidden="true" />
+                  ) : (
+                    <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-200" aria-hidden="true" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-zinc-100">
+                      {birthdayAudience.birthdayReady > 0
+                        ? `${birthdayAudience.birthdayReady} clientes têm os dados necessários para receber a mensagem.`
+                        : 'Ainda não existem clientes elegíveis para receber a mensagem.'}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {birthdayAudience.birthdayReady > 0
+                        ? 'A automação identifica automaticamente os aniversários e evita repetir mensagens já enviadas.'
+                        : 'Adiciona a data de nascimento e um email na ficha do cliente. A automação fica ativa e envia quando existir um aniversário elegível.'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </Card>
             <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
               {!selected ? (
@@ -948,7 +1026,7 @@ export function MarketingWorkspace({
                 <>
                   <Card className="border-white/10 bg-white/[0.02]">
                     <CardHeader>
-                      <CardTitle>Automação da campanha</CardTitle>
+                      <CardTitle>Configuração do fluxo</CardTitle>
                       <p className="text-sm text-muted-foreground">
                         {selected.name} ·{' '}
                         {STATUS_LABELS[selected.status] ?? selected.status}
@@ -974,7 +1052,7 @@ export function MarketingWorkspace({
                               }))
                             }
                             className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                            disabled={!canManage(selected)}
+                            disabled={!canManageAutomation(selected)}
                           >
                             <option value="interval">Intervalo</option>
                             <option value="event">Evento</option>
@@ -1002,7 +1080,7 @@ export function MarketingWorkspace({
                                     intervalValue: event.target.value,
                                   }))
                                 }
-                                disabled={!canManage(selected)}
+                                disabled={!canManageAutomation(selected)}
                               />
                             </div>
                             <div>
@@ -1023,7 +1101,7 @@ export function MarketingWorkspace({
                                   }))
                                 }
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                disabled={!canManage(selected)}
+                                disabled={!canManageAutomation(selected)}
                               >
                                 <option value="hours">Horas</option>
                                 <option value="days">Dias</option>
@@ -1049,7 +1127,7 @@ export function MarketingWorkspace({
                                 }))
                               }
                               className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                              disabled={!canManage(selected)}
+                              disabled={!canManageAutomation(selected)}
                             >
                               {events.map((event) => (
                                 <option key={event} value={event}>
@@ -1083,7 +1161,7 @@ export function MarketingWorkspace({
                                 }))
                               }
                               className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                              disabled={!canManage(selected)}
+                              disabled={!canManageAutomation(selected)}
                             >
                               <option value="-1">1 dia antes</option>
                               <option value="0">No próprio dia</option>
@@ -1112,7 +1190,7 @@ export function MarketingWorkspace({
                                 }))
                               }
                               className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                              disabled={!canManage(selected)}
+                              disabled={!canManageAutomation(selected)}
                             >
                               <option value="none">Mensagem apenas</option>
                               <option value="free_service">
@@ -1138,7 +1216,7 @@ export function MarketingWorkspace({
                                   }))
                                 }
                                 className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                disabled={!canManage(selected)}
+                                disabled={!canManageAutomation(selected)}
                               >
                                 <option value="">Selecionar serviço</option>
                                 {services.map((service) => (
@@ -1154,16 +1232,25 @@ export function MarketingWorkspace({
                       )}
                       <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/10 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-sm text-muted-foreground">
-                          Próxima execução:{' '}
+                          Próxima verificação:{' '}
                           <span className="font-medium text-zinc-200">
-                            {selected.next_run_at
-                              ? formatDate(selected.next_run_at)
-                              : 'Calculada ao guardar'}
+                            {selected.trigger_type === 'birthday'
+                              ? 'Diariamente · hora de Lisboa'
+                              : selected.next_run_at
+                                ? formatDate(selected.next_run_at)
+                                : 'Calculada ao guardar'}
                           </span>
+                          {selected.birthday_last_run_date && (
+                            <span className="mt-1 block text-xs text-zinc-500">
+                              Última execução: {new Intl.DateTimeFormat('pt-PT').format(
+                                new Date(`${selected.birthday_last_run_date}T12:00:00`),
+                              )}
+                            </span>
+                          )}
                         </p>
                         <Button
                           onClick={() => void saveAutomation()}
-                          disabled={automationSaving || !canManage(selected)}
+                          disabled={automationSaving || !canManageAutomation(selected)}
                         >
                           {automationSaving
                             ? 'A guardar…'
