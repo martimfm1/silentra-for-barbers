@@ -237,6 +237,7 @@ export function BookingDrawerCanonical({
     serviceId ?? '',
     professional?.id ?? 'all-professionals',
     days[0]?.dateStr ?? '',
+    days[days.length - 1]?.dateStr ?? '',
   ].join('|');
   const dayAvailabilityReady =
     verifiedDayAvailabilityKey === dayAvailabilityRequestKey;
@@ -470,6 +471,7 @@ export function BookingDrawerCanonical({
       !isOpen ||
       step !== 1 ||
       !shop ||
+      !days[0] ||
       !serviceId ||
       professionals.length === 0
     ) {
