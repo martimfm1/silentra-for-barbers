@@ -96,6 +96,56 @@ async function GET__unobserved() {
     if (audienceError) throw audienceError;
 
     const [total, withBirthDate, withEmail, birthdayReady] = audienceQueries;
+    const birthdayCampaign = (campaigns ?? []).find(
+      (campaign) =>
+        campaign.trigger_type === 'birthday' &&
+        campaign.active === true &&
+        campaign.status !== 'cancelled',
+    );
+    const localDateParts = Object.fromEntries(
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Lisbon',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+        .formatToParts(new Date())
+        .map((part) => [part.type, part.value]),
+    );
+    const birthdayTarget = new Date(
+      Date.UTC(
+        Number(localDateParts.year),
+        Number(localDateParts.month) - 1,
+        Number(localDateParts.day),
+      ),
+    );
+    birthdayTarget.setUTCDate(
+      birthdayTarget.getUTCDate() -
+        Number(birthdayCampaign?.birthday_offset_days ?? 0),
+    );
+    const targetMonthDay = birthdayTarget.toISOString().slice(5, 10);
+    let birthdaysToday = 0;
+    const audiencePageSize = 1000;
+    for (let offset = 0; ; offset += audiencePageSize) {
+      const { data: birthdayClients, error: birthdayClientsError } =
+        await admin
+          .from('users')
+          .select('birth_date,email')
+          .eq('barbershop_id', barbershopId)
+          .eq('role', 'client')
+          .not('birth_date', 'is', null)
+          .order('id', { ascending: true })
+          .range(offset, offset + audiencePageSize - 1);
+      if (birthdayClientsError) throw birthdayClientsError;
+      birthdaysToday += (birthdayClients ?? []).filter(
+        (client) =>
+          String(client.birth_date ?? '').slice(5) === targetMonthDay &&
+          typeof client.email === 'string' &&
+          client.email.trim().length > 0,
+      ).length;
+      if (!birthdayClients || birthdayClients.length < audiencePageSize) break;
+    }
+
     return NextResponse.json(
       {
         ok: true,
@@ -107,6 +157,7 @@ async function GET__unobserved() {
           withBirthDate: withBirthDate.count ?? 0,
           withEmail: withEmail.count ?? 0,
           birthdayReady: birthdayReady.count ?? 0,
+          birthdaysToday,
         },
         meta: { generatedAt: new Date().toISOString() },
       },
