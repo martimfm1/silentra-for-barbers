@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoyaltySummary } from '@/components/customer-portal/loyalty-summary';
+import { useAccessibleDialog } from '@/hooks/useAccessibleDialog';
 
 type Appointment = {
   id: string;
@@ -95,6 +96,20 @@ export function MyBookingsPage({
   const [actionId, setActionId] = useState<string | null>(null);
   const [details, setDetails] = useState<Appointment | null>(null);
   const [reschedule, setReschedule] = useState<Appointment | null>(null);
+  const detailsDialogRef = useRef<HTMLDivElement | null>(null);
+  const rescheduleDialogRef = useRef<HTMLDivElement | null>(null);
+  const bookingsHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  useAccessibleDialog({
+    open: Boolean(details),
+    dialogRef: detailsDialogRef,
+    onClose: () => setDetails(null),
+  });
+  useAccessibleDialog({
+    open: Boolean(reschedule),
+    dialogRef: rescheduleDialogRef,
+    onClose: () => setReschedule(null),
+    restoreFocusRef: bookingsHeadingRef,
+  });
   const [date, setDate] = useState('');
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
@@ -347,7 +362,11 @@ export function MyBookingsPage({
             >
               Explorar barbearias
             </Link>
-            <h1 className="mt-3 max-w-2xl text-[2.25rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-5xl">
+            <h1
+              ref={bookingsHeadingRef}
+              tabIndex={-1}
+              className="mt-3 max-w-2xl text-[2.25rem] font-semibold leading-[0.98] tracking-[-0.055em] outline-none focus-visible:ring-2 focus-visible:ring-white/30 sm:text-5xl"
+            >
               As tuas marcações, num só lugar.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
@@ -708,6 +727,8 @@ export function MyBookingsPage({
 
       {details && (
         <div
+          ref={detailsDialogRef}
+          tabIndex={-1}
           className="fixed inset-0 z-[220] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           role="dialog"
           aria-modal="true"
@@ -820,10 +841,12 @@ export function MyBookingsPage({
 
       {reschedule && (
         <div
+          ref={rescheduleDialogRef}
+          tabIndex={-1}
           className="fixed inset-0 z-[230] flex items-end bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Reagendar marcação"
+          aria-labelledby="customer-reschedule-title"
         >
           <div className="glassmorphism max-h-[88dvh] w-full overflow-y-auto rounded-t-[2rem] border border-white/10 bg-zinc-950/95 p-5 shadow-2xl sm:max-w-lg sm:rounded-[2rem] sm:p-7">
             <div className="flex items-start justify-between gap-4">
@@ -831,7 +854,10 @@ export function MyBookingsPage({
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
                   Reagendar
                 </p>
-                <h2 className="mt-2 text-xl font-semibold">
+                <h2
+                  id="customer-reschedule-title"
+                  className="mt-2 text-xl font-semibold"
+                >
                   Escolhe um novo horário
                 </h2>
                 <p className="mt-1 text-sm text-zinc-500">
@@ -849,6 +875,7 @@ export function MyBookingsPage({
             <label className="mt-6 block text-xs font-medium text-zinc-400">
               Nova data
               <input
+                data-dialog-initial-focus
                 type="date"
                 min={new Intl.DateTimeFormat('en-CA', {
                   timeZone: 'Europe/Lisbon',
