@@ -276,7 +276,7 @@ assert.match(
 );
 
 const barbershopReadHardening = await read(
-  'supabase/migrations/20261122134500_restrict_public_barbershop_read.sql',
+  'supabase/migrations/20261122154328_restrict_public_barbershop_read.sql',
 );
 const publicProfileResolver = await read('lib/barbershops/public-profile.ts');
 const enterpriseLandingPage = await read('app/site/[slug]/page.tsx');
