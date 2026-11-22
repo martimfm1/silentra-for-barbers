@@ -267,3 +267,27 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [ ] Rever refresh-token errors com logs correlacionados da Vercel/Auth e testar a recuperação de sessão.
 - [ ] Profiling por workload para as 50 FKs sem cobertura e os 71 índices sem uso; não remover/adicionar índices em massa.
 - [ ] Testes reais com staff de permissões distintas, testes E2E multi-tenant e teste de restauro PITR.
+
+
+### Remediação adicional após dry-run (22/11/2026)
+
+- [x] Removido `mbway_phone` da allowlist SELECT de `authenticated`. A configuração sensível é agora lida através de `/api/barbershops/mbway-settings`, que exige utilizador autenticado com role `owner` ou `admin` e resolve sempre o tenant a partir do perfil autenticado.
+- [x] Migradas as leituras públicas de `POST /api/bookings`, `GET /api/shops` (diretório) e `GET /api/shops/[id]/slots` para `createAdminClient()`, sem remover a filtragem de visibilidade do diretório nem bloquear a marcação através de links diretos.
+- [x] Novo dry-run da migration com JWT de um utilizador autenticado, seguido de ROLLBACK: uma barbearia visível, próprio perfil visível, zero barbearias de outros tenants; `created_by`, `qr_code_text` e `mbway_phone` não legíveis; `anon` sem SELECT na tabela. A produção ficou inalterada.
+- [x] Confirmado no código que os três fluxos normais de logout chamavam `auth.signOut()` sem scope. O scope JavaScript predefinido é `global` e revoga refresh tokens de todas as sessões, o que pode produzir `refresh_token_not_found` noutros dispositivos/abas. Alterados os fluxos de logout para `{ scope: 'local' }` e acrescentados contratos QA. Isto é uma correção preventiva plausível para os quatro erros históricos de um utilizador, mas a correlação com o utilizador afetado não foi demonstrada.
+- [ ] Confirmar CI completa no commit após as correções de MB WAY, rotas públicas e logout local.
+- [ ] Testar E2E com owner, admin e staff sem acesso a MB WAY, e com duas barbearias em ambiente isolado.
+
+### Profiling de performance — produção (22/11/2026)
+
+- [x] Consultados `pg_stat_user_tables`, `pg_stat_user_indexes` e `pg_stat_statements`; advisors continuam a reportar 50 FKs sem índice de cobertura e 71 índices sem utilização.
+- [x] As tabelas apontadas pelo advisor são atualmente pequenas (maior tamanho observado entre as amostras: 128 kB; `booking_waitlist_vacancies`: 33 linhas estimadas; `appointments`: 113; `users`: 29). Os índices sinalizados consultados têm 16 kB cada e zero scans no período estatístico disponível.
+- [x] Não foram adicionados nem removidos índices. Não existe evidência suficiente para indexar 50 FKs ou remover 71 índices; alguns índices de baixa frequência protegem caminhos de billing, tokens, expiração ou filas. Reavaliar após workload real e crescimento de dados.
+- [x] `claim_booking_waitlist_vacancies`: 13.008 chamadas e média ~14,3 ms em `pg_stat_statements`; `get_crm_clients_page`: 51 chamadas e média ~9,8 ms. Os P95 anteriormente observados no PostgREST têm amostras pequenas e não são prova isolada de query lenta.
+- [ ] Continuar a recolher métricas de tráfego real e analisar `EXPLAIN (ANALYZE, BUFFERS)` com consultas representativas num ambiente seguro.
+
+### Pendências externas/configuração
+
+- [ ] Leaked Password Protection: requer upgrade do projeto/organização para Supabase Pro; não existe ação de configuração Auth disponível através da ligação atual.
+- [ ] Sentry: falta `SENTRY_AUTH_TOKEN` para upload de source maps/releases. Configurar privadamente em Vercel/Sentry; não colocar o token no repositório ou em comentários.
+- [ ] Não foi possível correlacionar individualmente os refresh-token errors históricos com um evento de logout; a mudança para scope local previne a invalidação acidental de sessões independentes, mas a monitorização deve continuar.
