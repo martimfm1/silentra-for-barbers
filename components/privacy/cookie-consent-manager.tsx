@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Cookie, Settings2, ShieldCheck, X } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAccessibleDialog } from '@/hooks/useAccessibleDialog';
 import {
   COOKIE_CONSENT_COOKIE,
   COOKIE_CONSENT_MAX_AGE_SECONDS,
@@ -106,6 +107,15 @@ export function CookieConsentManager() {
     analytics: false,
     marketing: false,
   });
+  const preferencesDialogRef = useRef<HTMLElement | null>(null);
+  const configureButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useAccessibleDialog({
+    open: preferencesOpen,
+    dialogRef: preferencesDialogRef,
+    onClose: () => setPreferencesOpen(false),
+    restoreFocusRef: configureButtonRef,
+  });
 
   useEffect(() => {
     const stored = readStoredConsent();
@@ -198,6 +208,7 @@ export function CookieConsentManager() {
                   {t.reject}
                 </button>
                 <button
+                  ref={configureButtonRef}
                   type="button"
                   onClick={openPreferences}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-semibold transition hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
@@ -221,10 +232,12 @@ export function CookieConsentManager() {
           }}
         >
           <section
+            ref={preferencesDialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-labelledby="cookie-preferences-title"
-            className="max-h-[min(90dvh,760px)] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/15 bg-zinc-950 p-5 text-zinc-100 shadow-2xl shadow-black/60 sm:p-7"
+            className="max-h-[min(90dvh,760px)] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/15 bg-zinc-950 p-5 text-zinc-100 shadow-2xl shadow-black/60 outline-none sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
