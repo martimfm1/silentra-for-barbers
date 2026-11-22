@@ -6,7 +6,7 @@ Tarefas frequentes que alteram dados da aplicação devem correr no Supabase/Pos
 
 ## Campanhas de marketing e aniversários
 
-O worker de marketing é executado pelo **Supabase Cron** a cada 5 minutos através do job `silentra-marketing`. A migration `20261122134000_schedule_marketing_cron.sql` agenda o endpoint `/api/cron/marketing` e reutiliza o URL e segredo HMAC já existentes no Supabase Vault:
+O worker de marketing é executado pelo **Supabase Cron** a cada 5 minutos através do job `silentra-marketing`. A migration `20261122140747_schedule_marketing_cron.sql` agenda o endpoint `/api/cron/marketing` e reutiliza o URL e segredo HMAC já existentes no Supabase Vault:
 
 - `silentra_booking_outbox_url` — URL base do worker de automações de marcações; a migration deriva o endpoint de marketing.
 - `silentra_booking_outbox_cron_secret` — segredo HMAC partilhado com `BOOKING_OUTBOX_CRON_SECRET` (ou `CRON_SECRET`) no ambiente de produção.
