@@ -219,8 +219,16 @@ const nextConfig = {
         headers: [...noFrameHeaders],
       },
       {
+        // API responses are not public search documents. Keep this header even
+        // when a crawler ignores robots.txt or discovers an endpoint through a link.
         source: '/api/:path*',
-        headers: [...noFrameHeaders],
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          ...noFrameHeaders,
+        ],
       },
       {
         source: '/:path*',
