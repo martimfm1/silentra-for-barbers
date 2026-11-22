@@ -36,10 +36,13 @@ const AI_SEARCH_AGENTS = [
   'Perplexity-User',
 ];
 
-const AI_TRAINING_AGENTS = [
-  // Keep search visibility separate from permission to collect content for training.
+const AI_TRAINING_AND_GROUNDING_AGENTS = [
+  // ClaudeBot and GPTBot are training crawlers.
   'ClaudeBot',
   'GPTBot',
+  // Google-Extended controls both Gemini training and Gemini grounding.
+  // Blocking it does not block Google Search indexing, but it does opt out of
+  // Gemini grounding. This is the conservative no-training choice.
   'Google-Extended',
 ];
 
