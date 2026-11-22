@@ -1,6 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getDailySchedule,
@@ -34,8 +33,8 @@ async function GET__unobserved(
     const selectedDate = new Date(`${dateParam}T12:00:00`);
     const dayOfWeek = selectedDate.getDay();
 
-    const supabase = await createClient();
-    const { data: shop, error } = await supabase
+    const admin = createAdminClient();
+    const { data: shop, error } = await admin
       .from('shops')
       .select(
         `
@@ -73,7 +72,6 @@ async function GET__unobserved(
       );
     }
 
-    const admin = createAdminClient();
     const { data: professionals, error: professionalsError } = await admin
       .from('professionals')
       .select('id,weekly_schedule')
