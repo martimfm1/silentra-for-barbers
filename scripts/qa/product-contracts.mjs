@@ -1397,6 +1397,51 @@ const checks = [
       source.includes('Esta conta já é proprietária de outra barbearia.') &&
       source.includes('Esta conta já está associada a uma barbearia.'),
   },
+  {
+    name: 'Public booking time-slot lookup distinguishes loading, empty and retryable errors',
+    file: 'app/barbershops/components/booking-drawer-canonical.tsx',
+    test: (source) => {
+      const normalized = source.replace(/\s+/g, ' ');
+      return (
+        normalized.includes('loadingAvailability ? (') &&
+        normalized.includes('role="status" aria-live="polite"') &&
+        normalized.includes(') : slots.length ? (') &&
+        normalized.includes('selectedDayClosed') &&
+        normalized.includes("t('bookingDrawer.noSlots')") &&
+        normalized.includes(".catch((reason) => {") &&
+        normalized.includes("if (reason?.name !== 'AbortError')") &&
+        normalized.includes('setError(') &&
+        normalized.includes('setLoadingAvailability(false)') &&
+        normalized.includes('role="alert"') &&
+        normalized.includes('onClick={() => { setError(\'\'); if (step < 3) setRetryKey((value) => value + 1); }}') &&
+        normalized.includes("t('bookingDrawer.retry')")
+      );
+    },
+  },
+  {
+    name: 'Customer portal exposes recoverable load and reschedule states without confusing errors with empty results',
+    file: 'components/customer-portal/my-bookings-page.tsx',
+    test: (source) => {
+      const normalized = source.replace(/\s+/g, ' ');
+      return (
+        normalized.includes('!sessionEmail && loadError ? (') &&
+        normalized.includes('role="alert"') &&
+        normalized.includes('Tenta novamente antes de introduzires os teus dados.') &&
+        normalized.includes("onClick={() => void load({ showLoading: false })}") &&
+        normalized.includes('upcoming.length === 0') &&
+        normalized.includes('Não tens próximas marcações') &&
+        normalized.includes('availabilityLoading ? (') &&
+        normalized.includes('availabilityError ? (') &&
+        normalized.includes('role="alert"') &&
+        normalized.includes('onClick={() => void getAvailability(reschedule, date)}') &&
+        normalized.includes('availability?.closedDay') &&
+        normalized.includes('availability.availableSlots.length > 0') &&
+        normalized.includes('Não há horários disponíveis nesta data. Escolhe outro dia.') &&
+        normalized.includes('toast.success(\'Marcação reagendada. O novo horário já está atualizado.\')') &&
+        normalized.includes('toast.success(\'Marcação cancelada. O estado já foi atualizado.\')')
+      );
+    },
+  },
 ];
 let failed = 0;
 for (const check of checks) {
