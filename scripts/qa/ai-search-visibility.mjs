@@ -23,6 +23,8 @@ const searchAgents = [
   'Claude-User',
   'ChatGPT-User',
   'Perplexity-User',
+  'Google-Agent',
+  'Google-GeminiNotebook',
 ];
 
 const trainingAgents = ['ClaudeBot', 'GPTBot', 'Google-Extended'];
