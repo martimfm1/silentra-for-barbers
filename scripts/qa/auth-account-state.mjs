@@ -34,17 +34,17 @@ const siteNavbar = read('components/site-navbar.tsx');
 
 assert.match(
   authService,
-  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  /auth\.signOut\(\{ scope: 'local' \}\)/,
   'Dashboard logout must revoke only the current session, not all user sessions.',
 );
 assert.match(
   authLogoutRoute,
-  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  /auth\.signOut\(\{ scope: 'local' \}\)/,
   'Server logout endpoint must revoke only the current session.',
 );
 assert.match(
   siteNavbar,
-  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  /auth\.signOut\(\{ scope: 'local' \}\)/,
   'Public navbar logout must not invalidate refresh tokens on other devices or tabs.',
 );
 console.log(
