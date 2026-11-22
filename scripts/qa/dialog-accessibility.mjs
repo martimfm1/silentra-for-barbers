@@ -70,7 +70,7 @@ assert.match(cookieManager, /restoreFocusRef: configureButtonRef/);
 
 assert.match(siteNavbar, /keepFocusInside/);
 assert.match(siteNavbar, /event\.key === 'Escape'/);
-assert.match(dashboardSidebar, /keepFocusInside/);
+assert.match(dashboardSidebar, /handleDialogKeys/);
 assert.match(dashboardSidebar, /event\.key === 'Escape'/);
 
 console.log(
