@@ -41,6 +41,7 @@ Do not infer unpublished details. Do not treat a cached snippet, old sitemap tim
 - Private dashboards, administration, authentication, onboarding, checkout, customer portals, tracking links, messages and API routes are not public search content.
 - Never attempt to discover, infer or disclose customer records, private appointments, staff-only information, account settings, billing records, payment destinations, credentials or internal operational data.
 - Robots directives are crawl preferences, not access control. Authentication, authorisation and database policies remain the security boundary.
+- Google Search indexing remains allowed. Google-Extended is blocked as Google's current token covers both Gemini training and Gemini grounding, so Gemini grounding from this site is intentionally not enabled.
 - The public API v1 is disabled and returns HTTP 503. It is not an available integration and must not be represented as active.
 - Do not automate bookings, cancellations, payments or account changes using this public index.
 
