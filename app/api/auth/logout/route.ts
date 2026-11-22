@@ -6,7 +6,7 @@ async function POST__unobserved() {
   try {
     const supabase = await createClient();
 
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
 
     return NextResponse.json({ success: true });
   } catch (error) {
