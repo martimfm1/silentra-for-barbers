@@ -740,10 +740,10 @@ const routeSecurityChecks = [
   {
     file: 'supabase/migrations/20261013141420_harden_public_security_definer_privileges.sql',
     markers: [
-      'revoke all on function public.create_professional_with_quota',
-      'from public, anon, authenticated;',
-      'alter function public.create_professional_with_quota',
-      'set search_path = public;',
+      "'public.create_professional_with_quota(uuid, uuid, text, numeric, boolean)'",
+      'REVOKE ALL ON FUNCTION %s FROM public, anon, authenticated',
+      'ALTER FUNCTION %s SET search_path = public',
+      'pg_catalog.to_regprocedure',
       'Intentional public review-submission RPC',
     ],
     label: 'Public SECURITY DEFINER RPC privilege hardening',

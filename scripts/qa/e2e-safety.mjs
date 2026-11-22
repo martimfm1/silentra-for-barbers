@@ -27,6 +27,9 @@ assert.match(professionalUserIdMigration, /ADD COLUMN IF NOT EXISTS user_id uuid
 assert.match(marketingPolicyMigration, /from pg_policies/, 'Campaign policy migrations must tolerate existing policies.');
 assert.match(marketingPolicyMigration, /if not exists[\s\S]*marketing_campaigns_staff_read/, 'Campaign read policy must be idempotent.');
 assert.match(functionHardeningMigration, /pg_catalog\.to_regprocedure/, 'Function hardening must tolerate functions created by later migrations.');
+assert.match(functionHardeningMigration, /public\.create_professional_with_quota\(uuid, uuid, text, numeric, boolean\)/, 'Professional quota RPC must remain in the hardened function set.');
+assert.match(functionHardeningMigration, /REVOKE ALL ON FUNCTION %s FROM public, anon, authenticated/, 'Client roles must remain unable to invoke the protected RPCs.');
+assert.match(functionHardeningMigration, /ALTER FUNCTION %s SET search_path = public/, 'Security-definer functions must keep a fixed search path.');
 assert.match(newUserHardeningMigration, /REVOKE ALL ON FUNCTION public\.handle_new_user\(\)/, 'New Auth trigger function must be hardened after creation.');
 assert.match(newUserHardeningMigration, /SET search_path = public/, 'New Auth trigger function must use a fixed search path.');
 
