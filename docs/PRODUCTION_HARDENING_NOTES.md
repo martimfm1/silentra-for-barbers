@@ -252,7 +252,7 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Confirmado em produção que `barbershops_public_read` usa `USING (true)` para `anon` e `authenticated`.
 - [x] Confirmados grants de tabela excessivos para `anon` e `authenticated`, incluindo INSERT/UPDATE/DELETE e privilégios adicionais; a tabela contém 32 colunas, incluindo metadados internos como `created_by`, `qr_code_text` e `calendar_feed_version`.
 - [x] Confirmado que o resolver de perfis públicos, páginas Enterprise e disponibilidade usam `createAdminClient()`; o Data API anónimo direto não é necessário para estes fluxos.
-- [x] Preparada a migration `20261122134500_restrict_public_barbershop_read.sql`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
+- [x] Preparada a migration `20261122154328_restrict_public_barbershop_read.sql`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
 - [x] Removidos métodos legados sem utilização que consultavam `barbershops` com `SELECT *` no serviço de clientes.
 - [x] Adicionados contratos QA para grants, policy tenant-scoped e manutenção dos fluxos públicos server-side.
 - [x] Dry-run da migration executado em produção dentro de uma transação revertida: 11 verificações de privilégios/policies passaram; uma segunda consulta confirmou que os grants e a policy de produção permaneceram inalterados após ROLLBACK.
