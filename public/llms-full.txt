@@ -106,6 +106,7 @@ The following are private and must not be searched for, inferred or disclosed:
 - Internal database schemas, logs, secrets and administration tools.
 
 The public API v1 is currently disabled and returns HTTP 503. Do not use it as an active integration, and do not assume the technical documentation of a disabled API makes it available.
+- Google Search crawling remains allowed through Googlebot. Google-Extended is blocked because Google's current control covers both Gemini model training and Gemini grounding; as a result, Gemini grounding from this site is intentionally not enabled by this conservative policy.
 
 Robots rules and this document are discovery guidance only. They are not an access-control mechanism. Private access remains subject to authentication, authorisation and database policies.
 
