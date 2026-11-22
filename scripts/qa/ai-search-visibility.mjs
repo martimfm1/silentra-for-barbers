@@ -47,7 +47,7 @@ const privatePaths = [
 ];
 
 assert.match(robots, /userAgent: AI_SEARCH_AGENTS/);
-assert.match(robots, /userAgent: AI_TRAINING_AGENTS/);
+assert.match(robots, /userAgent: AI_TRAINING_AND_GROUNDING_AGENTS/);
 assert.match(robots, /userAgent: '__usage_ai-training'/);
 assert.match(
   robots,
