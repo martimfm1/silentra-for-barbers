@@ -3,15 +3,15 @@
 import { useEffect, useRef } from 'react';
 import { lockBodyScroll } from '@/lib/ui/body-scroll-lock';
 
-type ElementRef = {
-  current: HTMLElement | null;
+type ElementRef<T extends HTMLElement> = {
+  current: T | null;
 };
 
-type UseAccessibleDialogOptions = {
+type UseAccessibleDialogOptions<T extends HTMLElement> = {
   open: boolean;
-  dialogRef: ElementRef;
+  dialogRef: ElementRef<T>;
   onClose: () => void;
-  restoreFocusRef?: ElementRef;
+  restoreFocusRef?: ElementRef<HTMLElement>;
 };
 
 const FOCUSABLE_SELECTOR = [
@@ -30,12 +30,12 @@ const FOCUSABLE_SELECTOR = [
  * initial focus, a contained Tab sequence, Escape handling, focus restoration
  * and background scroll locking.
  */
-export function useAccessibleDialog({
+export function useAccessibleDialog<T extends HTMLElement>({
   open,
   dialogRef,
   onClose,
   restoreFocusRef,
-}: UseAccessibleDialogOptions) {
+}: UseAccessibleDialogOptions<T>) {
   const onCloseRef = useRef(onClose);
 
   useEffect(() => {
