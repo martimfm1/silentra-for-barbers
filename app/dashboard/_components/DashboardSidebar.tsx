@@ -77,7 +77,7 @@ const teamItems: SidebarItem[] = [
 const automationItems: SidebarItem[] = [
   {
     href: '/dashboard/automations',
-    label: 'Automações',
+    label: 'Automações de clientes',
     icon: Zap,
     feature: 'marketing_campaigns',
   },
@@ -129,7 +129,7 @@ const englishLabels: Record<string, string> = {
   Serviços: 'Services',
   Equipa: 'Team',
   'Visão geral': 'Overview',
-  Automações: 'Automations',
+  'Automações de clientes': 'Customer automations',
   'QR Code': 'QR code',
   'Lista de espera': 'Waitlist',
   Relatórios: 'Reports',
