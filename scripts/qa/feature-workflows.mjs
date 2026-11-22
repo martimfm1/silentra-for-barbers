@@ -148,7 +148,7 @@ assert.match(marketingCron, /timingSafeEqual/);
 assert.match(marketingCron, /x-marketing-timestamp/);
 assert.match(marketingCron, /BOOKING_OUTBOX_CRON_SECRET/);
 assert.match(marketingScheduleMigration, /silentra-marketing/);
-assert.match(marketingScheduleMigration, /'\\*\\/5 \\* \\* \\* \\*'/);
+assert.ok(marketingScheduleMigration.includes("'*/5 * * * *'"));
 assert.match(marketingScheduleMigration, /silentra_booking_outbox_cron_secret/);
 assert.match(marketingScheduleMigration, /silentra_booking_outbox_url/);
 assert.match(marketingScheduleMigration, /:marketing/);
