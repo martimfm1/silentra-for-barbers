@@ -9,6 +9,7 @@ const professionalUserIdMigration = readFileSync('supabase/migrations/2026082112
 const marketingPolicyMigration = readFileSync('supabase/migrations/20260902000000_marketing_campaigns.sql', 'utf8');
 const functionHardeningMigration = readFileSync('supabase/migrations/20261013141420_harden_public_security_definer_privileges.sql', 'utf8');
 const newUserHardeningMigration = readFileSync('supabase/migrations/20261103120052_harden_new_user_trigger.sql', 'utf8');
+const internalTableGrantsMigration = readFileSync('supabase/migrations/20261101233354_revoke_internal_table_client_grants.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -33,6 +34,9 @@ assert.match(functionHardeningMigration, /ALTER FUNCTION %s SET search_path = pu
 assert.match(functionHardeningMigration, /GRANT EXECUTE ON FUNCTION %s TO authenticated, service_role/, 'Authenticated helper RPCs must retain their intended grants when present.');
 assert.match(newUserHardeningMigration, /REVOKE ALL ON FUNCTION public\.handle_new_user\(\)/, 'New Auth trigger function must be hardened after creation.');
 assert.match(newUserHardeningMigration, /SET search_path = public/, 'New Auth trigger function must use a fixed search path.');
+assert.match(internalTableGrantsMigration, /pg_catalog\.to_regclass/, 'Internal table grants must tolerate optional tables in clean migration replays.');
+assert.match(internalTableGrantsMigration, /REVOKE ALL ON TABLE public\.%I FROM public, anon, authenticated/, 'Existing internal tables must remain inaccessible to client roles.');
+assert.match(internalTableGrantsMigration, /GRANT ALL ON TABLE public\.%I TO service_role/, 'Trusted server workers must retain internal table access.');
 
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
