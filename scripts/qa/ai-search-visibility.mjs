@@ -19,7 +19,6 @@ const searchAgents = [
   'PerplexityBot',
   'Claude-User',
   'ChatGPT-User',
-  'Perplexity-User',
 ];
 
 const trainingAgents = ['ClaudeBot', 'GPTBot', 'Google-Extended'];
