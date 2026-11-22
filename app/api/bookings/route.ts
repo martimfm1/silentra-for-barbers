@@ -4,7 +4,6 @@ import { readJsonObject } from '@/lib/security/request-validation';
 import { getClientIp } from '@/lib/security/public-rate-limit';
 import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
 import { notifyBarbersOfNewBooking } from '@/lib/brevo/barber-booking-notification';
@@ -180,9 +179,8 @@ async function POST__unobserved(request: Request) {
           },
         },
       );
-    const supabase = await createClient();
     const admin = createAdminClient();
-    const { data: shop, error: shopError } = await supabase
+    const { data: shop, error: shopError } = await admin
       .from('shops')
       .select(
         `barbershop_id,is_active,barbershops(name,address,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,minimum_booking_notice_minutes,require_birth_date,phone,mbway_enabled,mbway_phone)`,
@@ -361,7 +359,7 @@ async function POST__unobserved(request: Request) {
       : shopSchedule;
     const daySchedule = getDailySchedule(effectiveSchedule, selectedWeekday);
     const requestedStart = timeToMinutes(bookingTime);
-    const { data: selectedService, error: serviceError } = await supabase
+    const { data: selectedService, error: serviceError } = await admin
       .from('services')
       .select('id,name,duration,buffer_minutes,price')
       .eq('id', service)
@@ -409,7 +407,7 @@ async function POST__unobserved(request: Request) {
         },
         { status: 409 },
       );
-    const { data: blocks, error: blocksError } = await supabase
+    const { data: blocks, error: blocksError } = await admin
       .from('schedule_blocks')
       .select('professional_id,start_time,end_time,reason')
       .eq('barbershop_id', barbershopId)
