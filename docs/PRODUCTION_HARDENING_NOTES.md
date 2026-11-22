@@ -252,12 +252,12 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Confirmado em produção que `barbershops_public_read` usa `USING (true)` para `anon` e `authenticated`.
 - [x] Confirmados grants de tabela excessivos para `anon` e `authenticated`, incluindo INSERT/UPDATE/DELETE e privilégios adicionais; a tabela contém 32 colunas, incluindo metadados internos como `created_by`, `qr_code_text` e `calendar_feed_version`.
 - [x] Confirmado que o resolver de perfis públicos, páginas Enterprise e disponibilidade usam `createAdminClient()`; o Data API anónimo direto não é necessário para estes fluxos.
-- [x] Preparada a migration `20261122134500_restrict_public_barbershop_read.sql`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
+- [x] Migration aplicada em produção e registada como `20261122154328_restrict_public_barbershop_read`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
 - [x] Removidos métodos legados sem utilização que consultavam `barbershops` com `SELECT *` no serviço de clientes.
 - [x] Adicionados contratos QA para grants, policy tenant-scoped e manutenção dos fluxos públicos server-side.
 - [x] Dry-run da migration executado em produção dentro de uma transação revertida: 11 verificações de privilégios/policies passaram; uma segunda consulta confirmou que os grants e a policy de produção permaneceram inalterados após ROLLBACK.
 - [x] CI completa concluída com sucesso no GitHub Actions run #3454 (job Quality + Production Hardening): typecheck, lint, contratos QA, build e smoke QA sem falhas.
-- [ ] Atualizar a branch se necessário, obter revisão final e integrar o PR; aplicar a migration em produção e validar os fluxos autenticados/públicos apenas após autorização explícita.
+- [ ] Integrar o PR e publicar a aplicação após CI completa; a migration já está aplicada em produção e não deve ser reaplicada com outra versão.
 
 ### Outros findings confirmados / pendentes
 
@@ -301,3 +301,12 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Confirmado que a versão aplicada em produção é `20261122140747_schedule_marketing_cron`.
 - [x] Renomeada a migration do repositório de `20261122134000` para `20261122140747`, preservando o SQL aplicado, e atualizadas as referências em `docs/CRON.md`, `scripts/qa/feature-workflows.mjs` e `scripts/qa/product-contracts.mjs`.
 - [ ] Não reaplicar esta migration em produção: está registada como aplicada. Confirmar apenas que a sincronização GitHub/produção é reconhecida pelo Supabase CLI durante o próximo workflow de migrations, sem executar um novo push nesta fase.
+
+
+### Aplicação e verificação em produção — 22/11/2026
+
+- [x] Aplicada a migration de hardening em produção através de Supabase e registada como `20261122154328_restrict_public_barbershop_read`; o SQL foi aplicado de forma idempotente porque a matriz de privilégios e a policy já coincidiam com o estado esperado.
+- [x] Pós-aplicação: `anon` sem SELECT da tabela; `authenticated` sem SELECT de tabela, apenas colunas explícitas; `created_by`, `qr_code_text` e `mbway_phone` inacessíveis; UPDATE direto apenas em `address`; policy tenant-scoped ativa e policy pública ausente.
+- [x] Simulação read-only no papel `authenticated` com dois proprietários existentes: cada um viu exatamente a sua barbearia e zero barbearias do outro tenant. Ambas as transações terminaram com ROLLBACK.
+- [ ] Smoke QA das rotas públicas e dashboard após o deploy do código que usa `createAdminClient()`; não foram criadas marcações, nem enviados emails/mensagens durante esta validação.
+- [ ] E2E visual completo com contas independentes owner/admin/staff continua por fazer; foi decidido não criar uma branch Supabase paga.
