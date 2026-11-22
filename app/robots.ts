@@ -60,6 +60,13 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: AI_TRAINING_AGENTS,
         disallow: '/',
       },
+      {
+        // Emerging AIPREF policy token: express a site-wide no-training preference
+        // in addition to vendor-specific crawler rules. This is an Internet-Draft,
+        // not yet a universally adopted standard.
+        userAgent: '__usage_ai-training',
+        disallow: '/',
+      },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
