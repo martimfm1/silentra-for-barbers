@@ -49,6 +49,11 @@ const privatePaths = [
 assert.match(robots, /userAgent: AI_SEARCH_AGENTS/);
 assert.match(robots, /userAgent: AI_TRAINING_AGENTS/);
 assert.match(robots, /userAgent: '__usage_ai-training'/);
+assert.match(
+  robots,
+  /userAgent: '__usage_ai-training'[\s\S]{0,180}disallow: '\/'/,
+  'The shared draft AIPREF token must express a no-training preference.',
+);
 for (const agent of searchAgents) {
   assert.ok(robots.includes(agent), `AI search agent ${agent} must be allowed explicitly.`);
 }
@@ -71,6 +76,11 @@ assert.match(llms, /Private dashboards, platform administration, authentication/
 assert.doesNotMatch(llms, /https:\/\/barbers\.silentra\.me\/(?:api|dashboard|login|checkout)(?:\/|\b)/i);
 assert.match(llms, /\[Full AI-readable product guide\]\(https:\/\/barbers\.silentra\.me\/llms-full\.txt\)/);
 assert.match(llms, /\[Plans and pricing\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
+assert.match(
+  llms,
+  /^- \[[^\]]+\]\(https:\/\/barbers\.silentra\.me\//m,
+  'The public AI index must use canonical Markdown links.',
+);
 
 assert.match(llmsFull, /^# Silentra for Barbers/m);
 assert.match(llmsFull, /Customers do not need to install a mobile app or create a Silentra customer account/);
