@@ -169,6 +169,9 @@ jobs:
       - name: SEO foundation contracts
         run: pnpm qa:seo
 
+      - name: AI search visibility and privacy contracts
+        run: pnpm qa:ai-search
+
       - name: Public status page contracts
         run: pnpm qa:status
 
