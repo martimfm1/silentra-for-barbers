@@ -7,7 +7,7 @@
 Silentra for Barbers is a web-based SaaS platform for barbershop management and online booking, developed for the Portuguese market. It connects the barbershop's customer-facing booking experience with its day-to-day management tools.
 
 The product is designed for:
-- Barbershop owners who manage one or more locations or teams.
+- Barbershop owners who manage their barbershop's daily operation.
 - Managers and authorised team members who manage schedules and appointments.
 - Customers who want to find a barbershop, view its public information and request an appointment online.
 
