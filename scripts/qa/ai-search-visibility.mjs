@@ -71,6 +71,16 @@ assert.match(
   /source: '\/api\/:path\*'[\s\S]{0,500}X-Robots-Tag[\s\S]{0,250}noindex, nofollow, noarchive, nosnippet/,
   'API responses must carry noindex even if a crawler discovers an endpoint.',
 );
+assert.match(
+  nextConfig,
+  /source: '\/mensagens\/:path\*'[\s\S]{0,300}X-Robots-Tag[\s\S]{0,150}noindex, nofollow, noarchive, nosnippet/,
+  'The messages area must remain non-indexable.',
+);
+assert.match(
+  nextConfig,
+  /source: '\/barbershops\/:slug\/review\/claim'[\s\S]{0,350}X-Robots-Tag[\s\S]{0,150}noindex, nofollow, noarchive, nosnippet/,
+  'Token-assisted review claims must remain non-indexable.',
+);
 assert.match(sitemap, /\.eq\('status', 'active'\)/);
 assert.match(sitemap, /public_profile_enabled === false/);
 assert.match(sitemap, /custom_website_requests/);
