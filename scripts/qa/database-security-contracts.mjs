@@ -405,6 +405,16 @@ assert.ok(
   'Public booking slots must not depend on anonymous SELECT from barbershops.',
 );
 
+assert.ok(
+  publicBookingAvailability.includes(
+    'mbwayPhone: manualPrepaymentEnabled ? mbwayPhone :',
+  ) &&
+    publicBookingAvailability.includes(
+      "whatsappPhone: manualPrepaymentEnabled ? whatsappPhone :",
+    ),
+  'Public booking availability must not return payment destination numbers when MB WAY prepayment is unavailable.',
+);
+
 console.log(
   '[DATABASE_SECURITY_QA] tenant RLS, privileged RPCs, internal table grants and loyalty redemption contracts passed',
 );
