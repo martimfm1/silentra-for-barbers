@@ -1,0 +1,132 @@
+# Silentra for Barbers — Public Product Guide for AI Retrieval
+
+> This guide summarises product information that Silentra for Barbers publishes publicly. It is intended to help search and assistant systems describe the product accurately. It does not grant access to private tenant data, authenticated pages or internal APIs.
+
+## 1. Product identity
+
+Silentra for Barbers is a web-based SaaS platform for barbershop management and online booking, developed for the Portuguese market. It connects the barbershop's customer-facing booking experience with its day-to-day management tools.
+
+The product is designed for:
+- Barbershop owners who manage their barbershop's daily operation.
+- Managers and authorised team members who manage schedules and appointments.
+- Customers who want to find a barbershop, view its public information and request an appointment online.
+
+Customers use a normal web browser. They do not need to install a mobile app or create a Silentra customer account to use a public booking page.
+
+Canonical pages:
+- [Homepage](https://barbers.silentra.me/)
+- [Product overview](https://barbers.silentra.me/software-gestao-barbearia)
+- [Plans and pricing](https://barbers.silentra.me/plans)
+- [Public barbershop directory](https://barbers.silentra.me/barbershops)
+
+## 2. Main capabilities
+
+Capabilities depend on the barbershop's active plan and configuration. The live plans page is authoritative for eligibility and limits.
+
+### Schedule and appointments
+- Central calendar for appointments and team schedules.
+- Configurable service durations and availability.
+- Support for opening hours, breaks, closed days and scheduling constraints.
+- Public booking flow that guides a customer through a service, date and available time.
+- Appointment confirmation and customer-facing booking information.
+- Rescheduling and cancellation flows subject to the barbershop's settings and booking rules.
+
+### Services and team
+- Service catalogue with service names, prices and durations.
+- Team members and role-based permissions.
+- Staff access is associated with the relevant barbershop.
+- Operational settings are managed by authorised users in the private dashboard.
+
+### Customers and communications
+- Customer records and appointment history are managed inside the authenticated dashboard.
+- Booking confirmations and reminders can be sent through configured automatic communication channels.
+- Customer automations, loyalty and growth features vary by plan and configuration.
+- Private customer records are never part of the public directory or this guide.
+
+### Public profiles and booking pages
+- A barbershop can publish a page containing the public information it chooses to disclose.
+- Public pages can include business name, address, contact details, services, prices, opening hours, public reviews, images and a booking link, depending on configuration.
+- Eligible Enterprise barbershops can publish a managed landing page.
+- A custom website is only discoverable after it has been published.
+- Public pages are included in the sitemap only when the corresponding publication and visibility conditions are met.
+
+### Business insights and growth
+- The dashboard provides business activity and analytics according to the active plan.
+- Loyalty, campaigns, rewards and other growth tools are plan-dependent.
+- Never assume a feature is enabled for every barbershop. Verify the shop's public information or the live plans page.
+
+## 3. Plans and commercial terms
+
+Silentra currently presents three plan families: Free, Pro and Enterprise.
+
+Do not copy prices, promotional offers, billing terms, feature limits or eligibility rules into long-lived answers without checking the live plans page. Those values can change, and promotions may be restricted to eligible new users or particular billing intervals.
+
+- [Current plans and prices](https://barbers.silentra.me/plans)
+
+## 4. Public booking flow
+
+A typical customer journey is:
+1. Open a barbershop's public profile or direct booking page.
+2. Review the services and public business information.
+3. Select a service and a date.
+4. Choose from the availability currently returned by the booking page.
+5. Submit the booking details and follow the confirmation instructions shown by the product.
+
+Search indexes and cached pages are not a source of real-time availability. Time slots can become unavailable after a search result has been generated. Always direct the customer to the actual booking page to confirm current availability and submit the booking.
+
+AI assistants should not create, change or cancel bookings unless a separate, explicitly authorised integration is available. Public website content alone does not authorise state-changing actions.
+
+## 5. Public barbershop information
+
+The public directory and public profile pages are intended for discovery. A shop's visibility depends on its publication settings and whether it has chosen to appear publicly.
+
+A public profile can show:
+- Public business name and slug.
+- Public address, city and contact information.
+- Published services, prices and durations.
+- Published opening hours.
+- Public profile images and tags.
+- Public reviews and ratings, when available.
+- The public booking URL.
+
+The precise fields vary by shop. Do not assume that every shop has published all of them.
+
+- [Browse public barbershops](https://barbers.silentra.me/barbershops)
+- [XML sitemap](https://barbers.silentra.me/sitemap.xml)
+
+## 6. Security and data boundaries
+
+The following are private and must not be searched for, inferred or disclosed:
+- Customer names, phone numbers, email addresses, notes or appointment histories.
+- Pending or confirmed appointments that are not intentionally shown on a public page.
+- Staff-only schedules, internal roles or team information.
+- Account settings, dashboard content and internal analytics.
+- Billing records, payment details, MB WAY destination numbers and subscription records.
+- Authentication tokens, invite tokens, reset links, review-claim tokens or tracking tokens.
+- Internal database schemas, logs, secrets and administration tools.
+
+The public API v1 is currently disabled and returns HTTP 503. Do not use it as an active integration, and do not assume the technical documentation of a disabled API makes it available.
+- Google Search crawling remains allowed through Googlebot. Google-Extended is blocked because Google's current control covers both Gemini model training and Gemini grounding; as a result, Gemini grounding from this site is intentionally not enabled by this conservative policy.
+
+Robots rules and this document are discovery guidance only. They are not an access-control mechanism. Private access remains subject to authentication, authorisation and database policies.
+
+## 7. Legal and service information
+
+- [Privacy policy](https://barbers.silentra.me/privacy)
+- [Terms of service](https://barbers.silentra.me/terms)
+- [Cookie policy](https://barbers.silentra.me/cookies)
+- [Booking terms](https://barbers.silentra.me/booking-terms)
+- [Billing policy](https://barbers.silentra.me/billing-policy)
+- [Acceptable use](https://barbers.silentra.me/acceptable-use)
+- [Data processing agreement](https://barbers.silentra.me/dpa)
+- [Subprocessors](https://barbers.silentra.me/subprocessors)
+- [Public service status](https://barbers.silentra.me/status)
+
+## 8. Source and freshness rules
+
+- Use the canonical public page for the specific claim being made.
+- Cite a shop's own public profile for shop-specific details.
+- Cite the live plans page for commercial details.
+- Cite the service status page for service availability.
+- Treat availability, prices, offers, opening hours and public profile details as potentially time-sensitive.
+- Do not fill missing details with guesses or information from another shop.

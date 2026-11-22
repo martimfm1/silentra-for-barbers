@@ -15,6 +15,7 @@ const [
   analytics,
   authHandlers,
   checkoutSuccess,
+  envExample,
 ] = await Promise.all([
   read('lib/site-metadata.ts'),
   read('app/page.tsx'),
@@ -25,9 +26,14 @@ const [
   read('lib/analytics/marketing.ts'),
   read('app/login/services/auth-handles.ts'),
   read('app/checkout/success/page.tsx'),
+  read('.env.example'),
 ]);
 
 assert.match(metadata, /GOOGLE_SITE_VERIFICATION/);
+assert.match(metadata, /BING_SITE_VERIFICATION/);
+assert.match(metadata, /msvalidate\.01/);
+assert.match(envExample, /GOOGLE_SITE_VERIFICATION=/);
+assert.match(envExample, /BING_SITE_VERIFICATION=/);
 assert.doesNotMatch(metadata, /canonical: SITE_URL/);
 assert.match(homepage, /SoftwareApplication/);
 assert.match(homepage, /#organization/);

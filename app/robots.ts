@@ -33,12 +33,19 @@ const AI_SEARCH_AGENTS = [
   // User-directed fetchers used when someone asks an assistant to open a page
   'Claude-User',
   'ChatGPT-User',
+  'Perplexity-User',
+  // Google user-directed agents (may ignore robots.txt by design)
+  'Google-Agent',
+  'Google-GeminiNotebook',
 ];
 
-const AI_TRAINING_AGENTS = [
-  // Keep search visibility separate from permission to collect content for training.
+const AI_TRAINING_AND_GROUNDING_AGENTS = [
+  // ClaudeBot and GPTBot are training crawlers.
   'ClaudeBot',
   'GPTBot',
+  // Google-Extended controls both Gemini training and Gemini grounding.
+  // Blocking it does not block Google Search indexing, but it does opt out of
+  // Gemini grounding. This is the conservative no-training choice.
   'Google-Extended',
 ];
 
@@ -56,7 +63,14 @@ export default function robots(): MetadataRoute.Robots {
         disallow: PRIVATE_PATHS,
       },
       {
-        userAgent: AI_TRAINING_AGENTS,
+        userAgent: AI_TRAINING_AND_GROUNDING_AGENTS,
+        disallow: '/',
+      },
+      {
+        // Emerging AIPREF policy token: express a site-wide no-training preference
+        // in addition to vendor-specific crawler rules. This is an Internet-Draft,
+        // not yet a universally adopted standard.
+        userAgent: '__usage_ai-training',
         disallow: '/',
       },
     ],
