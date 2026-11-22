@@ -47,6 +47,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Assign isolated local database ports
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'supabase/config.toml';
+          const config = fs.readFileSync(path, 'utf8');
+          const start = config.indexOf('[db]\n');
+          const end = config.indexOf('\n[db.pooler]', start);
+          if (start < 0 || end < 0) throw new Error('Unable to locate the [db] section.');
+          const section = config.slice(start, end);
+          if (!/^port = 54322$/m.test(section) || !/^shadow_port = 54320$/m.test(section)) {
+            throw new Error('Unexpected Supabase database port defaults; refusing unsafe replacement.');
+          }
+          const next = section
+            .replace(/^port = 54322$/m, 'port = 55432')
+            .replace(/^shadow_port = 54320$/m, 'shadow_port = 55430');
+          fs.writeFileSync(path, config.slice(0, start) + next + config.slice(end));
+          NODE
+
       - name: Start disposable local Supabase
         run: pnpm exec supabase start --exclude studio,mailpit,logflare,supavisor,edge-runtime,vector
 

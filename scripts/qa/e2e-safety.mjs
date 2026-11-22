@@ -16,6 +16,8 @@ assert.match(workflow, /pnpm exec supabase status -o env/, 'E2E workflow must so
 assert.match(workflow, /playwright install/, 'E2E workflow must install a browser.');
 assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must discard its local stack.');
 assert.match(workflow, /--exclude studio,mailpit,logflare,supavisor,edge-runtime,vector/, 'E2E workflow must use current Supabase container names.');
+assert.match(workflow, /port = 55432/, 'E2E must use an isolated local database port.');
+assert.match(workflow, /shadow_port = 55430/, 'E2E must use an isolated shadow database port.');
 assert.ok(!supabaseConfig.includes('[local_smtp]'), 'Supabase config must not use the removed local_smtp section.');
 assert.ok(supabaseConfig.includes('additional_redirect_urls = ["http://127.0.0.1:3000"]'), 'Local Supabase redirects must match the HTTP loopback app origin.');
 assert.match(planEnumMigration, /pg_catalog\.pg_type/, 'The plan enum migration must detect an existing type.');
