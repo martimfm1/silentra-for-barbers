@@ -289,32 +289,32 @@ const barbershopLocationRoute = await read(
 
 assert.match(
   barbershopReadHardening,
-  /revoke all privileges on table public\\.barbershops from anon, authenticated/i,
+  /revoke all privileges on table public\.barbershops from anon, authenticated/i,
   'Direct Data API table grants must be removed before least-privilege grants are restored.',
 );
 assert.match(
   barbershopReadHardening,
-  /revoke all privileges \\([\\s\\S]*weekly_schedule[\\s\\S]*\\) on table public\\.barbershops from anon, authenticated/i,
+  /revoke all privileges \([\s\S]*weekly_schedule[\s\S]*\) on table public\.barbershops from anon, authenticated/i,
   'Existing column-level grants must also be revoked.',
 );
 assert.match(
   barbershopReadHardening,
-  /grant select \\([\\s\\S]*weekly_schedule[\\s\\S]*\\) on table public\\.barbershops to authenticated/i,
+  /grant select \([\s\S]*weekly_schedule[\s\S]*\) on table public\.barbershops to authenticated/i,
   'Authenticated dashboard reads must be limited to an explicit column allowlist.',
 );
 assert.match(
   barbershopReadHardening,
-  /grant update \\(address\\) on table public\\.barbershops to authenticated/i,
+  /grant update \(address\) on table public\.barbershops to authenticated/i,
   'The only direct client-side barbershop table update must be the tenant-checked location address.',
 );
 assert.match(
   barbershopReadHardening,
-  /drop policy if exists barbershops_public_read on public\\.barbershops/i,
+  /drop policy if exists barbershops_public_read on public\.barbershops/i,
   'The unconditional public read policy must be removed.',
 );
 assert.match(
   barbershopReadHardening,
-  /create policy barbershops_authenticated_tenant_read[\\s\\S]*to authenticated[\\s\\S]*actor\\.id = \\(select auth\\.uid\\(\\)\\)[\\s\\S]*actor\\.barbershop_id = barbershops\\.id/i,
+  /create policy barbershops_authenticated_tenant_read[\s\S]*to authenticated[\s\S]*actor\.id = \(select auth\.uid\(\)\)[\s\S]*actor\.barbershop_id = barbershops\.id/i,
   'Authenticated reads must be limited to staff belonging to the exact current tenant.',
 );
 assert.doesNotMatch(
@@ -324,37 +324,37 @@ assert.doesNotMatch(
 );
 assert.match(
   publicProfileResolver,
-  /createAdminClient\\(\\)/,
+  /createAdminClient\(\)/,
   'Public profile resolution must remain on the server-side service client.',
 );
 assert.match(
   enterpriseLandingPage,
-  /createAdminClient\\(\\)/,
+  /createAdminClient\(\)/,
   'Enterprise landing-page reads must remain server-side after public Data API access is removed.',
 );
 assert.match(
   publicBookingAvailability,
-  /createAdminClient\\(\\)/,
+  /createAdminClient\(\)/,
   'Public availability must continue through the validated server-side endpoint.',
 );
 assert.doesNotMatch(
   legacyClientsService,
-  /from\\(['"]barbershops['"]\\)/,
+  /from\(['"]barbershops['"]\)/,
   'The legacy customer service must not retain broad direct barbershop config reads or writes.',
 );
 assert.match(
   barbershopSettingsService,
-  /from\\(['"]barbershops['"]\\)[\\s\\S]*?\\.select\\(/,
+  /from\(['"]barbershops['"]\)[\s\S]*?\.select\(/,
   'The dashboard settings service must use explicit authenticated column reads.',
 );
 assert.doesNotMatch(
   barbershopSettingsService,
-  /from\\(['"]barbershops['"]\\)[\\s\\S]*?\\.select\\(['"]\\*['"]\\)/,
+  /from\(['"]barbershops['"]\)[\s\S]*?\.select\(['"]\*['"]\)/,
   'The dashboard settings service must not depend on SELECT *.',
 );
 assert.match(
   barbershopLocationRoute,
-  /profile\\?\\.barbershop_id !== barbershopId[\\s\\S]*owner', 'admin'[\\s\\S]*from\\(['"]barbershops['"]\\)[\\s\\S]*update\\(\\{ address \\}/,
+  /profile\?\.barbershop_id !== barbershopId[\s\S]*owner', 'admin'[\s\S]*from\(['"]barbershops['"]\)[\s\S]*update\(\{ address \}/,
   'The address-only direct update must check the authenticated tenant and owner/admin role.',
 );
 
