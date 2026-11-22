@@ -30,7 +30,7 @@
     "qa:dialog-accessibility": "node scripts/qa/dialog-accessibility.mjs",
     "qa:performance": "node scripts/qa/performance-audit.mjs",
     "qa:product": "node scripts/qa/product-contracts.mjs",
-    "qa": "pnpm typecheck && pnpm lint && pnpm qa:auth-account-state && pnpm qa:dashboard-customizations && pnpm build && pnpm qa:api && pnpm qa:loyalty && pnpm qa:client-matching && pnpm qa:client-database && pnpm qa:client-plans && pnpm qa:service-management && pnpm qa:barber-booking-email && pnpm qa:subscription-expiry && pnpm qa:appointment-rescheduling && pnpm qa:minimum-booking-notice && pnpm qa:waitlist && pnpm qa:plans && pnpm qa:security && pnpm qa:database-security && pnpm qa:production-hardening && pnpm qa:env-contract && pnpm qa:csrf && pnpm qa:copy && pnpm qa:i18n && pnpm qa:agenda-dialogs && pnpm qa:communication-growth && pnpm qa:closed-days && pnpm qa:weekly-schedules && pnpm qa:buttons && pnpm qa:appointment-accessibility && pnpm qa:dialog-accessibility && pnpm qa:haptics && pnpm qa:observability && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:overflow && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo && pnpm qa:ai-search && pnpm qa:status && pnpm qa:pwa && pnpm qa:push && pnpm qa:feature-workflows && pnpm qa:cookies && pnpm qa:legal",
+    "qa": "pnpm typecheck && pnpm lint && pnpm qa:auth-account-state && pnpm qa:dashboard-customizations && pnpm build && pnpm qa:api && pnpm qa:loyalty && pnpm qa:client-matching && pnpm qa:client-database && pnpm qa:client-plans && pnpm qa:service-management && pnpm qa:barber-booking-email && pnpm qa:subscription-expiry && pnpm qa:appointment-rescheduling && pnpm qa:minimum-booking-notice && pnpm qa:waitlist && pnpm qa:plans && pnpm qa:security && pnpm qa:database-security && pnpm qa:production-hardening && pnpm qa:env-contract && pnpm qa:csrf && pnpm qa:copy && pnpm qa:i18n && pnpm qa:agenda-dialogs && pnpm qa:communication-growth && pnpm qa:closed-days && pnpm qa:weekly-schedules && pnpm qa:buttons && pnpm qa:appointment-accessibility && pnpm qa:dialog-accessibility && pnpm qa:haptics && pnpm qa:observability && pnpm qa:performance && pnpm qa:product && pnpm qa:support && pnpm qa:ux && pnpm qa:overflow && pnpm qa:manual-promotions && pnpm qa:enterprise-landing-pages && pnpm qa:seo && pnpm qa:ai-search && pnpm qa:status && pnpm qa:pwa && pnpm qa:push && pnpm qa:feature-workflows && pnpm qa:e2e-safety && pnpm qa:cookies && pnpm qa:legal",
     "translate": "tsx scripts/translate.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -61,7 +61,8 @@
     "qa:haptics": "node scripts/qa/haptics.mjs",
     "qa:observability": "node scripts/qa/observability.mjs",
     "qa:subscription-expiry": "node scripts/qa/subscription-expiry-reminders.mjs",
-    "qa:weekly-schedules": "tsx scripts/qa/weekly-schedules.ts"
+    "qa:weekly-schedules": "tsx scripts/qa/weekly-schedules.ts",
+    "qa:e2e-safety": "node scripts/qa/e2e-safety.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",

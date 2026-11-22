@@ -1,0 +1,99 @@
+name: Isolated authenticated E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/isolated-e2e.yml"
+      - "scripts/e2e/**"
+      - "scripts/qa/e2e-safety.mjs"
+      - "supabase/**"
+      - "app/api/**"
+      - "app/onboarding/**"
+      - "app/login/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isolated-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  authenticated-e2e:
+    name: Authenticated flows against disposable local Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SUPABASE_TELEMETRY_DISABLED: "1"
+      E2E_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start disposable local Supabase
+        run: pnpm exec supabase start --exclude studio,mail,analytics,pooler,functions
+
+      - name: Export local-only Supabase credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm exec supabase status -o env > /tmp/supabase-local.env
+          set -a
+          source /tmp/supabase-local.env
+          set +a
+
+          test -n "${API_URL:-}"
+          test -n "${ANON_KEY:-}"
+          test -n "${SERVICE_ROLE_KEY:-}"
+
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}"
+            echo "RATE_LIMIT_SECRET=$(openssl rand -hex 32)"
+            echo "NEXT_PUBLIC_SITE_URL=${E2E_BASE_URL}"
+          } >> "$GITHUB_ENV"
+
+      - name: Install Chromium for isolated browser tests
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Start application against local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm dev > /tmp/silentra-e2e-next.log 2>&1 &
+          echo $! > /tmp/silentra-e2e-next.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/silentra-e2e-next.log
+          exit 1
+
+      - name: Run synthetic onboarding, invite, booking and tenant-isolation journeys
+        run: node scripts/e2e/booking-tenant-isolation.mjs
+
+      - name: Stop and discard the local Supabase stack
+        if: always()
+        run: pnpm exec supabase stop --no-backup

@@ -166,6 +166,9 @@ jobs:
       - name: Requested feature workflow contracts
         run: pnpm qa:feature-workflows
 
+      - name: Isolated E2E safety contracts
+        run: pnpm qa:e2e-safety
+
       - name: Dependency audit
         run: pnpm qa:deps
 
