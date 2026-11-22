@@ -96,6 +96,7 @@ type BirthdayAudience = {
   withBirthDate: number;
   withEmail: number;
   birthdayReady: number;
+  birthdaysToday: number;
 };
 type Metric = { label: string; value: number; Icon: LucideIcon; tone: string };
 type FormState = {
@@ -964,12 +965,13 @@ export function MarketingWorkspace({
                 </Button>
               </CardContent>
             </Card>
-            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Preparação da audiência de aniversário">
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-label="Preparação da audiência de aniversário">
               {[
                 { label: 'Clientes', value: birthdayAudience?.totalClients ?? 0, detail: 'Na base da barbearia' },
                 { label: 'Com nascimento', value: birthdayAudience?.withBirthDate ?? 0, detail: 'Data de nascimento registada' },
                 { label: 'Com email', value: birthdayAudience?.withEmail ?? 0, detail: 'Endereço disponível' },
-                { label: 'Prontos para receber', value: birthdayAudience?.birthdayReady ?? 0, detail: 'Data + email preenchidos' },
+                { label: 'Com dados completos', value: birthdayAudience?.birthdayReady ?? 0, detail: 'Data + email preenchidos' },
+                { label: 'Aniversários a enviar hoje', value: birthdayAudience?.birthdaysToday ?? 0, detail: 'Correspondem ao ciclo configurado' },
               ].map((item, index) => (
                 <Card key={item.label} className="border-white/10 bg-white/[0.025]">
                   <CardContent className="p-4 sm:p-5">
@@ -980,7 +982,7 @@ export function MarketingWorkspace({
                     <p className="mt-1 text-[11px] text-zinc-500">{item.detail}</p>
                     <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/[0.06]">
                       <div
-                        className={index === 3 ? 'h-full rounded-full bg-emerald-300/70' : 'h-full rounded-full bg-primary/60'}
+                        className={index === 4 ? 'h-full rounded-full bg-emerald-300/70' : 'h-full rounded-full bg-primary/60'}
                         style={{
                           width: `${birthdayAudience?.totalClients ? Math.min(100, (item.value / birthdayAudience.totalClients) * 100) : 0}%`,
                         }}
@@ -991,23 +993,29 @@ export function MarketingWorkspace({
               ))}
             </section>
             {birthdayAudience && (
-              <Card className={`border ${birthdayAudience.birthdayReady > 0 ? 'border-emerald-300/15 bg-emerald-300/[0.035]' : 'border-amber-300/20 bg-amber-300/[0.04]'}`}>
+              <Card className={`border ${birthdayAudience.birthdaysToday > 0 ? 'border-emerald-300/15 bg-emerald-300/[0.035]' : birthdayAudience.birthdayReady > 0 ? 'border-sky-300/15 bg-sky-300/[0.035]' : 'border-amber-300/20 bg-amber-300/[0.04]'}`}>
                 <CardContent className="flex items-start gap-3 p-4 sm:p-5">
-                  {birthdayAudience.birthdayReady > 0 ? (
+                  {birthdayAudience.birthdaysToday > 0 ? (
                     <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-300" aria-hidden="true" />
+                  ) : birthdayAudience.birthdayReady > 0 ? (
+                    <Cake className="mt-0.5 size-5 shrink-0 text-sky-300" aria-hidden="true" />
                   ) : (
                     <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-200" aria-hidden="true" />
                   )}
                   <div>
                     <p className="text-sm font-medium text-zinc-100">
-                      {birthdayAudience.birthdayReady > 0
-                        ? `${birthdayAudience.birthdayReady} clientes têm os dados necessários para receber a mensagem.`
-                        : 'Ainda não existem clientes elegíveis para receber a mensagem.'}
+                      {birthdayAudience.birthdaysToday > 0
+                        ? `${birthdayAudience.birthdaysToday} emails de aniversário correspondem ao ciclo de hoje.`
+                        : birthdayAudience.birthdayReady > 0
+                          ? `${birthdayAudience.birthdayReady} clientes têm data de nascimento e email, mas não há aniversários neste ciclo.`
+                          : 'Ainda não existem clientes com data de nascimento e email.'}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {birthdayAudience.birthdayReady > 0
-                        ? 'A automação identifica automaticamente os aniversários e evita repetir mensagens já enviadas.'
-                        : 'Adiciona a data de nascimento e um email na ficha do cliente. A automação fica ativa e envia quando existir um aniversário elegível.'}
+                      {birthdayAudience.birthdaysToday > 0
+                        ? 'O worker envia as mensagens devidas e não repete destinatários já registados como enviados.'
+                        : birthdayAudience.birthdayReady > 0
+                          ? 'A automação mantém-se ativa. O próximo envio acontece quando chegar uma data de aniversário elegível.'
+                          : 'Preenche a data de nascimento e o email na ficha dos clientes. Sem estes dois dados não há destinatários para enviar.'}
                     </p>
                   </div>
                 </CardContent>
