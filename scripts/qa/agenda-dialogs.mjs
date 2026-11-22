@@ -422,6 +422,66 @@ assert.match(
 assert.match(appointmentDetail, /seriesCancelScope !== null/);
 assert.match(appointmentDetail, /<AlertDialogContent className=/);
 
+const initialAgendaLoad = agenda.slice(
+  agenda.indexOf('const fetchInitialData'),
+  agenda.indexOf('useEffect', agenda.indexOf('const fetchInitialData')),
+);
+assert.match(
+  agenda,
+  /const \[hasLoadedInitialData, setHasLoadedInitialData\] = useState\(false\)/,
+  'A genuinely empty agenda must be distinguished from an agenda that never loaded.',
+);
+assert.match(
+  agenda,
+  /const \[agendaLoadError, setAgendaLoadError\] = useState<string \| null>\(null\)/,
+);
+assert.match(
+  initialAgendaLoad,
+  /setHasLoadedInitialData\(true\)/,
+  'A successful read must mark the agenda as loaded, even when the returned lists are empty.',
+);
+assert.match(
+  initialAgendaLoad,
+  /setAgendaLoadError\(null\)/,
+  'A successful retry must clear the persistent load error.',
+);
+assert.match(
+  initialAgendaLoad,
+  /catch \(error\)[\s\S]*setAgendaLoadError\(t\('agenda\.loadingError'\)\)/,
+  'A failed read must persist an explicit error instead of silently becoming an empty agenda.',
+);
+assert.match(
+  initialAgendaLoad,
+  /finally \{\s*setLoadingInitial\(false\)/,
+);
+assert.doesNotMatch(
+  initialAgendaLoad.slice(initialAgendaLoad.indexOf('catch (error)')),
+  /setAppointments\(\[\]\)|setServices\(\[\]\)|setProfessionals\(\[\]\)|setClients\(\[\]\)/,
+  'A failed refresh must not erase previously loaded data.',
+);
+assert.match(
+  agenda,
+  /\{agendaLoadError \? \([\s\S]*?role="alert"[\s\S]*?\{agendaLoadError\}[\s\S]*?onClick=\{\(\) => void fetchInitialData\(\)\}/,
+  'The agenda load error must remain visible with an explicit retry action.',
+);
+assert.match(agenda, /'Try again'/);
+assert.match(agenda, /'Tentar novamente'/);
+assert.match(
+  agenda,
+  /isCalendarView && \(loadingInitial \|\| hasLoadedInitialData\) \?/,
+  'The calendar must not show a false empty state before the first successful read.',
+);
+assert.match(
+  agenda,
+  /\{loadingInitial \? \([\s\S]*?\) : hasLoadedInitialData \? \(/,
+  'The appointment list and its true empty state must only render after a successful read.',
+);
+assert.match(
+  agenda,
+  /Previously loaded data is still visible[\s\S]*Os dados carregados anteriormente continuam visíveis/,
+  'The recovery message must make clear that stale data is still visible after a failed refresh.',
+);
+
 console.log(
   '[AGENDA_DIALOGS_QA] Booking and block dialogs, submit lifecycle, translations and overlay stacking passed.',
 );
