@@ -359,6 +359,52 @@ assert.ok(
   'The address-only direct update must check the authenticated tenant and owner/admin role.',
 );
 
+const publicBookingCreateRoute = await read('app/api/bookings/route.ts');
+const publicDirectoryRoute = await read('app/api/shops/route.ts');
+const publicSlotsRoute = await read('app/api/shops/[id]/slots/route.ts');
+const privateMbwaySettingsRoute = await read('app/api/barbershops/mbway-settings/route.ts');
+
+const selectGrantStart = barbershopReadHardening.indexOf('grant select (');
+const selectGrantEnd = barbershopReadHardening.indexOf(
+  ') on table public.barbershops to authenticated;',
+  selectGrantStart,
+);
+assert.ok(selectGrantStart >= 0 && selectGrantEnd > selectGrantStart);
+const selectGrant = barbershopReadHardening.slice(selectGrantStart, selectGrantEnd);
+assert.ok(
+  !selectGrant.includes('mbway_phone'),
+  'The private MB WAY destination must not be readable by every authenticated staff member.',
+);
+assert.ok(
+  privateMbwaySettingsRoute.includes("!['owner', 'admin'].includes(profile.role)") &&
+    privateMbwaySettingsRoute.includes(".select('mbway_enabled, mbway_phone')") &&
+    privateMbwaySettingsRoute.includes(".eq('id', profile.barbershop_id)"),
+  'The MB WAY destination must be served only after owner/admin authorization and scoped to the authenticated tenant.',
+);
+assert.ok(
+  !barbershopSettingsService.includes('mbway_enabled, mbway_phone') &&
+    barbershopSettingsService.includes("fetch('/api/barbershops/mbway-settings'"),
+  'Dashboard config must not read mbway_phone directly from the broad tenant SELECT grant.',
+);
+assert.ok(
+  publicBookingCreateRoute.includes('const admin = createAdminClient()') &&
+    publicBookingCreateRoute.includes('await admin') &&
+    !publicBookingCreateRoute.includes('createClient'),
+  'Public booking creation must resolve barbershop, service and block data server-side.',
+);
+assert.ok(
+  publicDirectoryRoute.includes('const admin = createAdminClient()') &&
+    !publicDirectoryRoute.includes('createClient') &&
+    publicDirectoryRoute.includes(".eq('barbershops.is_public_in_directory', true)"),
+  'The public directory must use server-side reads and keep its public-directory visibility filter.',
+);
+assert.ok(
+  publicSlotsRoute.includes('createAdminClient()') &&
+    publicSlotsRoute.includes('await admin') &&
+    !publicSlotsRoute.includes('createClient'),
+  'Public booking slots must not depend on anonymous SELECT from barbershops.',
+);
+
 console.log(
   '[DATABASE_SECURITY_QA] tenant RLS, privileged RPCs, internal table grants and loyalty redemption contracts passed',
 );
