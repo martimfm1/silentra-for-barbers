@@ -247,6 +247,12 @@ assert.match(
   /create policy "Permitir update de serviços da barbearia"[\s\S]*using \(\(select public\.get_my_barbershop_id\(\)\)\s*=/i,
   'Service write policies must cache the tenant helper per statement.',
 );
+assert.doesNotMatch(
+  rlsPolicyPerformance,
+  /get_my_barbershop_id\(\)\)\s*=\s*\(barbershop_id\)::text/i,
+  'Service tenant checks must compare UUID columns as UUIDs.',
+);
+
 assert.match(
   rlsPolicyPerformance,
   /create policy marketing_campaigns_staff_read[\s\S]*select public\.get_my_barbershop_id\(\)/i,
