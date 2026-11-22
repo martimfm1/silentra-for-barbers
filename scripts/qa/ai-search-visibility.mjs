@@ -5,12 +5,15 @@ import { resolve } from 'node:path';
 const root = process.cwd();
 const read = (path) => readFile(resolve(root, path), 'utf8');
 
-const [robots, llms, nextConfig, sitemap, publicApi] = await Promise.all([
+const [robots, llms, llmsFull, nextConfig, sitemap, publicApi, layout, plans] = await Promise.all([
   read('app/robots.ts'),
   read('public/llms.txt'),
+  read('public/llms-full.txt'),
   read('next.config.ts'),
   read('app/sitemap.ts'),
   read('app/api/v1/public/barbershops/[slug]/route.ts'),
+  read('app/layout.tsx'),
+  read('app/plans/page.tsx'),
 ]);
 
 const searchAgents = [
@@ -45,6 +48,7 @@ const privatePaths = [
 
 assert.match(robots, /userAgent: AI_SEARCH_AGENTS/);
 assert.match(robots, /userAgent: AI_TRAINING_AGENTS/);
+assert.match(robots, /userAgent: '__usage_ai-training'/);
 for (const agent of searchAgents) {
   assert.ok(robots.includes(agent), `AI search agent ${agent} must be allowed explicitly.`);
 }
@@ -65,6 +69,19 @@ assert.match(llms, /\/sitemap\.xml/);
 assert.match(llms, /public API v1 is currently disabled/i);
 assert.match(llms, /Private dashboards, platform administration, authentication/i);
 assert.doesNotMatch(llms, /https:\/\/barbers\.silentra\.me\/(?:api|dashboard|login|checkout)(?:\/|\b)/i);
+assert.match(llms, /\[Full AI-readable product guide\]\(https:\/\/barbers\.silentra\.me\/llms-full\.txt\)/);
+assert.match(llms, /\[Plans and pricing\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
+
+assert.match(llmsFull, /^# Silentra for Barbers/m);
+assert.match(llmsFull, /Customers do not need to install a mobile app or create a Silentra customer account/);
+assert.match(llmsFull, /Customer names, phone numbers, email addresses, notes or appointment histories/);
+assert.match(llmsFull, /public API v1 is currently disabled/i);
+assert.match(llmsFull, /\[Current plans and prices\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
+
+assert.match(layout, /rel="describedby"/);
+assert.match(layout, /href="\/llms\.txt"/);
+assert.match(plans, /'@type': 'FAQPage'/);
+assert.match(plans, /localizedFaqs\.map/);
 
 assert.match(
   nextConfig,
