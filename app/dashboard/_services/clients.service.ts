@@ -25,23 +25,6 @@ export interface UpdateClientPayload {
 }
 
 export const clientsService = {
-  async getBarbershopConfig(shopId: string) {
-    const supabase = createClient();
-    return await supabase
-      .from('barbershops')
-      .select('*')
-      .eq('id', shopId)
-      .maybeSingle();
-  },
-
-  async updateBarbershopConfig(
-    shopId: string,
-    config: Record<string, unknown>,
-  ) {
-    const supabase = createClient();
-    return await supabase.from('barbershops').update(config).eq('id', shopId);
-  },
-
   async createClient(clientData: CreateClientPayload) {
     const supabase = createClient();
     const {
