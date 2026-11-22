@@ -87,6 +87,8 @@ assert.match(llmsFull, /Customers do not need to install a mobile app or create 
 assert.match(llmsFull, /Customer names, phone numbers, email addresses, notes or appointment histories/);
 assert.match(llmsFull, /public API v1 is currently disabled/i);
 assert.match(llmsFull, /\[Current plans and prices\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
+assert.match(llmsFull, /Google-Extended is blocked[\s\S]*Gemini grounding/);
+assert.match(llms, /Google Search indexing remains allowed[\s\S]*Gemini grounding/);
 
 assert.match(layout, /rel="describedby"/);
 assert.match(layout, /href="\/llms\.txt"/);
