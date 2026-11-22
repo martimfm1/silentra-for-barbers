@@ -156,6 +156,7 @@ export function ClientDetailsDialog({
   const [loading, setLoading] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadRetryKey, setLoadRetryKey] = useState(0);
 
   useEffect(() => {
     if (!open || !clientId) return;
@@ -224,7 +225,7 @@ export function ClientDetailsDialog({
     })();
 
     return () => controller.abort();
-  }, [clientId, open, t]);
+  }, [clientId, open, t, loadRetryKey]);
 
   async function updateClientTag(tagId: string, action: 'add' | 'remove') {
     if (!clientId || !tagId || savingTag) return;
@@ -363,10 +364,21 @@ export function ClientDetailsDialog({
           </div>
         ) : error ? (
           <div
-            className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-200"
+            className="flex flex-col gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between"
             role="alert"
           >
-            {error}
+            <p className="min-w-0 text-sm text-red-200">{error}</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-10 shrink-0 border-red-400/25 text-red-100 hover:bg-red-500/10"
+              onClick={() =>
+                setLoadRetryKey((current) => current + 1)
+              }
+            >
+              {locale === 'pt' ? 'Tentar novamente' : 'Try again'}
+            </Button>
           </div>
         ) : client ? (
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)]">
