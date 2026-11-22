@@ -36,7 +36,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled, mbway_phone',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled',
       )
       .eq('id', barbershopId)
       .single();
@@ -53,12 +53,31 @@ export async function getBarbershopConfig(
 
     if (shopError) throw shopError;
 
+    // The MB WAY destination is private account configuration. It is served
+    // separately by an owner/admin-only endpoint, never through the broad
+    // authenticated barbershop SELECT allowlist.
+    let mbwayPhone = '';
+    const mbwayResponse = await fetch('/api/barbershops/mbway-settings', {
+      cache: 'no-store',
+      credentials: 'same-origin',
+    });
+    if (mbwayResponse.ok) {
+      const mbwayPayload = (await mbwayResponse.json().catch(() => null)) as
+        | { data?: { mbway_phone?: unknown } }
+        | null;
+      if (typeof mbwayPayload?.data?.mbway_phone === 'string') {
+        mbwayPhone = mbwayPayload.data.mbway_phone;
+      }
+    } else if (mbwayResponse.status !== 403) {
+      console.warn('[BARBERSHOP_MBWAY_SETTINGS_UNAVAILABLE]', mbwayResponse.status);
+    }
+
     return {
       data: {
         ...barberData,
         phone: barberData.phone ?? undefined,
         mbway_enabled: barberData.mbway_enabled === true,
-        mbway_phone: barberData.mbway_phone ?? '',
+        mbway_phone: mbwayPhone,
         address: barberData.address ?? undefined,
         opening_time: barberData.opening_time ?? undefined,
         closing_time: barberData.closing_time ?? undefined,
