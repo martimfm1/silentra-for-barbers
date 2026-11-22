@@ -291,3 +291,13 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [ ] Leaked Password Protection: requer upgrade do projeto/organização para Supabase Pro; não existe ação de configuração Auth disponível através da ligação atual.
 - [ ] Sentry: falta `SENTRY_AUTH_TOKEN` para upload de source maps/releases. Configurar privadamente em Vercel/Sentry; não colocar o token no repositório ou em comentários.
 - [ ] Não foi possível correlacionar individualmente os refresh-token errors históricos com um evento de logout; a mudança para scope local previne a invalidação acidental de sessões independentes, mas a monitorização deve continuar.
+
+
+
+### Sincronização da migration Marketing Cron — 22/11/2026
+
+- [x] Confirmado em produção que o job `silentra-marketing` está ativo a cada 5 minutos, assina os pedidos com HMAC a partir de segredos do Vault e chama `/api/cron/marketing`.
+- [x] Histórico das últimas 24 horas: 18 execuções com sucesso, 0 falhadas; última execução observada às 15:35 UTC com conclusão normal.
+- [x] Confirmado que a versão aplicada em produção é `20261122140747_schedule_marketing_cron`.
+- [x] Renomeada a migration do repositório de `20261122134000` para `20261122140747`, preservando o SQL aplicado, e atualizadas as referências em `docs/CRON.md`, `scripts/qa/feature-workflows.mjs` e `scripts/qa/product-contracts.mjs`.
+- [ ] Não reaplicar esta migration em produção: está registada como aplicada. Confirmar apenas que a sincronização GitHub/produção é reconhecida pelo Supabase CLI durante o próximo workflow de migrations, sem executar um novo push nesta fase.
