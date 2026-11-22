@@ -16,7 +16,7 @@ The authenticated E2E suite uses a disposable Supabase local stack. It never con
 Requirements: Node.js 24, pnpm 12.10.1, Docker, and enough memory for Supabase local development.
 
     pnpm install --frozen-lockfile
-    pnpm exec supabase start --exclude studio,mail,analytics,pooler,functions
+    pnpm exec supabase start --exclude studio,mailpit,logflare,supavisor,edge-runtime,vector
     pnpm exec supabase status -o env
 
 Export the API_URL, ANON_KEY and SERVICE_ROLE_KEY values from the local status output as:

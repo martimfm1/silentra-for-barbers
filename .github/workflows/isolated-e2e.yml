@@ -48,7 +48,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Start disposable local Supabase
-        run: pnpm exec supabase start --exclude studio,mail,analytics,pooler,functions
+        run: pnpm exec supabase start --exclude studio,mailpit,logflare,supavisor,edge-runtime,vector
 
       - name: Export local-only Supabase credentials
         shell: bash

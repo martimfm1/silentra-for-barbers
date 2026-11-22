@@ -3,12 +3,16 @@ import { readFileSync } from 'node:fs';
 
 const workflow = readFileSync('.github/workflows/isolated-e2e.yml', 'utf8');
 const runner = readFileSync('scripts/e2e/booking-tenant-isolation.mjs', 'utf8');
+const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
 assert.match(workflow, /pnpm exec supabase status -o env/, 'E2E workflow must source local Supabase credentials.');
 assert.match(workflow, /playwright install/, 'E2E workflow must install a browser.');
 assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must discard its local stack.');
+assert.match(workflow, /--exclude studio,mailpit,logflare,supavisor,edge-runtime,vector/, 'E2E workflow must use current Supabase container names.');
+assert.doesNotMatch(supabaseConfig, /^\\[local_smtp\\]/m, 'Supabase config must not use the removed local_smtp section.');
+assert.match(supabaseConfig, /additional_redirect_urls = \\[\"http:\/\/127\\.0\\.0\\.1:3000\"\\]/, 'Local Supabase redirects must match the HTTP loopback app origin.');
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
 assert.match(runner, /127\.0\.0\.1/, 'E2E runner must enforce loopback-only services.');
