@@ -13,7 +13,7 @@ export interface UserSessionProfile {
 export async function logout(): Promise<AuthResponse<null>> {
   const supabase = createClient();
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error)
       throw new Error(
         `[Supabase Auth Error]: ${error.message} (Status: ${error.status})`,
