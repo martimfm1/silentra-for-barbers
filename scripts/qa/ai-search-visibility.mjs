@@ -71,8 +71,8 @@ assert.match(llms, /\/plans/);
 assert.match(llms, /\/barbershops/);
 assert.match(llms, /\/status/);
 assert.match(llms, /\/sitemap\.xml/);
-assert.match(llms, /public API v1 is currently disabled/i);
-assert.match(llms, /Private dashboards, platform administration, authentication/i);
+assert.match(llms, /public API v1 is disabled/i);
+assert.match(llms, /Private dashboards, administration, authentication/i);
 assert.doesNotMatch(llms, /https:\/\/barbers\.silentra\.me\/(?:api|dashboard|login|checkout)(?:\/|\b)/i);
 assert.match(llms, /\[Full AI-readable product guide\]\(https:\/\/barbers\.silentra\.me\/llms-full\.txt\)/);
 assert.match(llms, /\[Plans and pricing\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
@@ -83,7 +83,7 @@ assert.match(
 );
 
 assert.match(llmsFull, /^# Silentra for Barbers/m);
-assert.match(llmsFull, /Customers do not need to install a mobile app or create a Silentra customer account/);
+assert.match(llmsFull, /They do not need to install a mobile app or create a Silentra customer account/);
 assert.match(llmsFull, /Customer names, phone numbers, email addresses, notes or appointment histories/);
 assert.match(llmsFull, /public API v1 is currently disabled/i);
 assert.match(llmsFull, /\[Current plans and prices\]\(https:\/\/barbers\.silentra\.me\/plans\)/);
