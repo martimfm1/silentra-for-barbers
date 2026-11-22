@@ -147,6 +147,7 @@ assert.match(marketingCron, /createHmac/);
 assert.match(marketingCron, /timingSafeEqual/);
 assert.match(marketingCron, /x-marketing-timestamp/);
 assert.match(marketingCron, /BOOKING_OUTBOX_CRON_SECRET/);
+assert.match(marketingCron, /export const POST/);
 assert.match(marketingScheduleMigration, /silentra-marketing/);
 assert.ok(marketingScheduleMigration.includes("'*/5 * * * *'"));
 assert.match(marketingScheduleMigration, /x-marketing-timestamp/);
