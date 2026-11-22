@@ -103,3 +103,4 @@ async function GET__unobserved(request: Request) {
 }
 
 export const GET = withApiObservability('/api/cron/marketing', GET__unobserved);
+export const POST = withApiObservability('/api/cron/marketing', GET__unobserved);
