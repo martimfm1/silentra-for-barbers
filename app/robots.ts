@@ -34,6 +34,9 @@ const AI_SEARCH_AGENTS = [
   'Claude-User',
   'ChatGPT-User',
   'Perplexity-User',
+  // Google user-directed agents (may ignore robots.txt by design)
+  'Google-Agent',
+  'Google-GeminiNotebook',
 ];
 
 const AI_TRAINING_AND_GROUNDING_AGENTS = [
