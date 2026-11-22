@@ -6,6 +6,7 @@ const runner = readFileSync('scripts/e2e/booking-tenant-isolation.mjs', 'utf8');
 const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const planEnumMigration = readFileSync('supabase/migrations/20260815194400_create_subscription_plan_enum.sql', 'utf8');
 const professionalUserIdMigration = readFileSync('supabase/migrations/20260821122900_add_professional_user_id.sql', 'utf8');
+const marketingPolicyMigration = readFileSync('supabase/migrations/20260902000000_marketing_campaigns.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -19,6 +20,8 @@ assert.match(planEnumMigration, /pg_catalog\.pg_type/, 'The plan enum migration 
 assert.match(planEnumMigration, /CREATE TYPE public\.subscription_plan AS ENUM/, 'The plan enum migration must create the enum for fresh databases.');
 assert.match(planEnumMigration, /'free'.*'pro'.*'enterprise'/s, 'The plan enum must include every supported plan.');
 assert.match(professionalUserIdMigration, /ADD COLUMN IF NOT EXISTS user_id uuid/, 'The professional user link must exist before team seat migrations use it.');
+assert.match(marketingPolicyMigration, /from pg_policies/, 'Campaign policy migrations must tolerate existing policies.');
+assert.match(marketingPolicyMigration, /if not exists[\s\S]*marketing_campaigns_staff_read/, 'Campaign read policy must be idempotent.');
 
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');

@@ -36,28 +36,60 @@ create index if not exists marketing_campaign_recipients_campaign_idx on public.
 alter table public.marketing_campaigns enable row level security;
 alter table public.marketing_campaign_recipients enable row level security;
 
-create policy "marketing_campaigns_staff_read" on public.marketing_campaigns
-  for select to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'marketing_campaigns'
+      and policyname = 'marketing_campaigns_staff_read'
+  ) then
+    create policy "marketing_campaigns_staff_read" on public.marketing_campaigns
+      for select to authenticated
+      using (barbershop_id = get_my_barbershop_id()::uuid);
+  end if;
 
-create policy "marketing_campaigns_staff_insert" on public.marketing_campaigns
-  for insert to authenticated
-  with check (
-    barbershop_id = get_my_barbershop_id()::uuid
-    and created_by = auth.uid()
-  );
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'marketing_campaigns'
+      and policyname = 'marketing_campaigns_staff_insert'
+  ) then
+    create policy "marketing_campaigns_staff_insert" on public.marketing_campaigns
+      for insert to authenticated
+      with check (
+        barbershop_id = get_my_barbershop_id()::uuid
+        and created_by = auth.uid()
+      );
+  end if;
 
-create policy "marketing_campaigns_staff_update" on public.marketing_campaigns
-  for update to authenticated
-  using (barbershop_id = get_my_barbershop_id()::uuid)
-  with check (barbershop_id = get_my_barbershop_id()::uuid);
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'marketing_campaigns'
+      and policyname = 'marketing_campaigns_staff_update'
+  ) then
+    create policy "marketing_campaigns_staff_update" on public.marketing_campaigns
+      for update to authenticated
+      using (barbershop_id = get_my_barbershop_id()::uuid)
+      with check (barbershop_id = get_my_barbershop_id()::uuid);
+  end if;
 
-create policy "marketing_campaign_recipients_staff_read" on public.marketing_campaign_recipients
-  for select to authenticated
-  using (exists (
-    select 1 from public.marketing_campaigns c
-    where c.id = campaign_id and c.barbershop_id = get_my_barbershop_id()::uuid
-  ));
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'marketing_campaign_recipients'
+      and policyname = 'marketing_campaign_recipients_staff_read'
+  ) then
+    create policy "marketing_campaign_recipients_staff_read" on public.marketing_campaign_recipients
+      for select to authenticated
+      using (exists (
+        select 1 from public.marketing_campaigns c
+        where c.id = campaign_id and c.barbershop_id = get_my_barbershop_id()::uuid
+      ));
+  end if;
+end
+$$;
 
 -- Recipient rows are server-managed. Browser clients cannot enqueue arbitrary recipients.
 comment on table public.marketing_campaign_recipients is 'Server-managed delivery state for marketing campaigns.';
