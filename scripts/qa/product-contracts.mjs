@@ -1023,12 +1023,12 @@ const checks = [
         normalized.includes('const [verifiedDayAvailabilityKey, setVerifiedDayAvailabilityKey] = useState<string | null>(null)') &&
         normalized.includes('dayAvailabilityReady = verifiedDayAvailabilityKey === dayAvailabilityRequestKey') &&
         normalized.includes('dayAvailabilityRequestKey = [') &&
+        normalized.includes("days[days.length - 1]?.dateStr ?? ''") &&
         normalized.includes('setVerifiedDayAvailabilityKey(dayAvailabilityRequestKey)') &&
         normalized.includes('setVerifiedDayAvailabilityKey(null)') &&
         normalized.includes('days.every((day) => {') &&
         normalized.includes('typeof status.available === \'boolean\'') &&
         normalized.includes('typeof status.closedDay === \'boolean\'') &&
-        normalized.includes('setVerifiedDayAvailabilityKey(dayAvailabilityRequestKey)') &&
         normalized.includes('!dayAvailabilityReady &&') &&
         normalized.includes('disabled={dayStatus.disabled}') &&
         normalized.includes('dayStatus.needsService') &&
