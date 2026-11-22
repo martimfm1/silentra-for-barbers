@@ -6,17 +6,14 @@ Tarefas frequentes que alteram dados da aplicação devem correr no Supabase/Pos
 
 ## Campanhas de marketing e aniversários
 
-O worker de marketing também é acionado pelo workflow do GitHub Actions a cada 5 minutos para processar filas sem esperar pelo cron diário do Vercel. O endpoint é público, mas a execução é protegida por segredo. Configurar o segredo de repositório `CRON_SECRET` em **Settings → Secrets and variables → Actions** com o mesmo valor de `CRON_SECRET` do ambiente de produção do Vercel. Não criar nem publicar o valor no repositório.
+O worker de marketing é executado pelo **Supabase Cron** a cada 5 minutos através do job `silentra-marketing`. A migration `20261122134000_schedule_marketing_cron.sql` agenda o endpoint `/api/cron/marketing` e reutiliza o URL e segredo HMAC já existentes no Supabase Vault:
 
-O endpoint `/api/cron/marketing` está agendado diariamente pelo Vercel Cron às 00:10 UTC (a hora local em Portugal muda com o horário de verão). Requer `CRON_SECRET` configurado no ambiente de produção e processa:
+- `silentra_booking_outbox_url` — URL base do worker de automações de marcações; a migration deriva o endpoint de marketing.
+- `silentra_booking_outbox_cron_secret` — segredo HMAC partilhado com `BOOKING_OUTBOX_CRON_SECRET` (ou `CRON_SECRET`) no ambiente de produção.
 
-- campanhas de aniversário e respetivos vouchers;
-- campanhas de marketing agendadas;
-- destinatários em fila e novas tentativas de entrega.
+O segredo nunca é incluído no pedido HTTP: o Supabase assina o timestamp com HMAC-SHA256 e o endpoint valida a assinatura e uma janela máxima de cinco minutos. O job processa campanhas de aniversário, campanhas agendadas e destinatários em fila. O workflow `.github/workflows/marketing-cron.yml` fica disponível apenas para execução manual de emergência.
 
-A execução regista contagens de campanhas, destinatários enviados/falhados e duração nos logs `[MARKETING_CRON]`. O endpoint deve permanecer protegido por `CRON_SECRET`.
-
-A configuração da mensagem é gerida em `/api/messages/birthdays`; este é um endpoint de configuração, não um cron. Não existe uma rota de execução `/api/cron/birthdays`: o envio é feito pelo worker de marketing. A migration `20261022161843_reconcile_legacy_birthday_campaigns.sql` recupera configurações antigas ativas que ainda não tenham uma campanha no sistema de Marketing, sem substituir campanhas existentes.
+A execução regista contagens de campanhas, destinatários enviados/falhados e duração nos logs `[MARKETING_CRON]`. A configuração da mensagem é gerida em `/api/messages/birthdays`; não existe uma rota independente `/api/cron/birthdays`. A migration `20261022161843_reconcile_legacy_birthday_campaigns.sql` recupera configurações antigas ativas sem substituir campanhas existentes.
 
 ## Conclusão automática de marcações
 
