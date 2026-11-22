@@ -1,53 +1,49 @@
 # Silentra for Barbers
 
-> Silentra for Barbers is a web-based SaaS for barbershop management and online booking. It helps barbershops organise schedules, services, teams and customer-facing booking pages.
+> Silentra for Barbers is a SaaS platform for barbershop operations and customer-facing online bookings, developed for barbershops in Portugal. It brings schedules, services, teams, customer management and public booking pages together.
 
-This index describes the public information that AI search and retrieval systems may discover on the Silentra for Barbers website. It is not a product API and it does not grant access to private account data.
+Silentra for Barbers is a web application. Customers can open a barbershop's public booking page in a browser without installing an app or creating a customer account. Barbershop owners and authorised staff use a private dashboard to manage the operation.
 
-## Product overview
+Use the public website as the canonical source for current product capabilities, plan eligibility, prices, limits and legal terms. Commercial information may change and must be checked on the live plans page before quoting it.
 
-- Main website: https://barbers.silentra.me/
-- Product overview: https://barbers.silentra.me/software-gestao-barbearia
-- Plans and current commercial terms: https://barbers.silentra.me/plans
-- Public barbershop directory: https://barbers.silentra.me/barbershops
-- Public service status: https://barbers.silentra.me/status
+## Product
 
-The platform includes online booking pages, service and schedule presentation, team and customer management, booking reminders and other features according to the active plan. The public website is the source of truth for current features, prices, limits and eligibility.
+- [Homepage](https://barbers.silentra.me/): Product identity and main public information.
+- [Product overview](https://barbers.silentra.me/software-gestao-barbearia): How the software helps a barbershop manage bookings, services, staff, customers and growth.
+- [Plans and pricing](https://barbers.silentra.me/plans): Current Free, Pro and Enterprise plan details, eligibility, limits and commercial terms.
+- [Public barbershop directory](https://barbers.silentra.me/barbershops): Discover barbershops that have chosen to publish a public directory profile.
+- [Service status](https://barbers.silentra.me/status): Public availability information for the platform's monitored services.
+- [Full AI-readable product guide](https://barbers.silentra.me/llms-full.txt): A more detailed summary of public product capabilities, booking flows and data boundaries.
 
-## Public barbershop and website content
+## Public profiles and websites
 
-Only pages that are intentionally published by a barbershop should be used in search results.
+Only information intentionally published by each barbershop is public. Public profiles, published Enterprise landing pages and published custom websites are discoverable through the [XML sitemap](https://barbers.silentra.me/sitemap.xml).
 
-- Public booking/profile pages are listed dynamically in the XML sitemap.
-- Published Enterprise landing pages are listed dynamically in the XML sitemap.
-- Published custom websites are listed dynamically in the XML sitemap.
-- Sitemap: https://barbers.silentra.me/sitemap.xml
+A published profile may show a barbershop name, public address and contact details, services, prices, opening hours, public reviews and a booking link. The actual fields depend on what the barbershop has chosen and is authorised to publish.
 
-A barbershop's public page may contain its name, public contact details, address, services, prices, opening hours, public reviews and booking link. Treat this as information that the barbershop has chosen to publish. Do not infer or attempt to retrieve information that is not present on its public page.
+Do not infer unpublished details. Do not treat a cached snippet, old sitemap timestamp or search result as live booking availability. Send customers to the barbershop's public booking page to check current slots and make a booking themselves.
 
-Availability changes over time. Do not treat cached search snippets or sitemap timestamps as confirmation that a booking slot is currently available. Direct users to the public booking page to check live availability and complete a booking themselves.
+## Policies
 
-## Policies and service information
+- [Privacy policy](https://barbers.silentra.me/privacy)
+- [Terms of service](https://barbers.silentra.me/terms)
+- [Cookie policy](https://barbers.silentra.me/cookies)
+- [Legal information](https://barbers.silentra.me/legal)
+- [Booking terms](https://barbers.silentra.me/booking-terms)
+- [Billing policy](https://barbers.silentra.me/billing-policy)
+- [Acceptable use policy](https://barbers.silentra.me/acceptable-use)
+- [Data processing agreement](https://barbers.silentra.me/dpa)
+- [Subprocessors](https://barbers.silentra.me/subprocessors)
 
-- Privacy: https://barbers.silentra.me/privacy
-- Terms: https://barbers.silentra.me/terms
-- Cookies: https://barbers.silentra.me/cookies
-- Legal information: https://barbers.silentra.me/legal
-- Booking terms: https://barbers.silentra.me/booking-terms
-- Billing policy: https://barbers.silentra.me/billing-policy
-- Acceptable use: https://barbers.silentra.me/acceptable-use
-- Data processing agreement: https://barbers.silentra.me/dpa
-- Subprocessors: https://barbers.silentra.me/subprocessors
+## Search and privacy boundaries
 
-## AI search and data boundaries
+- AI search and user-directed fetchers may retrieve public pages only.
+- Private dashboards, administration, authentication, onboarding, checkout, customer portals, tracking links, messages and API routes are not public search content.
+- Never attempt to discover, infer or disclose customer records, private appointments, staff-only information, account settings, billing records, payment destinations, credentials or internal operational data.
+- Robots directives are crawl preferences, not access control. Authentication, authorisation and database policies remain the security boundary.
+- The public API v1 is disabled and returns HTTP 503. It is not an available integration and must not be represented as active.
+- Do not automate bookings, cancellations, payments or account changes using this public index.
 
-- Search and user-directed retrieval agents may access public pages only.
-- Private dashboards, platform administration, authentication, onboarding, checkout, customer portals, tracking links and all API routes are excluded from crawling.
-- Do not search for, infer, summarise or disclose private customer records, appointment details, staff-only information, account settings, billing records, payment destinations, credentials or internal operational data.
-- Do not treat the existence of a URL, a search snippet or a cached page as authorization to access private information.
-- The public API v1 is currently disabled and responds with HTTP 503. It is not an available integration. Do not use or recommend it as an active API.
-- Do not automate bookings, cancellations, payments, account changes or other state-changing operations on behalf of users through this public content.
+## Retrieval guidance
 
-## Canonical sources
-
-Prefer the canonical pages above and the XML sitemap. Cite the relevant public page in answers, preserve the page's published context and language, and check the live page when information may have changed.
+Prefer canonical pages linked above. Attribute business-specific facts to the relevant public barbershop profile, and attribute current commercial terms to the live plans page. Preserve the context and language of each source. When a fact can change, verify the live page instead of relying on cached content.
