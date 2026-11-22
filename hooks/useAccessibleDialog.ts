@@ -67,10 +67,16 @@ export function useAccessibleDialog<T extends HTMLElement>({
       );
 
     const focusInitialElement = () => {
+      const focusableElements = getFocusableElements();
       const preferred = dialog.querySelector<HTMLElement>(
         '[data-dialog-initial-focus], [autofocus]',
       );
-      const target = preferred ?? getFocusableElements()[0] ?? dialog;
+      const target =
+        (preferred && focusableElements.includes(preferred)
+          ? preferred
+          : null) ??
+        focusableElements[0] ??
+        dialog;
       target.focus();
     };
 
