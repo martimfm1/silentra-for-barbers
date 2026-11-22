@@ -304,7 +304,8 @@ assert.ok(
 assert.ok(
   marketingWorkspace.includes('async function createBirthdayAutomation()') &&
     marketingWorkspace.includes("triggerType: 'birthday'") &&
-    marketingWorkspace.includes('Adicionar automaticamente') &&
+    marketingWorkspace.includes('Ativar automação') &&
+    marketingWorkspace.includes('Automações de clientes') &&
     marketingWorkspace.includes('birthdayCampaign'),
   'Automations must provide an idempotent one-click birthday automation setup.',
 );
