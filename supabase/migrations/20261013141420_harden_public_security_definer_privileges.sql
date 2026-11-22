@@ -32,28 +32,45 @@ revoke all on function public.get_effective_team_seat_count(uuid)
 grant execute on function public.get_effective_team_seat_count(uuid)
   to service_role;
 
--- These functions are only invoked by database triggers/event triggers. They
--- must not be callable as standalone PostgREST RPCs by client roles.
-revoke all on function public.ensure_shop_slug() from public, anon, authenticated;
-revoke all on function public.handle_new_user() from public, anon, authenticated;
-revoke all on function public.handle_new_user_subscription() from public, anon, authenticated;
-revoke all on function public.handle_updated_at() from public, anon, authenticated;
-revoke all on function public.handle_update_timestamp() from public, anon, authenticated;
-revoke all on function public.set_updated_at() from public, anon, authenticated;
-revoke all on function public.update_updated_at_column() from public, anon, authenticated;
-revoke all on function public.protect_user_tenant_fields() from public, anon, authenticated;
-revoke all on function public.record_marketplace_order_status_event() from public, anon, authenticated;
-revoke all on function public.rls_auto_enable() from public, anon, authenticated;
-revoke all on function public.sync_shop_review_stats() from public, anon, authenticated;
-revoke all on function public.notify_new_review() from public, anon, authenticated;
-revoke all on function public.sync_barbershop_name_to_shops() from public, anon, authenticated;
-revoke all on function public.sync_barbershop_phone_to_shops() from public, anon, authenticated;
-revoke all on function public.sync_barbershop_address_to_shops() from public, anon, authenticated;
-revoke all on function public.sync_barbershop_details_to_shops() from public, anon, authenticated;
-revoke all on function public.sync_barbershop_to_shop() from public, anon, authenticated;
-revoke all on function public.atualizar_receita_barbearia() from public, anon, authenticated;
-revoke all on function public.guard_cancelled_marketing_campaign() from public, anon, authenticated;
-revoke all on function public.touch_barbershop_billing_accounts_updated_at() from public, anon, authenticated;
+-- These functions may be introduced by later migrations or absent in a
+-- minimal replay. Revoke client execution whenever the function exists.
+DO $function_privileges$
+DECLARE
+  v_function text;
+BEGIN
+  FOR v_function IN
+    SELECT unnest(ARRAY[
+      'public.ensure_shop_slug()',
+      'public.handle_new_user()',
+      'public.handle_new_user_subscription()',
+      'public.handle_updated_at()',
+      'public.handle_update_timestamp()',
+      'public.set_updated_at()',
+      'public.update_updated_at_column()',
+      'public.protect_user_tenant_fields()',
+      'public.record_marketplace_order_status_event()',
+      'public.rls_auto_enable()',
+      'public.sync_shop_review_stats()',
+      'public.notify_new_review()',
+      'public.sync_barbershop_name_to_shops()',
+      'public.sync_barbershop_phone_to_shops()',
+      'public.sync_barbershop_address_to_shops()',
+      'public.sync_barbershop_details_to_shops()',
+      'public.sync_barbershop_to_shop()',
+      'public.atualizar_receita_barbearia()',
+      'public.guard_cancelled_marketing_campaign()',
+      'public.touch_barbershop_billing_accounts_updated_at()'
+    ])
+  LOOP
+    IF pg_catalog.to_regprocedure(v_function) IS NOT NULL THEN
+      EXECUTE pg_catalog.format(
+        'REVOKE ALL ON FUNCTION %s FROM public, anon, authenticated',
+        v_function
+      );
+    END IF;
+  END LOOP;
+END
+$function_privileges$;
 
 -- These helpers are used by authenticated authorization/RLS checks. They
 -- must not be callable by anon; keep authenticated and trusted server access.
@@ -69,26 +86,44 @@ grant execute on function public.complete_barbershop_onboarding(uuid) to authent
 revoke all on function public.set_barbershop_avatar_url(uuid, text) from public, anon;
 grant execute on function public.set_barbershop_avatar_url(uuid, text) to authenticated, service_role;
 
--- Pin search_path for every function flagged by the production advisor. This
--- prevents object-shadowing through a caller-controlled schema.
-alter function public.sync_barbershop_name_to_shops() set search_path = public;
-alter function public.update_updated_at_column() set search_path = public;
-alter function public.sync_barbershop_phone_to_shops() set search_path = public;
-alter function public.notify_new_review() set search_path = public;
-alter function public.sync_barbershop_address_to_shops() set search_path = public;
-alter function public.normalize_shop_slug(text) set search_path = public;
-alter function public.atualizar_receita_barbearia() set search_path = public;
-alter function public.sync_barbershop_to_shop() set search_path = public;
-alter function public.create_professional_with_quota(uuid, uuid, text, numeric, boolean) set search_path = public;
-alter function public.sync_barbershop_details_to_shops() set search_path = public;
-alter function public.check_if_admin() set search_path = public;
-alter function public.is_admin() set search_path = public;
-alter function public.handle_new_user() set search_path = public;
-alter function public.handle_update_timestamp() set search_path = public;
-alter function public.set_updated_at() set search_path = public;
-alter function public.touch_barbershop_billing_accounts_updated_at() set search_path = public;
-alter function public.guard_cancelled_marketing_campaign() set search_path = public;
-alter function public.marketplace_order_status_customer_message(text) set search_path = public;
+-- Pin search_path when the referenced trigger/helper function exists.
+-- Some legacy functions are recreated by later migrations; the follow-up
+-- migration reapplies this protection after those definitions are installed.
+DO $function_search_paths$
+DECLARE
+  v_function text;
+BEGIN
+  FOR v_function IN
+    SELECT unnest(ARRAY[
+      'public.sync_barbershop_name_to_shops()',
+      'public.update_updated_at_column()',
+      'public.sync_barbershop_phone_to_shops()',
+      'public.notify_new_review()',
+      'public.sync_barbershop_address_to_shops()',
+      'public.normalize_shop_slug(text)',
+      'public.atualizar_receita_barbearia()',
+      'public.sync_barbershop_to_shop()',
+      'public.create_professional_with_quota(uuid, uuid, text, numeric, boolean)',
+      'public.sync_barbershop_details_to_shops()',
+      'public.check_if_admin()',
+      'public.is_admin()',
+      'public.handle_new_user()',
+      'public.handle_update_timestamp()',
+      'public.set_updated_at()',
+      'public.touch_barbershop_billing_accounts_updated_at()',
+      'public.guard_cancelled_marketing_campaign()',
+      'public.marketplace_order_status_customer_message(text)'
+    ])
+  LOOP
+    IF pg_catalog.to_regprocedure(v_function) IS NOT NULL THEN
+      EXECUTE pg_catalog.format(
+        'ALTER FUNCTION %s SET search_path = public',
+        v_function
+      );
+    END IF;
+  END LOOP;
+END
+$function_search_paths$;
 
 -- Public review submission is intentionally callable without an account; its
 -- RPC performs its own shop-visibility and input validation checks.

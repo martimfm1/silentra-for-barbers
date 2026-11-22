@@ -7,6 +7,8 @@ const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const planEnumMigration = readFileSync('supabase/migrations/20260815194400_create_subscription_plan_enum.sql', 'utf8');
 const professionalUserIdMigration = readFileSync('supabase/migrations/20260821122900_add_professional_user_id.sql', 'utf8');
 const marketingPolicyMigration = readFileSync('supabase/migrations/20260902000000_marketing_campaigns.sql', 'utf8');
+const functionHardeningMigration = readFileSync('supabase/migrations/20261013141420_harden_public_security_definer_privileges.sql', 'utf8');
+const newUserHardeningMigration = readFileSync('supabase/migrations/20261103120052_harden_new_user_trigger.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -22,6 +24,9 @@ assert.match(planEnumMigration, /'free'.*'pro'.*'enterprise'/s, 'The plan enum m
 assert.match(professionalUserIdMigration, /ADD COLUMN IF NOT EXISTS user_id uuid/, 'The professional user link must exist before team seat migrations use it.');
 assert.match(marketingPolicyMigration, /from pg_policies/, 'Campaign policy migrations must tolerate existing policies.');
 assert.match(marketingPolicyMigration, /if not exists[\s\S]*marketing_campaigns_staff_read/, 'Campaign read policy must be idempotent.');
+assert.match(functionHardeningMigration, /pg_catalog\.to_regprocedure/, 'Function hardening must tolerate functions created by later migrations.');
+assert.match(newUserHardeningMigration, /REVOKE ALL ON FUNCTION public\.handle_new_user\(\)/, 'New Auth trigger function must be hardened after creation.');
+assert.match(newUserHardeningMigration, /SET search_path = public/, 'New Auth trigger function must use a fixed search path.');
 
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
