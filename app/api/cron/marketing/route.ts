@@ -11,13 +11,21 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function authorized(request: Request) {
+  const cronSecret = process.env.CRON_SECRET?.trim();
   const secret = (
-    process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET
+    process.env.BOOKING_OUTBOX_CRON_SECRET ?? cronSecret
   )?.trim();
   if (!secret) return false;
 
-  // Preserve manual invocation while allowing Supabase Cron to sign requests
-  // with the existing Vault secret, without putting it in the HTTP payload.
+  // Keep the original CRON_SECRET path for manual and GitHub Actions calls.
+  if (
+    (cronSecret &&
+      request.headers.get('authorization') === `Bearer ${cronSecret}`) ||
+    (cronSecret && request.headers.get('x-cron-secret') === cronSecret)
+  )
+    return true;
+
+  // Supabase Cron signs requests with the existing Vault secret.
   if (
     request.headers.get('authorization') === `Bearer ${secret}` ||
     request.headers.get('x-cron-secret') === secret
