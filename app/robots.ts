@@ -60,7 +60,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: PRIVATE_PATHS,
       },
       {
-        userAgent: AI_TRAINING_AGENTS,
+        userAgent: AI_TRAINING_AND_GROUNDING_AGENTS,
         disallow: '/',
       },
       {
