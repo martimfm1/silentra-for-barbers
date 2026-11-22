@@ -3,7 +3,7 @@
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
 import Link from 'next/link';
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -32,6 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useAccessibleDialog } from '@/hooks/useAccessibleDialog';
 import {
   Dialog,
   DialogContent,
@@ -205,6 +206,18 @@ export function MarketingWorkspace({
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
   const [details, setDetails] = useState<Campaign | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Campaign | null>(null);
+  const detailsDialogRef = useRef<HTMLElement | null>(null);
+  const deleteDialogRef = useRef<HTMLElement | null>(null);
+  useAccessibleDialog({
+    open: Boolean(details),
+    dialogRef: detailsDialogRef,
+    onClose: () => setDetails(null),
+  });
+  useAccessibleDialog({
+    open: Boolean(confirmDelete),
+    dialogRef: deleteDialogRef,
+    onClose: () => setConfirmDelete(null),
+  });
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [automation, setAutomation] =
     useState<AutomationState>(EMPTY_AUTOMATION);
@@ -1331,7 +1344,9 @@ export function MarketingWorkspace({
       {details && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
           <section
-            className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl"
+            ref={detailsDialogRef}
+            tabIndex={-1}
+            className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl outline-none"
             role="dialog"
             aria-modal="true"
             aria-labelledby="campaign-details-title"
@@ -1435,7 +1450,9 @@ export function MarketingWorkspace({
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <section
-            className="w-full max-w-md rounded-3xl border border-red-400/20 bg-zinc-950 p-6 shadow-2xl"
+            ref={deleteDialogRef}
+            tabIndex={-1}
+            className="w-full max-w-md rounded-3xl border border-red-400/20 bg-zinc-950 p-6 shadow-2xl outline-none"
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-campaign-title"

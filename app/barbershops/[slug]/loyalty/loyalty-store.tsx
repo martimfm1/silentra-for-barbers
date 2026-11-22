@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import {
   Copy,
@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAccessibleDialog } from '@/hooks/useAccessibleDialog';
 
 type Reward = {
   id: string;
@@ -70,6 +71,20 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
   const [activeRedemption, setActiveRedemption] =
     useState<ActiveRedemption | null>(null);
   const [countdown, setCountdown] = useState('');
+
+  const activeRedemptionDialogRef = useRef<HTMLDivElement | null>(null);
+  const selectedRewardDialogRef = useRef<HTMLDivElement | null>(null);
+
+  useAccessibleDialog({
+    open: Boolean(activeRedemption),
+    dialogRef: activeRedemptionDialogRef,
+    onClose: () => setActiveRedemption(null),
+  });
+  useAccessibleDialog({
+    open: Boolean(selectedReward),
+    dialogRef: selectedRewardDialogRef,
+    onClose: () => setSelectedReward(null),
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -553,9 +568,12 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
 
       {activeRedemption ? (
         <div
+          ref={activeRedemptionDialogRef}
+          tabIndex={-1}
           className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-3 backdrop-blur-sm sm:p-6"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="loyalty-active-voucher-title"
         >
           <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center py-4">
             <div className="w-full rounded-3xl border border-emerald-400/20 bg-zinc-950 p-5 shadow-2xl sm:p-6">
@@ -564,7 +582,10 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
                     Voucher ativo
                   </p>
-                  <h3 className="mt-2 text-xl font-semibold">
+                  <h3
+                    id="loyalty-active-voucher-title"
+                    className="mt-2 text-xl font-semibold"
+                  >
                     Apresenta isto na barbearia
                   </h3>
                 </div>
@@ -623,9 +644,12 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
 
       {selectedReward ? (
         <div
+          ref={selectedRewardDialogRef}
+          tabIndex={-1}
           className="fixed inset-0 z-50 flex items-end bg-black/70 p-3 backdrop-blur-sm sm:items-center sm:justify-center"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="loyalty-reward-confirmation-title"
         >
           <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900 p-5 shadow-2xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
@@ -633,7 +657,10 @@ export default function LoyaltyStore({ slug, shopName }: Props) {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
                   Confirmar resgate
                 </p>
-                <h3 className="mt-2 text-xl font-semibold">
+                <h3
+                  id="loyalty-reward-confirmation-title"
+                  className="mt-2 text-xl font-semibold"
+                >
                   {selectedReward.name}
                 </h3>
               </div>
