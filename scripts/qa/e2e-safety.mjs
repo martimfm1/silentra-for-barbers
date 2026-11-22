@@ -11,8 +11,8 @@ assert.match(workflow, /pnpm exec supabase status -o env/, 'E2E workflow must so
 assert.match(workflow, /playwright install/, 'E2E workflow must install a browser.');
 assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must discard its local stack.');
 assert.match(workflow, /--exclude studio,mailpit,logflare,supavisor,edge-runtime,vector/, 'E2E workflow must use current Supabase container names.');
-assert.doesNotMatch(supabaseConfig, /^\\[local_smtp\\]/m, 'Supabase config must not use the removed local_smtp section.');
-assert.match(supabaseConfig, /additional_redirect_urls = \\[\"http:\/\/127\\.0\\.0\\.1:3000\"\\]/, 'Local Supabase redirects must match the HTTP loopback app origin.');
+assert.ok(!supabaseConfig.includes('[local_smtp]'), 'Supabase config must not use the removed local_smtp section.');
+assert.ok(supabaseConfig.includes('additional_redirect_urls = ["http://127.0.0.1:3000"]'), 'Local Supabase redirects must match the HTTP loopback app origin.');
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
 assert.match(runner, /127\.0\.0\.1/, 'E2E runner must enforce loopback-only services.');
