@@ -33,6 +33,7 @@ const AI_SEARCH_AGENTS = [
   // User-directed fetchers used when someone asks an assistant to open a page
   'Claude-User',
   'ChatGPT-User',
+  'Perplexity-User',
 ];
 
 const AI_TRAINING_AGENTS = [
