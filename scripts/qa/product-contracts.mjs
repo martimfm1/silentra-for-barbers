@@ -1401,7 +1401,7 @@ const checks = [
     name: 'Public booking time-slot lookup distinguishes loading, empty and retryable errors',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
-      const normalized = source.replace(/\\s+/g, ' ');
+      const normalized = source.replace(/\s+/g, ' ');
       return (
         normalized.includes('loadingAvailability ? (') &&
         normalized.includes('role="status" aria-live="polite"') &&
@@ -1422,9 +1422,9 @@ const checks = [
     name: 'Customer portal exposes recoverable load and reschedule states without confusing errors with empty results',
     file: 'components/customer-portal/my-bookings-page.tsx',
     test: (source) => {
-      const normalized = source.replace(/\\s+/g, ' ');
+      const normalized = source.replace(/\s+/g, ' ');
       return (
-        normalized.includes('if (!sessionEmail && loadError)') &&
+        normalized.includes('!sessionEmail && loadError ? (') &&
         normalized.includes('role="alert"') &&
         normalized.includes('Tenta novamente antes de introduzires os teus dados.') &&
         normalized.includes("onClick={() => void load({ showLoading: false })}") &&
