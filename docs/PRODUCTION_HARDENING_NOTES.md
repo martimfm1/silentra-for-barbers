@@ -243,3 +243,27 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [ ] Rever 50 FKs sem cobertura e 74 índices sem utilização após recolha de workload representativo. Não indexar/remover em massa.
 - [ ] Avaliar btree_gist; pg_net é não relocável e não deve ser movido.
 - [ ] Configurar `SENTRY_AUTH_TOKEN` para que os source maps/releases sejam enviados ao Sentry; o build atual passou, mas o upload foi ignorado por falta de token. A variável não consta da lista de envs de produção.
+
+
+## Revalidação e remediação — 22 de novembro de 2026
+
+### P1 — leitura pública de barbershops (correção preparada)
+
+- [x] Confirmado em produção que `barbershops_public_read` usa `USING (true)` para `anon` e `authenticated`.
+- [x] Confirmados grants de tabela excessivos para `anon` e `authenticated`, incluindo INSERT/UPDATE/DELETE e privilégios adicionais; a tabela contém 32 colunas, incluindo metadados internos como `created_by`, `qr_code_text` e `calendar_feed_version`.
+- [x] Confirmado que o resolver de perfis públicos, páginas Enterprise e disponibilidade usam `createAdminClient()`; o Data API anónimo direto não é necessário para estes fluxos.
+- [x] Preparada a migration `20261122134500_restrict_public_barbershop_read.sql`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
+- [x] Removidos métodos legados sem utilização que consultavam `barbershops` com `SELECT *` no serviço de clientes.
+- [x] Adicionados contratos QA para grants, policy tenant-scoped e manutenção dos fluxos públicos server-side.
+- [x] Dry-run da migration executado em produção dentro de uma transação revertida: 11 verificações de privilégios/policies passaram; uma segunda consulta confirmou que os grants e a policy de produção permaneceram inalterados após ROLLBACK.
+- [ ] Executar CI completa e revisão do PR.
+- [ ] Aplicar a migration em produção e validar os fluxos autenticados/públicos após aprovação de deployment.
+
+### Outros findings confirmados / pendentes
+
+- [x] Security Advisor: 21 funções SECURITY DEFINER executáveis por authenticated; 0 executáveis por anon. A função `create_barbershop_invite_code` delega para `create_barbershop_invite_v2`, que valida `auth.uid()` e exige owner/admin do tenant. As funções analisadas têm `search_path` fixo e os roles cliente não têm CREATE nos schemas `public`/ `extensions`.
+- [ ] Leaked Password Protection continua desativada; a integração de gestão disponível não expõe a configuração Auth necessária.
+- [ ] Configurar `SENTRY_AUTH_TOKEN` no ambiente Vercel; requer um token de projeto Sentry fornecido/configurado pelo owner, não deve ser inventado nem registado em código.
+- [ ] Rever refresh-token errors com logs correlacionados da Vercel/Auth e testar a recuperação de sessão.
+- [ ] Profiling por workload para as 50 FKs sem cobertura e os 71 índices sem uso; não remover/adicionar índices em massa.
+- [ ] Testes reais com staff de permissões distintas, testes E2E multi-tenant e teste de restauro PITR.
