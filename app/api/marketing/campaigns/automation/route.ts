@@ -12,7 +12,7 @@ const EVENTS = [
 ] as const;
 const MODES = ['interval', 'event', 'birthday'] as const;
 const CAMPAIGN_SELECT =
-  'id,name,channel,trigger_type,interval_value,interval_unit,next_run_at,event_name,birthday_offset_days,birthday_reward_type,birthday_reward_service_id,active,status,updated_at';
+  'id,name,channel,trigger_type,interval_value,interval_unit,next_run_at,event_name,birthday_offset_days,birthday_last_run_date,birthday_reward_type,birthday_reward_service_id,active,status,updated_at';
 
 async function GET__unobserved() {
   try {
@@ -63,12 +63,51 @@ async function GET__unobserved() {
       );
     }
 
+    const audienceQueries = await Promise.all([
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client'),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client')
+        .not('birth_date', 'is', null),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client')
+        .not('email', 'is', null)
+        .neq('email', ''),
+      admin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershopId)
+        .eq('role', 'client')
+        .not('birth_date', 'is', null)
+        .not('email', 'is', null)
+        .neq('email', ''),
+    ]);
+
+    const audienceError = audienceQueries.find((result) => result.error)?.error;
+    if (audienceError) throw audienceError;
+
+    const [total, withBirthDate, withEmail, birthdayReady] = audienceQueries;
     return NextResponse.json(
       {
         ok: true,
         campaigns: campaigns ?? [],
         events: EVENTS,
         services: services ?? [],
+        birthdayAudience: {
+          totalClients: total.count ?? 0,
+          withBirthDate: withBirthDate.count ?? 0,
+          withEmail: withEmail.count ?? 0,
+          birthdayReady: birthdayReady.count ?? 0,
+        },
         meta: { generatedAt: new Date().toISOString() },
       },
       { headers: { 'Cache-Control': 'no-store' } },
