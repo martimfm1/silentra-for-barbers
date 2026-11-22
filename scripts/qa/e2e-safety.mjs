@@ -5,6 +5,7 @@ const workflow = readFileSync('.github/workflows/isolated-e2e.yml', 'utf8');
 const runner = readFileSync('scripts/e2e/booking-tenant-isolation.mjs', 'utf8');
 const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const planEnumMigration = readFileSync('supabase/migrations/20260815194400_create_subscription_plan_enum.sql', 'utf8');
+const professionalUserIdMigration = readFileSync('supabase/migrations/20260821122900_add_professional_user_id.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -17,6 +18,7 @@ assert.ok(supabaseConfig.includes('additional_redirect_urls = ["http://127.0.0.1
 assert.match(planEnumMigration, /pg_catalog\.pg_type/, 'The plan enum migration must detect an existing type.');
 assert.match(planEnumMigration, /CREATE TYPE public\.subscription_plan AS ENUM/, 'The plan enum migration must create the enum for fresh databases.');
 assert.match(planEnumMigration, /'free'.*'pro'.*'enterprise'/s, 'The plan enum must include every supported plan.');
+assert.match(professionalUserIdMigration, /ADD COLUMN IF NOT EXISTS user_id uuid/, 'The professional user link must exist before team seat migrations use it.');
 
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
