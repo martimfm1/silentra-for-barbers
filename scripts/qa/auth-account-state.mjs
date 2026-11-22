@@ -28,6 +28,25 @@ assert.match(pt, /unconfirmedLogin:/);
 assert.match(en, /invalidCredentials:/);
 assert.match(en, /unconfirmedLogin:/);
 
+const authService = read('app/dashboard/_services/auth.service.ts');
+const authLogoutRoute = read('app/api/auth/logout/route.ts');
+const siteNavbar = read('components/site-navbar.tsx');
+
+assert.match(
+  authService,
+  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  'Dashboard logout must revoke only the current session, not all user sessions.',
+);
+assert.match(
+  authLogoutRoute,
+  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  'Server logout endpoint must revoke only the current session.',
+);
+assert.match(
+  siteNavbar,
+  /auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  'Public navbar logout must not invalidate refresh tokens on other devices or tabs.',
+);
 console.log(
   '[AUTH_ACCOUNT_STATE_QA] login, registration, confirmation and enumeration protections verified',
 );
