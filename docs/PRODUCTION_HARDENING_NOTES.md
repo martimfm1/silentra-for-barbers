@@ -243,3 +243,51 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [ ] Rever 50 FKs sem cobertura e 74 índices sem utilização após recolha de workload representativo. Não indexar/remover em massa.
 - [ ] Avaliar btree_gist; pg_net é não relocável e não deve ser movido.
 - [ ] Configurar `SENTRY_AUTH_TOKEN` para que os source maps/releases sejam enviados ao Sentry; o build atual passou, mas o upload foi ignorado por falta de token. A variável não consta da lista de envs de produção.
+
+
+## Revalidação e remediação — 22 de novembro de 2026
+
+### P1 — leitura pública de barbershops (correção preparada)
+
+- [x] Confirmado em produção que `barbershops_public_read` usa `USING (true)` para `anon` e `authenticated`.
+- [x] Confirmados grants de tabela excessivos para `anon` e `authenticated`, incluindo INSERT/UPDATE/DELETE e privilégios adicionais; a tabela contém 32 colunas, incluindo metadados internos como `created_by`, `qr_code_text` e `calendar_feed_version`.
+- [x] Confirmado que o resolver de perfis públicos, páginas Enterprise e disponibilidade usam `createAdminClient()`; o Data API anónimo direto não é necessário para estes fluxos.
+- [x] Preparada a migration `20261122134500_restrict_public_barbershop_read.sql`: revoga grants de tabela/coluna de anon e authenticated, concede apenas as colunas necessárias ao dashboard autenticado, permite UPDATE direto apenas da morada e substitui a policy pública por uma policy de leitura limitada a membros staff do mesmo tenant.
+- [x] Removidos métodos legados sem utilização que consultavam `barbershops` com `SELECT *` no serviço de clientes.
+- [x] Adicionados contratos QA para grants, policy tenant-scoped e manutenção dos fluxos públicos server-side.
+- [x] Dry-run da migration executado em produção dentro de uma transação revertida: 11 verificações de privilégios/policies passaram; uma segunda consulta confirmou que os grants e a policy de produção permaneceram inalterados após ROLLBACK.
+- [x] CI completa concluída com sucesso no GitHub Actions run #3454 (job Quality + Production Hardening): typecheck, lint, contratos QA, build e smoke QA sem falhas.
+- [ ] Atualizar a branch se necessário, obter revisão final e integrar o PR; aplicar a migration em produção e validar os fluxos autenticados/públicos apenas após autorização explícita.
+
+### Outros findings confirmados / pendentes
+
+- [x] Security Advisor: 21 funções SECURITY DEFINER executáveis por authenticated; 0 executáveis por anon. A função `create_barbershop_invite_code` delega para `create_barbershop_invite_v2`, que valida `auth.uid()` e exige owner/admin do tenant. As funções analisadas têm `search_path` fixo e os roles cliente não têm CREATE nos schemas `public`/ `extensions`.
+- [ ] Leaked Password Protection continua desativada; a integração de gestão disponível não expõe a configuração Auth necessária.
+- [ ] Configurar `SENTRY_AUTH_TOKEN` no ambiente Vercel; requer um token de projeto Sentry fornecido/configurado pelo owner, não deve ser inventado nem registado em código.
+- [ ] Rever refresh-token errors com logs correlacionados da Vercel/Auth e testar a recuperação de sessão.
+- [ ] Profiling por workload para as 50 FKs sem cobertura e os 71 índices sem uso; não remover/adicionar índices em massa.
+- [ ] Testes reais com staff de permissões distintas, testes E2E multi-tenant e teste de restauro PITR.
+
+
+### Remediação adicional após dry-run (22/11/2026)
+
+- [x] Removido `mbway_phone` da allowlist SELECT de `authenticated`. A configuração sensível é agora lida através de `/api/barbershops/mbway-settings`, que exige utilizador autenticado com role `owner` ou `admin` e resolve sempre o tenant a partir do perfil autenticado.
+- [x] Migradas as leituras públicas de `POST /api/bookings`, `GET /api/shops` (diretório) e `GET /api/shops/[id]/slots` para `createAdminClient()`, sem remover a filtragem de visibilidade do diretório nem bloquear a marcação através de links diretos.
+- [x] Novo dry-run da migration com JWT de um utilizador autenticado, seguido de ROLLBACK: uma barbearia visível, próprio perfil visível, zero barbearias de outros tenants; `created_by`, `qr_code_text` e `mbway_phone` não legíveis; `anon` sem SELECT na tabela. A produção ficou inalterada.
+- [x] Confirmado no código que os três fluxos normais de logout chamavam `auth.signOut()` sem scope. O scope JavaScript predefinido é `global` e revoga refresh tokens de todas as sessões, o que pode produzir `refresh_token_not_found` noutros dispositivos/abas. Alterados os fluxos de logout para `{ scope: 'local' }` e acrescentados contratos QA. Isto é uma correção preventiva plausível para os quatro erros históricos de um utilizador, mas a correlação com o utilizador afetado não foi demonstrada.
+- [ ] Confirmar CI completa no commit após as correções de MB WAY, rotas públicas e logout local.
+- [ ] Testar E2E com owner, admin e staff sem acesso a MB WAY, e com duas barbearias em ambiente isolado.
+
+### Profiling de performance — produção (22/11/2026)
+
+- [x] Consultados `pg_stat_user_tables`, `pg_stat_user_indexes` e `pg_stat_statements`; advisors continuam a reportar 50 FKs sem índice de cobertura e 71 índices sem utilização.
+- [x] As tabelas apontadas pelo advisor são atualmente pequenas (maior tamanho observado entre as amostras: 128 kB; `booking_waitlist_vacancies`: 33 linhas estimadas; `appointments`: 113; `users`: 29). Os índices sinalizados consultados têm 16 kB cada e zero scans no período estatístico disponível.
+- [x] Não foram adicionados nem removidos índices. Não existe evidência suficiente para indexar 50 FKs ou remover 71 índices; alguns índices de baixa frequência protegem caminhos de billing, tokens, expiração ou filas. Reavaliar após workload real e crescimento de dados.
+- [x] `claim_booking_waitlist_vacancies`: 13.008 chamadas e média ~14,3 ms em `pg_stat_statements`; `get_crm_clients_page`: 51 chamadas e média ~9,8 ms. Os P95 anteriormente observados no PostgREST têm amostras pequenas e não são prova isolada de query lenta.
+- [ ] Continuar a recolher métricas de tráfego real e analisar `EXPLAIN (ANALYZE, BUFFERS)` com consultas representativas num ambiente seguro.
+
+### Pendências externas/configuração
+
+- [ ] Leaked Password Protection: requer upgrade do projeto/organização para Supabase Pro; não existe ação de configuração Auth disponível através da ligação atual.
+- [ ] Sentry: falta `SENTRY_AUTH_TOKEN` para upload de source maps/releases. Configurar privadamente em Vercel/Sentry; não colocar o token no repositório ou em comentários.
+- [ ] Não foi possível correlacionar individualmente os refresh-token errors históricos com um evento de logout; a mudança para scope local previne a invalidação acidental de sessões independentes, mas a monitorização deve continuar.
