@@ -328,6 +328,7 @@ export function AppointmentDetailDialog({
   const [activityEvents, setActivityEvents] = useState<AppointmentActivity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityError, setActivityError] = useState(false);
+  const [activityRetryKey, setActivityRetryKey] = useState(0);
   const [retryingActivityId, setRetryingActivityId] = useState<string | null>(null);
   const [activityRetryErrorId, setActivityRetryErrorId] = useState<string | null>(null);
 
@@ -382,7 +383,7 @@ export function AppointmentDetailDialog({
     return () => {
       active = false;
     };
-  }, [appointment?.id, open]);
+  }, [appointment?.id, open, activityRetryKey]);
 
   useEffect(() => {
     const hasInProgressRetry = activityEvents.some(
@@ -1332,11 +1333,27 @@ export function AppointmentDetailDialog({
                     <div className="h-3 w-1/2 animate-pulse rounded bg-white/10" />
                   </div>
                 ) : activityError ? (
-                  <p className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4 text-sm text-rose-200">
-                    {isEnglish
-                      ? 'Activity history could not be loaded. Close and reopen the details to try again.'
-                      : 'Não foi possível carregar o histórico. Fecha e volta a abrir os detalhes para tentar novamente.'}
-                  </p>
+                  <div
+                    role="alert"
+                    className="flex flex-col gap-3 rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <p className="text-sm leading-6 text-rose-200">
+                      {isEnglish
+                        ? 'Activity history could not be loaded.'
+                        : 'Não foi possível carregar o histórico de atividade.'}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setActivityRetryKey((current) => current + 1)
+                      }
+                      className="min-h-9 shrink-0 border-rose-300/20 text-rose-100 hover:bg-rose-400/[0.08]"
+                    >
+                      {isEnglish ? 'Try again' : 'Tentar novamente'}
+                    </Button>
+                  </div>
                 ) : activityEvents.length === 0 ? (
                   <p className="rounded-2xl border border-white/8 bg-white/[0.025] p-4 text-sm leading-6 text-zinc-400">
                     {isEnglish

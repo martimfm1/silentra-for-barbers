@@ -421,6 +421,27 @@ assert.match(
 );
 assert.match(appointmentDetail, /seriesCancelScope !== null/);
 assert.match(appointmentDetail, /<AlertDialogContent className=/);
+assert.match(appointmentDetail, /const \[activityRetryKey, setActivityRetryKey\] = useState\(0\)/);
+assert.match(
+  appointmentDetail,
+  /setActivityRetryKey\(\(current\) => current \+ 1\)/,
+  'Activity history retry must refetch without closing the appointment dialog.',
+);
+assert.match(
+  appointmentDetail,
+  /\}, \[appointment\?\.id, open, activityRetryKey\]\);/,
+  'The activity request must be tied to the retry key and the currently open appointment.',
+);
+assert.match(
+  appointmentDetail,
+  /activityError \? \([\s\S]*?role="alert"[\s\S]*?Activity history could not be loaded\.[\s\S]*?Try again[\s\S]*?Tentar novamente/,
+  'The activity error state must provide a visible retry action in both locales.',
+);
+assert.doesNotMatch(
+  appointmentDetail,
+  /Close and reopen the details to try again|Fecha e volta a abrir os detalhes para tentar novamente/,
+  'The activity history must not require closing and reopening the dialog to recover.',
+);
 
 const initialAgendaLoad = agenda.slice(
   agenda.indexOf('const fetchInitialData'),
