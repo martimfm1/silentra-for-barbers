@@ -389,7 +389,8 @@ assert.doesNotMatch(sidebar, /href: '\/dashboard\/settings\/public-profile'/);
 assert.doesNotMatch(sidebar, /label: 'Aniversários'/);
 assert.match(automationPage, /MarketingWorkspace initialView="automation"/);
 assert.match(marketingWorkspace, /createBirthdayAutomation/);
-assert.match(marketingWorkspace, /Adicionar automaticamente/);
+assert.match(marketingWorkspace, /Ativar automação/);
+assert.match(marketingWorkspace, /Automações de clientes/);
 assert.match(marketingWorkspace, /triggerType: 'birthday'/);
 
 // Dialogs for mutations and forms are shared, accessible and not browser-native.

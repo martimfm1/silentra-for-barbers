@@ -97,6 +97,9 @@ const adminReportsMigration = read(
   'supabase/migrations/20261022165246_platform_admin_reports.sql',
 );
 const marketingCronWorkflow = read('.github/workflows/marketing-cron.yml');
+const marketingScheduleMigration = read(
+  'supabase/migrations/20261122134000_schedule_marketing_cron.sql',
+);
 
 assert.match(
   websiteRequestApi,
@@ -140,9 +143,20 @@ assert.match(
   /not exists \([\s\S]*campaign.trigger_type = 'birthday'/,
 );
 assert.match(marketingCron, /processBirthdayCampaignDelivery/);
-assert.match(marketingCron, /CRON_SECRET/);
-assert.match(marketingCronWorkflow, /cron: '\*\/5 \* \* \* \*'/);
-assert.match(marketingCronWorkflow, /\/api\/cron\/marketing/);
+assert.match(marketingCron, /createHmac/);
+assert.match(marketingCron, /timingSafeEqual/);
+assert.match(marketingCron, /x-marketing-timestamp/);
+assert.match(marketingCron, /BOOKING_OUTBOX_CRON_SECRET/);
+assert.match(marketingCron, /export const POST/);
+assert.match(marketingScheduleMigration, /silentra-marketing/);
+assert.ok(marketingScheduleMigration.includes("'*/5 * * * *'"));
+assert.match(marketingScheduleMigration, /x-marketing-timestamp/);
+assert.match(marketingScheduleMigration, /silentra_booking_outbox_cron_secret/);
+assert.match(marketingScheduleMigration, /silentra_booking_outbox_url/);
+assert.match(marketingScheduleMigration, /:marketing/);
+assert.match(marketingScheduleMigration, /x-marketing-signature/);
+assert.match(marketingCronWorkflow, /workflow_dispatch:/);
+assert.doesNotMatch(marketingCronWorkflow, /schedule:/);
 
 assert.match(bookingApi, /'create_booking_atomic'/);
 assert.match(
@@ -290,7 +304,8 @@ assert.ok(
 assert.ok(
   marketingWorkspace.includes('async function createBirthdayAutomation()') &&
     marketingWorkspace.includes("triggerType: 'birthday'") &&
-    marketingWorkspace.includes('Adicionar automaticamente') &&
+    marketingWorkspace.includes('Ativar automação') &&
+    marketingWorkspace.includes('Automações de clientes') &&
     marketingWorkspace.includes('birthdayCampaign'),
   'Automations must provide an idempotent one-click birthday automation setup.',
 );

@@ -857,14 +857,15 @@ const checks = [
       source.includes('processScheduledCampaigns'),
   },
   {
-    name: 'Marketing worker is scheduled in GitHub Actions',
-    file: '.github/workflows/marketing-cron.yml',
+    name: 'Marketing worker is scheduled through Supabase Cron with the Vault HMAC secret',
+    file: 'supabase/migrations/20261122134000_schedule_marketing_cron.sql',
     test: (source) =>
-      source.includes("cron: '*/5 * * * *'") &&
-      source.includes(
-        'MARKETING_CRON_URL: https://barbers.silentra.me/api/cron/marketing',
-      ) &&
-      source.includes('x-cron-secret'),
+      source.includes("'silentra-marketing'") &&
+      source.includes("'*/5 * * * *'") &&
+      source.includes('silentra_booking_outbox_cron_secret') &&
+      source.includes('silentra_booking_outbox_url') &&
+      source.includes('x-marketing-signature') &&
+      source.includes("signing.ts || ':marketing'"),
   },
   {
     name: 'Published custom websites are included in the sitemap',
