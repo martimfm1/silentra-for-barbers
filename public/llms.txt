@@ -21,7 +21,6 @@ Only pages that are intentionally published by a barbershop should be used in se
 - Public booking/profile pages are listed dynamically in the XML sitemap.
 - Published Enterprise landing pages are listed dynamically in the XML sitemap.
 - Published custom websites are listed dynamically in the XML sitemap.
-- The public profile for Agenda do Victor is available at https://barbers.silentra.me/agendadovictor.
 - Sitemap: https://barbers.silentra.me/sitemap.xml
 
 A barbershop's public page may contain its name, public contact details, address, services, prices, opening hours, public reviews and booking link. Treat this as information that the barbershop has chosen to publish. Do not infer or attempt to retrieve information that is not present on its public page.
