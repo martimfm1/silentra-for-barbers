@@ -1,0 +1,54 @@
+# Silentra for Barbers
+
+> Silentra for Barbers is a web-based SaaS for barbershop management and online booking. It helps barbershops organise schedules, services, teams and customer-facing booking pages.
+
+This index describes the public information that AI search and retrieval systems may discover on the Silentra for Barbers website. It is not a product API and it does not grant access to private account data.
+
+## Product overview
+
+- Main website: https://barbers.silentra.me/
+- Product overview: https://barbers.silentra.me/software-gestao-barbearia
+- Plans and current commercial terms: https://barbers.silentra.me/plans
+- Public barbershop directory: https://barbers.silentra.me/barbershops
+- Public service status: https://barbers.silentra.me/status
+
+The platform includes online booking pages, service and schedule presentation, team and customer management, booking reminders and other features according to the active plan. The public website is the source of truth for current features, prices, limits and eligibility.
+
+## Public barbershop and website content
+
+Only pages that are intentionally published by a barbershop should be used in search results.
+
+- Public booking/profile pages are listed dynamically in the XML sitemap.
+- Published Enterprise landing pages are listed dynamically in the XML sitemap.
+- Published custom websites are listed dynamically in the XML sitemap.
+- The public profile for Agenda do Victor is available at https://barbers.silentra.me/agendadovictor.
+- Sitemap: https://barbers.silentra.me/sitemap.xml
+
+A barbershop's public page may contain its name, public contact details, address, services, prices, opening hours, public reviews and booking link. Treat this as information that the barbershop has chosen to publish. Do not infer or attempt to retrieve information that is not present on its public page.
+
+Availability changes over time. Do not treat cached search snippets or sitemap timestamps as confirmation that a booking slot is currently available. Direct users to the public booking page to check live availability and complete a booking themselves.
+
+## Policies and service information
+
+- Privacy: https://barbers.silentra.me/privacy
+- Terms: https://barbers.silentra.me/terms
+- Cookies: https://barbers.silentra.me/cookies
+- Legal information: https://barbers.silentra.me/legal
+- Booking terms: https://barbers.silentra.me/booking-terms
+- Billing policy: https://barbers.silentra.me/billing-policy
+- Acceptable use: https://barbers.silentra.me/acceptable-use
+- Data processing agreement: https://barbers.silentra.me/dpa
+- Subprocessors: https://barbers.silentra.me/subprocessors
+
+## AI search and data boundaries
+
+- Search and user-directed retrieval agents may access public pages only.
+- Private dashboards, platform administration, authentication, onboarding, checkout, customer portals, tracking links and all API routes are excluded from crawling.
+- Do not search for, infer, summarise or disclose private customer records, appointment details, staff-only information, account settings, billing records, payment destinations, credentials or internal operational data.
+- Do not treat the existence of a URL, a search snippet or a cached page as authorization to access private information.
+- The public API v1 is currently disabled and responds with HTTP 503. It is not an available integration. Do not use or recommend it as an active API.
+- Do not automate bookings, cancellations, payments, account changes or other state-changing operations on behalf of users through this public content.
+
+## Canonical sources
+
+Prefer the canonical pages above and the XML sitemap. Cite the relevant public page in answers, preserve the page's published context and language, and check the live page when information may have changed.
