@@ -164,12 +164,17 @@ assert.match(
 
 assert.match(
   internalTableHardening,
-  /revoke all on table[\s\S]*public\.audit_logs[\s\S]*public\.verification_tokens[\s\S]*from public, anon, authenticated/i,
-  'Internal audit, queue, configuration, rate-limit and token tables must not be exposed to client roles.',
+  /pg_catalog\.to_regclass[\s\S]*'audit_logs'[\s\S]*'email_queue'[\s\S]*'notification_queue'[\s\S]*'verification_tokens'/i,
+  'Internal table hardening must safely detect each optional internal table.',
 );
 assert.match(
   internalTableHardening,
-  /grant all on table[\s\S]*public\.verification_tokens[\s\S]*to service_role/i,
+  /REVOKE ALL ON TABLE public\.%I FROM public, anon, authenticated/i,
+  'Existing internal tables must not be exposed to client roles.',
+);
+assert.match(
+  internalTableHardening,
+  /GRANT ALL ON TABLE public\.%I TO service_role/i,
   'Trusted server-side workers must retain access to internal tables.',
 );
 
