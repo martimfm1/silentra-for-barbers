@@ -118,5 +118,5 @@ assert.match(sitemap, /custom_website_requests/);
 assert.match(publicApi, /const PUBLIC_API_ENABLED = false;/);
 
 console.log(
-  '[AI_SEARCH_VISIBILITY_QA] AI search agents can discover public SaaS content; private routes and training crawlers remain excluded.',
+  '[AI_SEARCH_VISIBILITY_QA] AI search agents can discover public SaaS content; private routes remain excluded and training/grounding preferences are explicit.',
 );
