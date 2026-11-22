@@ -3,9 +3,9 @@ import { CampaignLifecycleActions } from '@/app/dashboard/marketing/campaign-lif
 import { MarketingWorkspace } from '@/app/dashboard/marketing/marketing-workspace';
 
 export const metadata: Metadata = {
-  title: 'Automações',
+  title: 'Automações de clientes',
   description:
-    'Configura automatizações para simplificar tarefas e comunicações da tua barbearia.',
+    'Gere mensagens de aniversário e outros fluxos automáticos para manter a relação com os clientes.',
   robots: { index: false, follow: false },
 };
 
