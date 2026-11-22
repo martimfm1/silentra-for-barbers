@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
@@ -10,11 +11,37 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function authorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
+  const secret = (
+    process.env.BOOKING_OUTBOX_CRON_SECRET ?? process.env.CRON_SECRET
+  )?.trim();
   if (!secret) return false;
-  return (
+
+  // Preserve manual invocation while allowing Supabase Cron to sign requests
+  // with the existing Vault secret, without putting it in the HTTP payload.
+  if (
     request.headers.get('authorization') === `Bearer ${secret}` ||
     request.headers.get('x-cron-secret') === secret
+  )
+    return true;
+
+  const timestamp = request.headers.get('x-marketing-timestamp') ?? '';
+  const signature = request.headers.get('x-marketing-signature') ?? '';
+  if (!/^\\d{10}$/.test(timestamp) || !/^[a-f0-9]{64}$/i.test(signature))
+    return false;
+
+  const seconds = Number(timestamp);
+  if (
+    !Number.isSafeInteger(seconds) ||
+    Math.abs(Date.now() / 1000 - seconds) > 300
+  )
+    return false;
+
+  const expected = createHmac('sha256', secret)
+    .update(`${timestamp}:marketing`)
+    .digest();
+  const supplied = Buffer.from(signature, 'hex');
+  return (
+    supplied.length === expected.length && timingSafeEqual(supplied, expected)
   );
 }
 
