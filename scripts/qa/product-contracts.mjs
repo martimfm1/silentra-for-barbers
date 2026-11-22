@@ -1014,16 +1014,30 @@ const checks = [
       source.includes('shop={bookingShop}'),
   },
   {
-    name: 'Booking drawer loads day-off status and slots for the selected barber',
+    name: 'Booking drawer requires a complete verified availability overview before selecting a day',
     file: 'app/barbershops/components/booking-drawer-canonical.tsx',
     test: (source) => {
       const normalized = source.replace(/\s+/g, ' ').trim();
       return (
         normalized.includes('const availableDays = days;') &&
         normalized.includes('currentDayClosed = currentDay ? isDayOffForBookingDay(currentDay) || dayAvailability[currentDay.dateStr]?.closedDay === true : false') &&
-        normalized.includes('disabled={isUnavailable || loadingDayAvailability}') &&
+        normalized.includes('const [verifiedDayAvailabilityKey, setVerifiedDayAvailabilityKey] = useState<string | null>(null)') &&
+        normalized.includes('dayAvailabilityReady = verifiedDayAvailabilityKey === dayAvailabilityRequestKey') &&
+        normalized.includes('dayAvailabilityRequestKey = [') &&
+        normalized.includes("days[days.length - 1]?.dateStr ?? ''") &&
+        normalized.includes('setVerifiedDayAvailabilityKey(dayAvailabilityRequestKey)') &&
+        normalized.includes('setVerifiedDayAvailabilityKey(null)') &&
+        normalized.includes('days.every((day) => {') &&
+        normalized.includes('typeof status.available === \'boolean\'') &&
+        normalized.includes('typeof status.closedDay === \'boolean\'') &&
+        normalized.includes('!dayAvailabilityReady &&') &&
+        normalized.includes('disabled={dayStatus.disabled}') &&
+        normalized.includes('dayStatus.needsService') &&
+        normalized.includes('Choose a service first to check which days have openings.') &&
+        normalized.includes('Availability has not been fully verified yet. Please retry.') &&
+        normalized.includes('Could not verify availability for every day.') &&
         normalized.includes('!dayAvailabilityError') &&
-        normalized.includes('if (dayAvailabilityError)') &&
+        normalized.includes('!dayAvailabilityReady ||') &&
         normalized.includes('setRetryKey((value) => value + 1)') &&
         normalized.includes("t('bookingDrawer.retry')") &&
         normalized.includes('const nextOpenIndex = days.findIndex(') &&
