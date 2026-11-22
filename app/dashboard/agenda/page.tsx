@@ -96,6 +96,8 @@ export default function AgendaPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
+  const [agendaLoadError, setAgendaLoadError] = useState<string | null>(null);
   const [calendarBlocksRefreshKey, setCalendarBlocksRefreshKey] = useState(0);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -124,13 +126,16 @@ export default function AgendaPage() {
       setServices(servicesRes.data ?? []);
       setProfessionals(professionalsRes.data ?? []);
       setClients(clientsRes.data ?? []);
+      setHasLoadedInitialData(true);
+      setAgendaLoadError(null);
     } catch (error) {
       console.error('[Agenda Sync Error]:', error);
+      setAgendaLoadError(t('agenda.loadingError'));
       toast.error(t('agenda.loadingError'));
     } finally {
       setLoadingInitial(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, t]);
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
@@ -494,7 +499,7 @@ export default function AgendaPage() {
                 ? 'Review upcoming visits, confirm requests and keep the day organised.'
                 : 'Consulta as próximas visitas, confirma pedidos e mantém o dia organizado.'}
             </p>
-            {!loadingInitial && (
+            {!loadingInitial && hasLoadedInitialData && (
               <p className="mt-2 text-xs text-zinc-500">
                 <span className="font-semibold text-zinc-200">
                   {metrics.today}
@@ -529,9 +534,50 @@ export default function AgendaPage() {
           </div>
         </header>
 
+        {agendaLoadError ? (
+          <section
+            role="alert"
+            className="mb-4 flex flex-col gap-3 rounded-2xl border border-rose-400/20 bg-rose-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-rose-100">
+                {agendaLoadError}
+              </p>
+              {hasLoadedInitialData ? (
+                <p className="mt-1 text-xs leading-5 text-zinc-400">
+                  {locale === 'en'
+                    ? 'Previously loaded data is still visible. Retry to refresh the latest changes.'
+                    : 'Os dados carregados anteriormente continuam visíveis. Tenta novamente para atualizar a agenda.'}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs leading-5 text-zinc-400">
+                  {locale === 'en'
+                    ? 'The agenda has not been loaded yet. Retry to avoid treating this error as an empty schedule.'
+                    : 'A agenda ainda não foi carregada. Tenta novamente para não confundir este erro com uma agenda vazia.'}
+                </p>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loadingInitial}
+              onClick={() => void fetchInitialData()}
+              className="min-h-10 w-full shrink-0 border-rose-300/20 text-rose-100 hover:bg-rose-400/[0.08] sm:w-auto"
+            >
+              {loadingInitial
+                ? locale === 'en'
+                  ? 'Retrying…'
+                  : 'A tentar novamente…'
+                : locale === 'en'
+                  ? 'Try again'
+                  : 'Tentar novamente'}
+            </Button>
+          </section>
+        ) : null}
+
         {!isCalendarView ? <CalendarSyncCard /> : null}
 
-        {isCalendarView ? (
+        {isCalendarView && (loadingInitial || hasLoadedInitialData) ? (
           <section
             className="mt-4"
             aria-label={locale === 'en' ? 'Calendar' : 'Calendário'}
@@ -552,7 +598,7 @@ export default function AgendaPage() {
           <div className="mt-5">
             <AgendaLinesSkeleton />
           </div>
-        ) : (
+        ) : hasLoadedInitialData ? (
           <>
             <section
               className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-5"
@@ -771,7 +817,7 @@ export default function AgendaPage() {
               )}
             </div>
           </>
-        )}
+        ) : null}
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-7xl space-y-5 px-1">
