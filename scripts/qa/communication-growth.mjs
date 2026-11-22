@@ -62,7 +62,16 @@ assert.equal(appointmentDetails.includes('href={`mailto:'), false);
 assert.equal(appointmentDetails.includes('href={`tel:'), false);
 
 assert.match(automationsPage, /MarketingWorkspace initialView="automation"/);
+assert.match(automationsPage, /title: 'Automações de clientes'/);
 assert.match(workspace, /initialView !== 'automation'/);
+assert.match(workspace, /Automações de clientes/);
+assert.match(workspace, /birthdayAudience/);
+assert.match(workspace, /Prontos para receber/);
+assert.match(workspace, /canManageAutomation/);
+assert.match(sidebar, /Automações de clientes/);
+assert.match(automationsApi, /birthdayAudience/);
+assert.match(automationsApi, /withBirthDate/);
+assert.match(automationsApi, /birthdayReady/);
 assert.match(workspace, /triggerType: 'birthday'/);
 const automationSection = workspace.slice(
   workspace.indexOf("{view === 'automation' && ("),
