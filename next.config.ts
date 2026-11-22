@@ -179,7 +179,26 @@ const nextConfig = {
       },
       {
         source: '/mensagens/:path*',
-        headers: [...noFrameHeaders],
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          ...noFrameHeaders,
+        ],
+      },
+      {
+        // Token-assisted review claims are public-link actions, not search content.
+        source: '/barbershops/:slug/review/claim',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          ...noFrameHeaders,
+        ],
       },
       {
         source: '/silentra-admin/:path*',
