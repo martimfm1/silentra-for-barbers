@@ -66,7 +66,6 @@ grant select (
   default_language,
   minimum_booking_notice_minutes,
   mbway_enabled,
-  mbway_phone,
   auto_confirm_manual_bookings,
   require_birth_date,
   weekly_schedule
