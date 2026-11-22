@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const workflow = readFileSync('.github/workflows/isolated-e2e.yml', 'utf8');
 const runner = readFileSync('scripts/e2e/booking-tenant-isolation.mjs', 'utf8');
 const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
+const planEnumMigration = readFileSync('supabase/migrations/20260815194400_create_subscription_plan_enum.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -13,6 +14,10 @@ assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must
 assert.match(workflow, /--exclude studio,mailpit,logflare,supavisor,edge-runtime,vector/, 'E2E workflow must use current Supabase container names.');
 assert.ok(!supabaseConfig.includes('[local_smtp]'), 'Supabase config must not use the removed local_smtp section.');
 assert.ok(supabaseConfig.includes('additional_redirect_urls = ["http://127.0.0.1:3000"]'), 'Local Supabase redirects must match the HTTP loopback app origin.');
+assert.match(planEnumMigration, /pg_catalog\.pg_type/, 'The plan enum migration must detect an existing type.');
+assert.match(planEnumMigration, /CREATE TYPE public\.subscription_plan AS ENUM/, 'The plan enum migration must create the enum for fresh databases.');
+assert.match(planEnumMigration, /'free'.*'pro'.*'enterprise'/s, 'The plan enum must include every supported plan.');
+
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');
 assert.match(runner, /127\.0\.0\.1/, 'E2E runner must enforce loopback-only services.');
