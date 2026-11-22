@@ -73,6 +73,12 @@ export default async function RootLayout({
       )}
     >
       <head>
+        <link
+          rel="describedby"
+          href="/llms.txt"
+          type="text/markdown"
+          title="Silentra for Barbers — AI-readable public information"
+        />
         <script
           id="marketplace-tracking-token-bootstrap"
           dangerouslySetInnerHTML={{ __html: TRACKING_TOKEN_BOOTSTRAP_SCRIPT }}
