@@ -256,8 +256,8 @@ Não marcar os itens dependentes de validação/configuração como concluídos 
 - [x] Removidos métodos legados sem utilização que consultavam `barbershops` com `SELECT *` no serviço de clientes.
 - [x] Adicionados contratos QA para grants, policy tenant-scoped e manutenção dos fluxos públicos server-side.
 - [x] Dry-run da migration executado em produção dentro de uma transação revertida: 11 verificações de privilégios/policies passaram; uma segunda consulta confirmou que os grants e a policy de produção permaneceram inalterados após ROLLBACK.
-- [ ] Executar CI completa e revisão do PR.
-- [ ] Aplicar a migration em produção e validar os fluxos autenticados/públicos após aprovação de deployment.
+- [x] CI completa concluída com sucesso no GitHub Actions run #3454 (job Quality + Production Hardening): typecheck, lint, contratos QA, build e smoke QA sem falhas.
+- [ ] Atualizar a branch se necessário, obter revisão final e integrar o PR; aplicar a migration em produção e validar os fluxos autenticados/públicos apenas após autorização explícita.
 
 ### Outros findings confirmados / pendentes
 
