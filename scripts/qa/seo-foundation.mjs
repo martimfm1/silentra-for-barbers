@@ -39,7 +39,8 @@ assert.match(sitemap, /software-gestao-barbearia/);
 assert.match(sitemap, /barbershop_landing_pages/);
 assert.match(sitemap, /status', 'active'/);
 assert.match(robots, /sitemap\.xml/);
-assert.match(robots, /PRIVATE_PATHS/);\nassert.match(robots, /Claude-SearchBot/);
+assert.match(robots, /PRIVATE_PATHS/);
+assert.match(robots, /Claude-SearchBot/);
 assert.match(trackedLink, /silentra_cta_click/);
 assert.match(analytics, /window\.dataLayer\.push/);
 
