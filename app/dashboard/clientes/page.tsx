@@ -177,6 +177,26 @@ export default function ClientesPage() {
     handleDeleteClient,
   } = useClients(barbershopId, fetchClients);
 
+  const lastClientDialogBarbershopIdRef = useRef<string | null | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (isLoadingBarbershop) {
+      setSelectedClientId(null);
+      setEditingClient(null);
+      setShowAddClientForm(false);
+      return;
+    }
+
+    const currentBarbershopId = barbershopId ?? null;
+    if (lastClientDialogBarbershopIdRef.current !== currentBarbershopId) {
+      lastClientDialogBarbershopIdRef.current = currentBarbershopId;
+      setSelectedClientId(null);
+      setEditingClient(null);
+      setShowAddClientForm(false);
+    }
+  }, [barbershopId, isLoadingBarbershop, setEditingClient]);
+
   const currentPage = Math.floor(offset / CLIENTS_PAGE_SIZE) + 1;
   const totalPages = Math.max(1, Math.ceil(totalClients / CLIENTS_PAGE_SIZE));
 
