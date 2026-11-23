@@ -119,12 +119,14 @@ assert.match(serviceHook, /bufferMinutes > 120/);
 assert.match(serviceHook, /buffer_minutes: bufferMinutes/);
 assert.match(serviceCard, /new-service-buffer/);
 assert.match(servicePage, /edit-service-buffer/);
-assert.match(servicePage, /const hasLoadedServices = useRef\(false\)/);
+assert.match(servicePage, /const hasLoadedServicesRef = useRef\(false\)/);
+assert.match(servicePage, /const \[hasLoadedServices, setHasLoadedServices\] = useState\(false\)/);
+assert.match(servicePage, /setHasLoadedServices\(true\)/);
 assert.match(servicePage, /setLoadError\(t\('servicesPage\.loadError'\)\)/);
-assert.match(servicePage, /loadError && !hasLoadedServices\.current/);
+assert.match(servicePage, /loadError && !hasLoadedServices/);
 assert.match(servicePage, /role="alert"/);
 assert.match(servicePage, /onClick=\{\(\) => void fetchServices\(\)\}/);
-assert.match(servicePage, /hasLoadedServices\.current = true/);
+assert.match(servicePage, /hasLoadedServicesRef\.current = true/);
 
 assert.match(bookingDataApi, /service\.buffer_minutes/);
 assert.match(bookingDataApi, /reservedDuration/);
