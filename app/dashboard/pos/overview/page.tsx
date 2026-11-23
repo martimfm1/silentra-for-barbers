@@ -4,6 +4,7 @@ import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
+  AlertTriangle,
   ArrowLeft,
   BarChart3,
   RefreshCcw,
@@ -16,7 +17,6 @@ import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
-import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 type TransactionItem = {
@@ -76,25 +76,35 @@ export default function SalesOverviewPage() {
   const allowed = hasFeature('pos');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedTransactions, setHasLoadedTransactions] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [period, setPeriod] = useState<'today' | '7d' | '30d'>('30d');
 
   async function load() {
-    setLoading(true);
+    const isInitialLoad = !hasLoadedTransactions;
+    if (isInitialLoad) setLoading(true);
+    else setRefreshing(true);
+    setLoadError(null);
+
     try {
       const response = await fetch('/api/enterprise/pos', {
         headers: await authHeaders(locale),
         cache: 'no-store',
       });
       const body = await response.json();
-      if (!response.ok)
+      if (!response.ok || !Array.isArray(body.transactions)) {
         throw new Error(body.error || t('posOverviewPage.loadError'));
-      setTransactions(body.transactions ?? []);
+      }
+      setTransactions(body.transactions as Transaction[]);
+      setHasLoadedTransactions(true);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t('posOverviewPage.loadError'),
-      );
+      const message =
+        error instanceof Error ? error.message : t('posOverviewPage.loadError');
+      setLoadError(message);
     } finally {
-      setLoading(false);
+      if (isInitialLoad) setLoading(false);
+      else setRefreshing(false);
     }
   }
 
@@ -175,7 +185,7 @@ export default function SalesOverviewPage() {
     return [...map.entries()].sort((a, b) => b[1].revenue - a[1].revenue);
   }, [completed]);
 
-  if (accessLoading || loading) {
+  if (accessLoading) {
     return <SilentraLoading variant="dashboard" />;
   }
 
@@ -205,9 +215,59 @@ export default function SalesOverviewPage() {
     );
   }
 
+  if (loading) {
+    return <SilentraLoading variant="dashboard" />;
+  }
+
+  if (loadError && !hasLoadedTransactions) {
+    return (
+      <main className="min-h-screen px-4 py-16">
+        <div className="mx-auto max-w-xl">
+          <Card className="border-amber-300/20 bg-amber-300/[0.04]">
+            <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+              <div role="alert" className="flex flex-col items-center gap-2">
+                <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+                <h1 className="text-lg font-semibold">{t('posOverviewPage.title')}</h1>
+                <p className="max-w-lg text-sm text-muted-foreground">{loadError}</p>
+              </div>
+              <Button variant="outline" onClick={() => void load()} disabled={refreshing}>
+                <RefreshCcw className="mr-2 size-4" aria-hidden="true" />
+                {t('common.retry')}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen px-4 py-8 text-foreground sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-7">
+        {loadError && hasLoadedTransactions && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-zinc-100">{loadError}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {locale === 'pt'
+                  ? 'Os resultados anteriores continuam visíveis.'
+                  : 'Previously loaded results are still visible.'}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => void load()}
+              disabled={refreshing}
+              className="shrink-0"
+            >
+              <RefreshCcw className={`mr-2 size-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
@@ -252,9 +312,13 @@ export default function SalesOverviewPage() {
             <Button
               variant="outline"
               onClick={() => void load()}
+              disabled={refreshing}
               className="min-h-10"
             >
-              <RefreshCcw className="mr-2 size-4" />
+              <RefreshCcw
+                className={`mr-2 size-4 ${refreshing ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
               {t('posOverviewPage.refresh')}
             </Button>
           </div>
