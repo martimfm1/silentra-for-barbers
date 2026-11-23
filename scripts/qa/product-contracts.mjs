@@ -1328,6 +1328,25 @@ const checks = [
       !source.includes('<Spinner'),
   },
   {
+    name: 'POS overview distinguishes initial loading, plan access and recoverable transaction errors',
+    file: 'app/dashboard/pos/overview/page.tsx',
+    test: (source) => {
+      const normalized = source.replace(/\\s+/g, ' ');
+      return (
+        normalized.includes('const isInitialLoad = !hasLoadedTransactions') &&
+        normalized.includes('!response.ok || !Array.isArray(body.transactions)') &&
+        normalized.includes('setHasLoadedTransactions(true)') &&
+        normalized.includes('if (accessLoading)') &&
+        normalized.includes('if (!allowed)') &&
+        normalized.includes('if (loading)') &&
+        normalized.includes('loadError && !hasLoadedTransactions') &&
+        normalized.includes('loadError && hasLoadedTransactions') &&
+        normalized.includes('onClick={() => void load()}') &&
+        normalized.includes("t('common.retry')")
+      );
+    },
+  },
+  {
     name: 'Barbershop deletion requires password and a one-time email code on the server',
     file: 'app/api/dashboard/barbershop-deletion/request-code/route.ts',
     test: (source) =>
