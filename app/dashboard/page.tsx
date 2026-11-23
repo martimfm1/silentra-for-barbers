@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
@@ -102,6 +102,12 @@ export default function DashboardPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [dashboardLoadError, setDashboardLoadError] = useState(false);
+  const [hasLoadedDashboardData, setHasLoadedDashboardData] = useState(false);
+  const [hasLoadedAppointments, setHasLoadedAppointments] = useState(false);
+  const [dashboardDataBarbershopId, setDashboardDataBarbershopId] = useState<string | null>(null);
+  const dashboardRequestIdRef = useRef(0);
+  const lastDashboardBarbershopIdRef = useRef<string | null>(null);
   const [loadingSetupData, setLoadingSetupData] = useState(true);
   const [setupBarbershopConfig, setSetupBarbershopConfig] =
     useState<BarbershopConfigPayload | null>(null);
@@ -113,7 +119,11 @@ export default function DashboardPage() {
       setLoadingInitial(false);
       return;
     }
+
+    const requestId = ++dashboardRequestIdRef.current;
+    const currentBarbershopId = barbershopId;
     setLoadingInitial(true);
+
     try {
       const [
         appointmentsResult,
@@ -121,26 +131,30 @@ export default function DashboardPage() {
         professionalsResult,
         clientsResult,
       ] = await Promise.allSettled([
-        appointmentService.getAll(barbershopId),
-        servicesService.getAll(barbershopId),
-        professionalService.getAll(barbershopId),
-        appointmentService.getClients(barbershopId),
+        appointmentService.getAll(currentBarbershopId),
+        servicesService.getAll(currentBarbershopId),
+        professionalService.getAll(currentBarbershopId),
+        appointmentService.getClients(currentBarbershopId),
       ]);
 
-      if (appointmentsResult.status === 'rejected') {
-        throw appointmentsResult.reason;
+      if (requestId !== dashboardRequestIdRef.current) return;
+      if (
+        appointmentsResult.status !== 'fulfilled' ||
+        appointmentsResult.value.error ||
+        !Array.isArray(appointmentsResult.value.data)
+      ) {
+        throw new Error('DASHBOARD_APPOINTMENTS_LOAD_FAILED');
       }
-      if (appointmentsResult.value.error) {
-        throw appointmentsResult.value.error;
-      }
-      setAppointments(appointmentsResult.value.data ?? []);
+      setAppointments(appointmentsResult.value.data);
+      setHasLoadedAppointments(true);
 
       let secondaryDataFailed = false;
       if (
         servicesResult.status === 'fulfilled' &&
-        !servicesResult.value.error
+        !servicesResult.value.error &&
+        Array.isArray(servicesResult.value.data)
       ) {
-        setServices(servicesResult.value.data ?? []);
+        setServices(servicesResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Services Sync Error]');
@@ -148,37 +162,91 @@ export default function DashboardPage() {
 
       if (
         professionalsResult.status === 'fulfilled' &&
-        !professionalsResult.value.error
+        !professionalsResult.value.error &&
+        Array.isArray(professionalsResult.value.data)
       ) {
-        setProfessionals(professionalsResult.value.data ?? []);
+        setProfessionals(professionalsResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Professionals Sync Error]');
       }
 
-      if (clientsResult.status === 'fulfilled' && !clientsResult.value.error) {
-        setClients(clientsResult.value.data ?? []);
+      if (
+        clientsResult.status === 'fulfilled' &&
+        !clientsResult.value.error &&
+        Array.isArray(clientsResult.value.data)
+      ) {
+        setClients(clientsResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Clients Sync Error]');
       }
 
-      if (secondaryDataFailed) toast.error(t('dashboard.updateError'));
+      if (requestId !== dashboardRequestIdRef.current) return;
+      if (secondaryDataFailed) {
+        setDashboardLoadError(true);
+      } else {
+        setHasLoadedDashboardData(true);
+        setDashboardLoadError(false);
+      }
     } catch (error) {
-      console.error('[Dashboard Appointments Sync Error]:', error);
-      toast.error(t('dashboard.updateError'));
+      if (requestId !== dashboardRequestIdRef.current) return;
+      console.error('[Dashboard Overview Load Error]:', error);
+      setDashboardLoadError(true);
     } finally {
-      setLoadingInitial(false);
+      if (requestId === dashboardRequestIdRef.current) {
+        setLoadingInitial(false);
+        setDashboardDataBarbershopId(currentBarbershopId);
+      }
     }
-  }, [barbershopId, t]);
+  }, [barbershopId]);
 
   useEffect(() => {
-    if (isLoadingBarbershop) return;
-    if (!barbershopId) {
-      setLoadingInitial(false);
+    if (isLoadingBarbershop) {
+      dashboardRequestIdRef.current += 1;
       return;
     }
-    queueMicrotask(() => void fetchInitialData());
+
+    if (!barbershopId) {
+      dashboardRequestIdRef.current += 1;
+      lastDashboardBarbershopIdRef.current = null;
+      queueMicrotask(() => {
+        if (lastDashboardBarbershopIdRef.current !== null) return;
+        setAppointments([]);
+        setServices([]);
+        setProfessionals([]);
+        setClients([]);
+        setDashboardLoadError(false);
+        setHasLoadedDashboardData(false);
+        setHasLoadedAppointments(false);
+        setDashboardDataBarbershopId(null);
+        setLoadingInitial(false);
+      });
+      return;
+    }
+
+    if (lastDashboardBarbershopIdRef.current !== barbershopId) {
+      lastDashboardBarbershopIdRef.current = barbershopId;
+      dashboardRequestIdRef.current += 1;
+      queueMicrotask(() => {
+        if (lastDashboardBarbershopIdRef.current !== barbershopId) return;
+        setAppointments([]);
+        setServices([]);
+        setProfessionals([]);
+        setClients([]);
+        setDashboardLoadError(false);
+        setHasLoadedDashboardData(false);
+        setHasLoadedAppointments(false);
+        setDashboardDataBarbershopId(null);
+        setLoadingInitial(true);
+      });
+    }
+
+    const timer = window.setTimeout(() => void fetchInitialData(), 0);
+    return () => {
+      window.clearTimeout(timer);
+      dashboardRequestIdRef.current += 1;
+    };
   }, [barbershopId, fetchInitialData, isLoadingBarbershop]);
 
   useEffect(() => {
