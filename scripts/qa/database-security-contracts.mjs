@@ -8,6 +8,9 @@ const read = (file) => readFile(join(root, file), 'utf8');
 const initialHardening = await read(
   'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
+const serviceRolePublicSchemaPrivileges = await read(
+  'supabase/migrations/20261123102000_restore_service_role_public_schema_privileges.sql',
+);
 const serviceRoleUsersPrivileges = await read(
   'supabase/migrations/20261123100000_restore_service_role_users_privileges.sql',
 );
@@ -69,6 +72,21 @@ assert.match(
   serviceRoleUsersPrivileges,
   /has_table_privilege\('service_role',[\s\S]*'SELECT'[\s\S]*'INSERT'[\s\S]*'UPDATE'[\s\S]*'DELETE'/i,
   'The service-role user grant must be verified for every required write/read operation.',
+);
+assert.match(
+  serviceRolePublicSchemaPrivileges,
+  /GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO service_role/i,
+  'Trusted backend access must be restored for existing public-schema tables.',
+);
+assert.match(
+  serviceRolePublicSchemaPrivileges,
+  /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]*GRANT ALL PRIVILEGES ON TABLES TO service_role/i,
+  'Future public tables must inherit trusted service-role access.',
+);
+assert.match(
+  serviceRolePublicSchemaPrivileges,
+  /GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO service_role/i,
+  'Trusted backend access must include public-schema sequences.',
 );
 assert.match(
   initialHardening,
