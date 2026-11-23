@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [dashboard, settingsPage, editor, api, migration] = await Promise.all([
+const [dashboard, settingsPage, editor, api, migration, locationPanel] = await Promise.all([
   readFile('app/dashboard/page.tsx', 'utf8'),
   readFile('app/dashboard/settings/settings-page.tsx', 'utf8'),
   readFile('app/dashboard/_components/DashboardCustomization.tsx', 'utf8'),
@@ -10,6 +10,7 @@ const [dashboard, settingsPage, editor, api, migration] = await Promise.all([
     'supabase/migrations/20261030120137_dashboard_customizations.sql',
     'utf8',
   ),
+  readFile('components/dashboard/settings-location-panel.tsx', 'utf8'),
 ]);
 
 // Dashboard renders only the selected shortcuts and independently toggleable sections.
@@ -100,6 +101,21 @@ assert.match(settingsPage, /A configuração anteriormente carregada continua vi
 assert.match(settingsPage, /role="alert"/);
 assert.match(settingsPage, /onClick=\{\(\) => void load\(\)\}/);
 assert.match(settingsPage, /t\('common\.retry'\)/);
+assert.match(locationPanel, /const \[loadError, setLoadError\] = useState<string \| null>\(null\)/);
+assert.match(locationPanel, /lastSuccessfulBarbershopIdRef\.current !== barbershopId/);
+assert.match(locationPanel, /if \(result\.error \|\| !result\.data\)/);
+assert.match(locationPanel, /catch \(error: unknown\)/);
+assert.match(locationPanel, /finally \{/);
+assert.match(locationPanel, /hasCurrentBarbershopLoadError && !isCurrentBarbershopLoaded/);
+assert.match(locationPanel, /hasCurrentBarbershopLoadError && isCurrentBarbershopLoaded/);
+assert.match(locationPanel, /const \[loadErrorBarbershopId, setLoadErrorBarbershopId\] = useState</);
+assert.match(locationPanel, /loadErrorBarbershopId === barbershopId/);
+assert.match(locationPanel, /setLoadErrorBarbershopId\(barbershopId\)/);
+assert.match(locationPanel, /setLoadErrorBarbershopId\(null\)/);
+assert.match(locationPanel, /hasCurrentBarbershopLoadError/);
+assert.match(locationPanel, /setRetryKey\(\(key\) => key \+ 1\)/);
+assert.match(locationPanel, /loadedBarbershopId === barbershopId/);
+assert.match(locationPanel, /setAddress\(''\)/);
 assert.match(settingsPage, /customization\.create\(/);
 assert.match(settingsPage, /customization\.save\(/);
 assert.match(settingsPage, /activate: true/);
