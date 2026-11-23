@@ -15,7 +15,9 @@ const notificationSubscriptionsMigration = readFileSync('supabase/migrations/202
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
 assert.match(workflow, /pnpm exec supabase status -o env/, 'E2E workflow must source local Supabase credentials.');
-assert.match(workflow, /playwright install/, 'E2E workflow must install a browser.');
+assert.match(workflow, /pnpm add --save-dev --lockfile=false playwright@1\.56\.1/, 'E2E workflow must install Playwright through the existing pnpm package manager.');
+assert.match(workflow, /pnpm exec playwright install --with-deps chromium/, 'E2E workflow must install Chromium with the pnpm-managed Playwright CLI.');
+assert.doesNotMatch(workflow, /npm install --no-save|npx playwright/, 'E2E workflow must not mix npm/npx installs into pnpm node_modules.');
 assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must discard its local stack.');
 assert.match(workflow, /--exclude studio,mailpit,logflare,supavisor,edge-runtime,vector/, 'E2E workflow must use current Supabase container names.');
 assert.match(workflow, /port = 55432/, 'E2E must use an isolated local database port.');
