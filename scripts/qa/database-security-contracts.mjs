@@ -89,6 +89,11 @@ assert.match(
   'Trusted backend access must include public-schema sequences.',
 );
 assert.match(
+  serviceRolePublicSchemaPrivileges,
+  /has_table_privilege\('service_role',[\s\S]*'public\.shops',[\s\S]*'INSERT'[\s\S]*'UPDATE'[\s\S]*'DELETE'/i,
+  'The public storefront table must be verified for trusted backend reads and writes.',
+);
+assert.match(
   initialHardening,
   /grant update \([\s\S]*name_complete[\s\S]*birth_date[\s\S]*\) on table public\.users/i,
   'Authenticated users may only update safe profile/CRM fields.',

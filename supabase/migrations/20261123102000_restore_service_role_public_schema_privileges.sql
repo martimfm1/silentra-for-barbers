@@ -18,7 +18,9 @@ BEGIN
   IF NOT has_table_privilege('service_role', 'public.shops', 'SELECT')
     OR NOT has_table_privilege('service_role', 'public.users', 'SELECT')
     OR NOT has_table_privilege('service_role', 'public.barbershops', 'SELECT')
-    OR NOT has_sequence_privilege('service_role', 'public.shops_id_seq', 'USAGE')
+    OR NOT has_table_privilege('service_role', 'public.shops', 'INSERT')
+    OR NOT has_table_privilege('service_role', 'public.shops', 'UPDATE')
+    OR NOT has_table_privilege('service_role', 'public.shops', 'DELETE')
   THEN
     RAISE EXCEPTION
       'SECURITY_ASSERTION_FAILED: service_role must retain trusted public-schema data access';
