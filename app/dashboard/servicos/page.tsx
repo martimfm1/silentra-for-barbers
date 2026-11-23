@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
@@ -12,7 +12,7 @@ import { ManagementPageHeader } from '@/app/dashboard/_components/shared/Managem
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Scissors, Euro, Clock3 } from 'lucide-react';
+import { AlertTriangle, Clock3, Euro, RefreshCw, Scissors } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -27,19 +27,27 @@ export default function ServicosPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [showAddServiceForm, setShowAddServiceForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const hasLoadedServicesRef = useRef(false);
+  const [hasLoadedServices, setHasLoadedServices] = useState(false);
 
   const fetchServices = useCallback(async () => {
     if (!barbershopId) return;
-    setLoadingInitial(true);
+    const isInitialLoad = !hasLoadedServicesRef.current;
+    if (isInitialLoad) setLoadingInitial(true);
+    setLoadError(null);
     try {
       const res = await servicesService.getAll(barbershopId);
       if (res.error) throw res.error;
       setServices(res.data ?? []);
+      hasLoadedServicesRef.current = true;
+      setHasLoadedServices(true);
     } catch (error) {
       console.error('[Serviços Sync Error]:', error);
+      setLoadError(t('servicesPage.loadError'));
       toast.error(t('servicesPage.loadError'));
     } finally {
-      setLoadingInitial(false);
+      if (isInitialLoad) setLoadingInitial(false);
     }
   }, [barbershopId, t]);
 
@@ -74,20 +82,46 @@ export default function ServicosPage() {
 
         {loadingInitial ? (
           <ServicesSkeletonGrid />
+        ) : loadError && !hasLoadedServices ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
+            <div role="alert" className="flex flex-col items-center gap-2">
+              <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+              <h2 className="font-medium">{t('servicesPage.loadError')}</h2>
+              <p className="max-w-lg text-sm text-muted-foreground">{loadError}</p>
+            </div>
+            <Button variant="outline" onClick={() => void fetchServices()}>
+              <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
         ) : (
-          <ServicesListCard
-            servicesCount={services.length}
-            services={services}
-            showAddServiceForm={showAddServiceForm}
-            setShowAddServiceForm={setShowAddServiceForm}
-            newServiceData={newServiceData}
-            setNewServiceData={setNewServiceData}
-            handleCreateService={handleCreateService}
-            setEditingService={setEditingService}
-            handleDeleteService={handleDeleteService}
-            handleToggleServiceActive={handleToggleServiceActive}
-            loading={loadingService}
-          />
+          <>
+            {loadError && (
+              <div
+                role="alert"
+                className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <p className="text-sm text-muted-foreground">{loadError} Os serviços já carregados continuam visíveis.</p>
+                <Button variant="outline" onClick={() => void fetchServices()} className="shrink-0">
+                  <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                  {t('common.retry')}
+                </Button>
+              </div>
+            )}
+            <ServicesListCard
+              servicesCount={services.length}
+              services={services}
+              showAddServiceForm={showAddServiceForm}
+              setShowAddServiceForm={setShowAddServiceForm}
+              newServiceData={newServiceData}
+              setNewServiceData={setNewServiceData}
+              handleCreateService={handleCreateService}
+              setEditingService={setEditingService}
+              handleDeleteService={handleDeleteService}
+              handleToggleServiceActive={handleToggleServiceActive}
+              loading={loadingService}
+            />
+          </>
         )}
 
         <EditServiceDialog
