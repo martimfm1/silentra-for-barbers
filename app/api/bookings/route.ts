@@ -33,6 +33,7 @@ type BookingRequestBody = {
   customerPhone?: unknown;
   customerEmail?: unknown;
   customerBirthDate?: unknown;
+  customerMarketingEmailConsent?: unknown;
   prepayment?: unknown;
 };
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -104,6 +105,7 @@ async function POST__unobserved(request: Request) {
         'customerPhone',
         'customerEmail',
         'customerBirthDate',
+        'customerMarketingEmailConsent',
         'prepayment',
       ],
     });
@@ -119,9 +121,19 @@ async function POST__unobserved(request: Request) {
       customerPhone,
       customerEmail,
       customerBirthDate,
+      customerMarketingEmailConsent,
       prepayment,
     } = payload as BookingRequestBody;
     const isPrepayment = prepayment === true;
+    if (
+      customerMarketingEmailConsent !== undefined &&
+      typeof customerMarketingEmailConsent !== 'boolean'
+    )
+      return NextResponse.json(
+        { success: false, error: 'Preferência de email inválida.' },
+        { status: 400 },
+      );
+    const marketingEmailConsent = customerMarketingEmailConsent === true;
     if (prepayment !== undefined && typeof prepayment !== 'boolean')
       return NextResponse.json(
         { success: false, error: 'Opção de pré-pagamento inválida.' },
@@ -552,6 +564,28 @@ async function POST__unobserved(request: Request) {
       actorName: name,
       metadata: { newStatus: appointment.status ?? 'pending' },
     });
+
+    if (marketingEmailConsent && email) {
+      const { error: consentError } = await admin
+        .from('marketing_contact_preferences')
+        .upsert(
+          {
+            barbershop_id: barbershopId,
+            client_id: existingCustomerId,
+            email: email.toLowerCase(),
+            email_consent_at: new Date().toISOString(),
+            email_consent_source: 'public_booking',
+            email_unsubscribed_at: null,
+            email_preference_updated_by: null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'barbershop_id,email' },
+        );
+      if (consentError) {
+        // Marketing consent is optional: do not undo an already-created booking.
+        console.error('[API_BOOKING_MARKETING_CONSENT_ERROR]', consentError.code ?? 'UNKNOWN');
+      }
+    }
 
     const paymentExpiresAt = isPrepayment
       ? (appointment.payment_expires_at as string | null)

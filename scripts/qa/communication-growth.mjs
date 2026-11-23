@@ -15,6 +15,13 @@ const automationsApi = read('app/api/marketing/campaigns/automation/route.ts');
 const lifecycleActions = read('app/dashboard/marketing/campaign-lifecycle-actions.tsx');
 const cancellationApi = read('app/api/marketing/campaigns/[campaignId]/cancel/route.ts');
 const marketingDispatcher = read('lib/marketing/dispatcher.ts');
+const manualCampaignSendApi = read('app/api/marketing/campaigns/[campaignId]/send/route.ts');
+const marketingConsent = read('lib/marketing/consent.ts');
+const marketingEmailTemplate = read('lib/marketing/email-template.ts');
+const marketingUnsubscribeApi = read('app/api/marketing/unsubscribe/route.ts');
+const crmMarketingPreferenceApi = read('app/api/crm/clients/[clientId]/marketing-preference/route.ts');
+const clientDetailsDialog = read('components/dashboard/client-details-dialog.tsx');
+const marketingMigration = read('supabase/migrations/20261123100000_manual_marketing_campaigns_and_preferences.sql');
 const manualCampaignRetirement = read(
   'supabase/migrations/20261111130000_disable_manual_marketing_communications.sql',
 );
@@ -93,28 +100,44 @@ const automationSection = workspace.slice(
 );
 assert.ok(automationSection.length > 0, 'Automation workspace section must exist.');
 assert.doesNotMatch(automationSection, /Ações rápidas|Enviar agora/);
-assert.doesNotMatch(workspace, /option value="manual"/);
-assert.match(campaignsApi, /MANUAL_CAMPAIGNS_DISABLED/);
+assert.match(workspace, /triggerType: 'manual'/);
+assert.match(workspace, /quota\.monthlyLimit/);
+assert.match(workspace, /Audiência autorizada/);
+assert.match(campaignsApi, /body\?\.triggerType === 'manual'/);
+assert.match(campaignsApi, /trigger_type: 'manual'/);
 assert.match(campaignsApi, /trigger_type: 'birthday'/);
-assert.doesNotMatch(campaignsApi, /export const PATCH/);
+assert.match(campaignsApi, /export const PATCH/);
 assert.match(campaignsApi, /export const DELETE/);
-assert.match(campaignsApi, /\.in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
+assert.match(campaignsApi, /marketing_campaign_monthly_usage/);
 assert.match(cancellationApi, /\.in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
 assert.match(lifecycleActions, /campaign\.trigger_type/);
 assert.match(automationsPage, /CampaignLifecycleActions/);
-assert.match(automationsApi, /in\('trigger_type', \['interval', 'event', 'birthday'\]\)/);
-assert.match(
-  marketingDispatcher,
-  /!\['interval', 'event', 'birthday'\]\.includes\(campaign\.trigger_type\)/,
-  'Queued manual campaign recipients must be skipped by the background worker.',
-);
+assert.ok(automationsApi.includes(".in('trigger_type', ['interval', 'event', 'birthday'])"));
+assert.ok(manualCampaignSendApi.includes('requireModuleContext'));
+assert.ok(manualCampaignSendApi.includes('reserve_marketing_campaign_send'));
+assert.ok(manualCampaignSendApi.includes('queueManualCampaignRecipients'));
+assert.ok(manualCampaignSendApi.includes('MARKETING_MONTHLY_QUOTA_REACHED'));
+assert.ok(marketingDispatcher.includes("!['manual', 'interval', 'event', 'birthday'].includes(campaign.trigger_type)"));
+assert.ok(marketingDispatcher.includes('marketing_contact_preferences'));
+assert.ok(marketingDispatcher.includes('getMarketingUnsubscribeUrl'));
+assert.ok(marketingConsent.includes('email_consent_at'));
+assert.ok(marketingConsent.includes('email_unsubscribed_at'));
+assert.ok(marketingEmailTemplate.includes('Cancelar subscrição'));
+assert.ok(marketingUnsubscribeApi.includes('verifyMarketingUnsubscribeToken'));
+assert.ok(crmMarketingPreferenceApi.includes('confirmedByCustomer !== true'));
+assert.ok(clientDetailsDialog.includes('Registar autorização'));
+assert.ok(clientDetailsDialog.includes('Revogar autorização'));
+assert.ok(marketingMigration.includes('marketing_contact_preferences to service_role;'));
+assert.ok(marketingMigration.includes('marketing_campaign_monthly_usage to service_role;'));
+assert.ok(marketingMigration.includes('security invoker'));
+assert.doesNotMatch(marketingMigration, /security definer/);
+assert.ok(marketingMigration.includes('claim_birthday_marketing_campaign'));
 assert.match(manualCampaignRetirement, /status = 'skipped'/);
 assert.match(manualCampaignRetirement, /active = false/);
 
 for (const path of [
   'app/api/messages/send/route.ts',
   'app/api/messages/status/route.ts',
-  'app/api/marketing/campaigns/[campaignId]/send/route.ts',
   'app/api/marketplace/orders/[orderId]/email/route.ts',
 ]) {
   assert.equal(fs.existsSync(path), false, path + ' must be removed.');
@@ -133,5 +156,5 @@ for (const route of [
 }
 
 console.log(
-  '[COMMUNICATION_GROWTH_QA] Manual customer messaging and campaign creation are disabled; automatic triggers retain cancellation and cleanup controls.',
+  '[COMMUNICATION_GROWTH_QA] Manual email campaigns are plan-gated, tenant-scoped, consent-gated, quota-limited and unsubscribable; legacy general messaging remains retired.',
 );

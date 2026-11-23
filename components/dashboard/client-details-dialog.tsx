@@ -65,6 +65,13 @@ type ClientNote = {
   updated_at?: string | null;
 };
 
+type MarketingPreference = {
+  active: boolean;
+  consentedAt: string | null;
+  unsubscribedAt: string | null;
+  email: string | null;
+};
+
 type ClientDetails = {
   client: ClientProfile;
   appointments: Appointment[];
@@ -157,6 +164,12 @@ export function ClientDetailsDialog({
   const [savingNote, setSavingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadRetryKey, setLoadRetryKey] = useState(0);
+  const [marketingPreference, setMarketingPreference] =
+    useState<MarketingPreference | null>(null);
+  const [marketingConsentConfirmed, setMarketingConsentConfirmed] =
+    useState(false);
+  const [savingMarketingPreference, setSavingMarketingPreference] =
+    useState(false);
 
   useEffect(() => {
     if (!open || !clientId) return;
@@ -168,6 +181,8 @@ export function ClientDetailsDialog({
     setNoteDraft('');
     setAvailableTags([]);
     setSelectedTagId('');
+    setMarketingPreference(null);
+    setMarketingConsentConfirmed(false);
 
     void (async () => {
       try {
@@ -211,6 +226,27 @@ export function ClientDetailsDialog({
           } catch {
             if (!controller.signal.aborted) setAvailableTags([]);
           }
+
+          try {
+            const preferenceResponse = await fetch(
+              '/api/crm/clients/' + clientId + '/marketing-preference',
+              {
+                headers,
+                cache: 'no-store',
+                signal: controller.signal,
+              },
+            );
+            if (preferenceResponse.ok) {
+              const preferencePayload = await preferenceResponse.json();
+              if (!controller.signal.aborted) {
+                setMarketingPreference(preferencePayload.preference ?? null);
+              }
+            } else if (!controller.signal.aborted) {
+              setMarketingPreference(null);
+            }
+          } catch {
+            if (!controller.signal.aborted) setMarketingPreference(null);
+          }
         }
       } catch (requestError) {
         if (controller.signal.aborted) return;
@@ -226,6 +262,56 @@ export function ClientDetailsDialog({
 
     return () => controller.abort();
   }, [clientId, open, t, loadRetryKey]);
+
+  async function updateMarketingPreference(consent: boolean) {
+    if (!clientId || savingMarketingPreference) return;
+    if (consent && !marketingConsentConfirmed) return;
+    setSavingMarketingPreference(true);
+    try {
+      const headers = await authHeaders(true, t('crm.sessionExpired'));
+      const response = await fetch(
+        '/api/crm/clients/' + clientId + '/marketing-preference',
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            consent,
+            confirmedByCustomer: consent && marketingConsentConfirmed,
+          }),
+        },
+      );
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          payload.error ??
+            (locale === 'pt'
+              ? 'Não foi possível atualizar a autorização.'
+              : 'Could not update marketing permission.'),
+        );
+      }
+      setMarketingPreference(payload.preference ?? null);
+      setMarketingConsentConfirmed(false);
+      toast.success(
+        consent
+          ? locale === 'pt'
+            ? 'Autorização de email registada.'
+            : 'Email permission recorded.'
+          : locale === 'pt'
+            ? 'Autorização de email revogada.'
+            : 'Email permission revoked.',
+      );
+    } catch (saveError) {
+      toast.error(
+        saveError instanceof Error
+          ? saveError.message
+          : locale === 'pt'
+            ? 'Não foi possível guardar a preferência.'
+            : 'Could not save the preference.',
+      );
+    } finally {
+      setSavingMarketingPreference(false);
+    }
+  }
 
   async function updateClientTag(tagId: string, action: 'add' | 'remove') {
     if (!clientId || !tagId || savingTag) return;
@@ -622,6 +708,112 @@ export function ClientDetailsDialog({
                   ) : null}
                 </CardContent>
               </Card>
+
+              {marketingPreference ? (
+                <Card className="border-white/[0.09] bg-gradient-to-br from-white/[0.045] via-white/[0.025] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Mail className="size-5 text-emerald-300" />
+                      {locale === 'pt'
+                        ? 'Comunicações por email'
+                        : 'Email marketing'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={
+                          marketingPreference.active
+                            ? 'size-2 rounded-full bg-emerald-300'
+                            : 'size-2 rounded-full bg-zinc-500'
+                        }
+                        aria-hidden="true"
+                      />
+                      <p className="text-sm font-medium">
+                        {marketingPreference.active
+                          ? locale === 'pt'
+                            ? 'Autorização ativa'
+                            : 'Permission active'
+                          : locale === 'pt'
+                            ? 'Sem autorização ativa'
+                            : 'No active permission'}
+                      </p>
+                    </div>
+                    {marketingPreference.active && marketingPreference.consentedAt ? (
+                      <p className="text-xs text-zinc-500">
+                        {locale === 'pt' ? 'Registada em' : 'Recorded on'}{' '}
+                        {formatDate(marketingPreference.consentedAt, locale)}
+                      </p>
+                    ) : null}
+                    {!marketingPreference.email ? (
+                      <p className="text-xs text-zinc-500">
+                        {locale === 'pt'
+                          ? 'Adiciona um email à ficha antes de registares a autorização.'
+                          : 'Add an email address before recording permission.'}
+                      </p>
+                    ) : null}
+                    {marketingPreference.active ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={savingMarketingPreference}
+                        onClick={() => void updateMarketingPreference(false)}
+                      >
+                        {savingMarketingPreference
+                          ? locale === 'pt'
+                            ? 'A guardar…'
+                            : 'Saving…'
+                          : locale === 'pt'
+                            ? 'Revogar autorização'
+                            : 'Revoke permission'}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <label className="flex items-start gap-2.5 text-xs leading-5 text-zinc-400">
+                          <input
+                            type="checkbox"
+                            checked={marketingConsentConfirmed}
+                            onChange={(event) =>
+                              setMarketingConsentConfirmed(event.target.checked)
+                            }
+                            disabled={!marketingPreference.email || savingMarketingPreference}
+                            className="mt-0.5 size-4 shrink-0 accent-emerald-500"
+                          />
+                          <span>
+                            {locale === 'pt'
+                              ? 'O cliente confirmou expressamente que quer receber novidades e campanhas por email desta barbearia.'
+                              : 'The customer explicitly confirmed they want to receive news and campaigns from this barbershop by email.'}
+                          </span>
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={
+                            !marketingPreference.email ||
+                            !marketingConsentConfirmed ||
+                            savingMarketingPreference
+                          }
+                          onClick={() => void updateMarketingPreference(true)}
+                        >
+                          {savingMarketingPreference
+                            ? locale === 'pt'
+                              ? 'A guardar…'
+                              : 'Saving…'
+                            : locale === 'pt'
+                              ? 'Registar autorização'
+                              : 'Record permission'}
+                        </Button>
+                      </div>
+                    )}
+                    <p className="text-[11px] leading-4 text-zinc-500">
+                      {locale === 'pt'
+                        ? 'Regista apenas uma autorização dada pelo próprio cliente. O cliente pode cancelar a subscrição em qualquer email.'
+                        : 'Only record permission given by the customer. They can unsubscribe from any campaign email.'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : null}
 
               <ClientPlansManager clientId={client.id} />
 

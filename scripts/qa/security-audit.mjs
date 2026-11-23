@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 const sourceFiles = execFileSync(
   'git',
@@ -68,10 +69,9 @@ function extractConsoleArguments(source) {
 const findings = [];
 
 for (const file of sourceFiles) {
-  const source = execFileSync('git', ['show', `HEAD:${file}`], {
+  const source = execFileSync('git', ['show', 'HEAD:' + file], {
     encoding: 'utf8',
   });
-
   if (spoofableForwardedForPattern.test(source)) {
     findings.push(`spoofable X-Forwarded-For rate-limit key: ${file}`);
   }
@@ -310,12 +310,42 @@ const requestValidationChecks = [
   {
     file: 'app/api/marketing/campaigns/route.ts',
     markers: [
-      'MANUAL_CAMPAIGNS_DISABLED',
+      "body?.triggerType === 'manual'",
       "requireModuleContext(",
       ".eq('barbershop_id', barbershopId)",
-      ".in('trigger_type', ['interval', 'event', 'birthday'])",
+      "trigger_type: 'manual'",
     ],
-    label: 'Manual campaigns are rejected and automation reads stay tenant scoped',
+    label: 'Manual marketing campaigns are plan-gated and tenant scoped',
+  },
+  {
+    file: 'app/api/marketing/campaigns/[campaignId]/send/route.ts',
+    markers: [
+      'requireModuleContext',
+      'reserve_marketing_campaign_send',
+      'queueManualCampaignRecipients',
+      'MARKETING_MONTHLY_QUOTA_REACHED',
+    ],
+    label: 'Manual campaign delivery authorization and atomic monthly quota',
+  },
+  {
+    file: 'app/api/marketing/unsubscribe/route.ts',
+    markers: [
+      'verifyMarketingUnsubscribeToken',
+      "email_unsubscribed_at: new Date().toISOString()",
+      ".eq('barbershop_id', payload.barbershopId)",
+    ],
+    label: 'Signed tenant-scoped marketing unsubscribe endpoint',
+  },
+  {
+    file: 'app/api/crm/clients/[clientId]/marketing-preference/route.ts',
+    markers: [
+      "requireModuleContext(",
+      'readJsonObject(request',
+      'confirmedByCustomer !== true',
+      "email_preference_updated_by: context.userId",
+      ".eq('barbershop_id', context.barbershopId)",
+    ],
+    label: 'Staff marketing preference requires customer confirmation and tenant scope',
   },
   {
     file: 'app/api/barbershops/avatar/route.ts',
@@ -604,9 +634,7 @@ const requestValidationChecks = [
 ];
 
 for (const check of requestValidationChecks) {
-  const source = execFileSync('git', ['show', `HEAD:${check.file}`], {
-    encoding: 'utf8',
-  });
+  const source = readFileSync(check.file, 'utf8');
   const normalizedSource = source.replace(/\s+/g, ' ').trim();
   for (const marker of check.markers) {
     const normalizedMarker = marker.replace(/\s+/g, ' ').trim();

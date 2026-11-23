@@ -82,20 +82,12 @@ async function GET__unobserved() {
         .eq('role', 'client')
         .not('email', 'is', null)
         .neq('email', ''),
-      admin
-        .from('users')
-        .select('id', { count: 'exact', head: true })
-        .eq('barbershop_id', barbershopId)
-        .eq('role', 'client')
-        .not('birth_date', 'is', null)
-        .not('email', 'is', null)
-        .neq('email', ''),
     ]);
 
     const audienceError = audienceQueries.find((result) => result.error)?.error;
     if (audienceError) throw audienceError;
 
-    const [total, withBirthDate, withEmail, birthdayReady] = audienceQueries;
+    const [total, withBirthDate, withEmail] = audienceQueries;
     const birthdayCampaign = (campaigns ?? []).find(
       (campaign) =>
         campaign.trigger_type === 'birthday' &&
@@ -124,8 +116,28 @@ async function GET__unobserved() {
         Number(birthdayCampaign?.birthday_offset_days ?? 0),
     );
     const targetMonthDay = birthdayTarget.toISOString().slice(5, 10);
-    let birthdaysToday = 0;
+    const consentedEmails = new Set<string>();
     const audiencePageSize = 1000;
+    for (let offset = 0; ; offset += audiencePageSize) {
+      const { data: preferencePage, error: preferenceError } = await admin
+        .from('marketing_contact_preferences')
+        .select('email')
+        .eq('barbershop_id', barbershopId)
+        .not('email_consent_at', 'is', null)
+        .is('email_unsubscribed_at', null)
+        .order('email', { ascending: true })
+        .range(offset, offset + audiencePageSize - 1);
+      if (preferenceError) throw preferenceError;
+      for (const preference of preferencePage ?? []) {
+        if (typeof preference.email === 'string') {
+          consentedEmails.add(preference.email.trim().toLowerCase());
+        }
+      }
+      if (!preferencePage || preferencePage.length < audiencePageSize) break;
+    }
+
+    let birthdayReady = 0;
+    let birthdaysToday = 0;
     for (let offset = 0; ; offset += audiencePageSize) {
       const { data: birthdayClients, error: birthdayClientsError } =
         await admin
@@ -134,15 +146,19 @@ async function GET__unobserved() {
           .eq('barbershop_id', barbershopId)
           .eq('role', 'client')
           .not('birth_date', 'is', null)
+          .not('email', 'is', null)
+          .neq('email', '')
           .order('id', { ascending: true })
           .range(offset, offset + audiencePageSize - 1);
       if (birthdayClientsError) throw birthdayClientsError;
-      birthdaysToday += (birthdayClients ?? []).filter(
-        (client) =>
-          String(client.birth_date ?? '').slice(5) === targetMonthDay &&
-          typeof client.email === 'string' &&
-          client.email.trim().length > 0,
-      ).length;
+      for (const client of birthdayClients ?? []) {
+        const email = String(client.email ?? '').trim().toLowerCase();
+        if (!email || !consentedEmails.has(email)) continue;
+        birthdayReady++;
+        if (String(client.birth_date ?? '').slice(5) === targetMonthDay) {
+          birthdaysToday++;
+        }
+      }
       if (!birthdayClients || birthdayClients.length < audiencePageSize) break;
     }
 
@@ -156,7 +172,7 @@ async function GET__unobserved() {
           totalClients: total.count ?? 0,
           withBirthDate: withBirthDate.count ?? 0,
           withEmail: withEmail.count ?? 0,
-          birthdayReady: birthdayReady.count ?? 0,
+          birthdayReady,
           birthdaysToday,
         },
         meta: { generatedAt: new Date().toISOString() },
