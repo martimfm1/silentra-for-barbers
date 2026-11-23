@@ -262,7 +262,7 @@ export default function WaitlistPage() {
                 {en ? 'Active requests' : 'Pedidos ativos'}
               </p>
               <p className="mt-0.5 text-xl font-semibold tabular-nums text-emerald-100">
-                {activeCount}
+                {hasLoadedEntries ? activeCount : '—'}
               </p>
             </div>
             <Button
