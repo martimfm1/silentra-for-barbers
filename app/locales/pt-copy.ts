@@ -491,6 +491,10 @@ export const ptCopy = {
     loadStateError: 'Não foi possível carregar o estado da equipa.',
     loadProfilesError:
       'Não foi possível carregar os perfis de barbeiro. Tenta novamente.',
+    seatsUnavailableHint: 'Os lugares não foram confirmados. Tenta novamente antes de criares perfis ou enviares convites.',
+    previousSeatsHint: 'O último limite confirmado continua visível. Tenta novamente para atualizar.',
+    loadingSeats: 'A confirmar os lugares da equipa…',
+    previousProfilesHint: 'Os perfis carregados anteriormente continuam visíveis.',
     teamSeats: 'Lugares de equipa',
     barberProfiles: 'Perfis de barbeiro',
     teamDescription:
