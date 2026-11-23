@@ -102,21 +102,38 @@ async function newPage(browser) {
   page.on('pageerror', (error) => {
     console.error('E2E_PAGE_ERROR ' + error.message);
   });
+  page.on('requestfailed', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === baseUrl && url.pathname.startsWith('/api/auth/')) {
+      console.error(
+        'E2E_AUTH_REQUEST_FAILED ' +
+          request.method() +
+          ' ' +
+          url.pathname +
+          ' ' +
+          (request.failure()?.errorText || 'unknown'),
+      );
+    }
+  });
   return page;
 }
 
 async function login(page, identity, redirectPath) {
   const query = redirectPath ? '?redirect=' + encodeURIComponent(redirectPath) : '';
   await page.goto(baseUrl + '/login' + query, { waitUntil: 'domcontentloaded' });
+  await page.locator('form[data-testid="login-form"][data-login-ready="true"]').waitFor({ state: 'visible', timeout: 20_000 });
   await page.locator('#login-email').fill(identity.email);
   await page.locator('#login-password').fill(identity.password);
+  const isLoginRequest = (request) =>
+    new URL(request.url()).pathname === '/api/auth/login' &&
+    request.method() === 'POST';
+  const loginRequestPromise = page.waitForRequest(isLoginRequest, { timeout: 15_000 });
   const loginResponsePromise = page.waitForResponse(
-    (response) =>
-      new URL(response.url()).pathname === '/api/auth/login' &&
-      response.request().method() === 'POST',
+    (response) => isLoginRequest(response.request()),
     { timeout: 30_000 },
   );
   await page.getByRole('button', { name: 'Iniciar sessão' }).click();
+  await loginRequestPromise;
 
   const loginResponse = await loginResponsePromise;
   let loginResult = null;

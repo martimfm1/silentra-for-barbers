@@ -52,10 +52,15 @@ export default function LoginPage() {
   const [isUnconfirmed, setIsUnconfirmed] = useState(false);
   const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
+  const [isClientReady, setIsClientReady] = useState(false);
   const [inviteRedirect, setInviteRedirect] = useState<string | null>(null);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const loginEmailHintId = useId();
+
+  useEffect(() => {
+    setIsClientReady(true);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -199,6 +204,8 @@ export default function LoginPage() {
 
                     {activeTab === 'login' ? (
                       <form
+                        data-testid="login-form"
+                        data-login-ready={isClientReady ? 'true' : 'false'}
                         className="grid gap-4"
                         onSubmit={(event) =>
                           handleLogin({
@@ -317,7 +324,7 @@ export default function LoginPage() {
                             isSubmitting ? 'A iniciar sessão' : 'Iniciar sessão'
                           }
                           type="submit"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || !isClientReady}
                           className="min-h-11 w-full rounded-full font-semibold"
                         >
                           {isSubmitting ? (

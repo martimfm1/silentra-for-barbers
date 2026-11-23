@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const workflow = readFileSync('.github/workflows/isolated-e2e.yml', 'utf8');
 const runner = readFileSync('scripts/e2e/booking-tenant-isolation.mjs', 'utf8');
+const loginPage = readFileSync('app/login/page.tsx', 'utf8');
 const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const planEnumMigration = readFileSync('supabase/migrations/20260815194400_create_subscription_plan_enum.sql', 'utf8');
 const professionalUserIdMigration = readFileSync('supabase/migrations/20260821122900_add_professional_user_id.sql', 'utf8');
@@ -56,6 +57,9 @@ assert.match(runner, /SUPABASE_SERVICE_ROLE_KEY/, 'Service role must be read onl
 assert.match(runner, /\/api\/team\/invite/, 'E2E must exercise the invite API.');
 assert.match(runner, /Continuar com convite/, 'E2E must accept invitations in the browser UI.');
 assert.match(runner, /\/api\/auth\/login/, 'E2E must verify the real authenticated login API response.');
+assert.match(runner, /form\[data-testid="login-form"\]\[data-login-ready="true"\]/, 'E2E must wait for login form hydration before submitting credentials.');
+assert.match(loginPage, /data-login-ready=\{isClientReady \? 'true' : 'false'\}/, 'Login form must expose its hydration readiness state.');
+assert.match(loginPage, /disabled=\{isSubmitting \|\| !isClientReady\}/, 'Login submission must remain disabled until the client event handlers are hydrated.');
 assert.match(runner, /window\.location\.pathname === '\/onboarding'[\s\S]*waitForFunction/, 'E2E must wait for client-side App Router transitions without requiring a full document load.');
 assert.match(runner, /E2E_PAGE_ERROR/, 'E2E must surface uncaught browser errors in the action log.');
 assert.match(runner, /\/api\/bookings/, 'E2E must exercise public booking.');
