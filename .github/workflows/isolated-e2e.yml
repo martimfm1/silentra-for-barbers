@@ -95,11 +95,20 @@ jobs:
           pnpm add --save-dev playwright@1.56.1
           pnpm exec playwright install --with-deps chromium
 
-      - name: Start application against local Supabase
+      - name: Build application against local Supabase
         shell: bash
         run: |
           set -euo pipefail
-          pnpm dev > /tmp/silentra-e2e-next.log 2>&1 &
+          pnpm build > /tmp/silentra-e2e-build.log 2>&1 || {
+            cat /tmp/silentra-e2e-build.log
+            exit 1
+          }
+
+      - name: Start production application against local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm start > /tmp/silentra-e2e-next.log 2>&1 &
           echo $! > /tmp/silentra-e2e-next.pid
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then

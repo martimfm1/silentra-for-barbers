@@ -30,12 +30,13 @@ Export the API_URL, ANON_KEY and SERVICE_ROLE_KEY values from the local status o
 
 Install the browser runner temporarily (it is not added to the production dependency graph):
 
-    npm install --no-save --package-lock=false playwright@1.56.1
-    npx playwright install chromium
+    pnpm add --save-dev playwright@1.56.1
+    pnpm exec playwright install chromium
 
-Then start the app in one terminal and execute the test in another:
+Build and start the application in production mode against the local Supabase stack, then execute the test in another terminal:
 
-    pnpm dev
+    pnpm build
+    pnpm start
     node scripts/e2e/booking-tenant-isolation.mjs
 
 Stop and discard the local database afterwards:
