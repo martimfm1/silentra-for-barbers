@@ -70,6 +70,10 @@ assert.match(clientsPage, /const \[loadError, setLoadError\] = useState<string \
 assert.match(clientsPage, /const \[hasLoadedClients, setHasLoadedClients\] = useState\(false\)/);
 assert.match(clientsPage, /const lastBarbershopIdRef = useRef<string \| null \| undefined>\(undefined\)/);
 assert.match(clientsPage, /lastBarbershopIdRef\.current !== currentBarbershopId/);
+assert.match(clientsPage, /lastClientDialogBarbershopIdRef/);
+assert.match(clientsPage, /setSelectedClientId\(null\)/);
+assert.match(clientsPage, /setEditingClient\(null\)/);
+assert.match(clientsPage, /setShowAddClientForm\(false\)/);
 assert.match(clientsPage, /setClients\(\[\]\)/);
 assert.match(clientsPage, /setHasLoadedClients\(true\)/);
 assert.match(clientsPage, /loadError && !hasLoadedClients/);
