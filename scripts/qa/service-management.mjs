@@ -125,7 +125,7 @@ assert.match(servicePage, /loadError && !hasLoadedServices\.current/);
 assert.match(servicePage, /role="alert"/);
 assert.match(servicePage, /onClick=\{\(\) => void fetchServices\(\)\}/);
 assert.match(servicePage, /hasLoadedServices\.current = true/);
-assert.match(servicePage, /hasLoadedServices\\.current = true/);
+
 assert.match(bookingDataApi, /service\.buffer_minutes/);
 assert.match(bookingDataApi, /reservedDuration/);
 assert.match(bookingApi, /selectedService\.buffer_minutes/);
