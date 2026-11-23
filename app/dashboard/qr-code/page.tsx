@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
-import { Check, Copy, Download, Printer, QrCode, Share2 } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Download, Printer, QrCode, RefreshCw, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ManagementPageHeader } from '@/app/dashboard/_components/shared/ManagementPageHeader';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,7 @@ export default function QrCodePage() {
   const [png, setPng] = useState('');
   const [svg, setSvg] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const normalizedSlug = useMemo(
     () => normalizePublicProfileSlug(slug),
@@ -48,30 +49,55 @@ export default function QrCodePage() {
     (normalizedSlug
       ? `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (typeof window === 'undefined' ? '' : window.location.origin)).replace(/\/$/, '')}/barbershops/${encodeURIComponent(normalizedSlug)}`
       : '');
-  useEffect(() => {
-    fetch('/api/barbershops/qr-code', { cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        return response.json() as Promise<{
-          slug: string;
-          name: string;
-          text: string;
-          canCustomize: boolean;
-          publicUrl?: string;
-        }>;
-      })
-      .then((data) => {
-        setSlug(data.slug);
-        setSavedSlug(data.slug);
-        setCanCustomize(data.canCustomize);
-        setResolvedPublicUrl(data.publicUrl || '');
-        setName(data.name);
-        setText(data.text);
-        setSavedText(data.text);
-      })
-      .catch(() => toast.error(t('qrCodePage.loadError')))
-      .finally(() => setLoading(false));
+  const loadConfig = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const response = await fetch('/api/barbershops/qr-code', {
+        cache: 'no-store',
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            slug?: unknown;
+            name?: unknown;
+            text?: unknown;
+            canCustomize?: unknown;
+            publicUrl?: unknown;
+            error?: string;
+          }
+        | null;
+      if (
+        !response.ok ||
+        !payload ||
+        typeof payload.slug !== 'string' ||
+        typeof payload.name !== 'string' ||
+        typeof payload.text !== 'string' ||
+        typeof payload.canCustomize !== 'boolean'
+      ) {
+        throw new Error(payload?.error || t('qrCodePage.loadError'));
+      }
+
+      setSlug(payload.slug);
+      setSavedSlug(payload.slug);
+      setCanCustomize(payload.canCustomize);
+      setResolvedPublicUrl(
+        typeof payload.publicUrl === 'string' ? payload.publicUrl : '',
+      );
+      setName(payload.name);
+      setText(payload.text);
+      setSavedText(payload.text);
+    } catch (error) {
+      setLoadError(
+        error instanceof Error ? error.message : t('qrCodePage.loadError'),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [t]);
+
+  useEffect(() => {
+    void loadConfig();
+  }, [loadConfig]);
   useEffect(() => {
     if (!publicUrl) return;
     void Promise.all([
@@ -205,10 +231,24 @@ export default function QrCodePage() {
           accentClassName="border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
         />
         {loading ? (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2" aria-busy="true">
             <Skeleton className="h-[420px]" />
             <Skeleton className="h-[420px]" />
           </div>
+        ) : loadError ? (
+          <Card className="border-amber-300/20 bg-amber-300/[0.04]">
+            <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+              <div role="alert" className="flex flex-col items-center gap-2">
+                <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+                <h2 className="font-medium">{t('qrCodePage.loadError')}</h2>
+                <p className="max-w-lg text-sm text-muted-foreground">{loadError}</p>
+              </div>
+              <Button onClick={() => void loadConfig()} disabled={loading}>
+                <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                {t('common.retry')}
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <>
             <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
