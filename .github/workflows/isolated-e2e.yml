@@ -92,7 +92,6 @@ jobs:
 
       - name: Install Playwright with pnpm for isolated browser tests
         run: |
-          pnpm config set frozen-lockfile false
           pnpm add --save-dev playwright@1.56.1
           pnpm exec playwright install --with-deps chromium
 
