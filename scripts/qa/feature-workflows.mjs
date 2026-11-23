@@ -722,7 +722,7 @@ assert.ok(law13GrowthDashboard.includes('setupPublicProfile.publicPageReachable'
 assert.ok(law13GrowthDashboard.includes("appointment.status === 'completed'"));
 assert.ok(law13GrowthDashboard.includes('clientsMissingEmailCount > 0'));
 assert.ok(law13GrowthDashboard.includes("nonCancelledBookings.length <= 5"));
-assert.ok(law13GrowthDashboard.includes('loadingInitial || loadingSetupData || nextSetupStep'));
+assert.ok(law13GrowthDashboard.includes('loadingInitial || loadingSetupData || !hasLoadedDashboardData || nextSetupStep'));
 assert.ok(law13GrowthDashboard.includes('navigator.clipboard.writeText(publicUrl)'));
 assert.ok(law13GrowthDashboard.includes("'/dashboard/settings#settings-rules'"));
 assert.ok(law13GrowthDashboard.includes("'/dashboard/clientes'"));
