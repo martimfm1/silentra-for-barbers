@@ -586,7 +586,7 @@ assert.ok(onboardingDashboard.includes('setupPublicProfile.public_profile_enable
 assert.ok(onboardingDashboard.includes('services.some((service) => service.is_active !== false)'));
 assert.ok(onboardingDashboard.includes('professionals.some((professional) => professional.active !== false)'));
 assert.ok(onboardingDashboard.includes("appointment.status !== 'cancelled'"));
-assert.ok(onboardingDashboard.includes('!loadingSetupData && nextSetupStep'));
+assert.ok(onboardingDashboard.includes('!loadingSetupData && hasLoadedDashboardData && nextSetupStep'));
 assert.ok(onboardingConfigService.includes('weekly_schedule'));
 assert.ok(onboardingConfigService.includes('opening_time, closing_time'));
 assert.ok(onboardingPublicProfileApi.includes("'id, slug, custom_slug, city, price, tags, public_profile_enabled"));
