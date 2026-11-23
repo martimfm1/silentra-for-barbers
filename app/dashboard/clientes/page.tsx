@@ -191,7 +191,7 @@ export default function ClientesPage() {
           accentClassName="text-blue-400 bg-blue-500/10 border-blue-500/20"
         />
 
-        {loadingInitial ? (
+        {isLoadingBarbershop || loadingInitial ? (
           <ClientsListSkeleton />
         ) : loadError && !hasLoadedClients ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
