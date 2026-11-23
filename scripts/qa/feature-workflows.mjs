@@ -840,3 +840,16 @@ console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lea
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
+
+
+const waitlistPage = read('app/dashboard/espera/page.tsx');
+assert.match(waitlistPage, /Array\.isArray\(payload\.entries\)/);
+assert.match(waitlistPage, /setHasLoadedEntries\(true\)/);
+assert.match(waitlistPage, /setLoadError\(/);
+assert.match(waitlistPage, /role="alert"/);
+assert.match(waitlistPage, /hasLoadedEntries \? activeCount : '—'/);
+assert.match(waitlistPage, /!hasLoadedEntries \? null/);
+assert.ok(waitlistPage.includes('The previously loaded requests are still shown.'));
+assert.ok(waitlistPage.includes('Os pedidos carregados anteriormente continuam visíveis.'));
+assert.ok(waitlistPage.includes("{en ? 'Try again' : 'Tentar novamente'}"));
+console.log('[LAW13_WAITLIST_RECOVERY_QA] Waitlist payloads are validated; load failures are distinct from empty data and refresh errors preserve the last confirmed entries.');
