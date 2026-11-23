@@ -102,9 +102,14 @@ async function newPage(browser) {
   page.on('pageerror', (error) => {
     console.error('E2E_PAGE_ERROR ' + error.message);
   });
+  page.on('console', (message) => {
+    if (message.type() === 'error') {
+      console.error('E2E_BROWSER_CONSOLE_ERROR ' + message.text().slice(0, 500));
+    }
+  });
   page.on('requestfailed', (request) => {
     const url = new URL(request.url());
-    if (url.origin === baseUrl && url.pathname.startsWith('/api/auth/')) {
+    if (url.origin === baseUrl && (url.pathname.startsWith('/api/auth/') || url.pathname === '/login')) {
       console.error(
         'E2E_AUTH_REQUEST_FAILED ' +
           request.method() +
@@ -120,8 +125,40 @@ async function newPage(browser) {
 
 async function login(page, identity, redirectPath) {
   const query = redirectPath ? '?redirect=' + encodeURIComponent(redirectPath) : '';
-  await page.goto(baseUrl + '/login' + query, { waitUntil: 'domcontentloaded' });
-  await page.locator('form[data-testid="login-form"][data-login-ready="true"]').waitFor({ state: 'visible', timeout: 20_000 });
+  const requestedLoginUrl = baseUrl + '/login' + query;
+  const loginPageResponse = await page.goto(requestedLoginUrl, { waitUntil: 'domcontentloaded' });
+  try {
+    await page.locator('form[data-testid="login-form"][data-login-ready="true"]').waitFor({
+      state: 'visible',
+      timeout: 30_000,
+    });
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      currentUrl: window.location.href,
+      title: document.title,
+      bodyText: (document.body?.innerText || '').slice(0, 1_200),
+      forms: Array.from(document.forms).map((form) => ({
+        action: form.action,
+        method: form.method,
+        ready: form.getAttribute('data-login-ready'),
+        text: (form.innerText || '').slice(0, 350),
+      })),
+      inputs: Array.from(document.querySelectorAll('input')).map((input) => ({
+        id: input.id,
+        type: input.type,
+      })),
+    }));
+    console.error(
+      'E2E_LOGIN_FORM_DIAGNOSTIC ' +
+        JSON.stringify({
+          requestedLoginUrl,
+          responseStatus: loginPageResponse?.status() ?? null,
+          identityRole: identity.email.split('-')[0],
+          diagnostics,
+        }),
+    );
+    throw new Error('Synthetic login page did not hydrate: ' + (error instanceof Error ? error.message : 'unknown'));
+  }
   await page.locator('#login-email').fill(identity.email);
   await page.locator('#login-password').fill(identity.password);
   const isLoginRequest = (request) =>

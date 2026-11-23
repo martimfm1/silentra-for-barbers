@@ -62,6 +62,8 @@ assert.match(loginPage, /data-login-ready=\{isClientReady \? 'true' : 'false'\}/
 assert.match(loginPage, /disabled=\{isSubmitting \|\| !isClientReady\}/, 'Login submission must remain disabled until the client event handlers are hydrated.');
 assert.match(runner, /window\.location\.pathname === '\/onboarding'[\s\S]*waitForFunction/, 'E2E must wait for client-side App Router transitions without requiring a full document load.');
 assert.match(runner, /E2E_PAGE_ERROR/, 'E2E must surface uncaught browser errors in the action log.');
+assert.match(runner, /E2E_LOGIN_FORM_DIAGNOSTIC/, 'E2E must emit login-route diagnostics when hydration fails.');
+assert.match(runner, /E2E_BROWSER_CONSOLE_ERROR/, 'E2E must surface browser console errors.');
 assert.match(runner, /\/api\/bookings/, 'E2E must exercise public booking.');
 assert.match(runner, /\/api\/appointments\/.*\/activity/, 'E2E must exercise tenant-scoped appointment activity.');
 assert.match(runner, /\/api\/appointments\/.*\/reschedule/, 'E2E must exercise rescheduling.');
