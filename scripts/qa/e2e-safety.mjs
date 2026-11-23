@@ -16,7 +16,7 @@ assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runn
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
 assert.match(workflow, /pnpm exec supabase status -o env/, 'E2E workflow must source local Supabase credentials.');
 assert.match(workflow, /runs-on: ubuntu-24\.04/, 'E2E browser runner must use a Playwright-supported Ubuntu image.');
-assert.match(workflow, /pnpm add --save-dev --no-frozen-lockfile playwright@1\.56\.1/, 'E2E workflow must install Playwright through pnpm and refresh its ephemeral lockfile.');
+assert.match(workflow, /pnpm config set frozen-lockfile false[\s\S]*pnpm add --save-dev playwright@1\.56\.1/, 'E2E workflow must let pnpm refresh its ephemeral lockfile before installing Playwright.');
 assert.match(workflow, /pnpm exec playwright install --with-deps chromium/, 'E2E workflow must install Chromium with the pnpm-managed Playwright CLI.');
 assert.doesNotMatch(workflow, /npm install --no-save|npx playwright/, 'E2E workflow must not mix npm/npx installs into pnpm node_modules.');
 assert.match(workflow, /pnpm exec supabase stop --no-backup/, 'E2E workflow must discard its local stack.');

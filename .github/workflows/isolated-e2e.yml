@@ -92,7 +92,8 @@ jobs:
 
       - name: Install Playwright with pnpm for isolated browser tests
         run: |
-          pnpm add --save-dev --no-frozen-lockfile playwright@1.56.1
+          pnpm config set frozen-lockfile false
+          pnpm add --save-dev playwright@1.56.1
           pnpm exec playwright install --with-deps chromium
 
       - name: Start application against local Supabase
