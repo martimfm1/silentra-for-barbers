@@ -10,7 +10,7 @@ const [dashboard, settingsPage, editor, api, migration, locationPanel] = await P
     'supabase/migrations/20261030120137_dashboard_customizations.sql',
     'utf8',
   ),
-  read('components/dashboard/settings-location-panel.tsx', 'utf8'),
+  readFile('components/dashboard/settings-location-panel.tsx', 'utf8'),
 ]);
 
 // Dashboard renders only the selected shortcuts and independently toggleable sections.
