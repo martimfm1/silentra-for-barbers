@@ -55,6 +55,9 @@ assert.match(runner, /auth\.admin\.deleteUser/, 'E2E fixtures must be deleted af
 assert.match(runner, /SUPABASE_SERVICE_ROLE_KEY/, 'Service role must be read only by the Node test runner.');
 assert.match(runner, /\/api\/team\/invite/, 'E2E must exercise the invite API.');
 assert.match(runner, /Continuar com convite/, 'E2E must accept invitations in the browser UI.');
+assert.match(runner, /\/api\/auth\/login/, 'E2E must verify the real authenticated login API response.');
+assert.match(runner, /window\.location\.pathname === '\/onboarding'[\s\S]*waitForFunction/, 'E2E must wait for client-side App Router transitions without requiring a full document load.');
+assert.match(runner, /E2E_PAGE_ERROR/, 'E2E must surface uncaught browser errors in the action log.');
 assert.match(runner, /\/api\/bookings/, 'E2E must exercise public booking.');
 assert.match(runner, /\/api\/appointments\/.*\/activity/, 'E2E must exercise tenant-scoped appointment activity.');
 assert.match(runner, /\/api\/appointments\/.*\/reschedule/, 'E2E must exercise rescheduling.');

@@ -98,7 +98,11 @@ async function newPage(browser) {
     viewport: { width: 1440, height: 960 },
   });
   browserContexts.push(context);
-  return context.newPage();
+  const page = await context.newPage();
+  page.on('pageerror', (error) => {
+    console.error('E2E_PAGE_ERROR ' + error.message);
+  });
+  return page;
 }
 
 async function login(page, identity, redirectPath) {
@@ -106,9 +110,39 @@ async function login(page, identity, redirectPath) {
   await page.goto(baseUrl + '/login' + query, { waitUntil: 'domcontentloaded' });
   await page.locator('#login-email').fill(identity.email);
   await page.locator('#login-password').fill(identity.password);
+  const loginResponsePromise = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === '/api/auth/login' &&
+      response.request().method() === 'POST',
+    { timeout: 30_000 },
+  );
   await page.getByRole('button', { name: 'Iniciar sessão' }).click();
-  await page.waitForURL(
-    (url) => url.pathname === '/onboarding' || url.pathname === '/dashboard',
+
+  const loginResponse = await loginResponsePromise;
+  let loginResult = null;
+  try {
+    loginResult = await loginResponse.json();
+  } catch {
+    loginResult = null;
+  }
+  assert.equal(
+    loginResponse.status(),
+    200,
+    'Authentication API rejected synthetic account ' +
+      identity.email +
+      ' (HTTP ' +
+      loginResponse.status() +
+      ', code=' +
+      (loginResult && loginResult.code ? loginResult.code : 'unknown') +
+      ').',
+  );
+  assert.equal(loginResult && loginResult.success, true, 'Authentication API did not confirm a successful login.');
+
+  // Next.js App Router transitions are same-document navigations. Poll the
+  // pathname instead of waiting for a full document load event.
+  await page.waitForFunction(
+    () => window.location.pathname === '/onboarding' || window.location.pathname === '/dashboard',
+    undefined,
     { timeout: 30_000 },
   );
 }
@@ -206,9 +240,17 @@ async function joinWithInvite(browser, identity, inviteValue, label) {
   const visibleValue = await page.locator('#invite-code').inputValue();
   assert.ok(visibleValue.startsWith('SIL-'), label + ' invite link/QR token was not prefilled.');
   await page.getByRole('button', { name: 'Continuar com convite' }).click();
-  await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 30_000 });
+  await page.waitForFunction(
+    () => window.location.pathname === '/dashboard',
+    undefined,
+    { timeout: 30_000 },
+  );
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 30_000 });
+  await page.waitForFunction(
+    () => window.location.pathname === '/dashboard',
+    undefined,
+    { timeout: 30_000 },
+  );
   return page;
 }
 
