@@ -99,6 +99,14 @@ type BirthdayAudience = {
   birthdayReady: number;
   birthdaysToday: number;
 };
+type CampaignQuota = {
+  monthlyLimit: number;
+  used: number;
+  remaining: number;
+  eligibleContacts: number;
+  maxRecipientsPerCampaign: number;
+  month: string;
+};
 type Metric = { label: string; value: number; Icon: LucideIcon; tone: string };
 type FormState = {
   name: string;
@@ -189,6 +197,7 @@ export function MarketingWorkspace({
   const [services, setServices] = useState<Service[]>([]);
   const [birthdayAudience, setBirthdayAudience] =
     useState<BirthdayAudience | null>(null);
+  const [quota, setQuota] = useState<CampaignQuota | null>(null);
   const [events, setEvents] = useState<EventKey[]>(
     Object.keys(EVENT_LABELS) as EventKey[],
   );
@@ -235,6 +244,7 @@ export function MarketingWorkspace({
         campaign.status !== 'cancelled',
     ) ?? null;
   const canManage = (campaign: Campaign) =>
+    campaign.trigger_type === 'manual' &&
     campaign.channel === 'email' &&
     EDITABLE_STATUSES.includes(
       campaign.status as (typeof EDITABLE_STATUSES)[number],
@@ -286,6 +296,7 @@ export function MarketingWorkspace({
         );
       setCampaigns(merged);
       setHasLoaded(true);
+      setQuota((campaignData.quota ?? null) as CampaignQuota | null);
       setServices((automationData.services ?? []) as Service[]);
       setBirthdayAudience(
         (automationData.birthdayAudience ?? null) as BirthdayAudience | null,
@@ -334,6 +345,7 @@ export function MarketingWorkspace({
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase('pt-PT');
     return campaigns.filter((campaign) => {
+      if (campaign.trigger_type !== 'manual') return false;
       const matchesQuery =
         !needle ||
         `${campaign.name} ${campaign.subject ?? ''} ${campaign.body}`
@@ -426,6 +438,7 @@ export function MarketingWorkspace({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          triggerType: 'manual',
           id: editorMode === 'edit' ? selectedId : undefined,
           scheduledAt: form.scheduledAt
             ? new Date(form.scheduledAt).toISOString()
@@ -684,7 +697,41 @@ export function MarketingWorkspace({
         </header>
 
         {!isAutomationOnly && hasLoaded && (
-          <section
+          <>
+            {quota && (
+          <Card className="border-white/10 bg-white/[0.025]">
+            <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div>
+                <p className="text-sm font-medium">Quota de campanhas manuais</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {quota.used} de {quota.monthlyLimit} envios utilizados este mês · até {quota.maxRecipientsPerCampaign.toLocaleString('pt-PT')} destinatários por campanha
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="min-w-28 flex-1">
+                  <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
+                    <span>Utilização</span>
+                    <span>{Math.round((quota.used / Math.max(1, quota.monthlyLimit)) * 100)}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-emerald-400"
+                      style={{ width: String(Math.min(100, (quota.used / Math.max(1, quota.monthlyLimit)) * 100)) + '%' }}
+                    />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-semibold tabular-nums">{quota.remaining}</p>
+                  <p className="text-[10px] text-zinc-500">restantes</p>
+                </div>
+              </div>
+              <p className="text-xs text-zinc-500 sm:max-w-56">
+                {quota.eligibleContacts.toLocaleString('pt-PT')} contactos com autorização ativa
+              </p>
+            </CardContent>
+          </Card>
+            )}
+            <section
             className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
             aria-label="Resumo de marketing"
           >
@@ -702,7 +749,7 @@ export function MarketingWorkspace({
               </Card>
             ))}
           </section>
-  
+          </>
         )}
 
         {initialView !== 'automation' && (
@@ -790,7 +837,7 @@ export function MarketingWorkspace({
                 {filtered.length} campanha(s)
               </h2>
               <span>
-                Editar/apagar disponível enquanto não começou o envio.
+                As campanhas manuais usam apenas contactos com autorização ativa.
               </span>
             </div>
             {!hasLoaded && loading ? (
@@ -1053,8 +1100,8 @@ export function MarketingWorkspace({
               {[
                 { label: 'Clientes', value: birthdayAudience?.totalClients ?? 0, detail: 'Na base da barbearia' },
                 { label: 'Com nascimento', value: birthdayAudience?.withBirthDate ?? 0, detail: 'Data de nascimento registada' },
-                { label: 'Com email', value: birthdayAudience?.withEmail ?? 0, detail: 'Endereço disponível' },
-                { label: 'Com dados completos', value: birthdayAudience?.birthdayReady ?? 0, detail: 'Data + email preenchidos' },
+                { label: 'Com email', value: birthdayAudience?.withEmail ?? 0, detail: 'Endereço registado na ficha' },
+                { label: 'Elegíveis para campanha', value: birthdayAudience?.birthdayReady ?? 0, detail: 'Data + email com autorização ativa' },
                 { label: 'Aniversários a enviar hoje', value: birthdayAudience?.birthdaysToday ?? 0, detail: 'Correspondem ao ciclo configurado' },
               ].map((item, index) => (
                 <Card key={item.label} className="border-white/10 bg-white/[0.025]">
@@ -1628,16 +1675,8 @@ export function MarketingWorkspace({
                   </label>
                   <select
                     id="marketing-campaign-channel"
-                    disabled={editorMode === 'edit'}
-                    value={form.channel}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        channel: event.target.value as FormState['channel'],
-                        subject:
-                          event.target.value === 'sms' ? '' : current.subject,
-                      }))
-                    }
+                    disabled
+                    value="email"
                     className="mt-1.5 h-10 w-full rounded-md border border-white/10 bg-zinc-900/60 px-3 text-xs text-zinc-100 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                   >
                     <option value="email" className="bg-zinc-900 text-zinc-100">
@@ -1646,6 +1685,15 @@ export function MarketingWorkspace({
                   </select>
                 </div>
 
+                <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[0.045] p-3 text-xs leading-5 text-zinc-300">
+                  <p className="font-medium text-emerald-200">Audiência autorizada</p>
+                  <p className="mt-1 text-zinc-400">
+                    A campanha só será enviada a clientes desta barbearia que aceitaram receber comunicações por email. O link de cancelamento de subscrição é incluído automaticamente.
+                  </p>
+                  <p className="mt-2 text-zinc-500">
+                    Variáveis: {'{{nome}}'}, {'{{barbearia}}'} e {'{{booking_url}}'}.
+                  </p>
+                </div>
                 {form.channel === 'email' && (
                   <div>
                     <label

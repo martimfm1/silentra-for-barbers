@@ -171,6 +171,7 @@ export function BookingDrawerCanonical({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [marketingEmailConsent, setMarketingEmailConsent] = useState(false);
   const [customerState, setCustomerState] = useState<CustomerState>('idle');
   const [customerLookupField, setCustomerLookupField] = useState<CustomerLookupField | null>(null);
   const [customerSuggestion, setCustomerSuggestion] = useState<CustomerSuggestion | null>(null);
@@ -380,6 +381,7 @@ export function BookingDrawerCanonical({
     setPhone('');
     setEmail('');
     setBirthDate('');
+    setMarketingEmailConsent(false);
     setCustomerState('idle');
     setCustomerLookupField(null);
     setCustomerSuggestion(null);
@@ -888,6 +890,7 @@ export function BookingDrawerCanonical({
                   customerPhone: phone.trim(),
                   customerEmail: email.trim(),
                   ...(birthDateIso ? { customerBirthDate: birthDateIso } : {}),
+                  customerMarketingEmailConsent: marketingEmailConsent,
                   prepayment: prepaymentSelected,
                 },
           ),
@@ -1711,6 +1714,21 @@ export function BookingDrawerCanonical({
                     />
                   </div>
                 </label>
+                {!waitlistOnly && (
+                  <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-3 text-xs leading-5 text-zinc-400">
+                    <input
+                      type="checkbox"
+                      checked={marketingEmailConsent}
+                      onChange={(event) => setMarketingEmailConsent(event.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 accent-emerald-600"
+                    />
+                    <span>
+                      {locale === 'en'
+                        ? 'I agree to receive news, offers and birthday campaigns by email from this barbershop. I can unsubscribe at any time.'
+                        : 'Aceito receber novidades, ofertas e campanhas de aniversário por email desta barbearia. Posso cancelar a subscrição a qualquer momento.'}
+                    </span>
+                  </label>
+                )}
                 {!waitlistOnly && requireBirthDate && (
                   <label className="grid gap-1.5 text-xs text-zinc-400">
                     <span>{t('bookingDrawer.birthDate')} *</span>

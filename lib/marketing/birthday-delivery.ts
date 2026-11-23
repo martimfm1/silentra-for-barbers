@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendMarketingEmail, sendBrevoSms } from '@/lib/marketing/brevo';
+import { getConsentedMarketingEmails, getMarketingUnsubscribeUrl } from '@/lib/marketing/consent';
+import { renderMarketingEmail } from '@/lib/marketing/email-template';
 
 const TIME_ZONE = 'Europe/Lisbon';
 const MAX_CAMPAIGNS = 25;
@@ -37,16 +39,6 @@ function lisbonDate(offsetDays = 0) {
   return date.toISOString().slice(0, 10);
 }
 
-function htmlEscape(value: string) {
-  return value.replace(
-    /[&<>\"']/g,
-    (char) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
-        char
-      ] ?? char,
-  );
-}
-
 function renderTokens(
   value: string,
   variables: {
@@ -65,18 +57,6 @@ function renderTokens(
     .replaceAll('{{voucher_expires_at}}', variables.voucherExpiresAt ?? '');
 }
 
-function emailHtml(body: string, shopName: string) {
-  const safeShop = htmlEscape(shopName);
-  const content = body
-    .split(/\n\s*\n/)
-    .map(
-      (paragraph) =>
-        `<p style="margin:0 0 16px;line-height:1.7;color:#d4d4d8;">${htmlEscape(paragraph).replaceAll('\n', '<br />')}</p>`,
-    )
-    .join('');
-  return `<!doctype html><html lang="pt"><body style="margin:0;background:#09090b;font-family:Arial,Helvetica,sans-serif;color:#fafafa"><div style="max-width:600px;margin:0 auto;padding:32px 18px"><div style="border:1px solid #27272a;border-radius:20px;overflow:hidden;background:#0f0f12"><div style="padding:24px;border-bottom:1px solid #27272a;font-size:15px;font-weight:700;color:#fafafa">${safeShop}</div><div style="padding:28px 24px">${content}</div></div><p style="margin:16px 0 0;text-align:center;font-size:11px;color:#52525b">Enviado através da Silentra</p></div></body></html>`;
-}
-
 function voucherCode() {
   return `SIL-${crypto.randomUUID().replaceAll('-', '').slice(0, 10).toUpperCase()}`;
 }
@@ -90,6 +70,7 @@ async function getBirthdayCampaigns() {
     )
     .eq('active', true)
     .eq('trigger_type', 'birthday')
+    .eq('channel', 'email')
     .in('status', ['draft', 'scheduled', 'completed'])
     // Rotate older/unprocessed campaigns to the front so a 25-campaign batch
     // does not permanently starve shops when the tenant count grows.
@@ -100,21 +81,19 @@ async function getBirthdayCampaigns() {
   return (data ?? []) as BirthdayCampaign[];
 }
 
-async function claimCampaign(campaign: BirthdayCampaign, today: string) {
+async function claimCampaign(
+  campaign: BirthdayCampaign,
+  today: string,
+): Promise<string | null> {
   const admin = createAdminClient();
-  const { data } = await admin
-    .from('marketing_campaigns')
-    .update({
-      birthday_last_run_date: today,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', campaign.id)
-    .eq('active', true)
-    .eq('trigger_type', 'birthday')
-    .or(`birthday_last_run_date.is.null,birthday_last_run_date.neq.${today}`)
-    .select('id')
-    .maybeSingle();
-  return Boolean(data);
+  const startedAt = new Date().toISOString();
+  const { data, error } = await admin.rpc('claim_birthday_marketing_campaign', {
+    p_campaign_id: campaign.id,
+    p_today: today,
+    p_now: startedAt,
+  });
+  if (error) throw error;
+  return data === true ? startedAt : null;
 }
 
 async function issueVoucher(input: {
@@ -204,7 +183,16 @@ async function sendBirthdayMessage(input: {
             to: input.destination,
             toName: input.clientName,
             subject,
-            html: emailHtml(body, input.shopName),
+            html: renderMarketingEmail({
+              body,
+              shopName: input.shopName,
+              bookingUrl,
+              unsubscribeUrl: getMarketingUnsubscribeUrl(
+                input.campaign.barbershop_id,
+                input.destination,
+              ),
+              kind: 'birthday',
+            }),
             senderName: input.shopName,
           })
         : await sendBrevoSms({
@@ -237,9 +225,11 @@ export async function processBirthdayCampaignDelivery(limit = MAX_CAMPAIGNS) {
 
   for (const campaign of campaigns) {
     if (campaign.birthday_last_run_date === today) continue;
-    if (!(await claimCampaign(campaign, today))) continue;
+    const campaignProcessingStartedAt = await claimCampaign(campaign, today);
+    if (!campaignProcessingStartedAt) continue;
 
     campaignsProcessed++;
+    try {
     const birthdayDate = lisbonDate(-(campaign.birthday_offset_days ?? 0));
     const monthDay = birthdayDate.slice(5);
     const destinationField =
@@ -269,8 +259,18 @@ export async function processBirthdayCampaignDelivery(limit = MAX_CAMPAIGNS) {
       if (!page || page.length < CLIENT_PAGE_SIZE) break;
     }
 
-    const matching = clients.filter(
+    const birthdayMatches = clients.filter(
       (client) => String(client.birth_date ?? '').slice(5) === monthDay,
+    );
+    const consentedEmails = await getConsentedMarketingEmails(
+      admin,
+      campaign.barbershop_id,
+      birthdayMatches
+        .map((client) => client.email)
+        .filter((email): email is string => Boolean(email)),
+    );
+    const matching = birthdayMatches.filter((client) =>
+      consentedEmails.has(String(client.email ?? '').trim().toLowerCase()),
     );
 
     const { data: shop, error: shopError } = await admin
@@ -285,6 +285,20 @@ export async function processBirthdayCampaignDelivery(limit = MAX_CAMPAIGNS) {
       const destination =
         campaign.channel === 'email' ? client.email : client.num_phone;
       if (typeof destination !== 'string' || !destination.trim()) continue;
+
+      // Check the preference again immediately before delivery so an
+      // unsubscribe made after audience collection is still respected.
+      const { data: currentPreference, error: currentPreferenceError } =
+        await admin
+          .from('marketing_contact_preferences')
+          .select('id')
+          .eq('barbershop_id', campaign.barbershop_id)
+          .eq('email', destination.trim().toLowerCase())
+          .not('email_consent_at', 'is', null)
+          .is('email_unsubscribed_at', null)
+          .maybeSingle();
+      if (currentPreferenceError) throw currentPreferenceError;
+      if (!currentPreference) continue;
 
       const voucher = await issueVoucher({
         campaign,
@@ -382,17 +396,40 @@ export async function processBirthdayCampaignDelivery(limit = MAX_CAMPAIGNS) {
       }
     }
 
-    await admin
+    const finishedAt = new Date().toISOString();
+    const { error: finishError } = await admin
       .from('marketing_campaigns')
       .update({
-        status: 'completed',
+        status: campaignFailed > 0 ? 'scheduled' : 'completed',
+        birthday_last_run_date: campaignFailed > 0 ? null : today,
+        birthday_processing_started_at: null,
         total_recipients: matching.length,
         sent_count: campaignSent,
         failed_count: campaignFailed,
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        completed_at: campaignFailed > 0 ? null : finishedAt,
+        updated_at: finishedAt,
       })
-      .eq('id', campaign.id);
+      .eq('id', campaign.id)
+      .eq('birthday_processing_started_at', campaignProcessingStartedAt);
+    if (finishError) throw finishError;
+    } catch (error) {
+      const { error: releaseError } = await admin
+        .from('marketing_campaigns')
+        .update({
+          birthday_processing_started_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', campaign.id)
+        .eq('birthday_processing_started_at', campaignProcessingStartedAt);
+      if (releaseError) {
+        console.error('[BIRTHDAY_CAMPAIGN_LEASE_RELEASE_ERROR]', releaseError.code);
+      }
+      console.error(
+        '[BIRTHDAY_CAMPAIGN_PROCESSING_ERROR]',
+        error instanceof Error ? error.message : String(error),
+      );
+      failed++;
+    }
   }
 
   return {
