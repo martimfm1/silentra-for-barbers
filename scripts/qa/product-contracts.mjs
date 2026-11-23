@@ -1446,7 +1446,7 @@ const checks = [
     name: 'QR-code page distinguishes loading from a recoverable configuration error',
     file: 'app/dashboard/qr-code/page.tsx',
     test: (source) => {
-      const normalized = source.replace(/\\s+/g, ' ');
+      const normalized = source.replace(/\s+/g, ' ');
       return (
         normalized.includes('const loadConfig = useCallback(async () =>') &&
         normalized.includes('setLoadError(null)') &&
