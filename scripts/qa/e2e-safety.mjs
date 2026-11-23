@@ -10,6 +10,7 @@ const marketingPolicyMigration = readFileSync('supabase/migrations/2026090200000
 const functionHardeningMigration = readFileSync('supabase/migrations/20261013141420_harden_public_security_definer_privileges.sql', 'utf8');
 const newUserHardeningMigration = readFileSync('supabase/migrations/20261103120052_harden_new_user_trigger.sql', 'utf8');
 const internalTableGrantsMigration = readFileSync('supabase/migrations/20261101233354_revoke_internal_table_client_grants.sql', 'utf8');
+const notificationSubscriptionsMigration = readFileSync('supabase/migrations/20261103012253_create_notification_subscriptions.sql', 'utf8');
 
 assert.match(workflow, /workflow_dispatch:/, 'E2E workflow must be manually runnable.');
 assert.match(workflow, /pnpm exec supabase start --exclude/, 'E2E workflow must start its own local Supabase stack.');
@@ -37,6 +38,8 @@ assert.match(newUserHardeningMigration, /SET search_path = public/, 'New Auth tr
 assert.match(internalTableGrantsMigration, /pg_catalog\.to_regclass/, 'Internal table grants must tolerate optional tables in clean migration replays.');
 assert.match(internalTableGrantsMigration, /REVOKE ALL ON TABLE public\.%I FROM public, anon, authenticated/, 'Existing internal tables must remain inaccessible to client roles.');
 assert.match(internalTableGrantsMigration, /GRANT ALL ON TABLE public\.%I TO service_role/, 'Trusted server workers must retain internal table access.');
+assert.match(notificationSubscriptionsMigration, /CREATE TABLE IF NOT EXISTS public\.notification_subscriptions/, 'Web push subscriptions must be created by the migration history.');
+assert.match(notificationSubscriptionsMigration, /REFERENCES auth\.users\(id\) ON DELETE CASCADE/, 'Web push subscriptions must be scoped to their Auth user.');
 
 
 assert.match(runner, /assertLoopbackUrl/, 'E2E runner must reject remote targets.');

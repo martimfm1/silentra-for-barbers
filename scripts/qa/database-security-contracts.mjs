@@ -164,9 +164,23 @@ assert.match(
 
 assert.match(
   internalTableHardening,
-  /pg_catalog\.to_regclass[\s\S]*'audit_logs'[\s\S]*'email_queue'[\s\S]*'notification_queue'[\s\S]*'verification_tokens'/i,
-  'Internal table hardening must safely detect each optional internal table.',
+  /pg_catalog\.to_regclass/i,
+  'Internal table hardening must safely detect optional tables before changing privileges.',
 );
+for (const table of [
+  'audit_logs',
+  'email_queue',
+  'notification_queue',
+  'notification_subscriptions',
+  'platform_settings',
+  'rate_limits',
+  'verification_tokens',
+]) {
+  assert.ok(
+    internalTableHardening.includes(`'${table}'`),
+    `Internal table hardening must include ${table}.`,
+  );
+}
 assert.match(
   internalTableHardening,
   /REVOKE ALL ON TABLE public\.%I FROM public, anon, authenticated/i,
