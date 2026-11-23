@@ -73,6 +73,7 @@ assert.match(clientsPage, /lastBarbershopIdRef\.current !== currentBarbershopId/
 assert.match(clientsPage, /setClients\(\[\]\)/);
 assert.match(clientsPage, /setHasLoadedClients\(true\)/);
 assert.match(clientsPage, /loadError && !hasLoadedClients/);
+assert.match(clientsPage, /isLoadingBarbershop \|\| loadingInitial/);
 assert.match(clientsPage, /loadError && \(/);
 assert.match(clientsPage, /role="alert"/);
 assert.match(clientsPage, /onClick=\{\(\) => void fetchClients\(\)\}/);
