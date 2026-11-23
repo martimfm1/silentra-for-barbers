@@ -196,7 +196,9 @@ export function MarketingWorkspace({
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [channelFilter, setChannelFilter] = useState('all');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState('');
   const [sendingId, setSendingId] = useState('');
@@ -245,6 +247,7 @@ export function MarketingWorkspace({
   const load = useCallback(async () => {
     if (!allowed) return;
     setLoading(true);
+    setLoadError(null);
     try {
       const [campaignResponse, automationResponse] = await Promise.all([
         fetch('/api/marketing/campaigns', { cache: 'no-store' }),
@@ -260,8 +263,16 @@ export function MarketingWorkspace({
         throw new Error(
           automationData.error ?? 'Não foi possível carregar as automações.',
         );
+      if (
+        !Array.isArray(campaignData.campaigns) ||
+        !Array.isArray(automationData.campaigns)
+      ) {
+        throw new Error(
+          'A resposta do servidor não contém listas válidas de campanhas e automações. Tenta novamente.',
+        );
+      }
 
-      const base = (campaignData.campaigns ?? []) as Campaign[];
+      const base = campaignData.campaigns as Campaign[];
       const automated = (automationData.campaigns ?? []) as Campaign[];
       const merged = base
         .map((campaign) => ({
@@ -274,6 +285,7 @@ export function MarketingWorkspace({
             (campaign.trigger_type && campaign.trigger_type !== 'manual'),
         );
       setCampaigns(merged);
+      setHasLoaded(true);
       setServices((automationData.services ?? []) as Service[]);
       setBirthdayAudience(
         (automationData.birthdayAudience ?? null) as BirthdayAudience | null,
@@ -290,6 +302,7 @@ export function MarketingWorkspace({
           ? error.message
           : 'Erro ao carregar o marketing.';
       setLiveMessage(message);
+      setLoadError(message);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -608,6 +621,28 @@ export function MarketingWorkspace({
         <div className="sr-only" aria-live="polite">
           {liveMessage}
         </div>
+        {loadError && hasLoaded && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-200" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-zinc-100">
+                  {isAutomationOnly ? 'Não foi possível atualizar as automações.' : 'Não foi possível atualizar as campanhas.'}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {loadError} Os dados anteriormente carregados continuam visíveis.
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => void load()} disabled={loading} className="shrink-0">
+              <RefreshCw className={`mr-2 size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+              Tentar novamente
+            </Button>
+          </div>
+        )}
         <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.025] to-transparent p-5 sm:p-7 lg:p-8">
           <div
             aria-hidden="true"
@@ -648,7 +683,7 @@ export function MarketingWorkspace({
           </div>
         </header>
 
-        {!isAutomationOnly && (
+        {!isAutomationOnly && hasLoaded && (
           <section
             className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
             aria-label="Resumo de marketing"
@@ -758,13 +793,27 @@ export function MarketingWorkspace({
                 Editar/apagar disponível enquanto não começou o envio.
               </span>
             </div>
-            {loading && campaigns.length === 0 ? (
+            {!hasLoaded && loading ? (
               <Card className="border-white/10 bg-white/[0.02]">
                 <CardContent className="py-6">
                   <SilentraLoading
                     variant="compact"
                     message="A carregar campanhas…"
                   />
+                </CardContent>
+              </Card>
+            ) : !hasLoaded && loadError ? (
+              <Card className="border-amber-300/20 bg-amber-300/[0.04]">
+                <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+                  <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+                  <div role="alert">
+                    <h3 className="font-medium">Não foi possível carregar as campanhas.</h3>
+                    <p className="mt-1 max-w-lg text-sm text-muted-foreground">{loadError}</p>
+                  </div>
+                  <Button onClick={() => void load()} disabled={loading}>
+                    <RefreshCw className={`mr-2 size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                    Tentar novamente
+                  </Button>
                 </CardContent>
               </Card>
             ) : filtered.length === 0 ? (
@@ -925,7 +974,29 @@ export function MarketingWorkspace({
           </section>
         )}
 
-        {view === 'automation' && (
+        {view === 'automation' && !hasLoaded && (
+          <Card className="border-white/10 bg-white/[0.02]">
+            <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+              {loadError ? (
+                <>
+                  <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+                  <div role="alert">
+                    <h2 className="font-medium">Não foi possível carregar as automações.</h2>
+                    <p className="mt-1 max-w-lg text-sm text-muted-foreground">{loadError}</p>
+                  </div>
+                  <Button onClick={() => void load()} disabled={loading}>
+                    <RefreshCw className={`mr-2 size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                    Tentar novamente
+                  </Button>
+                </>
+              ) : (
+                <SilentraLoading variant="compact" message="A carregar automações…" />
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {view === 'automation' && hasLoaded && (
           <>
             <Card className="relative overflow-hidden border-amber-300/20 bg-gradient-to-br from-[#201b16] via-[#171719] to-[#111318] shadow-lg shadow-black/20">
               <div
