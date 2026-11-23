@@ -92,6 +92,11 @@ assert.match(settingsPage, /const \[loadError, setLoadError\] = useState<string 
 assert.match(settingsPage, /if \(c\.error \|\| !c\.data\)/);
 assert.match(settingsPage, /finally \{[\s\S]*?setLoading\(false\)/);
 assert.match(settingsPage, /loadError && !initial && !loading && !planLoading/);
+assert.match(settingsPage, /const isInitialLoad = initial === null/);
+assert.match(settingsPage, /if \(isInitialLoad\) setLoading\(true\)/);
+assert.match(settingsPage, /if \(isInitialLoad\) setLoading\(false\)/);
+assert.match(settingsPage, /loadError && initial/);
+assert.match(settingsPage, /A configuração anteriormente carregada continua visível/);
 assert.match(settingsPage, /role="alert"/);
 assert.match(settingsPage, /onClick=\{\(\) => void load\(\)\}/);
 assert.match(settingsPage, /t\('common\.retry'\)/);
