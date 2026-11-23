@@ -504,7 +504,7 @@ export default function EquipaPage() {
                 isFreePlan={isFreePlan}
                 freeLimitReached={!canCreateProfile}
               />
-            )}
+            ) : null}
             <Dialog
               open={!!editingProfessional && hasCurrentProfessionals}
               onOpenChange={(open) => !open && setEditingProfessional(null)}
