@@ -601,6 +601,34 @@ assert.ok(onboardingTeamPage.includes("new URLSearchParams(window.location.searc
 assert.ok(onboardingTeamPage.includes("url.searchParams.set('tab', nextTab)"));
 assert.ok(onboardingTeamPage.includes('window.history.replaceState'));
 assert.ok(onboardingTeamPage.includes('onValueChange={selectTab}'));
+assert.ok(onboardingTeamPage.includes('useState<TeamSeatState | null>(null)'));
+assert.doesNotMatch(onboardingTeamPage, /used:\s*0,\s*limit:\s*1/);
+assert.match(onboardingTeamPage, /Number\.isSafeInteger\(used\)/);
+assert.match(onboardingTeamPage, /Number\.isSafeInteger\(limit\)/);
+assert.match(onboardingTeamPage, /teamSeatsErrorBarbershopId === barbershopId/);
+assert.match(onboardingTeamPage, /professionalsRequestIdRef\.current/);
+assert.match(onboardingTeamPage, /loadedProfessionalsBarbershopIdRef\.current !== barbershopId/);
+assert.match(onboardingTeamPage, /const canCreateProfile = Boolean\([\s\S]*?currentTeamSeats &&[\s\S]*?hasCurrentProfessionals/);
+assert.match(onboardingTeamPage, /activeTab === 'invite' && currentTeamSeats/);
+assert.match(onboardingTeamPage, /activeTab === 'invite' && !currentTeamSeats/);
+assert.match(onboardingTeamPage, /currentProfessionalsError && hasCurrentProfessionals/);
+assert.match(onboardingTeamPage, /setProfessionalsErrorBarbershopId\(barbershopId\)/);
+assert.match(onboardingTeamPage, /setProfessionals\(\[\]\)/);
+assert.match(onboardingTeamPage, /setEditingProfessional\(null\)/);
+assert.ok(onboardingTeamPage.includes('const [teamSeats, setTeamSeats] = useState<TeamSeatState | null>(null)'));
+assert.ok(onboardingTeamPage.includes('Number.isSafeInteger(used)'));
+assert.ok(onboardingTeamPage.includes('Number.isSafeInteger(limit)'));
+assert.ok(onboardingTeamPage.includes('setTeamSeatsLoadError(t('));
+assert.ok(onboardingTeamPage.includes('teamSeatsErrorBarbershopId === barbershopId'));
+assert.ok(onboardingTeamPage.includes('professionalsRequestIdRef.current'));
+assert.ok(onboardingTeamPage.includes('loadedProfessionalsBarbershopIdRef.current !== barbershopId'));
+assert.ok(onboardingTeamPage.includes('currentTeamSeats &&'));
+assert.ok(onboardingTeamPage.includes("activeTab === 'invite' && currentTeamSeats"));
+assert.ok(onboardingTeamPage.includes("activeTab === 'invite' && !currentTeamSeats"));
+assert.ok(onboardingTeamPage.includes('currentProfessionalsError && hasCurrentProfessionals'));
+assert.ok(onboardingTeamPage.includes('setProfessionalsErrorBarbershopId(barbershopId)'));
+assert.ok(onboardingTeamPage.includes('setProfessionals([])'));
+assert.ok(onboardingTeamPage.includes('setEditingProfessional(null)'));
 assert.ok(onboardingInviteCard.includes("fetch('/api/team/invite'"));
 assert.ok(onboardingInviteCard.includes('Active invitations are restored from the server after refresh'));
 assert.ok(onboardingInviteCard.includes('Os convites ativos são recuperados do servidor'));
@@ -812,3 +840,16 @@ console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lea
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
+
+
+const waitlistPage = read('app/dashboard/espera/page.tsx');
+assert.match(waitlistPage, /Array\.isArray\(payload\.entries\)/);
+assert.match(waitlistPage, /setHasLoadedEntries\(true\)/);
+assert.match(waitlistPage, /setLoadError\(/);
+assert.match(waitlistPage, /role="alert"/);
+assert.match(waitlistPage, /hasLoadedEntries \? activeCount : '—'/);
+assert.match(waitlistPage, /!hasLoadedEntries \? null/);
+assert.ok(waitlistPage.includes('The previously loaded requests are still shown.'));
+assert.ok(waitlistPage.includes('Os pedidos carregados anteriormente continuam visíveis.'));
+assert.ok(waitlistPage.includes("{en ? 'Try again' : 'Tentar novamente'}"));
+console.log('[LAW13_WAITLIST_RECOVERY_QA] Waitlist payloads are validated; load failures are distinct from empty data and refresh errors preserve the last confirmed entries.');
