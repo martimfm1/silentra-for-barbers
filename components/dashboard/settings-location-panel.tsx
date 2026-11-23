@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CheckCircle2, MapPin, Save, Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { AlertTriangle, CheckCircle2, MapPin, RefreshCw, Save, Search } from 'lucide-react';
 import {
   AddressAutocomplete,
   type AddressSuggestion,
@@ -18,28 +18,66 @@ import { Spinner } from '@/components/ui/spinner';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
 import { barbershopService } from '@/app/dashboard/_services/barbershop.service';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function SettingsLocationPanel({
   barbershopId,
 }: {
   barbershopId: string;
 }) {
+  const { t } = useLanguage();
   const [address, setAddress] = useState('');
   const [selected, setSelected] = useState<AddressSuggestion | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadedBarbershopId, setLoadedBarbershopId] = useState<string | null>(
+    null,
+  );
+  const [retryKey, setRetryKey] = useState(0);
+  const lastSuccessfulBarbershopIdRef = useRef<string | null>(null);
+  const isCurrentBarbershopLoaded = loadedBarbershopId === barbershopId;
 
   useEffect(() => {
     let active = true;
-    void barbershopService.getConfig(barbershopId).then((result) => {
-      if (!active) return;
-      if (result.data?.address) setAddress(result.data.address);
-      setLoading(false);
-    });
+    const isInitialLoad =
+      lastSuccessfulBarbershopIdRef.current !== barbershopId;
+
+    if (isInitialLoad) {
+      setLoading(true);
+      setAddress('');
+      setSelected(null);
+      setLoadedBarbershopId(null);
+    }
+    setLoadError(null);
+
+    void (async () => {
+      try {
+        const result = await barbershopService.getConfig(barbershopId);
+        if (!active) return;
+        if (result.error || !result.data) {
+          throw result.error ?? new Error(t('settingsPage.loadFailed'));
+        }
+
+        setAddress(result.data.address ?? '');
+        setSelected(null);
+        lastSuccessfulBarbershopIdRef.current = barbershopId;
+        setLoadedBarbershopId(barbershopId);
+      } catch (error: unknown) {
+        if (!active) return;
+        console.error('[Settings Location Load Error]:', error);
+        setLoadError(
+          error instanceof Error ? error.message : t('settingsPage.loadFailed'),
+        );
+      } finally {
+        if (active && isInitialLoad) setLoading(false);
+      }
+    })();
+
     return () => {
       active = false;
     };
-  }, [barbershopId]);
+  }, [barbershopId, retryKey, t]);
 
   const handleSelect = (suggestion: AddressSuggestion) => {
     setAddress(suggestion.fullAddress || suggestion.streetWithNumber);
@@ -86,11 +124,28 @@ export function SettingsLocationPanel({
     }
   };
 
-  if (loading) {
+  if (loading || (!isCurrentBarbershopLoaded && !loadError)) {
     return (
-      <Card className="border-white/10 bg-black/40">
+      <Card className="border-white/10 bg-black/40" aria-busy="true">
         <CardContent className="flex min-h-32 items-center justify-center">
           <SilentraLoading variant="compact" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loadError && !isCurrentBarbershopLoaded) {
+    return (
+      <Card className="border-amber-300/20 bg-amber-300/[0.04]">
+        <CardContent className="flex min-h-32 flex-col items-center justify-center gap-3 p-5 text-center">
+          <div role="alert" className="flex flex-col items-center gap-2">
+            <AlertTriangle className="size-6 text-amber-200" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">{loadError}</p>
+          </div>
+          <Button variant="outline" onClick={() => setRetryKey((key) => key + 1)}>
+            <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+            {t('common.retry')}
+          </Button>
         </CardContent>
       </Card>
     );
@@ -108,6 +163,23 @@ export function SettingsLocationPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {loadError && isCurrentBarbershopLoaded && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-xs leading-5 text-muted-foreground">{loadError}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRetryKey((key) => key + 1)}
+              className="shrink-0"
+            >
+              <RefreshCw className="mr-2 size-3.5" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
         <AddressAutocomplete
           value={address}
           onChange={(value) => {
