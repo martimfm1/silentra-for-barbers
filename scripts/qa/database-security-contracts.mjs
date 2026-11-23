@@ -8,6 +8,9 @@ const read = (file) => readFile(join(root, file), 'utf8');
 const initialHardening = await read(
   'supabase/migrations/20261101225911_harden_production_tenant_rls.sql',
 );
+const serviceRoleUsersPrivileges = await read(
+  'supabase/migrations/20261123100000_restore_service_role_users_privileges.sql',
+);
 const appointmentUpdateHardening = await read(
   'supabase/migrations/20261101230103_harden_appointment_update_rls.sql',
 );
@@ -56,6 +59,16 @@ assert.match(
   initialHardening,
   /revoke all privileges on table public\.users from anon/i,
   'Anonymous users must not have direct user/CRM table privileges.',
+);
+assert.match(
+  serviceRoleUsersPrivileges,
+  /grant all privileges on table public\.users to service_role/i,
+  'Trusted server-side routes must retain full user/profile table access.',
+);
+assert.match(
+  serviceRoleUsersPrivileges,
+  /has_table_privilege\('service_role',[\s\S]*'SELECT'[\s\S]*'INSERT'[\s\S]*'UPDATE'[\s\S]*'DELETE'/i,
+  'The service-role user grant must be verified for every required write/read operation.',
 );
 assert.match(
   initialHardening,
