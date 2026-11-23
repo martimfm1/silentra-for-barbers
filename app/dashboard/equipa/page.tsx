@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { toast } from 'sonner';
 import { Professional } from '@/types';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import { useProfessionals } from '@/app/state/_hooks/dashboard/useProfessionals';
@@ -13,7 +12,7 @@ import { TeamMembersManager } from '@/app/dashboard/_components/team/TeamMembers
 import { ManagementPageHeader } from '@/app/dashboard/_components/shared/ManagementPageHeader';
 import { AnimatedTabList } from '@/components/dashboard/animated-tabs';
 import { Spinner } from '@/components/ui/spinner';
-import { Briefcase, UsersRound, KeyRound, UserPlus } from 'lucide-react';
+import { AlertTriangle, Briefcase, KeyRound, RefreshCw, UserPlus, UsersRound } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -50,8 +49,13 @@ export default function EquipaPage() {
   const { barbershopId, loading: isLoadingBarbershop } = useBarbershop();
   const { plan, loading: isLoadingPlan } = useFeatureAccess();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [professionalsBarbershopId, setProfessionalsBarbershopId] = useState<string | null>(null);
+  const [professionalsLoadError, setProfessionalsLoadError] = useState<string | null>(null);
+  const [professionalsErrorBarbershopId, setProfessionalsErrorBarbershopId] = useState<string | null>(null);
   const [showAddProfessionalForm, setShowAddProfessionalForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const professionalsRequestIdRef = useRef(0);
+  const loadedProfessionalsBarbershopIdRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<TeamTab>('professionals');
 
   useEffect(() => {
@@ -79,57 +83,102 @@ export default function EquipaPage() {
       `${url.pathname}${url.search}${url.hash}`,
     );
   }, []);
-  const [teamSeats, setTeamSeats] = useState<TeamSeatState>({
-    used: 0,
-    limit: 1,
-    unlimited: false,
-  });
+  const [teamSeats, setTeamSeats] = useState<TeamSeatState | null>(null);
+  const [teamSeatsBarbershopId, setTeamSeatsBarbershopId] = useState<string | null>(null);
+  const [teamSeatsLoadError, setTeamSeatsLoadError] = useState<string | null>(null);
+  const [teamSeatsErrorBarbershopId, setTeamSeatsErrorBarbershopId] = useState<string | null>(null);
   const [teamLoading, setTeamLoading] = useState(true);
+  const teamSeatsRequestRef = useRef<AbortController | null>(null);
+  const lastTeamBarbershopIdRef = useRef<string | null>(null);
   const isFreePlan = plan === 'free';
 
   const fetchTeamState = useCallback(async () => {
     if (!barbershopId) return;
+    teamSeatsRequestRef.current?.abort();
+    const controller = new AbortController();
+    teamSeatsRequestRef.current = controller;
     setTeamLoading(true);
+    setTeamSeatsLoadError(null);
+    setTeamSeatsErrorBarbershopId(null);
+
     try {
-      const response = await fetch('/api/team/members', { cache: 'no-store' });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok)
-        throw new Error(data.error || t('teamPage.loadStateError'));
-      setTeamSeats(data.seats ?? { used: 0, limit: 1, unlimited: false });
+      const response = await fetch('/api/team/members', {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      const data = await response.json().catch(() => null);
+      const seats = data?.seats as Partial<TeamSeatState> | undefined;
+      const used = seats?.used;
+      const limit = seats?.limit;
+      const unlimited = seats?.unlimited;
+
+      if (
+        !response.ok ||
+        typeof used !== 'number' ||
+        !Number.isSafeInteger(used) ||
+        used < 0 ||
+        typeof limit !== 'number' ||
+        !Number.isSafeInteger(limit) ||
+        limit < 0 ||
+        typeof unlimited !== 'boolean'
+      ) {
+        throw new Error(data?.error || t('teamPage.loadStateError'));
+      }
+      if (controller.signal.aborted) return;
+
+      setTeamSeats({ used, limit, unlimited });
+      setTeamSeatsBarbershopId(barbershopId);
     } catch (error) {
+      if (controller.signal.aborted) return;
       console.error('[TEAM_STATE_LOAD_FAIL]', error);
+      setTeamSeatsLoadError(t('teamPage.loadStateError'));
+      setTeamSeatsErrorBarbershopId(barbershopId);
     } finally {
-      setTeamLoading(false);
+      if (!controller.signal.aborted) setTeamLoading(false);
     }
   }, [barbershopId, t]);
 
   const fetchProfessionals = useCallback(async () => {
     if (!barbershopId) return;
-    setLoadingInitial(true);
+    const requestId = ++professionalsRequestIdRef.current;
+    const isInitialLoad =
+      loadedProfessionalsBarbershopIdRef.current !== barbershopId;
+    if (isInitialLoad) setLoadingInitial(true);
+    setProfessionalsLoadError(null);
+    setProfessionalsErrorBarbershopId(null);
+
     try {
       const res = await professionalService.getAll(barbershopId);
-      if (res.error) throw res.error;
+      if (requestId !== professionalsRequestIdRef.current) return;
+      if (res.error || !Array.isArray(res.data)) {
+        throw res.error ?? new Error(t('teamPage.loadProfilesError'));
+      }
+
       setProfessionals(
-        (res.data ?? []).filter(
+        res.data.filter(
           (professional) => professional.active !== false,
         ),
       );
+      loadedProfessionalsBarbershopIdRef.current = barbershopId;
+      setProfessionalsBarbershopId(barbershopId);
     } catch (error) {
+      if (requestId !== professionalsRequestIdRef.current) return;
       console.error('[Equipa Sync Error]:', error);
-      toast.error(t('teamPage.loadProfilesError'));
+      setProfessionalsLoadError(t('teamPage.loadProfilesError'));
+      setProfessionalsErrorBarbershopId(barbershopId);
     } finally {
-      setLoadingInitial(false);
+      if (
+        requestId === professionalsRequestIdRef.current &&
+        isInitialLoad
+      ) {
+        setLoadingInitial(false);
+      }
     }
   }, [barbershopId, t]);
 
   const refreshTeam = useCallback(async () => {
     await Promise.all([fetchProfessionals(), fetchTeamState()]);
   }, [fetchProfessionals, fetchTeamState]);
-
-  useEffect(() => {
-    if (!isLoadingBarbershop && barbershopId)
-      queueMicrotask(() => void refreshTeam());
-  }, [barbershopId, isLoadingBarbershop, refreshTeam]);
 
   const {
     loadingProfessionals,
@@ -144,13 +193,109 @@ export default function EquipaPage() {
     handleDeleteProfessional,
   } = useProfessionals(barbershopId, refreshTeam, isFreePlan);
 
-  const noProfileYet = professionals.length === 0;
-  const canCreateProfile =
-    teamSeats.unlimited || teamSeats.used < teamSeats.limit || noProfileYet;
-  const teamLimitReached =
-    !teamSeats.unlimited && teamSeats.used >= teamSeats.limit;
+  useEffect(() => {
+    if (isLoadingBarbershop) {
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+      loadedProfessionalsBarbershopIdRef.current = null;
+      lastTeamBarbershopIdRef.current = null;
+      return;
+    }
 
-  if (isLoadingPlan) return <main className="min-h-screen bg-zinc-950" />;
+    if (!barbershopId) {
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+      loadedProfessionalsBarbershopIdRef.current = null;
+      lastTeamBarbershopIdRef.current = null;
+      queueMicrotask(() => {
+        if (lastTeamBarbershopIdRef.current !== null) return;
+        setTeamSeats(null);
+        setTeamSeatsBarbershopId(null);
+        setTeamSeatsLoadError(null);
+        setTeamSeatsErrorBarbershopId(null);
+        setTeamLoading(false);
+        setProfessionals([]);
+        setProfessionalsBarbershopId(null);
+        setProfessionalsLoadError(null);
+        setProfessionalsErrorBarbershopId(null);
+        setLoadingInitial(false);
+        setShowAddProfessionalForm(false);
+        setEditingProfessional(null);
+      });
+      return;
+    }
+
+    if (lastTeamBarbershopIdRef.current !== barbershopId) {
+      lastTeamBarbershopIdRef.current = barbershopId;
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+      loadedProfessionalsBarbershopIdRef.current = null;
+      queueMicrotask(() => {
+        if (lastTeamBarbershopIdRef.current !== barbershopId) return;
+        setTeamSeats(null);
+        setTeamSeatsBarbershopId(null);
+        setTeamSeatsLoadError(null);
+        setTeamSeatsErrorBarbershopId(null);
+        setTeamLoading(true);
+        setProfessionals([]);
+        setProfessionalsBarbershopId(null);
+        setProfessionalsLoadError(null);
+        setProfessionalsErrorBarbershopId(null);
+        setLoadingInitial(true);
+        setShowAddProfessionalForm(false);
+        setEditingProfessional(null);
+      });
+    }
+
+    const timer = window.setTimeout(() => void refreshTeam(), 0);
+    return () => {
+      window.clearTimeout(timer);
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+    };
+  }, [
+    barbershopId,
+    isLoadingBarbershop,
+    refreshTeam,
+    setEditingProfessional,
+  ]);
+
+  const currentTeamSeats =
+    Boolean(barbershopId) &&
+    !isLoadingBarbershop &&
+    teamSeatsBarbershopId === barbershopId
+      ? teamSeats
+      : null;
+  const currentTeamSeatsError =
+    !isLoadingBarbershop && teamSeatsErrorBarbershopId === barbershopId
+      ? teamSeatsLoadError
+      : null;
+  const hasCurrentProfessionals =
+    Boolean(barbershopId) &&
+    !isLoadingBarbershop &&
+    professionalsBarbershopId === barbershopId;
+  const currentProfessionalsError =
+    Boolean(barbershopId) &&
+    !isLoadingBarbershop &&
+    professionalsErrorBarbershopId === barbershopId
+      ? professionalsLoadError
+      : null;
+  const noProfileYet =
+    hasCurrentProfessionals && professionals.length === 0;
+  const canCreateProfile = Boolean(
+    currentTeamSeats &&
+      hasCurrentProfessionals &&
+      (currentTeamSeats.unlimited ||
+        currentTeamSeats.used < currentTeamSeats.limit ||
+        noProfileYet),
+  );
+  const teamLimitReached = Boolean(
+    currentTeamSeats &&
+      !currentTeamSeats.unlimited &&
+      currentTeamSeats.used >= currentTeamSeats.limit,
+  );
+
+  if (isLoadingPlan || isLoadingBarbershop) return <main className="min-h-screen bg-zinc-950" aria-busy="true" />;
 
   return (
     <main className="min-h-screen bg-zinc-950 p-4 pt-16 text-zinc-100 sm:p-6 sm:pt-16 lg:p-8 lg:pt-16">
@@ -170,17 +315,55 @@ export default function EquipaPage() {
           }
         />
 
+        {currentTeamSeatsError && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-zinc-100">{currentTeamSeatsError}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {currentTeamSeats
+                  ? t('teamPage.previousSeatsHint')
+                  : t('teamPage.seatsUnavailableHint')}
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => void fetchTeamState()} disabled={teamLoading} className="shrink-0">
+              <RefreshCw className={`mr-2 size-4 ${teamLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
+
+        {currentProfessionalsError && hasCurrentProfessionals && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-zinc-100">{currentProfessionalsError}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {t('teamPage.previousProfilesHint')}
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => void fetchProfessionals()} className="shrink-0">
+              <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
+
         <section className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
               {t('teamPage.teamSeats')}
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">
-              {teamLoading
-                ? '—'
-                : teamSeats.unlimited
-                  ? `${teamSeats.used} / ∞`
-                  : `${teamSeats.used} / ${teamSeats.limit}`}
+              {currentTeamSeats
+                ? currentTeamSeats.unlimited
+                  ? `${currentTeamSeats.used} / ∞`
+                  : `${currentTeamSeats.used} / ${currentTeamSeats.limit}`
+                : '—'}
             </p>
             <p className="mt-1 text-xs text-zinc-500">
               {t('teamPage.seatDescription')}
@@ -191,7 +374,7 @@ export default function EquipaPage() {
               {t('teamPage.barberProfiles')}
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">
-              {professionals.length}
+              {hasCurrentProfessionals ? professionals.length : '—'}
             </p>
             <p className="mt-1 text-xs text-zinc-500">
               {t('teamPage.activeProfilesHint')}
@@ -220,7 +403,30 @@ export default function EquipaPage() {
           tabClassName="flex min-w-0 items-center justify-center"
         />
 
-        {activeTab === 'invite' && <InviteCodeCard seats={teamSeats} />}
+        {activeTab === 'invite' && currentTeamSeats && (
+          <InviteCodeCard seats={currentTeamSeats} />
+        )}
+        {activeTab === 'invite' && !currentTeamSeats && (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-10 text-center">
+            {teamLoading ? (
+              <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Spinner className="size-4" />
+                {t('teamPage.loadingSeats')}
+              </div>
+            ) : (
+              <div role="alert" className="flex flex-col items-center gap-2">
+                <AlertTriangle className="size-6 text-amber-200" aria-hidden="true" />
+                <p className="max-w-lg text-sm text-muted-foreground">
+                  {currentTeamSeatsError || t('teamPage.seatsUnavailableHint')}
+                </p>
+              </div>
+            )}
+            <Button variant="outline" onClick={() => void fetchTeamState()} disabled={teamLoading}>
+              <RefreshCw className={`mr-2 size-4 ${teamLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
         {activeTab === 'members' && (
           <TeamMembersManager onMembershipChanged={refreshTeam} />
         )}
@@ -242,7 +448,7 @@ export default function EquipaPage() {
                 </div>
               </div>
             )}
-            {loadingInitial ? (
+            {loadingInitial || (!hasCurrentProfessionals && !currentProfessionalsError) ? (
               <div
                 role="status"
                 aria-label={t('teamPage.loadingProfiles')}
@@ -255,7 +461,18 @@ export default function EquipaPage() {
                   />
                 ))}
               </div>
-            ) : (
+            ) : !hasCurrentProfessionals && currentProfessionalsError ? (
+              <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
+                <div role="alert" className="flex flex-col items-center gap-2">
+                  <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+                  <p className="max-w-lg text-sm text-muted-foreground">{currentProfessionalsError}</p>
+                </div>
+                <Button variant="outline" onClick={() => void fetchProfessionals()}>
+                  <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                  {t('common.retry')}
+                </Button>
+              </div>
+            ) : hasCurrentProfessionals ? (
               <ProfessionalsListCard
                 professionalsCount={professionals.length}
                 professionals={professionals}
@@ -287,16 +504,16 @@ export default function EquipaPage() {
                 isFreePlan={isFreePlan}
                 freeLimitReached={!canCreateProfile}
               />
-            )}
+            ) : null}
             <Dialog
-              open={!!editingProfessional}
+              open={!!editingProfessional && hasCurrentProfessionals}
               onOpenChange={(open) => !open && setEditingProfessional(null)}
             >
               <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>{t('teamPage.editBarber')}</DialogTitle>
                 </DialogHeader>
-                {editingProfessional && (
+                {editingProfessional && hasCurrentProfessionals && (
                   <form
                     onSubmit={handleUpdateProfessional}
                     className="grid gap-4 py-4"
