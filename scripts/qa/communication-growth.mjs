@@ -66,13 +66,13 @@ assert.match(automationsPage, /title: 'Automações de clientes'/);
 assert.match(workspace, /initialView !== 'automation'/);
 assert.match(workspace, /Automações de clientes/);
 assert.match(workspace, /birthdayAudience/);
-assert.match(workspace, /const \\[loading, setLoading\\] = useState\\(true\\)/);
-assert.match(workspace, /const \\[hasLoaded, setHasLoaded\\] = useState\\(false\\)/);
-assert.match(workspace, /const \\[loadError, setLoadError\\] = useState<string \\| null>\\(null\\)/);
-assert.match(workspace, /!Array\\.isArray\\(campaignData\\.campaigns\\)/);
-assert.match(workspace, /!Array\\.isArray\\(automationData\\.campaigns\\)/);
-assert.match(workspace, /setHasLoaded\\(true\\)/);
-assert.match(workspace, /setLoadError\\(message\\)/);
+assert.match(workspace, /const \[loading, setLoading\] = useState\(true\)/);
+assert.match(workspace, /const \[hasLoaded, setHasLoaded\] = useState\(false\)/);
+assert.match(workspace, /const \[loadError, setLoadError\] = useState<string \| null>\(null\)/);
+assert.match(workspace, /!Array\.isArray\(campaignData\.campaigns\)/);
+assert.match(workspace, /!Array\.isArray\(automationData\.campaigns\)/);
+assert.match(workspace, /setHasLoaded\(true\)/);
+assert.match(workspace, /setLoadError\(message\)/);
 assert.match(workspace, /!hasLoaded && loading/);
 assert.match(workspace, /!hasLoaded && loadError/);
 assert.match(workspace, /loadError && hasLoaded/);
@@ -88,7 +88,7 @@ assert.match(automationsApi, /withBirthDate/);
 assert.match(automationsApi, /birthdayReady/);
 assert.match(workspace, /triggerType: 'birthday'/);
 const automationSection = workspace.slice(
-  workspace.indexOf("{view === 'automation' && ("),
+  workspace.indexOf("{view === 'automation' && hasLoaded && ("),
   workspace.indexOf("{initialView !== 'automation' && view === 'performance' && ("),
 );
 assert.ok(automationSection.length > 0, 'Automation workspace section must exist.');
