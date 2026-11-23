@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { toast } from 'sonner';
 import { Professional } from '@/types';
 import { professionalService } from '@/app/dashboard/_services/professionals.service';
 import { useProfessionals } from '@/app/state/_hooks/dashboard/useProfessionals';
@@ -195,41 +194,57 @@ export default function EquipaPage() {
   } = useProfessionals(barbershopId, refreshTeam, isFreePlan);
 
   useEffect(() => {
-    const resetTenantState = () => {
+    if (isLoadingBarbershop) {
       teamSeatsRequestRef.current?.abort();
       professionalsRequestIdRef.current += 1;
       loadedProfessionalsBarbershopIdRef.current = null;
-      setTeamSeats(null);
-      setTeamSeatsBarbershopId(null);
-      setTeamSeatsLoadError(null);
-      setTeamSeatsErrorBarbershopId(null);
-      setTeamLoading(true);
-      setProfessionals([]);
-      setProfessionalsBarbershopId(null);
-      setProfessionalsLoadError(null);
-      setProfessionalsErrorBarbershopId(null);
-      setLoadingInitial(true);
-      setShowAddProfessionalForm(false);
-      setEditingProfessional(null);
-    };
-
-    if (isLoadingBarbershop) {
       lastTeamBarbershopIdRef.current = null;
-      resetTenantState();
       return;
     }
 
     if (!barbershopId) {
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+      loadedProfessionalsBarbershopIdRef.current = null;
       lastTeamBarbershopIdRef.current = null;
-      resetTenantState();
-      setLoadingInitial(false);
-      setTeamLoading(false);
+      queueMicrotask(() => {
+        if (lastTeamBarbershopIdRef.current !== null) return;
+        setTeamSeats(null);
+        setTeamSeatsBarbershopId(null);
+        setTeamSeatsLoadError(null);
+        setTeamSeatsErrorBarbershopId(null);
+        setTeamLoading(false);
+        setProfessionals([]);
+        setProfessionalsBarbershopId(null);
+        setProfessionalsLoadError(null);
+        setProfessionalsErrorBarbershopId(null);
+        setLoadingInitial(false);
+        setShowAddProfessionalForm(false);
+        setEditingProfessional(null);
+      });
       return;
     }
 
     if (lastTeamBarbershopIdRef.current !== barbershopId) {
       lastTeamBarbershopIdRef.current = barbershopId;
-      resetTenantState();
+      teamSeatsRequestRef.current?.abort();
+      professionalsRequestIdRef.current += 1;
+      loadedProfessionalsBarbershopIdRef.current = null;
+      queueMicrotask(() => {
+        if (lastTeamBarbershopIdRef.current !== barbershopId) return;
+        setTeamSeats(null);
+        setTeamSeatsBarbershopId(null);
+        setTeamSeatsLoadError(null);
+        setTeamSeatsErrorBarbershopId(null);
+        setTeamLoading(true);
+        setProfessionals([]);
+        setProfessionalsBarbershopId(null);
+        setProfessionalsLoadError(null);
+        setProfessionalsErrorBarbershopId(null);
+        setLoadingInitial(true);
+        setShowAddProfessionalForm(false);
+        setEditingProfessional(null);
+      });
     }
 
     const timer = window.setTimeout(() => void refreshTeam(), 0);
@@ -246,6 +261,7 @@ export default function EquipaPage() {
   ]);
 
   const currentTeamSeats =
+    Boolean(barbershopId) &&
     !isLoadingBarbershop &&
     teamSeatsBarbershopId === barbershopId
       ? teamSeats
@@ -255,9 +271,13 @@ export default function EquipaPage() {
       ? teamSeatsLoadError
       : null;
   const hasCurrentProfessionals =
-    !isLoadingBarbershop && professionalsBarbershopId === barbershopId;
+    Boolean(barbershopId) &&
+    !isLoadingBarbershop &&
+    professionalsBarbershopId === barbershopId;
   const currentProfessionalsError =
-    !isLoadingBarbershop && professionalsErrorBarbershopId === barbershopId
+    Boolean(barbershopId) &&
+    !isLoadingBarbershop &&
+    professionalsErrorBarbershopId === barbershopId
       ? professionalsLoadError
       : null;
   const noProfileYet =
@@ -486,14 +506,14 @@ export default function EquipaPage() {
               />
             )}
             <Dialog
-              open={!!editingProfessional}
+              open={!!editingProfessional && hasCurrentProfessionals}
               onOpenChange={(open) => !open && setEditingProfessional(null)}
             >
               <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-white/10 bg-zinc-950 text-white sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>{t('teamPage.editBarber')}</DialogTitle>
                 </DialogHeader>
-                {editingProfessional && (
+                {editingProfessional && hasCurrentProfessionals && (
                   <form
                     onSubmit={handleUpdateProfessional}
                     className="grid gap-4 py-4"
