@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Users } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Client } from '@/types';
@@ -39,14 +39,19 @@ export default function ClientesPage() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [hasLoadedClients, setHasLoadedClients] = useState(false);
   const requestController = useRef<AbortController | null>(null);
-  const hasLoadedClients = useRef(false);
+  const hasLoadedClientsRef = useRef(false);
+  const lastBarbershopIdRef = useRef<string | null | undefined>(undefined);
 
   const fetchClients = useCallback(async () => {
     if (!barbershopId) {
       setClients([]);
       setTotalClients(0);
-      hasLoadedClients.current = true;
+      hasLoadedClientsRef.current = true;
+      setHasLoadedClients(true);
+      setLoadError(null);
       setLoadingInitial(false);
       return;
     }
@@ -54,7 +59,8 @@ export default function ClientesPage() {
     requestController.current?.abort();
     const controller = new AbortController();
     requestController.current = controller;
-    setLoadingInitial(!hasLoadedClients.current);
+    setLoadingInitial(!hasLoadedClientsRef.current);
+    setLoadError(null);
 
     try {
       const supabase = createClient();
@@ -98,13 +104,15 @@ export default function ClientesPage() {
       }
 
       setClients(payload.clients as Client[]);
-      hasLoadedClients.current = true;
+      hasLoadedClientsRef.current = true;
+      setHasLoadedClients(true);
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error('[Clientes Sync Error]:', error);
-      toast.error(
-        error instanceof Error ? error.message : t('clientsPage.loadError'),
-      );
+      const message =
+        error instanceof Error ? error.message : t('clientsPage.loadError');
+      setLoadError(message);
+      toast.error(message);
     } finally {
       if (!controller.signal.aborted) setLoadingInitial(false);
     }
@@ -112,6 +120,22 @@ export default function ClientesPage() {
 
   useEffect(() => {
     if (isLoadingBarbershop) return;
+
+    const currentBarbershopId = barbershopId ?? null;
+    if (lastBarbershopIdRef.current !== currentBarbershopId) {
+      lastBarbershopIdRef.current = currentBarbershopId;
+      requestController.current?.abort();
+      hasLoadedClientsRef.current = false;
+      setHasLoadedClients(false);
+      setClients([]);
+      setTotalClients(0);
+      setLoadError(null);
+      setLoadingInitial(true);
+      if (offset !== 0) {
+        setOffset(0);
+        return;
+      }
+    }
 
     const timer = window.setTimeout(
       () => void fetchClients(),
@@ -153,6 +177,26 @@ export default function ClientesPage() {
     handleDeleteClient,
   } = useClients(barbershopId, fetchClients);
 
+  const lastClientDialogBarbershopIdRef = useRef<string | null | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (isLoadingBarbershop) {
+      setSelectedClientId(null);
+      setEditingClient(null);
+      setShowAddClientForm(false);
+      return;
+    }
+
+    const currentBarbershopId = barbershopId ?? null;
+    if (lastClientDialogBarbershopIdRef.current !== currentBarbershopId) {
+      lastClientDialogBarbershopIdRef.current = currentBarbershopId;
+      setSelectedClientId(null);
+      setEditingClient(null);
+      setShowAddClientForm(false);
+    }
+  }, [barbershopId, isLoadingBarbershop, setEditingClient]);
+
   const currentPage = Math.floor(offset / CLIENTS_PAGE_SIZE) + 1;
   const totalPages = Math.max(1, Math.ceil(totalClients / CLIENTS_PAGE_SIZE));
 
@@ -167,32 +211,63 @@ export default function ClientesPage() {
           accentClassName="text-blue-400 bg-blue-500/10 border-blue-500/20"
         />
 
-        {loadingInitial ? (
+        {isLoadingBarbershop || loadingInitial ? (
           <ClientsListSkeleton />
+        ) : loadError && !hasLoadedClients ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
+            <div role="alert" className="flex flex-col items-center gap-2">
+              <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+              <h2 className="font-medium">{t('clientsPage.title')}</h2>
+              <p className="max-w-lg text-sm text-muted-foreground">{loadError}</p>
+            </div>
+            <Button variant="outline" onClick={() => void fetchClients()}>
+              <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
         ) : (
-          <ClientsListCard
-            clientsCount={totalClients}
-            filteredClients={clients}
-            searchClientQuery={searchClientQuery}
-            setSearchClientQuery={updateSearch}
-            showAddClientForm={showAddClientForm}
-            setShowAddClientForm={setShowAddClientForm}
-            newClientData={newClientData}
-            setNewClientData={setNewClientData}
-            handleCreateClient={handleCreateClient}
-            setEditingClient={setEditingClient}
-            handleDeleteClient={handleDeleteClient}
-            onViewClient={(client) => setSelectedClientId(client.id)}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setOffset((page - 1) * CLIENTS_PAGE_SIZE)}
-            sortBy={sortBy}
-            setSortBy={(value) => {
-              setSortBy(value);
-              setOffset(0);
-            }}
-            loading={loadingClients}
-          />
+          <>
+            {loadError && (
+              <div
+                role="alert"
+                className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-zinc-100">{loadError}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {t('clientsPage.previousResultsHint')}
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => void fetchClients()} className="shrink-0">
+                  <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                  {t('common.retry')}
+                </Button>
+              </div>
+            )}
+            <ClientsListCard
+              clientsCount={totalClients}
+              filteredClients={clients}
+              searchClientQuery={searchClientQuery}
+              setSearchClientQuery={updateSearch}
+              showAddClientForm={showAddClientForm}
+              setShowAddClientForm={setShowAddClientForm}
+              newClientData={newClientData}
+              setNewClientData={setNewClientData}
+              handleCreateClient={handleCreateClient}
+              setEditingClient={setEditingClient}
+              handleDeleteClient={handleDeleteClient}
+              onViewClient={(client) => setSelectedClientId(client.id)}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setOffset((page - 1) * CLIENTS_PAGE_SIZE)}
+              sortBy={sortBy}
+              setSortBy={(value) => {
+                setSortBy(value);
+                setOffset(0);
+              }}
+              loading={loadingClients}
+            />
+          </>
         )}
 
         <ClientDetailsDialog

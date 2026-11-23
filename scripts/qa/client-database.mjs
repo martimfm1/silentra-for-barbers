@@ -66,6 +66,25 @@ assert.match(
   /Authorization: \`Bearer \$\{session\.access_token\}\`/,
 );
 assert.match(clientsPage, /onViewClient/);
+assert.match(clientsPage, /const \[loadError, setLoadError\] = useState<string \| null>\(null\)/);
+assert.match(clientsPage, /const \[hasLoadedClients, setHasLoadedClients\] = useState\(false\)/);
+assert.match(clientsPage, /const lastBarbershopIdRef = useRef<string \| null \| undefined>\(undefined\)/);
+assert.match(clientsPage, /lastBarbershopIdRef\.current !== currentBarbershopId/);
+assert.match(clientsPage, /lastClientDialogBarbershopIdRef/);
+assert.match(clientsPage, /setSelectedClientId\(null\)/);
+assert.match(clientsPage, /setEditingClient\(null\)/);
+assert.match(clientsPage, /setShowAddClientForm\(false\)/);
+assert.match(clientsPage, /setClients\(\[\]\)/);
+assert.match(clientsPage, /setHasLoadedClients\(true\)/);
+assert.match(clientsPage, /loadError && !hasLoadedClients/);
+assert.match(clientsPage, /isLoadingBarbershop \|\| loadingInitial/);
+assert.match(clientsPage, /loadError && \(/);
+assert.match(clientsPage, /role="alert"/);
+assert.match(clientsPage, /onClick=\{\(\) => void fetchClients\(\)\}/);
+assert.match(clientsPage, /clientsPage\.previousResultsHint/);
+assert.match(clientsPage, /hasLoadedClientsRef\.current = false/);
+assert.match(clientsPage, /requestController\.current\?\.abort\(\)/);
+assert.match(clientsPage, /setLoadError\(message\)/);
 assert.match(clientsCard, /onViewClient/);
 assert.match(clientsCard, /currentPage/);
 assert.match(clientsCard, /totalPages/);

@@ -355,6 +355,7 @@ export const enCopy = {
     description:
       'Keep essential contact details organised. Client history grows with each booking.',
     loadError: 'Unable to load clients. Please try again.',
+    previousResultsHint: 'Previously loaded results are still visible. Retry to load the current search.',
     loading: 'Loading clients',
     editTitle: 'Edit client',
     name: 'Name',

@@ -358,6 +358,7 @@ export const ptCopy = {
     description:
       'Mantém os contactos essenciais organizados. O histórico cresce com as marcações.',
     loadError: 'Não foi possível carregar os clientes. Tenta novamente.',
+    previousResultsHint: 'Os resultados anteriores continuam visíveis. Volta a tentar para carregar a pesquisa atual.',
     loading: 'A carregar clientes',
     editTitle: 'Editar cliente',
     name: 'Nome',
