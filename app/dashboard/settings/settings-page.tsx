@@ -195,7 +195,8 @@ export default function SettingsPageOrganized() {
   const bannerRef = useRef<HTMLInputElement>(null);
   const load = useCallback(async () => {
     if (!barbershopId) return;
-    setLoading(true);
+    const isInitialLoad = initial === null;
+    if (isInitialLoad) setLoading(true);
     setLoadError(null);
     try {
       const c = await barbershopService.getConfig(barbershopId);
@@ -216,9 +217,9 @@ export default function SettingsPageOrganized() {
       setLoadError(t('settingsPage.loadFailed'));
       toast.error(t('settingsPage.loadFailed'));
     } finally {
-      setLoading(false);
+      if (isInitialLoad) setLoading(false);
     }
-  }, [barbershopId, t]);
+  }, [barbershopId, initial, t]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -677,6 +678,18 @@ export default function SettingsPageOrganized() {
   return (
     <main className="settings-page min-h-screen bg-transparent text-zinc-50">
       <div className="mx-auto max-w-7xl px-4 pb-28 pt-4 sm:px-6 lg:px-8">
+        {loadError && initial && (
+          <div
+            role="alert"
+            className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-sm text-muted-foreground">{loadError} A configuração anteriormente carregada continua visível.</p>
+            <Button variant="outline" onClick={() => void load()} className="shrink-0">
+              <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
         <header className="sticky top-0 z-30 -mx-4 border-b bg-zinc-950/10 px-4 py-4 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <div className="flex min-w-0 items-center gap-3">
