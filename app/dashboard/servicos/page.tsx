@@ -28,18 +28,20 @@ export default function ServicosPage() {
   const [showAddServiceForm, setShowAddServiceForm] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const hasLoadedServices = useRef(false);
+  const hasLoadedServicesRef = useRef(false);
+  const [hasLoadedServices, setHasLoadedServices] = useState(false);
 
   const fetchServices = useCallback(async () => {
     if (!barbershopId) return;
-    const isInitialLoad = !hasLoadedServices.current;
+    const isInitialLoad = !hasLoadedServicesRef.current;
     if (isInitialLoad) setLoadingInitial(true);
     setLoadError(null);
     try {
       const res = await servicesService.getAll(barbershopId);
       if (res.error) throw res.error;
       setServices(res.data ?? []);
-      hasLoadedServices.current = true;
+      hasLoadedServicesRef.current = true;
+      setHasLoadedServices(true);
     } catch (error) {
       console.error('[Serviços Sync Error]:', error);
       setLoadError(t('servicesPage.loadError'));
@@ -80,7 +82,7 @@ export default function ServicosPage() {
 
         {loadingInitial ? (
           <ServicesSkeletonGrid />
-        ) : loadError && !hasLoadedServices.current ? (
+        ) : loadError && !hasLoadedServices ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
             <div role="alert" className="flex flex-col items-center gap-2">
               <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
