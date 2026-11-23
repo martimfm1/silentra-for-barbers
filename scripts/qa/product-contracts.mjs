@@ -1442,6 +1442,25 @@ const checks = [
       );
     },
   },
+  {
+    name: 'QR-code page distinguishes loading from a recoverable configuration error',
+    file: 'app/dashboard/qr-code/page.tsx',
+    test: (source) => {
+      const normalized = source.replace(/\s+/g, ' ');
+      return (
+        normalized.includes('const loadConfig = useCallback(async () =>') &&
+        normalized.includes('setLoadError(null)') &&
+        normalized.includes('typeof payload.slug !== \'string\'') &&
+        normalized.includes('typeof payload.canCustomize !== \'boolean\'') &&
+        normalized.includes('setLoadError(') &&
+        normalized.includes(') : loadError ? (') &&
+        normalized.includes('role=\"alert\"') &&
+        normalized.includes('onClick={() => void loadConfig()}') &&
+        normalized.includes("t('common.retry')") &&
+        normalized.includes('aria-busy=\"true\"')
+      );
+    },
+  },
 ];
 let failed = 0;
 for (const check of checks) {
