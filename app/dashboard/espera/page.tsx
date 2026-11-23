@@ -67,6 +67,8 @@ export default function WaitlistPage() {
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasLoadedEntries, setHasLoadedEntries] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -81,16 +83,24 @@ export default function WaitlistPage() {
       }
       if (silent) setRefreshing(true);
       else setLoading(true);
+      setLoadError(null);
       try {
         const response = await fetch('/api/dashboard/waitlist', {
           cache: 'no-store',
         });
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok || !payload.success)
-          throw new Error(payload.error || 'WAITLIST_LOAD_FAILED');
-        setEntries(Array.isArray(payload.entries) ? payload.entries : []);
+        const payload = await response.json().catch(() => null);
+        if (
+          !response.ok ||
+          !payload?.success ||
+          !Array.isArray(payload.entries)
+        ) {
+          throw new Error(payload?.error || 'WAITLIST_LOAD_FAILED');
+        }
+        setEntries(payload.entries);
+        setHasLoadedEntries(true);
+        setLoadError(null);
       } catch {
-        toast.error(
+        setLoadError(
           en
             ? 'Could not load the waitlist.'
             : 'Não foi possível carregar a lista de espera.',
@@ -261,7 +271,7 @@ export default function WaitlistPage() {
               size="icon"
               className="size-11 shrink-0"
               onClick={() => void load(true)}
-              disabled={refreshing}
+              disabled={loading || refreshing}
               aria-label={en ? 'Refresh waitlist' : 'Atualizar lista de espera'}
             >
               <RefreshCw
@@ -317,6 +327,37 @@ export default function WaitlistPage() {
             </div>
           </div>
 
+          {loadError && (
+            <div
+              role="alert"
+              className="mt-4 flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-zinc-100">{loadError}</p>
+                {hasLoadedEntries && (
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    {en
+                      ? 'The previously loaded requests are still shown.'
+                      : 'Os pedidos carregados anteriormente continuam visíveis.'}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void load(true)}
+                disabled={loading || refreshing}
+                className="shrink-0"
+              >
+                <RefreshCw
+                  className={refreshing ? 'mr-2 size-4 animate-spin' : 'mr-2 size-4'}
+                  aria-hidden="true"
+                />
+                {en ? 'Try again' : 'Tentar novamente'}
+              </Button>
+            </div>
+          )}
+
           {loading ? (
             <div className="grid gap-3 py-6">
               {[0, 1, 2].map((item) => (
@@ -326,7 +367,7 @@ export default function WaitlistPage() {
                 />
               ))}
             </div>
-          ) : visibleEntries.length === 0 ? (
+          ) : !hasLoadedEntries ? null : visibleEntries.length === 0 ? (
             <div className="flex min-h-64 flex-col items-center justify-center px-5 py-10 text-center">
               <div className="flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.035] text-zinc-400">
                 <Clock3 className="size-5" aria-hidden="true" />
