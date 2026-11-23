@@ -55,6 +55,15 @@ const specializedGuards = [
     ],
   },
   {
+    pattern: /\/marketing\/unsubscribe\/route\.ts$/,
+    markers: [
+      'verifyMarketingUnsubscribeToken',
+      'createAdminClient',
+      ".eq('barbershop_id', payload.barbershopId)",
+      ".eq('email', payload.email)",
+    ],
+  },
+  {
     pattern: /\/loyalty\/redemption\/qr\/route\.ts$/,
     markers: ['hashLoyaltyToken'],
   },
