@@ -106,8 +106,8 @@ assert.match(locationPanel, /lastSuccessfulBarbershopIdRef\.current !== barbersh
 assert.match(locationPanel, /if \(result\.error \|\| !result\.data\)/);
 assert.match(locationPanel, /catch \(error: unknown\)/);
 assert.match(locationPanel, /finally \{/);
-assert.match(locationPanel, /loadError && !isCurrentBarbershopLoaded/);
-assert.match(locationPanel, /loadError && isCurrentBarbershopLoaded/);
+assert.match(locationPanel, /hasCurrentBarbershopLoadError && !isCurrentBarbershopLoaded/);
+assert.match(locationPanel, /hasCurrentBarbershopLoadError && isCurrentBarbershopLoaded/);
 assert.match(locationPanel, /const \[loadErrorBarbershopId, setLoadErrorBarbershopId\] = useState</);
 assert.match(locationPanel, /loadErrorBarbershopId === barbershopId/);
 assert.match(locationPanel, /setLoadErrorBarbershopId\(barbershopId\)/);
