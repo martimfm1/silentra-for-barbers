@@ -31,12 +31,17 @@ export function SettingsLocationPanel({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadErrorBarbershopId, setLoadErrorBarbershopId] = useState<
+    string | null
+  >(null);
   const [loadedBarbershopId, setLoadedBarbershopId] = useState<string | null>(
     null,
   );
   const [retryKey, setRetryKey] = useState(0);
   const lastSuccessfulBarbershopIdRef = useRef<string | null>(null);
   const isCurrentBarbershopLoaded = loadedBarbershopId === barbershopId;
+  const hasCurrentBarbershopLoadError =
+    loadError !== null && loadErrorBarbershopId === barbershopId;
 
   useEffect(() => {
     let active = true;
@@ -50,6 +55,7 @@ export function SettingsLocationPanel({
       setLoadedBarbershopId(null);
     }
     setLoadError(null);
+    setLoadErrorBarbershopId(null);
 
     void (async () => {
       try {
@@ -69,6 +75,7 @@ export function SettingsLocationPanel({
         setLoadError(
           error instanceof Error ? error.message : t('settingsPage.loadFailed'),
         );
+        setLoadErrorBarbershopId(barbershopId);
       } finally {
         if (active && isInitialLoad) setLoading(false);
       }
@@ -124,7 +131,7 @@ export function SettingsLocationPanel({
     }
   };
 
-  if (loading || (!isCurrentBarbershopLoaded && !loadError)) {
+  if (loading || (!isCurrentBarbershopLoaded && !hasCurrentBarbershopLoadError)) {
     return (
       <Card className="border-white/10 bg-black/40" aria-busy="true">
         <CardContent className="flex min-h-32 items-center justify-center">
@@ -134,7 +141,7 @@ export function SettingsLocationPanel({
     );
   }
 
-  if (loadError && !isCurrentBarbershopLoaded) {
+  if (hasCurrentBarbershopLoadError && !isCurrentBarbershopLoaded) {
     return (
       <Card className="border-amber-300/20 bg-amber-300/[0.04]">
         <CardContent className="flex min-h-32 flex-col items-center justify-center gap-3 p-5 text-center">
@@ -163,7 +170,7 @@ export function SettingsLocationPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {loadError && isCurrentBarbershopLoaded && (
+        {hasCurrentBarbershopLoadError && isCurrentBarbershopLoaded && (
           <div
             role="alert"
             className="flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-3 sm:flex-row sm:items-center sm:justify-between"
