@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
+  AlertTriangle,
   ArrowLeft,
   BellRing,
   Building2,
@@ -18,6 +19,7 @@ import {
   ImageIcon,
   LogOut,
   Palette,
+  RefreshCw,
   Save,
   ShieldCheck,
   Trash2,
@@ -169,6 +171,7 @@ export default function SettingsPageOrganized() {
   const canManualMbway = hasFeature('manual_mbway_prepayment');
   const automationAllowed = plan === 'pro' || plan === 'enterprise';
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -192,10 +195,14 @@ export default function SettingsPageOrganized() {
   const bannerRef = useRef<HTMLInputElement>(null);
   const load = useCallback(async () => {
     if (!barbershopId) return;
-    setLoading(true);
-    const c = await barbershopService.getConfig(barbershopId);
-    if (c.error) toast.error(t('settingsPage.loadFailed'));
-    if (c.data) {
+    const isInitialLoad = initial === null;
+    if (isInitialLoad) setLoading(true);
+    setLoadError(null);
+    try {
+      const c = await barbershopService.getConfig(barbershopId);
+      if (c.error || !c.data) {
+        throw c.error ?? new Error(t('settingsPage.loadFailed'));
+      }
       const n = normalize(c.data);
       setConfig(n);
       setInitial(n);
@@ -205,9 +212,14 @@ export default function SettingsPageOrganized() {
           ? 'hours'
           : 'minutes',
       );
+    } catch (error) {
+      console.error('[Settings Config Load Error]:', error);
+      setLoadError(t('settingsPage.loadFailed'));
+      toast.error(t('settingsPage.loadFailed'));
+    } finally {
+      if (isInitialLoad) setLoading(false);
     }
-    setLoading(false);
-  }, [barbershopId, t]);
+  }, [barbershopId, initial, t]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -646,9 +658,38 @@ export default function SettingsPageOrganized() {
         </div>
       </main>
     );
+  if (loadError && !initial && !loading && !planLoading)
+    return (
+      <main className="settings-page min-h-screen bg-transparent px-4 py-8 text-zinc-50">
+        <div className="mx-auto flex max-w-xl flex-col items-center gap-4 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] px-5 py-12 text-center">
+          <div role="alert" className="flex flex-col items-center gap-2">
+            <AlertTriangle className="size-7 text-amber-200" aria-hidden="true" />
+            <h1 className="text-lg font-semibold">{t('settingsPage.title')}</h1>
+            <p className="max-w-lg text-sm text-muted-foreground">{loadError}</p>
+          </div>
+          <Button onClick={() => void load()}>
+            <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+            {t('common.retry')}
+          </Button>
+        </div>
+      </main>
+    );
+
   return (
     <main className="settings-page min-h-screen bg-transparent text-zinc-50">
       <div className="mx-auto max-w-7xl px-4 pb-28 pt-4 sm:px-6 lg:px-8">
+        {loadError && initial && (
+          <div
+            role="alert"
+            className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-sm text-muted-foreground">{loadError} A configuração anteriormente carregada continua visível.</p>
+            <Button variant="outline" onClick={() => void load()} className="shrink-0">
+              <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
         <header className="sticky top-0 z-30 -mx-4 border-b bg-zinc-950/10 px-4 py-4 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <div className="flex min-w-0 items-center gap-3">
