@@ -75,6 +75,16 @@ Alertas devem apontar para uma pessoa responsável e incluir rota, ambiente, reg
 5. Testar health, login, booking, billing, webhook e email após rollback.
 6. Registar o motivo, duração, impacto e ações de follow-up.
 
+### Rollback específico — marketing consent e campanhas manuais
+Migration `20261123010746_manual_marketing_campaigns_and_preferences`:
+
+- **Rollback da aplicação:** é seguro voltar ao deployment anterior mantendo a migration aplicada. O schema é aditivo; a versão anterior da aplicação pode ignorar as tabelas e funções novas.
+- **Não executar um down migration destrutivo:** não remover `marketing_contact_preferences`, `marketing_campaign_monthly_usage` nem as respetivas funções enquanto existirem registos. A primeira tabela guarda prova de consentimento/revogação; a segunda guarda a quota mensal. Apagá-las pode voltar a permitir envios a contactos que fizeram unsubscribe ou repor quotas já consumidas.
+- **Não restaurar automaticamente o estado antigo de campanhas de aniversário:** a migration recupera ciclos que tinham destinatários falhados. Repor `birthday_last_run_date` sem reconciliar os destinatários pode impedir retries ou duplicar mensagens.
+- **Correção de schema:** preferir uma migration forward-only e idempotente. Antes de alterar ou retirar a funcionalidade, desativar os envios no servidor, preservar os registos e documentar a reconciliação de consentimentos/quota. Uma restauração de backup requer plano aprovado e verificação de integridade antes de reabrir envios.
+- **Verificação pós-aplicação:** confirmar a versão/nome na migration history; existência das duas tabelas; RLS ativo em ambas; acesso de leitura negado a `anon` e `authenticated`, concedido a `service_role`; funções `reserve_marketing_campaign_send`, `release_marketing_campaign_send` e `claim_birthday_marketing_campaign` com `SECURITY INVOKER` e execução limitada a `service_role`. Executar `pnpm qa:communication-growth`, `pnpm qa:security` e Smoke QA.
+- **Estado verificado em produção (24/11/2026):** migration history contém `20261123010746 / manual_marketing_campaigns_and_preferences`; as duas tabelas existem, têm RLS ativo, as permissões de leitura correspondem ao esperado e as três funções são `SECURITY INVOKER`. A verificação foi read-only; não foram executados DDL nem alterações de dados durante a auditoria.
+
 ## 6. Verificação de providers
 
 ### Stripe
