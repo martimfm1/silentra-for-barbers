@@ -1,7 +1,7 @@
 'use client';
 
 import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { SilentraLoading } from '@/components/ui/silentra-loading';
 import Link from 'next/link';
 import {
@@ -44,6 +44,51 @@ type WebsiteRequest = {
   created_at: string;
   published_at?: string | null;
 };
+
+function isWebsiteRequestList(value: unknown): value is WebsiteRequest[] {
+  const validStatuses: WebsiteRequest['status'][] = [
+    'requested',
+    'contacted',
+    'in_progress',
+    'review',
+    'published',
+    'rejected',
+  ];
+  return (
+    Array.isArray(value) &&
+    value.every((entry) => {
+      if (!entry || typeof entry !== 'object') return false;
+      const item = entry as Record<string, unknown>;
+      return (
+        typeof item.id === 'string' &&
+        typeof item.shop_name === 'string' &&
+        typeof item.desired_slug === 'string' &&
+        typeof item.brief === 'string' &&
+        typeof item.contact_email === 'string' &&
+        typeof item.status === 'string' &&
+        validStatuses.includes(item.status as WebsiteRequest['status']) &&
+        typeof item.created_at === 'string'
+      );
+    })
+  );
+}
+
+function isWebsiteAccess(value: unknown): value is WebsiteAccess {
+  if (!value || typeof value !== 'object') return false;
+  const access = value as Record<string, unknown>;
+  return (
+    typeof access.allowed === 'boolean' &&
+    typeof access.setupFee === 'number' &&
+    Number.isFinite(access.setupFee) &&
+    access.setupFee >= 0 &&
+    typeof access.monthlyFee === 'number' &&
+    Number.isFinite(access.monthlyFee) &&
+    access.monthlyFee >= 0 &&
+    ['enterprise', 'admin_grant', 'not_granted'].includes(
+      String(access.source),
+    )
+  );
+}
 
 const STATUS = {
   pt: {
@@ -116,38 +161,55 @@ export default function CustomWebsiteDashboardPage() {
   const [desiredSlug, setDesiredSlug] = useState('');
   const [brief, setBrief] = useState('');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [hasLoadedRequests, setHasLoadedRequests] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const requestIdRef = useRef(0);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setLoadError(null);
+    const requestId = ++requestIdRef.current;
+    const initialLoad = !hasLoadedRequests;
+    if (initialLoad) setLoading(true);
+    else setRefreshing(true);
+
     try {
       const response = await fetch('/api/dashboard/custom-website', {
         cache: 'no-store',
       });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok)
-        throw new Error(
-          body.error ||
-            (pt
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) {
+        const message =
+          body && typeof body === 'object' && 'error' in body &&
+          typeof body.error === 'string'
+            ? body.error
+            : pt
               ? 'Não foi possível carregar os pedidos.'
-              : 'Could not load website requests.'),
-        );
-      if (!body || typeof body !== 'object' || !('access' in body)) {
+              : 'Could not load website requests.';
+        throw new Error(message);
+      }
+      if (
+        !body ||
+        typeof body !== 'object' ||
+        !('data' in body) ||
+        !('access' in body) ||
+        !isWebsiteRequestList(body.data) ||
+        !isWebsiteAccess(body.access)
+      ) {
         throw new Error(
           pt
             ? 'A resposta do serviço de sites é inválida.'
             : 'The website service returned an invalid response.',
         );
       }
-      setRequests(Array.isArray(body.data) ? body.data : []);
-      setAccess(
-        body.access && typeof body.access === 'object'
-          ? (body.access as WebsiteAccess)
-          : null,
-      );
+
+      if (requestId !== requestIdRef.current) return;
+      setRequests(body.data);
+      setAccess(body.access);
+      setHasLoadedRequests(true);
+      setLoadError(null);
     } catch (error) {
+      if (requestId !== requestIdRef.current) return;
       const message =
         error instanceof Error
           ? error.message
@@ -155,14 +217,19 @@ export default function CustomWebsiteDashboardPage() {
             ? 'Não foi possível carregar os pedidos.'
             : 'Could not load website requests.';
       setLoadError(message);
-      toast.error(message);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  }, [pt]);
+  }, [hasLoadedRequests, pt]);
 
   useEffect(() => {
     if (!planLoading) void load();
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [load, planLoading]);
 
   const activeRequest = requests.find((item) =>
@@ -212,7 +279,7 @@ export default function CustomWebsiteDashboardPage() {
     }
   }
 
-  if (planLoading || loading) {
+  if (planLoading || (loading && !hasLoadedRequests)) {
     return (
       <SilentraLoading
         variant="dashboard"
@@ -317,6 +384,40 @@ export default function CustomWebsiteDashboardPage() {
 
   return (
     <main className="dashboard-page mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-8">
+      {loadError && access !== null && (
+        <section
+          role="alert"
+          className="flex flex-col gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-zinc-100">{loadError}</p>
+            {hasLoadedRequests && (
+              <p className="mt-1 text-xs leading-5 text-zinc-500">
+                {pt
+                  ? 'Os últimos pedidos confirmados continuam visíveis.'
+                  : 'The last successfully loaded requests are still shown.'}
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void load()}
+            disabled={refreshing || loading}
+            className="min-h-10 shrink-0"
+          >
+            {refreshing ? (
+              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+            ) : null}
+            {pt ? 'Tentar novamente' : 'Try again'}
+          </Button>
+        </section>
+      )}
+      {refreshing && !loadError && (
+        <p role="status" aria-live="polite" className="text-xs text-zinc-500">
+          {pt ? 'A atualizar os pedidos…' : 'Refreshing requests…'}
+        </p>
+      )}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link
