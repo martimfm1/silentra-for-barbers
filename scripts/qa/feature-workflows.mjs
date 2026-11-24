@@ -837,6 +837,28 @@ assert.ok(appointmentDetailDialog.includes('Push:'));
 console.log('[APPOINTMENT_NOTIFICATION_RETRY_QA] Atomic tenant-scoped claim, lease ownership and provider result persistence are enforced.');
 
 
+
+const customWebsitePage = read('app/dashboard/website/page.tsx');
+assert.match(customWebsitePage, /function isWebsiteRequestList/);
+assert.match(customWebsitePage, /function isWebsiteAccess/);
+assert.match(customWebsitePage, /const requestIdRef = useRef\(0\)/);
+assert.match(customWebsitePage, /const hasLoadedRequestsRef = useRef\(false\)/);
+assert.match(customWebsitePage, /const initialLoad = !hasLoadedRequestsRef\.current/);
+assert.match(customWebsitePage, /hasLoadedRequestsRef\.current = true/);
+assert.doesNotMatch(customWebsitePage, /\}, \[hasLoadedRequests, pt\]\);/);
+assert.match(customWebsitePage, /const \[refreshing, setRefreshing\] = useState\(false\)/);
+assert.match(customWebsitePage, /const \[hasLoadedRequests, setHasLoadedRequests\] = useState\(false\)/);
+assert.match(customWebsitePage, /!isWebsiteRequestList\(body\.data\)/);
+assert.match(customWebsitePage, /!isWebsiteAccess\(body\.access\)/);
+assert.match(customWebsitePage, /requestId !== requestIdRef\.current/);
+assert.match(customWebsitePage, /setHasLoadedRequests\(true\)/);
+assert.match(customWebsitePage, /role="alert"/);
+assert.match(customWebsitePage, /Os últimos pedidos confirmados continuam visíveis\./);
+assert.match(customWebsitePage, /onClick=\{\(\) => void load\(\)\}/);
+assert.match(customWebsitePage, /loading && !hasLoadedRequests/);
+assert.doesNotMatch(customWebsitePage, /setRequests\(Array\.isArray\(body\.data\) \? body\.data : \[\]\)/);
+console.log('[LAW13_CUSTOM_WEBSITE_RECOVERY_QA] Validated response payloads, retryable refresh errors, last-known request preservation and stale-request protection.');
+
 console.log(
   'Custom websites, public API, birthday automation, booking outbox, admin reports, booking lifecycle, dashboard dialogs, visible chart and billing regression contracts passed.',
 );
