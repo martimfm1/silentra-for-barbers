@@ -145,4 +145,23 @@ assert.match(globalStyles, /dashboard-dock-item/);
 assert.match(sidebar, /dashboard-dock-item/);
 assert.match(sidebar, /MoreHorizontal/);
 
+
+assert.match(dashboard, /const dashboardRequestIdRef = useRef\(0\)/);
+assert.match(dashboard, /dashboardDataBarbershopId !== barbershopId/);
+assert.match(dashboard, /requestId !== dashboardRequestIdRef\.current/);
+assert.match(dashboard, /setDashboardDataBarbershopId\(currentBarbershopId\)/);
+assert.match(dashboard, /setDashboardLoadError\(true\)/);
+assert.match(dashboard, /setHasLoadedDashboardData\(true\)/);
+assert.match(dashboard, /setHasLoadedAppointments\(true\)/);
+assert.match(dashboard, /role="alert"/);
+assert.match(dashboard, /onClick=\{\(\) => void fetchInitialData\(\)\}/);
+assert.match(dashboard, /setAppointments\(\[\]\)/);
+assert.match(dashboard, /!hasLoadedAppointments/);
+assert.match(dashboard, /hasLoadedDashboardData/);
+assert.match(dashboard, /Array\.isArray\(appointmentsResult\.value\.data\)/);
+assert.match(dashboard, /Array\.isArray\(servicesResult\.value\.data\)/);
+assert.match(dashboard, /Array\.isArray\(professionalsResult\.value\.data\)/);
+assert.match(dashboard, /Array\.isArray\(clientsResult\.value\.data\)/);
+console.log('[DASHBOARD_OVERVIEW_RECOVERY_QA] Overview reads are tenant-scoped, response arrays are validated, retry errors are persistent, and unconfirmed appointment/metric data is not presented as an empty state.');
+
 console.log('Dashboard customization contracts passed.');

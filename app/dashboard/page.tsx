@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
@@ -102,6 +102,12 @@ export default function DashboardPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [dashboardLoadError, setDashboardLoadError] = useState(false);
+  const [hasLoadedDashboardData, setHasLoadedDashboardData] = useState(false);
+  const [hasLoadedAppointments, setHasLoadedAppointments] = useState(false);
+  const [dashboardDataBarbershopId, setDashboardDataBarbershopId] = useState<string | null>(null);
+  const dashboardRequestIdRef = useRef(0);
+  const lastDashboardBarbershopIdRef = useRef<string | null>(null);
   const [loadingSetupData, setLoadingSetupData] = useState(true);
   const [setupBarbershopConfig, setSetupBarbershopConfig] =
     useState<BarbershopConfigPayload | null>(null);
@@ -113,7 +119,11 @@ export default function DashboardPage() {
       setLoadingInitial(false);
       return;
     }
+
+    const requestId = ++dashboardRequestIdRef.current;
+    const currentBarbershopId = barbershopId;
     setLoadingInitial(true);
+
     try {
       const [
         appointmentsResult,
@@ -121,26 +131,30 @@ export default function DashboardPage() {
         professionalsResult,
         clientsResult,
       ] = await Promise.allSettled([
-        appointmentService.getAll(barbershopId),
-        servicesService.getAll(barbershopId),
-        professionalService.getAll(barbershopId),
-        appointmentService.getClients(barbershopId),
+        appointmentService.getAll(currentBarbershopId),
+        servicesService.getAll(currentBarbershopId),
+        professionalService.getAll(currentBarbershopId),
+        appointmentService.getClients(currentBarbershopId),
       ]);
 
-      if (appointmentsResult.status === 'rejected') {
-        throw appointmentsResult.reason;
+      if (requestId !== dashboardRequestIdRef.current) return;
+      if (
+        appointmentsResult.status !== 'fulfilled' ||
+        appointmentsResult.value.error ||
+        !Array.isArray(appointmentsResult.value.data)
+      ) {
+        throw new Error('DASHBOARD_APPOINTMENTS_LOAD_FAILED');
       }
-      if (appointmentsResult.value.error) {
-        throw appointmentsResult.value.error;
-      }
-      setAppointments(appointmentsResult.value.data ?? []);
+      setAppointments(appointmentsResult.value.data);
+      setHasLoadedAppointments(true);
 
       let secondaryDataFailed = false;
       if (
         servicesResult.status === 'fulfilled' &&
-        !servicesResult.value.error
+        !servicesResult.value.error &&
+        Array.isArray(servicesResult.value.data)
       ) {
-        setServices(servicesResult.value.data ?? []);
+        setServices(servicesResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Services Sync Error]');
@@ -148,37 +162,91 @@ export default function DashboardPage() {
 
       if (
         professionalsResult.status === 'fulfilled' &&
-        !professionalsResult.value.error
+        !professionalsResult.value.error &&
+        Array.isArray(professionalsResult.value.data)
       ) {
-        setProfessionals(professionalsResult.value.data ?? []);
+        setProfessionals(professionalsResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Professionals Sync Error]');
       }
 
-      if (clientsResult.status === 'fulfilled' && !clientsResult.value.error) {
-        setClients(clientsResult.value.data ?? []);
+      if (
+        clientsResult.status === 'fulfilled' &&
+        !clientsResult.value.error &&
+        Array.isArray(clientsResult.value.data)
+      ) {
+        setClients(clientsResult.value.data);
       } else {
         secondaryDataFailed = true;
         console.error('[Dashboard Clients Sync Error]');
       }
 
-      if (secondaryDataFailed) toast.error(t('dashboard.updateError'));
+      if (requestId !== dashboardRequestIdRef.current) return;
+      if (secondaryDataFailed) {
+        setDashboardLoadError(true);
+      } else {
+        setHasLoadedDashboardData(true);
+        setDashboardLoadError(false);
+      }
     } catch (error) {
-      console.error('[Dashboard Appointments Sync Error]:', error);
-      toast.error(t('dashboard.updateError'));
+      if (requestId !== dashboardRequestIdRef.current) return;
+      console.error('[Dashboard Overview Load Error]:', error);
+      setDashboardLoadError(true);
     } finally {
-      setLoadingInitial(false);
+      if (requestId === dashboardRequestIdRef.current) {
+        setLoadingInitial(false);
+        setDashboardDataBarbershopId(currentBarbershopId);
+      }
     }
-  }, [barbershopId, t]);
+  }, [barbershopId]);
 
   useEffect(() => {
-    if (isLoadingBarbershop) return;
-    if (!barbershopId) {
-      setLoadingInitial(false);
+    if (isLoadingBarbershop) {
+      dashboardRequestIdRef.current += 1;
       return;
     }
-    queueMicrotask(() => void fetchInitialData());
+
+    if (!barbershopId) {
+      dashboardRequestIdRef.current += 1;
+      lastDashboardBarbershopIdRef.current = null;
+      queueMicrotask(() => {
+        if (lastDashboardBarbershopIdRef.current !== null) return;
+        setAppointments([]);
+        setServices([]);
+        setProfessionals([]);
+        setClients([]);
+        setDashboardLoadError(false);
+        setHasLoadedDashboardData(false);
+        setHasLoadedAppointments(false);
+        setDashboardDataBarbershopId(null);
+        setLoadingInitial(false);
+      });
+      return;
+    }
+
+    if (lastDashboardBarbershopIdRef.current !== barbershopId) {
+      lastDashboardBarbershopIdRef.current = barbershopId;
+      dashboardRequestIdRef.current += 1;
+      queueMicrotask(() => {
+        if (lastDashboardBarbershopIdRef.current !== barbershopId) return;
+        setAppointments([]);
+        setServices([]);
+        setProfessionals([]);
+        setClients([]);
+        setDashboardLoadError(false);
+        setHasLoadedDashboardData(false);
+        setHasLoadedAppointments(false);
+        setDashboardDataBarbershopId(null);
+        setLoadingInitial(true);
+      });
+    }
+
+    const timer = window.setTimeout(() => void fetchInitialData(), 0);
+    return () => {
+      window.clearTimeout(timer);
+      dashboardRequestIdRef.current += 1;
+    };
   }, [barbershopId, fetchInitialData, isLoadingBarbershop]);
 
   useEffect(() => {
@@ -433,7 +501,7 @@ export default function DashboardPage() {
     (client) => clientsWithBookings.has(client.id) && !client.email?.trim(),
   ).length;
   const growthSuggestion =
-    loadingInitial || loadingSetupData || nextSetupStep
+    loadingInitial || loadingSetupData || !hasLoadedDashboardData || nextSetupStep
       ? null
       : (plan === 'pro' || plan === 'enterprise') &&
           upcomingAppointments.length > 0 &&
@@ -562,6 +630,24 @@ export default function DashboardPage() {
       Boolean(action),
     );
 
+  if (
+    isLoadingBarbershop ||
+    (barbershopId && dashboardDataBarbershopId !== barbershopId) ||
+    (!barbershopId && dashboardDataBarbershopId !== null)
+  ) {
+    return (
+      <main className="min-h-screen space-y-4 p-4 pt-20" aria-busy="true">
+        <Skeleton className="h-24 w-full rounded-2xl bg-white/10" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-28 rounded-2xl bg-white/10" />
+          ))}
+        </div>
+        <Skeleton className="h-72 w-full rounded-2xl bg-white/10" />
+      </main>
+    );
+  }
+
   return (
     <TooltipProvider>
       <main
@@ -619,7 +705,35 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {!loadingInitial && !loadingSetupData && nextSetupStep && (
+          {dashboardLoadError && (
+            <section
+              role="alert"
+              className="mb-6 flex flex-col gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-zinc-100">
+                  {t('dashboard.updateError')}
+                </p>
+                {hasLoadedDashboardData && (
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    {locale === 'en'
+                      ? 'The last successfully loaded dashboard data is still shown.'
+                      : 'Os últimos dados carregados com sucesso continuam visíveis.'}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => void fetchInitialData()}
+                disabled={loadingInitial}
+                className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t('common.retry')}
+              </button>
+            </section>
+          )}
+
+          {!loadingInitial && !loadingSetupData && hasLoadedDashboardData && nextSetupStep && (
             <section
               className="mb-6 overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.05] p-5 backdrop-blur-xl sm:p-6"
               aria-labelledby="setup-title"
@@ -812,7 +926,8 @@ export default function DashboardPage() {
 
           {customization.config.sections.nextAppointment &&
             nextAppointment &&
-            !loadingInitial && (
+            !loadingInitial &&
+            hasLoadedAppointments && (
               <section
                 className="glassmorphism mb-5 rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur-xl sm:p-5"
                 aria-labelledby="next-appointment-title"
@@ -860,7 +975,8 @@ export default function DashboardPage() {
             )}
 
           {customization.config.sections.metrics &&
-            visibleMetrics.length > 0 && (
+            visibleMetrics.length > 0 &&
+            (loadingInitial || hasLoadedDashboardData) && (
               <section className="pt-1" aria-labelledby="business-overview">
                 <div className="mb-3 flex items-center justify-between">
                   <h2
@@ -869,7 +985,7 @@ export default function DashboardPage() {
                   >
                     {t('dashboard.businessSummary')}
                   </h2>
-                  {!loadingInitial && (
+                  {!loadingInitial && hasLoadedDashboardData && (
                     <span className="text-xs text-zinc-500">
                       {services.length} {t('dashboard.services')} ·{' '}
                       {professionals.length} {t('dashboard.professionals')}
@@ -955,7 +1071,11 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="h-[310px] min-w-0 w-full pt-4">
-                    {!loadingInitial && !hasChartActivity ? (
+                    {!loadingInitial && !hasLoadedAppointments ? (
+                      <div className="flex h-full min-h-[240px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center text-sm text-zinc-400" role="alert">
+                        {locale === 'en' ? 'Appointment data could not be confirmed.' : 'Não foi possível confirmar os dados das marcações.'}
+                      </div>
+                    ) : !loadingInitial && !hasChartActivity ? (
                       <div className="flex h-full min-h-[240px] min-w-0 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 text-center">
                         <CalendarDays
                           className="size-6 text-zinc-500"
@@ -1070,6 +1190,10 @@ export default function DashboardPage() {
                             className="h-16 w-full bg-white/10"
                           />
                         ))}
+                      </div>
+                    ) : !hasLoadedAppointments ? (
+                      <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center text-sm text-zinc-400" role="alert">
+                        {locale === 'en' ? 'Appointment data could not be confirmed.' : 'Não foi possível confirmar os dados das marcações.'}
                       </div>
                     ) : upcomingAppointments.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center">
