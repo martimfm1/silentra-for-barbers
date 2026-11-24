@@ -165,11 +165,12 @@ export default function CustomWebsiteDashboardPage() {
   const [hasLoadedRequests, setHasLoadedRequests] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const hasLoadedRequestsRef = useRef(false);
   const requestIdRef = useRef(0);
 
   const load = useCallback(async () => {
     const requestId = ++requestIdRef.current;
-    const initialLoad = !hasLoadedRequests;
+    const initialLoad = !hasLoadedRequestsRef.current;
     if (initialLoad) setLoading(true);
     else setRefreshing(true);
 
@@ -206,6 +207,7 @@ export default function CustomWebsiteDashboardPage() {
       if (requestId !== requestIdRef.current) return;
       setRequests(body.data);
       setAccess(body.access);
+      hasLoadedRequestsRef.current = true;
       setHasLoadedRequests(true);
       setLoadError(null);
     } catch (error) {
@@ -223,7 +225,7 @@ export default function CustomWebsiteDashboardPage() {
         setRefreshing(false);
       }
     }
-  }, [hasLoadedRequests, pt]);
+  }, [pt]);
 
   useEffect(() => {
     if (!planLoading) void load();
