@@ -25,6 +25,7 @@ const marketingMigration = read('supabase/migrations/20261123010746_manual_marke
 const manualCampaignRetirement = read(
   'supabase/migrations/20261111130000_disable_manual_marketing_communications.sql',
 );
+const productionOperations = read('docs/PRODUCTION_OPERATIONS.md');
 
 
 for (const source of [communication, messages, marketingPage]) {
@@ -154,6 +155,12 @@ for (const route of [
 ]) {
   assert.ok(tools.includes(route), 'Tools overview must keep ' + route);
 }
+
+
+assert.ok(productionOperations.includes('20261123010746_manual_marketing_campaigns_and_preferences'));
+assert.ok(productionOperations.includes('Não executar um down migration destrutivo'));
+assert.ok(productionOperations.includes('SECURITY INVOKER'));
+assert.ok(productionOperations.includes('A verificação foi read-only'));
 
 console.log(
   '[COMMUNICATION_GROWTH_QA] Manual email campaigns are plan-gated, tenant-scoped, consent-gated, quota-limited and unsubscribable; legacy general messaging remains retired.',
