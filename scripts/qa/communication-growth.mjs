@@ -21,7 +21,7 @@ const marketingEmailTemplate = read('lib/marketing/email-template.ts');
 const marketingUnsubscribeApi = read('app/api/marketing/unsubscribe/route.ts');
 const crmMarketingPreferenceApi = read('app/api/crm/clients/[clientId]/marketing-preference/route.ts');
 const clientDetailsDialog = read('components/dashboard/client-details-dialog.tsx');
-const marketingMigration = read('supabase/migrations/20261123100000_manual_marketing_campaigns_and_preferences.sql');
+const marketingMigration = read('supabase/migrations/20261123010746_manual_marketing_campaigns_and_preferences.sql');
 const manualCampaignRetirement = read(
   'supabase/migrations/20261111130000_disable_manual_marketing_communications.sql',
 );
