@@ -3,6 +3,7 @@ import { recordAppointmentActivity } from '@/lib/appointments/activity';
 import { NextResponse } from 'next/server';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
+import { sendWebPushToCustomerEmail } from '@/lib/notifications/providers/push';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 
 const CONFIRM_ROLES = [
@@ -254,6 +255,23 @@ async function POST__unobserved(
           error: emailError,
           notificationFailed: true,
         });
+      }
+    }
+
+    if (recipientEmail) {
+      try {
+        await sendWebPushToCustomerEmail(recipientEmail, {
+          title: 'Marcação confirmada · ' + barbershop.name,
+          body: (service?.name || 'Serviço') + ' · ' + new Intl.DateTimeFormat('pt-PT', {
+            timeZone: 'Europe/Lisbon',
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(appointment.date_hour)),
+          url: '/my-bookings',
+          tag: 'customer-booking-' + appointment.id,
+        });
+      } catch (pushError) {
+        console.error('[APPOINTMENT_CONFIRM_CUSTOMER_PUSH_ERROR]', pushError instanceof Error ? pushError.name : 'UNKNOWN');
       }
     }
 
