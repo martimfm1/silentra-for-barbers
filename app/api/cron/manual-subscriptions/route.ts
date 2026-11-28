@@ -1,4 +1,5 @@
 import { withApiObservability } from '@/lib/observability/api';
+import { hasValidCronSecret } from '@/lib/security/secret-comparison';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -6,12 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function authorized(request: Request): boolean {
-  const expected = process.env.CRON_SECRET?.trim();
-  if (!expected) return false;
-  return (
-    request.headers.get('authorization') === `Bearer ${expected}` ||
-    request.headers.get('x-cron-secret') === expected
-  );
+  return hasValidCronSecret(request, process.env.CRON_SECRET);
 }
 
 async function GET__unobserved(request: Request) {

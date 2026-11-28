@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { hasValidCronSecret } from '@/lib/security/secret-comparison';
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import {
@@ -18,19 +19,10 @@ function authorized(request: Request) {
   if (!secret) return false;
 
   // Keep the original CRON_SECRET path for manual and GitHub Actions calls.
-  if (
-    (cronSecret &&
-      request.headers.get('authorization') === `Bearer ${cronSecret}`) ||
-    (cronSecret && request.headers.get('x-cron-secret') === cronSecret)
-  )
-    return true;
+  if (hasValidCronSecret(request, cronSecret)) return true;
 
-  // Supabase Cron signs requests with the existing Vault secret.
-  if (
-    request.headers.get('authorization') === `Bearer ${secret}` ||
-    request.headers.get('x-cron-secret') === secret
-  )
-    return true;
+  // Supabase Cron may use the dedicated outbox secret.
+  if (hasValidCronSecret(request, secret)) return true;
 
   const timestamp = request.headers.get('x-marketing-timestamp') ?? '';
   const signature = request.headers.get('x-marketing-signature') ?? '';
