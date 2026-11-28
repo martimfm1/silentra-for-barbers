@@ -129,11 +129,11 @@ export function BookingForm({
   const [availabilityError, setAvailabilityError] = useState(false);
   const [availabilityRetryKey, setAvailabilityRetryKey] = useState(0);
   const selectableServices = useMemo(
-    () => services.filter((service) => service.is_active !== false),
+    () => services.filter((service) => service.is_active === true),
     [services],
   );
   const selectableProfessionals = useMemo(
-    () => professionals.filter((professional) => professional.active !== false),
+    () => professionals.filter((professional) => professional.active === true),
     [professionals],
   );
   const selectedClient = clients.find(
