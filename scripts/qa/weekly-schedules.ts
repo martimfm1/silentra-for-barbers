@@ -190,9 +190,18 @@ assert.ok(
   bookingAvailability.includes('appointment.start, appointment.end'),
   'Availability must compare the full appointment interval, not only its start',
 );
+const appointmentCapacity = readFileSync(
+  'lib/bookings/appointment-capacity.ts',
+  'utf8',
+);
 assert.ok(
-  bookingAvailability.includes('Number(appointment.duration_minutes ?? 30)'),
-  'Existing bookings must reserve their persisted duration',
+  bookingAvailability.includes('getReservedAppointmentMinutes(appointment)'),
+  'Existing bookings must reserve the effective service duration, not a stale snapshot',
+);
+assert.ok(
+  bookingAvailability.includes('services(duration,buffer_minutes)') &&
+    appointmentCapacity.includes('Math.round(serviceDuration)'),
+  'Availability must resolve legacy appointment capacity from the linked service',
 );
 assert.ok(
   bookingAvailability.includes('slotStart + reservedDuration <= periodEnd'),
