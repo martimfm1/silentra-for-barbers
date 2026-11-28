@@ -35,6 +35,7 @@ async function POST__unobserved(request: Request) {
     const email = normalizePortalEmail(bodyResult.value.email);
     if (!email) return genericResponse;
 
+    // Each bucket is persisted through the consume_public_rate_limit RPC.
     const [emailAllowed, ipAllowed, cooldownAllowed] = await Promise.all([
       consumePublicRateLimit(
         request, 'customer-portal-request-email', email,
