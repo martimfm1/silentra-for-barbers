@@ -124,6 +124,9 @@ jobs:
       - name: Weekly barber schedule contracts
         run: pnpm qa:weekly-schedules
 
+      - name: Periodic business reports close-boundary contracts
+        run: pnpm qa:periodic-reports
+
       - name: Button accessible-name audit
         run: pnpm qa:buttons
 
