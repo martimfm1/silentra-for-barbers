@@ -150,7 +150,7 @@ async function POST__unobserved(request: Request) {
         platform,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: 'email,endpoint' },
+      { onConflict: 'endpoint' },
     );
 
   if (saveError) {
