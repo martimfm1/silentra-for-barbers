@@ -11,6 +11,12 @@ export type PeriodReportWindow = {
   endAt: string;
   previousStartAt: string;
   previousEndAt: string;
+  closedAt: string;
+};
+
+export type PeriodReportPreference = {
+  enabled: boolean;
+  enabledAt: string | null;
 };
 
 const ZONE = 'Europe/Lisbon';
@@ -81,28 +87,22 @@ function previousMonth(date: string): { start: string; end: string } {
   return { start: monthStart(end), end };
 }
 
-function closingInstant(schedule: WeeklySchedule, date: string): Date | null {
+function closingInstant(schedule: WeeklySchedule, date: string): Date {
   const day = getDailySchedule(schedule, weekday(date));
-  if (day.day_off || day.work_intervals.length === 0) return null;
-  const times = day.work_intervals.map((item) => item.end.slice(0, 5))
-    .filter((time) => /^([01]\d|2[0-3]):[0-5]\d$/.test(time)).sort();
+  const times = day.day_off ? [] : day.work_intervals
+    .map((item) => item.end.slice(0, 5))
+    .filter((time) => /^([01]\d|2[0-3]):[0-5]\d$/.test(time))
+    .sort();
   const last = times[times.length - 1];
-  return last ? localToUtc(date, last) : null;
-}
 
-function periodHasClosed(
-  schedule: WeeklySchedule, start: string, end: string, now: Date,
-): boolean {
-  for (let date = end; date >= start; date = addDays(date, -1)) {
-    const closing = closingInstant(schedule, date);
-    if (closing) return closing.getTime() <= now.getTime();
-  }
-  return localToUtc(end, '23:59').getTime() <= now.getTime();
+  // On non-working days there is no shift close, so the calendar day closes
+  // at 23:59 in Lisbon. Working days close after the final scheduled interval.
+  return localToUtc(date, last ?? '23:59');
 }
 
 function makeWindow(
   type: PeriodReportType, startDate: string, endDate: string,
-  previousStartDate: string, previousEndDate: string,
+  previousStartDate: string, previousEndDate: string, closedAt: Date,
 ): PeriodReportWindow {
   return {
     type, startDate, endDate, previousStartDate, previousEndDate,
@@ -110,6 +110,7 @@ function makeWindow(
     endAt: localToUtc(addDays(endDate, 1), '00:00').toISOString(),
     previousStartAt: localToUtc(previousStartDate, '00:00').toISOString(),
     previousEndAt: localToUtc(addDays(previousEndDate, 1), '00:00').toISOString(),
+    closedAt: closedAt.toISOString(),
   };
 }
 
@@ -119,36 +120,58 @@ export function getClosedReportPeriods(
   const today = dateKey(now);
   const periods: PeriodReportWindow[] = [];
 
+  // Daily summaries close at the end of the last scheduled shift. On a day
+  // off, they close at 23:59 local time.
   for (let offset = 0; offset < 14; offset += 1) {
     const date = addDays(today, -offset);
     const closing = closingInstant(schedule, date);
-    if (!closing || closing.getTime() > now.getTime()) continue;
+    if (closing.getTime() > now.getTime()) continue;
     const previous = addDays(date, -1);
-    periods.push(makeWindow('day', date, date, previous, previous));
+    periods.push(makeWindow('day', date, date, previous, previous, closing));
     break;
   }
 
+  // A week is only closed at the end of Sunday, never after an earlier
+  // weekday shift. The 23:59 boundary also works when the shop is closed Sunday.
   const thisWeek = weekStart(today);
   for (let offset = 0; offset < 4; offset += 1) {
     const start = addDays(thisWeek, -7 * offset);
     const end = addDays(start, 6);
-    if (!periodHasClosed(schedule, start, end, now)) continue;
+    const closing = localToUtc(end, '23:59');
+    if (closing.getTime() > now.getTime()) continue;
     const previousStart = addDays(start, -7);
-    periods.push(makeWindow('week', start, end, previousStart, addDays(previousStart, 6)));
+    periods.push(makeWindow(
+      'week', start, end, previousStart, addDays(previousStart, 6), closing,
+    ));
     break;
   }
 
+  // Monthly summaries only close at 23:59 on the calendar month's final day.
   const [year, month] = today.split('-').map(Number);
   for (let offset = 0; offset < 3; offset += 1) {
     const date = new Date(Date.UTC(year, month - 1 - offset, 1));
     const start = date.getUTCFullYear() + '-' +
       String(date.getUTCMonth() + 1).padStart(2, '0') + '-01';
     const end = monthEnd(start);
-    if (!periodHasClosed(schedule, start, end, now)) continue;
+    const closing = localToUtc(end, '23:59');
+    if (closing.getTime() > now.getTime()) continue;
     const previous = previousMonth(start);
-    periods.push(makeWindow('month', start, end, previous.start, previous.end));
+    periods.push(makeWindow('month', start, end, previous.start, previous.end, closing));
     break;
   }
 
   return periods;
+}
+
+export function filterEligibleReportPeriods(
+  periods: PeriodReportWindow[],
+  preferences: Record<PeriodReportType, PeriodReportPreference>,
+): PeriodReportWindow[] {
+  return periods.filter((period) => {
+    const preference = preferences[period.type];
+    if (!preference.enabled) return false;
+    if (!preference.enabledAt) return true;
+    const enabledAt = new Date(preference.enabledAt).getTime();
+    return Number.isFinite(enabledAt) && new Date(period.closedAt).getTime() > enabledAt;
+  });
 }
