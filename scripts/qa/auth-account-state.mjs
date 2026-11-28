@@ -62,6 +62,7 @@ assert.match(otpVerify, /VERIFY_IP_LIMIT = 30/);
 assert.match(otpVerify, /Código inválido ou expirado/);
 assert.match(otpMigration, /attempts <= 3/);
 assert.match(otpMigration, /for update/);
+assert.match(otpMigration, /set search_path = ''/);
 assert.match(otpMigration, /consumed_at = now\(\)/);
 assert.match(supabaseProxy, /profile\?\.role === 'client'/);
 assert.match(tenantGuard, /profile\.role === 'client'/);
