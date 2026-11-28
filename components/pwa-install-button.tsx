@@ -50,9 +50,7 @@ export function PwaInstallButton({ locale = 'pt' }: PwaInstallButtonProps) {
   const isEnglish = locale === 'en';
   const pathname = usePathname();
   const isDashboardPage =
-    pathname === '/dashboard' ||
-    pathname.startsWith('/dashboard/') ||
-    pathname === '/my-bookings';
+    pathname === '/dashboard' || pathname.startsWith('/dashboard/') || pathname === '/my-bookings';
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
