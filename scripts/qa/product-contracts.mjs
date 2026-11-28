@@ -372,7 +372,9 @@ const checks = [
       source.includes("onConflict: 'barbershop_id,period_type,period_start'") &&
       source.includes('unreadReports') &&
       source.includes('viewed_at') &&
-      source.includes('pointOfSaleRevenue'),
+      source.includes('pointOfSaleRevenue') &&
+      source.includes('service_price') &&
+      source.includes('function servicePrice'),
   },
   {
     name: 'Dashboard closing summaries include revenue, retention, cancellations and actionable insights',
