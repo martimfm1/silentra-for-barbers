@@ -170,7 +170,7 @@ function isAllowedPushServiceEndpoint(url: URL): boolean {
   const allowedHost =
     host === 'push.apple.com' ||
     host.endsWith('.push.apple.com') ||
-    host.endsWith('.googleapis.com') ||
+    host === 'fcm.googleapis.com' ||
     host === 'updates.push.services.mozilla.com' ||
     host.endsWith('.push.services.mozilla.com') ||
     host.endsWith('.notify.windows.com');
