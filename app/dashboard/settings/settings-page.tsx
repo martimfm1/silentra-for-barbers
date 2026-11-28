@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   AlertTriangle,
   ArrowLeft,
+  BarChart3,
   BellRing,
   Building2,
   CalendarCheck,
@@ -108,6 +109,9 @@ type Config = {
   default_language: 'pt' | 'en';
   mbway_enabled: boolean;
   mbway_phone: string;
+  periodic_reports_daily_enabled: boolean;
+  periodic_reports_weekly_enabled: boolean;
+  periodic_reports_monthly_enabled: boolean;
 };
 
 const normalize = (v: Partial<Config>): Config => ({
@@ -136,6 +140,9 @@ const normalize = (v: Partial<Config>): Config => ({
   default_language: v.default_language === 'en' ? 'en' : 'pt',
   mbway_enabled: v.mbway_enabled === true,
   mbway_phone: v.mbway_phone ?? '',
+  periodic_reports_daily_enabled: v.periodic_reports_daily_enabled !== false,
+  periodic_reports_weekly_enabled: v.periodic_reports_weekly_enabled !== false,
+  periodic_reports_monthly_enabled: v.periodic_reports_monthly_enabled !== false,
 });
 
 export default function SettingsPageOrganized() {
@@ -1327,8 +1334,68 @@ export default function SettingsPageOrganized() {
             </section>
   </div>
 </details>
-            
-            
+
+            <details id="settings-periodic-reports" data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
+  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+    <span className="flex min-w-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/[.06] text-violet-300" aria-hidden="true">
+        <BarChart3 className="size-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-zinc-100">{locale === 'en' ? 'Automatic summaries' : 'Resumos automáticos'}</span>
+        <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{locale === 'en' ? 'Choose which closing summaries open automatically on your dashboard.' : 'Escolhe quais os resumos de fecho que aparecem automaticamente na dashboard.'}</span>
+      </span>
+    </span>
+    <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+  </summary>
+  <div className="settings-accordion-content space-y-4 border-t border-white/[.07] px-4 pb-4 pt-4 sm:px-5">
+    <p className="text-xs leading-5 text-zinc-500">
+      {locale === 'en'
+        ? 'Each summary appears only after its period has fully closed. Disabling a summary does not delete its saved history.'
+        : 'Cada resumo só aparece depois de o respetivo período estar totalmente fechado. Desativar um resumo não apaga o histórico guardado.'}
+    </p>
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-zinc-200">{locale === 'en' ? 'Daily summary' : 'Resumo diário'}</p>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">
+          {locale === 'en' ? 'Appears after the final working shift of each day.' : 'Aparece depois do último turno de trabalho de cada dia.'}
+        </p>
+      </div>
+      <Switch
+        checked={config.periodic_reports_daily_enabled}
+        onCheckedChange={(enabled) => set({ periodic_reports_daily_enabled: enabled })}
+        aria-label={locale === 'en' ? 'Enable daily summary' : 'Ativar resumo diário'}
+      />
+    </div>
+    <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-zinc-200">{locale === 'en' ? 'Weekly summary' : 'Resumo semanal'}</p>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">
+          {locale === 'en' ? 'Appears only on Sunday, at the end of the day.' : 'Aparece apenas ao domingo, no final do dia.'}
+        </p>
+      </div>
+      <Switch
+        checked={config.periodic_reports_weekly_enabled}
+        onCheckedChange={(enabled) => set({ periodic_reports_weekly_enabled: enabled })}
+        aria-label={locale === 'en' ? 'Enable weekly summary' : 'Ativar resumo semanal'}
+      />
+    </div>
+    <div className="flex items-center justify-between gap-4 border-t border-white/[.07] pt-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-zinc-200">{locale === 'en' ? 'Monthly summary' : 'Resumo mensal'}</p>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">
+          {locale === 'en' ? 'Appears on the last calendar day of the month, at the end of the day.' : 'Aparece no último dia do mês, no final do dia.'}
+        </p>
+      </div>
+      <Switch
+        checked={config.periodic_reports_monthly_enabled}
+        onCheckedChange={(enabled) => set({ periodic_reports_monthly_enabled: enabled })}
+        aria-label={locale === 'en' ? 'Enable monthly summary' : 'Ativar resumo mensal'}
+      />
+    </div>
+  </div>
+</details>
+
             <details id="public-profile" data-settings-category className="settings-accordion group min-w-0 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
   <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
     <span className="flex min-w-0 items-center gap-3">
