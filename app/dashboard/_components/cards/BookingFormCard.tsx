@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useBarbershop } from '@/context/BarbershopContext';
 import { cn } from '@/lib/utils';
@@ -236,6 +236,14 @@ export function BookingForm({
   const availabilityIsReady =
     availability?.selectedDate === selectedDate && !availabilityLoading;
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (!selectedSlotIsAvailable || availabilityLoading || availabilityError) {
+      event.preventDefault();
+      return;
+    }
+    onSubmit(event);
+  };
+
   const [clientQuery, setClientQuery] = useState('');
   const [showClientResults, setShowClientResults] = useState(false);
   const [activeClientIndex, setActiveClientIndex] = useState(-1);
@@ -388,7 +396,7 @@ export function BookingForm({
         </DialogClose>
       </header>
 
-      <form onSubmit={onSubmit} className="relative z-[1] flex min-h-0 flex-1 flex-col">
+      <form onSubmit={handleFormSubmit} className="relative z-[1] flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 sm:space-y-5 sm:px-6 sm:py-6">
           <section
             className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.045] to-white/[0.015] p-3.5 shadow-inner shadow-black/10 sm:p-5"
