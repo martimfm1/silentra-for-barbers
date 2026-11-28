@@ -30,16 +30,18 @@ jobs:
       E2E_BASE_URL: http://127.0.0.1:3000
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@5eea8caf49c844361c1e9ddc1324e179c54b58e9 # pinned pnpm/action-setup commit
         with:
           version: 12.10.1
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@66f83c8206e0997178c8fd7bf1da9efccf5dd388 # pinned actions/setup-node commit
         with:
           node-version: 24
           cache: pnpm
