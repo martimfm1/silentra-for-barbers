@@ -5,6 +5,7 @@ import { getPortalSession } from '@/lib/customer-booking-portal';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
+import { getReservedAppointmentMinutes } from '@/lib/bookings/appointment-capacity';
 import {
   appointmentsShareProfessionalCapacity,
   getDailySchedule,
@@ -50,7 +51,7 @@ async function getAuthorizedAppointment(
   const { data: appointment, error } = await admin
     .from('appointments')
     .select(
-      `id,barbershop_id,date_hour,duration_minutes,buffer_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration)`,
+      `id,barbershop_id,date_hour,duration_minutes,buffer_minutes,status,manual_email,manual_name,client_id,professional_id,service_id,barbershops(name,default_language,opening_time,closing_time,lunch_start,lunch_end,closed_days,weekly_schedule,time_limit_cancellation_hours,minimum_booking_notice_minutes),services(name,duration,buffer_minutes)`,
     )
     .eq('id', appointmentId)
     .maybeSingle();
@@ -108,16 +109,7 @@ async function getAvailability(
     ? normalizeWeeklySchedule(professionalSchedule.weekly_schedule)
     : shopSchedule;
   const daySchedule = getDailySchedule(effectiveSchedule, weekday);
-  const service = Array.isArray(appointment.services)
-    ? appointment.services[0]
-    : appointment.services;
-  const duration = Math.min(
-    Math.max(
-      Number(appointment.duration_minutes ?? service?.duration ?? 30),
-      1,
-    ),
-    1440,
-  ) + Math.max(0, Math.min(120, Number(appointment.buffer_minutes ?? 0)));
+  const duration = getReservedAppointmentMinutes(appointment);
   if (daySchedule.day_off)
     return { availableSlots: [], closedDay: true, blockedIntervals: [] };
   const { data: blocks, error: blocksError } = await admin
@@ -136,7 +128,7 @@ async function getAvailability(
   );
   const { data: existingAppointments, error: appointmentsError } = await admin
     .from('appointments')
-    .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
+    .select('id,date_hour,duration_minutes,buffer_minutes,professional_id,services(duration,buffer_minutes)')
     .eq('barbershop_id', appointment.barbershop_id)
     .gte('date_hour', `${date}T00:00:00`)
     .lte('date_hour', `${date}T23:59:59`)
@@ -157,9 +149,7 @@ async function getAvailability(
         ? {
             start: timeToMinutes(parts[1]),
             end:
-              timeToMinutes(parts[1]) +
-              Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
-              Math.max(0, Number(item.buffer_minutes ?? 0)),
+              timeToMinutes(parts[1]) + getReservedAppointmentMinutes(item),
           }
         : null;
     })
