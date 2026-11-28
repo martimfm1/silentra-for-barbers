@@ -509,6 +509,8 @@ export const ptCopy = {
     upgradeTeam: 'Aumentar equipa',
   },
   agendaCalendar: {
+    calendarOptions: 'Opções do calendário',
+    calendarOptionsDescription: 'Sincronização e filtros num só lugar.',
     filters: 'Filtros',
     filtersTitle: 'O que aparece no calendário',
     filtersDescription: 'Escolhe os elementos que queres ver. As preferências são guardadas automaticamente neste dispositivo.',

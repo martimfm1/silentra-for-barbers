@@ -589,6 +589,7 @@ export default function AgendaPage() {
               professionals={professionals}
               onAppointmentClick={setSelectedAppointment}
               onDeleteBlock={handleDeleteScheduleBlock}
+              calendarSyncSlot={<CalendarSyncCard compact />}
             />
           </section>
         ) : null}

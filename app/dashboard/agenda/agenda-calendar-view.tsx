@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   AlertCircle,
   CalendarDays,
   CalendarOff,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -36,11 +38,6 @@ import type { Appointment, Professional } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { AgendaCalendarSkeleton } from './agenda-view-skeletons';
 import { getDailySchedule, normalizeWeeklySchedule } from '@/lib/scheduling/weekly-schedule';
@@ -179,6 +176,7 @@ export function AgendaCalendarView({
   professionals: allProfessionals,
   onAppointmentClick,
   onDeleteBlock,
+  calendarSyncSlot,
 }: {
   appointments: Appointment[];
   appointmentsLoading: boolean;
@@ -186,6 +184,7 @@ export function AgendaCalendarView({
   professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
   onDeleteBlock?: (blockId: string) => Promise<boolean>;
+  calendarSyncSlot?: ReactNode;
 }) {
   const { t, locale } = useLanguage();
   const weekdayLabels =
@@ -205,7 +204,6 @@ export function AgendaCalendarView({
   });
   const [calendarFiltersLoadedForShop, setCalendarFiltersLoadedForShop] =
     useState<string | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const professionals = useMemo(
     () => allProfessionals.filter((item) => item.active !== false),
     [allProfessionals],
@@ -436,28 +434,37 @@ export function AgendaCalendarView({
             </div>
           </div>
 
-          <div className="mt-4 flex justify-end">
-            <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-10 gap-2 rounded-xl border-white/10 bg-white/[0.025] px-3 text-xs text-zinc-300 hover:bg-white/[0.06]"
-                >
-                  <SlidersHorizontal className="size-3.5" aria-hidden="true" />
-                  {t('agendaCalendar.filters')}
-                  {hiddenFilterCount > 0 ? (
-                    <span className="rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-emerald-200">
-                      {hiddenFilterCount}
-                    </span>
-                  ) : null}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                side="bottom"
-                className="w-[min(90vw,340px)] border border-white/10 bg-zinc-950 p-4 text-zinc-100 shadow-2xl"
-              >
+          <details className="group mt-4 overflow-hidden rounded-xl border border-white/[0.08] bg-black/10">
+            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 marker:hidden transition-colors hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] text-zinc-300">
+                  <SlidersHorizontal className="size-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                    {t('agendaCalendar.calendarOptions')}
+                    {hiddenFilterCount > 0 ? (
+                      <span className="rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-emerald-200">
+                        {hiddenFilterCount}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[11px] font-normal text-zinc-500">
+                    {t('agendaCalendar.calendarOptionsDescription')}
+                  </span>
+                </span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+            </summary>
+
+            <div className="grid gap-3 border-t border-white/[0.07] p-3 xl:grid-cols-[minmax(19rem,0.8fr)_minmax(0,1.2fr)]">
+              {calendarSyncSlot ? (
+                <div className="min-w-0 rounded-xl border border-white/[0.07] bg-white/[0.015] p-2">
+                  {calendarSyncSlot}
+                </div>
+              ) : null}
+
+              <section className="min-w-0 rounded-xl border border-white/[0.07] bg-white/[0.015] p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-zinc-100">
@@ -481,7 +488,8 @@ export function AgendaCalendarView({
                     {t('agendaCalendar.resetFilters')}
                   </Button>
                 </div>
-                <div className="mt-4 space-y-3">
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="space-y-3">
                     {filterOptions.slice(0, 4).map(({ key, label }) => (
                       <div
@@ -503,39 +511,38 @@ export function AgendaCalendarView({
                       </div>
                     ))}
                   </div>
-                  <div className="border-t border-white/[0.08] pt-3">
-                    <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
+                  <div className="space-y-3 border-t border-white/[0.08] pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
                       {t('agendaCalendar.otherItems')}
                     </p>
-                    <div className="space-y-3">
-                      {filterOptions.slice(4).map(({ key, label }) => (
-                        <div
-                          key={key}
-                          className="flex items-center justify-between gap-3"
-                        >
-                          <span className="text-xs text-zinc-300">{label}</span>
-                          <Switch
-                            size="sm"
-                            checked={calendarFilters[key]}
-                            onCheckedChange={(checked) =>
-                              setCalendarFilters((current) => ({
-                                ...current,
-                                [key]: checked,
-                              }))
-                            }
-                            aria-label={label}
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    {filterOptions.slice(4).map(({ key, label }) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between gap-3"
+                      >
+                        <span className="text-xs text-zinc-300">{label}</span>
+                        <Switch
+                          size="sm"
+                          checked={calendarFilters[key]}
+                          onCheckedChange={(checked) =>
+                            setCalendarFilters((current) => ({
+                              ...current,
+                              [key]: checked,
+                            }))
+                          }
+                          aria-label={label}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
+
                 <p className="mt-4 border-t border-white/[0.08] pt-3 text-[10px] text-emerald-200/70">
                   {t('agendaCalendar.filtersSaved')}
                 </p>
-              </PopoverContent>
-            </Popover>
-          </div>
+              </section>
+            </div>
+          </details>
 
           <div
             className="mt-4 flex flex-wrap gap-2"

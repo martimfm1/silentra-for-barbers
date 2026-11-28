@@ -54,6 +54,17 @@ assert.ok(
   'The layout must not mount a detached calendar without the page detail handler.',
 );
 assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
+assert.ok(agendaCalendar.includes('<details className="group mt-4'));
+assert.ok(agendaCalendar.includes('calendarSyncSlot?: ReactNode'));
+assert.ok(agendaCalendar.includes('{calendarSyncSlot}'));
+assert.ok(agendaCalendar.includes("t('agendaCalendar.calendarOptions')"));
+assert.ok(agendaCalendar.includes('group-open:rotate-180'));
+assert.ok(agenda.includes('calendarSyncSlot={<CalendarSyncCard compact />}'));
+assert.ok(agenda.includes("!isCalendarView ? <CalendarSyncCard /> : null"));
+assert.ok(calendarSync.includes('compact = false'));
+assert.ok(calendarSync.includes("compact ? '' : 'mt-5'"));
+assert.ok(ptCopy.includes("calendarOptions: 'Opções do calendário'"));
+assert.ok(enCopy.includes("calendarOptions: 'Calendar options'"));
 assert.ok(agendaCalendar.includes('function parseCalendarFilters'));
 assert.ok(agendaCalendar.includes('silentra:agenda-calendar-filters:'));
 assert.ok(agendaCalendar.includes('window.localStorage.getItem'));

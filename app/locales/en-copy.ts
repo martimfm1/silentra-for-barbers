@@ -504,6 +504,8 @@ export const enCopy = {
     upgradeTeam: 'Expand team',
   },
   agendaCalendar: {
+    calendarOptions: 'Calendar options',
+    calendarOptionsDescription: 'Sync and filters in one place.',
     filters: 'Filters',
     filtersTitle: 'What appears on the calendar',
     filtersDescription: 'Choose what you want to see. Your preferences are saved automatically on this device.',
