@@ -875,7 +875,11 @@ export function AgendaCalendarView({
               <span className="shrink-0 text-zinc-500">{locale === 'en' ? 'Default hours' : 'Horário geral'}</span>
               <span className="text-right font-medium tabular-nums text-zinc-200">
                 {selectedShopDay.day_off
-                  ? (locale === 'en' ? 'Day off' : 'Folga')
+                  ? calendarFilters.daysOff
+                    ? locale === 'en'
+                      ? 'Day off'
+                      : 'Folga'
+                    : '—'
                   : selectedShopDay.work_intervals.map((item) => `${item.start}–${item.end}`).join(' · ')}
               </span>
             </div>
