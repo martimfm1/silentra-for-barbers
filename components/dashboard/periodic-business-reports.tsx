@@ -206,7 +206,7 @@ function ReportDetails({ report, locale }: { report: Report; locale: string }) {
       </section>
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-        {cards.map(([label, value, detail, Icon], index) => (
+        {cards.map(([label, value, detail, Icon]) => (
           <div
             key={label}
             className="group relative min-w-0 overflow-hidden rounded-2xl border border-border/60 bg-card/55 p-3.5 shadow-[0_14px_44px_-34px_rgba(0,0,0,0.65)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card/75 sm:p-4"
