@@ -26,7 +26,6 @@ async function POST__unobserved(request: Request) {
       typeof password !== 'string' ||
       password.length < 12 ||
       password.length > 128 ||
-      !isStrongPassword(password) ||
       !name ||
       !phone
     ) {
@@ -41,7 +40,10 @@ async function POST__unobserved(request: Request) {
 
     // Enforce the same password policy before forwarding credentials to Auth.
     if (!isStrongPassword(password)) {
-      return NextResponse.json({ error: PASSWORD_POLICY_MESSAGE }, { status: 400 });
+      return NextResponse.json(
+        { error: PASSWORD_POLICY_MESSAGE },
+        { status: 400 },
+      );
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
