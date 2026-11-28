@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const read = (file) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
+
+const notifications = read('app/api/customer-portal/notifications/route.ts');
+const calendarSettings = read('app/api/customer-portal/calendar/settings/route.ts');
+const calendarFeed = read('app/api/customer-portal/calendar/route.ts');
+const pushSender = read('lib/notifications/providers/push.ts');
+const experience = read('components/customer-portal/customer-experience-panel.tsx');
+const migration = read('supabase/migrations/20261128150000_customer_pwa_features.sql');
+const login = read('app/login/page.tsx');
+const pt = read('app/locales/pt.ts');
+const pwaLayout = read('app/my-bookings/layout.tsx');
+const customerManifest = JSON.parse(read('public/customer.webmanifest'));
+
+assert.ok(login.includes('auth.customerAreaTitle'));
+assert.ok(login.includes('relative isolate mt-5'));
+assert.ok(pt.includes("customerAreaTitle: 'És cliente de uma barbearia?'"));
+assert.ok(notifications.includes('getPortalSession(request)'));
+assert.ok(notifications.includes('assertSameOrigin(request)'));
+assert.ok(notifications.includes('customer_notification_subscriptions'));
+assert.ok(calendarSettings.includes('getPortalSession(request)'));
+assert.ok(calendarSettings.includes('hashPortalToken(token)'));
+assert.ok(calendarFeed.includes('hashPortalToken(token)'));
+assert.ok(calendarFeed.includes(".eq('manual_email', email)"));
+assert.ok(calendarFeed.includes(".in('client_id', clientIds)"));
+assert.ok(pushSender.includes('sendWebPushToCustomerEmail'));
+assert.ok(experience.includes('Notification.requestPermission()'));
+assert.ok(experience.includes('PushManager'));
+assert.ok(experience.includes('webcal:'));
+assert.ok(experience.includes('calendar.google.com'));
+assert.ok(migration.toLowerCase().includes('enable row level security'));
+assert.ok(migration.toLowerCase().includes('revoke all on table public.customer_notification_subscriptions'));
+assert.ok(pwaLayout.includes("manifest: '/customer.webmanifest'"));
+assert.equal(customerManifest.start_url, '/my-bookings');
+assert.equal(customerManifest.id, '/my-bookings');
+
+console.log('Customer PWA, Web Push and calendar contracts passed.');
