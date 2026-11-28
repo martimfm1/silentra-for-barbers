@@ -367,8 +367,11 @@ for (const key of [
   assert.match(ptCopy, new RegExp(key + ':'));
   assert.match(enCopy, new RegExp(key + ':'));
 }
-assert.ok(bookingForm.includes("'Hoje'") || bookingForm.includes('Hoje'));
-assert.ok(bookingForm.includes('Amanhã'));
+assert.ok(
+  bookingForm.includes("'HOJE'") || bookingForm.includes("'TODAY'"),
+);
+assert.ok(bookingForm.includes('buildManualBookingDays(locale)'));
+assert.ok(bookingForm.includes('count = 14'));
 assert.ok(agenda.includes('birth_date: client.birth_date ??'));
 assert.ok(agenda.includes('birthDate: formData.birth_date ??'));
 assert.ok(agenda.includes('setSelectedDate(getLocalDateInputValue())'));
