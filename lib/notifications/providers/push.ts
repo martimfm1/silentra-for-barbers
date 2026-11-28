@@ -165,6 +165,25 @@ function encryptPayload(
   header[20] = serverPublicKey.length;
   return Buffer.concat([header, serverPublicKey, ciphertext]);
 }
+function isAllowedPushServiceEndpoint(url: URL): boolean {
+  const host = url.hostname.toLowerCase();
+  const allowedHost =
+    host === 'push.apple.com' ||
+    host.endsWith('.push.apple.com') ||
+    host.endsWith('.googleapis.com') ||
+    host === 'updates.push.services.mozilla.com' ||
+    host.endsWith('.push.services.mozilla.com') ||
+    host.endsWith('.notify.windows.com');
+
+  return (
+    url.protocol === 'https:' &&
+    (!url.port || url.port === '443') &&
+    !url.username &&
+    !url.password &&
+    allowedHost
+  );
+}
+
 async function sendToSubscription(
   subscription: StoredSubscription,
   payload: WebPushPayload,
@@ -172,11 +191,10 @@ async function sendToSubscription(
   const config = getVapidConfig();
   if (!config) return { success: false };
   const endpoint = new URL(subscription.endpoint);
-  if (
-    endpoint.protocol !== 'https:' ||
-    (endpoint.port && endpoint.port !== '443')
-  )
+  if (!isAllowedPushServiceEndpoint(endpoint)) {
+    console.error('[WEB_PUSH_ENDPOINT_BLOCKED]');
     return { success: false };
+  }
   const response = await fetch(endpoint, {
     method: 'POST',
     redirect: 'error',
