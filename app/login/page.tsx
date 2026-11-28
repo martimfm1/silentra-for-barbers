@@ -161,6 +161,21 @@ export default function LoginPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
+                    <div className="mt-5 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.045] p-4">
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {t('auth.customerAreaTitle')}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-zinc-400">
+                        {t('auth.customerAreaDescription')}
+                      </p>
+                      <Link
+                        href="/my-bookings"
+                        className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] px-3 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/[0.13] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50"
+                      >
+                        {t('auth.customerAreaLink')}
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </div>
                     {successMsg ? (
                       <div
                         className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300"
@@ -517,21 +532,6 @@ export default function LoginPage() {
                         </Button>
                       </form>
                     )}
-                    <div className="mt-5 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.045] p-4">
-                      <p className="text-sm font-semibold text-zinc-100">
-                        {t('auth.customerAreaTitle')}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-zinc-400">
-                        {t('auth.customerAreaDescription')}
-                      </p>
-                      <Link
-                        href="/my-bookings"
-                        className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] px-3 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/[0.13] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50"
-                      >
-                        {t('auth.customerAreaLink')}
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </Link>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
