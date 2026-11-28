@@ -18,6 +18,19 @@ grant select (
   periodic_reports_monthly_enabled
 ) on table public.barbershops to authenticated;
 
+-- Persist the true period-close instant so re-enabling a popup never
+-- resurfaces a period that closed while the preference was disabled.
+alter table public.barbershop_period_reports
+  add column if not exists closed_at timestamptz;
+
+update public.barbershop_period_reports
+set closed_at = created_at
+where closed_at is null;
+
+alter table public.barbershop_period_reports
+  alter column closed_at set default now(),
+  alter column closed_at set not null;
+
 -- Completion is separate from merely viewing a report in the history.
 alter table public.barbershop_period_reports
   add column if not exists completed_at timestamptz;
