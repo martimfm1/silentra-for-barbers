@@ -376,7 +376,8 @@ const checks = [
       source.includes('viewed_at') &&
       source.includes('completed_at') &&
       source.includes("action === 'complete'") &&
-      source.includes('filterEligibleReportPeriods') &&
+      source.includes('closed_at') &&
+      source.includes('Always persist closed summaries') &&
       source.includes('periodic_reports_daily_enabled_at') &&
       source.includes('pointOfSaleRevenue') &&
       source.includes('service_price') &&
