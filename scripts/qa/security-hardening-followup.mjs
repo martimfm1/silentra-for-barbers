@@ -24,6 +24,8 @@ const brevoWebhook = read('lib/marketing/brevo-webhook.ts');
 assert.match(brevoWebhook, /constantTimeSecretMatch\(authorization/);
 assert.match(brevoWebhook, /constantTimeSecretMatch\(headerSecret/);
 
+assert.match(read('next.config.ts'), /object-src 'none'; base-uri 'self'/);
+
 const rateLimitMigration = read(
   'supabase/migrations/20261128150000_harden_public_rate_limit_rls.sql',
 );
