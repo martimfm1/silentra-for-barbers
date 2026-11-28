@@ -256,6 +256,7 @@ async function GET__unobserved(
         .select('id, duration, buffer_minutes')
         .eq('id', serviceId)
         .eq('barbershop_id', barbershopId)
+        .eq('is_active', true)
         .maybeSingle(),
       admin
         .from('professionals')
