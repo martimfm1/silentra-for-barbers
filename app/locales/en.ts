@@ -385,7 +385,7 @@ export const en = {
     fullNamePlaceholder: 'e.g. John Smith',
     mobilePhone: 'Mobile phone',
     createAccountWorkspace: 'Create barbershop account',
-    customerAreaTitle: 'Are you a Silentra customer?',
+    customerAreaTitle: 'Are you a barbershop customer?',
     customerAreaDescription:
       'You do not need an account to view, cancel, or reschedule your bookings.',
     customerAreaLink: 'View my bookings',
