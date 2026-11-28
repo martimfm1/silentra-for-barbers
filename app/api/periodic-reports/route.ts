@@ -14,6 +14,7 @@ type Appointment = {
   date_hour: string;
   status: string;
   value_products: number | string | null;
+  service_price: number | string | null;
   client_id: string | null;
   manual_name: string | null;
   service: { name: string; price: number | string } | null;
@@ -73,7 +74,7 @@ async function loadAppointments(
   const result: Appointment[] = [];
   for (let offset = 0; offset < 10_000; offset += 1_000) {
     const { data, error } = await admin.from('appointments')
-      .select('id,date_hour,status,value_products,client_id,manual_name,service:services(name,price)')
+      .select('id,date_hour,status,value_products,service_price,client_id,manual_name,service:services(name,price)')
       .eq('barbershop_id', shopId).gte('date_hour', from).lt('date_hour', to)
       .order('date_hour', { ascending: true }).range(offset, offset + 999);
     if (error) throw error;
@@ -94,9 +95,14 @@ async function loadPosSales(
   return (data ?? []) as PosSale[];
 }
 
+function servicePrice(row: Appointment): number {
+  // Prefer the price captured when the booking was created; fall back only for legacy rows.
+  return number(row.service_price ?? row.service?.price);
+}
+
 function bookingRevenue(rows: Appointment[]): number {
   return round(rows.filter((row) => row.status === 'completed').reduce(
-    (sum, row) => sum + number(row.service?.price) + number(row.value_products), 0,
+    (sum, row) => sum + servicePrice(row) + number(row.value_products), 0,
   ));
 }
 
@@ -117,7 +123,7 @@ async function calculate(
 
   const completed = rows.filter((row) => row.status === 'completed');
   const cancelled = rows.filter((row) => row.status === 'cancelled');
-  const serviceRevenue = round(completed.reduce((sum, row) => sum + number(row.service?.price), 0));
+  const serviceRevenue = round(completed.reduce((sum, row) => sum + servicePrice(row), 0));
   const productRevenue = round(completed.reduce((sum, row) => sum + number(row.value_products), 0));
   const posRevenue = round(pos.reduce((sum, row) => sum + number(row.total), 0));
   const previousRevenue = round(bookingRevenue(previousRows) +
@@ -140,15 +146,16 @@ async function calculate(
     if (name) {
       const current = services.get(name) ?? { name, count: 0, revenue: 0 };
       current.count += 1;
-      current.revenue = round(current.revenue + number(row.service?.price));
+      current.revenue = round(current.revenue + servicePrice(row));
       services.set(name, current);
     }
     const day = portugalDate(row.date_hour);
     dailyRevenue.set(day, round((dailyRevenue.get(day) ?? 0) +
-      number(row.service?.price) + number(row.value_products)));
+      servicePrice(row) + number(row.value_products)));
   }
 
   for (const row of rows) {
+    if (row.status === 'cancelled') continue;
     const day = portugalDate(row.date_hour);
     dailyBookings.set(day, (dailyBookings.get(day) ?? 0) + 1);
   }

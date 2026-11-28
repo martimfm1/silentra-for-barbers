@@ -41,4 +41,19 @@ sundaySchedule.sunday = {
 assert.equal(hasPeriod('2026-03-29T17:59:00Z', 'day', '2026-03-29', sundaySchedule), false);
 assert.equal(hasPeriod('2026-03-29T18:01:00Z', 'day', '2026-03-29', sundaySchedule), true);
 
+
+// Only the latest closed window of each type is backfilled on a dashboard visit.
+// This avoids an expensive burst of historical calculations while preserving
+// the most recent daily, weekly and monthly close.
+const catchUp = getClosedReportPeriods(
+  new Date('2026-12-01T08:00:00Z'),
+  weekdaySchedule(),
+);
+assert.equal(catchUp.filter((period) => period.type === 'day').length, 1);
+assert.equal(catchUp.filter((period) => period.type === 'week').length, 1);
+assert.equal(catchUp.filter((period) => period.type === 'month').length, 1);
+assert.equal(catchUp.find((period) => period.type === 'day')?.startDate, '2026-11-30');
+assert.equal(catchUp.find((period) => period.type === 'week')?.startDate, '2026-11-23');
+assert.equal(catchUp.find((period) => period.type === 'month')?.startDate, '2026-11-01');
+
 console.log('Periodic reports QA passed: daily, weekly, monthly close boundaries and Europe/Lisbon DST.');

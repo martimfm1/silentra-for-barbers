@@ -125,6 +125,7 @@ export function getClosedReportPeriods(
     if (!closing || closing.getTime() > now.getTime()) continue;
     const previous = addDays(date, -1);
     periods.push(makeWindow('day', date, date, previous, previous));
+    break;
   }
 
   const thisWeek = weekStart(today);
@@ -134,6 +135,7 @@ export function getClosedReportPeriods(
     if (!periodHasClosed(schedule, start, end, now)) continue;
     const previousStart = addDays(start, -7);
     periods.push(makeWindow('week', start, end, previousStart, addDays(previousStart, 6)));
+    break;
   }
 
   const [year, month] = today.split('-').map(Number);
@@ -145,6 +147,7 @@ export function getClosedReportPeriods(
     if (!periodHasClosed(schedule, start, end, now)) continue;
     const previous = previousMonth(start);
     periods.push(makeWindow('month', start, end, previous.start, previous.end));
+    break;
   }
 
   return periods;
