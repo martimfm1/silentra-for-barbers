@@ -2,7 +2,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { PLANS } from '@/lib/stripe/constants';
 import { normalizeWeeklySchedule } from '@/lib/scheduling/weekly-schedule';
-import { getClosedReportPeriods, type PeriodReportWindow } from '@/lib/analytics/periodic-reports';
+import { getClosedReportPeriods, type PeriodReportPreference, type PeriodReportType, type PeriodReportWindow } from '@/lib/analytics/periodic-reports';
 import { UUID_PATTERN } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { moduleErrorResponse, requireModuleContext } from '@/services/modules/authorization';
@@ -48,6 +48,8 @@ type SavedReport = {
   period_end: string;
   data: Metrics;
   viewed_at: string | null;
+  completed_at: string | null;
+  closed_at: string;
   created_at: string;
 };
 
@@ -200,12 +202,31 @@ async function GET__unobserved(request: Request) {
       'basic_dashboard', 'dashboard', request,
     );
     const { data: shop, error: shopError } = await admin.from('barbershops')
-      .select('weekly_schedule,opening_time,closing_time,lunch_start,lunch_end,closed_days')
+      .select('weekly_schedule,opening_time,closing_time,lunch_start,lunch_end,closed_days,periodic_reports_daily_enabled,periodic_reports_weekly_enabled,periodic_reports_monthly_enabled,periodic_reports_daily_enabled_at,periodic_reports_weekly_enabled_at,periodic_reports_monthly_enabled_at')
       .eq('id', barbershopId).maybeSingle();
     if (shopError) throw shopError;
     if (!shop) return NextResponse.json({ error: 'Barbershop not found' }, { status: 404 });
 
-    const periods = getClosedReportPeriods(new Date(), normalizeWeeklySchedule(shop.weekly_schedule, shop));
+    const preferences: Record<PeriodReportType, PeriodReportPreference> = {
+      day: {
+        enabled: shop.periodic_reports_daily_enabled !== false,
+        enabledAt: shop.periodic_reports_daily_enabled_at ?? null,
+      },
+      week: {
+        enabled: shop.periodic_reports_weekly_enabled !== false,
+        enabledAt: shop.periodic_reports_weekly_enabled_at ?? null,
+      },
+      month: {
+        enabled: shop.periodic_reports_monthly_enabled !== false,
+        enabledAt: shop.periodic_reports_monthly_enabled_at ?? null,
+      },
+    };
+    // Always persist closed summaries for the reports history. Preferences
+    // control only the automatic popup, not whether the data is retained.
+    const periods = getClosedReportPeriods(
+      new Date(),
+      normalizeWeeklySchedule(shop.weekly_schedule, shop),
+    );
     const earliest = periods.reduce(
       (value, period) => period.startDate < value ? period.startDate : value,
       periods[0]?.startDate ?? '9999-12-31',
@@ -222,7 +243,8 @@ async function GET__unobserved(request: Request) {
         const data = await calculate(admin, barbershopId, plan, period);
         const { error } = await admin.from('barbershop_period_reports').upsert({
           barbershop_id: barbershopId, period_type: period.type,
-          period_start: period.startDate, period_end: period.endDate, data,
+          period_start: period.startDate, period_end: period.endDate,
+          closed_at: period.closedAt, data,
         }, {
           onConflict: 'barbershop_id,period_type,period_start',
           ignoreDuplicates: true,
@@ -232,14 +254,20 @@ async function GET__unobserved(request: Request) {
     }
 
     const { data: reports, error: reportsError } = await admin.from('barbershop_period_reports')
-      .select('id,period_type,period_start,period_end,data,viewed_at,created_at')
+      .select('id,period_type,period_start,period_end,data,viewed_at,completed_at,closed_at,created_at')
       .eq('barbershop_id', barbershopId)
       .order('period_start', { ascending: false }).order('created_at', { ascending: false }).limit(500);
     if (reportsError) throw reportsError;
     const records = (reports ?? []) as unknown as SavedReport[];
     return NextResponse.json({
       reports: records,
-      unreadReports: records.filter((report) => !report.viewed_at),
+      unreadReports: records.filter((report) => {
+        const preference = preferences[report.period_type];
+        return preference.enabled &&
+          !report.completed_at &&
+          (!preference.enabledAt ||
+            new Date(report.closed_at).getTime() > new Date(preference.enabledAt).getTime());
+      }),
     }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     const response = moduleErrorResponse(error);
@@ -254,8 +282,41 @@ async function PATCH__unobserved(request: Request) {
     const { admin, barbershopId } = await requireModuleContext(
       'basic_dashboard', 'dashboard', request,
     );
-    const body = await readJsonObject(request, { maxBytes: 4096, allowedKeys: ['id'] });
+    const body = await readJsonObject(request, { maxBytes: 32768, allowedKeys: ['id', 'action', 'ids'] });
     if (!body.ok) return body.response;
+    const action = typeof body.value.action === 'string' ? body.value.action : 'viewed';
+    if (action === 'complete') {
+      const rawIds = body.value.ids;
+      if (!Array.isArray(rawIds) || rawIds.length < 1 || rawIds.length > 500) {
+        return NextResponse.json({ error: 'Invalid report ids' }, { status: 400 });
+      }
+      const ids = rawIds.filter((id): id is string => typeof id === 'string');
+      if (
+        ids.length !== rawIds.length ||
+        new Set(ids).size !== ids.length ||
+        ids.some((id) => !UUID_PATTERN.test(id))
+      ) {
+        return NextResponse.json({ error: 'Invalid report ids' }, { status: 400 });
+      }
+
+      const { data: ownedReports, error: ownedError } = await admin.from('barbershop_period_reports')
+        .select('id').eq('barbershop_id', barbershopId).in('id', ids);
+      if (ownedError) throw ownedError;
+      if ((ownedReports ?? []).length !== ids.length) {
+        return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+      }
+
+      const completedAt = new Date().toISOString();
+      const { error: completionError } = await admin.from('barbershop_period_reports')
+        .update({ viewed_at: completedAt, completed_at: completedAt })
+        .eq('barbershop_id', barbershopId).in('id', ids);
+      if (completionError) throw completionError;
+      return NextResponse.json({ success: true, completedIds: ids });
+    }
+
+    if (action !== 'viewed') {
+      return NextResponse.json({ error: 'Invalid report action' }, { status: 400 });
+    }
     const id = typeof body.value.id === 'string' ? body.value.id : '';
     if (!UUID_PATTERN.test(id)) {
       return NextResponse.json({ error: 'Invalid report id' }, { status: 400 });

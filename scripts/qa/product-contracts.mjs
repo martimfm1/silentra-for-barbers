@@ -358,7 +358,9 @@ const checks = [
       source.includes('getClosedReportPeriods') &&
       source.includes("const ZONE = 'Europe/Lisbon'") &&
       source.includes('closingInstant') &&
-      source.includes('periodHasClosed') &&
+      source.includes("localToUtc(end, '23:59')") &&
+      source.includes('closedAt') &&
+      source.includes('filterEligibleReportPeriods') &&
       source.includes('previousStartAt'),
   },
   {
@@ -372,6 +374,11 @@ const checks = [
       source.includes("onConflict: 'barbershop_id,period_type,period_start'") &&
       source.includes('unreadReports') &&
       source.includes('viewed_at') &&
+      source.includes('completed_at') &&
+      source.includes("action === 'complete'") &&
+      source.includes('closed_at') &&
+      source.includes('Always persist closed summaries') &&
+      source.includes('periodic_reports_daily_enabled_at') &&
       source.includes('pointOfSaleRevenue') &&
       source.includes('service_price') &&
       source.includes('function servicePrice'),
@@ -388,7 +395,65 @@ const checks = [
       source.includes('bestRevenueDay') &&
       source.includes('pointOfSaleRevenue') &&
       source.includes('Mostrar mais resumos') &&
+      source.includes('markCompleted') &&
+      source.includes('completeReports') &&
+      source.includes("action: 'complete'") &&
+      source.includes('function PeriodIcon') &&
+      source.includes('bg-gradient-to-br from-primary') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('Opportunities to improve') &&
       source.includes("method: 'PATCH'"),
+  },
+  {
+    name: 'Analytics reports page uses a consistent default glassmorphism and gradient visual system',
+    file: 'app/dashboard/analytics/page.tsx',
+    test: (source) =>
+      source.includes('const GLASS_PANEL') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('bg-gradient-to-br') &&
+      source.includes('tracking-[-0.04em]') &&
+      source.includes('<PeriodReportsHistory />'),
+  },
+  {
+    name: 'Report history and summary dialogs share the premium glass visual language',
+    file: 'components/dashboard/periodic-business-reports.tsx',
+    test: (source) =>
+      source.includes('function PeriodIcon') &&
+      source.includes('rounded-[1.75rem]') &&
+      source.includes('bg-gradient-to-br') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('shadow-[0_32px_110px_-45px_rgba(0,0,0,0.8)]') &&
+      source.includes('Concluir'),
+  },
+  {
+    name: 'Barbershop settings expose independent daily, weekly and monthly summary preferences',
+    file: 'app/dashboard/settings/settings-page.tsx',
+    test: (source) =>
+      source.includes('settings-periodic-reports') &&
+      source.includes('periodic_reports_daily_enabled') &&
+      source.includes('periodic_reports_weekly_enabled') &&
+      source.includes('periodic_reports_monthly_enabled') &&
+      source.includes('Desativar um resumo não apaga o histórico'),
+  },
+  {
+    name: 'Summary preference fields are loaded with tenant-safe column grants and saved through the owner RPC',
+    file: 'app/dashboard/_services/barbershop.service.ts',
+    test: (source) =>
+      source.includes('periodic_reports_daily_enabled') &&
+      source.includes('periodic_reports_weekly_enabled') &&
+      source.includes('periodic_reports_monthly_enabled') &&
+      source.includes('update_barbershop_config'),
+  },
+  {
+    name: 'Summary preferences preserve server-side activation timestamps and explicit completion state',
+    file: 'supabase/migrations/20261129000000_periodic_report_preferences_and_completion.sql',
+    test: (source) =>
+      source.includes('periodic_reports_daily_enabled_at') &&
+      source.includes('periodic_reports_weekly_enabled_at') &&
+      source.includes('periodic_reports_monthly_enabled_at') &&
+      source.includes('add column if not exists completed_at') &&
+      source.includes('add column if not exists closed_at') &&
+      source.includes('grant select ('),
   },
   {
     name: 'Periodic report snapshots are tenant-scoped and inaccessible directly to browser roles',
