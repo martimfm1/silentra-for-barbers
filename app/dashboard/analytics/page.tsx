@@ -90,6 +90,8 @@ type RevenuePoint = {
   value: number;
 };
 
+const GLASS_PANEL = 'border-border/60 bg-card/60 shadow-[0_20px_70px_-46px_rgba(16,185,129,0.42)] backdrop-blur-2xl';
+
 function copy(locale: string, pt: string, en: string) {
   return locale === 'en' ? en : pt;
 }
@@ -485,7 +487,7 @@ export default function AnalyticsPage() {
 
   if (accessLoading) {
     return (
-      <main className="min-w-0 space-y-5 px-3 py-5 sm:px-6 lg:px-8">
+      <main className="relative isolate min-w-0 space-y-5 overflow-hidden px-3 py-5 sm:px-6 lg:px-8">
         <Skeleton className="h-24 w-full rounded-2xl" />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {Array.from({ length: 5 }).map((_, index) => (
@@ -503,7 +505,7 @@ export default function AnalyticsPage() {
         <div className="mx-auto max-w-7xl space-y-5">
           <PeriodReportsHistory />
           <div className="mx-auto max-w-xl">
-          <Card className="border-border/70">
+          <Card className={cn(GLASS_PANEL, 'border-primary/15')}>
             <CardContent className="flex flex-col items-center gap-5 py-12 text-center sm:py-16">
               <span className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
                 <Lock className="size-5" />
@@ -533,19 +535,23 @@ export default function AnalyticsPage() {
   );
 
   return (
-    <main className="min-w-0 overflow-x-clip px-3 py-4 text-foreground sm:px-5 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6">
-        <PeriodReportsHistory />
-        <header className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur-xl sm:rounded-3xl sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+    <main className="relative isolate min-w-0 overflow-x-clip px-3 py-4 text-foreground sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-28 top-10 size-80 rounded-full bg-primary/[0.12] blur-[110px]" />
+        <div className="absolute right-[-8rem] top-[34rem] size-96 rounded-full bg-cyan-500/[0.07] blur-[130px]" />
+        <div className="absolute bottom-0 left-1/3 size-96 rounded-full bg-violet-500/[0.05] blur-[140px]" />
+      </div>
+      <div className="relative z-10 mx-auto max-w-7xl space-y-5 sm:space-y-6">
+        <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-card/95 via-card/75 to-primary/[0.09] p-5 shadow-[0_24px_90px_-48px_rgba(16,185,129,0.5)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-7 lg:p-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              <BarChart3 className="size-4" aria-hidden="true" />
+            <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary shadow-sm shadow-primary/10">
+              <BarChart3 className="size-3.5" aria-hidden="true" />
               {t('analyticsPage.eyebrow')}
             </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl lg:text-[2.65rem]">
               {t('analyticsPage.title')}
             </h1>
-            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[15px]">
               {t('analyticsPage.description')}
             </p>
           </div>
@@ -562,13 +568,16 @@ export default function AnalyticsPage() {
             />
             {t('analyticsPage.update')}
           </Button>
+          <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-primary/[0.12] blur-3xl" />
+          <div aria-hidden="true" className="pointer-events-none absolute bottom-[-5rem] right-1/3 size-40 rounded-full bg-cyan-400/[0.08] blur-3xl" />
         </header>
 
         <section
           aria-label={copy(locale, 'Filtros dos relatórios', 'Report filters')}
-          className="rounded-2xl border border-border/70 bg-card p-3.5 sm:p-4"
+          className="relative isolate overflow-hidden rounded-[1.5rem] border border-border/60 bg-card/55 p-4 shadow-[0_18px_70px_-48px_rgba(0,0,0,0.7)] backdrop-blur-2xl sm:rounded-[1.75rem] sm:p-5"
         >
-          <div className="flex flex-col gap-3">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-primary/[0.09] blur-3xl" />
+          <div className="relative z-10 flex flex-col gap-3.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <CalendarDays
@@ -608,8 +617,8 @@ export default function AnalyticsPage() {
                   className={cn(
                     'min-h-10 shrink-0 rounded-xl border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     preset === value
-                      ? 'border-primary/30 bg-primary/10 text-primary'
-                      : 'border-border bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                      ? 'border-primary/40 bg-gradient-to-r from-primary to-emerald-500 text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'border-border/70 bg-background/45 text-muted-foreground backdrop-blur-md hover:border-primary/25 hover:bg-primary/[0.06] hover:text-foreground',
                   )}
                 >
                   {label}
@@ -638,7 +647,7 @@ export default function AnalyticsPage() {
                     setDraftFrom(event.target.value);
                     setPreset('custom');
                   }}
-                  className="mt-1 min-h-11 w-full text-base"
+                  className="mt-1 min-h-11 w-full rounded-xl border-border/60 bg-background/45 text-base shadow-inner shadow-black/[0.02] backdrop-blur-md focus-visible:ring-primary/30"
                 />
               </div>
               <div className="min-w-0">
@@ -658,7 +667,7 @@ export default function AnalyticsPage() {
                     setDraftTo(event.target.value);
                     setPreset('custom');
                   }}
-                  className="mt-1 min-h-11 w-full text-base"
+                  className="mt-1 min-h-11 w-full rounded-xl border-border/60 bg-background/45 text-base shadow-inner shadow-black/[0.02] backdrop-blur-md focus-visible:ring-primary/30"
                 />
               </div>
               <Button
@@ -683,6 +692,8 @@ export default function AnalyticsPage() {
           </div>
         </section>
 
+        <PeriodReportsHistory />
+
         {loading && !data ? (
           <div role="status" aria-live="polite" className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -694,7 +705,7 @@ export default function AnalyticsPage() {
             <span className="sr-only">{t('analyticsPage.updating')}</span>
           </div>
         ) : loadError && !data ? (
-          <Card>
+          <Card className={GLASS_PANEL}>
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
               <XCircle className="size-8 text-destructive" aria-hidden="true" />
               <p className="font-semibold">{t('analyticsPage.loadError')}</p>
@@ -804,7 +815,7 @@ export default function AnalyticsPage() {
             </section>
 
             <section className="grid min-w-0 gap-4 xl:grid-cols-[1.55fr_1fr]">
-              <Card className="min-w-0 overflow-hidden">
+              <Card className={cn(GLASS_PANEL, 'min-w-0 overflow-hidden')}>
                 <CardHeader className="border-b border-border/70 pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -853,7 +864,7 @@ export default function AnalyticsPage() {
                               className={cn(
                                 'w-full rounded-t-md transition-[height,opacity] duration-300',
                                 item.value > 0
-                                  ? 'bg-primary/75 group-hover:bg-primary'
+                                  ? 'bg-gradient-to-t from-primary/70 via-primary to-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.18)] group-hover:brightness-110'
                                   : 'bg-muted/80',
                               )}
                               style={{
@@ -896,7 +907,7 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">
                     {copy(
@@ -928,7 +939,7 @@ export default function AnalyticsPage() {
                     locale={locale}
                     accent="bg-primary/75"
                   />
-                  <div className="rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
+                  <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.10] via-primary/[0.035] to-transparent px-4 py-3.5 shadow-inner shadow-primary/[0.04]">
                     <p className="text-xs text-muted-foreground">
                       {copy(locale, 'Total registado', 'Recorded total')}
                     </p>
@@ -941,7 +952,7 @@ export default function AnalyticsPage() {
             </section>
 
             <section className="grid min-w-0 gap-4 xl:grid-cols-[1fr_1.3fr]">
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Activity
@@ -988,9 +999,9 @@ export default function AnalyticsPage() {
                         {completionRate.toFixed(1)}%
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
                       <div
-                        className="h-full rounded-full bg-emerald-500 transition-[width] duration-300"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-300 shadow-[0_0_16px_rgba(16,185,129,0.35)] transition-[width] duration-500"
                         style={{
                           width:
                             Math.min(100, Math.max(0, completionRate)) + '%',
@@ -1001,7 +1012,7 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Users className="size-4 text-primary" aria-hidden="true" />
@@ -1078,7 +1089,7 @@ export default function AnalyticsPage() {
             </section>
 
             <section className="grid min-w-0 gap-4 xl:grid-cols-2">
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Scissors
@@ -1112,9 +1123,9 @@ export default function AnalyticsPage() {
                             {money(item.revenue, locale)}
                           </span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
                           <div
-                            className="h-full rounded-full bg-primary transition-[width] duration-300"
+                            className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.25)] transition-[width] duration-500"
                             style={{
                               width:
                                 Math.max(
@@ -1144,7 +1155,7 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Users className="size-4 text-primary" aria-hidden="true" />
@@ -1171,9 +1182,9 @@ export default function AnalyticsPage() {
                             {money(item.revenue, locale)}
                           </span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
                           <div
-                            className="h-full rounded-full bg-primary/75 transition-[width] duration-300"
+                            className="h-full rounded-full bg-gradient-to-r from-primary/80 to-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.2)] transition-[width] duration-500"
                             style={{
                               width:
                                 Math.max(
@@ -1211,7 +1222,7 @@ export default function AnalyticsPage() {
             </section>
 
             <section className="grid min-w-0 gap-4 xl:grid-cols-2">
-              <Card className="min-w-0">
+              <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <CreditCard
@@ -1240,9 +1251,9 @@ export default function AnalyticsPage() {
                             {money(item.revenue, locale)}
                           </span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
                           <div
-                            className="h-full rounded-full bg-primary/75"
+                            className="h-full rounded-full bg-gradient-to-r from-primary/80 to-cyan-400"
                             style={{
                               width:
                                 Math.max(
@@ -1266,7 +1277,7 @@ export default function AnalyticsPage() {
               </Card>
 
               {data.clientAgeGroups.length ? (
-                <Card className="min-w-0">
+                <Card className={cn(GLASS_PANEL, 'min-w-0')}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base">
                       {t('analyticsPage.ageProfile')}
@@ -1284,9 +1295,9 @@ export default function AnalyticsPage() {
                         <span className="text-muted-foreground">
                           {ageLabel(item.label, locale)}
                         </span>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
                           <div
-                            className="h-full rounded-full bg-primary/65"
+                            className="h-full rounded-full bg-gradient-to-r from-primary/70 to-violet-400"
                             style={{
                               width:
                                 Math.max((item.count / maxAgeGroup) * 100, 2) +
@@ -1327,7 +1338,7 @@ export default function AnalyticsPage() {
                   {insights.map((item, index) => (
                     <div
                       key={item.title + String(index)}
-                      className="rounded-2xl border border-border/70 bg-card p-4"
+                      className={cn(GLASS_PANEL, 'rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25')}
                     >
                       <div className="flex items-start gap-2">
                         {item.positive === undefined ? (
@@ -1392,7 +1403,7 @@ export default function AnalyticsPage() {
             ) : null}
 
             {noBookings ? (
-              <Card className="border-dashed">
+              <Card className={cn(GLASS_PANEL, 'border-dashed border-primary/20')}>
                 <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
                   <CalendarDays
                     className="size-8 text-muted-foreground"
@@ -1422,7 +1433,7 @@ export default function AnalyticsPage() {
             ) : null}
 
             <section aria-labelledby="analytics-exports-title">
-              <Card className="overflow-hidden">
+              <Card className={cn(GLASS_PANEL, 'overflow-hidden')}>
                 <CardHeader className="border-b border-border/70 bg-muted/20 pb-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div className="min-w-0">
@@ -1546,9 +1557,9 @@ function Metric({
   return (
     <Card
       className={cn(
-        'min-w-0 overflow-hidden',
+        cn(GLASS_PANEL, 'min-w-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25'),
         featured &&
-          'col-span-2 border-primary/25 bg-primary/[0.035] xl:col-span-1',
+          'relative col-span-2 border-primary/30 bg-gradient-to-br from-primary/[0.18] via-card/70 to-emerald-500/[0.06] shadow-[0_20px_70px_-42px_rgba(16,185,129,0.55)] xl:col-span-1',
       )}
     >
       <CardHeader className="pb-2">
@@ -1556,7 +1567,7 @@ function Metric({
           <span className="min-w-0 truncate">{title}</span>
           <span
             className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted/70',
+              'flex size-9 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-gradient-to-br from-primary/[0.15] via-primary/[0.06] to-transparent text-primary shadow-sm',
               featured && 'bg-primary/10 text-primary',
             )}
           >
@@ -1565,7 +1576,7 @@ function Metric({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="break-words text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
+        <p className={cn('break-words text-2xl font-semibold tracking-[-0.04em] tabular-nums sm:text-[1.7rem]', featured && 'text-3xl sm:text-[2rem]')}>
           {value}
         </p>
         <p
@@ -1595,7 +1606,7 @@ function MetricMini({
   detail?: string;
 }) {
   return (
-    <div className="min-w-0 rounded-xl border border-border/70 bg-muted/20 p-3.5">
+    <div className={cn(GLASS_PANEL, 'min-w-0 rounded-2xl bg-background/35 p-3.5 transition-all hover:border-primary/20')}>
       <p className="text-xs leading-4 text-muted-foreground">{label}</p>
       <p className="mt-1 break-words text-lg font-semibold tracking-tight tabular-nums">
         {value}
@@ -1640,7 +1651,7 @@ function RevenueMix({
           {money(value, locale)}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted/70 ring-1 ring-border/40">
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-300',
