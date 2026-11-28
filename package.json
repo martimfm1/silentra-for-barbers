@@ -14,6 +14,7 @@
     "qa:env": "node scripts/qa/env-check.mjs",
     "qa:env-contract": "node scripts/qa/env-contract.mjs",
     "qa:security": "node scripts/qa/security-audit.mjs",
+    "qa:security-hardening-followup": "node scripts/qa/security-hardening-followup.mjs",
     "qa:database-security": "node scripts/qa/database-security-contracts.mjs",
     "qa:production-hardening": "node scripts/qa/production-hardening-remediations.mjs",
     "qa:deps": "node scripts/qa/dependency-audit.mjs",
