@@ -59,11 +59,11 @@ export async function requireTenantAuthorization(
   const admin = createAdminClient();
   const { data: profile, error: profileError } = await admin
     .from('users')
-    .select('id, barbershop_id')
+    .select('id, barbershop_id, role')
     .eq('id', user.id)
     .maybeSingle();
 
-  if (profileError || !profile?.barbershop_id) {
+  if (profileError || !profile?.barbershop_id || profile.role === 'client') {
     throw new TenantAuthorizationError(403, 'TENANT_NOT_FOUND');
   }
 
