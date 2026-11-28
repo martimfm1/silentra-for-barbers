@@ -278,12 +278,12 @@ async function PATCH__unobserved(request: Request) {
     const { admin, barbershopId } = await requireModuleContext(
       'basic_dashboard', 'dashboard', request,
     );
-    const body = await readJsonObject(request, { maxBytes: 4096, allowedKeys: ['id', 'action', 'ids'] });
+    const body = await readJsonObject(request, { maxBytes: 32768, allowedKeys: ['id', 'action', 'ids'] });
     if (!body.ok) return body.response;
     const action = typeof body.value.action === 'string' ? body.value.action : 'viewed';
     if (action === 'complete') {
       const rawIds = body.value.ids;
-      if (!Array.isArray(rawIds) || rawIds.length < 1 || rawIds.length > 3) {
+      if (!Array.isArray(rawIds) || rawIds.length < 1 || rawIds.length > 500) {
         return NextResponse.json({ error: 'Invalid report ids' }, { status: 400 });
       }
       const ids = rawIds.filter((id): id is string => typeof id === 'string');
