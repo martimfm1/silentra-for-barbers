@@ -36,7 +36,7 @@ Staff subscriptions are stored in `public.notification_subscriptions`, scoped to
 
 ## Current events
 
-Staff push remains focused on operational booking events. Customer push is opt-in and can be sent for public booking requests, booking confirmations, barber reschedules/cancellations, and the 24-hour appointment reminder. It is addressed to the email verified in the customer portal and opens `/my-bookings`. Existing transactional email delivery remains unchanged.
+Staff push remains focused on operational booking events. Customer push is opt-in and can be sent for public booking requests, manually created bookings, booking confirmations, barber reschedules/cancellations, and the 24-hour appointment reminder. It is addressed to the email verified in the customer portal and opens `/my-bookings`. Existing transactional email delivery remains unchanged.
 
 ## Troubleshooting
 
