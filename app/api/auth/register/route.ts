@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getAuthCallbackUrl, sanitizeInviteRedirect } from '@/lib/auth/email-confirmation';
 import { normalizeText } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
+import { isStrongPassword, PASSWORD_POLICY_MESSAGE } from '@/lib/security/password-policy';
 
 async function POST__unobserved(request: Request) {
   try {
@@ -25,16 +26,22 @@ async function POST__unobserved(request: Request) {
       typeof password !== 'string' ||
       password.length < 12 ||
       password.length > 128 ||
+      !isStrongPassword(password) ||
       !name ||
       !phone
     ) {
       return NextResponse.json(
         {
           error:
-            'Usa um email válido, uma palavra-passe entre 12 e 128 caracteres e preenche os restantes campos.',
+            'Usa um email válido, uma palavra-passe forte e preenche os restantes campos.',
         },
         { status: 400 },
       );
+    }
+
+    // Enforce the same password policy before forwarding credentials to Auth.
+    if (!isStrongPassword(password)) {
+      return NextResponse.json({ error: PASSWORD_POLICY_MESSAGE }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
