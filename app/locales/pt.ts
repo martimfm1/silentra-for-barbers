@@ -386,7 +386,7 @@ export const pt = {
     fullNamePlaceholder: 'Ex.: João Silva',
     mobilePhone: 'Telemóvel',
     createAccountWorkspace: 'Criar conta de barbearia',
-    customerAreaTitle: 'És cliente da Silentra?',
+    customerAreaTitle: 'És cliente de uma barbearia?',
     customerAreaDescription:
       'Não precisas de criar conta para consultar, cancelar ou reagendar as tuas marcações.',
     customerAreaLink: 'Consultar as minhas marcações',
