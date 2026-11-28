@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { withApiObservability } from '@/lib/observability/api';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBrevoEmail } from '@/lib/email/brevo';
+import { sendWebPushToCustomerEmail } from '@/lib/notifications/providers/push';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -229,6 +230,17 @@ async function GET__unobserved(request: Request) {
         });
         if (!result.success)
           throw new Error(result.error || 'Email delivery failed');
+
+        try {
+          await sendWebPushToCustomerEmail(recipient, {
+            title: isEnglish ? 'Appointment reminder' : 'Lembrete de marcação',
+            body: (service?.name || (isEnglish ? 'Appointment' : 'Marcação')) + ' · ' + date.date + ' · ' + date.time,
+            url: '/my-bookings',
+            tag: 'appointment-reminder-' + appointment.id,
+          });
+        } catch (pushError) {
+          console.error('[CUSTOMER_APPOINTMENT_REMINDER_PUSH_ERROR]', pushError instanceof Error ? pushError.name : 'UNKNOWN');
+        }
 
         await complete();
         sent += 1;
