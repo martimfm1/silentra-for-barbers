@@ -286,8 +286,12 @@ async function PATCH__unobserved(request: Request) {
       if (!Array.isArray(rawIds) || rawIds.length < 1 || rawIds.length > 3) {
         return NextResponse.json({ error: 'Invalid report ids' }, { status: 400 });
       }
-      const ids = Array.from(new Set(rawIds));
-      if (ids.length !== rawIds.length || ids.some((id) => typeof id !== 'string' || !UUID_PATTERN.test(id))) {
+      const ids = rawIds.filter((id): id is string => typeof id === 'string');
+      if (
+        ids.length !== rawIds.length ||
+        new Set(ids).size !== ids.length ||
+        ids.some((id) => !UUID_PATTERN.test(id))
+      ) {
         return NextResponse.json({ error: 'Invalid report ids' }, { status: 400 });
       }
 
