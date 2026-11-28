@@ -53,6 +53,8 @@ assert.ok(experience.includes('webcal:'));
 assert.ok(experience.includes('calendar.google.com'));
 assert.ok(migration.toLowerCase().includes('enable row level security'));
 assert.ok(migration.toLowerCase().includes('revoke all on table public.customer_notification_subscriptions'));
+assert.ok(migration.includes('customer_notification_subscriptions_endpoint_uidx'));
+assert.ok(notifications.includes("{ onConflict: 'endpoint' }"));
 assert.ok(pwaLayout.includes("manifest: '/customer.webmanifest'"));
 assert.equal(customerManifest.start_url, '/my-bookings');
 assert.equal(customerManifest.id, '/my-bookings');
