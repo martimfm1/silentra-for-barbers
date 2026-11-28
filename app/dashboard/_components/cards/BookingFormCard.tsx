@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useBarbershop } from '@/context/BarbershopContext';
 import { cn } from '@/lib/utils';
 import { type BookingFormProps } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,71 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
+
+type ManualBookingSlotStatus = 'available' | 'booked' | 'blocked' | 'break' | 'past';
+
+type ManualBookingAvailabilitySlot = {
+  time: string;
+  endTime: string;
+  status: ManualBookingSlotStatus;
+  detail: string | null;
+};
+
+type ManualBookingAvailabilityDay = {
+  date: string;
+  available: boolean;
+  closedDay: boolean;
+  availableCount: number;
+  bookedCount: number;
+  blockedCount: number;
+};
+
+type ManualBookingAvailabilityResponse = {
+  selectedDate: string;
+  days: ManualBookingAvailabilityDay[];
+  slots: ManualBookingAvailabilitySlot[];
+  dayOff: boolean;
+  workingIntervals: Array<{ start: string; end: string }>;
+  breakIntervals: Array<{ start: string; end: string }>;
+  serviceDuration: number;
+  serviceBuffer: number;
+};
+
+type ManualBookingCalendarDay = {
+  dateStr: string;
+  weekdayShort: string;
+  dayNumeric: number;
+  fullDateFormatted: string;
+  isToday: boolean;
+};
+
+function buildManualBookingDays(locale: 'pt' | 'en', count = 14): ManualBookingCalendarDay[] {
+  const dateLocale = locale === 'pt' ? 'pt-PT' : 'en-GB';
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index);
+    const dateStr = localDateValue(date);
+    const fullDate = date.toLocaleDateString(dateLocale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+
+    return {
+      dateStr,
+      weekdayShort: date
+        .toLocaleDateString(dateLocale, { weekday: 'short' })
+        .replace('.', '')
+        .toUpperCase(),
+      dayNumeric: date.getDate(),
+      fullDateFormatted: fullDate.charAt(0).toUpperCase() + fullDate.slice(1),
+      isToday: index === 0,
+    };
+  });
+}
 
 function localDateValue(date: Date) {
   const year = date.getFullYear();
@@ -54,10 +120,14 @@ export function BookingForm({
   onSubmit,
 }: BookingFormProps) {
   const { t, locale } = useLanguage();
+  const { barbershopId } = useBarbershop();
+  const calendarDays = useMemo(() => buildManualBookingDays(locale), [locale]);
   const today = localDateValue(new Date());
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrow = localDateValue(tomorrowDate);
+  const [availability, setAvailability] =
+    useState<ManualBookingAvailabilityResponse | null>(null);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(false);
+  const [availabilityRetryKey, setAvailabilityRetryKey] = useState(0);
   const selectedClient = clients.find(
     (client) => client.id === formData.clientId,
   );
@@ -76,6 +146,87 @@ export function BookingForm({
         dateStyle: 'medium',
       }).format(new Date(`${selectedDate}T00:00:00`))
     : '';
+
+  useEffect(() => {
+    setSelectedTime('');
+  }, [formData.service_id, selectedProfessionalId, setSelectedTime]);
+
+  useEffect(() => {
+    if (
+      !barbershopId ||
+      !formData.service_id ||
+      !selectedProfessionalId ||
+      !selectedDate
+    ) {
+      setAvailability(null);
+      setAvailabilityLoading(false);
+      setAvailabilityError(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const query = new URLSearchParams({
+      fromDate: today,
+      selectedDate,
+      serviceId: formData.service_id,
+      professionalId: selectedProfessionalId,
+    });
+
+    setAvailability(null);
+    setAvailabilityError(false);
+    setAvailabilityLoading(true);
+
+    void fetch(
+      `/api/barbershops/${barbershopId}/booking-availability?${query.toString()}`,
+      { signal: controller.signal, cache: 'no-store' },
+    )
+      .then(async (response) => {
+        const responseData = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(
+            responseData?.error ||
+              (locale === 'en'
+                ? 'Could not load the barber’s availability.'
+                : 'Não foi possível carregar a disponibilidade do barbeiro.'),
+          );
+        }
+        return responseData as ManualBookingAvailabilityResponse;
+      })
+      .then((responseData) => {
+        if (controller.signal.aborted) return;
+        setAvailability(responseData);
+      })
+      .catch((reason) => {
+        if (reason?.name !== 'AbortError') {
+          console.error('[MANUAL_BOOKING_AVAILABILITY_ERROR]', reason);
+          setAvailability(null);
+          setAvailabilityError(true);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setAvailabilityLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [
+    barbershopId,
+    formData.service_id,
+    locale,
+    selectedDate,
+    selectedProfessionalId,
+    today,
+    availabilityRetryKey,
+  ]);
+
+  const selectedAvailabilityDay = availability?.days.find(
+    (day) => day.date === selectedDate,
+  );
+  const selectedAvailabilitySlots = availability?.slots ?? [];
+  const selectedSlotIsAvailable = selectedAvailabilitySlots.some(
+    (slot) => slot.time === selectedTime && slot.status === 'available',
+  );
+  const availabilityIsReady =
+    availability?.selectedDate === selectedDate && !availabilityLoading;
 
   const [clientQuery, setClientQuery] = useState('');
   const [showClientResults, setShowClientResults] = useState(false);
@@ -183,12 +334,6 @@ export function BookingForm({
     setClientQuery('');
     setShowClientResults(false);
     setActiveClientIndex(-1);
-  };
-
-  const setQuickDate = (offset: number) => {
-    const date = new Date();
-    date.setDate(date.getDate() + offset);
-    setSelectedDate(localDateValue(date));
   };
 
   const formatPrice = (price: string) => {
@@ -775,76 +920,293 @@ export function BookingForm({
               </div>
             </div>
 
-            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
-              <div className="grid min-w-0 max-w-full gap-1.5">
-                <label
-                  htmlFor="booking-date"
-                  className="text-xs font-medium text-zinc-400"
-                >
-                  {t('bookingForm.date')}
-                </label>
-                <input
-                  id="booking-date"
-                  name="date"
-                  type="date"
-                  required
-                  value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                  className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/[0.035] px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
-                />
-                <div className="mt-1 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(0)}
-                    aria-pressed={selectedDate === today}
-                    className={cn(
-                      'min-h-10 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
-                      selectedDate === today
-                        ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
-                        : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06]',
-                    )}
-                  >
-                    {locale === 'en' ? 'Today' : 'Hoje'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuickDate(1)}
-                    aria-pressed={selectedDate === tomorrow}
-                    className={cn(
-                      'min-h-10 rounded-lg border px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
-                      selectedDate === tomorrow
-                        ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
-                        : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06]',
-                    )}
-                  >
-                    {locale === 'en' ? 'Tomorrow' : 'Amanhã'}
-                  </button>
-                </div>
-              </div>
-              <div className="grid min-w-0 max-w-full content-start gap-1.5">
-                <label
-                  htmlFor="booking-time"
-                  className="text-xs font-medium text-zinc-400"
-                >
-                  {t('bookingForm.time')}
-                </label>
-                <input
-                  id="booking-time"
-                  name="time"
-                  type="time"
-                  required
-                  step={300}
-                  value={selectedTime}
-                  onChange={(event) => setSelectedTime(event.target.value)}
-                  className="color-scheme-dark box-border block min-h-12 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-white/[0.035] px-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-4 focus:ring-emerald-400/[0.08] sm:px-3.5 sm:text-base"
-                />
-                <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-600">
-                  <Clock3 className="size-3.5 shrink-0" aria-hidden="true" />
+            <div className="space-y-4">
+              {!selectedService || !selectedProfessional ? (
+                <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] px-3 py-3 text-xs leading-5 text-amber-100/80">
                   {locale === 'en'
-                    ? 'Uses your device time picker'
-                    : 'Usa o seletor de horas do teu dispositivo'}
-                </p>
-              </div>
+                    ? 'Choose a service and a barber first to see the real schedule.'
+                    : 'Escolhe primeiro o serviço e o barbeiro para veres a agenda real.'}
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-zinc-300">
+                        {locale === 'en' ? 'Choose a day' : 'Escolhe o dia'}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-zinc-600">
+                        {locale === 'en'
+                          ? 'Next 14 days · days off and full days are identified'
+                          : 'Próximos 14 dias · folgas e dias sem vagas identificados'}
+                      </p>
+                    </div>
+                    {availabilityLoading ? (
+                      <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] text-zinc-500">
+                        <Spinner className="size-3" />
+                        {locale === 'en' ? 'Checking' : 'A verificar'}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div
+                    className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-2"
+                    aria-label={locale === 'en' ? 'Available days' : 'Dias disponíveis'}
+                  >
+                    {calendarDays.map((day) => {
+                      const dayStatus = availability?.days.find(
+                        (item) => item.date === day.dateStr,
+                      );
+                      const isSelected = selectedDate === day.dateStr;
+                      const isDayOff = dayStatus?.closedDay === true;
+                      const isFullyBooked = Boolean(
+                        dayStatus && !dayStatus.available && !dayStatus.closedDay,
+                      );
+                      const isDisabled = isDayOff || availabilityLoading || !dayStatus;
+
+                      return (
+                        <button
+                          key={day.dateStr}
+                          type="button"
+                          disabled={isDisabled}
+                          aria-pressed={isSelected}
+                          aria-label={`${day.fullDateFormatted}${isDayOff ? locale === 'en' ? ', day off' : ', folga' : isFullyBooked ? locale === 'en' ? ', fully booked' : ', sem vagas' : ''}`}
+                          onClick={() => {
+                            if (isDisabled || isSelected) return;
+                            setSelectedDate(day.dateStr);
+                            setSelectedTime('');
+                          }}
+                          className={cn(
+                            'min-w-[72px] shrink-0 snap-start rounded-2xl border px-2.5 py-3 text-center transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed',
+                            isSelected
+                              ? 'border-emerald-400/40 bg-emerald-400/[0.09] text-white'
+                              : isDayOff || isFullyBooked
+                                ? 'border-rose-400/25 bg-rose-400/[0.055] text-rose-200/80 opacity-80'
+                                : 'border-white/10 bg-white/[0.025] text-zinc-200 hover:border-white/20',
+                          )}
+                        >
+                          <span className="block text-[10px] font-semibold text-zinc-500">
+                            {day.isToday
+                              ? locale === 'en'
+                                ? 'TODAY'
+                                : 'HOJE'
+                              : day.weekdayShort}
+                          </span>
+                          <span className="mt-1 block text-xl font-black">
+                            {day.dayNumeric}
+                          </span>
+                          <span
+                            className={cn(
+                              'mt-1 block text-[10px] font-semibold',
+                              isDayOff || isFullyBooked
+                                ? 'text-rose-300'
+                                : isSelected
+                                  ? 'text-emerald-200'
+                                  : 'text-zinc-500',
+                            )}
+                          >
+                            {availabilityLoading || !dayStatus
+                              ? locale === 'en'
+                                ? 'Checking'
+                                : 'A verificar'
+                              : isDayOff
+                                ? locale === 'en'
+                                  ? 'Day off'
+                                  : 'Folga'
+                                : isFullyBooked
+                                  ? locale === 'en'
+                                    ? 'No slots'
+                                    : 'Sem vagas'
+                                  : locale === 'en'
+                                    ? `${dayStatus.availableCount} free`
+                                    : `${dayStatus.availableCount} livres`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {selectedService && selectedProfessional ? (
+                <>
+                  {availabilityError ? (
+                    <div
+                      role="alert"
+                      className="flex flex-col gap-2 rounded-xl border border-rose-400/20 bg-rose-400/[0.05] px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <p className="text-xs leading-5 text-rose-200/90">
+                        {locale === 'en'
+                          ? 'Availability could not be confirmed. Retry before choosing a time.'
+                          : 'Não foi possível confirmar a disponibilidade. Volta a tentar antes de escolheres uma hora.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setAvailabilityRetryKey((current) => current + 1)}
+                        className="min-h-9 shrink-0 rounded-lg border border-rose-300/20 px-3 text-xs font-semibold text-rose-100 hover:bg-rose-300/[0.08]"
+                      >
+                        {locale === 'en' ? 'Try again' : 'Tentar novamente'}
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {availabilityLoading ? (
+                    <div className="flex min-h-24 items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-black/15 text-xs text-zinc-500">
+                      <Spinner className="size-4" />
+                      {locale === 'en'
+                        ? 'Checking bookings and working hours…'
+                        : 'A confirmar marcações e horário de trabalho…'}
+                    </div>
+                  ) : availabilityIsReady && availability ? (
+                    <>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-zinc-100">
+                            {selectedDateLabel}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-zinc-500">
+                            {locale === 'en'
+                              ? `${availability.serviceDuration} min service${availability.serviceBuffer ? ` + ${availability.serviceBuffer} min buffer` : ''}`
+                              : `Serviço de ${availability.serviceDuration} min${availability.serviceBuffer ? ` + ${availability.serviceBuffer} min de intervalo` : ''}`}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-[10px] font-medium">
+                          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-2 py-1 text-emerald-200">
+                            {availability.days.find((day) => day.date === selectedDate)?.availableCount ?? 0} {locale === 'en' ? 'free' : 'livres'}
+                          </span>
+                          <span className="rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-2 py-1 text-amber-200">
+                            {selectedAvailabilityDay?.bookedCount ?? 0} {locale === 'en' ? 'booked' : 'marcados'}
+                          </span>
+                          <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.06] px-2 py-1 text-rose-200">
+                            {selectedAvailabilityDay?.blockedCount ?? 0} {locale === 'en' ? 'blocked' : 'bloqueados'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-white/[0.07] bg-black/15 px-3 py-2.5">
+                        <p className="text-[11px] leading-5 text-zinc-400">
+                          <span className="font-semibold text-zinc-300">
+                            {locale === 'en' ? 'Working hours' : 'Horário de trabalho'}:
+                          </span>{' '}
+                          {availability.dayOff || availability.workingIntervals.length === 0
+                            ? locale === 'en'
+                              ? 'Day off'
+                              : 'Dia de folga'
+                            : availability.workingIntervals
+                                .map((interval) => `${interval.start}–${interval.end}`)
+                                .join(' · ')}
+                        </p>
+                        {availability.breakIntervals.length > 0 ? (
+                          <p className="mt-1 text-[11px] leading-5 text-zinc-500">
+                            <span className="font-semibold text-zinc-400">
+                              {locale === 'en' ? 'Breaks' : 'Pausas'}:
+                            </span>{' '}
+                            {availability.breakIntervals
+                              .map((interval) => `${interval.start}–${interval.end}`)
+                              .join(' · ')}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      {availability.dayOff ? (
+                        <div className="rounded-xl border border-rose-400/20 bg-rose-400/[0.055] px-3 py-4 text-center">
+                          <p className="text-sm font-semibold text-rose-200">
+                            {locale === 'en' ? 'The barber is off on this day.' : 'O barbeiro está de folga neste dia.'}
+                          </p>
+                        </div>
+                      ) : selectedAvailabilitySlots.length > 0 ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-semibold text-zinc-300">
+                              {locale === 'en' ? 'Start time' : 'Hora de início'}
+                            </p>
+                            <p className="text-[10px] text-zinc-600">
+                              {locale === 'en'
+                                ? 'Unavailable times show the reason'
+                                : 'Os horários ocupados mostram o motivo'}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                            {selectedAvailabilitySlots.map((slot) => {
+                              const isAvailable = slot.status === 'available';
+                              const isSelected = selectedTime === slot.time && isAvailable;
+                              const statusLabel =
+                                slot.status === 'booked'
+                                  ? locale === 'en' ? 'Booked' : 'Marcado'
+                                  : slot.status === 'blocked'
+                                    ? locale === 'en' ? 'Blocked' : 'Bloqueado'
+                                    : slot.status === 'break'
+                                      ? locale === 'en' ? 'Break' : 'Pausa'
+                                      : slot.status === 'past'
+                                        ? locale === 'en' ? 'Passed' : 'Já passou'
+                                        : locale === 'en' ? 'Available' : 'Livre';
+                              return (
+                                <button
+                                  key={slot.time}
+                                  type="button"
+                                  disabled={!isAvailable}
+                                  aria-pressed={isSelected}
+                                  onClick={() => setSelectedTime(slot.time)}
+                                  className={cn(
+                                    'min-w-0 rounded-xl border px-2.5 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed',
+                                    isSelected
+                                      ? 'border-emerald-400/45 bg-emerald-400/[0.11] text-emerald-100'
+                                      : isAvailable
+                                        ? 'border-white/10 bg-white/[0.025] text-zinc-100 hover:border-emerald-400/30 hover:bg-emerald-400/[0.04]'
+                                        : slot.status === 'booked'
+                                          ? 'border-amber-400/20 bg-amber-400/[0.045] text-amber-100/80'
+                                          : slot.status === 'blocked'
+                                            ? 'border-rose-400/20 bg-rose-400/[0.045] text-rose-100/80'
+                                            : 'border-white/[0.07] bg-white/[0.015] text-zinc-500 opacity-80',
+                                  )}
+                                >
+                                  <span className="flex items-center justify-between gap-1">
+                                    <span className="text-sm font-semibold tabular-nums">
+                                      {slot.time}
+                                    </span>
+                                    <span className="text-[9px] font-semibold uppercase tracking-wide opacity-70">
+                                      {statusLabel}
+                                    </span>
+                                  </span>
+                                  {slot.detail ? (
+                                    <span className="mt-1 block line-clamp-2 text-[10px] leading-4 opacity-75">
+                                      {slot.detail}
+                                    </span>
+                                  ) : slot.status === 'available' ? (
+                                    <span className="mt-1 block text-[10px] text-emerald-200/60">
+                                      {locale === 'en' ? `Until ${slot.endTime}` : `Até às ${slot.endTime}`}
+                                    </span>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-white/[0.07] bg-black/15 px-3 py-4 text-center text-xs text-zinc-500">
+                          {locale === 'en'
+                            ? 'No selectable times fit this service on this day.'
+                            : 'Não existem horários compatíveis com este serviço neste dia.'}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-600">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="size-2 rounded-full bg-emerald-400" />
+                          {locale === 'en' ? 'Available' : 'Livre'}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="size-2 rounded-full bg-amber-400" />
+                          {locale === 'en' ? 'Booked' : 'Marcado'}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="size-2 rounded-full bg-rose-400" />
+                          {locale === 'en' ? 'Blocked' : 'Bloqueado'}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              ) : null}
             </div>
 
             <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-white/[0.07] bg-black/15 p-3 sm:grid-cols-2">
@@ -951,7 +1313,12 @@ export function BookingForm({
           <Button
             type="submit"
             disabled={
-              loading || services.length === 0 || professionals.length === 0
+              loading ||
+              services.length === 0 ||
+              professionals.length === 0 ||
+              !selectedSlotIsAvailable ||
+              availabilityLoading ||
+              availabilityError
             }
             className="silentra-action-primary min-h-12 w-full shrink-0 rounded-xl bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 shadow-[0_10px_28px_rgba(16,185,129,0.18)] transition hover:bg-emerald-400 hover:shadow-[0_12px_32px_rgba(16,185,129,0.24)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-48"
           >
