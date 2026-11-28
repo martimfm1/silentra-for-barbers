@@ -397,9 +397,22 @@ assert.ok(servicesHook.includes('buffer_minutes: bufferMinutes'));
 assert.ok(publicBookingData.includes('serviceBuffer'));
 assert.ok(publicBookingData.includes('reservedDuration'));
 assert.ok(publicBookingApi.includes('selectedService.buffer_minutes'));
-assert.ok(teamRescheduleApi.includes('appointment.buffer_minutes'));
-assert.ok(customerPortalAppointmentApi.includes('appointment.buffer_minutes'));
-assert.ok(customerPortalAppointmentApi.includes('item.buffer_minutes'));
+assert.ok(
+  teamRescheduleApi.includes('getReservedAppointmentMinutes(appointment)'),
+  'Staff rescheduling must use the linked service duration for legacy appointments',
+);
+assert.ok(
+  teamRescheduleApi.includes('getReservedAppointmentMinutes(item)'),
+  'Staff rescheduling must use the linked service duration for existing conflicts',
+);
+assert.ok(
+  customerPortalAppointmentApi.includes('getReservedAppointmentMinutes(appointment)'),
+  'Customer portal availability must use the linked service duration',
+);
+assert.ok(
+  customerPortalAppointmentApi.includes('getReservedAppointmentMinutes(item)'),
+  'Customer portal availability must use the linked service duration for existing bookings',
+);
 assert.ok(appointmentDashboardHook.includes('SCHEDULE_BLOCK_OVERLAPS_APPOINTMENT'));
 
 // A 60-minute service with a 30-minute buffer reserves 90 minutes.
