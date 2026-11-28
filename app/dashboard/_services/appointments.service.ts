@@ -156,6 +156,7 @@ export const appointmentService = {
         client_phone: payload.manual_phone ?? '',
         manual_email: clientEmail,
         manual_birth_date: payload.manual_birth_date,
+        duration_minutes: capacity.duration_minutes,
       },
     ] as const;
 
@@ -233,6 +234,7 @@ export const appointmentService = {
         client_phone: payload.manual_phone ?? '',
         manual_email: payload.manual_email?.trim().toLowerCase() || null,
         manual_birth_date: payload.manual_birth_date,
+        duration_minutes: capacityByService.get(payload.service_id)!.duration_minutes,
       })),
     ] as const;
 
