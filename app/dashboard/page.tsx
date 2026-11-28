@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { PLAN_NAMES } from '@/lib/billing/plan-features';
 import { useDashboardCustomization } from '@/app/dashboard/_components/DashboardCustomization';
+import { DashboardClosingReports } from '@/components/dashboard/periodic-business-reports';
 
 type PublicProfileSetup = {
   slug: string | null;
@@ -658,6 +659,7 @@ export default function DashboardPage() {
           } as React.CSSProperties
         }
       >
+        {barbershopId ? <DashboardClosingReports barbershopId={barbershopId} /> : null}
         <div className="relative px-3 pb-5 pt-8 sm:px-5 md:px-8 md:pb-12">
           <section
             className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
