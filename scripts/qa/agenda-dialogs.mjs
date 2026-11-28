@@ -54,6 +54,23 @@ assert.ok(
   'The layout must not mount a detached calendar without the page detail handler.',
 );
 assert.ok(agendaCalendar.includes('onAppointmentClick?.(appointment)'));
+assert.ok(agendaCalendar.includes('function parseCalendarFilters'));
+assert.ok(agendaCalendar.includes('silentra:agenda-calendar-filters:'));
+assert.ok(agendaCalendar.includes('window.localStorage.getItem'));
+assert.ok(agendaCalendar.includes('window.localStorage.setItem'));
+assert.ok(agendaCalendar.includes('calendarFilters[appointment.status]'));
+assert.ok(agendaCalendar.includes('calendarFilters.blocks'));
+assert.ok(agendaCalendar.includes('calendarFilters.breaks'));
+assert.ok(agendaCalendar.includes('calendarFilters.daysOff'));
+for (const key of [
+  'filters', 'filtersTitle', 'filtersDescription', 'filtersSaved',
+  'resetFilters', 'otherItems', 'filterPending', 'filterScheduled',
+  'filterCompleted', 'filterCancelled', 'filterBlocks', 'filterBreaks',
+  'filterDaysOff',
+]) {
+  assert.ok(ptCopy.includes(key + ':'), 'pt-PT calendar filters are missing ' + key + '.');
+  assert.ok(enCopy.includes(key + ':'), 'en-GB calendar filters are missing ' + key + '.');
+}
 assert.ok(
   agendaCalendar.includes('<div\n                  key={key}'),
   'Calendar day cells must be non-interactive containers, not buttons.',
