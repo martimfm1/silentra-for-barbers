@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { applyProviderDeliveryEvent } from '@/lib/marketing/delivery';
+import { constantTimeSecretMatch } from '@/lib/security/secret-comparison';
 
 function authorized(request: NextRequest) {
   const secret = process.env.BREVO_WEBHOOK_SECRET;
   if (!secret) return false;
   const authorization = request.headers.get('authorization');
   const headerSecret = request.headers.get('x-webhook-secret');
-  return authorization === `Bearer ${secret}` || headerSecret === secret;
+  const bearerMatches = constantTimeSecretMatch(authorization, `Bearer ${secret}`);
+  const headerMatches = constantTimeSecretMatch(headerSecret, secret);
+  return bearerMatches || headerMatches;
 }
 
 function resolveChannel(payload: Record<string, unknown>): 'email' | 'sms' {
