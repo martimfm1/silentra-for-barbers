@@ -253,6 +253,12 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
+          {
+            key: 'Content-Security-Policy',
+            // Deliberately omit frame-ancestors here: public booking pages are embeddable.
+            // Sensitive routes override framing with frame-ancestors 'none'.
+            value: "object-src 'none'; base-uri 'self'",
+          },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
             key: 'Permissions-Policy',
