@@ -2,7 +2,7 @@ const MIN_PASSWORD_LENGTH = 12;
 const MAX_PASSWORD_LENGTH = 128;
 
 const PASSWORD_COMPLEXITY =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s])(?=.{12,128}$).+$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.{12,128}$).+$/;
 
 export function isStrongPassword(value: unknown): value is string {
   return (
