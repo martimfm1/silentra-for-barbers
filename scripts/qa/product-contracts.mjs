@@ -398,7 +398,32 @@ const checks = [
       source.includes('markCompleted') &&
       source.includes('completeReports') &&
       source.includes("action: 'complete'") &&
+      source.includes('function PeriodIcon') &&
+      source.includes('bg-gradient-to-br from-primary') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('Opportunities to improve') &&
       source.includes("method: 'PATCH'"),
+  },
+  {
+    name: 'Analytics reports page uses a consistent default glassmorphism and gradient visual system',
+    file: 'app/dashboard/analytics/page.tsx',
+    test: (source) =>
+      source.includes('const GLASS_PANEL') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('bg-gradient-to-br') &&
+      source.includes('tracking-[-0.04em]') &&
+      source.includes('<PeriodReportsHistory />'),
+  },
+  {
+    name: 'Report history and summary dialogs share the premium glass visual language',
+    file: 'components/dashboard/periodic-business-reports.tsx',
+    test: (source) =>
+      source.includes('function PeriodIcon') &&
+      source.includes('rounded-[1.75rem]') &&
+      source.includes('bg-gradient-to-br') &&
+      source.includes('backdrop-blur-2xl') &&
+      source.includes('shadow-[0_32px_110px_-45px_rgba(0,0,0,0.8)]') &&
+      source.includes('Concluir'),
   },
   {
     name: 'Barbershop settings expose independent daily, weekly and monthly summary preferences',
