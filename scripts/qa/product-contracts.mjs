@@ -9,6 +9,16 @@ async function read(path) {
 
 const checks = [
   {
+    name: 'Manual and recurring appointments snapshot the selected service duration and buffer',
+    file: 'app/dashboard/_services/appointments.service.ts',
+    test: (source) =>
+      source.includes('getServiceCapacitySnapshots') &&
+      source.includes(".select('id,duration,buffer_minutes')") &&
+      source.includes('duration_minutes: capacity.duration_minutes') &&
+      source.includes('buffer_minutes: capacity.buffer_minutes') &&
+      source.includes('payloads.map((payload) => {'),
+  },
+  {
     name: 'Public profile resolution fails closed when the canonical plan lookup is unavailable',
     file: 'lib/barbershops/public-profile.ts',
     test: (source) =>
