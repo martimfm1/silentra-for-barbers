@@ -18,6 +18,8 @@ const confirmRoute = read('app/api/appointments/[appointmentId]/confirm/route.ts
 const rescheduleRoute = read('app/api/appointments/[appointmentId]/reschedule/route.ts');
 const cancelRoute = read('app/api/appointments/[appointmentId]/cancel/route.ts');
 const reminderWorker = read('app/api/cron/appointment-reminders/route.ts');
+const manualCustomerPush = read('app/api/appointments/[appointmentId]/notifications/customer/route.ts');
+const manualBookingHook = read('app/state/_hooks/dashboard/useAppointments.ts');
 const serviceWorker = read('public/sw.js');
 const customerManifest = JSON.parse(read('public/customer.webmanifest'));
 
@@ -38,6 +40,10 @@ assert.ok(confirmRoute.includes('sendWebPushToCustomerEmail'));
 assert.ok(rescheduleRoute.includes('sendWebPushToCustomerEmail'));
 assert.ok(cancelRoute.includes('sendWebPushToCustomerEmail'));
 assert.ok(reminderWorker.includes('sendWebPushToCustomerEmail'));
+assert.ok(manualCustomerPush.includes('requireTenantAuthorization'));
+assert.ok(manualCustomerPush.includes(".eq('barbershop_id', tenant.barbershopId)"));
+assert.ok(manualCustomerPush.includes('sendWebPushToCustomerEmail'));
+assert.ok(manualBookingHook.includes('/notifications/customer'));
 assert.ok(serviceWorker.includes('vibrate: [90, 45, 90]'));
 assert.ok(experience.includes('Notification.requestPermission()'));
 assert.ok(experience.includes('PushManager'));
