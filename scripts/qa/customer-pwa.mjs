@@ -35,6 +35,8 @@ assert.ok(calendarFeed.includes('hashPortalToken(token)'));
 assert.ok(calendarFeed.includes(".eq('manual_email', email)"));
 assert.ok(calendarFeed.includes(".in('client_id', clientIds)"));
 assert.ok(pushSender.includes('sendWebPushToCustomerEmail'));
+assert.ok(pushSender.includes('isAllowedPushServiceEndpoint'));
+assert.ok(pushSender.includes('WEB_PUSH_ENDPOINT_BLOCKED'));
 assert.ok(bookingRoute.includes('sendWebPushToCustomerEmail'));
 assert.ok(confirmRoute.includes('sendWebPushToCustomerEmail'));
 assert.ok(rescheduleRoute.includes('sendWebPushToCustomerEmail'));
