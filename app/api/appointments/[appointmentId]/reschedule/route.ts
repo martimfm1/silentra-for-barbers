@@ -7,6 +7,7 @@ import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendCustomerAppointmentRescheduledEmail } from '@/lib/brevo/appointment-change-notifications';
+import { sendWebPushToCustomerEmail } from '@/lib/notifications/providers/push';
 import { getReservedAppointmentMinutes } from '@/lib/bookings/appointment-capacity';
 import {
   appointmentsShareProfessionalCapacity,
@@ -441,6 +442,20 @@ async function PATCH__unobserved(
       }
       if (!notificationSent)
         console.error('[PRO_APPOINTMENT_RESCHEDULE_EMAIL_FAILED]');
+      try {
+        await sendWebPushToCustomerEmail(recipientEmail, {
+          title: shop?.default_language === 'en' ? 'Your appointment was changed' : 'A tua marcação foi alterada',
+          body: (service?.name || 'Serviço') + ' · ' + new Intl.DateTimeFormat(shop?.default_language === 'en' ? 'en-GB' : 'pt-PT', {
+            timeZone: 'Europe/Lisbon',
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(updated.date_hour)),
+          url: '/my-bookings',
+          tag: 'customer-booking-' + appointment.id,
+        });
+      } catch (pushError) {
+        console.error('[PRO_APPOINTMENT_RESCHEDULE_PUSH_ERROR]', pushError instanceof Error ? pushError.name : 'UNKNOWN');
+      }
     }
 
     await recordAppointmentActivity(admin, {
