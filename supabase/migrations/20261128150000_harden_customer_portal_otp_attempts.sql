@@ -19,7 +19,7 @@ create or replace function public.verify_booking_portal_code(
 returns table(ok boolean, error_code text, verification_id uuid)
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   v_row public.booking_portal_verifications%rowtype;
