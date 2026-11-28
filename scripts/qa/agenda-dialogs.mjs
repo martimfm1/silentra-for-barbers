@@ -7,6 +7,9 @@ const agendaLayout = read('app/dashboard/agenda/layout.tsx');
 const hook = read('app/state/_hooks/dashboard/useAppointments.ts');
 
 const bookingForm = read('app/dashboard/_components/cards/BookingFormCard.tsx');
+const manualBookingAvailability = read(
+  'app/api/barbershops/[barbershopId]/booking-availability/route.ts',
+);
 const appointmentsService = read(
   'app/dashboard/_services/appointments.service.ts',
 );
@@ -280,8 +283,25 @@ assert.ok(bookingForm.includes('replace(/\\D/g'));
 assert.ok(bookingForm.includes("addEventListener('pointerdown'"));
 assert.ok(bookingForm.includes('singleProfessional'));
 assert.ok(bookingForm.includes('services.length === 1'));
-assert.ok(bookingForm.includes('type="date"'));
-assert.ok(bookingForm.includes('type="time"'));
+assert.ok(bookingForm.includes('buildManualBookingDays'));
+assert.ok(bookingForm.includes('booking-availability'));
+assert.ok(bookingForm.includes('Folga'));
+assert.ok(bookingForm.includes('Marcado'));
+assert.ok(bookingForm.includes('Bloqueado'));
+assert.ok(bookingForm.includes('Pausas'));
+assert.ok(bookingForm.includes('selectedSlotIsAvailable'));
+assert.doesNotMatch(bookingForm, /id="booking-date"[\\s\\S]*?type="date"/);
+assert.doesNotMatch(bookingForm, /id="booking-time"[\\s\\S]*?type="time"/);
+assert.ok(manualBookingAvailability.includes('requireTenantAuthorization'));
+assert.ok(manualBookingAvailability.includes('barbershop_member_permissions'));
+assert.ok(manualBookingAvailability.includes('appointmentsShareProfessionalCapacity'));
+assert.ok(manualBookingAvailability.includes("status: 'booked'"));
+assert.ok(manualBookingAvailability.includes("status: 'blocked'"));
+assert.ok(manualBookingAvailability.includes("status: 'break'"));
+assert.ok(manualBookingAvailability.includes("status: 'past'"));
+assert.ok(manualBookingAvailability.includes('manual_name'));
+assert.ok(manualBookingAvailability.includes('workingIntervals'));
+assert.ok(manualBookingAvailability.includes('availabilityCount') || manualBookingAvailability.includes('availableCount'));
 assert.ok(bookingForm.includes('booking-recurrence'));
 assert.ok(bookingForm.includes('booking-recurrence-end'));
 assert.ok(bookingForm.includes('max-w-full'));
