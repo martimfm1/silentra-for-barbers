@@ -501,29 +501,42 @@ export default function AnalyticsPage() {
 
   if (!allowed) {
     return (
-      <main className="min-w-0 px-3 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl space-y-5">
+      <main className="relative isolate min-w-0 overflow-x-clip px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -left-24 top-8 size-72 rounded-full bg-primary/[0.12] blur-[110px]" />
+          <div className="absolute right-[-7rem] top-[28rem] size-80 rounded-full bg-violet-500/[0.06] blur-[120px]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-7xl space-y-5 sm:space-y-6">
+          <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-card/95 via-card/75 to-primary/[0.09] p-5 shadow-[0_24px_90px_-48px_rgba(16,185,129,0.5)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-7">
+            <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+              <BarChart3 className="size-3.5" aria-hidden="true" />
+              {t('analyticsPage.eyebrow')}
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{t('analyticsPage.title')}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t('analyticsPage.description')}</p>
+          </header>
           <PeriodReportsHistory />
           <div className="mx-auto max-w-xl">
-          <Card className={cn(GLASS_PANEL, 'border-primary/15')}>
-            <CardContent className="flex flex-col items-center gap-5 py-12 text-center sm:py-16">
-              <span className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-                <Lock className="size-5" />
-              </span>
-              <h1 className="text-xl font-semibold sm:text-2xl">
-                {t('analyticsPage.advancedTitle')}
-              </h1>
-              <FeaturePlanBadge feature="advanced_analytics" />
-              <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-                {t('analyticsPage.upgradeDescription')}
-              </p>
-              <Button asChild className="min-h-11 w-full sm:w-auto">
-                <Link href="/dashboard/billing">
-                  {t('analyticsPage.upgrade')}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+            <Card className={cn(GLASS_PANEL, 'relative isolate overflow-hidden border-primary/15')}>
+              <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 size-48 rounded-full bg-primary/[0.12] blur-3xl" />
+              <CardContent className="relative z-10 flex flex-col items-center gap-5 py-12 text-center sm:py-16">
+                <span className="flex size-14 items-center justify-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/20 to-transparent text-primary shadow-sm">
+                  <Lock className="size-5" />
+                </span>
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                  {t('analyticsPage.advancedTitle')}
+                </h2>
+                <FeaturePlanBadge feature="advanced_analytics" />
+                <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+                  {t('analyticsPage.upgradeDescription')}
+                </p>
+                <Button asChild className="min-h-11 w-full rounded-xl bg-gradient-to-r from-primary to-emerald-500 font-semibold text-primary-foreground shadow-lg shadow-primary/20 sm:w-auto">
+                  <Link href="/dashboard/billing">
+                    {t('analyticsPage.upgrade')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
@@ -542,7 +555,7 @@ export default function AnalyticsPage() {
         <div className="absolute bottom-0 left-1/3 size-96 rounded-full bg-violet-500/[0.05] blur-[140px]" />
       </div>
       <div className="relative z-10 mx-auto max-w-7xl space-y-5 sm:space-y-6">
-        <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-card/95 via-card/75 to-primary/[0.09] p-5 shadow-[0_24px_90px_-48px_rgba(16,185,129,0.5)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-7 lg:p-8 lg:flex-row lg:items-end lg:justify-between">
+        <header className="relative isolate flex flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-card/95 via-card/75 to-primary/[0.09] p-5 shadow-[0_24px_90px_-48px_rgba(16,185,129,0.5)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-7 lg:flex-row lg:items-end lg:justify-between lg:p-8">
           <div className="min-w-0">
             <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary shadow-sm shadow-primary/10">
               <BarChart3 className="size-3.5" aria-hidden="true" />
@@ -1372,7 +1385,7 @@ export default function AnalyticsPage() {
 
             {data.enterprise ? (
               <section aria-labelledby="analytics-enterprise-title">
-                <Card>
+                <Card className={cn(GLASS_PANEL, 'min-w-0 overflow-hidden')}>
                   <CardHeader className="pb-3">
                     <CardTitle
                       id="analytics-enterprise-title"
@@ -1557,7 +1570,8 @@ function Metric({
   return (
     <Card
       className={cn(
-        cn(GLASS_PANEL, 'min-w-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25'),
+        GLASS_PANEL,
+        'min-w-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25',
         featured &&
           'relative col-span-2 border-primary/30 bg-gradient-to-br from-primary/[0.18] via-card/70 to-emerald-500/[0.06] shadow-[0_20px_70px_-42px_rgba(16,185,129,0.55)] xl:col-span-1',
       )}
