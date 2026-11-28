@@ -34,7 +34,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
           'Para reservas e gestão de clientes, podemos tratar nome, telefone, email, serviço, profissional, data e hora, estado da marcação, notas e dados introduzidos manualmente pela barbearia ou pelo cliente.',
           'Quando pedes para entrar numa lista de espera, tratamos os teus dados de contacto, serviço, profissional opcional, data pretendida e registo do consentimento para a barbearia selecionada poder contactar-te sobre uma vaga. Este pedido não é uma marcação nem reserva um horário. O consentimento para este contacto operacional não é consentimento para marketing.',
           'Podemos tratar avaliações, dados de utilização, registos de auditoria, informações técnicas, identificadores de sessão, dados de subscrição e informação necessária para prevenir abuso e manter a segurança.',
-          'As notificações push podem utilizar os dados técnicos necessários para manter uma subscrição do dispositivo. O envio push atualmente é usado para notificações operacionais dirigidas aos barbeiros, nomeadamente novos bookings.',
+          'Quando um cliente ativa notificações, podemos guardar o email de acesso ao portal, o endpoint e as chaves técnicas da subscrição e a plataforma do dispositivo. Estas notificações são transacionais e podem informar sobre novos pedidos, confirmações, alterações, cancelamentos e lembretes das marcações. O cliente pode desativá-las em cada dispositivo. Quando o cliente ativa a sincronização do calendário, criamos um link iCalendar privado, apenas de leitura, com um token revogável; qualquer pessoa que tenha esse link pode consultar as marcações abrangidas. O cliente pode gerar um novo link ou desativar a sincronização.',
         ],
       },
       {
@@ -160,7 +160,7 @@ export const privacyPolicy: Record<'pt' | 'en', PrivacyDocument> = {
           'For bookings and customer management, we may process name, phone, email, service, professional, date and time, appointment status, notes, and information entered manually by the barbershop or customer.',
           'When you ask to join a waitlist, we process your contact details, requested service, optional professional, preferred date, and consent record so the selected barbershop can contact you about an opening. A waitlist request is not an appointment and does not reserve a time. Consent to this operational contact is not marketing consent.',
           'We may process reviews, usage data, audit records, technical information, session identifiers, subscription data, and information required to prevent abuse and maintain security.',
-          'Push notifications may use technical data required to maintain a device subscription. Push is currently used for operational notifications to barbers, including new bookings.',
+          'When a customer enables notifications, we may store the portal email, subscription endpoint and technical keys, and device platform. These notifications are transactional and may cover booking requests, confirmations, changes, cancellations, and reminders. Customers can disable them on each device. When customers enable calendar sync, we create a private, read-only iCalendar link with a revocable token; anyone who has the link can view the covered bookings. Customers can rotate the link or disable the feed.',
         ],
       },
       {

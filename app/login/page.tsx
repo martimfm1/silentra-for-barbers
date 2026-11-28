@@ -161,20 +161,29 @@ export default function LoginPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
-                    <div className="mt-5 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.045] p-4">
-                      <p className="text-sm font-semibold text-zinc-100">
-                        {t('auth.customerAreaTitle')}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-zinc-400">
-                        {t('auth.customerAreaDescription')}
-                      </p>
-                      <Link
-                        href="/my-bookings"
-                        className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] px-3 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/[0.13] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50"
-                      >
-                        {t('auth.customerAreaLink')}
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </Link>
+                    <div className="relative isolate mt-5 overflow-hidden rounded-2xl border border-emerald-300/20 bg-gradient-to-br from-emerald-300/[0.12] via-white/[0.035] to-sky-300/[0.06] p-4 shadow-[0_16px_45px_rgba(16,185,129,0.06)]">
+                      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-12 size-36 rounded-full bg-emerald-300/[0.12] blur-3xl" />
+                      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+                            Silentra · Área do cliente
+                          </p>
+                          <p className="mt-1 text-base font-semibold tracking-tight text-zinc-50">
+                            {t('auth.customerAreaTitle')}
+                          </p>
+                          <p className="mt-1 max-w-md text-xs leading-5 text-zinc-300/80">
+                            {t('auth.customerAreaDescription')}
+                          </p>
+                        </div>
+                        <Link
+                          href="/my-bookings"
+                          data-haptic="selection"
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200/20 bg-emerald-200/[0.12] px-3.5 text-xs font-semibold text-emerald-50 transition hover:border-emerald-100/35 hover:bg-emerald-200/[0.18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50"
+                        >
+                          {t('auth.customerAreaLink')}
+                          <ArrowRight className="size-3.5" aria-hidden="true" />
+                        </Link>
+                      </div>
                     </div>
                     {successMsg ? (
                       <div

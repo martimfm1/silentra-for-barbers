@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Consulta e gere as tuas marcações de barbearia através da Silentra.',
   robots: { index: false, follow: false },
+  manifest: '/customer.webmanifest',
 };
 
 export default function MyBookingsLayout({

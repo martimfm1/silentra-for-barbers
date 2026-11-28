@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoyaltySummary } from '@/components/customer-portal/loyalty-summary';
+import { CustomerExperiencePanel } from '@/components/customer-portal/customer-experience-panel';
 import { useAccessibleDialog } from '@/hooks/useAccessibleDialog';
 
 type Appointment = {
@@ -543,6 +544,8 @@ export function MyBookingsPage({
                 {refreshing ? 'A atualizar…' : 'Atualizar'}
               </button>
             </div>
+
+            <CustomerExperiencePanel />
 
             {loadError ? (
               <div

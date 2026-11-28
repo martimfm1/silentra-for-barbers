@@ -6,6 +6,7 @@ const PRECACHE_URLS = [
   '/icon-192.png',
   '/icon-512.png',
   '/apple-touch-icon.png',
+  '/customer.webmanifest',
 ];
 
 self.addEventListener('install', (event) => {
@@ -63,6 +64,7 @@ self.addEventListener('push', (event) => {
           : 'silentra-notification',
       data: { url: target },
       renotify: false,
+      vibrate: [90, 45, 90],
     }),
   );
 });
@@ -111,6 +113,7 @@ self.addEventListener('fetch', (event) => {
     '/icon-512.png',
     '/apple-touch-icon.png',
     '/site.webmanifest',
+    '/customer.webmanifest',
   ].includes(url.pathname);
   if (!isStaticAsset && !isPwaAsset) return;
 

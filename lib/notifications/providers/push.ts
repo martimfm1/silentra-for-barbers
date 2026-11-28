@@ -165,6 +165,25 @@ function encryptPayload(
   header[20] = serverPublicKey.length;
   return Buffer.concat([header, serverPublicKey, ciphertext]);
 }
+function isAllowedPushServiceEndpoint(url: URL): boolean {
+  const host = url.hostname.toLowerCase();
+  const allowedHost =
+    host === 'push.apple.com' ||
+    host.endsWith('.push.apple.com') ||
+    host === 'fcm.googleapis.com' ||
+    host === 'updates.push.services.mozilla.com' ||
+    host.endsWith('.push.services.mozilla.com') ||
+    host.endsWith('.notify.windows.com');
+
+  return (
+    url.protocol === 'https:' &&
+    (!url.port || url.port === '443') &&
+    !url.username &&
+    !url.password &&
+    allowedHost
+  );
+}
+
 async function sendToSubscription(
   subscription: StoredSubscription,
   payload: WebPushPayload,
@@ -172,11 +191,10 @@ async function sendToSubscription(
   const config = getVapidConfig();
   if (!config) return { success: false };
   const endpoint = new URL(subscription.endpoint);
-  if (
-    endpoint.protocol !== 'https:' ||
-    (endpoint.port && endpoint.port !== '443')
-  )
+  if (!isAllowedPushServiceEndpoint(endpoint)) {
+    console.error('[WEB_PUSH_ENDPOINT_BLOCKED]');
     return { success: false };
+  }
   const response = await fetch(endpoint, {
     method: 'POST',
     redirect: 'error',
@@ -242,4 +260,52 @@ export async function sendWebPushToUser(
   payload: WebPushPayload,
 ): Promise<{ sent: number; failed: number }> {
   return sendWebPushToUsers([userId], payload);
+}
+
+export async function sendWebPushToCustomerEmail(
+  email: string,
+  payload: WebPushPayload,
+): Promise<{ sent: number; failed: number }> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || !isPushEnabled() || !isWebPushConfigured()) {
+    return { sent: 0, failed: 0 };
+  }
+
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from('customer_notification_subscriptions')
+    .select('id,endpoint,p256dh,auth')
+    .eq('email', normalized);
+
+  if (error) {
+    console.error('[CUSTOMER_WEB_PUSH_SUBSCRIPTIONS_LOOKUP_FAILED]', error.code ?? 'UNKNOWN');
+    return { sent: 0, failed: 1 };
+  }
+
+  const subscriptions = (data ?? []) as StoredSubscription[];
+  const results = await Promise.all(
+    subscriptions.map(async (subscription) => {
+      try {
+        const result = await sendToSubscription(subscription, payload);
+        if (result.status === 404 || result.status === 410) {
+          await admin
+            .from('customer_notification_subscriptions')
+            .delete()
+            .eq('id', subscription.id);
+        }
+        return result.success;
+      } catch (error) {
+        console.error(
+          '[CUSTOMER_WEB_PUSH_DELIVERY_FAILED]',
+          error instanceof Error ? error.name : 'UNKNOWN',
+        );
+        return false;
+      }
+    }),
+  );
+
+  return {
+    sent: results.filter(Boolean).length,
+    failed: results.filter((success) => !success).length,
+  };
 }
