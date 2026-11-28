@@ -52,7 +52,7 @@ assert.ok(serviceWorker.includes('vibrate: [90, 45, 90]'));
 assert.ok(experience.includes('Notification.requestPermission()'));
 assert.ok(experience.includes('PushManager'));
 assert.ok(experience.includes('webcal:'));
-assert.ok(experience.includes('calendar.google.com'));
+assert.ok(experience.includes('settings/addbyurl?url='));
 assert.ok(migration.toLowerCase().includes('enable row level security'));
 assert.ok(migration.toLowerCase().includes('revoke all on table public.customer_notification_subscriptions'));
 assert.ok(migration.includes('customer_notification_subscriptions_endpoint_uidx'));
