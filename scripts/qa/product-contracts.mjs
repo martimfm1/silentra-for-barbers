@@ -426,6 +426,7 @@ const checks = [
       source.includes('periodic_reports_weekly_enabled_at') &&
       source.includes('periodic_reports_monthly_enabled_at') &&
       source.includes('add column if not exists completed_at') &&
+      source.includes('add column if not exists closed_at') &&
       source.includes('grant select ('),
   },
   {
