@@ -128,17 +128,21 @@ export function BookingForm({
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState(false);
   const [availabilityRetryKey, setAvailabilityRetryKey] = useState(0);
+  const selectableServices = services.filter((service) => service.is_active !== false);
+  const selectableProfessionals = professionals.filter(
+    (professional) => professional.active !== false,
+  );
   const selectedClient = clients.find(
     (client) => client.id === formData.clientId,
   );
   const selectedClientName = selectedClient?.name_complete ?? '';
-  const selectedService = services.find(
+  const selectedService = selectableServices.find(
     (service) => service.id === formData.service_id,
   );
   const singleProfessional =
-    professionals.length === 1 ? professionals[0] : null;
+    selectableProfessionals.length === 1 ? selectableProfessionals[0] : null;
   const singleProfessionalId = singleProfessional?.id;
-  const selectedProfessional = professionals.find(
+  const selectedProfessional = selectableProfessionals.find(
     (professional) => professional.id === selectedProfessionalId,
   );
   const selectedDateLabel = selectedDate
@@ -262,10 +266,13 @@ export function BookingForm({
   }, [singleProfessionalId, selectedProfessionalId, setSelectedProfessionalId]);
 
   useEffect(() => {
-    if (services.length === 1 && !formData.service_id) {
-      setFormData((previous) => ({ ...previous, service_id: services[0].id }));
+    if (selectableServices.length === 1 && !formData.service_id) {
+      setFormData((previous) => ({
+        ...previous,
+        service_id: selectableServices[0].id,
+      }));
     }
-  }, [formData.service_id, services, setFormData]);
+  }, [formData.service_id, selectableServices, setFormData]);
 
   const matchingClients = useMemo(() => {
     const query = clientQuery
@@ -795,7 +802,7 @@ export function BookingForm({
                     className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
                   >
                     <SelectGroup>
-                      {services.map((service) => (
+                      {selectableServices.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id}
@@ -870,7 +877,7 @@ export function BookingForm({
                       className="w-[var(--radix-select-trigger-width)] max-h-72 min-w-0 max-w-[calc(100vw-2rem)] border-white/10 bg-zinc-900 text-white"
                     >
                       <SelectGroup>
-                        {professionals.map((professional) => (
+                        {selectableProfessionals.map((professional) => (
                           <SelectItem
                             key={professional.id}
                             value={professional.id}
@@ -885,7 +892,7 @@ export function BookingForm({
                 </div>
               )}
             </div>
-            {services.length === 0 || professionals.length === 0 ? (
+            {selectableServices.length === 0 || selectableProfessionals.length === 0 ? (
               <p
                 role="status"
                 className="mt-3 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] px-3 py-2.5 text-xs leading-5 text-amber-200/80"
@@ -1314,8 +1321,8 @@ export function BookingForm({
             type="submit"
             disabled={
               loading ||
-              services.length === 0 ||
-              professionals.length === 0 ||
+              selectableServices.length === 0 ||
+              selectableProfessionals.length === 0 ||
               !selectedSlotIsAvailable ||
               availabilityLoading ||
               availabilityError
