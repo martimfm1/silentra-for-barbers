@@ -1,7 +1,6 @@
 import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { getReservedAppointmentMinutes } from '@/lib/bookings/appointment-capacity';
 import {
@@ -108,27 +107,64 @@ function getLisbonClock() {
   };
 }
 
-async function getTenant(request: Request, barbershopId: string) {
-  const authUser = await getCurrentUser(request);
-  if (!authUser) return null;
+const AVAILABILITY_ROLES = [
+  'owner',
+  'admin',
+  'manager',
+  'barber',
+  'receptionist',
+  'staff',
+] as const;
 
-  const admin = createAdminClient();
-  const { data: user, error } = await admin
-    .from('users')
-    .select('id, barbershop_id, role')
-    .eq('id', authUser.id)
-    .maybeSingle();
+function hasAgendaGrant(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const permissions = value as Record<string, unknown>;
+  return permissions.agenda === true || permissions.appointments === true;
+}
 
-  if (
-    error ||
-    !user?.barbershop_id ||
-    !['admin', 'owner', 'staff'].includes(user.role ?? 'staff') ||
-    user.barbershop_id !== barbershopId
-  ) {
-    return null;
+async function authorizeAgenda(request: Request, barbershopId: string) {
+  const tenant = await requireTenantAuthorization(request, AVAILABILITY_ROLES);
+  if (!tenant.ok) return { ok: false as const, status: tenant.status };
+
+  if (tenant.barbershopId !== barbershopId) {
+    return { ok: false as const, status: 403 };
   }
 
-  return admin;
+  if (tenant.role !== 'owner' && tenant.role !== 'admin') {
+    const { data: grant, error: grantError } = await tenant.admin
+      .from('barbershop_member_permissions')
+      .select('permissions')
+      .eq('barbershop_id', tenant.barbershopId)
+      .eq('user_id', tenant.userId)
+      .maybeSingle();
+
+    if (grantError) {
+      console.error('[MANUAL_BOOKING_AVAILABILITY_PERMISSION_ERROR]', grantError.code ?? 'UNKNOWN');
+      return { ok: false as const, status: 503 };
+    }
+
+    let allowed = grant ? hasAgendaGrant(grant.permissions) : false;
+    if (!grant) {
+      const legacy = await tenant.admin
+        .from('staff_permissions')
+        .select('allowed')
+        .eq('barbershop_id', tenant.barbershopId)
+        .eq('user_id', tenant.userId)
+        .in('permission', ['agenda', 'appointments'])
+        .eq('allowed', true)
+        .limit(1)
+        .maybeSingle();
+      if (legacy.error) {
+        console.error('[MANUAL_BOOKING_AVAILABILITY_LEGACY_PERMISSION_ERROR]', legacy.error.code ?? 'UNKNOWN');
+        return { ok: false as const, status: 503 };
+      }
+      allowed = legacy.data?.allowed === true;
+    }
+
+    if (!allowed) return { ok: false as const, status: 403 };
+  }
+
+  return { ok: true as const, admin: tenant.admin };
 }
 
 function getAppointmentDescription(appointment: AppointmentRow, start: number) {
@@ -165,13 +201,14 @@ async function GET__unobserved(
       );
     }
 
-    const admin = await getTenant(request, barbershopId);
-    if (!admin) {
+    const access = await authorizeAgenda(request, barbershopId);
+    if (!access.ok) {
       return NextResponse.json(
-        { error: 'Não tem acesso a esta barbearia.' },
-        { status: 403 },
+        { error: 'Não tem permissão para consultar a disponibilidade da agenda.' },
+        { status: access.status },
       );
     }
+    const admin = access.admin;
 
     const { searchParams } = new URL(request.url);
     const fromDate = searchParams.get('fromDate') ?? '';
