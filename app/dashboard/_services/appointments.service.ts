@@ -15,6 +15,54 @@ export interface FinalizeBookingPayload {
 
 const supabase = createClient();
 
+type AppointmentCapacitySnapshot = {
+  duration_minutes: number;
+  buffer_minutes: number;
+};
+
+/**
+ * Manual dashboard bookings do not go through the public atomic-booking RPC.
+ * Resolve and snapshot the selected service capacity before inserting so
+ * recurring occurrences reserve the same duration as their service.
+ */
+async function getServiceCapacitySnapshots(
+  barbershopId: string,
+  serviceIds: string[],
+) {
+  const uniqueServiceIds = [...new Set(serviceIds)];
+  const { data: services, error } = await supabase
+    .from('services')
+    .select('id,duration,buffer_minutes')
+    .eq('barbershop_id', barbershopId)
+    .in('id', uniqueServiceIds);
+
+  if (error) return { data: null, error };
+
+  const snapshots = new Map<string, AppointmentCapacitySnapshot>();
+  for (const service of services ?? []) {
+    const rawDuration = Number(service.duration ?? 30);
+    const rawBuffer = Number(service.buffer_minutes ?? 0);
+    snapshots.set(service.id, {
+      duration_minutes: Number.isFinite(rawDuration)
+        ? Math.min(Math.max(Math.round(rawDuration), 1), 1440)
+        : 30,
+      buffer_minutes: Number.isFinite(rawBuffer)
+        ? Math.min(Math.max(Math.round(rawBuffer), 0), 120)
+        : 0,
+    });
+  }
+
+  const missingService = uniqueServiceIds.find((id) => !snapshots.has(id));
+  if (missingService) {
+    return {
+      data: null,
+      error: new Error('O serviço selecionado não pertence a esta barbearia.'),
+    };
+  }
+
+  return { data: snapshots, error: null };
+}
+
 export const appointmentService = {
   async getAll(barbershopId: string) {
     const { data, error } = await listRecords<Appointment>(
@@ -43,6 +91,24 @@ export const appointmentService = {
     manual_email?: string | null;
     recurrence_series_id?: string | null;
   }) {
+    const capacityResult = await getServiceCapacitySnapshots(
+      payload.barbershop_id,
+      [payload.service_id],
+    );
+    if (capacityResult.error || !capacityResult.data) {
+      return {
+        data: null,
+        error: capacityResult.error ?? new Error('Não foi possível validar a duração do serviço.'),
+      };
+    }
+    const capacity = capacityResult.data.get(payload.service_id);
+    if (!capacity) {
+      return {
+        data: null,
+        error: new Error('O serviço selecionado não pertence a esta barbearia.'),
+      };
+    }
+
     const clientEmail = payload.manual_email?.trim().toLowerCase() || null;
 
     let resolvedClientId = payload.client_id;
@@ -74,6 +140,8 @@ export const appointmentService = {
       ...payload,
       client_id: resolvedClientId,
       manual_email: clientEmail,
+      duration_minutes: capacity.duration_minutes,
+      buffer_minutes: capacity.buffer_minutes,
     };
 
     const variants = [
@@ -123,14 +191,38 @@ export const appointmentService = {
       return { data: [] as Appointment[], error: null };
     }
 
+    const barbershopId = payloads[0].barbershop_id;
+    if (payloads.some((payload) => payload.barbershop_id !== barbershopId)) {
+      return {
+        data: null,
+        error: new Error('Uma série recorrente não pode misturar barbearias.'),
+      };
+    }
+    const capacityResult = await getServiceCapacitySnapshots(
+      barbershopId,
+      payloads.map((payload) => payload.service_id),
+    );
+    if (capacityResult.error || !capacityResult.data) {
+      return {
+        data: null,
+        error: capacityResult.error ?? new Error('Não foi possível validar a duração do serviço.'),
+      };
+    }
+    const capacityByService = capacityResult.data;
+
     // A single INSERT keeps the whole recurring series atomic: either every
     // occurrence is created or none is, including when a slot conflicts.
     const variants = [
-      payloads.map((payload) => ({
-        ...payload,
-        client_id: payload.client_id || null,
-        manual_email: payload.manual_email?.trim().toLowerCase() || null,
-      })),
+      payloads.map((payload) => {
+        const capacity = capacityByService.get(payload.service_id)!;
+        return {
+          ...payload,
+          duration_minutes: capacity.duration_minutes,
+          buffer_minutes: capacity.buffer_minutes,
+          client_id: payload.client_id || null,
+          manual_email: payload.manual_email?.trim().toLowerCase() || null,
+        };
+      }),
       payloads.map((payload) => ({
         barbershop_id: payload.barbershop_id,
         date: payload.date_hour,
