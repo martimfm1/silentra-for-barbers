@@ -27,16 +27,16 @@ Redeploy after adding the variables. Do not rotate the key pair after users have
 
 ## User flow
 
-1. Open Dashboard → Settings → Push notifications.
-2. On iPhone, if using a Safari tab, add Silentra to the Home Screen and open it from the new icon.
-3. Tap **Enable notifications** and accept the browser prompt.
-4. Use **Send a test notification** to verify delivery.
+1. **Barbers:** open Dashboard → Settings → Push notifications.
+2. **Customers:** open As minhas marcações, confirm the booking email, install the customer web app if using iPhone, then enable notifications in the customer experience panel.
+3. On iPhone, add Silentra to the Home Screen and open it from the new icon before requesting Web Push permission.
+4. Accept the browser prompt. Customers can use the test notification in the panel; barbers can use the existing settings test.
 
-Subscriptions are stored in `public.notification_subscriptions`, scoped to the authenticated staff user. The table has RLS enabled and no client-role grants; server routes use the service role after tenant/role authorization. Expired push endpoints (HTTP 404/410) are removed automatically.
+Staff subscriptions are stored in `public.notification_subscriptions`, scoped to the authenticated staff user. Customer subscriptions are stored separately in `public.customer_notification_subscriptions`, scoped to the email verified in the customer booking portal. Both tables have RLS enabled and no client-role grants; server routes use the service role after their respective staff or portal-session authorization. Expired push endpoints (HTTP 404/410) are removed automatically.
 
 ## Current events
 
-Push is sent for new bookings created through the public booking flow and the dashboard booking form. It is delivered to the assigned barber when one is assigned, otherwise to the barbershop's barber/owner/admin accounts. The existing email notification remains unchanged for public bookings; dashboard-created bookings use push only to avoid duplicate emails.
+Staff push remains focused on operational booking events. Customer push is opt-in and can be sent for public booking requests, booking confirmations, barber reschedules/cancellations, and the 24-hour appointment reminder. It is addressed to the email verified in the customer portal and opens `/my-bookings`. Existing transactional email delivery remains unchanged.
 
 ## Troubleshooting
 
@@ -44,3 +44,8 @@ Push is sent for new bookings created through the public booking flow and the da
 - If permission was denied, change notification permissions in the browser or iOS Settings for the installed Silentra web app.
 - A regular iPhone Safari tab can use the dashboard but cannot subscribe to Web Push; use the Home Screen app.
 - Check Vercel function logs for `WEB_PUSH_DELIVERY_FAILED` or `PUSH_SUBSCRIPTION_SAVE_ERROR`.
+
+
+## Customer calendar feed
+
+The customer portal can create a private read-only iCalendar subscription link for Apple Calendar and Google Calendar. The link contains a revocable credential; anyone with it can view the feed, so it must be treated like a password. Customers can rotate the link or disable the feed from the same panel. The feed is resolved server-side to the verified email and includes only that customer's bookings.
