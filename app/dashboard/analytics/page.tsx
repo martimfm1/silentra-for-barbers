@@ -38,6 +38,7 @@ import { FeaturePlanBadge } from '@/components/billing/FeaturePlanBadge';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import { PeriodReportsHistory } from '@/components/dashboard/periodic-business-reports';
 
 type Analytics = {
   plan: 'free' | 'pro' | 'enterprise';
@@ -499,7 +500,9 @@ export default function AnalyticsPage() {
   if (!allowed) {
     return (
       <main className="min-w-0 px-3 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto max-w-7xl space-y-5">
+          <PeriodReportsHistory />
+          <div className="mx-auto max-w-xl">
           <Card className="border-border/70">
             <CardContent className="flex flex-col items-center gap-5 py-12 text-center sm:py-16">
               <span className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
@@ -519,6 +522,7 @@ export default function AnalyticsPage() {
               </Button>
             </CardContent>
           </Card>
+          </div>
         </div>
       </main>
     );
@@ -531,6 +535,7 @@ export default function AnalyticsPage() {
   return (
     <main className="min-w-0 overflow-x-clip px-3 py-4 text-foreground sm:px-5 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6">
+        <PeriodReportsHistory />
         <header className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur-xl sm:rounded-3xl sm:p-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">

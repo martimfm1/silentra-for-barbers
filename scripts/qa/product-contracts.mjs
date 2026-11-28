@@ -352,6 +352,55 @@ const checks = [
       source.includes('setBannerDraftUrl(null)'),
   },
   {
+    name: 'Periodic report windows respect configured closing times and Europe Lisbon daylight saving changes',
+    file: 'lib/analytics/periodic-reports.ts',
+    test: (source) =>
+      source.includes('getClosedReportPeriods') &&
+      source.includes("const ZONE = 'Europe/Lisbon'") &&
+      source.includes('closingInstant') &&
+      source.includes('periodHasClosed') &&
+      source.includes('previousStartAt'),
+  },
+  {
+    name: 'Periodic reports are tenant-authorized, generated once after close and stored for history',
+    file: 'app/api/periodic-reports/route.ts',
+    test: (source) =>
+      source.includes("requireModuleContext(") &&
+      source.includes("'basic_dashboard'") &&
+      source.includes('barbershop_period_reports') &&
+      source.includes('getClosedReportPeriods') &&
+      source.includes("onConflict: 'barbershop_id,period_type,period_start'") &&
+      source.includes('unreadReports') &&
+      source.includes('viewed_at') &&
+      source.includes('pointOfSaleRevenue') &&
+      source.includes('service_price') &&
+      source.includes('function servicePrice'),
+  },
+  {
+    name: 'Dashboard closing summaries include revenue, retention, cancellations and actionable insights',
+    file: 'components/dashboard/periodic-business-reports.tsx',
+    test: (source) =>
+      source.includes('DashboardClosingReports') &&
+      source.includes('PeriodReportsHistory') &&
+      source.includes('cancellationRate') &&
+      source.includes('rebookingRate') &&
+      source.includes('topService') &&
+      source.includes('bestRevenueDay') &&
+      source.includes('pointOfSaleRevenue') &&
+      source.includes('Mostrar mais resumos') &&
+      source.includes("method: 'PATCH'"),
+  },
+  {
+    name: 'Periodic report snapshots are tenant-scoped and inaccessible directly to browser roles',
+    file: 'supabase/migrations/20261128230000_barbershop_period_reports.sql',
+    test: (source) =>
+      source.includes('barbershop_id uuid not null') &&
+      source.includes('unique (barbershop_id, period_type, period_start)') &&
+      source.includes('enable row level security') &&
+      source.includes('revoke all on public.barbershop_period_reports from anon, authenticated') &&
+      source.includes('grant all on public.barbershop_period_reports to service_role'),
+  },
+  {
     name: 'Reports page separates service revenue from product sales and supports client rebooking analysis',
     file: 'app/dashboard/analytics/page.tsx',
     test: (source) =>
