@@ -7,6 +7,7 @@ import { hasPlanFeature } from '@/lib/billing/plan-features';
 import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { sendCustomerAppointmentRescheduledEmail } from '@/lib/brevo/appointment-change-notifications';
+import { getReservedAppointmentMinutes } from '@/lib/bookings/appointment-capacity';
 import {
   appointmentsShareProfessionalCapacity,
   getDailySchedule,
@@ -194,7 +195,7 @@ async function PATCH__unobserved(
     const { data: appointment, error: appointmentError } = await admin
       .from('appointments')
       .select(
-        'id,status,date_hour,duration_minutes,buffer_minutes,professional_id,service_id,manual_email,manual_name,client_id',
+        'id,status,date_hour,duration_minutes,buffer_minutes,professional_id,service_id,manual_email,manual_name,client_id,services(duration,buffer_minutes)',
       )
       .eq('id', appointmentId)
       .eq('barbershop_id', barbershopId)
@@ -239,10 +240,7 @@ async function PATCH__unobserved(
         { status: 400 },
       );
     }
-    const duration = Math.min(
-      Math.max(Number(appointment.duration_minutes ?? 30), 1),
-      1440,
-    ) + Math.max(0, Number(appointment.buffer_minutes ?? 0));
+    const duration = getReservedAppointmentMinutes(appointment);
     const startMinutes = minutes(time);
     const endMinutes = startMinutes + duration;
 
@@ -268,7 +266,7 @@ async function PATCH__unobserved(
         const bounds = getLisbonDayBounds(date);
         return admin
           .from('appointments')
-          .select('id,date_hour,duration_minutes,buffer_minutes,professional_id')
+          .select('id,date_hour,duration_minutes,buffer_minutes,professional_id,services(duration,buffer_minutes)')
           .eq('barbershop_id', barbershopId)
           .gte('date_hour', bounds.start)
           .lt('date_hour', bounds.endExclusive)
@@ -349,10 +347,7 @@ async function PATCH__unobserved(
       const local = getLisbonParts(String(item.date_hour ?? ''));
       if (local.date !== date) return false;
       const otherStart = minutes(local.time);
-      const otherEnd =
-        otherStart +
-        Math.min(Math.max(Number(item.duration_minutes ?? 30), 1), 1440) +
-        Math.max(0, Number(item.buffer_minutes ?? 0));
+      const otherEnd = otherStart + getReservedAppointmentMinutes(item);
       return startMinutes < otherEnd && endMinutes > otherStart;
     });
     if (conflict)

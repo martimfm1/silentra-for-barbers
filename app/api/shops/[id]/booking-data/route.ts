@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidDate, UUID_PATTERN } from '@/lib/validation';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
+import { getReservedAppointmentMinutes } from '@/lib/bookings/appointment-capacity';
 import {
   appointmentsShareProfessionalCapacity,
   getDailySchedule,
@@ -19,6 +20,7 @@ type AppointmentRow = {
   status: string | null;
   payment_status?: string | null;
   payment_expires_at?: string | null;
+  services?: { duration?: number | null; buffer_minutes?: number | null } | { duration?: number | null; buffer_minutes?: number | null }[] | null;
 };
 type ScheduleBlockRow = {
   id: string;
@@ -156,7 +158,7 @@ async function GET__unobserved(
         ? admin
             .from('appointments')
             .select(
-              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
+              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at, services(duration,buffer_minutes)',
             )
             .eq('barbershop_id', barbershopId)
             .gte('date_hour', dayStart)
@@ -165,7 +167,7 @@ async function GET__unobserved(
         : admin
             .from('appointments')
             .select(
-              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at',
+              'date_hour, duration_minutes, buffer_minutes, professional_id, status, payment_status, payment_expires_at, services(duration,buffer_minutes)',
             )
             .eq('barbershop_id', barbershopId)
             .gte('date_hour', dayStart)
@@ -350,12 +352,7 @@ async function GET__unobserved(
         if (!parsed || parsed.date !== date) return null;
         return {
           start: parsed.minutes,
-          end:
-            parsed.minutes +
-            Math.min(
-              Math.max(Number(appointment.duration_minutes ?? 30), 1),
-              1440,
-            ) + Math.max(0, Number(appointment.buffer_minutes ?? 0)),
+          end: parsed.minutes + getReservedAppointmentMinutes(appointment),
           professionalId: appointment.professional_id,
         };
       })
@@ -506,13 +503,7 @@ async function GET__unobserved(
                 if (!parsed || parsed.date !== availabilityDate) return null;
                 return {
                   start: parsed.minutes,
-                  end:
-                    parsed.minutes +
-                    Math.min(
-                      Math.max(Number(appointment.duration_minutes ?? 30), 1),
-                      1440,
-                    ) +
-                    Math.max(0, Number(appointment.buffer_minutes ?? 0)),
+                  end: parsed.minutes + getReservedAppointmentMinutes(appointment),
                   professionalId: appointment.professional_id,
                 };
               })

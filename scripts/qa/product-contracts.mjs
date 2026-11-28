@@ -9,6 +9,30 @@ async function read(path) {
 
 const checks = [
   {
+    name: 'Legacy booking availability and staff rescheduling use linked service capacity',
+    file: 'app/api/shops/[id]/booking-data/route.ts',
+    test: (source) =>
+      source.includes("services(duration,buffer_minutes)") &&
+      source.includes('getReservedAppointmentMinutes(appointment)'),
+  },
+  {
+    name: 'Customer portal availability uses linked service capacity for legacy appointments',
+    file: 'app/api/customer-portal/appointments/[appointmentId]/route.ts',
+    test: (source) =>
+      source.includes('getReservedAppointmentMinutes(appointment)') &&
+      source.includes('getReservedAppointmentMinutes(item)'),
+  },
+  {
+    name: 'Manual and recurring appointments snapshot the selected service duration and buffer',
+    file: 'app/dashboard/_services/appointments.service.ts',
+    test: (source) =>
+      source.includes('getServiceCapacitySnapshots') &&
+      source.includes(".select('id,duration,buffer_minutes')") &&
+      source.includes('duration_minutes: capacity.duration_minutes') &&
+      source.includes('buffer_minutes: capacity.buffer_minutes') &&
+      source.includes('payloads.map((payload) => {'),
+  },
+  {
     name: 'Public profile resolution fails closed when the canonical plan lookup is unavailable',
     file: 'lib/barbershops/public-profile.ts',
     test: (source) =>
