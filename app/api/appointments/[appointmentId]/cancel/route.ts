@@ -6,6 +6,7 @@ import { resolveAccessPlanForUser } from '@/services/billing/plan-access.guard';
 import { requireTenantAuthorization } from '@/services/modules/tenant-authorization';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { sendAppointmentCancellationEmail } from '@/lib/brevo/appointment-cancellation';
+import { sendWebPushToCustomerEmail } from '@/lib/notifications/providers/push';
 
 const ROLES = [
   'owner',
@@ -216,6 +217,23 @@ async function DELETE__unobserved(
           language,
         })
       : null;
+
+    if (customerEmail) {
+      try {
+        await sendWebPushToCustomerEmail(customerEmail, {
+          title: language === 'en' ? 'Your appointment was cancelled' : 'A tua marcação foi cancelada',
+          body: (serviceResult.data?.name?.trim() || 'Serviço') + ' · ' + new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : 'pt-PT', {
+            timeZone: 'Europe/Lisbon',
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(appointment.date_hour)),
+          url: '/my-bookings',
+          tag: 'customer-booking-' + appointment.id,
+        });
+      } catch (pushError) {
+        console.error('[APPOINTMENT_CANCELLATION_CUSTOMER_PUSH_ERROR]', pushError instanceof Error ? pushError.name : 'UNKNOWN');
+      }
+    }
 
     const { data: cancellationActivity, error: cancellationActivityError } =
       await tenant.admin
