@@ -62,6 +62,7 @@ async function POST__unobserved(request: Request) {
       await supabase.auth.signInWithPassword({ email, password });
 
     if (authError || !authData.user) {
+      // Keep unknown accounts and incorrect passwords indistinguishable.
       if (authError?.code === 'email_not_confirmed') {
         return NextResponse.json(
           { code: 'EMAIL_NOT_CONFIRMED' },
