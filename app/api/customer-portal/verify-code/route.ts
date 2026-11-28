@@ -1,9 +1,8 @@
 import { withApiObservability } from '@/lib/observability/api';
-import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getClientIp } from '@/lib/security/public-rate-limit';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import {
   generateSessionToken,
   getSessionExpiry,
@@ -13,19 +12,9 @@ import {
   setPortalCookie,
 } from '@/lib/customer-booking-portal';
 
-const VERIFY_LIMIT = 10;
+const VERIFY_EMAIL_LIMIT = 5;
+const VERIFY_IP_LIMIT = 30;
 const VERIFY_WINDOW_SECONDS = 10 * 60;
-
-function rateLimitKey(request: Request, email: string): string {
-  const secret = process.env.RATE_LIMIT_SECRET;
-  if (!secret || secret.length < 32)
-    throw new Error(
-      'RATE_LIMIT_SECRET is not configured with sufficient entropy.',
-    );
-  return createHmac('sha256', secret)
-    .update(`customer-portal-verify:${email}:${getClientIp(request)}`)
-    .digest('hex');
-}
 
 async function POST__unobserved(request: Request) {
   try {
@@ -40,46 +29,45 @@ async function POST__unobserved(request: Request) {
         ? bodyResult.value.code.trim()
         : '';
     const clientPlatform = bodyResult.value.clientPlatform ?? 'web';
+
     if (clientPlatform !== 'web' && clientPlatform !== 'mobile') {
       return NextResponse.json(
         { success: false, error: 'Plataforma de cliente inválida.' },
         { status: 400, headers: { 'Cache-Control': 'no-store' } },
       );
     }
-    if (!email || !/^\d{6}$/.test(code))
+    if (!email || !/^\d{6}$/.test(code)) {
       return NextResponse.json(
-        { success: false, error: 'Email ou código inválido.' },
-        { status: 400 },
-      );
-
-    const admin = createAdminClient();
-    const { data: allowed, error: rateError } = await admin.rpc(
-      'consume_public_rate_limit',
-      {
-        p_key: rateLimitKey(request, email),
-        p_limit: VERIFY_LIMIT,
-        p_window_seconds: VERIFY_WINDOW_SECONDS,
-      },
-    );
-    if (rateError) {
-      console.error('[CUSTOMER_PORTAL_VERIFY_RATE_LIMIT_ERROR]', rateError);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não foi possível processar o código neste momento.',
-        },
-        { status: 503 },
+        { success: false, error: 'Código inválido ou expirado.' },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
     }
-    if (allowed !== true)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Demasiadas tentativas. Pede um novo código.',
-        },
-        { status: 429 },
-      );
 
+    const [emailAllowed, ipAllowed] = await Promise.all([
+      consumePublicRateLimit(
+        request, 'customer-portal-verify-email', email,
+        VERIFY_EMAIL_LIMIT, VERIFY_WINDOW_SECONDS, false,
+      ),
+      consumePublicRateLimit(
+        request, 'customer-portal-verify-ip', 'all',
+        VERIFY_IP_LIMIT, VERIFY_WINDOW_SECONDS, true,
+      ),
+    ]);
+
+    if (!emailAllowed || !ipAllowed) {
+      return NextResponse.json(
+        { success: false, error: 'Código inválido ou expirado.' },
+        {
+          status: 429,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Retry-After': String(VERIFY_WINDOW_SECONDS),
+          },
+        },
+      );
+    }
+
+    const admin = createAdminClient();
     const { data: verification, error } = await admin.rpc(
       'verify_booking_portal_code',
       {
@@ -88,23 +76,24 @@ async function POST__unobserved(request: Request) {
       },
     );
     const result = Array.isArray(verification) ? verification[0] : verification;
+
     if (error) {
-      console.error('[CUSTOMER_PORTAL_VERIFY_RPC_ERROR]', error);
+      console.error(
+        '[CUSTOMER_PORTAL_VERIFY_RPC_ERROR]',
+        error.code ?? 'UNKNOWN',
+      );
       return NextResponse.json(
         { success: false, error: 'Não foi possível verificar o código.' },
-        { status: 503 },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
     if (!result?.ok) {
       return NextResponse.json(
+        { success: false, error: 'Código inválido ou expirado.' },
         {
-          success: false,
-          error:
-            result?.error_code === 'TOO_MANY_ATTEMPTS'
-              ? 'Demasiadas tentativas. Pede um novo código.'
-              : 'Código inválido ou expirado.',
+          status: 401,
+          headers: { 'Cache-Control': 'no-store' },
         },
-        { status: result?.error_code === 'TOO_MANY_ATTEMPTS' ? 429 : 401 },
       );
     }
 
@@ -116,7 +105,10 @@ async function POST__unobserved(request: Request) {
       .eq('email', email)
       .lt('expires_at', new Date().toISOString());
     if (revokeError)
-      console.warn('[CUSTOMER_PORTAL_SESSION_CLEANUP_ERROR]', revokeError);
+      console.warn(
+        '[CUSTOMER_PORTAL_SESSION_CLEANUP_ERROR]',
+        revokeError.code ?? 'UNKNOWN',
+      );
 
     const { error: sessionError } = await admin
       .from('booking_portal_sessions')
@@ -126,10 +118,13 @@ async function POST__unobserved(request: Request) {
         expires_at: expiresAt,
       });
     if (sessionError) {
-      console.error('[CUSTOMER_PORTAL_SESSION_ERROR]', sessionError);
+      console.error(
+        '[CUSTOMER_PORTAL_SESSION_ERROR]',
+        sessionError.code ?? 'UNKNOWN',
+      );
       return NextResponse.json(
         { success: false, error: 'Não foi possível iniciar a sessão.' },
-        { status: 503 },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
@@ -145,10 +140,13 @@ async function POST__unobserved(request: Request) {
       { headers: { 'Cache-Control': 'no-store', Pragma: 'no-cache' } },
     );
   } catch (error) {
-    console.error('[CUSTOMER_PORTAL_VERIFY_ERROR]', error);
+    console.error(
+      '[CUSTOMER_PORTAL_VERIFY_ERROR]',
+      error instanceof Error ? error.name : 'unknown',
+    );
     return NextResponse.json(
       { success: false, error: 'Não foi possível verificar o código.' },
-      { status: 503 },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }

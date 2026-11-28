@@ -11,15 +11,9 @@ const localRateLimitBuckets = new Map<string, LocalRateLimitBucket>();
 const MAX_LOCAL_RATE_LIMIT_BUCKETS = 10_000;
 
 export function getClientIp(request: Request): string {
-  // On Vercel and other trusted ingress platforms, x-real-ip is populated by
-  // the edge with the observed client address. Validate it rather than taking
-  // arbitrary header text as a rate-limit key.
   const real = request.headers.get('x-real-ip')?.trim();
   if (real && isIP(real)) return real;
 
-  // Proxies append the observed address to X-Forwarded-For. Never use the
-  // leftmost value: it can be supplied by the caller and would let a client
-  // rotate rate-limit buckets by forging the header.
   const forwarded = request.headers
     .get('x-forwarded-for')
     ?.split(',')
@@ -39,10 +33,6 @@ function getRateLimitSecret(): string {
   return secret;
 }
 
-// Local development should remain usable without a running Supabase instance.
-// This intentionally process-local limiter is never used in production; it is
-// not shared between workers and must not be relied on for production abuse
-// protection.
 function consumeInMemoryRateLimit(
   key: string,
   limit: number,
@@ -86,24 +76,30 @@ function consumeInMemoryRateLimit(
   return true;
 }
 
+/**
+ * Shared persistent rate limiter. By default the bucket is bound to both the
+ * normalized identifier and the validated client IP. Set includeIp=false for
+ * an identifier-wide bucket (for example, one email across changing IPs).
+ */
 export async function consumePublicRateLimit(
   request: Request,
   scope: string,
   identifier: string,
   limit: number,
   windowSeconds: number,
+  includeIp = true,
 ): Promise<boolean> {
   const ip = getClientIp(request);
   const normalizedIdentifier = identifier.trim().toLowerCase();
-  const rateLimitInput = `${scope}:${normalizedIdentifier}:${ip}`;
+  const rateLimitInput = includeIp
+    ? `${scope}:${normalizedIdentifier}:${ip}`
+    : `${scope}:${normalizedIdentifier}`;
 
   if (process.env.NODE_ENV === 'development') {
     const localKey = createHash('sha256').update(rateLimitInput).digest('hex');
     return consumeInMemoryRateLimit(localKey, limit, windowSeconds);
   }
 
-  // Production keeps the shared, persistent server-side limit. Missing
-  // secrets or RPC/database failures deliberately fail closed in production.
   const key = createHmac('sha256', getRateLimitSecret())
     .update(rateLimitInput)
     .digest('hex');

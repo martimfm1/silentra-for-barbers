@@ -8,6 +8,13 @@ export async function proxySupabase(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      // The browser Supabase client must read these cookies to refresh its session.
+      // The separate customer-portal session cookie remains HttpOnly.
+      cookieOptions: {
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -50,7 +57,7 @@ export async function proxySupabase(request: NextRequest) {
     // helpers into the request proxy because they cannot resolve this session.
     const { data: profile, error: profileError } = await supabase
       .from('users')
-      .select('barbershop_id')
+      .select('barbershop_id, role')
       .eq('id', user.id)
       .maybeSingle();
 
@@ -59,6 +66,14 @@ export async function proxySupabase(request: NextRequest) {
     }
 
     const barbershopId = profile?.barbershop_id ?? null;
+    const isCustomerAccount = profile?.role === 'client';
+
+    if (
+      isCustomerAccount &&
+      (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding'))
+    ) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
 
     if (barbershopId) {
       response.cookies.set('barbershop_id', barbershopId, {

@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
+import { isStrongPassword, PASSWORD_POLICY_MESSAGE } from '@/lib/security/password-policy';
 
 async function POST__unobserved(request: Request) {
   try {
@@ -16,10 +17,11 @@ async function POST__unobserved(request: Request) {
     if (
       typeof password !== 'string' ||
       password.length < 12 ||
-      password.length > 128
+      password.length > 128 ||
+      !isStrongPassword(password)
     ) {
       return NextResponse.json(
-        { error: 'A nova palavra-passe deve ter entre 12 e 128 caracteres.' },
+        { error: PASSWORD_POLICY_MESSAGE },
         { status: 400 },
       );
     }

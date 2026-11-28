@@ -2,6 +2,11 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { readJsonObject } from '@/lib/security/request-validation';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
+
+const LOGIN_RATE_WINDOW_SECONDS = 15 * 60;
+const LOGIN_EMAIL_LIMIT = 5;
+const LOGIN_IP_LIMIT = 30;
 
 async function POST__unobserved(request: Request) {
   try {
@@ -24,19 +29,40 @@ async function POST__unobserved(request: Request) {
     if (!email || !password || email.length > 254 || password.length > 128) {
       return NextResponse.json(
         { error: 'Email e palavra-passe são obrigatórios.' },
-        { status: 400 },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    const [emailAllowed, ipAllowed] = await Promise.all([
+      consumePublicRateLimit(
+        request, 'barber-login-email', email,
+        LOGIN_EMAIL_LIMIT, LOGIN_RATE_WINDOW_SECONDS, false,
+      ),
+      consumePublicRateLimit(
+        request, 'barber-login-ip', 'all',
+        LOGIN_IP_LIMIT, LOGIN_RATE_WINDOW_SECONDS, true,
+      ),
+    ]);
+
+    if (!emailAllowed || !ipAllowed) {
+      return NextResponse.json(
+        { code: 'LOGIN_RATE_LIMITED' },
+        {
+          status: 429,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Retry-After': String(LOGIN_RATE_WINDOW_SECONDS),
+          },
+        },
       );
     }
 
     const supabase = await createClient();
-
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({ email, password });
 
     if (authError || !authData.user) {
-      // Keep unknown accounts and incorrect passwords indistinguishable to
-      // prevent email enumeration. Unconfirmed email is actionable only
-      // after Supabase has accepted the credentials.
+      // Keep unknown accounts and incorrect passwords indistinguishable.
       if (authError?.code === 'email_not_confirmed') {
         return NextResponse.json(
           { code: 'EMAIL_NOT_CONFIRMED' },
@@ -60,12 +86,10 @@ async function POST__unobserved(request: Request) {
       console.error('[LOGIN_PROFILE_ERROR]', profileError.message);
       return NextResponse.json(
         { error: 'Não foi possível carregar o perfil da conta.' },
-        { status: 500 },
+        { status: 500, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
-    // A sessão é persistida pelo cliente SSR através dos cookies Supabase.
-    // Não devolvemos access/refresh tokens no JSON da API.
     return NextResponse.json(
       {
         success: true,
@@ -87,10 +111,7 @@ async function POST__unobserved(request: Request) {
               email: authData.user.email ?? null,
             },
       },
-      {
-        status: 200,
-        headers: { 'Cache-Control': 'no-store' },
-      },
+      { status: 200, headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
     console.error(
@@ -99,7 +120,7 @@ async function POST__unobserved(request: Request) {
     );
     return NextResponse.json(
       { error: 'Ocorreu um erro interno no início de sessão.' },
-      { status: 500 },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }

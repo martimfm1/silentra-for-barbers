@@ -1,9 +1,8 @@
 import { withApiObservability } from '@/lib/observability/api';
-import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getClientIp } from '@/lib/security/public-rate-limit';
+import { consumePublicRateLimit } from '@/lib/security/public-rate-limit';
 import {
   generateVerificationCode,
   getVerificationExpiry,
@@ -14,24 +13,18 @@ import { sendCustomerPortalCodeEmail } from '@/lib/brevo/customer-booking-portal
 
 const REQUEST_LIMIT = 3;
 const REQUEST_WINDOW_SECONDS = 10 * 60;
-
-function rateLimitKey(request: Request, email: string): string {
-  const secret = process.env.RATE_LIMIT_SECRET;
-  if (!secret || secret.length < 32)
-    throw new Error(
-      'RATE_LIMIT_SECRET is not configured with sufficient entropy.',
-    );
-  return createHmac('sha256', secret)
-    .update(`customer-portal-request:${email}:${getClientIp(request)}`)
-    .digest('hex');
-}
+const IP_REQUEST_LIMIT = 10;
+const EMAIL_COOLDOWN_SECONDS = 60;
 
 async function POST__unobserved(request: Request) {
-  const genericResponse = NextResponse.json({
-    success: true,
-    message:
-      'Se o endereço for válido, vais receber um código de confirmação por email.',
-  });
+  const genericResponse = NextResponse.json(
+    {
+      success: true,
+      message:
+        'Se o endereço for válido, vais receber um código de confirmação por email.',
+    },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 
   try {
     const bodyResult = await readJsonObject(request, {
@@ -40,58 +33,42 @@ async function POST__unobserved(request: Request) {
     });
     if (!bodyResult.ok) return bodyResult.response;
     const email = normalizePortalEmail(bodyResult.value.email);
-    if (!email) {
-      return NextResponse.json(
-        { success: false, error: 'Indica um email válido.' },
-        { status: 400 },
-      );
-    }
+    if (!email) return genericResponse;
+
+    // Each bucket is persisted through the consume_public_rate_limit RPC.
+    const [emailAllowed, ipAllowed, cooldownAllowed] = await Promise.all([
+      consumePublicRateLimit(
+        request, 'customer-portal-request-email', email,
+        REQUEST_LIMIT, REQUEST_WINDOW_SECONDS, false,
+      ),
+      consumePublicRateLimit(
+        request, 'customer-portal-request-ip', 'all',
+        IP_REQUEST_LIMIT, REQUEST_WINDOW_SECONDS, true,
+      ),
+      consumePublicRateLimit(
+        request, 'customer-portal-request-cooldown', email,
+        1, EMAIL_COOLDOWN_SECONDS, false,
+      ),
+    ]);
+
+    // Keep responses indistinguishable for eligible and ineligible addresses.
+    if (!emailAllowed || !ipAllowed || !cooldownAllowed) return genericResponse;
 
     const admin = createAdminClient();
-    const { data: allowed, error: rateError } = await admin.rpc(
-      'consume_public_rate_limit',
-      {
-        p_key: rateLimitKey(request, email),
-        p_limit: REQUEST_LIMIT,
-        p_window_seconds: REQUEST_WINDOW_SECONDS,
-      },
-    );
-    if (rateError) {
-      console.error('[CUSTOMER_PORTAL_RATE_LIMIT_ERROR]', rateError);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não foi possível processar o pedido neste momento.',
-        },
-        { status: 503 },
-      );
-    }
-    if (allowed !== true) return genericResponse;
-
-    const recentCutoff = new Date(Date.now() - 60_000).toISOString();
-    const { count, error: recentError } = await admin
-      .from('booking_portal_verifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('email', email)
-      .gte('requested_at', recentCutoff);
-
-    if (recentError) {
-      console.error('[CUSTOMER_PORTAL_RATE_CHECK_ERROR]', recentError);
-      return genericResponse;
-    }
-    if ((count ?? 0) >= 1) return genericResponse;
-
     const code = generateVerificationCode();
+
     const { error: cleanupError } = await admin
       .from('booking_portal_verifications')
       .delete()
       .eq('email', email)
       .is('consumed_at', null);
-    if (cleanupError)
-      console.warn(
+    if (cleanupError) {
+      console.error(
         '[CUSTOMER_PORTAL_VERIFICATION_CLEANUP_ERROR]',
-        cleanupError,
+        cleanupError.code ?? 'UNKNOWN',
       );
+      return genericResponse;
+    }
 
     const { error: insertError } = await admin
       .from('booking_portal_verifications')
@@ -102,14 +79,20 @@ async function POST__unobserved(request: Request) {
       });
 
     if (insertError) {
-      console.error('[CUSTOMER_PORTAL_CODE_INSERT_ERROR]', insertError);
+      console.error(
+        '[CUSTOMER_PORTAL_CODE_INSERT_ERROR]',
+        insertError.code ?? 'UNKNOWN',
+      );
       return genericResponse;
     }
 
     try {
       await sendCustomerPortalCodeEmail(email, code);
     } catch (error) {
-      console.error('[CUSTOMER_PORTAL_EMAIL_ERROR]', error);
+      console.error(
+        '[CUSTOMER_PORTAL_EMAIL_ERROR]',
+        error instanceof Error ? error.name : 'unknown',
+      );
       await admin
         .from('booking_portal_verifications')
         .delete()
@@ -120,10 +103,13 @@ async function POST__unobserved(request: Request) {
 
     return genericResponse;
   } catch (error) {
-    console.error('[CUSTOMER_PORTAL_REQUEST_CODE_ERROR]', error);
+    console.error(
+      '[CUSTOMER_PORTAL_REQUEST_CODE_ERROR]',
+      error instanceof Error ? error.name : 'unknown',
+    );
     return NextResponse.json(
       { success: false, error: 'Não foi possível processar o pedido.' },
-      { status: 503 },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }
