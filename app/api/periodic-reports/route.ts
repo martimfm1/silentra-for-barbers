@@ -2,7 +2,7 @@ import { withApiObservability } from '@/lib/observability/api';
 import { NextResponse } from 'next/server';
 import { PLANS } from '@/lib/stripe/constants';
 import { normalizeWeeklySchedule } from '@/lib/scheduling/weekly-schedule';
-import { filterEligibleReportPeriods, getClosedReportPeriods, type PeriodReportPreference, type PeriodReportType, type PeriodReportWindow } from '@/lib/analytics/periodic-reports';
+import { getClosedReportPeriods, type PeriodReportPreference, type PeriodReportType, type PeriodReportWindow } from '@/lib/analytics/periodic-reports';
 import { UUID_PATTERN } from '@/lib/validation';
 import { readJsonObject } from '@/lib/security/request-validation';
 import { moduleErrorResponse, requireModuleContext } from '@/services/modules/authorization';
@@ -49,6 +49,7 @@ type SavedReport = {
   data: Metrics;
   viewed_at: string | null;
   completed_at: string | null;
+  closed_at: string;
   created_at: string;
 };
 
@@ -220,9 +221,11 @@ async function GET__unobserved(request: Request) {
         enabledAt: shop.periodic_reports_monthly_enabled_at ?? null,
       },
     };
-    const periods = filterEligibleReportPeriods(
-      getClosedReportPeriods(new Date(), normalizeWeeklySchedule(shop.weekly_schedule, shop)),
-      preferences,
+    // Always persist closed summaries for the reports history. Preferences
+    // control only the automatic popup, not whether the data is retained.
+    const periods = getClosedReportPeriods(
+      new Date(),
+      normalizeWeeklySchedule(shop.weekly_schedule, shop),
     );
     const earliest = periods.reduce(
       (value, period) => period.startDate < value ? period.startDate : value,
@@ -240,7 +243,8 @@ async function GET__unobserved(request: Request) {
         const data = await calculate(admin, barbershopId, plan, period);
         const { error } = await admin.from('barbershop_period_reports').upsert({
           barbershop_id: barbershopId, period_type: period.type,
-          period_start: period.startDate, period_end: period.endDate, data,
+          period_start: period.startDate, period_end: period.endDate,
+          closed_at: period.closedAt, data,
         }, {
           onConflict: 'barbershop_id,period_type,period_start',
           ignoreDuplicates: true,
@@ -250,7 +254,7 @@ async function GET__unobserved(request: Request) {
     }
 
     const { data: reports, error: reportsError } = await admin.from('barbershop_period_reports')
-      .select('id,period_type,period_start,period_end,data,viewed_at,completed_at,created_at')
+      .select('id,period_type,period_start,period_end,data,viewed_at,completed_at,closed_at,created_at')
       .eq('barbershop_id', barbershopId)
       .order('period_start', { ascending: false }).order('created_at', { ascending: false }).limit(500);
     if (reportsError) throw reportsError;
@@ -262,7 +266,7 @@ async function GET__unobserved(request: Request) {
         return preference.enabled &&
           !report.completed_at &&
           (!preference.enabledAt ||
-            new Date(report.created_at).getTime() >= new Date(preference.enabledAt).getTime());
+            new Date(report.closed_at).getTime() > new Date(preference.enabledAt).getTime());
       }),
     }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
