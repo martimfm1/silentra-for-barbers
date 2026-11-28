@@ -206,6 +206,9 @@ function CalendarSyncCard() {
             <ShieldCheck className="mr-1 inline size-3.5" aria-hidden="true" />
             {t('customerPortal.calendarPrivacy')}
           </p>
+          <p className="mt-2 text-[10px] leading-5 text-zinc-500">
+            {t('customerPortal.calendarReadOnly')}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.07] pt-3">
             <button
               type="button"
