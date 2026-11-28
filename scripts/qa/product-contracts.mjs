@@ -420,7 +420,7 @@ const checks = [
   },
   {
     name: 'Summary preferences preserve server-side activation timestamps and explicit completion state',
-    file: 'supabase/migrations/20261128150000_periodic_report_preferences_and_completion.sql',
+    file: 'supabase/migrations/20261129000000_periodic_report_preferences_and_completion.sql',
     test: (source) =>
       source.includes('periodic_reports_daily_enabled_at') &&
       source.includes('periodic_reports_weekly_enabled_at') &&
