@@ -13,6 +13,12 @@ const migration = read('supabase/migrations/20261128150000_customer_pwa_features
 const login = read('app/login/page.tsx');
 const pt = read('app/locales/pt.ts');
 const pwaLayout = read('app/my-bookings/layout.tsx');
+const bookingRoute = read('app/api/bookings/route.ts');
+const confirmRoute = read('app/api/appointments/[appointmentId]/confirm/route.ts');
+const rescheduleRoute = read('app/api/appointments/[appointmentId]/reschedule/route.ts');
+const cancelRoute = read('app/api/appointments/[appointmentId]/cancel/route.ts');
+const reminderWorker = read('app/api/cron/appointment-reminders/route.ts');
+const serviceWorker = read('public/sw.js');
 const customerManifest = JSON.parse(read('public/customer.webmanifest'));
 
 assert.ok(login.includes('auth.customerAreaTitle'));
@@ -27,6 +33,12 @@ assert.ok(calendarFeed.includes('hashPortalToken(token)'));
 assert.ok(calendarFeed.includes(".eq('manual_email', email)"));
 assert.ok(calendarFeed.includes(".in('client_id', clientIds)"));
 assert.ok(pushSender.includes('sendWebPushToCustomerEmail'));
+assert.ok(bookingRoute.includes('sendWebPushToCustomerEmail'));
+assert.ok(confirmRoute.includes('sendWebPushToCustomerEmail'));
+assert.ok(rescheduleRoute.includes('sendWebPushToCustomerEmail'));
+assert.ok(cancelRoute.includes('sendWebPushToCustomerEmail'));
+assert.ok(reminderWorker.includes('sendWebPushToCustomerEmail'));
+assert.ok(serviceWorker.includes('vibrate: [90, 45, 90]'));
 assert.ok(experience.includes('Notification.requestPermission()'));
 assert.ok(experience.includes('PushManager'));
 assert.ok(experience.includes('webcal:'));
