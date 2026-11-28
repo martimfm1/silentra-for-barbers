@@ -282,7 +282,7 @@ assert.ok(bookingForm.includes('matchingClients'));
 assert.ok(bookingForm.includes('replace(/\\D/g'));
 assert.ok(bookingForm.includes("addEventListener('pointerdown'"));
 assert.ok(bookingForm.includes('singleProfessional'));
-assert.ok(bookingForm.includes('services.length === 1'));
+assert.ok(bookingForm.includes('selectableServices.length === 1'));
 assert.ok(bookingForm.includes('buildManualBookingDays'));
 assert.ok(bookingForm.includes('booking-availability'));
 assert.ok(bookingForm.includes('Folga'));
