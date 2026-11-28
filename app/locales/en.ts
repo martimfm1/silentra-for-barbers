@@ -297,6 +297,8 @@ export const en = {
     signIn: 'Sign in',
     logout: 'Log out',
     manageBookings: 'Manage bookings',
+    myBookings: 'My bookings',
+    professionalAccess: 'Professional access',
   },
   legal: {
     termsTitle: 'Terms & Conditions',
@@ -365,15 +367,15 @@ export const en = {
     backToApp: 'Back to app',
     loginTab: 'Sign in',
     registerTab: 'Register',
-    reservedArea: 'Barbershop reserved area',
+    reservedArea: 'Professional access · barbershops',
     manageTitle: 'Manage bookings, clients, and operations in one place.',
     manageSubtitle:
-      'Sign in to your account or create barbershop access and start working with Silentra.',
+      'This area is for barbershop owners and teams. Customers can manage their bookings without creating an account.',
     welcomeBack: 'Welcome back',
     loginCredentials: 'Access your account credentials.',
-    createWorkspace: 'Create workspace',
+    createWorkspace: 'Create professional account',
     createWorkspaceSubtitle:
-      'Set up your access and start managing your barbershop.',
+      'Create access for your barbershop. Customers do not need an account to book or manage appointments.',
     emailAddress: 'Email address',
     verifiedEmailHint: 'Use your verified organization email address.',
     showPassword: 'Show password',
@@ -382,7 +384,11 @@ export const en = {
     fullName: 'Full name',
     fullNamePlaceholder: 'e.g. John Smith',
     mobilePhone: 'Mobile phone',
-    createAccountWorkspace: 'Create workspace',
+    createAccountWorkspace: 'Create barbershop account',
+    customerAreaTitle: 'Are you a Silentra customer?',
+    customerAreaDescription:
+      'You do not need an account to view, cancel, or reschedule your bookings.',
+    customerAreaLink: 'View my bookings',
     registered:
       'Check your inbox. If your account needs to be created or confirmed, you will receive an email with the next steps.',
     invalidCredentials:
@@ -442,6 +448,10 @@ export const en = {
       'If you still have trouble, make sure you are using the most recent confirmation email.',
   },
   onboarding: {
+    customerAccessTitle: 'Here to manage your bookings?',
+    customerAccessDescription:
+      'This area is for managing a barbershop. As a customer, you can view your bookings without creating an account.',
+    customerAccessLink: 'Go to my bookings',
     title: 'Set up your barbershop',
     subtitle:
       'Complete the essentials now and adjust the remaining details later in Settings.',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -756,6 +757,23 @@ export default function OnboardingPage() {
                   </span>
                 )}
               </div>
+            </div>
+            <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-zinc-100">
+                  {t('onboarding.customerAccessTitle')}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-zinc-400">
+                  {t('onboarding.customerAccessDescription')}
+                </p>
+              </div>
+              <Link
+                href="/my-bookings"
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] px-3 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/[0.13] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50"
+              >
+                {t('onboarding.customerAccessLink')}
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
             </div>
             {step === 'create' && draftReady && (
               <p

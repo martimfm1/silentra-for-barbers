@@ -288,7 +288,7 @@ export function SiteNavbar() {
         href: '/barbershops',
       },
       {
-        label: t('nav.manageBookings', { defaultValue: 'As minhas marcações' }),
+        label: t('nav.myBookings', { defaultValue: 'As minhas marcações' }),
         href: '/my-bookings',
       },
       {
@@ -306,6 +306,10 @@ export function SiteNavbar() {
         href: '/barbershops',
       },
       {
+        label: t('nav.myBookings', { defaultValue: 'As minhas marcações' }),
+        href: '/my-bookings',
+      },
+      {
         label:
           locale === 'pt' ? 'Software para barbearias' : 'Barbershop software',
         href: '/software-gestao-barbearia',
@@ -315,8 +319,8 @@ export function SiteNavbar() {
         href: '/plans',
       },
       {
-        label: t('nav.forBarbers', { defaultValue: 'Para barbeiros' }),
-        href: '/registo',
+        label: t('nav.professionalAccess', { defaultValue: 'Acesso profissional' }),
+        href: '/login',
       },
     ],
     [t, locale],

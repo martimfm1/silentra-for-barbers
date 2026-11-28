@@ -297,6 +297,8 @@ export const pt = {
     signIn: 'Entrar',
     logout: 'Sair',
     manageBookings: 'Gerir agendamentos',
+    myBookings: 'As minhas marcações',
+    professionalAccess: 'Acesso profissional',
   },
   legal: {
     termsTitle: 'Termos e Condições',
@@ -366,15 +368,15 @@ export const pt = {
     backToApp: 'Voltar à aplicação',
     loginTab: 'Entrar',
     registerTab: 'Registar',
-    reservedArea: 'Área reservada para barbearias',
+    reservedArea: 'Acesso profissional · barbearias',
     manageTitle: 'Gere reservas, clientes e operações num só lugar.',
     manageSubtitle:
-      'Entra na tua conta ou cria acesso para a tua barbearia e começa a trabalhar com a Silentra.',
+      'Este acesso destina-se a proprietários e equipas de barbearias. Os clientes podem gerir as suas marcações sem criar conta.',
     welcomeBack: 'Bem-vindo de volta',
     loginCredentials: 'Acede com as credenciais da tua conta.',
-    createWorkspace: 'Criar espaço de trabalho',
+    createWorkspace: 'Criar conta profissional',
     createWorkspaceSubtitle:
-      'Configura o teu acesso e começa a gerir a tua barbearia.',
+      'Cria o acesso da tua barbearia. Este registo não é necessário para marcar ou gerir serviços como cliente.',
     emailAddress: 'Endereço de email',
     verifiedEmailHint: 'Usa o endereço de email verificado da tua organização.',
     showPassword: 'Mostrar palavra-passe',
@@ -383,7 +385,11 @@ export const pt = {
     fullName: 'Nome completo',
     fullNamePlaceholder: 'Ex.: João Silva',
     mobilePhone: 'Telemóvel',
-    createAccountWorkspace: 'Criar espaço de trabalho',
+    createAccountWorkspace: 'Criar conta de barbearia',
+    customerAreaTitle: 'És cliente da Silentra?',
+    customerAreaDescription:
+      'Não precisas de criar conta para consultar, cancelar ou reagendar as tuas marcações.',
+    customerAreaLink: 'Consultar as minhas marcações',
     registered:
       'Verifica a tua caixa de entrada. Se for necessário confirmar ou criar a conta, receberás um email com os próximos passos.',
     invalidCredentials:
@@ -442,6 +448,10 @@ export const pt = {
       'Se continuares com problemas, verifica se estás a utilizar o email de confirmação mais recente.',
   },
   onboarding: {
+    customerAccessTitle: 'Estás aqui para gerir as tuas marcações?',
+    customerAccessDescription:
+      'Esta área é para gerir uma barbearia. Como cliente, podes consultar as tuas marcações sem criar conta.',
+    customerAccessLink: 'Ir para as minhas marcações',
     title: 'Vamos configurar a tua barbearia',
     subtitle:
       'Completa o essencial agora e ajusta os restantes detalhes mais tarde nas Definições.',
