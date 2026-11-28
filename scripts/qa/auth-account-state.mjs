@@ -17,6 +17,7 @@ const supabaseConfig = read('supabase/config.toml');
 const otpMigration = read('supabase/migrations/20261128150000_harden_customer_portal_otp_attempts.sql');
 const supabaseProxy = read('lib/supabase/proxy.ts');
 const tenantGuard = read('lib/security/tenant-guard.ts');
+const supabaseServer = read('lib/supabase/server.ts');
 
 assert.match(loginRoute, /EMAIL_NOT_CONFIRMED/);
 assert.match(loginRoute, /INVALID_CREDENTIALS/);
@@ -51,6 +52,8 @@ assert.match(portalSecurity, /randomInt\(100000, 1000000\)/);
 assert.match(portalSecurity, /CODE_TTL_MS = 10 \* 60 \* 1000/);
 assert.match(portalSecurity, /httpOnly: true/);
 assert.match(portalSecurity, /sameSite: 'lax'/);
+assert.match(supabaseServer, /sameSite: 'lax'/);
+assert.match(supabaseServer, /secure: process\.env\.NODE_ENV === 'production'/);
 assert.match(otpRequest, /customer-portal-request-email/);
 assert.match(otpRequest, /customer-portal-request-ip/);
 assert.match(otpRequest, /customer-portal-request-cooldown/);
