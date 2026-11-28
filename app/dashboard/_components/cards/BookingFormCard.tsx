@@ -128,9 +128,13 @@ export function BookingForm({
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState(false);
   const [availabilityRetryKey, setAvailabilityRetryKey] = useState(0);
-  const selectableServices = services.filter((service) => service.is_active !== false);
-  const selectableProfessionals = professionals.filter(
-    (professional) => professional.active !== false,
+  const selectableServices = useMemo(
+    () => services.filter((service) => service.is_active !== false),
+    [services],
+  );
+  const selectableProfessionals = useMemo(
+    () => professionals.filter((professional) => professional.active !== false),
+    [professionals],
   );
   const selectedClient = clients.find(
     (client) => client.id === formData.clientId,
