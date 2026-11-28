@@ -11,8 +11,10 @@ create table if not exists public.customer_notification_subscriptions (
   updated_at timestamptz not null default now()
 );
 
-create unique index if not exists customer_notification_subscriptions_email_endpoint_uidx
-  on public.customer_notification_subscriptions (email, endpoint);
+-- A browser push endpoint can belong to one customer email only.
+-- A later verified customer session on the same device reassigns that endpoint.
+create unique index if not exists customer_notification_subscriptions_endpoint_uidx
+  on public.customer_notification_subscriptions (endpoint);
 create index if not exists customer_notification_subscriptions_email_updated_idx
   on public.customer_notification_subscriptions (email, updated_at desc);
 
