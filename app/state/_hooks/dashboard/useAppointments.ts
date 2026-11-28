@@ -281,6 +281,21 @@ export function useAppointments(
           } catch (emailError) {
             console.error('[CREATE_BOOKING_EMAIL_ERROR]', emailError);
           }
+
+          try {
+            const pushResponse = await fetch(
+              `/api/appointments/${encodeURIComponent(firstCreatedAppointment.id)}/notifications/customer`,
+              { method: 'POST' },
+            );
+            if (!pushResponse.ok) {
+              console.warn('[CREATE_BOOKING_CUSTOMER_PUSH_SKIPPED]', {
+                appointmentId: firstCreatedAppointment.id,
+                status: pushResponse.status,
+              });
+            }
+          } catch (pushError) {
+            console.error('[CREATE_BOOKING_CUSTOMER_PUSH_ERROR]', pushError);
+          }
         }
 
         const appointmentDateLabel = new Intl.DateTimeFormat(
