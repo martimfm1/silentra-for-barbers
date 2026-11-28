@@ -63,6 +63,7 @@ self.addEventListener('push', (event) => {
           : 'silentra-notification',
       data: { url: target },
       renotify: false,
+      vibrate: [90, 45, 90],
     }),
   );
 });
