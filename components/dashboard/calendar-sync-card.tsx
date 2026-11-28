@@ -31,7 +31,7 @@ type CalendarFeedResponse = {
   error?: string;
 };
 
-export function CalendarSyncCard() {
+export function CalendarSyncCard({ compact = false }: { compact?: boolean }) {
   const { t } = useLanguage();
   const [visible, setVisible] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -162,7 +162,7 @@ export function CalendarSyncCard() {
         type="button"
         variant="outline"
         onClick={() => setDialogOpen(true)}
-        className="mt-5 flex min-h-14 w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] px-4 text-left text-zinc-100 hover:bg-white/[.06] sm:w-auto sm:min-w-[20rem]"
+        className={`flex min-h-14 w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] px-4 text-left text-zinc-100 hover:bg-white/[.06] sm:w-auto sm:min-w-[20rem] ${compact ? '' : 'mt-5'}`}
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-300/10 text-emerald-200">

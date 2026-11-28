@@ -1,16 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   AlertCircle,
   CalendarDays,
   CalendarOff,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Coffee,
-  Users,
+  RotateCcw,
+  SlidersHorizontal,
   Trash2,
+  Users,
 } from 'lucide-react';
 import {
   addMonths,
@@ -33,6 +37,7 @@ import { barbershopService } from '@/app/dashboard/_services/barbershop.service'
 import type { Appointment, Professional } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { AgendaCalendarSkeleton } from './agenda-view-skeletons';
 import { getDailySchedule, normalizeWeeklySchedule } from '@/lib/scheduling/weekly-schedule';
@@ -55,6 +60,70 @@ type CalendarBlock = {
   reason?: string | null;
   professionals?: { name?: string | null } | null;
 };
+
+type CalendarFilters = {
+  pending: boolean;
+  scheduled: boolean;
+  completed: boolean;
+  cancelled: boolean;
+  blocks: boolean;
+  breaks: boolean;
+  daysOff: boolean;
+};
+
+const DEFAULT_CALENDAR_FILTERS: CalendarFilters = {
+  pending: true,
+  scheduled: true,
+  completed: true,
+  cancelled: true,
+  blocks: true,
+  breaks: true,
+  daysOff: true,
+};
+
+function parseCalendarFilters(value: string | null): CalendarFilters {
+  if (!value) return { ...DEFAULT_CALENDAR_FILTERS };
+
+  try {
+    const parsed = JSON.parse(value) as Partial<CalendarFilters>;
+    return {
+      pending:
+        typeof parsed.pending === 'boolean'
+          ? parsed.pending
+          : DEFAULT_CALENDAR_FILTERS.pending,
+      scheduled:
+        typeof parsed.scheduled === 'boolean'
+          ? parsed.scheduled
+          : DEFAULT_CALENDAR_FILTERS.scheduled,
+      completed:
+        typeof parsed.completed === 'boolean'
+          ? parsed.completed
+          : DEFAULT_CALENDAR_FILTERS.completed,
+      cancelled:
+        typeof parsed.cancelled === 'boolean'
+          ? parsed.cancelled
+          : DEFAULT_CALENDAR_FILTERS.cancelled,
+      blocks:
+        typeof parsed.blocks === 'boolean'
+          ? parsed.blocks
+          : DEFAULT_CALENDAR_FILTERS.blocks,
+      breaks:
+        typeof parsed.breaks === 'boolean'
+          ? parsed.breaks
+          : DEFAULT_CALENDAR_FILTERS.breaks,
+      daysOff:
+        typeof parsed.daysOff === 'boolean'
+          ? parsed.daysOff
+          : DEFAULT_CALENDAR_FILTERS.daysOff,
+    };
+  } catch {
+    return { ...DEFAULT_CALENDAR_FILTERS };
+  }
+}
+
+function calendarFiltersStorageKey(barbershopId: string) {
+  return 'silentra:agenda-calendar-filters:' + barbershopId;
+}
 
 const statusTone: Record<Appointment['status'], string> = {
   pending: 'bg-amber-300',
@@ -107,6 +176,7 @@ export function AgendaCalendarView({
   professionals: allProfessionals,
   onAppointmentClick,
   onDeleteBlock,
+  calendarSyncSlot,
 }: {
   appointments: Appointment[];
   appointmentsLoading: boolean;
@@ -114,6 +184,7 @@ export function AgendaCalendarView({
   professionals: Professional[];
   onAppointmentClick?: (appointment: Appointment) => void;
   onDeleteBlock?: (blockId: string) => Promise<boolean>;
+  calendarSyncSlot?: ReactNode;
 }) {
   const { t, locale } = useLanguage();
   const weekdayLabels =
@@ -128,6 +199,11 @@ export function AgendaCalendarView({
   const [config, setConfig] = useState<ScheduleConfig>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [calendarFilters, setCalendarFilters] = useState<CalendarFilters>({
+    ...DEFAULT_CALENDAR_FILTERS,
+  });
+  const [calendarFiltersLoadedForShop, setCalendarFiltersLoadedForShop] =
+    useState<string | null>(null);
   const professionals = useMemo(
     () => allProfessionals.filter((item) => item.active !== false),
     [allProfessionals],
@@ -160,6 +236,37 @@ export function AgendaCalendarView({
   useEffect(() => {
     void load();
   }, [load, blocksRefreshKey]);
+
+  useEffect(() => {
+    if (!barbershopId) {
+      setCalendarFiltersLoadedForShop(null);
+      setCalendarFilters({ ...DEFAULT_CALENDAR_FILTERS });
+      return;
+    }
+
+    try {
+      setCalendarFilters(
+        parseCalendarFilters(
+          window.localStorage.getItem(calendarFiltersStorageKey(barbershopId)),
+        ),
+      );
+    } catch {
+      setCalendarFilters({ ...DEFAULT_CALENDAR_FILTERS });
+    }
+    setCalendarFiltersLoadedForShop(barbershopId);
+  }, [barbershopId]);
+
+  useEffect(() => {
+    if (!barbershopId || calendarFiltersLoadedForShop !== barbershopId) return;
+    try {
+      window.localStorage.setItem(
+        calendarFiltersStorageKey(barbershopId),
+        JSON.stringify(calendarFilters),
+      );
+    } catch {
+      // Calendar filters remain usable when browser storage is unavailable.
+    }
+  }, [barbershopId, calendarFilters, calendarFiltersLoadedForShop]);
 
   const calendarDays = useMemo(
     () =>
@@ -218,10 +325,14 @@ export function AgendaCalendarView({
         )
       : getDailySchedule(shopSchedule, date.getDay()).day_off;
   const selectedShopDay = getDailySchedule(shopSchedule, selectedDate.getDay());
-  const selectedAppointments =
-    appointmentsByDay.get(dayKey(selectedDate)) ?? [];
-  const selectedBlocks = blocksByDay.get(dayKey(selectedDate)) ?? [];
-  const selectedClosed = isTeamDayOff(selectedDate);
+  const selectedAppointments = (
+    appointmentsByDay.get(dayKey(selectedDate)) ?? []
+  ).filter((appointment) => calendarFilters[appointment.status]);
+  const selectedBlocks = calendarFilters.blocks
+    ? blocksByDay.get(dayKey(selectedDate)) ?? []
+    : [];
+  const selectedClosed =
+    calendarFilters.daysOff && isTeamDayOff(selectedDate);
   const selectedActive = selectedAppointments.filter(
     (item) => item.status !== 'cancelled',
   );
@@ -235,6 +346,18 @@ export function AgendaCalendarView({
     : selectedActive.length > 0
       ? 100
       : 0;
+  const filterOptions: Array<{ key: keyof CalendarFilters; label: string }> = [
+    { key: 'pending', label: t('agendaCalendar.filterPending') },
+    { key: 'scheduled', label: t('agendaCalendar.filterScheduled') },
+    { key: 'completed', label: t('agendaCalendar.filterCompleted') },
+    { key: 'cancelled', label: t('agendaCalendar.filterCancelled') },
+    { key: 'blocks', label: t('agendaCalendar.filterBlocks') },
+    { key: 'breaks', label: t('agendaCalendar.filterBreaks') },
+    { key: 'daysOff', label: t('agendaCalendar.filterDaysOff') },
+  ];
+  const hiddenFilterCount = Object.values(calendarFilters).filter(
+    (visible) => !visible,
+  ).length;
 
   if (loading || appointmentsLoading) return <AgendaCalendarSkeleton />;
 
@@ -311,6 +434,116 @@ export function AgendaCalendarView({
             </div>
           </div>
 
+          <details className="group mt-4 overflow-hidden rounded-xl border border-white/[0.08] bg-black/10">
+            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 marker:hidden transition-colors hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400 [&::-webkit-details-marker]:hidden">
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] text-zinc-300">
+                  <SlidersHorizontal className="size-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+                    {t('agendaCalendar.calendarOptions')}
+                    {hiddenFilterCount > 0 ? (
+                      <span className="rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-emerald-200">
+                        {hiddenFilterCount}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[11px] font-normal text-zinc-500">
+                    {t('agendaCalendar.calendarOptionsDescription')}
+                  </span>
+                </span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+            </summary>
+
+            <div className="grid gap-3 border-t border-white/[0.07] p-3 xl:grid-cols-[minmax(19rem,0.8fr)_minmax(0,1.2fr)]">
+              {calendarSyncSlot ? (
+                <div className="min-w-0 rounded-xl border border-white/[0.07] bg-white/[0.015] p-2">
+                  {calendarSyncSlot}
+                </div>
+              ) : null}
+
+              <section className="min-w-0 rounded-xl border border-white/[0.07] bg-white/[0.015] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {t('agendaCalendar.filtersTitle')}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-zinc-500">
+                      {t('agendaCalendar.filtersDescription')}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="min-h-9 shrink-0 gap-1.5 rounded-lg px-2 text-[10px] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
+                    aria-label={t('agendaCalendar.resetFilters')}
+                    onClick={() =>
+                      setCalendarFilters({ ...DEFAULT_CALENDAR_FILTERS })
+                    }
+                  >
+                    <RotateCcw className="size-3" aria-hidden="true" />
+                    {t('agendaCalendar.resetFilters')}
+                  </Button>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    {filterOptions.slice(0, 4).map(({ key, label }) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between gap-3"
+                      >
+                        <span className="text-xs text-zinc-300">{label}</span>
+                        <Switch
+                          size="sm"
+                          checked={calendarFilters[key]}
+                          onCheckedChange={(checked) =>
+                            setCalendarFilters((current) => ({
+                              ...current,
+                              [key]: checked,
+                            }))
+                          }
+                          aria-label={label}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-3 border-t border-white/[0.08] pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
+                      {t('agendaCalendar.otherItems')}
+                    </p>
+                    {filterOptions.slice(4).map(({ key, label }) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between gap-3"
+                      >
+                        <span className="text-xs text-zinc-300">{label}</span>
+                        <Switch
+                          size="sm"
+                          checked={calendarFilters[key]}
+                          onCheckedChange={(checked) =>
+                            setCalendarFilters((current) => ({
+                              ...current,
+                              [key]: checked,
+                            }))
+                          }
+                          aria-label={label}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="mt-4 border-t border-white/[0.08] pt-3 text-[10px] text-emerald-200/70">
+                  {t('agendaCalendar.filtersSaved')}
+                </p>
+              </section>
+            </div>
+          </details>
+
           <div
             className="mt-4 flex flex-wrap gap-2"
             aria-label={t('agendaCalendar.legend')}
@@ -327,14 +560,18 @@ export function AgendaCalendarView({
               <span className="size-1.5 rounded-full bg-violet-300" />
               {locale === 'en' ? 'Very busy' : 'Muito ocupada'}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
-              <span className="size-1.5 rounded-full bg-rose-300" />
-              {locale === 'en' ? 'Blocked time' : 'Bloqueio'}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
-              <span className="size-1.5 rounded-full bg-amber-300" />
-              {t('agendaCalendar.lunchDayOff')}
-            </span>
+            {calendarFilters.blocks ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
+                <span className="size-1.5 rounded-full bg-rose-300" />
+                {locale === 'en' ? 'Blocked time' : 'Bloqueio'}
+              </span>
+            ) : null}
+            {calendarFilters.breaks || calendarFilters.daysOff ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-zinc-500">
+                <span className="size-1.5 rounded-full bg-amber-300" />
+                {t('agendaCalendar.lunchDayOff')}
+              </span>
+            ) : null}
           </div>
         </CardHeader>
 
@@ -356,10 +593,15 @@ export function AgendaCalendarView({
           <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl bg-white/[0.055] sm:rounded-3xl">
             {calendarDays.map((date) => {
               const key = dayKey(date);
-              const dayAppointments = appointmentsByDay.get(key) ?? [];
-              const dayBlocks = blocksByDay.get(key) ?? [];
+              const dayAppointments = (
+                appointmentsByDay.get(key) ?? []
+              ).filter((appointment) => calendarFilters[appointment.status]);
+              const dayBlocks = calendarFilters.blocks
+                ? blocksByDay.get(key) ?? []
+                : [];
               const level = occupancyLevel(dayAppointments);
-              const isClosed = isTeamDayOff(date);
+              const dayIsClosed = isTeamDayOff(date);
+              const isClosed = calendarFilters.daysOff && dayIsClosed;
               const generalDay = getDailySchedule(shopSchedule, date.getDay());
               const inMonth = isSameMonth(date, month);
               const selected = isSameDay(date, selectedDate);
@@ -533,7 +775,9 @@ export function AgendaCalendarView({
                         {t('agendaCalendar.moreBlockedTimes')}
                       </span>
                     ) : null}
-                    {generalDay.break_intervals.length > 0 && !isClosed ? (
+                    {calendarFilters.breaks &&
+                    generalDay.break_intervals.length > 0 &&
+                    !dayIsClosed ? (
                       <div className="hidden items-center gap-1 text-[9px] text-amber-300/70 sm:flex">
                         <Coffee className="size-3" aria-hidden="true" />
                         {locale === 'en' ? 'Break' : 'Pausa'} {generalDay.break_intervals.map((item) => `${item.start}–${item.end}`).join(', ')}
@@ -638,11 +882,16 @@ export function AgendaCalendarView({
               <span className="shrink-0 text-zinc-500">{locale === 'en' ? 'Default hours' : 'Horário geral'}</span>
               <span className="text-right font-medium tabular-nums text-zinc-200">
                 {selectedShopDay.day_off
-                  ? (locale === 'en' ? 'Day off' : 'Folga')
+                  ? calendarFilters.daysOff
+                    ? locale === 'en'
+                      ? 'Day off'
+                      : 'Folga'
+                    : '—'
                   : selectedShopDay.work_intervals.map((item) => `${item.start}–${item.end}`).join(' · ')}
               </span>
             </div>
-            {selectedShopDay.break_intervals.length > 0 ? (
+            {calendarFilters.breaks &&
+            selectedShopDay.break_intervals.length > 0 ? (
               <div className="mt-3 flex items-start justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs">
                 <span className="flex shrink-0 items-center gap-1.5 text-zinc-500">
                   <Coffee className="size-3.5" aria-hidden="true" />
