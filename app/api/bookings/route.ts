@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmationEmail } from '@/lib/brevo/brevo';
 import { notifyBarbersOfNewBooking } from '@/lib/brevo/barber-booking-notification';
 import { sendBrevoEmail } from '@/lib/email/brevo';
+import { sendWebPushToCustomerEmail } from '@/lib/notifications/providers/push';
 import { dispatchAppointmentAutomations } from '@/lib/automations/dispatch-appointment';
 import { findPublicBookingCustomer } from '@/lib/bookings/public-customer-profile';
 import { isBeforeMinimumBookingNotice } from '@/lib/bookings/minimum-notice';
@@ -667,6 +668,21 @@ async function POST__unobserved(request: Request) {
         '[BARBER_BOOKING_NOTIFICATION_ERROR]',
         error instanceof Error ? error.name : 'UNKNOWN',
       );
+    }
+
+    if (email) {
+      try {
+        await sendWebPushToCustomerEmail(email, {
+          title: appointment.status === 'scheduled'
+            ? 'Marcação confirmada · ' + barbershopName
+            : 'Pedido recebido · ' + barbershopName,
+          body: (selectedService.name || 'Serviço') + ' · ' + bookingDate + ' às ' + bookingTime,
+          url: '/my-bookings',
+          tag: 'customer-booking-' + appointment.id,
+        });
+      } catch (pushError) {
+        console.error('[CUSTOMER_BOOKING_PUSH_ERROR]', pushError instanceof Error ? pushError.name : 'UNKNOWN');
+      }
     }
 
     if (appointment.status === 'scheduled') {
