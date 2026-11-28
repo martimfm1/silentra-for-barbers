@@ -7,6 +7,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
 
 type PeriodType = 'day' | 'week' | 'month';
@@ -38,6 +39,7 @@ type Report = {
   period_end: string;
   data: ReportData;
   viewed_at: string | null;
+  completed_at: string | null;
   created_at: string;
 };
 
@@ -197,9 +199,18 @@ async function markViewed(id: string) {
   const response = await fetch('/api/periodic-reports', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
+    body: JSON.stringify({ id, action: 'viewed' }),
   });
   if (!response.ok) throw new Error('Could not mark report as viewed');
+}
+
+async function markCompleted(ids: string[]) {
+  const response = await fetch('/api/periodic-reports', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'complete', ids }),
+  });
+  if (!response.ok) throw new Error('Could not complete reports');
 }
 
 export function DashboardClosingReports({ barbershopId }: { barbershopId: string }) {
@@ -208,6 +219,7 @@ export function DashboardClosingReports({ barbershopId }: { barbershopId: string
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const selected = reports.find((report) => report.id === selectedId) ?? null;
 
   useEffect(() => {
@@ -235,13 +247,21 @@ export function DashboardClosingReports({ barbershopId }: { barbershopId: string
     return () => controller.abort();
   }, [barbershopId]);
 
-  useEffect(() => {
-    if (!open || !selected || selected.viewed_at) return;
-    void markViewed(selected.id).then(() => {
-      setReports((items) => items.map((item) => item.id === selected.id
-        ? { ...item, viewed_at: new Date().toISOString() } : item));
-    }).catch((error) => console.error('Report view update failed', error));
-  }, [open, selected]);
+  async function completeReports() {
+    if (completing || reports.length === 0) return;
+    setCompleting(true);
+    try {
+      await markCompleted(reports.map((report) => report.id));
+      setReports([]);
+      setSelectedId(null);
+      setOpen(false);
+    } catch (error) {
+      console.error('Report completion failed', error);
+      toast.error(copy(locale, 'Não foi possível concluir os resumos. Tenta novamente.', 'Could not complete the summaries. Please try again.'));
+    } finally {
+      setCompleting(false);
+    }
+  }
 
   if (loading || reports.length === 0) return null;
   const index = reports.findIndex((report) => report.id === selectedId);
@@ -267,7 +287,7 @@ export function DashboardClosingReports({ barbershopId }: { barbershopId: string
             onClick={() => setSelectedId(reports[index - 1]?.id ?? null)}>{copy(locale, 'Anterior', 'Previous')}</Button>
           <Button size="sm" variant="outline" type="button" disabled={index < 0 || index >= reports.length - 1}
             onClick={() => setSelectedId(reports[index + 1]?.id ?? null)}>{copy(locale, 'Seguinte', 'Next')}</Button>
-          <Button size="sm" type="button" onClick={() => setOpen(false)}>{copy(locale, 'Concluir', 'Done')}</Button>
+          <Button size="sm" type="button" disabled={completing} onClick={() => void completeReports()}>{completing ? copy(locale, 'A guardar…', 'Saving…') : copy(locale, 'Concluir', 'Done')}</Button>
         </div>
       </div>
     </DialogContent>
