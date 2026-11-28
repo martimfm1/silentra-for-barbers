@@ -24,6 +24,9 @@ export interface BarbershopConfigPayload {
   default_language: 'pt' | 'en';
   mbway_enabled?: boolean;
   mbway_phone?: string;
+  periodic_reports_daily_enabled?: boolean;
+  periodic_reports_weekly_enabled?: boolean;
+  periodic_reports_monthly_enabled?: boolean;
 }
 
 export type ServiceResponse<T> = { data: T | null; error: Error | null };
@@ -36,7 +39,7 @@ export async function getBarbershopConfig(
     const { data: barberData, error: barberError } = await supabase
       .from('barbershops')
       .select(
-        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled',
+        'name, phone, address, opening_time, closing_time, lunch_start, lunch_end, closed_days, weekly_schedule, allow_online_bookings, auto_reminders, auto_confirm_bookings, auto_confirm_manual_bookings, auto_complete_bookings, is_public_in_directory, time_limit_cancellation_hours, minimum_booking_notice_minutes, require_birth_date, default_language, mbway_enabled, periodic_reports_daily_enabled, periodic_reports_weekly_enabled, periodic_reports_monthly_enabled',
       )
       .eq('id', barbershopId)
       .single();
@@ -103,6 +106,9 @@ export async function getBarbershopConfig(
           ),
         ),
         require_birth_date: barberData.require_birth_date !== false,
+        periodic_reports_daily_enabled: barberData.periodic_reports_daily_enabled !== false,
+        periodic_reports_weekly_enabled: barberData.periodic_reports_weekly_enabled !== false,
+        periodic_reports_monthly_enabled: barberData.periodic_reports_monthly_enabled !== false,
         popular_service_id: shopData?.popular_service_id ?? null,
       },
       error: null,
